@@ -37,17 +37,18 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
   };
 
   const toggleMenu = () => {
-    if (isLoggedIn) {
-      setIsMenuOpen(prev => !prev);
-    } else {
-      console.log("Please log in to access the menu.");
-    }
+    setIsMenuOpen(prev => !prev);
   };
 
   const handleOpenAccountPanel = () => {
     setIsMenuOpen(false);
     openAccountPanel();
   };
+
+  const handleOpenLoginPanelFromMenu = () => {
+    setIsMenuOpen(false);
+    toggleLoginPanel();
+  }
 
   useEffect(() => {
     const isAnyPanelOpen = isLoginPanelOpen || isNotifPanelOpen || isMenuOpen;
@@ -120,8 +121,14 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
           >
-            <button onClick={handleOpenAccountPanel} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('account')}</button>
-            <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('logout')}</button>
+            {isLoggedIn ? (
+              <>
+                <button onClick={handleOpenAccountPanel} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('account')}</button>
+                <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('logout')}</button>
+              </>
+            ) : (
+              <button onClick={handleOpenLoginPanelFromMenu} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('login')}</button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

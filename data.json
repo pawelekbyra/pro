@@ -10,6 +10,17 @@
       "displayName": "Updated User",
       "avatar": "/avatars/default.png",
       "sessionVersion": 2
+    },
+    {
+      "id": "2",
+      "email": "admin",
+      "username": "admin",
+      "passwordHash": "$2b$10$uBTfx3F0cMql64qzm.b1Qe7ts/SmtfNdxYPPerF1gBr/DSTvUF.fS",
+      "firstName": "Admin",
+      "lastName": "User",
+      "displayName": "Admin",
+      "avatar": "/avatars/default.png",
+      "sessionVersion": 1
     }
   ],
   "slides": [
