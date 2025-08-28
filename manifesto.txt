@@ -1,33 +1,94 @@
-Ting Tong: Manifest Projektu i Dziennik Zmian
+Manifest Projektu: Ting Tong SaaS
+Misja: Stworzyć w pełni funkcjonalny, dopracowany prototyp aplikacji wideo, używając czystego HTML, CSS i JavaScript. Prototyp ten ma wiernie odzwierciedlać wygląd i wszystkie funkcjonalności z dostarczonych plików (tingtong.txt, pehape.txt) i służyć jako solidna podstawa dla przyszłej migracji do nowoczesnych technologii.
 
-## Manifest Projektu: Ting Tong SaaS
+Wizja: Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową. Stworzenie dopracowanego prototypu jest kluczowym krokiem do zweryfikowania koncepcji i zebrania feedbacku przed zainwestowaniem w pełną architekturę systemową.
 
-**Misja:** Stworzyć w pełni funkcjonalny, dopracowany prototyp aplikacji wideo, używając czystego HTML, CSS i JavaScript. Prototyp ten ma wiernie odzwierciedlać wygląd i wszystkie funkcjonalności z dostarczonych plików (`tingtong.txt`, `pehape.txt`) i służyć jako solidna podstawa dla przyszłej migracji do nowoczesnych technologii.
+Status Projektu (Stan na 2025-08-28)
+BLOKER KRYTYCZNY: Prace nad pierwotnie planowaną migracją do Next.js zostały tymczasowo wstrzymane z powodu nierozwiązywalnych problemów ze środowiskiem deweloperskim (npm). Polecenie npm install w obecnym środowisku nie instaluje zależności, uniemożliwiając uruchomienie projektu.
 
-**Wizja:** Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową. Stworzenie dopracowanego prototypu jest kluczowym krokiem do zweryfikowania koncepcji i zebrania feedbacku przed zainwestowaniem w pełną architekturę systemową.
+Obecny Cel: Zgodnie z planem awaryjnym (Plan B), projekt wraca do fazy rozwoju prototypu w HTML/CSS/JS. Głównym priorytetem jest zapewnienie, aby prototyp był w 100% kompletny, stabilny i funkcjonalny.
 
-## Status Projektu (Stan na 2025-08-28)
+Architektura Projektu
+Plan A (Wstrzymany)
+Framework: Next.js (z App Router)
 
-**BLOKER KRYTYCZNY:** Prace nad pierwotnie planowaną migracją do **Next.js zostały tymczasowo wstrzymane** z powodu nierozwiązywalnych problemów ze środowiskiem deweloperskim (`npm`). Polecenie `npm install` w obecnym środowisku nie instaluje zależności, uniemożliwiając uruchomienie projektu.
+Stylizacja: Tailwind CSS, shadcn/ui
 
-**Obecny Cel:** Zgodnie z planem awaryjnym (Plan B), projekt wraca do fazy rozwoju prototypu w **HTML/CSS/JS**. Głównym priorytetem jest zapewnienie, aby prototyp był w 100% kompletny, stabilny i funkcjonalny.
+Animacje: Framer Motion
 
-## Architektura Projektu
+Plan B (Obecnie Realizowany)
+Frontend: Czysty HTML5, CSS3, JavaScript (ES6+).
 
-### Plan A (Wstrzymany)
-- **Framework:** Next.js (z App Router)
-- **Stylizacja:** Tailwind CSS, shadcn/ui
-- **Animacje:** Framer Motion
+Struktura: Aplikacja jednostronicowa (SPA) bez frameworka.
 
-### Plan B (Obecnie Realizowany)
-- **Frontend:** Czysty HTML5, CSS3, JavaScript (ES6+).
-- **Struktura:** Aplikacja jednostronicowa (SPA) bez frameworka.
-- **Silnik wideo:** `hls.js` z fallbackiem do MP4.
-- **Backend:** Brak. Logika jest w pełni po stronie klienta, interakcje z API są symulowane.
+Silnik wideo: hls.js z fallbackiem do MP4.
 
-## Dziennik Zmian
-| Data       | Etap Zakończony                               | Komentarz                                                                                                                                                             |
-|------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 2025-08-28 | Planowanie                                    | Zdefiniowano pierwotny manifest i plan migracji do Next.js.                                                                                                           |
-| 2025-08-28 | Zmiana Strategii (Pivot)                      | Zdiagnozowano krytyczny błąd środowiska `npm`. Prace nad Next.js wstrzymane. Projekt oficjalnie wraca do Planu B: dopracowanie prototypu w HTML/CSS/JS.                  |
-| 2025-08-28 | Etap 1 (Plan B): Przygotowanie prototypu      | Rozpoczęcie prac nad weryfikacją i dopracowaniem istniejącego kodu prototypu w celu osiągnięcia pełnej funkcjonalności.                                                 |
+Backend: Brak. Logika jest w pełni po stronie klienta, interakcje z API są symulowane.
+
+Dziennik Zmian
+Data
+
+Etap Zakończony
+
+Komentarz
+
+2025-08-28
+
+Planowanie
+
+Zdefiniowano pierwotny manifest i plan migracji do Next.js.
+
+2025-08-28
+
+Zmiana Strategii (Pivot)
+
+Zdiagnozowano krytyczny błąd środowiska npm. Prace nad Next.js wstrzymane. Projekt oficjalnie wraca do Planu B: dopracowanie prototypu w HTML/CSS/JS.
+
+2025-08-28
+
+Etap 1 (Plan B): Przygotowanie prototypu
+
+Rozpoczęcie prac nad weryfikacją i dopracowaniem istniejącego kodu prototypu w celu osiągnięcia pełnej funkcjonalności.
+
+2025-08-28
+
+Etap 1 (Plan B): Ukończenie prototypu
+
+Status: Ukończono etap tworzenia prototypu UI w czystym HTML, CSS i JS. Wszelkie kluczowe elementy wizualne i interakcje z plików tingtong.txt i pehape.txt są wiernie odwzorowane. Prototyp jest stabilny i gotowy do dalszych prac.
+
+Plan Wdrożenia (Etapami)
+Etap 1: Inicjalizacja i Front-end (prototyp)
+
+Zadanie: Stworzenie kompletnego, samodzielnego prototypu aplikacji webowej w czystym HTML, CSS i JavaScript.
+
+Cel: Wiernie odtworzyć cały interfejs i interakcje z plików tingtong.txt i pehape.txt.
+
+Dane: Cała logika aplikacji jest tymczasowo oparta o statyczne dane (mock data) z pliku data.json, aby umożliwić niezależną pracę.
+
+Output: Działająca, statyczna aplikacja webowa, która wygląda i działa jak tingtong.txt, ale jest zbudowana na nowoczesnym stosie technologicznym. Aplikacja będzie gotowa do podłączenia pod API w przyszłości.
+
+Do zrobienia: Rozwiązanie problemu środowiskowego npm w celu umożliwienia migracji do Next.js.
+
+Etap 2: Migracja do Next.js i Frontend
+
+Zadanie: Przepisanie prototypu na projekt Next.js z użyciem Reacta.
+
+Cel: Odtworzyć wygląd i funkcjonalności prototypu w środowisku Next.js, wykorzystując komponenty i stan (state management).
+
+Do zrobienia: Wdrożyć zależności (tailwindcss, shadcn/ui, framer-motion, hls.js), przepisać logikę z app.js na komponenty React, stworzyć plik data.json jako atrapę backendu i zaimplementować API Routes w Next.js do jego obsługi.
+
+Etap 3: Backend (implementacja logiki)
+
+Zadanie: Stworzenie i skonfigurowanie back-endu w NestJS, który zaimplementuje logikę z pliku pehape.txt.
+
+Logika: Implementacja API w standardzie REST/GraphQL dla polubień, komentarzy, logowania, zarządzania profilem i powiadomień. Konfiguracja bazy danych PostgreSQL. Uruchomienie mikroserwisu do transkodowania wideo.
+
+Output: Działające API, które obsłuży wszystkie funkcjonalności front-endu.
+
+Etap 4: Integracja i rozszerzenia
+
+Zadanie: Połączenie front-endu z gotowym back-endem. Zastąpienie mock data prawdziwymi danymi z API.
+
+Optymalizacja: Włączenie adaptacyjnego bitrate w odtwarzaczu wideo, tak aby pobierał pliki HLS z serwera.
+
+Wdrożenie: Skonfigurowanie wdrożenia front-endu i back-endu w kontenerach (Docker) i środowisku chmurowym (np. Kubernetes), aby zapewnić skalowalność.
