@@ -68,6 +68,12 @@ Bloker npm ROZWIĄZANY & Migracja do Next.js/React ROZPOCZĘTA
 
 Status: Problem z npm został pomyślnie rozwiązany! Jules rozpoczął migrację UI i logiki do komponentów React w projekcie Next.js. Przenosi kod HTML i CSS z tingtong.txt, tworząc komponenty React (.tsx) z klasami Tailwind. Logika z app.js jest implementowana wewnątrz tych komponentów przy użyciu hooków React.
 
+2025-08-28
+
+Faza 1 (Core Feed) Migracji do Next.js
+
+Status: Ukończono. Pomyślnie zmigrowano główny feed wideo, w tym przewijanie slajdów (Framer Motion), komponenty UI (TopBar, Sidebar, BottomBar) z użyciem Tailwind CSS, oraz podstawowe interakcje (like, panele logowania i powiadomień). Zaimplementowano ulepszoną logikę HLS.js i poprawiono błąd blokowania przewijania tła.
+
 Plan Wdrożenia (Etapami)
 Etap 1: Inicjalizacja i Front-end (prototyp)
 
