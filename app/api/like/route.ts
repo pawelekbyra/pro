@@ -1,28 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
-import { db, User } from '@/lib/db';
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
-const COOKIE_NAME = 'session';
-
-interface UserPayload {
-    user: User;
-}
-
-async function verifySession(req: NextRequest) {
-    const sessionCookie = cookies().get(COOKIE_NAME);
-    if (!sessionCookie) return null;
-    try {
-        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload as UserPayload;
-    } catch (error) {
-        return null;
-    }
-}
+import { db } from '@/lib/db';
+import { verifySession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
-  const payload = await verifySession(request);
+  const payload = await verifySession();
   if (!payload || !payload.user) {
     return NextResponse.json({ success: false, message: 'Authentication required to like a post.' }, { status: 401 });
   }
