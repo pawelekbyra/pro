@@ -21,6 +21,7 @@ export default function Home() {
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
   const controls = useAnimation();
   const y = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +75,7 @@ export default function Home() {
   const openInfoModal = () => setIsInfoModalOpen(true);
   const closeInfoModal = () => setIsInfoModalOpen(false);
 
-  const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen;
+  const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen || isTopBarModalOpen;
 
   if (slides.length === 0) {
     return (
@@ -117,7 +118,7 @@ export default function Home() {
             <Slide
               slide={slide}
               isActive={index === activeIndex}
-              setIsModalOpen={isAnyModalOpen} // Pass down the combined state
+              setIsModalOpen={setIsTopBarModalOpen}
               openAccountPanel={openAccountPanel}
               openCommentsModal={openCommentsModal}
               openInfoModal={openInfoModal}
