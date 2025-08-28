@@ -1,81 +1,92 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import VideoPlayer from "@/components/VideoPlayer";
-import SlideUI from "@/components/SlideUI"; // Import the new component
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue, useAnimation, PanInfo } from 'framer-motion';
+import Slide, { SlideData } from '@/components/Slide';
 
-interface Slide {
-  id: string;
-  user: string;
-  description: string;
-  mp4Url: string;
-  poster: string;
-  initialLikes: number;
-  initialIsLiked: boolean;
-}
-
-const slideVariants = {
-  hidden: { y: "100%", opacity: 0 },
-  visible: { y: 0, opacity: 1 },
-  exit: { y: "-100%", opacity: 0 },
+const DRAG_THRESHOLD = 150;
+const SPRING_OPTIONS = {
+  type: 'spring',
+  damping: 25,
+  stiffness: 150,
 };
 
 export default function Home() {
-  const [slides, setSlides] = useState<Slide[]>([]);
+  const [slides, setSlides] = useState<SlideData[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false); // New state to control drag
+  const controls = useAnimation();
+  const y = useMotionValue(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchSlides = async () => {
       try {
         const response = await fetch('/api/slides');
+        if (!response.ok) throw new Error('Failed to fetch slides');
         const data = await response.json();
         setSlides(data.slides);
       } catch (error) {
         console.error("Failed to fetch slides:", error);
       }
     };
-
     fetchSlides();
   }, []);
 
+  useEffect(() => {
+    controls.start({
+      y: -activeIndex * (containerRef.current?.offsetHeight || 0),
+      transition: SPRING_OPTIONS,
+    });
+  }, [activeIndex, controls]);
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (isModalOpen) return; // Don't do anything if a modal is open
+
+    const { offset } = info;
+    if (Math.abs(offset.y) > DRAG_THRESHOLD) {
+      if (offset.y < 0) {
+        setActiveIndex((prev) => Math.min(prev + 1, slides.length - 1));
+      } else {
+        setActiveIndex((prev) => Math.max(prev - 1, 0));
+      }
+    } else {
+      controls.start({
+        y: -activeIndex * (containerRef.current?.offsetHeight || 0),
+        transition: SPRING_OPTIONS,
+      });
+    }
+  };
+
   if (slides.length === 0) {
-    return <div className="flex items-center justify-center h-screen bg-black text-white">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-black text-white">
+        Loading...
+      </div>
+    );
   }
 
-  const goToNext = () => {
-    setActiveIndex((prevIndex) => (prevIndex + 1) % slides.length);
-  };
-
-  const goToPrev = () => {
-    setActiveIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
-  };
-
-  const currentSlide = slides[activeIndex];
-
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-black">
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={currentSlide.id}
-          className="relative h-full w-full"
-          variants={slideVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-        >
-          <VideoPlayer src={currentSlide.mp4Url} poster={currentSlide.poster} />
-          <SlideUI slide={currentSlide} />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Buttons for testing animation */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-4">
-        <Button onClick={goToPrev}>Prev</Button>
-        <Button onClick={goToNext}>Next</Button>
-      </div>
+    <main ref={containerRef} className="relative h-screen w-screen overflow-hidden bg-black">
+      <motion.div
+        className="h-full w-full"
+        drag={isModalOpen ? false : "y"} // Conditionally enable drag
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.1, bottom: 0.1 }}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        style={{ y }}
+      >
+        {slides.map((slide, index) => (
+          <div key={slide.id} className="h-full w-full absolute top-0 left-0" style={{ top: `${index * 100}%` }}>
+            <Slide
+              slide={slide}
+              isActive={index === activeIndex}
+              setIsModalOpen={setIsModalOpen} // Pass the setter function
+            />
+          </div>
+        ))}
+      </motion.div>
     </main>
   );
 }
