@@ -1,39 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify, SignJWT } from 'jose';
+import { SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { db, User } from '@/lib/db';
+import { verifySession } from '@/lib/auth';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
 
-async function verifySession(req: NextRequest): Promise<{ user: User } | null> {
-    const sessionCookie = cookies().get(COOKIE_NAME);
-    if (!sessionCookie) return null;
-
-    try {
-        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload as { user: User };
-    } catch (error) {
-        return null;
-    }
-}
-
-// This GET handler is no longer needed here, as the /api/account/status route handles this.
-// However, leaving it in won't cause harm. For cleanup, it could be removed.
+// This GET handler is redundant and can be removed.
 export async function GET(req: NextRequest) {
-    const payload = await verifySession(req);
-
+    const payload = await verifySession();
     if (!payload || !payload.user) {
         return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
     }
-
     return NextResponse.json({ success: true, data: payload.user });
 }
 
 
 // PUT handler to update the user's profile
 export async function PUT(req: NextRequest) {
-    const payload = await verifySession(req);
+    const payload = await verifySession();
 
     if (!payload || !payload.user) {
         return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
@@ -48,8 +34,8 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({ success: false, message: 'All fields are required.' }, { status: 400 });
         }
 
-        // Validate if the new email is already in use by another user
-        if (email.toLowerCase() !== currentUser.email.toLowerCase()) {
+        const currentEmail = (await db.findUserById(currentUser.id))?.email;
+        if (email.toLowerCase() !== currentEmail?.toLowerCase()) {
             const emailInUse = await db.isEmailInUse(email, currentUser.id);
             if (emailInUse) {
                 return NextResponse.json({ success: false, message: 'This email is already in use.' }, { status: 409 });
@@ -82,7 +68,7 @@ export async function PUT(req: NextRequest) {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            maxAge: 60 * 60 * 24, // 1 day
+            maxAge: 60 * 60 * 24,
         });
 
 

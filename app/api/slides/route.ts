@@ -1,20 +1,39 @@
-import { NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
+import { NextRequest, NextResponse } from 'next/server';
+import { db, User } from '@/lib/db';
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
+const COOKIE_NAME = 'session';
+
+interface UserPayload {
+    user: User;
+    iat: number;
+    exp: number;
+}
+
+async function getUserIdFromSession() {
+    const sessionCookie = cookies().get(COOKIE_NAME);
+    if (!sessionCookie) return null;
+
+    try {
+        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
+        return (payload as UserPayload).user?.id || null;
+    } catch (error) {
+        return null;
+    }
+}
 
 export async function GET() {
   try {
-    // Construct the path to the data.json file
-    const jsonDirectory = path.join(process.cwd(), 'data.json');
-    // Read the file contents
-    const fileContents = await fs.readFile(jsonDirectory, 'utf8');
-    // Parse the JSON data
-    const data = JSON.parse(fileContents);
+    const userId = await getUserIdFromSession();
+    const slidesWithDynamicData = await db.getSlides(userId || undefined);
 
-    // Return the data as a JSON response
-    return NextResponse.json(data);
+    // The db layer now returns the full structure, so we just need the slides part
+    return NextResponse.json({ slides: slidesWithDynamicData });
+
   } catch (error) {
-    console.error('Error reading data.json:', error);
+    console.error('Error reading slides data:', error);
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });
   }
 }
