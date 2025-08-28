@@ -1,33 +1,33 @@
 Ting Tong: Manifest Projektu i Dziennik Zmian
-Manifest Projektu: Ting Tong SaaS
-Misja: Stworzyć skalowalną, nowoczesną aplikację wideo inspirowaną interfejsem TikToka, odtwarzając wiernie wygląd i funkcjonalności z dostarczonych plików (tingtong.txt i pehape.txt), ale z użyciem profesjonalnych technologii.
 
-Wizja: Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową, z łatwą możliwością rozbudowy o moduły takie jak zaawansowane silniki wideo, systemy gamifikacji, a także jako natywna aplikacja mobilna.
+## Manifest Projektu: Ting Tong SaaS
 
-Architektura Projektu
-Front-end: Aplikacja front-endowa zostanie zbudowana na Next.js z wykorzystaniem Reacta (App Router).
+**Misja:** Stworzyć w pełni funkcjonalny, dopracowany prototyp aplikacji wideo, używając czystego HTML, CSS i JavaScript. Prototyp ten ma wiernie odzwierciedlać wygląd i wszystkie funkcjonalności z dostarczonych plików (`tingtong.txt`, `pehape.txt`) i służyć jako solidna podstawa dla przyszłej migracji do nowoczesnych technologii.
 
-Stylizacja: Tailwind CSS w połączeniu z komponentami shadcn/ui dla spójności i szybkości.
+**Wizja:** Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową. Stworzenie dopracowanego prototypu jest kluczowym krokiem do zweryfikowania koncepcji i zebrania feedbacku przed zainwestowaniem w pełną architekturę systemową.
 
-Animacje: Framer Motion dla płynnych i angażujących animacji.
+## Status Projektu (Stan na 2025-08-28)
 
-Silnik wideo: hls.js z fallbackiem do MP4, przygotowany do obsługi Adaptacyjnego Bitrate'u (ABR).
+**BLOKER KRYTYCZNY:** Prace nad pierwotnie planowaną migracją do **Next.js zostały tymczasowo wstrzymane** z powodu nierozwiązywalnych problemów ze środowiskiem deweloperskim (`npm`). Polecenie `npm install` w obecnym środowisku nie instaluje zależności, uniemożliwiając uruchomienie projektu.
 
-PWA: Pełna obsługa PWA (Progressive Web App) z funkcjami offline i cache'em za pomocą Workbox.
+**Obecny Cel:** Zgodnie z planem awaryjnym (Plan B), projekt wraca do fazy rozwoju prototypu w **HTML/CSS/JS**. Głównym priorytetem jest zapewnienie, aby prototyp był w 100% kompletny, stabilny i funkcjonalny.
 
-Back-end: System zostanie zbudowany jako oddzielny, bezgłowy backend na NestJS (Node.js), co pozwoli na elastyczne skalowanie.
+## Architektura Projektu
 
-Baza danych: PostgreSQL do przechowywania danych użytkowników, filmów i interakcji, z opcjonalnym Redis do cache'owania i obsługi powiadomień w czasie rzeczywistym.
+### Plan A (Wstrzymany)
+- **Framework:** Next.js (z App Router)
+- **Stylizacja:** Tailwind CSS, shadcn/ui
+- **Animacje:** Framer Motion
 
-Hosting wideo: Pliki wideo będą przechowywane w usłudze kompatybilnej z Amazon S3 (np. DigitalOcean Spaces), co zapewni ich globalną dostępność i skalowalność.
+### Plan B (Obecnie Realizowany)
+- **Frontend:** Czysty HTML5, CSS3, JavaScript (ES6+).
+- **Struktura:** Aplikacja jednostronicowa (SPA) bez frameworka.
+- **Silnik wideo:** `hls.js` z fallbackiem do MP4.
+- **Backend:** Brak. Logika jest w pełni po stronie klienta, interakcje z API są symulowane.
 
-Transkodowanie wideo: Niestandardowy proces transkodowania (np. oparty na ffmpeg) będzie konwertował wideo na formaty HLS/DASH.
-
-Autoryzacja: Zabezpieczone API w standardzie REST/GraphQL z autoryzacją opartą o tokeny JWT oraz opcjonalnymi opcjami logowania społecznościowego.
-
-Dziennik Zmian
-Data	Etap	Wdrożenie	Komentarz
-2025-08-28	Planowanie	N/A	Zdefiniowano manifest projektu, architekturę i plan wdrożenia. Projekt jest gotowy do rozpoczęcia prac programistycznych.
-2025-08-28	Etap 1: Front-end	N/A	Status: Rozpoczęcie prac nad odtworzeniem interfejsu w czystym HTML/CSS/JS, co jest tymczasowym rozwiązaniem z powodu problemów ze środowiskiem Node.js. Skupienie na wiernym odtworzeniu wyglądu i funkcjonalności prototypu, który zostanie przepisany do Next.js po rozwiązaniu problemów technicznych.
-
-Export to Sheets
+## Dziennik Zmian
+| Data       | Etap Zakończony                               | Komentarz                                                                                                                                                             |
+|------------|-----------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2025-08-28 | Planowanie                                    | Zdefiniowano pierwotny manifest i plan migracji do Next.js.                                                                                                           |
+| 2025-08-28 | Zmiana Strategii (Pivot)                      | Zdiagnozowano krytyczny błąd środowiska `npm`. Prace nad Next.js wstrzymane. Projekt oficjalnie wraca do Planu B: dopracowanie prototypu w HTML/CSS/JS.                  |
+| 2025-08-28 | Etap 1 (Plan B): Przygotowanie prototypu      | Rozpoczęcie prac nad weryfikacją i dopracowaniem istniejącego kodu prototypu w celu osiągnięcia pełnej funkcjonalności.                                                 |
