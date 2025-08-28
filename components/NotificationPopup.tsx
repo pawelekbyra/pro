@@ -13,7 +13,6 @@ const iconMap = {
   offer: <Tag size={24} className="text-white/80" />,
 };
 
-// Sub-component for a single notification item
 const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: number) => void }> = ({ notification, onToggle }) => {
   return (
     <motion.li
@@ -23,15 +22,18 @@ const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: nu
       exit={{ opacity: 0 }}
       className={`rounded-lg cursor-pointer transition-colors hover:bg-white/10 mb-1`}
       onClick={() => onToggle(notification.id)}
+      onKeyPress={(e) => e.key === 'Enter' && onToggle(notification.id)}
+      tabIndex={0}
+      aria-expanded={notification.expanded}
     >
       <div className="flex items-center gap-3 p-3">
-        <div className="notif-icon">{iconMap[notification.type]}</div>
+        <div className="notif-icon" aria-hidden="true">{iconMap[notification.type]}</div>
         <div className="flex-1 flex justify-between items-center">
           <div className="flex flex-col">
             <span className={`text-sm ${notification.unread ? 'font-semibold' : 'font-normal'}`}>{notification.preview}</span>
             <span className="text-xs text-white/60">{notification.time}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" aria-hidden="true">
             {notification.unread && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
             <ChevronDown size={16} className={`text-white/60 transition-transform ${notification.expanded ? 'rotate-180' : ''}`} />
           </div>
@@ -79,6 +81,9 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
       {isOpen && (
         <motion.div
           ref={popupRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="notification-title"
           className="absolute right-3 w-[350px] max-w-[calc(100vw-20px)] bg-[rgba(30,30,30,0.9)] border border-white/15 rounded-xl shadow-lg z-40 text-white flex flex-col"
           style={{
             top: 'calc(var(--topbar-height) + 3px)',
@@ -91,7 +96,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
-            <h3 className="font-semibold text-base">{t('notifications')}</h3>
+            <h3 id="notification-title" className="font-semibold text-base">{t('notifications')}</h3>
             <button onClick={onClose} className="text-white/70 hover:text-white transition-colors" aria-label={t('close')}>
               <X size={20} />
             </button>

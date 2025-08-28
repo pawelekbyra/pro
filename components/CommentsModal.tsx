@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, MessageSquare, MessageCircle } from 'lucide-react';
+import { X, MessageCircle } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import Image from 'next/image';
 import { useFocusTrap } from '@/lib/useFocusTrap';
@@ -27,7 +27,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, comments
         if (c.id === id) {
           return { ...c, isLiked: !c.isLiked, likes: c.isLiked ? c.likes - 1 : c.likes + 1 };
         }
-        // Handle likes on replies
         const updatedReplies = c.replies.map(r => {
             if (r.id === id) {
                 return { ...r, isLiked: !r.isLiked, likes: r.isLiked ? r.likes - 1 : r.likes + 1 };
@@ -78,7 +77,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, comments
             transition={{ type: 'spring', stiffness: 400, damping: 40 }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex-shrink-0 relative flex items-center justify-center p-4 border-b border-gray-200">
               <h2 className="text-base font-semibold text-black">{commentsCount} {t('comments')}</h2>
               <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black" aria-label={t('close')}>
@@ -86,7 +84,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, comments
               </button>
             </div>
 
-            {/* Comments List */}
             <div className="flex-1 overflow-y-auto p-4">
               <AnimatePresence>
                 {comments.length > 0 ? (
@@ -110,10 +107,9 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, comments
               </AnimatePresence>
             </div>
 
-            {/* Input Form */}
             <div className="flex-shrink-0 p-2 border-t border-gray-200 bg-white">
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                <Image src="https://i.pravatar.cc/100?u=current_user" alt="Twój avatar" className="rounded-full" width={32} height={32} />
+                <Image src="https://i.pravatar.cc/100?u=current_user" alt={t('userAvatar')} className="rounded-full" width={32} height={32} />
                 <input
                   type="text"
                   value={newComment}

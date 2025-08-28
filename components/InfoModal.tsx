@@ -34,7 +34,6 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="relative flex items-center justify-center p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold">{t('infoModalTitle')}</h2>
               <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black" aria-label={t('close')}>
@@ -42,12 +41,10 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
               </button>
             </div>
 
-            {/* Body */}
             <div className="flex-1 overflow-y-auto p-6 text-sm space-y-4">
               <p>{t('loremIpsum1')}</p>
               <p>{t('loremIpsum2')}</p>
 
-              {/* Tip CTA */}
               <div className="bg-gray-100 rounded-lg p-4 text-center border border-gray-200">
                 <Heart className="mx-auto text-pink-500 mb-2" size={32} />
                 <p className="font-semibold">{t('infoModalTipHeader')}</p>

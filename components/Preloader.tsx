@@ -13,10 +13,9 @@ const Preloader: React.FC = () => {
   const [selectedLang, setSelectedLang] = useState<'pl' | 'en' | null>(null);
 
   const handleLangSelect = (lang: 'pl' | 'en') => {
-    if (selectedLang) return; // Prevent double-clicks
+    if (selectedLang) return;
     setSelectedLang(lang);
 
-    // 1. Unlock audio
     const videos = document.querySelectorAll('video');
     let unlocked = false;
     videos.forEach(video => {
@@ -25,8 +24,7 @@ const Preloader: React.FC = () => {
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            // Autoplay started!
-            video.pause(); // Immediately pause it, we just wanted the gesture
+            video.pause();
           }).catch(error => {
             console.warn("Audio unlock failed, user may need to tap video.", error);
           });
@@ -35,17 +33,15 @@ const Preloader: React.FC = () => {
       }
     });
 
-    // 2. Set the language
     selectInitialLang(lang);
 
-    // 3. Trigger fade-out animation
     setTimeout(() => {
       setIsHiding(true);
-    }, 300); // Small delay for the selection animation to play
+    }, 300);
   };
 
   if (isLangSelected) {
-    return null; // Don't render if a language is already selected (e.g., from localStorage)
+    return null;
   }
 
   return (

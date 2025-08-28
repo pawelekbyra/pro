@@ -6,17 +6,16 @@ import { Button } from '@/components/ui/button';
 import ToggleSwitch from './ui/ToggleSwitch';
 import CropModal from './CropModal';
 import { Crown } from 'lucide-react';
-import { useUser } from '@/context/UserContext'; // Import useUser
+import { useUser } from '@/context/UserContext';
 import Image from 'next/image';
 import { Skeleton } from './ui/Skeleton';
 
 const ProfileTab: React.FC = () => {
-  const { user: profile, isLoading, checkUserStatus } = useUser(); // Use user from context and add isLoading
+  const { user: profile, isLoading, checkUserStatus } = useUser();
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // State for cropping modal
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +41,6 @@ const ProfileTab: React.FC = () => {
       }
 
       setStatus({ type: 'success', message: 'Profile updated successfully!' });
-      // Refresh the user context with the new data
       await checkUserStatus();
 
     } catch (error: any) {
@@ -66,12 +64,10 @@ const ProfileTab: React.FC = () => {
       setIsCropModalOpen(true);
     };
     reader.readAsDataURL(file);
-    event.target.value = ''; // Reset input value
+    event.target.value = '';
   };
 
   const handleCropComplete = async (newAvatarUrl: string) => {
-      // This will be fully implemented in the next step
-      // For now, just close the modal and refresh context
       await checkUserStatus();
       setIsCropModalOpen(false);
       setImageToCrop(null);

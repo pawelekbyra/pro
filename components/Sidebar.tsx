@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { Heart, MessageCircle, Share2, Info, Languages, Coffee } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
@@ -20,7 +20,6 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, likesCount, isLiked, handl
   const { t, toggleLanguage } = useTranslation();
   const { addToast } = useToast();
 
-  // Helper function to format counts (e.g., 1500 -> 1.5K)
   const formatCount = (count: number) => {
     if (count >= 1000000) return (count / 1000000).toFixed(1).replace('.0', '') + 'M';
     if (count >= 1000) return (count / 1000).toFixed(1).replace('.0', '') + 'K';
@@ -29,25 +28,13 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, likesCount, isLiked, handl
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href)
-      .then(() => {
-        addToast(t('linkCopied'), 'success');
-      })
-      .catch(() => {
-        addToast(t('linkCopyError'), 'error');
-      });
+      .then(() => addToast(t('linkCopied'), 'success'))
+      .catch(() => addToast(t('linkCopyError'), 'error'));
   };
 
-  const handleInfo = () => {
-    openInfoModal();
-  };
-
-  const handleLanguage = () => {
-    toggleLanguage();
-  };
-
-  const handleTip = () => {
-    addToast(t('tipThanks'), 'success');
-  };
+  const handleInfo = () => openInfoModal();
+  const handleLanguage = () => toggleLanguage();
+  const handleTip = () => addToast(t('tipThanks'), 'success');
 
   return (
     <aside

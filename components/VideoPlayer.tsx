@@ -34,7 +34,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setCurrentSrc(mp4Src);
   };
 
-  // Use the custom hook only if we are trying to play an HLS stream
   useHls({
     videoRef,
     src: isHls ? currentSrc : null,
@@ -42,7 +41,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   });
 
   useEffect(() => {
-    // If we are not using HLS, we need to set the src directly
     if (!isHls && videoRef.current) {
       videoRef.current.src = currentSrc;
     }
@@ -55,16 +53,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       });
     } else {
       videoRef.current?.pause();
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-      }
     }
   }, [isActive]);
 
   // Effect to handle external seeking
   useEffect(() => {
     if (seekTime !== null && videoRef.current) {
-      videoRef.current.currentTime = seekTime;
+      if (Math.abs(videoRef.current.currentTime - seekTime) > 0.5) {
+        videoRef.current.currentTime = seekTime;
+      }
     }
   }, [seekTime]);
 
@@ -98,11 +95,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       playsInline
       webkit-playsinline
       preload="metadata"
-      // The key forces a re-mount of the video element when the src changes
-      // This is important for switching between HLS and MP4
       key={currentSrc}
     >
-      {/* The source tag is managed by the useHls hook or the useEffect above */}
     </video>
   );
 };

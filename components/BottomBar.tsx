@@ -20,7 +20,6 @@ const BottomBar: React.FC<BottomBarProps> = ({ user, description, duration, curr
         background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
       }}
     >
-      {/* Video Progress Bar - will be implemented in a later step */}
       <VideoProgressBar
         duration={duration}
         currentTime={currentTime}

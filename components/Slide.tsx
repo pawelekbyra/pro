@@ -40,24 +40,20 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
   const { addToast } = useToast();
   const { t } = useTranslation();
 
-  // Video progress state
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [seekTime, setSeekTime] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(isActive);
-
-  // Like state
   const [isLiked, setIsLiked] = useState(slide.isLiked);
   const [likesCount, setLikesCount] = useState(slide.initialLikes);
   const [showHeart, setShowHeart] = useState(false);
 
-  // Gesture handling state
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleTimeUpdate = (time: number) => {
     setCurrentTime(time);
     if (seekTime !== null) {
-      setSeekTime(null); // Reset seekTime after it has been processed
+      setSeekTime(null);
     }
   };
 
@@ -73,14 +69,11 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
   const handleLike = async () => {
     const previousIsLiked = isLiked;
     const previousLikesCount = likesCount;
-
     const newIsLiked = !isLiked;
     const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
-
     setIsLiked(newIsLiked);
     setLikesCount(newLikesCount);
 
-    // Show heart animation only when liking
     if (newIsLiked) {
       setShowHeart(true);
       setTimeout(() => setShowHeart(false), 800);
@@ -103,12 +96,10 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
 
   const handleVideoAreaClick = () => {
     if (clickTimeout.current) {
-      // Double click
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
       handleLike();
     } else {
-      // Single click
       clickTimeout.current = setTimeout(() => {
         setIsPlaying(prev => !prev);
         clickTimeout.current = null;
@@ -159,7 +150,7 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
 
         <TopBar
           setIsModalOpen={setIsModalOpen}
-          openAccountPanel={openAccountPanel} // Pass it down
+          openAccountPanel={openAccountPanel}
         />
         <Sidebar
           avatarUrl={slide.avatar}

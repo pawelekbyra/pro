@@ -37,23 +37,26 @@ const AccountPanel: React.FC<AccountPanelProps> = ({ isOpen, onClose }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          onClick={onClose} // Close on overlay click
+          onClick={onClose}
         >
           <motion.div
             ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="account-panel-title"
             className="absolute top-0 left-0 h-full w-full max-w-md bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] flex flex-col"
             initial={{ x: '-100%' }}
             animate={{ x: '0%' }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the panel
+            onClick={(e) => e.stopPropagation()}
           >
             <div
                 className="relative flex-shrink-0 flex items-center justify-center bg-white/5 border-b border-white/10"
                 style={{ height: 'var(--topbar-height)', paddingTop: 'var(--safe-area-top)'}}
             >
-              <h2 className="text-base font-semibold text-white">{t(activeTab)}</h2>
-              <button onClick={onClose} className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-full text-2xl font-light text-white/80 hover:text-white">&times;</button>
+              <h2 id="account-panel-title" className="text-base font-semibold text-white">{t(activeTab)}</h2>
+              <button onClick={onClose} className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-full text-2xl font-light text-white/80 hover:text-white" aria-label={t('close')}>&times;</button>
             </div>
 
             <div className="flex-shrink-0 flex bg-black/20 border-b border-white/10">
