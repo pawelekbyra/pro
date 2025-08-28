@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/Providers";
 import AppLayout from "@/components/AppLayout";
+import AppHeightProvider from "@/components/AppHeightProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,9 +21,11 @@ export default function RootLayout({
   return (
     <html lang="pl" suppressHydrationWarning>
       <body className={cn("antialiased", inter.className)}>
-        <Providers>
-          <AppLayout>{children}</AppLayout>
-        </Providers>
+        <AppHeightProvider>
+          <Providers>
+            <AppLayout>{children}</AppLayout>
+          </Providers>
+        </AppHeightProvider>
       </body>
     </html>
   );
