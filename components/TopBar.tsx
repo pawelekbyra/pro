@@ -9,11 +9,13 @@ import NotificationPopup from './NotificationPopup';
 interface TopBarProps {
   isLoggedIn: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
+  openAccountPanel: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, setIsModalOpen }) => {
+const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, setIsModalOpen, openAccountPanel }) => {
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
   const [isNotifPanelOpen, setIsNotifPanelOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleLoginPanel = () => {
     if (!isLoggedIn) {
@@ -22,28 +24,37 @@ const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, setIsModalOpen }) => {
   };
 
   const toggleNotifPanel = () => {
-    // For now, allow access even if not logged in, as per prototype.
-    // In a real app, this would likely be restricted.
     setIsNotifPanelOpen((prev) => !prev);
   };
 
-  // Effect to inform the parent page about the modal state
+  const toggleMenu = () => {
+      if (isLoggedIn) {
+          setIsMenuOpen(prev => !prev)
+      } else {
+          // In a real app, you might show an alert
+          console.log("Please log in to access the menu.");
+      }
+  }
+
+  const handleOpenAccountPanel = () => {
+    setIsMenuOpen(false);
+    openAccountPanel();
+  };
+
   useEffect(() => {
-    const isAnyPanelOpen = isLoginPanelOpen || isNotifPanelOpen;
+    const isAnyPanelOpen = isLoginPanelOpen || isNotifPanelOpen || isMenuOpen;
     setIsModalOpen(isAnyPanelOpen);
 
-    // Also add/remove class to body to prevent scrolling on mobile
     if (isAnyPanelOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
 
-    // Cleanup function
     return () => {
       document.body.style.overflow = '';
     }
-  }, [isLoginPanelOpen, isNotifPanelOpen, setIsModalOpen]);
+  }, [isLoginPanelOpen, isNotifPanelOpen, isMenuOpen, setIsModalOpen]);
 
 
   return (
@@ -60,7 +71,7 @@ const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, setIsModalOpen }) => {
           borderColor: isLoginPanelOpen ? 'transparent' : 'rgba(255, 255, 255, 0.15)',
         }}
       >
-        <button className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center">
+        <button onClick={toggleMenu} className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center">
           <Menu size={24} />
         </button>
 
@@ -95,6 +106,20 @@ const TopBar: React.FC<TopBarProps> = ({ isLoggedIn, setIsModalOpen }) => {
           ></div>
         </button>
       </div>
+
+      <AnimatePresence>
+        {isMenuOpen && (
+            <motion.div
+                className="logged-in-menu absolute top-[var(--topbar-height)] left-0 z-40 bg-[rgba(20,20,20,0.85)] backdrop-blur-xl border-b-2 border-r-2 border-white/10 rounded-br-lg"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+            >
+                <a href="#" onClick={handleOpenAccountPanel} className="block text-white px-4 py-3 hover:bg-white/10">Account</a>
+                <a href="#" className="block text-white px-4 py-3 hover:bg-white/10">Logout</a>
+            </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isLoginPanelOpen && (

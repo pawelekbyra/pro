@@ -26,10 +26,12 @@ interface SlideProps {
   slide: SlideData;
   isActive: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
+  openAccountPanel: () => void; // Add this prop
 }
 
-const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel }) => {
+  // Mock login state for now, will be replaced with global state
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true to test the menu
 
   const isSecret = slide.access === 'secret';
   const showSecretOverlay = isSecret && !isLoggedIn;
@@ -53,7 +55,11 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen }) => {
           </div>
         )}
 
-        <TopBar isLoggedIn={isLoggedIn} setIsModalOpen={setIsModalOpen} />
+        <TopBar
+          isLoggedIn={isLoggedIn}
+          setIsModalOpen={setIsModalOpen}
+          openAccountPanel={openAccountPanel} // Pass it down
+        />
         <Sidebar
           avatarUrl={slide.avatar}
           initialLikes={slide.initialLikes}
