@@ -56,6 +56,12 @@ Etap 1 (Plan B): Ukończenie prototypu
 
 Status: Ukończono etap tworzenia prototypu UI w czystym HTML, CSS i JS. Wszelkie kluczowe elementy wizualne i interakcje z plików tingtong.txt i pehape.txt są wiernie odwzorowane. Prototyp jest stabilny i gotowy do dalszych prac.
 
+2025-08-28
+
+Rozwiązywanie Blokera npm
+
+Status: W trakcie. Zdiagnozowano potencjalne przyczyny problemu z npm install w środowisku Codespaces (niepoprawna konfiguracja devcontainer.json, wersja Node.js/npm, uprawnienia, cache środowiska). Podjęto kroki w celu rozwiązania problemu.
+
 Plan Wdrożenia (Etapami)
 Etap 1: Inicjalizacja i Front-end (prototyp)
 
