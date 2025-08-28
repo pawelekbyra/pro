@@ -11,6 +11,7 @@ export interface User {
   lastName: string;
   displayName: string;
   avatar: string;
+  sessionVersion: number;
 }
 
 export interface Slide {
@@ -163,5 +164,18 @@ export const db = {
       const likeCount = data.likes.filter(l => l.slideId === slideId).length;
       return { newStatus: 'liked', likeCount };
     }
+  },
+
+  async incrementSessionVersion(userId: string): Promise<boolean> {
+    const data = await readDb();
+    const userIndex = data.users.findIndex(u => u.id === userId);
+
+    if (userIndex === -1) {
+      return false;
+    }
+
+    data.users[userIndex].sessionVersion = (data.users[userIndex].sessionVersion || 1) + 1;
+    await writeDb(data);
+    return true;
   }
 };

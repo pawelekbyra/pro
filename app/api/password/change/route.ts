@@ -1,26 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
-import { UserPayload } from '@/lib/types';
+import { verifySession } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
 
-async function verifySession(req: NextRequest) {
-    const sessionCookie = cookies().get(COOKIE_NAME);
-    if (!sessionCookie) return null;
-    try {
-        const { payload } = await jwtVerify<UserPayload>(sessionCookie.value, JWT_SECRET);
-        return payload;
-    } catch (error) {
-        return null;
-    }
-}
-
 export async function POST(request: NextRequest) {
-  const payload = await verifySession(request);
+  const payload = await verifySession();
   if (!payload || !payload.user) {
     return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
   }
@@ -53,8 +40,10 @@ export async function POST(request: NextRequest) {
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
     await db.updateUserPassword(payload.user.id, newPasswordHash);
 
-    // Changing the password should invalidate other sessions.
-    // We log the user out by clearing the cookie.
+    // Invalidate all old sessions by incrementing the session version
+    await db.incrementSessionVersion(payload.user.id);
+
+    // We also log the current session out by clearing the cookie.
     cookies().delete(COOKIE_NAME);
 
     return NextResponse.json({

@@ -1,20 +1,19 @@
-import { NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { verifySession } from '@/lib/auth';
 
 export async function GET() {
   try {
-    // Construct the path to the data.json file
-    const jsonDirectory = path.join(process.cwd(), 'data.json');
-    // Read the file contents
-    const fileContents = await fs.readFile(jsonDirectory, 'utf8');
-    // Parse the JSON data
-    const data = JSON.parse(fileContents);
+    const session = await verifySession();
+    const userId = session?.user?.id;
 
-    // Return the data as a JSON response
-    return NextResponse.json(data);
+    const slidesWithDynamicData = await db.getSlides(userId);
+
+    // The db layer now returns the full structure, so we just need the slides part
+    return NextResponse.json({ slides: slidesWithDynamicData });
+
   } catch (error) {
-    console.error('Error reading data.json:', error);
+    console.error('Error reading slides data:', error);
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });
   }
 }
