@@ -1,17 +1,41 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { promises as fs } from 'fs';
+import { jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
 
-// This is a mock API. In a real app, you'd use a database.
-// We read the data on every request to simulate fetching from a DB,
-// but we don't write it back, so the state is ephemeral.
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
+const COOKIE_NAME = 'session';
+
+async function verifySession(req: NextRequest) {
+    const sessionCookie = cookies().get(COOKIE_NAME);
+    if (!sessionCookie) return null;
+    try {
+        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
+        return payload;
+    } catch (error) {
+        return null;
+    }
+}
+
 async function getSlidesData() {
   const jsonDirectory = path.join(process.cwd(), 'data.json');
   const fileContents = await fs.readFile(jsonDirectory, 'utf8');
   return JSON.parse(fileContents);
 }
 
-export async function POST(request: Request) {
+interface UserProfile {
+  email: string;
+  [key: string]: any; // Allow other properties
+}
+
+export async function POST(request: NextRequest) {
+  const payload = await verifySession(request);
+  if (!payload || !payload.user) {
+    return NextResponse.json({ success: false, message: 'Authentication required to like a post.' }, { status: 401 });
+  }
+  const user = payload.user as UserProfile;
+
   try {
     const { likeId } = await request.json();
 
@@ -26,17 +50,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Slide not found' }, { status: 404 });
     }
 
-    // Toggle the like state and update the count
-    slide.isLiked = !slide.isLiked;
-    slide.initialLikes = slide.isLiked ? slide.initialLikes + 1 : slide.initialLikes - 1;
+    // This is a mock, so we just toggle the state. In a real app, this would be a database transaction
+    // tied to the user's ID from the JWT payload.
+    const newIsLiked = !slide.isLiked;
+    const newLikesCount = newIsLiked ? slide.initialLikes + 1 : slide.initialLikes - 1;
 
-    // In this mock, we don't save the changes back to data.json.
-    // The state is intentionally ephemeral for this prototype.
+    console.log(`User ${user.email} toggled like for post ${likeId}. New status: ${newIsLiked}`);
 
     return NextResponse.json({
       success: true,
-      status: slide.isLiked ? 'liked' : 'unliked',
-      count: slide.initialLikes,
+      isLiked: newIsLiked,
+      likeCount: newLikesCount,
     });
 
   } catch (error) {

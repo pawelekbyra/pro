@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useHls } from '@/lib/useHls';
 
 interface VideoPlayerProps {
-  src: string; // Will be the HLS source if available, otherwise MP4
   hlsSrc?: string | null;
   mp4Src: string;
   poster: string;

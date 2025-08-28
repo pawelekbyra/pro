@@ -1,49 +1,53 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ToggleSwitch from './ui/ToggleSwitch';
-import CropModal from './CropModal'; // Import the crop modal
+import CropModal from './CropModal';
 import { Crown } from 'lucide-react';
-
-interface UserProfile {
-  firstName: string;
-  lastName: string;
-  email: string;
-  displayName: string;
-  avatar: string;
-}
+import { useUser } from '@/context/UserContext'; // Import useUser
 
 const ProfileTab: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user: profile, checkUserStatus } = useUser(); // Use user from context
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // State for cropping modal
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch('/api/profile/update');
-        const data = await res.json();
-        if (data.success) {
-          setProfile(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch profile", error);
-      }
-    };
-    fetchProfile();
-  }, []);
-
   const handleProfileSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // ... (submission logic remains the same)
+    setIsSubmitting(true);
+    setStatus(null);
+
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch('/api/profile/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.message || 'Failed to update profile.');
+      }
+
+      setStatus({ type: 'success', message: 'Profile updated successfully!' });
+      // Refresh the user context with the new data
+      await checkUserStatus();
+
+    } catch (error: any) {
+      setStatus({ type: 'error', message: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleAvatarEditClick = () => {
@@ -63,10 +67,10 @@ const ProfileTab: React.FC = () => {
     event.target.value = ''; // Reset input value
   };
 
-  const handleCropComplete = (newAvatarUrl: string) => {
-      if (profile) {
-          setProfile({...profile, avatar: newAvatarUrl});
-      }
+  const handleCropComplete = async (newAvatarUrl: string) => {
+      // This will be fully implemented in the next step
+      // For now, just close the modal and refresh context
+      await checkUserStatus();
       setIsCropModalOpen(false);
       setImageToCrop(null);
       setStatus({ type: 'success', message: 'Avatar updated successfully!' });
@@ -79,6 +83,12 @@ const ProfileTab: React.FC = () => {
   return (
     <>
       <div className="tab-pane active p-4" id="profile-tab">
+        {status && (
+          <div className={`p-3 rounded-md mb-4 text-sm ${status.type === 'success' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+            {status.message}
+          </div>
+        )}
+
         <div className="avatar-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4 flex flex-col items-center text-center">
             <div className="relative w-20 h-20 mb-3">
                 <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg">
@@ -111,18 +121,20 @@ const ProfileTab: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="form-group">
                 <label className="form-label text-sm font-medium mb-2 block">First Name</label>
-                <Input type="text" name="firstName" defaultValue={profile.firstName} placeholder="Your first name" />
+                <Input type="text" name="firstName" defaultValue={profile.firstName} placeholder="Your first name" disabled={isSubmitting} />
               </div>
               <div className="form-group">
                 <label className="form-label text-sm font-medium mb-2 block">Last Name</label>
-                <Input type="text" name="lastName" defaultValue={profile.lastName} placeholder="Your last name" />
+                <Input type="text" name="lastName" defaultValue={profile.lastName} placeholder="Your last name" disabled={isSubmitting} />
               </div>
             </div>
             <div className="form-group mb-4">
               <label className="form-label text-sm font-medium mb-2 block">Email</label>
-              <Input type="email" name="email" defaultValue={profile.email} placeholder="email@example.com" />
+              <Input type="email" name="email" defaultValue={profile.email} placeholder="email@example.com" disabled={isSubmitting} />
             </div>
-            <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700">Save Changes</Button>
+            <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
           </form>
         </div>
 
