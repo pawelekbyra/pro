@@ -19,6 +19,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
   const [isNotifPanelOpen, setIsNotifPanelOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true); // Assume true initially, can be updated from an API call later
 
   const toggleLoginPanel = () => {
     if (!isLoggedIn) {
@@ -97,7 +98,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
 
         <button onClick={toggleNotifPanel} className="absolute top-1/2 -translate-y-1/2 right-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
           <Bell size={22} />
-          {isLoggedIn && (
+          {isLoggedIn && hasUnread && (
             <div
               className="absolute w-2 h-2 rounded-full border-2"
               style={{
@@ -146,7 +147,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
       </AnimatePresence>
 
       <AnimatePresence>
-        {isNotifPanelOpen && <NotificationPopup onClose={() => setIsNotifPanelOpen(false)} />}
+        {isNotifPanelOpen && <NotificationPopup isOpen={isNotifPanelOpen} onClose={() => setIsNotifPanelOpen(false)} />}
       </AnimatePresence>
     </>
   );
