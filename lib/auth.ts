@@ -24,7 +24,7 @@ export async function verifySession(): Promise<AuthPayload | null> {
     try {
         // 1. Verify the token's signature and structure
         const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        const authPayload = payload as AuthPayload;
+        const authPayload = payload as unknown as AuthPayload;
 
         if (!authPayload.user?.id || typeof authPayload.user?.sessionVersion !== 'number') {
             console.log("Token payload is malformed.");

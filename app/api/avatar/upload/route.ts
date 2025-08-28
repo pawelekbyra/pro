@@ -1,24 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify, SignJWT } from 'jose';
+import { SignJWT } from 'jose';
 import { cookies } from 'next/headers';
-import { db, User } from '@/lib/db';
+import { db } from '@/lib/db';
 import path from 'path';
 import { writeFile, stat, mkdir } from 'fs/promises';
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
-const COOKIE_NAME = 'session';
-
-async function verifySession(req: NextRequest): Promise<{ user: User } | null> {
-    const sessionCookie = cookies().get(COOKIE_NAME);
-    if (!sessionCookie) return null;
-
-    try {
-        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload as { user: User };
-    } catch (error) {
-        return null;
-    }
-}
+import { verifySession } from '@/lib/auth';
 
 async function ensureDir(dirPath: string) {
     try {
@@ -33,7 +19,7 @@ async function ensureDir(dirPath: string) {
 }
 
 export async function POST(request: NextRequest) {
-    const payload = await verifySession(request);
+    const payload = await verifySession();
     if (!payload || !payload.user) {
         return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
     }
@@ -76,9 +62,9 @@ export async function POST(request: NextRequest) {
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()
             .setExpirationTime('24h')
-            .sign(JWT_SECRET);
+            .sign(new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256'));
 
-        cookies().set(COOKIE_NAME, token, {
+        cookies().set('session', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
