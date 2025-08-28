@@ -235,7 +235,7 @@
          */
         const State = (function() {
             const _state = {
-                isUserLoggedIn: (typeof TingTongData !== 'undefined' && TingTongData.isLoggedIn) || false,
+                isUserLoggedIn: localStorage.getItem('tt_isLoggedIn') === 'true',
                 currentLang: 'pl',
                 currentSlideIndex: 0,
                 isAutoplayBlocked: false,
@@ -837,36 +837,33 @@
             async function handleLogin(form) {
                 const submitButton = form.querySelector('input[type="submit"]');
                 submitButton.disabled = true;
-                try {
-                    const data = Object.fromEntries(new FormData(form).entries());
-                    const json = await API.login(data);
-                    if (json.success) {
-                        State.set('isUserLoggedIn', true);
-                        UI.showAlert(Utils.getTranslation('loginSuccess'));
-                        await API.refreshNonce();
-                        App.fetchAndUpdateSlideData();
-                        UI.updateUIForLoginState();
-                    } else {
-                        UI.showAlert(json.data?.message || Utils.getTranslation('loginFailed'), true);
-                    }
-                } finally {
-                    submitButton.disabled = false;
-                }
+
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Mock login logic
+                localStorage.setItem('tt_isLoggedIn', 'true');
+                State.set('isUserLoggedIn', true);
+                UI.showAlert(Utils.getTranslation('loginSuccess'));
+                UI.updateUIForLoginState();
+
+                submitButton.disabled = false;
             }
 
             async function handleLogout(link) {
                 if (link.disabled) return;
                 link.disabled = true;
-                const json = await API.logout();
-                if (json.success) {
-                    State.set('isUserLoggedIn', false);
-                    UI.showAlert(Utils.getTranslation('logoutSuccess'));
-                    slidesData.forEach(slide => slide.isLiked = false);
-                    await API.refreshNonce();
-                    UI.updateUIForLoginState();
-                } else {
-                    UI.showAlert(json.data?.message || 'Logout failed.', true);
-                }
+
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Mock logout logic
+                localStorage.removeItem('tt_isLoggedIn');
+                State.set('isUserLoggedIn', false);
+                UI.showAlert(Utils.getTranslation('logoutSuccess'));
+                slidesData.forEach(slide => slide.isLiked = false); // Reset likes on logout
+                UI.updateUIForLoginState();
+
                 link.disabled = false;
             }
 
@@ -880,31 +877,12 @@
                 const slideData = slidesData.find(s => s.id === slideId);
                 if (!slideData) return;
 
-                const isCurrentlyLiked = !!slideData.isLiked;
-                const newLikedState = !isCurrentlyLiked;
-                const currentCount = slideData.initialLikes;
-                const newCount = newLikedState ? currentCount + 1 : Math.max(0, currentCount - 1);
+                // Mock like toggle logic
+                slideData.isLiked = !slideData.isLiked;
+                slideData.initialLikes += slideData.isLiked ? 1 : -1;
 
-                // Optimistic UI update
-                slideData.isLiked = newLikedState;
-                slideData.initialLikes = newCount;
-                UI.applyLikeStateToDom(slideData.likeId, newLikedState, newCount);
-                button.disabled = true;
-
-                const json = await API.toggleLike(slideData.likeId);
-
-                if (json.success) {
-                    slideData.isLiked = json.data.status === 'liked';
-                    slideData.initialLikes = json.data.count;
-                    UI.applyLikeStateToDom(slideData.likeId, slideData.isLiked, slideData.initialLikes);
-                } else {
-                    // Revert
-                    slideData.isLiked = isCurrentlyLiked;
-                    slideData.initialLikes = currentCount;
-                    UI.applyLikeStateToDom(slideData.likeId, isCurrentlyLiked, currentCount);
-                    UI.showAlert(json.data?.message || Utils.getTranslation('likeError'), true);
-                }
-                button.disabled = false;
+                // Update the UI immediately
+                UI.applyLikeStateToDom(slideData.likeId, slideData.isLiked, slideData.initialLikes);
             }
 
             function handleShare(button) {
@@ -1323,38 +1301,33 @@
                 button.disabled = true;
                 button.innerHTML = '<span class="loading-spinner"></span> Zapisywanie...';
 
-                try {
-                    const outputCanvas = document.createElement('canvas');
-                    outputCanvas.width = 200;
-                    outputCanvas.height = 200;
-                    const outputCtx = outputCanvas.getContext('2d');
+                await new Promise(resolve => setTimeout(resolve, 700));
 
-                    const cropSize = Math.min(cropCanvas.width, cropCanvas.height) * 0.8;
-                    const srcSize = cropSize / scale;
-                    const srcX = (cropImage.width - srcSize) / 2 - (offsetX / scale);
-                    const srcY = (cropImage.height - srcSize) / 2 - (offsetY / scale);
+                const outputCanvas = document.createElement('canvas');
+                outputCanvas.width = 200;
+                outputCanvas.height = 200;
+                const outputCtx = outputCanvas.getContext('2d');
 
-                    outputCtx.drawImage(cropImage, srcX, srcY, srcSize, srcSize, 0, 0, 200, 200);
+                const cropSize = Math.min(cropCanvas.width, cropCanvas.height) * 0.8;
+                const srcSize = cropSize / scale;
+                const srcX = (cropImage.width - srcSize) / 2 - (offsetX / scale);
+                const srcY = (cropImage.height - srcSize) / 2 - (offsetY / scale);
 
-                    const dataUrl = outputCanvas.toDataURL('image/png', 0.9);
-                    const result = await uploadAvatar(dataUrl);
+                outputCtx.drawImage(cropImage, srcX, srcY, srcSize, srcSize, 0, 0, 200, 200);
 
-                    if (result.success && result.data?.url) {
-                        const newAvatarUrl = result.data.url + '?t=' + Date.now();
-                        document.getElementById('userAvatar').src = newAvatarUrl;
-                        document.querySelectorAll('.profile img, .tiktok-symulacja .profile img').forEach(img => { img.src = newAvatarUrl; });
-                        showSuccess('profileSuccess', 'Avatar został zaktualizowany!');
-                        closeCropModal();
-                        document.dispatchEvent(new CustomEvent('tt:avatar-updated', { detail: { url: newAvatarUrl } }));
-                    } else {
-                        throw new Error(result.data?.message || 'Nie otrzymano URL avatara');
-                    }
-                } catch (error) {
-                    showError('profileError', error.message || 'Błąd podczas przetwarzania obrazu.');
-                } finally {
-                    button.disabled = false;
-                    button.innerHTML = originalHTML;
-                }
+                const dataUrl = outputCanvas.toDataURL('image/png', 0.9);
+
+                // Update the avatar image on the page locally
+                document.getElementById('userAvatar').src = dataUrl;
+                // Also update the avatar in the main UI if it exists
+                const mainAvatar = document.querySelector('.webyx-section.active .profileButton img');
+                if(mainAvatar) mainAvatar.src = dataUrl;
+
+                showSuccess('profileSuccess', 'Avatar został zaktualizowany! (DEMO)');
+                closeCropModal();
+
+                button.disabled = false;
+                button.innerHTML = originalHTML;
             }
 
             async function apiRequest(action, data = {}) {
@@ -1383,21 +1356,20 @@
                 const originalText = button.textContent;
                 button.disabled = true;
                 button.innerHTML = '<span class="loading-spinner"></span> Zapisywanie...';
-                try {
-                    const data = { first_name: document.getElementById('firstName').value.trim(), last_name: document.getElementById('lastName').value.trim(), email: document.getElementById('email').value.trim() };
-                    if (!data.first_name || !data.last_name || !data.email) throw new Error('Wszystkie pola są wymagane.');
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) throw new Error('Podaj prawidłowy adres email.');
-                    const result = await updateProfile(data);
-                    if (result.success) {
-                        showSuccess('profileSuccess', 'Profil został zaktualizowany!');
-                        populateProfileForm(result.data);
-                    } else { throw new Error(result.data?.message || 'Błąd aktualizacji profilu.'); }
-                } catch (error) {
-                    showError('profileError', error.message);
-                } finally {
-                    button.disabled = false;
-                    button.textContent = originalText;
-                }
+
+                await new Promise(resolve => setTimeout(resolve, 700));
+
+                const firstName = document.getElementById('firstName').value.trim();
+                const lastName = document.getElementById('lastName').value.trim();
+                const displayName = `${firstName} ${lastName}`;
+
+                // Update UI elements to show change
+                document.getElementById('displayName').textContent = displayName;
+
+                showSuccess('profileSuccess', 'Profil został zaktualizowany! (DEMO)');
+
+                button.disabled = false;
+                button.textContent = originalText;
             }
 
             async function handlePasswordSubmit(event) {
@@ -1406,22 +1378,14 @@
                 const originalText = button.textContent;
                 button.disabled = true;
                 button.innerHTML = '<span class="loading-spinner"></span> Zmienianie...';
-                try {
-                    const currentPassword = document.getElementById('currentPassword').value, newPassword = document.getElementById('newPassword').value, confirmPassword = document.getElementById('confirmPassword').value;
-                    if (!currentPassword || !newPassword || !confirmPassword) throw new Error('Wszystkie pola są wymagane.');
-                    if (newPassword.length < 8) throw new Error('Nowe hasło musi mieć minimum 8 znaków.');
-                    if (newPassword !== confirmPassword) throw new Error('Nowe hasła muszą być identyczne.');
-                    const result = await changePassword({ current_password: currentPassword, new_password_1: newPassword, new_password_2: confirmPassword });
-                    if (result.success) {
-                        showSuccess('passwordSuccess', 'Hasło zostało zmienione!');
-                        document.getElementById('passwordForm').reset();
-                    } else { throw new Error(result.data?.message || 'Błąd zmiany hasła.'); }
-                } catch (error) {
-                    showError('passwordError', error.message);
-                } finally {
-                    button.disabled = false;
-                    button.textContent = originalText;
-                }
+
+                await new Promise(resolve => setTimeout(resolve, 700));
+
+                showSuccess('passwordSuccess', 'Hasło zostało zmienione! (DEMO)');
+                document.getElementById('passwordForm').reset();
+
+                button.disabled = false;
+                button.textContent = originalText;
             }
 
             async function handleDeleteSubmit(event) {
@@ -1430,21 +1394,15 @@
                 const originalText = button.textContent;
                 button.disabled = true;
                 button.innerHTML = '<span class="loading-spinner"></span> Usuwanie...';
-                try {
-                    const confirmText = document.getElementById('deleteConfirmation').value;
-                    if (confirmText.trim() !== 'USUWAM KONTO') throw new Error('Wpisz dokładnie: USUWAM KONTO');
-                    const result = await deleteAccount(confirmText);
-                    if (result.success) {
-                        showSuccess('deleteSuccess', 'Konto zostało usunięte. Trwa wylogowywanie...');
-                        setTimeout(() => window.location.reload(), 2000);
-                    } else { throw new Error(result.data?.message || 'Błąd usuwania konta.'); }
-                } catch (error) {
-                    showError('deleteError', error.message);
-                    if(!document.getElementById('deleteSuccess').classList.contains('show')) {
-                      button.disabled = false;
-                      button.textContent = originalText;
-                    }
-                }
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                showSuccess('deleteSuccess', 'Konto zostało usunięte. Trwa wylogowywanie...');
+
+                setTimeout(() => {
+                    localStorage.removeItem('tt_isLoggedIn');
+                    window.location.reload();
+                }, 2000);
             }
 
             function hideAllMessages() { document.querySelectorAll('.status-message').forEach(el => { el.classList.remove('show'); el.style.display = 'none'; }); }
