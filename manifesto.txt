@@ -74,6 +74,12 @@ Faza 1 (Core Feed) Migracji do Next.js
 
 Status: Ukończono. Pomyślnie zmigrowano główny feed wideo, w tym przewijanie slajdów (Framer Motion), komponenty UI (TopBar, Sidebar, BottomBar) z użyciem Tailwind CSS, oraz podstawowe interakcje (like, panele logowania i powiadomień). Zaimplementowano ulepszoną logikę HLS.js i poprawiono błąd blokowania przewijania tła.
 
+2025-08-28
+
+Faza 2 (Panel Konta) Migracji do Next.js
+
+Status: Ukończono. Pomyślnie zmigrowano panel konta użytkownika, w tym zakładki Profil, Hasło i Usuń Konto. Zaimplementowano formularze z użyciem `shadcn/ui`, logikę przesyłania i przycinania awatara, oraz odpowiednie mockowe endpointy API. Dodano animacje `Framer Motion` dla paneli i poprawiono błędy UX.
+
 Plan Wdrożenia (Etapami)
 Etap 1: Inicjalizacja i Front-end (prototyp)
 

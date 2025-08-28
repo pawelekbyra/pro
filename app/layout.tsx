@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-// import { Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-// const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ting Tong",
@@ -17,8 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pl" suppressHydrationWarning>
-      {/* <body className={cn("antialiased", inter.className)}> */}
-      <body className={cn("antialiased")}>
+      <body className={cn("antialiased", inter.className)}>
         {children}
       </body>
     </html>
