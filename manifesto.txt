@@ -1,0 +1,98 @@
+ Ting Tong SaaS
+Misja: Stworzyć skalowalną, nowoczesną aplikację wideo inspirowaną interfejsem TikToka, odtwarzając wiernie wygląd i funkcjonalności z dostarczonych plików (tingtong.txt i pehape.txt), ale z użyciem profesjonalnych technologii.
+
+Wizja: Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową, z łatwą możliwością rozbudowy o moduły takie jak zaawansowane silniki wideo, systemy gamifikacji, a także jako natywna aplikacja mobilna.
+
+Architektura projektu
+Front-end: Aplikacja front-endowa zostanie zbudowana na Next.js z wykorzystaniem Reacta (App Router).
+
+Stylizacja: Tailwind CSS w połączeniu z komponentami shadcn/ui dla spójności i szybkości.
+
+Animacje: Framer Motion dla płynnych i angażujących animacji.
+
+Silnik wideo: hls.js z fallbackiem do MP4, przygotowany do obsługi Adaptacyjnego Bitrate'u (ABR).
+
+PWA: Pełna obsługa PWA (Progressive Web App) z funkcjami offline i cache'em za pomocą Workbox.
+
+Back-end: System zostanie zbudowany jako oddzielny, bezgłowy backend na NestJS (Node.js), co pozwoli na elastyczne skalowanie.
+
+Baza danych: PostgreSQL do przechowywania danych użytkowników, filmów i interakcji, z opcjonalnym Redis do cache'owania i obsługi powiadomień w czasie rzeczywistym.
+
+Hosting wideo: Pliki wideo będą przechowywane w usłudze kompatybilnej z Amazon S3 (np. DigitalOcean Spaces), co zapewni ich globalną dostępność i skalowalność.
+
+Transkodowanie wideo: Niestandardowy proces transkodowania (np. oparty na ffmpeg) będzie konwertował wideo na formaty HLS/DASH.
+
+Autoryzacja: Zabezpieczone API w standardzie REST/GraphQL z autoryzacją opartą o tokeny JWT oraz opcjonalnymi opcjami logowania społecznościowego.
+
+Wygląd i funkcjonalności (do odtworzenia)
+Główny Feed: Pionowy, przewijany feed z wideo zajmującym całą przestrzeń ekranu. Przewijanie musi mieć efekt przyciągania do sekcji (scroll-snap) .
+
+Interakcje wideo: Automatyczne odtwarzanie, pauzowanie/wznawianie po dotknięciu, wyciszanie/odciszanie i zapętlanie.
+
+
+Paski UI: Przezroczyste, rozmyte paski na górze i na dole ekranu (topbar, bottombar), które nie zasłaniają wideo .
+
+
+Panel boczny (Sidebar):
+
+Avatar twórcy z przyciskiem + dla niezalogowanych użytkowników.
+
+Przycisk polubień z licznikiem, obsługujący optymistyczne aktualizacje .
+
+Przyciski do komentarzy, udostępniania, powiadomień oraz zmiany języka.
+
+Panel użytkownika:
+
+
+Panel Logowania: Interfejs do logowania .
+
+
+Panel Konta: Zakładki do zarządzania profilem , zmiany hasła i usuwania konta.
+
+
+Powiadomienia: System powiadomień z wyskakującym okienkiem .
+
+
+Alerts: System wyskakujących powiadomień na dole ekranu .
+
+
+Dostępność (A11y): Aplikacja musi być w pełni dostępna, z odpowiednimi atrybutami aria i obsługą klawiatury .
+
+Plan wdrożenia (etapami)
+Jules, proszę o realizację projektu w następujących etapach, z jasnym podziałem odpowiedzialności.
+
+Etap 1: Inicjalizacja i front-end (samodzielny)
+Zadanie: Stworzenie i skonfigurowanie projektu front-end w Next.js. Celem jest odtworzenie całego interfejsu i interakcji z pliku 
+
+tingtong.txt .
+
+Dane: Cała logika aplikacji ma być tymczasowo oparta o statyczne dane (mock data) z pliku data.json, aby umożliwić niezależną pracę bez backendu.
+
+Output: Kompletna aplikacja webowa PWA, która wygląda i działa jak tingtong.txt, ale jest zbudowana na nowoczesnym stosie technologicznym. Aplikacja będzie gotowa do podłączenia pod API w przyszłości.
+
+Wdrożenie: Zautomatyzowanie procesu wdrożenia za pomocą GitHub Actions na statyczny hosting.
+
+Etap 2: Backend (implementacja logiki)
+
+Zadanie: Stworzenie i skonfigurowanie back-endu w NestJS, który zaimplementuje logikę z pliku pehape.txt .
+
+Logika:
+
+Implementacja API w standardzie REST/GraphQL dla polubień, komentarzy, logowania, zarządzania profilem i powiadomień.
+
+Konfiguracja bazy danych PostgreSQL.
+
+Uruchomienie mikroserwisu do transkodowania wideo.
+
+Output: Działające API, które obsłuży wszystkie funkcjonalności front-endu.
+
+Etap 3: Integracja i rozszerzenia
+Zadanie: Połączenie front-endu z gotowym back-endem. Zastąpienie mock data prawdziwymi danymi z API.
+
+Optymalizacja: Włączenie adaptacyjnego bitrate w odtwarzaczu wideo, tak aby pobierał pliki HLS z serwera.
+
+Wdrożenie: Skonfigurowanie wdrożenia front-endu i back-endu w kontenerach (Docker) i środowisku chmurowym (np. Kubernetes), aby zapewnić skalowalność.
+
+Jules, ten manifest i plan pracy to pełen obraz projektu. Jesteśmy gotowi do pracy nad każdym z tych etapów.
+
+Za kazdym razem kiedy dokonasz zmnain utworz w tym manifescie dziennik zmian i komentarz z data i wdrozeniami na jakim etapie jestesmy i co jeszcze jest do zrobienia. popraw plik manifestu zeby byl profesjonalnym kompasem i dziennikiem zmian
