@@ -27,10 +27,11 @@ interface SlideProps {
   slide: SlideData;
   isActive: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
-  openAccountPanel: () => void; // Add this prop
+  openAccountPanel: () => void;
+  openCommentsModal: () => void;
 }
 
-const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel }) => {
+const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel, openCommentsModal }) => {
   const { isLoggedIn, isLoading } = useUser();
 
   const isSecret = slide.access === 'secret';
@@ -66,6 +67,7 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           isLiked={slide.isLiked}
           likeId={slide.likeId}
           commentsCount={slide.initialComments}
+          openCommentsModal={openCommentsModal}
         />
         <BottomBar user={slide.user} description={slide.description} />
       </div>

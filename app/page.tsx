@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useAnimation, PanInfo } from 'framer-motion';
 import Slide, { SlideData } from '@/components/Slide';
-import AccountPanel from '@/components/AccountPanel'; // Import AccountPanel
+import AccountPanel from '@/components/AccountPanel';
+import CommentsModal from '@/components/CommentsModal';
 
 const DRAG_THRESHOLD = 150;
 const SPRING_OPTIONS = {
@@ -16,7 +17,8 @@ export default function Home() {
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false); // State for Account Panel
+  const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const controls = useAnimation();
   const y = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,8 +65,11 @@ export default function Home() {
   const openAccountPanel = () => setIsAccountPanelOpen(true);
   const closeAccountPanel = () => setIsAccountPanelOpen(false);
 
+  const openCommentsModal = () => setIsCommentsModalOpen(true);
+  const closeCommentsModal = () => setIsCommentsModalOpen(false);
+
   // Combine modal states to control dragging
-  const isAnyModalOpen = isModalOpen || isAccountPanelOpen;
+  const isAnyModalOpen = isModalOpen || isAccountPanelOpen || isCommentsModalOpen;
 
   if (slides.length === 0) {
     return (
@@ -91,14 +96,19 @@ export default function Home() {
               slide={slide}
               isActive={index === activeIndex}
               setIsModalOpen={setIsModalOpen}
-              openAccountPanel={openAccountPanel} // Pass open function
+              openAccountPanel={openAccountPanel}
+              openCommentsModal={openCommentsModal}
             />
           </div>
         ))}
       </motion.div>
 
-      {/* Render Account Panel */}
       <AccountPanel isOpen={isAccountPanelOpen} onClose={closeAccountPanel} />
+      <CommentsModal
+        isOpen={isCommentsModalOpen}
+        onClose={closeCommentsModal}
+        commentsCount={slides[activeIndex]?.initialComments || 0}
+      />
     </main>
   );
 }

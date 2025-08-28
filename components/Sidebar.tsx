@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, Info, Languages, Coffee } from 'lucide-react';
+import { useToast } from '@/context/ToastContext';
 
 interface SidebarProps {
   avatarUrl: string;
@@ -9,11 +10,13 @@ interface SidebarProps {
   isLiked: boolean;
   likeId: string;
   commentsCount: number;
+  openCommentsModal: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: initialIsLiked, likeId, commentsCount }) => {
+const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: initialIsLiked, likeId, commentsCount, openCommentsModal }) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likesCount, setLikesCount] = useState(initialLikes);
+  const { addToast } = useToast();
 
   // Helper function to format counts (e.g., 1500 -> 1.5K)
   const formatCount = (count: number) => {
@@ -47,17 +50,15 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: ini
       }
 
       const data = await response.json();
-      // Optionally, you can sync with the server's response
-      // For now, the optimistic update is enough for a mock.
-      // setIsLiked(data.isLiked);
-      // setLikesCount(data.likeCount);
+      // For now, the optimistic update is enough.
+      addToast(newIsLiked ? 'Polubiono!' : 'Cofnięto polubienie', 'success');
 
     } catch (error) {
       console.error(error);
       // Revert the UI on error
       setIsLiked(previousIsLiked);
       setLikesCount(previousLikesCount);
-      // You could show an error toast here
+      addToast('Błąd sieci, spróbuj ponownie', 'error');
     }
   };
 
@@ -91,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: ini
         <span className="icon-label">{formatCount(likesCount)}</span>
       </button>
 
-      <button className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
         <MessageCircle size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
       </button>
