@@ -51,6 +51,13 @@ const ProfileTab: React.FC = () => {
     }
   };
 
+  const handleSettingsSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // TODO: Implement settings submission logic
+    console.log("Settings form submitted");
+    setStatus({ type: 'success', message: 'Settings saved (not really)!' });
+  };
+
   const handleAvatarEditClick = () => {
     fileInputRef.current?.click();
   };

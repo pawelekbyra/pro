@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { db, User } from '@/lib/db';
+import { db } from '@/lib/db';
+import { UserPayload } from '@/lib/types';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
-
-interface UserPayload {
-    user: User;
-}
 
 async function verifySession(req: NextRequest) {
     const sessionCookie = cookies().get(COOKIE_NAME);
     if (!sessionCookie) return null;
     try {
-        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload as UserPayload;
+        const { payload } = await jwtVerify<UserPayload>(sessionCookie.value, JWT_SECRET);
+        return payload;
     } catch (error) {
         return null;
     }

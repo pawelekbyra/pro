@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { UserPayload } from '@/lib/types';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
+        const { payload } = await jwtVerify<UserPayload>(sessionCookie.value, JWT_SECRET);
 
         if (!payload || !payload.user) {
             // The token is valid, but the payload is malformed.
