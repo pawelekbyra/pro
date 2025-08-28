@@ -7,6 +7,7 @@ import ToggleSwitch from './ui/ToggleSwitch';
 import CropModal from './CropModal';
 import { Crown } from 'lucide-react';
 import { useUser } from '@/context/UserContext'; // Import useUser
+import Image from 'next/image';
 
 const ProfileTab: React.FC = () => {
   const { user: profile, checkUserStatus } = useUser(); // Use user from context
@@ -119,7 +120,7 @@ const ProfileTab: React.FC = () => {
         <div className="avatar-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4 flex flex-col items-center text-center">
             <div className="relative w-20 h-20 mb-3">
                 <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg">
-                    <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" id="userAvatar" />
+                    <Image src={profile.avatar} alt="Avatar" width={80} height={80} className="w-full h-full object-cover" id="userAvatar" />
                 </div>
                 <button onClick={handleAvatarEditClick} className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 bg-pink-600 border-2 border-[#2d2d2d] rounded-full text-white text-lg font-bold flex items-center justify-center" id="avatarEditBtn" title="Change avatar">
                     +
@@ -167,7 +168,23 @@ const ProfileTab: React.FC = () => {
 
         <div className="settings-section bg-white/5 border border-white/10 rounded-xl p-5">
           <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3"><span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>Settings</h3>
-          <form onSubmit={handleSettingsSubmit}>
+          <form onSubmit={(e) => {
+              e.preventDefault();
+              // This is a placeholder for a real API call
+              setIsSubmitting(true);
+              setStatus(null);
+              setTimeout(() => {
+                try {
+                  // Simulate API success
+                  console.log('Saving settings:', { emailConsent, emailLanguage });
+                  setStatus({ type: 'success', message: 'Settings saved successfully!' });
+                } catch (error: any) {
+                  setStatus({ type: 'error', message: error.message });
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }, 1000);
+          }}>
             <div className="flex items-center justify-between mb-4">
               <label className="form-label text-sm">Email Consent</label>
               <ToggleSwitch isActive={emailConsent} onToggle={() => setEmailConsent(p => !p)} />

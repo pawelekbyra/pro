@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useHls } from '@/lib/useHls';
+import { Heart, Pause, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface VideoPlayerProps {
   hlsSrc?: string | null;
@@ -9,20 +11,30 @@ interface VideoPlayerProps {
   poster: string;
   isActive: boolean;
   isSecretActive: boolean;
+  likeId: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, likeId }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
-  const handleHlsFatalError = () => {
+  // State for player UI
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
+  const [showPause, setShowPause] = useState(false);
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleHlsFatalError = useCallback(() => {
     console.warn('HLS failed, falling back to MP4.');
     setIsHls(false);
     setCurrentSrc(mp4Src);
-  };
+  }, [mp4Src]);
 
-  // Use the custom hook only if we are trying to play an HLS stream
+  // FIX #11: useHls hook is now called unconditionally
   useHls({
     videoRef,
     src: isHls ? currentSrc : null,
@@ -30,47 +42,177 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
   });
 
   useEffect(() => {
-    // If we are not using HLS, we need to set the src directly
     if (!isHls && videoRef.current) {
       videoRef.current.src = currentSrc;
     }
   }, [isHls, currentSrc]);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
     if (isActive) {
-      videoRef.current?.play().catch(error => {
-        console.error("Autoplay was prevented:", error);
-      });
+      video.play().catch(error => console.error("Autoplay was prevented:", error));
     } else {
-      videoRef.current?.pause();
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-      }
+      video.pause();
+      video.currentTime = 0;
+    }
+
+    const updatePlayingState = () => setIsPlaying(!video.paused);
+    video.addEventListener('play', updatePlayingState);
+    video.addEventListener('pause', updatePlayingState);
+    return () => {
+      video.removeEventListener('play', updatePlayingState);
+      video.removeEventListener('pause', updatePlayingState);
     }
   }, [isActive]);
 
+  // FIX #4: Progress bar update logic
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const updateProgress = () => {
+      if (!isDragging) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
+    };
+    video.addEventListener('timeupdate', updateProgress);
+    return () => video.removeEventListener('timeupdate', updateProgress);
+  }, [isDragging]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    updateScrubber(e.clientX);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    updateScrubber(e.clientX);
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
+
+  const updateScrubber = (clientX: number) => {
+    const video = videoRef.current;
+    const progress = progressRef.current;
+    if (!video || !progress) return;
+    const rect = progress.getBoundingClientRect();
+    const newProgress = ((clientX - rect.left) / rect.width) * 100;
+    const clampedProgress = Math.max(0, Math.min(100, newProgress));
+    setProgress(clampedProgress);
+    video.currentTime = (clampedProgress / 100) * video.duration;
+  };
+
+  const triggerLikeAnimation = () => {
+    setShowHeart(true);
+    setTimeout(() => setShowHeart(false), 800);
+    // Find the actual like button and click it
+    const likeButton = document.querySelector(`[data-like-id="${likeId}"]`) as HTMLButtonElement;
+    likeButton?.click();
+  };
+
+  const triggerPauseAnimation = () => {
+    setShowPause(true);
+    setTimeout(() => setShowPause(false), 500);
+  }
+
+  // FIX #5 & #6: Single and Double Tap Gesture Logic
+  const handleVideoClick = () => {
+    if (clickTimeout.current) {
+      // Double click
+      clearTimeout(clickTimeout.current);
+      clickTimeout.current = null;
+      triggerLikeAnimation();
+    } else {
+      // Single click
+      clickTimeout.current = setTimeout(() => {
+        const video = videoRef.current;
+        if (video) {
+          if (video.paused) {
+            video.play();
+          } else {
+            video.pause();
+            triggerPauseAnimation();
+          }
+        }
+        clickTimeout.current = null;
+      }, 250);
+    }
+  };
+
+  const videoWrapperClassName = [
+    'absolute top-0 left-0 w-full h-full'
+  ].filter(Boolean).join(' ');
+
   const videoClassName = [
     'videoPlayer',
-    'absolute top-0 left-0 w-full h-full object-cover',
+    'w-full h-full object-cover',
     isSecretActive ? 'secret-active' : '',
   ].filter(Boolean).join(' ');
 
   return (
-    <video
-      ref={videoRef}
-      className={videoClassName}
-      poster={poster}
-      muted
-      loop
-      playsInline
-      webkit-playsinline
-      preload="metadata"
-      // The key forces a re-mount of the video element when the src changes
-      // This is important for switching between HLS and MP4
-      key={currentSrc}
-    >
-      {/* The source tag is managed by the useHls hook or the useEffect above */}
-    </video>
+    <div className={videoWrapperClassName} onClick={handleVideoClick}>
+      <video
+        ref={videoRef}
+        className={videoClassName}
+        poster={poster}
+        muted
+        loop
+        playsInline
+        webkit-playsinline="true"
+        preload="metadata"
+        key={currentSrc}
+      />
+      <AnimatePresence>
+        {showHeart && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.5 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <Heart size={80} className="text-white fill-white drop-shadow-lg" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showPause && (
+          <motion.div
+            initial={{ opacity: 0, scale: 1.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.2, ease: 'easeIn' }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          >
+            <Pause size={60} className="text-white/80 fill-white/30 drop-shadow-lg" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div
+        ref={progressRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        className="absolute bottom-0 left-0 w-full h-10 cursor-pointer group"
+        style={{ paddingBottom: 'calc(var(--bottombar-base-height) - 10px)' }}
+      >
+        <div className="absolute left-0 bottom-0 w-full h-1 bg-white/25 rounded-full group-hover:h-1.5 transition-all">
+          <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${progress}%` }}></div>
+        </div>
+        <div
+          className="absolute bottom-0 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{
+            left: `${progress}%`,
+            backgroundColor: 'var(--accent-color)',
+            boxShadow: '0 0 6px rgba(255, 255, 255, 0.6)',
+          }}
+        ></div>
+      </div>
+    </div>
   );
 };
 
