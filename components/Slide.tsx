@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useUser } from '@/context/UserContext';
 import VideoPlayer from './VideoPlayer';
 import Sidebar from './Sidebar';
 import BottomBar from './BottomBar';
@@ -30,11 +31,11 @@ interface SlideProps {
 }
 
 const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel }) => {
-  // Mock login state for now, will be replaced with global state
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true to test the menu
+  const { isLoggedIn, isLoading } = useUser();
 
   const isSecret = slide.access === 'secret';
-  const showSecretOverlay = isSecret && !isLoggedIn;
+  // Don't show the overlay while the user state is loading
+  const showSecretOverlay = isSecret && !isLoading && !isLoggedIn;
 
   return (
     <div className="webyx-section h-full w-full relative overflow-hidden">
@@ -56,7 +57,6 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
         )}
 
         <TopBar
-          isLoggedIn={isLoggedIn}
           setIsModalOpen={setIsModalOpen}
           openAccountPanel={openAccountPanel} // Pass it down
         />

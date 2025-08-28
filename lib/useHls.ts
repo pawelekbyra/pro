@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
 
 interface UseHlsParams {
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   src: string | null;
   onFatalError?: () => void; // Callback to handle fatal errors (e.g., fallback to MP4)
 }
@@ -11,7 +11,7 @@ const HLS_CONFIG = {
   abrEnabled: true,
   capLevelToPlayerSize: true,
   startLevel: -1,
-  abrEwmaFastLive: true,
+  abrEwmaFastLive: 3.0, // Corrected from boolean to number
   maxAutoLevelCapping: undefined, // Let HLS decide by default
   // Add retry configuration for robustness
   manifestLoadErrorMaxRetry: 5,

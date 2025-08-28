@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 const DELETE_CONFIRM_TEXT = 'USUWAM KONTO';
 
@@ -11,6 +12,7 @@ const DeleteTab: React.FC = () => {
   const [confirmation, setConfirmation] = useState('');
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { logout } = useUser();
 
   const handleDeleteSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,8 +35,13 @@ const DeleteTab: React.FC = () => {
 
       if (res.ok && result.success) {
         setStatus({ type: 'success', message: result.message });
-        // In a real app, you would redirect or log the user out here.
-        // For now, just disable the button permanently.
+        // The API has cleared the session cookie.
+        // Now, update the frontend state by calling logout from the context.
+        setTimeout(() => {
+          logout();
+          // The user is now logged out, and the UI will update.
+          // The AccountPanel will close automatically as it's conditional on being logged in.
+        }, 2000); // Wait 2 seconds to allow user to read the success message.
       } else {
         throw new Error(result.message || 'Failed to delete account.');
       }

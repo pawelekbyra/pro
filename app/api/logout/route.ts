@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+const COOKIE_NAME = 'session';
 
 export async function POST() {
-  const response = NextResponse.json({ success: true, message: 'Logged out successfully.' });
+  try {
+    // Clear the session cookie
+    cookies().delete(COOKIE_NAME);
 
-  // Clear the mock cookie
-  response.cookies.set('auth_token', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: -1, // Expire the cookie immediately
-  });
-
-  return response;
+    return NextResponse.json({ success: true, message: 'Logged out successfully.' });
+  } catch (error) {
+    console.error('Logout API error:', error);
+    return NextResponse.json({ success: false, message: 'An internal server error occurred' }, { status: 500 });
+  }
 }
