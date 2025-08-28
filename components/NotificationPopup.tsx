@@ -3,15 +3,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bell, Mail, User, Tag, ChevronDown } from 'lucide-react';
-
-// Enhanced mock data with full details and types
-const mockNotificationsData = [
-  { id: 1, type: 'message' as const, preview: 'New message from Admin', time: '2 mins ago', full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', unread: true, expanded: false },
-  { id: 2, type: 'profile' as const, preview: 'Your profile has been updated', time: '10 mins ago', full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', unread: true, expanded: false },
-  { id: 3, type: 'offer' as const, preview: 'A special offer is waiting for you!', time: '1 hour ago', full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', unread: false, expanded: false },
-];
-
-type Notification = typeof mockNotificationsData[0];
+import { useTranslation } from '@/context/LanguageContext';
+import { useFocusTrap } from '@/lib/useFocusTrap';
+import { mockNotificationsData, Notification } from '@/lib/mockData';
 
 const iconMap = {
   message: <Mail size={24} className="text-white/80" />,
@@ -68,6 +62,8 @@ interface NotificationPopupProps {
 }
 
 const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
+  const popupRef = useFocusTrap<HTMLDivElement>(isOpen);
   const [notifications, setNotifications] = useState<Notification[]>(mockNotificationsData);
 
   const handleToggle = (id: number) => {
@@ -82,6 +78,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={popupRef}
           className="absolute right-3 w-[350px] max-w-[calc(100vw-20px)] bg-[rgba(30,30,30,0.9)] border border-white/15 rounded-xl shadow-lg z-40 text-white flex flex-col"
           style={{
             top: 'calc(var(--topbar-height) + 3px)',
@@ -94,8 +91,8 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
-            <h3 className="font-semibold text-base">Powiadomienia</h3>
-            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+            <h3 className="font-semibold text-base">{t('notifications')}</h3>
+            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors" aria-label={t('close')}>
               <X size={20} />
             </button>
           </div>
@@ -109,7 +106,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
             ) : (
               <div className="text-center py-10 text-white/60 flex flex-col items-center gap-4">
                 <Bell size={48} className="opacity-50" />
-                <p>Wszystko na bieżąco!</p>
+                <p>{t('allCaughtUp')}</p>
               </div>
             )}
           </ul>

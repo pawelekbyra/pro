@@ -9,9 +9,21 @@ interface VideoPlayerProps {
   poster: string;
   isActive: boolean;
   isSecretActive: boolean;
+  onTimeUpdate: (time: number) => void;
+  onLoadedMetadata: (duration: number) => void;
+  seekTime: number | null;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  hlsSrc,
+  mp4Src,
+  poster,
+  isActive,
+  isSecretActive,
+  onTimeUpdate,
+  onLoadedMetadata,
+  seekTime,
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
@@ -49,6 +61,25 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     }
   }, [isActive]);
 
+  // Effect to handle external seeking
+  useEffect(() => {
+    if (seekTime !== null && videoRef.current) {
+      videoRef.current.currentTime = seekTime;
+    }
+  }, [seekTime]);
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      onTimeUpdate(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      onLoadedMetadata(videoRef.current.duration);
+    }
+  };
+
   const videoClassName = [
     'videoPlayer',
     'absolute top-0 left-0 w-full h-full object-cover',
@@ -58,6 +89,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
   return (
     <video
       ref={videoRef}
+      onTimeUpdate={handleTimeUpdate}
+      onLoadedMetadata={handleLoadedMetadata}
       className={videoClassName}
       poster={poster}
       muted

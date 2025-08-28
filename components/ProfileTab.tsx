@@ -7,9 +7,11 @@ import ToggleSwitch from './ui/ToggleSwitch';
 import CropModal from './CropModal';
 import { Crown } from 'lucide-react';
 import { useUser } from '@/context/UserContext'; // Import useUser
+import Image from 'next/image';
+import { Skeleton } from './ui/Skeleton';
 
 const ProfileTab: React.FC = () => {
-  const { user: profile, checkUserStatus } = useUser(); // Use user from context
+  const { user: profile, isLoading, checkUserStatus } = useUser(); // Use user from context and add isLoading
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,8 +78,8 @@ const ProfileTab: React.FC = () => {
       setStatus({ type: 'success', message: 'Avatar updated successfully!' });
   }
 
-  if (!profile) {
-    return <div className="p-5 text-center">Loading profile...</div>;
+  if (isLoading || !profile) {
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -92,7 +94,7 @@ const ProfileTab: React.FC = () => {
         <div className="avatar-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4 flex flex-col items-center text-center">
             <div className="relative w-20 h-20 mb-3">
                 <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg">
-                    <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" id="userAvatar" />
+                    <Image src={profile.avatar} alt="Avatar" className="object-cover" id="userAvatar" width={80} height={80} />
                 </div>
                 <button onClick={handleAvatarEditClick} className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 bg-pink-600 border-2 border-[#2d2d2d] rounded-full text-white text-lg font-bold flex items-center justify-center" id="avatarEditBtn" title="Change avatar">
                     +
@@ -157,5 +159,42 @@ const ProfileTab: React.FC = () => {
     </>
   );
 };
+
+const ProfileSkeleton = () => (
+  <div className="p-4 space-y-4">
+    <div className="avatar-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4 flex flex-col items-center text-center">
+      <Skeleton className="w-20 h-20 rounded-full" />
+      <Skeleton className="h-5 w-32 mt-4" />
+      <Skeleton className="h-4 w-40 mt-2" />
+      <Skeleton className="h-6 w-20 mt-2 rounded-full" />
+    </div>
+    <div className="form-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4">
+      <Skeleton className="h-6 w-40 mb-5" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
+      <div className="space-y-2 mb-4">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+      <Skeleton className="h-12 w-full" />
+    </div>
+    <div className="settings-section bg-white/5 border border-white/10 rounded-xl p-5">
+      <Skeleton className="h-6 w-32 mb-5" />
+      <div className="flex items-center justify-between mb-4">
+        <Skeleton className="h-5 w-24" />
+        <Skeleton className="h-6 w-12 rounded-full" />
+      </div>
+      <Skeleton className="h-12 w-full" />
+    </div>
+  </div>
+);
 
 export default ProfileTab;

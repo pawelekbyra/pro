@@ -5,6 +5,7 @@ import { motion, useMotionValue, useAnimation, PanInfo } from 'framer-motion';
 import Slide, { SlideData } from '@/components/Slide';
 import AccountPanel from '@/components/AccountPanel';
 import CommentsModal from '@/components/CommentsModal';
+import InfoModal from '@/components/InfoModal';
 
 const DRAG_THRESHOLD = 150;
 const SPRING_OPTIONS = {
@@ -19,6 +20,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const controls = useAnimation();
   const y = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,8 +70,11 @@ export default function Home() {
   const openCommentsModal = () => setIsCommentsModalOpen(true);
   const closeCommentsModal = () => setIsCommentsModalOpen(false);
 
+  const openInfoModal = () => setIsInfoModalOpen(true);
+  const closeInfoModal = () => setIsInfoModalOpen(false);
+
   // Combine modal states to control dragging
-  const isAnyModalOpen = isModalOpen || isAccountPanelOpen || isCommentsModalOpen;
+  const isAnyModalOpen = isModalOpen || isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen;
 
   if (slides.length === 0) {
     return (
@@ -98,6 +103,7 @@ export default function Home() {
               setIsModalOpen={setIsModalOpen}
               openAccountPanel={openAccountPanel}
               openCommentsModal={openCommentsModal}
+              openInfoModal={openInfoModal}
             />
           </div>
         ))}
@@ -109,6 +115,7 @@ export default function Home() {
         onClose={closeCommentsModal}
         commentsCount={slides[activeIndex]?.initialComments || 0}
       />
+      <InfoModal isOpen={isInfoModalOpen} onClose={closeInfoModal} />
     </main>
   );
 }

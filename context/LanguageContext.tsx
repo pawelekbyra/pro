@@ -1,29 +1,12 @@
 "use client";
 
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
+import plTranslations from '@/locales/pl.json';
+import enTranslations from '@/locales/en.json';
 
-// A simplified version of the translations from tingtong.txt
-const translations: Record<string, Record<string, string>> = {
-  pl: {
-    loggedOutText: "Nie masz psychy się zalogować",
-    loggedInWelcome: 'Witaj, {name}',
-    selectLang: 'Wybierz Język',
-    polish: 'Polski',
-    english: 'English',
-    loading: 'Ładowanie...',
-    account: 'Konto',
-    logout: 'Wyloguj',
-  },
-  en: {
-    loggedOutText: "You don't have the guts to log in",
-    loggedInWelcome: 'Welcome, {name}',
-    selectLang: 'Select Language',
-    polish: 'Polski',
-    english: 'English',
-    loading: 'Loading...',
-    account: 'Account',
-    logout: 'Logout',
-  }
+const translations = {
+  pl: plTranslations,
+  en: enTranslations,
 };
 
 type Language = 'pl' | 'en';
@@ -33,6 +16,7 @@ interface LanguageContextType {
   isLangSelected: boolean;
   t: (key: string, params?: { [key: string]: string }) => string;
   selectInitialLang: (lang: Language) => void;
+  toggleLanguage: () => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -49,14 +33,23 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const setLanguage = useCallback((newLang: Language) => {
+    setLangState(newLang);
+    localStorage.setItem('app_lang', newLang);
+  }, []);
+
   const selectInitialLang = (initialLang: Language) => {
-    setLangState(initialLang);
-    localStorage.setItem('app_lang', initialLang);
+    setLanguage(initialLang);
     setIsLangSelected(true);
   };
 
+  const toggleLanguage = () => {
+    const newLang = lang === 'pl' ? 'en' : 'pl';
+    setLanguage(newLang);
+  };
+
   const t = (key: string, params?: { [key: string]: string }) => {
-    let text = translations[lang]?.[key] || key;
+    let text = translations[lang][key as keyof typeof translations[Language]] || key;
     if (params) {
       Object.keys(params).forEach(pKey => {
         text = text.replace(`{${pKey}}`, params[pKey] || '');
@@ -65,7 +58,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return text;
   };
 
-  const value = { lang, t, isLangSelected, selectInitialLang };
+  const value = { lang, t, isLangSelected, selectInitialLang, toggleLanguage };
 
   return (
     <LanguageContext.Provider value={value}>

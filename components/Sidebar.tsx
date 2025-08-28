@@ -1,21 +1,23 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Heart, MessageCircle, Share2, Info, Languages, Coffee } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
+import { useTranslation } from '@/context/LanguageContext';
 
 interface SidebarProps {
   avatarUrl: string;
-  initialLikes: number;
+  likesCount: number;
   isLiked: boolean;
-  likeId: string;
+  handleLike: () => void;
   commentsCount: number;
   openCommentsModal: () => void;
+  openInfoModal: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: initialIsLiked, likeId, commentsCount, openCommentsModal }) => {
-  const [isLiked, setIsLiked] = useState(initialIsLiked);
-  const [likesCount, setLikesCount] = useState(initialLikes);
+const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, likesCount, isLiked, handleLike, commentsCount, openCommentsModal, openInfoModal }) => {
+  const { t, toggleLanguage } = useTranslation();
   const { addToast } = useToast();
 
   // Helper function to format counts (e.g., 1500 -> 1.5K)
@@ -25,41 +27,26 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: ini
     return String(count);
   };
 
-  const handleLike = async () => {
-    // Optimistic UI update
-    const previousIsLiked = isLiked;
-    const previousLikesCount = likesCount;
-
-    const newIsLiked = !isLiked;
-    const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
-
-    setIsLiked(newIsLiked);
-    setLikesCount(newLikesCount);
-
-    try {
-      const response = await fetch('/api/like', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ likeId }),
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        addToast(t('linkCopied'), 'success');
+      })
+      .catch(() => {
+        addToast(t('linkCopyError'), 'error');
       });
+  };
 
-      if (!response.ok) {
-        throw new Error('Failed to like post');
-      }
+  const handleInfo = () => {
+    openInfoModal();
+  };
 
-      const data = await response.json();
-      // For now, the optimistic update is enough.
-      addToast(newIsLiked ? 'Polubiono!' : 'Cofnięto polubienie', 'success');
+  const handleLanguage = () => {
+    toggleLanguage();
+  };
 
-    } catch (error) {
-      console.error(error);
-      // Revert the UI on error
-      setIsLiked(previousIsLiked);
-      setLikesCount(previousLikesCount);
-      addToast('Błąd sieci, spróbuj ponownie', 'error');
-    }
+  const handleTip = () => {
+    addToast(t('tipThanks'), 'success');
   };
 
   return (
@@ -72,8 +59,8 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: ini
       }}
     >
       <div className="relative w-12 h-12 mb-1.5">
-        <button className="w-full h-full">
-          <img src={avatarUrl} alt="User avatar" className="w-full h-full rounded-full border-2 border-white object-cover" />
+        <button className="w-full h-full" aria-label={t('userAvatar')}>
+          <Image src={avatarUrl} alt={t('userAvatar')} className="rounded-full border-2 border-white object-cover" width={48} height={48} />
         </button>
         <div
           className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-lg font-bold border-2 border-white"
@@ -83,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: ini
         </div>
       </div>
 
-      <button onClick={handleLike} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button onClick={handleLike} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold" aria-label={t('like')}>
         <Heart
           size={32}
           className={`transition-colors duration-200 ${isLiked ? 'fill-red-500 stroke-red-500' : 'fill-transparent stroke-white'}`}
@@ -92,17 +79,30 @@ const Sidebar: React.FC<SidebarProps> = ({ avatarUrl, initialLikes, isLiked: ini
         <span className="icon-label">{formatCount(likesCount)}</span>
       </button>
 
-      <button onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold" aria-label={t('comment')}>
         <MessageCircle size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
       </button>
 
-      <button className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button onClick={handleShare} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold" aria-label={t('share')}>
         <Share2 size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-        <span className="icon-label">Share</span>
+        <span className="icon-label">{t('share')}</span>
       </button>
 
-      {/* Other buttons are static for now */}
+      <button onClick={handleInfo} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold" aria-label={t('info')}>
+        <Info size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <span className="icon-label">{t('info')}</span>
+      </button>
+
+      <button onClick={handleLanguage} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold" aria-label={t('toggleLanguage')}>
+        <Languages size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <span className="icon-label">{t('language')}</span>
+      </button>
+
+      <button onClick={handleTip} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold" aria-label={t('tip')}>
+        <Coffee size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <span className="icon-label">{t('tip')}</span>
+      </button>
     </aside>
   );
 };
