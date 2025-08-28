@@ -6,28 +6,27 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-supe
 const COOKIE_NAME = 'session';
 
 export async function GET(req: NextRequest) {
-  const sessionCookie = cookies().get(COOKIE_NAME);
+    const sessionCookie = cookies().get(COOKIE_NAME);
 
-  if (!sessionCookie) {
-    return NextResponse.json({ isLoggedIn: false, user: null });
-  }
-
-  try {
-    const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-
-    const user = payload.user;
-
-    if (!user) {
-        return NextResponse.json({ isLoggedIn: false, user: null });
+    if (!sessionCookie) {
+        // It's not an error, just means the user is not logged in.
+        return NextResponse.json({ success: false, user: null, message: 'No session found' });
     }
 
-    // No need to cast here as we are just passing it through,
-    // but it's good practice to ensure the structure if we were to use it.
-    // For now, the 'unknown' type is acceptable for the response body.
-    // The build error happens when you try to *access properties* on an unknown type.
-    return NextResponse.json({ isLoggedIn: true, user: user });
-  } catch (error) {
-    console.error('Session verification failed:', error);
-    return NextResponse.json({ isLoggedIn: false, user: null });
-  }
+    try {
+        const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
+
+        if (!payload || !payload.user) {
+            // The token is valid, but the payload is malformed.
+            return NextResponse.json({ success: false, user: null, message: 'Invalid token payload' });
+        }
+
+        return NextResponse.json({ success: true, user: payload.user });
+
+    } catch (error) {
+        // This can happen if the token is expired or invalid.
+        console.log('JWT verification error:', error);
+        // Again, return a successful response from the server, but indicate the auth failed.
+        return NextResponse.json({ success: false, user: null, message: 'Session expired or invalid' });
+    }
 }

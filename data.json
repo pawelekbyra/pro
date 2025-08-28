@@ -1,4 +1,16 @@
 {
+  "users": [
+    {
+      "id": "1",
+      "email": "test@example.com",
+      "username": "testuser",
+      "passwordHash": "$2b$10$R8kjqDRG7lp3aH3ojL2YCOm5ykM5xC7G6cugVm1E8zKEyPXBG52.y",
+      "firstName": "Test",
+      "lastName": "User",
+      "displayName": "Test User",
+      "avatar": "/avatars/default.png"
+    }
+  ],
   "slides": [
     {
       "id": "1",
@@ -9,10 +21,7 @@
       "hlsUrl": null,
       "poster": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGIctGhgoMSA+PIxCSkdHTFROU2A3NkVJQkpbY2P/2wBDAQYGBgoJEQoSDxAHExQXHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx//wAARCAAoABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIDAQT/xAAfEAEAAgICAwEBAAAAAAAAAAABAhEDBCESMUFRYnH/xAAaAQADAQEBAQAAAAAAAAAAAAAAAQIDBAUG/8QAHREAAgICAwEBAAAAAAAAAAAAAAECEQMhEjFBYf/a.AABEIAKAAYQMBIgACEQEDEQA/AOgY2XQk9RLbl+nEdI9Tae4grQYdQl5+Lq+wMv04jo9W45pTDl30y9U2nuJpDDy7aZeobT3EFaDBzH6cvVtp7iaQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC2Bg4z9Ofq209xAWgwcZ+nP1ba+4gLgYOM/Tn6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gLpL2DCPxZeqbT3EFaDBxH6cvVtp7iCtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMHGfpz9W2nuICtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVsDBzH6cvVtp7iAtgYOM/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMGHkP05eqbT3EFaDBh5D9OXqm09xBWgweQ/Tl6ptPcQVcDB5D9OXq209xBWwMHkP05erbT3EBaDB5D9OXq209xAWgweR+nP1bae4gLpP//Z",
       "avatar": "https://i.pravatar.cc/100?u=pawel",
-      "access": "public",
-      "initialLikes": 1500,
-      "isLiked": false,
-      "initialComments": 567
+      "access": "public"
     },
     {
       "id": "2",
@@ -23,10 +32,7 @@
       "hlsUrl": null,
       "poster": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGIctGhgoMSA+PIxCSkdHTFROU2A3NkVJQkpbY2P/2wBDAQYGBgoJEQoSDxAHExQXHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx//wAARCAAoABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIDAQT/xAAfEAEAAgICAwEBAAAAAAAAAAABAhEDBCESMUFRYnH/xAAaAQADAQEBAQAAAAAAAAAAAAAAAQIDBAUG/8QAHREAAgICAwEBAAAAAAAAAAAAAAECEQMhEjFBYf/a.AABEIAKAAYQMBIgACEQEDEQA/AOgY2XQk9RLbl+nEdI9Tae4grQYdQl5+Lq+wMv04jo9W45pTDl30y9U2nuJpDDy7aZeobT3EFaDBzH6cvVtp7iaQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC2Bg4z9Ofq209xAWgwcZ+nP1ba+4gLgYOM/Tn6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gLpL2DCPxZeqbT3EFaDBxH6cvVtp7iCtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMHGfpz9W2nuICtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVsDBzH6cvVtp7iAtgYOM/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMGHkP05eqbT3EFaDBh5D9OXqm09xBWgweQ/Tl6ptPcQVcDB5D9OXq209xBWwMHkP05erbT3EBaDB5D9OXq209xAWgweR+nP1bae4gLpP//Z",
       "avatar": "https://i.pravatar.cc/100?u=webdev",
-      "access": "public",
-      "initialLikes": 2200,
-      "isLiked": true,
-      "initialComments": 1245
+      "access": "public"
     },
     {
       "id": "3",
@@ -37,10 +43,8 @@
       "hlsUrl": null,
       "poster": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGIctGhgoMSA+PIxCSkdHTFROU2A3NkVJQkpbY2P/2wBDAQYGBgoJEQoSDxAHExQXHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx//wAARCAAoABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIDAQT/xAAfEAEAAgICAwEBAAAAAAAAAAABAhEDBCESMUFRYnH/xAAaAQADAQEBAQAAAAAAAAAAAAAAAQIDBAUG/8QAHREAAgICAwEBAAAAAAAAAAAAAAECEQMhEjFBYf/a.AABEIAKAAYQMBIgACEQEDEQA/AOgY2XQk9RLbl+nEdI9Tae4grQYdQl5+Lq+wMv04jo9W45pTDl30y9U2nuJpDDy7aZeobT3EFaDBzH6cvVtp7iaQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC2Bg4z9Ofq209xAWgwcZ+nP1ba+4gLgYOM/Tn6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gLpL2DCPxZeqbT3EFaDBxH6cvVtp7iCtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMHGfpz9W2nuICtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVsDBzH6cvVtp7iAtgYOM/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMGHkP05eqbT3EFaDBh5D9OXqm09xBWgweQ/Tl6ptPcQVcDB5D9OXq209xBWwMHkP05erbT3EBaDB5D9OXq209xAWgweR+nP1bae4gLpP//Z",
       "avatar": "https://i.pravatar.cc/100?u=tester",
-      "access": "secret",
-      "initialLikes": 2,
-      "isLiked": false,
-      "initialComments": 2
+      "access": "secret"
     }
-  ]
+  ],
+  "likes": []
 }

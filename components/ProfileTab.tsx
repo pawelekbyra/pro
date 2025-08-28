@@ -10,7 +10,8 @@ import { useUser } from '@/context/UserContext'; // Import useUser
 
 const ProfileTab: React.FC = () => {
   const { user: profile, checkUserStatus } = useUser(); // Use user from context
-  const [emailConsent, setEmailConsent] = useState(true);
+  const [emailConsent, setEmailConsent] = useState(true); // Default value
+  const [emailLanguage, setEmailLanguage] = useState('pl'); // Default value
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -67,14 +68,40 @@ const ProfileTab: React.FC = () => {
     event.target.value = ''; // Reset input value
   };
 
-  const handleCropComplete = async (newAvatarUrl: string) => {
-      // This will be fully implemented in the next step
-      // For now, just close the modal and refresh context
-      await checkUserStatus();
-      setIsCropModalOpen(false);
-      setImageToCrop(null);
-      setStatus({ type: 'success', message: 'Avatar updated successfully!' });
-  }
+  const handleCropComplete = async (avatarBlob: Blob | null) => {
+    if (!avatarBlob) {
+        setIsCropModalOpen(false);
+        setImageToCrop(null);
+        return;
+    }
+
+    const formData = new FormData();
+    // The backend expects the field name 'avatar'
+    formData.append('avatar', avatarBlob, 'avatar.png');
+
+    setStatus(null);
+    try {
+        const res = await fetch('/api/avatar/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await res.json();
+        if (!res.ok) {
+            throw new Error(result.message || 'Failed to upload avatar.');
+        }
+
+        setStatus({ type: 'success', message: 'Avatar updated successfully!' });
+        // The user context is updated automatically via the re-issued JWT,
+        // but we can call checkUserStatus() to be explicit.
+        await checkUserStatus();
+    } catch (error: any) {
+        setStatus({ type: 'error', message: error.message });
+    } finally {
+        setIsCropModalOpen(false);
+        setImageToCrop(null);
+    }
+  };
 
   if (!profile) {
     return <div className="p-5 text-center">Loading profile...</div>;
@@ -140,20 +167,34 @@ const ProfileTab: React.FC = () => {
 
         <div className="settings-section bg-white/5 border border-white/10 rounded-xl p-5">
           <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3"><span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>Settings</h3>
-          <div className="flex items-center justify-between mb-4">
-            <label className="form-label text-sm">Email Consent</label>
-            <ToggleSwitch isActive={emailConsent} onToggle={() => setEmailConsent(p => !p)} />
-          </div>
-          <Button className="w-full bg-pink-600 hover:bg-pink-700">Save Settings</Button>
+          <form onSubmit={handleSettingsSubmit}>
+            <div className="flex items-center justify-between mb-4">
+              <label className="form-label text-sm">Email Consent</label>
+              <ToggleSwitch isActive={emailConsent} onToggle={() => setEmailConsent(p => !p)} />
+            </div>
+            <div className="form-group">
+                <label className="form-label text-sm font-medium mb-2 block">Email Language</label>
+                <div className="flex gap-2">
+                    <Button type="button" variant={emailLanguage === 'pl' ? 'secondary' : 'outline'} onClick={() => setEmailLanguage('pl')} className="flex-1">Polski</Button>
+                    <Button type="button" variant={emailLanguage === 'en' ? 'secondary' : 'outline'} onClick={() => setEmailLanguage('en')} className="flex-1">English</Button>
+                </div>
+            </div>
+            <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700 mt-4" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </form>
         </div>
       </div>
 
-      <CropModal
-        isOpen={isCropModalOpen}
-        onClose={() => setIsCropModalOpen(false)}
-        imageSrc={imageToCrop}
-        onCropComplete={handleCropComplete}
-      />
+      {/* Conditionally render the modal to re-mount it with new props */}
+      {isCropModalOpen && (
+        <CropModal
+            isOpen={isCropModalOpen}
+            onClose={() => setIsCropModalOpen(false)}
+            imageSrc={imageToCrop}
+            onCropComplete={handleCropComplete}
+        />
+      )}
     </>
   );
 };

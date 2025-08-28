@@ -1,52 +1,95 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
+import { db, User } from '@/lib/db';
+import path from 'path';
+import { writeFile, stat, mkdir } from 'fs/promises';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
 
-async function verifySession(req: NextRequest) {
+async function verifySession(req: NextRequest): Promise<{ user: User } | null> {
     const sessionCookie = cookies().get(COOKIE_NAME);
     if (!sessionCookie) return null;
+
     try {
         const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload;
+        return payload as { user: User };
     } catch (error) {
         return null;
     }
 }
 
-export async function POST(request: NextRequest) {
-  const payload = await verifySession(request);
-  if (!payload) {
-    return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
-  }
-
-  try {
-    const body = await request.json();
-    const { image } = body;
-
-    if (!image || !image.startsWith('data:image/')) {
-      return NextResponse.json({ success: false, message: 'Invalid image data' }, { status: 400 });
+async function ensureDir(dirPath: string) {
+    try {
+        await stat(dirPath);
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            await mkdir(dirPath, { recursive: true });
+        } else {
+            throw error;
+        }
     }
+}
 
-    // In a real app, you would:
-    // 1. Decode the base64 image.
-    // 2. Upload it to a storage service (like S3).
-    // 3. Get the new URL.
-    // 4. Update the user's record in the database with the new URL.
+export async function POST(request: NextRequest) {
+    const payload = await verifySession(request);
+    if (!payload || !payload.user) {
+        return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
+    }
+    const currentUser = payload.user;
 
-    // For this mock, we'll just return the data URL itself.
-    // This allows the frontend to display the cropped image immediately.
-    return NextResponse.json({
-      success: true,
-      data: {
-        url: image, // Return the base64 data URL
-      },
-    });
+    try {
+        const data = await request.formData();
+        const file: File | null = data.get('avatar') as unknown as File;
 
-  } catch (error) {
-    console.error('Error in avatar upload API:', error);
-    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
-  }
+        if (!file) {
+            return NextResponse.json({ success: false, message: 'No file provided.' }, { status: 400 });
+        }
+
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Define the directory and ensure it exists
+        const avatarsDir = path.join(process.cwd(), 'public', 'avatars');
+        await ensureDir(avatarsDir);
+
+        // Create a unique filename
+        const extension = path.extname(file.name) || '.png'; // Default to png
+        const filename = `${currentUser.id}-${Date.now()}${extension}`;
+        const avatarPath = path.join(avatarsDir, filename);
+
+        await writeFile(avatarPath, buffer);
+        console.log(`Avatar for user ${currentUser.id} saved to ${avatarPath}`);
+
+        const avatarUrl = `/avatars/${filename}`;
+
+        // Update user record in the database
+        const updatedUser = await db.updateUser(currentUser.id, { avatar: avatarUrl });
+        if (!updatedUser) {
+            return NextResponse.json({ success: false, message: 'Failed to update user record.' }, { status: 500 });
+        }
+
+        // Re-issue the JWT with the updated user details
+        const { passwordHash, ...userPayload } = updatedUser;
+        const token = await new SignJWT({ user: userPayload })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setIssuedAt()
+            .setExpirationTime('24h')
+            .sign(JWT_SECRET);
+
+        cookies().set(COOKIE_NAME, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24, // 1 day
+        });
+
+        return NextResponse.json({ success: true, url: avatarUrl });
+
+    } catch (error) {
+        console.error('Avatar upload error:', error);
+        return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
+    }
 }
