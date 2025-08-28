@@ -4,18 +4,10 @@ import { cookies } from 'next/headers';
 import { db, User } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 const COOKIE_NAME = 'session';
 
-// This GET handler is redundant and can be removed.
-export async function GET(req: NextRequest) {
-    const payload = await verifySession();
-    if (!payload || !payload.user) {
-        return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
-    }
-    return NextResponse.json({ success: true, data: payload.user });
-}
-
+export const dynamic = 'force-dynamic';
 
 // PUT handler to update the user's profile
 export async function PUT(req: NextRequest) {

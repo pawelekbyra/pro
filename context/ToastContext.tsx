@@ -51,15 +51,15 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="fixed bottom-0 inset-x-0 z-[100] flex items-center justify-center pointer-events-none" style={{ paddingBottom: 'calc(var(--bottombar-height) + 20px)' }}>
+      <div className="fixed top-0 inset-x-0 z-[100] flex flex-col items-center gap-2 pointer-events-none" style={{ paddingTop: 'calc(var(--topbar-height) + 20px)' }}>
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
               layout
-              initial={{ opacity: 0, y: 50, scale: 0.3 }}
+              initial={{ opacity: 0, y: -50, scale: 0.3 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.5 }}
+              exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className="pointer-events-auto"
             >

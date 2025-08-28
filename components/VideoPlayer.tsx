@@ -142,15 +142,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     }
   };
 
-  const videoWrapperClassName = [
-    'absolute top-0 left-0 w-full h-full'
-  ].filter(Boolean).join(' ');
+  const videoWrapperClassName = 'absolute top-0 left-0 w-full h-full';
 
-  const videoClassName = [
-    'videoPlayer',
-    'w-full h-full object-cover',
-    isSecretActive ? 'secret-active' : '',
-  ].filter(Boolean).join(' ');
+  const videoClassName = `videoPlayer w-full h-full object-cover ${isSecretActive ? 'secret-active' : ''}`;
+
+  const progressFillClassName = `h-full bg-yellow-400 rounded-full transition-all duration-100 ease-linear ${isDragging ? 'no-transition' : ''}`;
+
+  const progressHandleClassName = `absolute bottom-0 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity ${isDragging ? 'no-transition' : ''}`;
 
   return (
     <div className={videoWrapperClassName} onClick={handleVideoClick}>
@@ -201,13 +199,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
         style={{ paddingBottom: 'calc(var(--bottombar-base-height) - 10px)' }}
       >
         <div className="absolute left-0 bottom-0 w-full h-1 bg-white/25 rounded-full group-hover:h-1.5 transition-all">
-          <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${progress}%` }}></div>
+          <div className={progressFillClassName} style={{ width: `${progress}%` }}></div>
         </div>
         <div
-          className="absolute bottom-0 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          className={progressHandleClassName}
           style={{
             left: `${progress}%`,
-            backgroundColor: 'var(--accent-color)',
+            backgroundColor: 'hsl(var(--primary))',
             boxShadow: '0 0 6px rgba(255, 255, 255, 0.6)',
           }}
         ></div>

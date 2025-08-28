@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { X, ZoomIn, ZoomOut, Check, Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
+import { useTranslation } from '@/context/LanguageContext';
 
 
 interface CropModalProps {
@@ -17,6 +18,7 @@ interface CropModalProps {
 const CROP_AREA_SIZE = 200; // The size of the circular crop area
 
 const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCropComplete }) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(new Image());
   const [scale, setScale] = useState(1);
@@ -135,8 +137,8 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
             transition={{ duration: 0.3 }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-white">Crop Avatar</h3>
-              <Button variant="ghost" size="icon" onClick={onClose} disabled={isSaving}>
+              <h3 className="text-lg font-semibold text-white">{t('cropAvatarTitle')}</h3>
+              <Button variant="ghost" size="icon" onClick={onClose} disabled={isSaving} aria-label={t('closeCropModalAriaLabel')}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -149,6 +151,7 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
+                aria-label={t('cropCanvasAriaLabel')}
               />
               <div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-dashed border-white rounded-full pointer-events-none"
@@ -157,7 +160,7 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
             </div>
 
             <div className="flex items-center gap-3 mb-5">
-              <Button variant="outline" size="icon" onClick={() => setScale(s => s * 0.9)} disabled={isSaving}><ZoomOut className="h-5 w-5" /></Button>
+              <Button variant="outline" size="icon" onClick={() => setScale(s => s * 0.9)} disabled={isSaving} aria-label={t('zoomOutAriaLabel')}><ZoomOut className="h-5 w-5" /></Button>
               <Input
                 type="range"
                 min={0.1} max={3} step="0.01"
@@ -165,13 +168,14 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
                 onChange={(e) => setScale(parseFloat(e.target.value))}
                 className="w-full"
                 disabled={isSaving}
+                aria-label={t('zoomSliderAriaLabel')}
               />
-              <Button variant="outline" size="icon" onClick={() => setScale(s => s * 1.1)} disabled={isSaving}><ZoomIn className="h-5 w-5" /></Button>
+              <Button variant="outline" size="icon" onClick={() => setScale(s => s * 1.1)} disabled={isSaving} aria-label={t('zoomInAriaLabel')}><ZoomIn className="h-5 w-5" /></Button>
             </div>
 
-            <Button onClick={handleSave} className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold" disabled={isSaving}>
+            <Button onClick={handleSave} className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold" disabled={isSaving} aria-label={t('saveAvatarAriaLabel')}>
               {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-              {isSaving ? 'Saving...' : 'Save Avatar'}
+              {isSaving ? t('saving') : t('saveAvatarButton')}
             </Button>
           </motion.div>
         </motion.div>

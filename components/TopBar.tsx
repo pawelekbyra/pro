@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LoginForm from './LoginForm';
 import NotificationPopup from './NotificationPopup';
 import { useUser } from '@/context/UserContext';
-import { useTranslation } from '@/context/LanguageContext'; // Import the translation hook
+import { useTranslation } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 
 interface TopBarProps {
   setIsModalOpen: (isOpen: boolean) => void;
@@ -15,11 +16,12 @@ interface TopBarProps {
 
 const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => {
   const { user, isLoggedIn, isLoading, logout } = useUser();
-  const { t } = useTranslation(); // Use the translation hook
+  const { t } = useTranslation();
+  const { addToast } = useToast();
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
   const [isNotifPanelOpen, setIsNotifPanelOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [hasUnread, setHasUnread] = useState(true); // Assume true initially, can be updated from an API call later
+  const [hasUnread, setHasUnread] = useState(true);
 
   const toggleLoginPanel = () => {
     if (!isLoggedIn) {
@@ -38,6 +40,14 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
 
   const toggleMenu = () => {
     setIsMenuOpen(prev => !prev);
+  };
+
+  const handleMenuClick = () => {
+    if (isLoggedIn) {
+      toggleMenu();
+    } else {
+      addToast(t('menuAccessAlert'), 'info');
+    }
   };
 
   const handleOpenAccountPanel = () => {
@@ -75,7 +85,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
           borderColor: isLoginPanelOpen ? 'transparent' : 'rgba(255, 255, 255, 0.15)',
         }}
       >
-        <button onClick={toggleMenu} className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
+        <button onClick={handleMenuClick} className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
           <Menu size={24} />
         </button>
 
@@ -105,7 +115,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
               style={{
                 top: '10px',
                 right: '11px',
-                backgroundColor: 'var(--accent-color)',
+                backgroundColor: 'hsl(var(--primary))',
                 borderColor: '#6F6F6F'
               }}
             ></div>
@@ -121,13 +131,11 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
           >
-            {isLoggedIn ? (
+            {isLoggedIn && (
               <>
                 <button onClick={handleOpenAccountPanel} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('account')}</button>
                 <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('logout')}</button>
               </>
-            ) : (
-              <button onClick={handleOpenLoginPanelFromMenu} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('login')}</button>
             )}
           </motion.div>
         )}

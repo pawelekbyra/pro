@@ -68,7 +68,71 @@ const translations: Record<string, Record<string, string>> = {
         notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.',
         notif3Preview: 'Specjalna oferta czeka na Ciebie!',
         notif3Time: '1 godz. temu',
-        notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.'
+        notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.',
+        loadingProfile: 'Ładowanie profilu...',
+        profileUpdateSuccess: 'Profil zaktualizowany pomyślnie!',
+        profileUpdateError: 'Błąd aktualizacji profilu.',
+        avatarUploadSuccess: 'Awatar zaktualizowany pomyślnie!',
+        avatarUploadError: 'Błąd wysyłania awatara.',
+        avatarAlt: 'Awatar użytkownika',
+        changeAvatarTitle: 'Zmień awatar',
+        patronTier: 'Patron',
+        personalData: 'Dane osobowe',
+        firstName: 'Imię',
+        firstNamePlaceholder: 'Twoje imię',
+        lastName: 'Nazwisko',
+        lastNamePlaceholder: 'Twoje nazwisko',
+        email: 'Email',
+        emailPlaceholder: 'email@example.com',
+        saving: 'Zapisywanie...',
+        saveChanges: 'Zapisz zmiany',
+        settings: 'Ustawienia',
+        settingsSaveSuccess: 'Ustawienia zapisane pomyślnie!',
+        emailConsent: 'Zgody email',
+        emailLanguage: 'Język wiadomości email',
+        saveSettings: 'Zapisz ustawienia',
+        deleteAccountConfirmText: 'USUWAM KONTO',
+        deleteAccountConfirmError: 'Tekst potwierdzający jest nieprawidłowy.',
+        deleteAccountError: 'Błąd usuwania konta.',
+        deleteAccountTitle: 'Usuń konto',
+        warningTitle: '⚠️ Uwaga!',
+        deleteAccountWarning: 'Ta operacja jest nieodwracalna. Wszystkie Twoje dane, filmy i ustawienia zostaną trwale usunięte.',
+        deleteAccountPrompt: 'Aby potwierdzić, wpisz:',
+        deleteAccountInfo: 'Po usunięciu konta zostaniesz automatycznie wylogowany.',
+        deleting: 'Usuwanie...',
+        deleteAccountButton: 'Trwale usuń konto',
+        loginPlaceholder: 'Login',
+        passwordPlaceholder: 'Hasło',
+        loggingIn: 'Logowanie...',
+        loginButton: 'Wejdź',
+        loginUnknownError: 'Wystąpił nieznany błąd.',
+        userAvatar: 'Awatar użytkownika {user}',
+        reply: 'Odpowiedz',
+        commentsTitle: '{count} komentarzy',
+        yourAvatar: 'Twój awatar',
+        addCommentPlaceholder: 'Dodaj komentarz...',
+        sendButton: 'Wyślij',
+        noCommentsYet: 'Brak komentarzy. Bądź pierwszy!',
+        changePasswordTitle: 'Zmień hasło',
+        currentPasswordLabel: 'Aktualne hasło',
+        currentPasswordPlaceholder: 'Wpisz aktualne hasło',
+        newPasswordLabel: 'Nowe hasło',
+        newPasswordPlaceholder: 'Minimum 8 znaków',
+        confirmPasswordLabel: 'Potwierdź nowe hasło',
+        confirmPasswordPlaceholder: 'Potwierdź nowe hasło',
+        passwordMinLength: 'Hasło musi mieć co najmniej 8 znaków.',
+        changingPassword: 'Zmienianie...',
+        changePasswordButton: 'Zmień hasło',
+        passwordChangeSuccess: 'Hasło zmienione pomyślnie!',
+        passwordChangeError: 'Nie udało się zmienić hasła.',
+        cropAvatarTitle: 'Przytnij Awatar',
+        closeCropModalAriaLabel: 'Zamknij okno przycinania',
+        cropCanvasAriaLabel: 'Obszar do przycinania awatara',
+        zoomOutAriaLabel: 'Pomniejsz',
+        zoomSliderAriaLabel: 'Suwak powiększenia',
+        zoomInAriaLabel: 'Powiększ',
+        saveAvatarAriaLabel: 'Zapisz nowy awatar',
+        saveAvatarButton: 'Zapisz Awatar'
     },
     en: {
         loggedOutText: "You don't have the guts to log in",
@@ -135,7 +199,71 @@ const translations: Record<string, Record<string, string>> = {
         notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.',
         notif3Preview: 'A special offer is waiting for you!',
         notif3Time: '1 hour ago',
-        notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.'
+        notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.',
+        loadingProfile: 'Loading profile...',
+        profileUpdateSuccess: 'Profile updated successfully!',
+        profileUpdateError: 'Failed to update profile.',
+        avatarUploadSuccess: 'Avatar updated successfully!',
+        avatarUploadError: 'Failed to upload avatar.',
+        avatarAlt: 'User avatar',
+        changeAvatarTitle: 'Change avatar',
+        patronTier: 'Patron',
+        personalData: 'Personal Data',
+        firstName: 'First Name',
+        firstNamePlaceholder: 'Your first name',
+        lastName: 'Last Name',
+        lastNamePlaceholder: 'Your last name',
+        email: 'Email',
+        emailPlaceholder: 'email@example.com',
+        saving: 'Saving...',
+        saveChanges: 'Save Changes',
+        settings: 'Settings',
+        settingsSaveSuccess: 'Settings saved successfully!',
+        emailConsent: 'Email Consent',
+        emailLanguage: 'Email Language',
+        saveSettings: 'Save Settings',
+        deleteAccountConfirmText: 'DELETE ACCOUNT',
+        deleteAccountConfirmError: 'Confirmation text is incorrect.',
+        deleteAccountError: 'Failed to delete account.',
+        deleteAccountTitle: 'Delete Account',
+        warningTitle: '⚠️ Warning!',
+        deleteAccountWarning: 'This operation is irreversible. All your data, videos, and settings will be permanently deleted.',
+        deleteAccountPrompt: 'To confirm, type:',
+        deleteAccountInfo: 'After deleting your account, you will be automatically logged out.',
+        deleting: 'Deleting...',
+        deleteAccountButton: 'Permanently Delete Account',
+        loginPlaceholder: 'Login',
+        passwordPlaceholder: 'Password',
+        loggingIn: 'Logging in...',
+        loginButton: 'Enter',
+        loginUnknownError: 'An unknown error occurred.',
+        userAvatar: "{user}'s avatar",
+        reply: 'Reply',
+        commentsTitle: '{count} comments',
+        yourAvatar: 'Your avatar',
+        addCommentPlaceholder: 'Add a comment...',
+        sendButton: 'Send',
+        noCommentsYet: 'No comments yet. Be the first!',
+        changePasswordTitle: 'Change Password',
+        currentPasswordLabel: 'Current Password',
+        currentPasswordPlaceholder: 'Enter current password',
+        newPasswordLabel: 'New Password',
+        newPasswordPlaceholder: 'Minimum 8 characters',
+        confirmPasswordLabel: 'Confirm New Password',
+        confirmPasswordPlaceholder: 'Confirm new password',
+        passwordMinLength: 'Password must be at least 8 characters long.',
+        changingPassword: 'Changing...',
+        changePasswordButton: 'Change Password',
+        passwordChangeSuccess: 'Password changed successfully!',
+        passwordChangeError: 'Failed to change password.',
+        cropAvatarTitle: 'Crop Avatar',
+        closeCropModalAriaLabel: 'Close crop modal',
+        cropCanvasAriaLabel: 'Avatar cropping area',
+        zoomOutAriaLabel: 'Zoom out',
+        zoomSliderAriaLabel: 'Zoom slider',
+        zoomInAriaLabel: 'Zoom in',
+        saveAvatarAriaLabel: 'Save new avatar',
+        saveAvatarButton: 'Save Avatar'
     }
 };
 
@@ -147,6 +275,7 @@ interface LanguageContextType {
   t: (key: string, params?: { [key: string]: string }) => string;
   selectInitialLang: (lang: Language) => void;
   toggleLanguage: () => void;
+  setLanguage: (lang: Language) => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -155,18 +284,23 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState<Language>('pl');
   const [isLangSelected, setIsLangSelected] = useState(false);
 
+  const setLanguage = (newLang: Language) => {
+    setLangState(newLang);
+    localStorage.setItem('app_lang', newLang);
+    if (!isLangSelected) {
+      setIsLangSelected(true);
+    }
+  };
+
   useEffect(() => {
     const savedLang = localStorage.getItem('app_lang');
     if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
-      setLangState(savedLang);
-      setIsLangSelected(true); // Skip preloader if language is already set
+      setLanguage(savedLang);
     }
   }, []);
 
   const selectInitialLang = (initialLang: Language) => {
-    setLangState(initialLang);
-    localStorage.setItem('app_lang', initialLang);
-    setIsLangSelected(true);
+    setLanguage(initialLang);
   };
 
   const t = (key: string, params?: { [key: string]: string }) => {
@@ -181,11 +315,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleLanguage = () => {
     const newLang = lang === 'pl' ? 'en' : 'pl';
-    setLangState(newLang);
-    localStorage.setItem('app_lang', newLang);
+    setLanguage(newLang);
   };
 
-  const value = { lang, t, isLangSelected, selectInitialLang, toggleLanguage };
+  const value = { lang, t, isLangSelected, selectInitialLang, toggleLanguage, setLanguage };
 
   return (
     <LanguageContext.Provider value={value}>
