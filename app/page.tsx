@@ -8,11 +8,11 @@ import CommentsModal from '@/components/CommentsModal';
 import InfoModal from '@/components/InfoModal';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const DRAG_THRESHOLD = 150;
-const SPRING_OPTIONS = {
-  type: 'spring',
-  damping: 25,
-  stiffness: 150,
+const DRAG_THRESHOLD = 100;
+const TRANSITION_OPTIONS = {
+  type: 'tween',
+  ease: 'easeInOut',
+  duration: 0.3,
 };
 
 export default function Home() {
@@ -43,7 +43,7 @@ export default function Home() {
   useEffect(() => {
     controls.start({
       y: -activeIndex * (containerRef.current?.offsetHeight || 0),
-      transition: SPRING_OPTIONS,
+      transition: TRANSITION_OPTIONS,
     });
   }, [activeIndex, controls]);
 
@@ -61,7 +61,7 @@ export default function Home() {
     } else {
       controls.start({
         y: -activeIndex * (containerRef.current?.offsetHeight || 0),
-        transition: SPRING_OPTIONS,
+        transition: TRANSITION_OPTIONS,
       });
     }
   };
@@ -108,7 +108,6 @@ export default function Home() {
         className="h-full w-full"
         drag={isAnyModalOpen ? false : "y"}
         dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.1, bottom: 0.1 }}
         onDragEnd={handleDragEnd}
         animate={controls}
         style={{ y }}
