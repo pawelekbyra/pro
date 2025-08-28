@@ -4,48 +4,111 @@ Misja: Stworzyć w pełni funkcjonalny, dopracowany prototyp aplikacji wideo, u�
 Wizja: Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową. Stworzenie dopracowanego prototypu jest kluczowym krokiem do zweryfikowania koncepcji i zebrania feedbacku przed zainwestowaniem w pełną architekturę systemową.
 
 Status Projektu (Stan na 2025-08-28)
-BLOKER ROZWIĄZANY: Problem ze środowiskiem deweloperskim `npm` został zdiagnozowany i rozwiązany. Prace nad migracją do Next.js (Plan A) zostały wznowione i są w toku.
+BLOKER KRYTYCZNY: Prace nad pierwotnie planowaną migracją do Next.js zostały tymczasowo wstrzymane z powodu nierozwiązywalnych problemów ze środowiskiem deweloperskim (npm). Polecenie npm install w obecnym środowisku nie instaluje zależności, uniemożliwiając uruchomienie projektu.
 
-Obecny Cel: Realizacja Planu A: Pełna migracja aplikacji do Next.js, React, TypeScript, Tailwind CSS i Framer Motion.
+Obecny Cel: Zgodnie z planem awaryjnym (Plan B), projekt wraca do fazy rozwoju prototypu w HTML/CSS/JS. Głównym priorytetem jest zapewnienie, aby prototyp był w 100% kompletny, stabilny i funkcjonalny.
 
 Architektura Projektu
-Plan A (Obecnie Realizowany)
+Plan A (Wstrzymany)
 Framework: Next.js (z App Router)
+
 Stylizacja: Tailwind CSS, shadcn/ui
+
 Animacje: Framer Motion
 
-Plan B (Zakończony)
+Plan B (Obecnie Realizowany)
 Frontend: Czysty HTML5, CSS3, JavaScript (ES6+).
+
 Struktura: Aplikacja jednostronicowa (SPA) bez frameworka.
+
 Silnik wideo: hls.js z fallbackiem do MP4.
+
 Backend: Brak. Logika jest w pełni po stronie klienta, interakcje z API są symulowane.
 
 Dziennik Zmian
-Data | Etap Zakończony | Komentarz
---- | --- | ---
-2025-08-28 | Planowanie | Zdefiniowano pierwotny manifest i plan migracji do Next.js.
-2025-08-28 | Zmiana Strategii (Pivot) | Zdiagnozowano krytyczny błąd środowiska npm. Prace nad Next.js wstrzymane. Projekt oficjalnie wraca do Planu B: dopracowanie prototypu w HTML/CSS/JS.
-2025-08-28 | Etap 1 (Plan B): Przygotowanie prototypu | Rozpoczęcie prac nad weryfikacją i dopracowaniem istniejącego kodu prototypu w celu osiągnięcia pełnej funkcjonalności.
-2025-08-28 | Etap 1 (Plan B): Ukończenie prototypu | Status: Ukończono etap tworzenia prototypu UI w czystym HTML, CSS i JS. Wszelkie kluczowe elementy wizualne i interakcje z plików tingtong.txt i pehape.txt są wiernie odwzorowane. Prototyp jest stabilny i gotowy do dalszych prac.
-2025-08-28 | Rozwiązywanie Blokera npm | Status: Ukończono. Problem został zidentyfikowany jako brak uprawnień do zapisu w katalogu roboczym. Zastosowano obejście polegające na pracy w katalogu tymczasowym.
-2025-08-28 | Etap 2 (Plan A): Migracja do Next.js | Status: Ukończono. Prototyp został przepisany na architekturę Next.js. Stworzono strukturę komponentów, zaimplementowano UI, podstawową logikę, animacje Framer Motion oraz mock API.
+Data
+
+Etap Zakończony
+
+Komentarz
+
+2025-08-28
+
+Planowanie
+
+Zdefiniowano pierwotny manifest i plan migracji do Next.js.
+
+2025-08-28
+
+Zmiana Strategii (Pivot)
+
+Zdiagnozowano krytyczny błąd środowiska npm. Prace nad Next.js wstrzymane. Projekt oficjalnie wraca do Planu B: dopracowanie prototypu w HTML/CSS/JS.
+
+2025-08-28
+
+Etap 1 (Plan B): Przygotowanie prototypu
+
+Rozpoczęcie prac nad weryfikacją i dopracowaniem istniejącego kodu prototypu w celu osiągnięcia pełnej funkcjonalności.
+
+2025-08-28
+
+Etap 1 (Plan B): Ukończenie prototypu
+
+Status: Ukończono etap tworzenia prototypu UI w czystym HTML, CSS i JS. Wszelkie kluczowe elementy wizualne i interakcje z plików tingtong.txt i pehape.txt są wiernie odwzorowane. Prototyp jest stabilny i gotowy do dalszych prac.
+
+2025-08-28
+
+Rozwiązywanie Blokera npm (Uprawnienia)
+
+Status: W trakcie. Zdiagnozowano problem z uprawnieniami do zapisu w katalogu /app. Paweł (administrator) spróbuje wykonać polecenie sudo chown -R jules:jules /app && sudo chmod -R u+w /app, aby nadać Julesowi pełne uprawnienia do zapisu.
+
+2025-08-28
+
+Bloker npm ROZWIĄZANY & Migracja do Next.js/React ROZPOCZĘTA
+
+Status: Problem z npm został pomyślnie rozwiązany! Jules rozpoczął migrację UI i logiki do komponentów React w projekcie Next.js. Przenosi kod HTML i CSS z tingtong.txt, tworząc komponenty React (.tsx) z klasami Tailwind. Logika z app.js jest implementowana wewnątrz tych komponentów przy użyciu hooków React.
 
 Plan Wdrożenia (Etapami)
 Etap 1: Inicjalizacja i Front-end (prototyp)
-Status: Zakończony.
 
-Etap 2: Migracja do Next.js i Frontend
-Status: W toku.
+Zadanie: Stworzenie kompletnego, samodzielnego prototypu aplikacji webowej w czystym HTML, CSS i JavaScript.
+
+Cel: Wiernie odtworzyć cały interfejs i interakcje z plików tingtong.txt i pehape.txt.
+
+Dane: Cała logika aplikacji jest tymczasowo oparta o statyczne dane (mock data) z pliku data.json, aby umożliwić niezależną pracę.
+
+Output: Działająca, statyczna aplikacja webowa, która wygląda i działa jak tingtong.txt, ale jest zbudowana na nowoczesnym stosie technologicznym. Aplikacja będzie gotowa do podłączenia pod API w przyszłości.
+
+Do zrobienia: Rozwiązanie problemu środowiskowego npm w celu umożliwienia migracji do Next.js.
+
+Etap 2: Migracja do Next.js i Frontend (Core UI)
+
 Zadanie: Przepisanie prototypu na projekt Next.js z użyciem Reacta.
-Cel: Odtworzyć wygląd i funkcjonalności prototypu w środowisku Next.js, wykorzystując komponenty i stan (state management).
-Do zrobienia: Dokończyć implementację modali, zintegrować w pełni logikę z mock API, dodać obsługę błędów i stanów ładowania.
 
-Etap 3: Backend (implementacja logiki)
+Cel: Odtworzyć wygląd i podstawowe funkcjonalności prototypu w środowisku Next.js, wykorzystując komponenty i stan (state management), z naciskiem na "premium" UX (animacje Framer Motion, Tailwind CSS, shadcn/ui).
+
+Do zrobienia: Wdrożyć zależności (tailwindcss, shadcn/ui, framer-motion, hls.js), przepisać logikę z app.js na komponenty React, stworzyć plik data.json jako atrapę backendu i zaimplementować API Routes w Next.js do jego obsługi.
+
+Etap 3: Rozwój Funkcjonalności w Next.js (Admin, Komentarze, Powiadomienia)
+
+Zadanie: Implementacja rozbudowanych modułów, takich jak panel administracyjny, system komentarzy i powiadomień, bezpośrednio w aplikacji Next.js/React.
+
+Cel: Zapewnienie pełnej funkcjonalności tych modułów z wykorzystaniem mock API, przygotowując je na integrację z prawdziwym backendem.
+
+Do zrobienia: Rozpoczęcie prac po ukończeniu Etapu 2.
+
+Etap 4: Backend (implementacja logiki)
+
 Zadanie: Stworzenie i skonfigurowanie back-endu w NestJS, który zaimplementuje logikę z pliku pehape.txt.
+
 Logika: Implementacja API w standardzie REST/GraphQL dla polubień, komentarzy, logowania, zarządzania profilem i powiadomień. Konfiguracja bazy danych PostgreSQL. Uruchomienie mikroserwisu do transkodowania wideo.
+
 Output: Działające API, które obsłuży wszystkie funkcjonalności front-endu.
 
-Etap 4: Integracja i rozszerzenia
+Etap 5: Integracja i rozszerzenia
+
 Zadanie: Połączenie front-endu z gotowym back-endem. Zastąpienie mock data prawdziwymi danymi z API.
+
 Optymalizacja: Włączenie adaptacyjnego bitrate w odtwarzaczu wideo, tak aby pobierał pliki HLS z serwera.
+
 Wdrożenie: Skonfigurowanie wdrożenia front-endu i back-endu w kontenerach (Docker) i środowisku chmurowym (np. Kubernetes), aby zapewnić skalowalność.
