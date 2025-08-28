@@ -1,32 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { db, User } from '@/lib/db';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
+
+interface UserPayload {
+    user: User;
+}
 
 async function verifySession(req: NextRequest) {
     const sessionCookie = cookies().get(COOKIE_NAME);
     if (!sessionCookie) return null;
     try {
         const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload;
+        return payload as UserPayload;
     } catch (error) {
         return null;
     }
-}
-
-async function getSlidesData() {
-  const jsonDirectory = path.join(process.cwd(), 'data.json');
-  const fileContents = await fs.readFile(jsonDirectory, 'utf8');
-  return JSON.parse(fileContents);
-}
-
-interface UserProfile {
-  email: string;
-  [key: string]: any; // Allow other properties
 }
 
 export async function POST(request: NextRequest) {
@@ -34,7 +26,7 @@ export async function POST(request: NextRequest) {
   if (!payload || !payload.user) {
     return NextResponse.json({ success: false, message: 'Authentication required to like a post.' }, { status: 401 });
   }
-  const user = payload.user as UserProfile;
+  const currentUser = payload.user;
 
   try {
     const { likeId } = await request.json();
@@ -43,24 +35,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'likeId is required' }, { status: 400 });
     }
 
-    const allData = await getSlidesData();
-    const slide = allData.slides.find((s: any) => s.likeId === likeId);
-
-    if (!slide) {
-      return NextResponse.json({ success: false, message: 'Slide not found' }, { status: 404 });
-    }
-
-    // This is a mock, so we just toggle the state. In a real app, this would be a database transaction
-    // tied to the user's ID from the JWT payload.
-    const newIsLiked = !slide.isLiked;
-    const newLikesCount = newIsLiked ? slide.initialLikes + 1 : slide.initialLikes - 1;
-
-    console.log(`User ${user.email} toggled like for post ${likeId}. New status: ${newIsLiked}`);
+    const result = await db.toggleLike(likeId, currentUser.id);
 
     return NextResponse.json({
       success: true,
-      isLiked: newIsLiked,
-      likeCount: newLikesCount,
+      isLiked: result.newStatus === 'liked',
+      likeCount: result.likeCount,
     });
 
   } catch (error) {

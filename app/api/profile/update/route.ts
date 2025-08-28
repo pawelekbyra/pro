@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
+import { db, User } from '@/lib/db';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
 const COOKIE_NAME = 'session';
 
-interface UserProfile {
-  [key: string]: any; // Allow any properties
-}
-
-async function verifySession(req: NextRequest) {
+async function verifySession(req: NextRequest): Promise<{ user: User } | null> {
     const sessionCookie = cookies().get(COOKIE_NAME);
     if (!sessionCookie) return null;
 
     try {
         const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-        return payload;
+        return payload as { user: User };
     } catch (error) {
         return null;
     }
 }
 
-// GET handler to retrieve the current user's profile from their session
+// This GET handler is no longer needed here, as the /api/account/status route handles this.
+// However, leaving it in won't cause harm. For cleanup, it could be removed.
 export async function GET(req: NextRequest) {
     const payload = await verifySession(req);
 
@@ -40,7 +38,7 @@ export async function PUT(req: NextRequest) {
     if (!payload || !payload.user) {
         return NextResponse.json({ success: false, message: 'Not authenticated' }, { status: 401 });
     }
-    const user = payload.user as UserProfile;
+    const currentUser = payload.user;
 
     try {
         const body = await req.json();
@@ -50,17 +48,45 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({ success: false, message: 'All fields are required.' }, { status: 400 });
         }
 
-        // In a real database, you would update the user's record here.
-        // For this mock, we'll just merge the new data and return it.
-        const updatedUser = {
-            ...user,
+        // Validate if the new email is already in use by another user
+        if (email.toLowerCase() !== currentUser.email.toLowerCase()) {
+            const emailInUse = await db.isEmailInUse(email, currentUser.id);
+            if (emailInUse) {
+                return NextResponse.json({ success: false, message: 'This email is already in use.' }, { status: 409 });
+            }
+        }
+
+        const updates: Partial<User> = {
             firstName,
             lastName,
             email,
             displayName: `${firstName} ${lastName}`,
         };
 
-        return NextResponse.json({ success: true, data: updatedUser });
+        const updatedUser = await db.updateUser(currentUser.id, updates);
+
+        if (!updatedUser) {
+             return NextResponse.json({ success: false, message: 'User not found or failed to update.' }, { status: 404 });
+        }
+
+        // Re-issue the JWT with the updated user details
+        const { passwordHash, ...userPayload } = updatedUser;
+        const token = await new SignJWT({ user: userPayload })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setIssuedAt()
+            .setExpirationTime('24h')
+            .sign(JWT_SECRET);
+
+        cookies().set(COOKIE_NAME, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24, // 1 day
+        });
+
+
+        return NextResponse.json({ success: true, data: userPayload });
 
     } catch (error) {
         console.error('Error in profile update API:', error);

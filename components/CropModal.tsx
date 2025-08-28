@@ -11,7 +11,7 @@ interface CropModalProps {
   isOpen: boolean;
   onClose: () => void;
   imageSrc: string | null;
-  onCropComplete: (newAvatarUrl: string) => void;
+  onCropComplete: (blob: Blob | null) => void;
 }
 
 const CROP_AREA_SIZE = 200; // The size of the circular crop area
@@ -88,42 +88,34 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
     setIsSaving(true);
 
     const outputCanvas = document.createElement('canvas');
-    outputCanvas.width = CROP_AREA_SIZE;
-    outputCanvas.height = CROP_AREA_SIZE;
+    const finalSize = Math.min(img.width, img.height, 256); // Output a reasonable size
+    outputCanvas.width = finalSize;
+    outputCanvas.height = finalSize;
     const ctx = outputCanvas.getContext('2d');
     if (!ctx) return;
 
     const imgWidth = img.width * scale;
     const imgHeight = img.height * scale;
-    const x = (canvas.width - imgWidth) / 2 + offset.x;
-    const y = (canvas.height - imgHeight) / 2 + offset.y;
+    const canvasCenterX = canvas.width / 2;
+    const canvasCenterY = canvas.height / 2;
 
-    // Calculate the source rectangle from the original image
-    const sourceX = (canvas.width / 2 - x) / scale;
-    const sourceY = (canvas.height / 2 - y) / scale;
-    const sourceSize = canvas.width / scale; // Assuming canvas is square for simplicity of crop area
+    const cropAreaDeviceSize = CROP_AREA_SIZE;
+    const cropAreaSourceSize = cropAreaDeviceSize / scale;
 
-    ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, CROP_AREA_SIZE, CROP_AREA_SIZE);
+    const sourceX = (img.width / 2) - (canvasCenterX - (canvasCenterX + offset.x)) / scale - (cropAreaSourceSize / 2);
+    const sourceY = (img.height / 2) - (canvasCenterY - (canvasCenterY + offset.y)) / scale - (cropAreaSourceSize / 2);
 
-    const dataUrl = outputCanvas.toDataURL('image/png');
+    ctx.drawImage(img, sourceX, sourceY, cropAreaSourceSize, cropAreaSourceSize, 0, 0, finalSize, finalSize);
 
-    try {
-        const res = await fetch('/api/avatar/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: dataUrl }),
-        });
-        const result = await res.json();
-        if (result.success) {
-            onCropComplete(result.data.url);
+    outputCanvas.toBlob((blob) => {
+        if (blob) {
+            onCropComplete(blob);
         } else {
-            throw new Error(result.message || 'Upload failed');
+            console.error("Canvas to Blob conversion failed.");
+            onCropComplete(null);
         }
-    } catch (error) {
-        console.error("Failed to upload avatar", error);
-    } finally {
         setIsSaving(false);
-    }
+    }, 'image/png', 0.9);
   };
 
   return (
