@@ -1,17 +1,6 @@
 {
   "users": [
     {
-      "id": "1",
-      "email": "updated.user@example.com",
-      "username": "testuser",
-      "passwordHash": "$2b$10$sHJb002GtBkmTjJeHJ2zIO28tMrwilZa8V/LTNgTbq2A2NshgRKEK",
-      "firstName": "Updated",
-      "lastName": "User",
-      "displayName": "Updated User",
-      "avatar": "/avatars/default.png",
-      "sessionVersion": 2
-    },
-    {
       "id": "2",
       "email": "admin",
       "username": "admin",
@@ -20,7 +9,8 @@
       "lastName": "User",
       "displayName": "Admin",
       "avatar": "/avatars/default.png",
-      "sessionVersion": 1
+      "sessionVersion": 1,
+      "role": "admin"
     }
   ],
   "slides": [
@@ -58,10 +48,6 @@
       "access": "secret"
     }
   ],
-  "likes": [
-    {
-      "slideId": "1",
-      "userId": "1"
-    }
-  ]
+  "likes": [],
+  "comments": []
 }

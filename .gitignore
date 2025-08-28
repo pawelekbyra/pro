@@ -14,3 +14,16 @@ yarn-error.log*
 # Other
 .DS_Store
 jules-scratch/
+
+# Local environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Log files
+*.log
+
+# Test files
+test-db.ts
+cookie.txt
