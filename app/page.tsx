@@ -1,19 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useAnimation, PanInfo } from 'framer-motion';
 import Slide, { SlideData } from '@/components/Slide';
 import AccountPanel from '@/components/AccountPanel';
 import CommentsModal from '@/components/CommentsModal';
 import InfoModal from '@/components/InfoModal';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const DRAG_THRESHOLD = 100;
-const TRANSITION_OPTIONS = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.3,
-};
 
 export default function Home() {
   const [slides, setSlides] = useState<SlideData[]>([]);
@@ -22,9 +14,8 @@ export default function Home() {
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
-  const controls = useAnimation();
-  const y = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -33,6 +24,7 @@ export default function Home() {
         if (!response.ok) throw new Error('Failed to fetch slides');
         const data = await response.json();
         setSlides(data.slides);
+        slideRefs.current = slideRefs.current.slice(0, data.slides.length);
       } catch (error) {
         console.error("Failed to fetch slides:", error);
       }
@@ -41,30 +33,34 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    controls.start({
-      y: -activeIndex * (containerRef.current?.offsetHeight || 0),
-      transition: TRANSITION_OPTIONS,
-    });
-  }, [activeIndex, controls]);
-
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen;
-    if (isAnyModalOpen) return;
-
-    const { offset } = info;
-    if (Math.abs(offset.y) > DRAG_THRESHOLD) {
-      if (offset.y < 0) {
-        setActiveIndex((prev) => Math.min(prev + 1, slides.length - 1));
-      } else {
-        setActiveIndex((prev) => Math.max(prev - 1, 0));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = slideRefs.current.indexOf(entry.target as HTMLDivElement);
+            if (index !== -1) {
+              setActiveIndex(index);
+            }
+          }
+        });
+      },
+      {
+        root: containerRef.current,
+        threshold: 0.5,
       }
-    } else {
-      controls.start({
-        y: -activeIndex * (containerRef.current?.offsetHeight || 0),
-        transition: TRANSITION_OPTIONS,
+    );
+
+    const currentRefs = slideRefs.current;
+    currentRefs.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      currentRefs.forEach((ref) => {
+        if (ref) observer.unobserve(ref);
       });
-    }
-  };
+    };
+  }, [slides]);
 
   const openAccountPanel = () => setIsAccountPanelOpen(true);
   const closeAccountPanel = () => setIsAccountPanelOpen(false);
@@ -103,34 +99,33 @@ export default function Home() {
   }
 
   return (
-    <main ref={containerRef} className="relative h-screen w-screen overflow-hidden bg-black">
-      <motion.div
-        className="h-full w-full"
-        drag={isAnyModalOpen ? false : "y"}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        onDragEnd={handleDragEnd}
-        animate={controls}
-        style={{ y }}
-      >
-        {slides.map((slide, index) => (
-          <div key={slide.id} className="h-full w-full absolute top-0 left-0" style={{ top: `${index * 100}%` }}>
-            <Slide
-              slide={slide}
-              isActive={index === activeIndex}
-              setIsModalOpen={setIsTopBarModalOpen}
-              openAccountPanel={openAccountPanel}
-              openCommentsModal={openCommentsModal}
-              openInfoModal={openInfoModal}
-            />
-          </div>
-        ))}
-      </motion.div>
+    <main
+      ref={containerRef}
+      className="relative h-screen w-screen overflow-y-auto snap-y snap-mandatory"
+    >
+      {slides.map((slide, index) => (
+        <div
+          key={slide.id}
+          ref={(el) => { slideRefs.current[index] = el; }}
+          className="h-full w-full snap-start flex-shrink-0"
+        >
+          <Slide
+            slide={slide}
+            isActive={index === activeIndex && !isAnyModalOpen}
+            setIsModalOpen={setIsTopBarModalOpen}
+            openAccountPanel={openAccountPanel}
+            openCommentsModal={openCommentsModal}
+            openInfoModal={openInfoModal}
+          />
+        </div>
+      ))}
 
       <AccountPanel isOpen={isAccountPanelOpen} onClose={closeAccountPanel} />
       <CommentsModal
         isOpen={isCommentsModalOpen}
         onClose={closeCommentsModal}
-        commentsCount={slides[activeIndex]?.initialComments || 0}
+        slideId={slides[activeIndex]?.id}
+        initialCommentsCount={slides[activeIndex]?.initialComments || 0}
       />
       <InfoModal isOpen={isInfoModalOpen} onClose={closeInfoModal} />
     </main>

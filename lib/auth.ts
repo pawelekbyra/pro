@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { db, User } from '@/lib/db';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-super-secret-key-that-is-long-enough-for-hs256');
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 const COOKIE_NAME = 'session';
 
 export interface AuthPayload {

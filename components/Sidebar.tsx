@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, Info, Languages, Coffee } from 'lucide-react';
+import { Heart, MessageCircle, Send, Info, Globe2, Coffee } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
@@ -105,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {!isLoggedIn && (
           <div
             className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-lg font-bold border-2 border-white pointer-events-none"
-            style={{ backgroundColor: 'var(--accent-color)'}}
+            style={{ backgroundColor: 'hsl(var(--primary))'}}
           >
             +
           </div>
@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <button onClick={handleShare} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Share2 size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <Send size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{t('shareText') || 'Share'}</span>
       </button>
 
@@ -137,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <button onClick={toggleLanguage} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Languages size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <Globe2 size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{lang.toUpperCase()}</span>
       </button>
 

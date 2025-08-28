@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 import { verifySession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
