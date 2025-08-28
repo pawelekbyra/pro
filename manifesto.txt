@@ -1,126 +1,61 @@
 Manifest Projektu: Ting Tong SaaS
-Misja: Stworzyć w pełni funkcjonalny, dopracowany prototyp aplikacji wideo, używając czystego HTML, CSS i JavaScript. Prototyp ten ma wiernie odzwierciedlać wygląd i wszystkie funkcjonalności z dostarczonych plików (tingtong.txt, pehape.txt) i służyć jako solidna podstawa dla przyszłej migracji do nowoczesnych technologii.
+Misja
 
-Wizja: Ting Tong ma być w przyszłości pełnoprawną platformą społecznościową. Stworzenie dopracowanego prototypu jest kluczowym krokiem do zweryfikowania koncepcji i zebrania feedbacku przed zainwestowaniem w pełną architekturę systemową.
+Stworzenie w pełni funkcjonalnej, wydajnej i dopracowanej aplikacji wideo opartej o nowoczesny stos technologiczny (Next.js/React/TypeScript), która wiernie odwzorowuje oryginalną koncepcję, zapewnia doskonałe wrażenia użytkownika (premium UX) i stanowi solidną, skalowalną podstawę do dalszego rozwoju i integracji z pełnoprawnym backendem.
+
+Wizja
+
+Ting Tong ma stać się wiodącą platformą społecznościową opartą na treściach wideo. Obecny prototyp jest kluczowym krokiem w kierunku weryfikacji koncepcji, zebrania opinii i przygotowania do dalszych inwestycji w architekturę produkcyjną oraz wdrożenie w środowisku chmurowym.
 
 Status Projektu (Stan na 2025-08-28)
-BLOKER KRYTYCZNY: Prace nad pierwotnie planowaną migracją do Next.js zostały tymczasowo wstrzymane z powodu nierozwiązywalnych problemów ze środowiskiem deweloperskim (npm). Polecenie npm install w obecnym środowisku nie instaluje zależności, uniemożliwiając uruchomienie projektu.
 
-Obecny Cel: Zgodnie z planem awaryjnym (Plan B), projekt wraca do fazy rozwoju prototypu w HTML/CSS/JS. Głównym priorytetem jest zapewnienie, aby prototyp był w 100% kompletny, stabilny i funkcjonalny.
+Rozwiązano pierwotne problemy ze środowiskiem npm.
+
+Aplikacja została w całości przepisana z monolitycznego HTML/CSS/JS na nowoczesny projekt oparty o Next.js i React.
+
+Ukończono migrację kluczowych elementów frontendu (feed, panel konta).
+
+Obecny cel: implementacja komentarzy, panelu admina oraz przygotowanie do integracji z docelowym backendem.
 
 Architektura Projektu
-Plan A (Wstrzymany)
-Framework: Next.js (z App Router)
 
-Stylizacja: Tailwind CSS, shadcn/ui
+Framework: Next.js (App Router)
+
+Język: TypeScript
+
+Stylizacja: Tailwind CSS + shadcn/ui
 
 Animacje: Framer Motion
 
-Plan B (Obecnie Realizowany)
-Frontend: Czysty HTML5, CSS3, JavaScript (ES6+).
+Odtwarzanie Wideo: hls.js z fallbackiem do MP4
 
-Struktura: Aplikacja jednostronicowa (SPA) bez frameworka.
-
-Silnik wideo: hls.js z fallbackiem do MP4.
-
-Backend: Brak. Logika jest w pełni po stronie klienta, interakcje z API są symulowane.
+Backend (tymczasowy): Mock API oparte na Next.js API Routes
 
 Dziennik Zmian
-Data
+Data	Etap Zakończony	Komentarz
+2025-08-28	Faza 1: Migracja Głównego Feedu	Przeniesiono UI i logikę głównego feedu. Zaimplementowano przewijanie slajdów w Framer Motion, ostylowano TopBar/Sidebar/BottomBar w Tailwind CSS. Dodano polubienia (z optymistycznym UI), logowanie/wylogowanie i panel powiadomień z mock API.
+2025-08-28	Faza 2: Migracja Panelu Konta	Zaimplementowano panel zarządzania kontem z zakładkami (Profil, Hasło, Usuń Konto). Stworzono API routes. Dodano przesyłanie i przycinanie awatara oraz animacje panelu.
+Roadmap
+1. Implementacja Systemu Komentarzy
 
-Etap Zakończony
+Stworzenie interfejsu modala do wyświetlania/dodawania komentarzy.
 
-Komentarz
+Mock endpoint /api/comments do zarządzania komentarzami.
 
-2025-08-28
+Integracja UI z mock API.
 
-Planowanie
+2. Implementacja Panelu Administratora (/admin-panel)
 
-Zdefiniowano pierwotny manifest i plan migracji do Next.js.
+Oddzielny layout i routing.
 
-2025-08-28
+Funkcje: przeglądanie/usuwanie użytkowników, zarządzanie filmami (CRUD na data.json).
 
-Zmiana Strategii (Pivot)
+Zabezpieczenie dostępu (rola admina).
 
-Zdiagnozowano krytyczny błąd środowiska npm. Prace nad Next.js wstrzymane. Projekt oficjalnie wraca do Planu B: dopracowanie prototypu w HTML/CSS/JS.
+3. Pełna Integracja z Backendem (etap docelowy)
 
-2025-08-28
+Zastąpienie mockowych API routes rzeczywistymi wywołaniami do backendu (NestJS).
 
-Etap 1 (Plan B): Przygotowanie prototypu
+Integracja z Firebase Authentication.
 
-Rozpoczęcie prac nad weryfikacją i dopracowaniem istniejącego kodu prototypu w celu osiągnięcia pełnej funkcjonalności.
-
-2025-08-28
-
-Etap 1 (Plan B): Ukończenie prototypu
-
-Status: Ukończono etap tworzenia prototypu UI w czystym HTML, CSS i JS. Wszelkie kluczowe elementy wizualne i interakcje z plików tingtong.txt i pehape.txt są wiernie odwzorowane. Prototyp jest stabilny i gotowy do dalszych prac.
-
-2025-08-28
-
-Rozwiązywanie Blokera npm (Uprawnienia)
-
-Status: W trakcie. Zdiagnozowano problem z uprawnieniami do zapisu w katalogu /app. Paweł (administrator) spróbuje wykonać polecenie sudo chown -R jules:jules /app && sudo chmod -R u+w /app, aby nadać Julesowi pełne uprawnienia do zapisu.
-
-2025-08-28
-
-Bloker npm ROZWIĄZANY & Migracja do Next.js/React ROZPOCZĘTA
-
-Status: Problem z npm został pomyślnie rozwiązany! Jules rozpoczął migrację UI i logiki do komponentów React w projekcie Next.js. Przenosi kod HTML i CSS z tingtong.txt, tworząc komponenty React (.tsx) z klasami Tailwind. Logika z app.js jest implementowana wewnątrz tych komponentów przy użyciu hooków React.
-
-2025-08-28
-
-Faza 1 (Core Feed) Migracji do Next.js
-
-Status: Ukończono. Pomyślnie zmigrowano główny feed wideo, w tym przewijanie slajdów (Framer Motion), komponenty UI (TopBar, Sidebar, BottomBar) z użyciem Tailwind CSS, oraz podstawowe interakcje (like, panele logowania i powiadomień). Zaimplementowano ulepszoną logikę HLS.js i poprawiono błąd blokowania przewijania tła.
-
-2025-08-28
-
-Faza 2 (Panel Konta) Migracji do Next.js
-
-Status: Ukończono. Pomyślnie zmigrowano panel konta użytkownika, w tym zakładki Profil, Hasło i Usuń Konto. Zaimplementowano formularze z użyciem `shadcn/ui`, logikę przesyłania i przycinania awatara, oraz odpowiednie mockowe endpointy API. Dodano animacje `Framer Motion` dla paneli i poprawiono błędy UX.
-
-Plan Wdrożenia (Etapami)
-Etap 1: Inicjalizacja i Front-end (prototyp)
-
-Zadanie: Stworzenie kompletnego, samodzielnego prototypu aplikacji webowej w czystym HTML, CSS i JavaScript.
-
-Cel: Wiernie odtworzyć cały interfejs i interakcje z plików tingtong.txt i pehape.txt.
-
-Dane: Cała logika aplikacji jest tymczasowo oparta o statyczne dane (mock data) z pliku data.json, aby umożliwić niezależną pracę.
-
-Output: Działająca, statyczna aplikacja webowa, która wygląda i działa jak tingtong.txt, ale jest zbudowana na nowoczesnym stosie technologicznym. Aplikacja będzie gotowa do podłączenia pod API w przyszłości.
-
-Do zrobienia: Rozwiązanie problemu środowiskowego npm w celu umożliwienia migracji do Next.js.
-
-Etap 2: Migracja do Next.js i Frontend (Core UI)
-
-Zadanie: Przepisanie prototypu na projekt Next.js z użyciem Reacta.
-
-Cel: Odtworzyć wygląd i podstawowe funkcjonalności prototypu w środowisku Next.js, wykorzystując komponenty i stan (state management), z naciskiem na "premium" UX (animacje Framer Motion, Tailwind CSS, shadcn/ui).
-
-Do zrobienia: Wdrożyć zależności (tailwindcss, shadcn/ui, framer-motion, hls.js), przepisać logikę z app.js na komponenty React, stworzyć plik data.json jako atrapę backendu i zaimplementować API Routes w Next.js do jego obsługi.
-
-Etap 3: Rozwój Funkcjonalności w Next.js (Admin, Komentarze, Powiadomienia)
-
-Zadanie: Implementacja rozbudowanych modułów, takich jak panel administracyjny, system komentarzy i powiadomień, bezpośrednio w aplikacji Next.js/React.
-
-Cel: Zapewnienie pełnej funkcjonalności tych modułów z wykorzystaniem mock API, przygotowując je na integrację z prawdziwym backendem.
-
-Do zrobienia: Rozpoczęcie prac po ukończeniu Etapu 2.
-
-Etap 4: Backend (implementacja logiki)
-
-Zadanie: Stworzenie i skonfigurowanie back-endu w NestJS, który zaimplementuje logikę z pliku pehape.txt.
-
-Logika: Implementacja API w standardzie REST/GraphQL dla polubień, komentarzy, logowania, zarządzania profilem i powiadomień. Konfiguracja bazy danych PostgreSQL. Uruchomienie mikroserwisu do transkodowania wideo.
-
-Output: Działające API, które obsłuży wszystkie funkcjonalności front-endu.
-
-Etap 5: Integracja i rozszerzenia
-
-Zadanie: Połączenie front-endu z gotowym back-endem. Zastąpienie mock data prawdziwymi danymi z API.
-
-Optymalizacja: Włączenie adaptacyjnego bitrate w odtwarzaczu wideo, tak aby pobierał pliki HLS z serwera.
-
-Wdrożenie: Skonfigurowanie wdrożenia front-endu i back-endu w kontenerach (Docker) i środowisku chmurowym (np. Kubernetes), aby zapewnić skalowalność.
+Usprawnienie playera wideo (manifesty HLS z serwera transkodującego, adaptacyjny bitrate).
