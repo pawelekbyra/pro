@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import { Button } from './ui/button';
+import Image from 'next/image';
 
 const Preloader: React.FC = () => {
   const { t, selectInitialLang, isLangSelected } = useTranslation();
@@ -61,10 +62,13 @@ const Preloader: React.FC = () => {
               ease: 'easeInOut',
             }}
           >
-            <img
+            <Image
               src="https://pawelperfect.pl/wp-content/uploads/2025/07/output-onlinepngtools-1-1.png"
               alt="Ting Tong Logo"
+              width={192}
+              height={192}
               className="w-48 h-48"
+              priority
             />
           </motion.div>
 

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, MessageSquare } from 'lucide-react';
+import Image from 'next/image';
 
 // Mock data for comments
 const mockCommentsData = [
@@ -60,7 +61,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, isReply = fa
     exit={{ opacity: 0, y: -20 }}
     className={`flex items-start gap-3 ${isReply ? 'ml-8' : ''}`}
   >
-    <img src={comment.avatar} alt={`${comment.user}'s avatar`} className="w-8 h-8 rounded-full mt-1" />
+    <Image src={comment.avatar} alt={`${comment.user}'s avatar`} width={32} height={32} className="w-8 h-8 rounded-full mt-1" />
     <div className="flex-1">
       <p className="text-xs font-bold text-gray-800">{comment.user}</p>
       <p className="text-sm text-black">{comment.text}</p>
@@ -171,7 +172,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, comments
             {/* Input Form */}
             <div className="flex-shrink-0 p-2 border-t border-gray-200 bg-white">
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                <img src="https://i.pravatar.cc/100?u=current_user" alt="Twój avatar" className="w-8 h-8 rounded-full" />
+                <Image src="https://i.pravatar.cc/100?u=current_user" alt="Twój avatar" width={32} height={32} className="w-8 h-8 rounded-full" />
                 <input
                   type="text"
                   value={newComment}
