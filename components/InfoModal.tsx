@@ -31,29 +31,29 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <motion.div
-            className="modal-content bg-white text-black rounded-xl max-w-md w-full max-h-[80vh] flex flex-col"
+            className="modal-content bg-black/80 backdrop-blur-md text-white rounded-xl max-w-md w-full max-h-[80vh] flex flex-col border border-white/10"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ duration: 0.3 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-white/10">
               <h2 id="infoTitle" className="text-lg font-semibold">
                 {t('infoModalTitle') || 'Information'}
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-black"
+                className="text-white/60 hover:text-white"
                 aria-label={t('closeInfoAriaLabel') || 'Close information'}
               >
                 <X size={24} />
               </button>
             </div>
-            <div className="modal-body flex-1 overflow-y-auto p-6 space-y-4 text-sm">
+            <div className="modal-body flex-1 overflow-y-auto p-6 space-y-4 text-sm text-white/80">
               <p>{t('infoModalBodyP1') || 'Lorem ipsum dolor sit amet...'}</p>
               <p>{t('infoModalBodyP2') || 'Ut in nulla enim...'}</p>
-              <div className="tip-cta bg-gray-100 border border-gray-200 rounded-lg p-4 text-center">
+              <div className="tip-cta bg-white/5 border border-white/10 rounded-lg p-4 text-center">
                 <Coffee className="mx-auto text-pink-500 w-10 h-10 mb-2" />
                 <p className="text-sm">
                   {t('infoModalBodyTip') || 'Enjoying the app? Leave a tip...'}
