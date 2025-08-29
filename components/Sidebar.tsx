@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { HeartCrack, MessageSquare, CircleEllipsis, Rat } from 'lucide-react';
+import { HeartCrack, MessageSquare, Rat, FileQuestionMark } from 'lucide-react';
 import { PiShareFat } from 'react-icons/pi';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
@@ -82,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className="absolute right-0 flex flex-col items-center gap-2 z-20"
+      className="absolute right-0 flex flex-col items-center gap-[1.5rem] z-20"
       style={{
         top: 'calc((var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 + var(--topbar-height))',
         transform: 'translateY(-50%)',
@@ -91,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     >
       <div className="relative w-12 h-12 mb-1.5">
         <button onClick={openAccountPanel} className="w-full h-full flex items-center justify-center text-white">
-          <Rat size={48} strokeWidth={1.3} />
+          <Rat size={48} strokeWidth={1.4} />
         </button>
         {!isLoggedIn && (
           <div
@@ -106,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <button onClick={handleLike} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
         <HeartCrack
           size={32}
-          strokeWidth={1.3}
+          strokeWidth={1.4}
           className={`transition-colors duration-200 ${isLiked ? 'fill-red-500 stroke-red-500' : 'fill-transparent stroke-white'}`}
           style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}
         />
@@ -114,17 +114,17 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <button onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <MessageSquare size={32} strokeWidth={1.3} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <MessageSquare size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
       </button>
 
       <button onClick={handleShare} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <PiShareFat size={32} strokeWidth={1.3} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <PiShareFat size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{t('shareText') || 'Share'}</span>
       </button>
 
       <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold mt-4">
-        <CircleEllipsis size={32} strokeWidth={1.3} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <FileQuestionMark size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">WTF?!</span>
       </button>
     </aside>
