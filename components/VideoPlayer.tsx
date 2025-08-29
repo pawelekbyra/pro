@@ -12,18 +12,15 @@ interface VideoPlayerProps {
   isActive: boolean;
   isSecretActive: boolean;
   likeId: string;
+  videoRef: React.RefObject<HTMLVideoElement>;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, likeId }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, likeId, videoRef }) => {
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
   // State for player UI
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [showPause, setShowPause] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -67,44 +64,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     }
   }, [isActive]);
 
-  // FIX #4: Progress bar update logic
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const updateProgress = () => {
-      if (!isDragging) {
-        setProgress((video.currentTime / video.duration) * 100);
-      }
-    };
-    video.addEventListener('timeupdate', updateProgress);
-    return () => video.removeEventListener('timeupdate', updateProgress);
-  }, [isDragging]);
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    updateScrubber(e.clientX);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    updateScrubber(e.clientX);
-  };
-
-  const handlePointerUp = () => {
-    setIsDragging(false);
-  };
-
-  const updateScrubber = (clientX: number) => {
-    const video = videoRef.current;
-    const progress = progressRef.current;
-    if (!video || !progress) return;
-    const rect = progress.getBoundingClientRect();
-    const newProgress = ((clientX - rect.left) / rect.width) * 100;
-    const clampedProgress = Math.max(0, Math.min(100, newProgress));
-    setProgress(clampedProgress);
-    video.currentTime = (clampedProgress / 100) * video.duration;
-  };
-
   const triggerLikeAnimation = () => {
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
@@ -146,10 +105,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
 
   const videoClassName = `videoPlayer w-full h-full object-cover ${isSecretActive ? 'secret-active' : ''}`;
 
-  const progressFillClassName = `h-full bg-yellow-400 rounded-full transition-all duration-100 ease-linear ${isDragging ? 'no-transition' : ''}`;
-
-  const progressHandleClassName = `absolute bottom-0 -translate-x-1/2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity ${isDragging ? 'no-transition' : ''}`;
-
   return (
     <div className={videoWrapperClassName} onClick={handleVideoClick}>
       <video
@@ -189,27 +144,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
           </motion.div>
         )}
       </AnimatePresence>
-      <div
-        ref={progressRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        className="absolute bottom-0 left-0 w-full h-10 cursor-pointer group"
-        style={{ paddingBottom: 'calc(var(--bottombar-base-height) - 10px)' }}
-      >
-        <div className="absolute left-0 bottom-0 w-full h-1 bg-white/25 rounded-full group-hover:h-1.5 transition-all">
-          <div className={progressFillClassName} style={{ width: `${progress}%` }}></div>
-        </div>
-        <div
-          className={progressHandleClassName}
-          style={{
-            left: `${progress}%`,
-            backgroundColor: 'hsl(var(--primary))',
-            boxShadow: '0 0 6px rgba(255, 255, 255, 0.6)',
-          }}
-        ></div>
-      </div>
     </div>
   );
 };

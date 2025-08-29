@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useUser } from '@/context/UserContext';
 import VideoPlayer from './VideoPlayer';
 import Sidebar from './Sidebar';
@@ -35,6 +35,8 @@ interface SlideProps {
 const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal }) => {
   const { isLoggedIn, isLoading } = useUser();
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const isSecret = slide.access === 'secret';
   // Don't show the overlay while the user state is loading
   const showSecretOverlay = isSecret && !isLoading && !isLoggedIn;
@@ -46,6 +48,7 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           hlsSrc={slide.hlsUrl}
           mp4Src={slide.mp4Url}
           poster={slide.poster}
+          videoRef={videoRef}
           isActive={isActive && !showSecretOverlay}
           isSecretActive={showSecretOverlay}
           likeId={slide.likeId}
@@ -73,7 +76,7 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           openInfoModal={openInfoModal}
           openAccountPanel={openAccountPanel}
         />
-        <BottomBar user={slide.user} description={slide.description} />
+        <BottomBar user={slide.user} description={slide.description} videoRef={videoRef} isActive={isActive && !showSecretOverlay} />
       </div>
     </div>
   );
