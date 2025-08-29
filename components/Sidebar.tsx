@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { HeartCrack, MessageSquare, Forward, BookOpenText } from 'lucide-react';
+import { HeartCrack, MessageSquare, BookOpenText } from 'lucide-react';
+import { PiShareFat } from 'react-icons/pi';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
@@ -117,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <button onClick={handleShare} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Forward size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <PiShareFat size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{t('shareText') || 'Share'}</span>
       </button>
 

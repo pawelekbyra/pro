@@ -111,7 +111,8 @@ export default function Home() {
   return (
     <main
       ref={containerRef}
-      className="relative h-screen w-screen overflow-y-auto snap-y snap-mandatory"
+      className="relative w-screen overflow-y-auto snap-y snap-mandatory"
+      style={{ height: 'var(--app-height)' }}
     >
       {slides.map((slide, index) => (
         <div
