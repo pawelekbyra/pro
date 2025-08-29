@@ -27,8 +27,11 @@ const AccountPanel: React.FC<AccountPanelProps> = ({ isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div
+        <motion.div
           className="fixed inset-0 bg-black/80 z-[60]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           onClick={onClose} // Close on overlay click
         >
           <motion.div
@@ -48,9 +51,9 @@ const AccountPanel: React.FC<AccountPanelProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="flex-shrink-0 flex bg-black/20 border-b border-white/10">
-              <button onClick={() => handleTabClick('profile')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'profile' ? 'text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>Profil</button>
-              <button onClick={() => handleTabClick('password')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'password' ? 'text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>Hasło</button>
-              <button onClick={() => handleTabClick('delete')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'delete' ? 'text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>Usuń konto</button>
+              <button onClick={() => handleTabClick('profile')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'profile' ? 'bg-white/5 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>Profil</button>
+              <button onClick={() => handleTabClick('password')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'password' ? 'bg-white/5 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>Hasło</button>
+              <button onClick={() => handleTabClick('delete')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'delete' ? 'bg-white/5 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>Usuń konto</button>
             </div>
 
             <div className="flex-1 overflow-y-auto">

@@ -39,9 +39,9 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserI
     >
       <Image src={comment.user.avatar} alt={t('userAvatar', { user: comment.user.displayName })} width={32} height={32} className="w-8 h-8 rounded-full mt-1" />
       <div className="flex-1">
-        <p className="text-xs font-bold text-gray-800">{comment.user.displayName}</p>
-        <p className="text-sm text-black">{comment.text}</p>
-        <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+        <p className="text-xs font-bold text-white/80">{comment.user.displayName}</p>
+        <p className="text-sm text-white">{comment.text}</p>
+        <div className="flex items-center gap-4 text-xs text-white/60 mt-1">
           <button onClick={() => onLike(comment.id)} className="flex items-center gap-1">
             <Heart size={14} className={isLiked ? 'text-red-500 fill-current' : ''} />
             {comment.likedBy.length > 0 && <span>{comment.likedBy.length}</span>}
@@ -125,20 +125,20 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
     if (isLoading) {
       return (
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-white/40" />
         </div>
       );
     }
     if (error) {
       return (
-        <div className="flex-1 flex items-center justify-center text-center text-red-500 p-4">
+        <div className="flex-1 flex items-center justify-center text-center text-red-400 p-4">
           {error}
         </div>
       );
     }
     if (comments.length === 0) {
         return (
-            <div className="flex-1 flex items-center justify-center text-center text-gray-500 p-4">
+            <div className="flex-1 flex items-center justify-center text-center text-white/60 p-4">
                 {t('noCommentsYet')}
             </div>
         );
@@ -168,7 +168,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
           onClick={onClose}
         >
           <motion.div
-            className="w-full bg-white rounded-t-2xl flex flex-col"
+            className="w-full bg-black/80 backdrop-blur-md rounded-t-2xl flex flex-col border-t border-white/10"
             style={{ height: '75dvh' }}
             initial={{ y: '100%' }}
             animate={{ y: '0%' }}
@@ -176,9 +176,9 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
             transition={{ type: 'spring', stiffness: 400, damping: 40 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex-shrink-0 relative flex items-center justify-center p-4 border-b border-gray-200">
-              <h2 className="text-base font-semibold text-black">{t('commentsTitle', { count: (comments.length || initialCommentsCount).toString() })}</h2>
-              <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black">
+            <div className="flex-shrink-0 relative flex items-center justify-center p-4 border-b border-white/10">
+              <h2 className="text-base font-semibold text-white">{t('commentsTitle', { count: (comments.length || initialCommentsCount).toString() })}</h2>
+              <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white">
                 <X size={24} />
               </button>
             </div>
@@ -186,7 +186,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
             {renderContent()}
 
             {user && (
-              <div className="flex-shrink-0 p-2 border-t border-gray-200 bg-white">
+              <div className="flex-shrink-0 p-2 border-t border-white/10 bg-black/50">
                 <form onSubmit={handleSubmit} className="flex items-center gap-2">
                   <Image src={user.avatar} alt={t('yourAvatar')} width={32} height={32} className="w-8 h-8 rounded-full" />
                   <input
@@ -194,7 +194,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder={t('addCommentPlaceholder')}
-                    className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
+                    className="flex-1 px-4 py-2 bg-white/10 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
                     disabled={isSubmitting}
                   />
                   <button type="submit" className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-semibold disabled:opacity-50 flex items-center justify-center w-[80px]" disabled={!newComment.trim() || isSubmitting}>
