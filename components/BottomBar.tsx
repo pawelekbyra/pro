@@ -77,7 +77,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal
   // The main container for the bottom bar, styled to match the prototype
   return (
     <div
-      className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-end text-white"
+      className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white"
       style={{
         padding: '10px 10px calc(10px + var(--safe-area-bottom)) 12px',
         minHeight: 'var(--bottombar-base-height)',
@@ -119,7 +119,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal
       </div>
 
       {/* New Button Panel */}
-      <div className="flex justify-center items-center gap-4 pt-2">
+      <div className="flex justify-around items-center pt-2">
         <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
           <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
           <span className="icon-label">{t('tipText') || 'Tip'}</span>
