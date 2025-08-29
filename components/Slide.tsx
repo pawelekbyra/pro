@@ -75,9 +75,10 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           commentsCount={slide.initialComments}
           openCommentsModal={openCommentsModal}
           openAccountPanel={openAccountPanel}
+          openInfoModal={openInfoModal}
         />
         <VideoInfo user={slide.user} description={slide.description} />
-        <BottomBar videoRef={videoRef} isActive={isActive && !showSecretOverlay} openInfoModal={openInfoModal} />
+        <BottomBar videoRef={videoRef} isActive={isActive && !showSecretOverlay} />
       </div>
     </div>
   );
