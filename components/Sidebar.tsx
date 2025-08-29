@@ -79,15 +79,14 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const handleShowTipJar = () => {
-    // This assumes a global function or an element with this ID exists, as per the prototype
-    const bmcButton = document.querySelector('#bmc-wbtn') as HTMLElement;
+  const handleTipClick = () => {
+    const bmcButton = document.querySelector('[data-id="pawelperfect"]') as HTMLElement;
     if (bmcButton) {
-      bmcButton.click();
+        (bmcButton as HTMLElement).click();
     } else {
       addToast('BuyMeACoffee widget not found.', 'error');
     }
-  }
+  };
 
   return (
     <aside
@@ -141,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <span className="icon-label">{lang.toUpperCase()}</span>
       </button>
 
-      <button onClick={handleShowTipJar} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
         <Coffee size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{t('tipText') || 'Tip'}</span>
       </button>

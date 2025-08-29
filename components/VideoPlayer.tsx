@@ -138,7 +138,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ duration: 0.2, ease: 'easeIn' }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            className="absolute left-0 w-full flex items-center justify-center pointer-events-none"
+            style={{
+              top: 'var(--topbar-height)',
+              height: 'calc(100% - var(--topbar-height) - var(--bottombar-height))'
+            }}
           >
             <Pause size={60} className="text-white/80 fill-white/30 drop-shadow-lg" />
           </motion.div>
