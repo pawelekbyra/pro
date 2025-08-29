@@ -84,7 +84,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
         <motion.div
           className="absolute right-3 w-[350px] max-w-[calc(100vw-20px)] bg-[rgba(30,30,30,0.9)] border border-white/15 rounded-xl shadow-lg z-40 text-white flex flex-col"
           style={{
-            top: 'calc(var(--topbar-height) + 3px)',
+            top: 'calc(var(--topbar-base-height) + var(--safe-area-top) - 10px)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
           }}

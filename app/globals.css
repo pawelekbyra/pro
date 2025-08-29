@@ -105,3 +105,9 @@
     transition: none !important;
   }
 }
+
+@layer utilities {
+  #bmc-wbtn {
+    display: none !important;
+  }
+}
