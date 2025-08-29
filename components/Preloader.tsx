@@ -63,7 +63,7 @@ const Preloader: React.FC = () => {
             }}
           >
             <Image
-              src="https://pawelperfect.pl/wp-content/uploads/2025/07/output-onlinepngtools-1-1.png"
+              src="/icons/icon-512x512.png"
               alt="Ting Tong Logo"
               width={192}
               height={192}
