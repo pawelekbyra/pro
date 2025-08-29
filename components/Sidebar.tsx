@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share } from 'lucide-react';
+import { HeartCrack, MessageSquare, Forward, BookOpenText } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
@@ -15,6 +15,7 @@ interface SidebarProps {
   commentsCount: number;
   openCommentsModal: () => void;
   openAccountPanel: () => void;
+  openInfoModal: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -25,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   commentsCount,
   openCommentsModal,
   openAccountPanel,
+  openInfoModal,
 }) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likesCount, setLikesCount] = useState(initialLikes);
@@ -101,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <button onClick={handleLike} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Heart
+        <HeartCrack
           size={32}
           className={`transition-colors duration-200 ${isLiked ? 'fill-red-500 stroke-red-500' : 'fill-transparent stroke-white'}`}
           style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}
@@ -110,15 +112,19 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <button onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <MessageCircle size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <MessageSquare size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
       </button>
 
       <button onClick={handleShare} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Share size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <Forward size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{t('shareText') || 'Share'}</span>
       </button>
 
+      <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold mt-4">
+        <BookOpenText size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <span className="icon-label">{t('infoText') || 'Info'}</span>
+      </button>
     </aside>
   );
 };

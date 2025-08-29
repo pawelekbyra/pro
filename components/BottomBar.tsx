@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Globe, Coffee, Bot, BookOpenText } from 'lucide-react';
+import { Coffee, Bot, Rabbit, Gamepad2 } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 
 interface BottomBarProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   isActive: boolean;
-  openInfoModal: () => void;
 }
 
-const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal }) => {
+const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const { t, lang, toggleLanguage } = useTranslation();
+  const { t } = useTranslation();
   const { addToast } = useToast();
 
   const handleTipClick = () => {
@@ -79,7 +78,8 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal
     <div
       className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white"
       style={{
-        padding: '10px 10px calc(10px + var(--safe-area-bottom)) 12px',
+        padding: '10px 12px',
+        paddingBottom: 'calc(10px + var(--safe-area-bottom))',
         minHeight: 'var(--bottombar-base-height)',
         background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
       }}
@@ -91,7 +91,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         className="absolute left-0 w-full h-10 cursor-pointer group"
-        style={{ top: '-22px' }} // This positioning is key to match the prototype
+        style={{ top: '-16px' }} // Reduced the gap
         role="slider"
         aria-valuemin={0}
         aria-valuemax={100}
@@ -120,21 +120,25 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal
 
       {/* New Button Panel */}
       <div className="flex justify-around items-center pt-2">
-        <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">{t('tipText') || 'Tip'}</span>
+        {/* Gierki Button */}
+        <button onClick={() => { /* Placeholder for Gierki action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Gamepad2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">Gierki</span>
         </button>
-        <button onClick={toggleLanguage} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Globe size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">{lang.toUpperCase()}</span>
+        {/* Monsta Button */}
+        <button onClick={() => { /* Placeholder for Monsta action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Rabbit size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">Monsta</span>
         </button>
-        <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <BookOpenText size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">{t('infoText') || 'Info'}</span>
-        </button>
+        {/* Robert Button */}
         <button onClick={() => { /* Placeholder for Robert action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
           <Bot size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
           <span className="icon-label">Robert</span>
+        </button>
+        {/* Tip Button */}
+        <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">{t('tipText') || 'Tip'}</span>
         </button>
       </div>
     </div>
