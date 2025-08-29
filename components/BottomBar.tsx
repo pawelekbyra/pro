@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Info, Globe2, Coffee, Bot } from 'lucide-react';
+import { Globe, Coffee, Bot, BookOpenText } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 
@@ -125,11 +125,11 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal
           <span className="icon-label">{t('tipText') || 'Tip'}</span>
         </button>
         <button onClick={toggleLanguage} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Globe2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <Globe size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
           <span className="icon-label">{lang.toUpperCase()}</span>
         </button>
         <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Info size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <BookOpenText size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
           <span className="icon-label">{t('infoText') || 'Info'}</span>
         </button>
         <button onClick={() => { /* Placeholder for Robert action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
