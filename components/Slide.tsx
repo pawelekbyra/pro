@@ -5,6 +5,7 @@ import { useUser } from '@/context/UserContext';
 import VideoPlayer from './VideoPlayer';
 import Sidebar from './Sidebar';
 import BottomBar from './BottomBar';
+import VideoInfo from './VideoInfo';
 import TopBar from './TopBar';
 import { Lock } from 'lucide-react';
 
@@ -76,7 +77,8 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           openInfoModal={openInfoModal}
           openAccountPanel={openAccountPanel}
         />
-        <BottomBar user={slide.user} description={slide.description} videoRef={videoRef} isActive={isActive && !showSecretOverlay} />
+        <VideoInfo user={slide.user} description={slide.description} />
+        <BottomBar videoRef={videoRef} isActive={isActive && !showSecretOverlay} />
       </div>
     </div>
   );
