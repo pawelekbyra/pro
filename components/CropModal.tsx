@@ -124,7 +124,7 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-5"
+          className="fixed inset-0 bg-white/30 backdrop-blur-sm z-[110] flex items-center justify-center p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

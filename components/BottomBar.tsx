@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Coffee, Bot, Rabbit, Gamepad2 } from 'lucide-react';
+import { Coffee, Bot, Bird, Gamepad2 } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 
@@ -126,7 +126,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
         </button>
         {/* Monsta Button */}
         <button onClick={() => { /* Placeholder for Monsta action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Rabbit size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <Bird size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
           <span className="icon-label">Monsta</span>
         </button>
         {/* Robert Button */}
