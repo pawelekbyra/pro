@@ -145,16 +145,17 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
         {isLoginPanelOpen && (
           <motion.div
             className="absolute left-0 w-full z-20 overflow-hidden"
-            style={{
-              top: 'var(--topbar-height)',
-              background: 'rgba(0, 0, 0, 0.6)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-            }}
             initial={{ height: 0 }}
             animate={{ height: 'auto' }}
             exit={{ height: 0 }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
+            style={{
+              top: 'var(--topbar-height)',
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              paddingTop: '10px'
+            }}
           >
             <LoginForm onLoginSuccess={() => setIsLoginPanelOpen(false)} />
           </motion.div>

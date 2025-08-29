@@ -34,25 +34,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 px-6 pb-5 bg-white">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 px-6 pb-5">
       <Input
         type="text"
-        placeholder={t('loginPlaceholder')}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         disabled={isLoading}
-        className="bg-gray-100 border-gray-300 text-black placeholder:text-gray-500"
+        className="bg-white border-2 border-black text-black placeholder:text-gray-500 font-mono"
       />
       <Input
         type="password"
-        placeholder={t('passwordPlaceholder')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         disabled={isLoading}
-        className="bg-gray-100 border-gray-300 text-black placeholder:text-gray-500"
+        className="bg-white border-2 border-black text-black placeholder:text-gray-500 font-mono"
       />
       <Button type="submit" variant="default" disabled={isLoading} className="font-bold uppercase tracking-wider bg-pink-600 hover:bg-pink-700">
-        {isLoading ? t('loggingIn') : t('loginButton')}
+        {isLoading ? t('loggingIn') : 'ENTER'}
       </Button>
       {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
     </form>
