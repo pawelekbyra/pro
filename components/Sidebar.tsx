@@ -1,20 +1,19 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, Info, Globe2, Coffee } from 'lucide-react';
+import { Heart, MessageCircle, Send } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
 import Image from 'next/image';
 
 interface SidebarProps {
-  avatarUrl: string;
+  avatarUrl:string;
   initialLikes: number;
   isLiked: boolean;
   likeId: string;
   commentsCount: number;
   openCommentsModal: () => void;
-  openInfoModal: () => void;
   openAccountPanel: () => void;
 }
 
@@ -25,7 +24,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   likeId,
   commentsCount,
   openCommentsModal,
-  openInfoModal,
   openAccountPanel,
 }) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
@@ -79,15 +77,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const handleTipClick = () => {
-    const bmcButton = document.querySelector('[data-id="pawelperfect"]') as HTMLElement;
-    if (bmcButton) {
-        (bmcButton as HTMLElement).click();
-    } else {
-      addToast('BuyMeACoffee widget not found.', 'error');
-    }
-  };
-
   return (
     <aside
       className="absolute right-0 flex flex-col items-center gap-2 z-20"
@@ -130,20 +119,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         <span className="icon-label">{t('shareText') || 'Share'}</span>
       </button>
 
-      <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Info size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-        <span className="icon-label">{t('infoText') || 'Info'}</span>
-      </button>
-
-      <button onClick={toggleLanguage} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Globe2 size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-        <span className="icon-label">{lang.toUpperCase()}</span>
-      </button>
-
-      <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-        <Coffee size={32} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-        <span className="icon-label">{t('tipText') || 'Tip'}</span>
-      </button>
     </aside>
   );
 };

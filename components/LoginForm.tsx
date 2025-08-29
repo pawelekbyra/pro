@@ -34,7 +34,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 px-6 pb-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 px-4 pb-5">
       <Input
         type="text"
         value={username}
