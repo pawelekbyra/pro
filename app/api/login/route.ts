@@ -10,13 +10,13 @@ const COOKIE_NAME = 'session';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { username, password } = body; // Assuming 'username' is the email for login
+    const { email, password } = body;
 
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json({ success: false, message: 'Email and password are required' }, { status: 400 });
     }
 
-    const user = await db.findUserByEmail(username);
+    const user = await db.findUserByEmail(email);
 
     if (!user) {
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 });
