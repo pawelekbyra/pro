@@ -27,3 +27,4 @@ jules-scratch/
 # Test files
 test-db.ts
 cookie.txt
+package-lock.json

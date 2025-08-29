@@ -42,7 +42,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     if (!isHls && videoRef.current) {
       videoRef.current.src = currentSrc;
     }
-  }, [isHls, currentSrc]);
+  }, [isHls, currentSrc, videoRef]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -62,7 +62,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
       video.removeEventListener('play', updatePlayingState);
       video.removeEventListener('pause', updatePlayingState);
     }
-  }, [isActive]);
+  }, [isActive, videoRef]);
 
   const triggerLikeAnimation = () => {
     setShowHeart(true);
