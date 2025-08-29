@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { HeartCrack, MessageSquare, Rat, FileQuestionMark } from 'lucide-react';
+import { HeartCrack, MessageSquare, Rat, FileQuestion } from 'lucide-react';
 import { PiShareFat } from 'react-icons/pi';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
@@ -124,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold mt-4">
-        <FileQuestionMark size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+        <FileQuestion size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">WTF?!</span>
       </button>
     </aside>
