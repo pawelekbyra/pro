@@ -1,24 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Info, Globe2, Coffee, Bot } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 
-// Props interface remains the same
 interface BottomBarProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   isActive: boolean;
+  openInfoModal: () => void;
 }
 
-const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
-  // Re-integrate state and refs from the original component's logic
+const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive, openInfoModal }) => {
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const { t, lang, toggleLanguage } = useTranslation();
+  const { addToast } = useToast();
 
-  // Re-integrate useEffect for time updates
+  const handleTipClick = () => {
+    const bmcButton = document.querySelector('[data-id="pawelperfect"]') as HTMLElement;
+    if (bmcButton) {
+        (bmcButton as HTMLElement).click();
+    } else {
+      addToast('BuyMeACoffee widget not found.', 'error');
+    }
+  };
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !isActive) return;
 
     const handleTimeUpdate = () => {
-      // Only update progress based on video time if the user is not dragging the bar
       if (!isDragging && video.duration) {
         setProgress((video.currentTime / video.duration) * 100);
       }
@@ -105,6 +116,26 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
             transition: isDragging ? 'none' : 'left 0.1s linear',
           }}
         />
+      </div>
+
+      {/* New Button Panel */}
+      <div className="flex justify-center items-center gap-4 pt-2">
+        <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">{t('tipText') || 'Tip'}</span>
+        </button>
+        <button onClick={toggleLanguage} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Globe2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">{lang.toUpperCase()}</span>
+        </button>
+        <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Info size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">{t('infoText') || 'Info'}</span>
+        </button>
+        <button onClick={() => { /* Placeholder for Robert action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <Bot size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+          <span className="icon-label">Robert</span>
+        </button>
       </div>
     </div>
   );
