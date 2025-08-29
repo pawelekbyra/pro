@@ -44,7 +44,10 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
 
   return (
     <div className="webyx-section h-full w-full relative overflow-hidden">
-      <div className={`tiktok-symulacja h-full w-full relative ${isLoggedIn ? 'is-logged-in' : ''}`}>
+      <div
+        className={`tiktok-symulacja h-full w-full relative ${isLoggedIn ? 'is-logged-in' : ''}`}
+        style={{ paddingBottom: 'var(--safe-area-bottom)' }}
+      >
         <VideoPlayer
           hlsSrc={slide.hlsUrl}
           mp4Src={slide.mp4Url}

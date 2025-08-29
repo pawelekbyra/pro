@@ -79,7 +79,6 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
       className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white"
       style={{
         padding: '10px 12px',
-        paddingBottom: 'calc(10px + var(--safe-area-bottom))',
         minHeight: 'var(--bottombar-base-height)',
         background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
       }}
