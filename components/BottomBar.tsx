@@ -2,13 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // Props interface remains the same
 interface BottomBarProps {
-  user: string;
-  description: string;
   videoRef: React.RefObject<HTMLVideoElement>;
   isActive: boolean;
 }
 
-const BottomBar: React.FC<BottomBarProps> = ({ user, description, videoRef, isActive }) => {
+const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   // Re-integrate state and refs from the original component's logic
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -99,20 +97,14 @@ const BottomBar: React.FC<BottomBarProps> = ({ user, description, videoRef, isAc
         </div>
         {/* Draggable dot/handle */}
         <div
-          className="absolute top-1/2 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute top-1/2 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full opacity-100"
           style={{
             left: `${progress}%`,
             transform: 'translate(-50%, -50%)',
             boxShadow: '0 0 6px rgba(255, 255, 255, 0.6)',
-            transition: isDragging ? 'none' : 'left 0.1s linear, opacity 0.2s',
+            transition: isDragging ? 'none' : 'left 0.1s linear',
           }}
         />
-      </div>
-
-      {/* This div represents the '.text-info' container */}
-      <div className="flex-none min-w-0" style={{ textShadow: '0 0 4px rgba(0, 0, 0, 0.8)' }}>
-        <h3 className="text-lg font-bold mb-1 leading-tight">@{user}</h3>
-        <p className="text-sm leading-snug whitespace-normal">{description}</p>
       </div>
     </div>
   );
