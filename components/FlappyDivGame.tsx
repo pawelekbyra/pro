@@ -3,12 +3,12 @@ import type { GameSlide } from '@/lib/types';
 
 const GAME_HEIGHT = 500;
 const PLAYER_SIZE = 40;
-const GRAVITY = 3;
-const JUMP_STRENGTH = 80;
-const OBSTACLE_WIDTH = 50;
-const OBSTACLE_GAP = 150;
-const OBSTACLE_SPEED = 4;
-const OBSTACLE_INTERVAL = 1500; // ms
+const GRAVITY = 800; // Adjusted for deltaTime implementation
+const JUMP_STRENGTH = -350; // A direct impulse
+const OBSTACLE_WIDTH = 60;
+const OBSTACLE_GAP = 180; // Slightly larger gap
+const OBSTACLE_SPEED = 180; // Pixels per second
+const OBSTACLE_INTERVAL = 1800; // ms
 
 const FlappyDivGame = ({ slide }: { slide: GameSlide }) => {
   const [playerY, setPlayerY] = useState(GAME_HEIGHT / 2);
@@ -29,69 +29,98 @@ const FlappyDivGame = ({ slide }: { slide: GameSlide }) => {
 
   const jump = useCallback(() => {
     if (!isGameOver) {
-      setVelocityY(-JUMP_STRENGTH / 5); // simplified jump mechanic
+      setVelocityY(JUMP_STRENGTH);
     }
   }, [isGameOver]);
 
-  useEffect(() => {
-    if (!isRunning || isGameOver) return;
+  const gameLoopRef = React.useRef<number>();
+  const lastTimeRef = React.useRef<number>();
+  const lastObstacleTimeRef = React.useRef<number>(0);
 
-    const gameLoop = setInterval(() => {
-      // Gravity
-      setVelocityY(prev => prev + GRAVITY * 0.1);
-      setPlayerY(prev => Math.max(0, Math.min(prev + velocityY, GAME_HEIGHT - PLAYER_SIZE)));
+  const gameLoop = useCallback((time: number) => {
+    if (lastTimeRef.current === undefined) {
+      lastTimeRef.current = time;
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+      return;
+    }
 
-      // Game over if hits floor
-      if (playerY >= GAME_HEIGHT - PLAYER_SIZE) {
-        setIsGameOver(true);
-        setIsRunning(false);
-      }
+    const deltaTime = (time - lastTimeRef.current) / 1000; // in seconds
 
-      // Move and check obstacles
-      setObstacles(prevObstacles => {
-        const newObstacles = prevObstacles
-          .map(obs => ({ ...obs, x: obs.x - OBSTACLE_SPEED }))
-          .filter(obs => obs.x > -OBSTACLE_WIDTH);
+    // --- Game Logic ---
+    // Gravity
+    setPlayerY(prevPlayerY => {
+        const newVelocityY = velocityY + GRAVITY * deltaTime;
+        setVelocityY(newVelocityY);
+        const newPlayerY = prevPlayerY + newVelocityY;
 
-        // Collision detection
-        const playerRect = { x: 100, y: playerY, width: PLAYER_SIZE, height: PLAYER_SIZE };
-        for (const obs of newObstacles) {
-          const topPipeRect = { x: obs.x, y: 0, width: OBSTACLE_WIDTH, height: obs.gapY };
-          const bottomPipeRect = { x: obs.x, y: obs.gapY + OBSTACLE_GAP, width: OBSTACLE_WIDTH, height: GAME_HEIGHT };
-
-          if (
-            (playerRect.x < obs.x + OBSTACLE_WIDTH && playerRect.x + playerRect.width > obs.x &&
-            (playerRect.y < topPipeRect.y + topPipeRect.height || playerRect.y + playerRect.height > bottomPipeRect.y))
-          ) {
+        if (newPlayerY >= GAME_HEIGHT - PLAYER_SIZE) {
             setIsGameOver(true);
             setIsRunning(false);
-            return [];
-          }
+            return GAME_HEIGHT - PLAYER_SIZE;
+        }
+        return Math.max(0, newPlayerY);
+    });
+
+    // Obstacle generation
+    if (time - lastObstacleTimeRef.current > OBSTACLE_INTERVAL) {
+        lastObstacleTimeRef.current = time;
+        const gapY = Math.random() * (GAME_HEIGHT - OBSTACLE_GAP - 100) + 50;
+        setObstacles(prev => [...prev, { x: 500, gapY }]);
+    }
+
+    // Move obstacles, check collision, and score
+    setObstacles(prevObstacles => {
+        let newScore = score;
+        const newObstacles = prevObstacles
+            .map(obs => ({ ...obs, x: obs.x - OBSTACLE_SPEED * deltaTime }))
+            .filter(obs => obs.x > -OBSTACLE_WIDTH);
+
+        const playerRect = { x: 100, y: playerY, width: PLAYER_SIZE, height: PLAYER_SIZE };
+        for (const obs of newObstacles) {
+            const topPipeRect = { x: obs.x, y: 0, width: OBSTACLE_WIDTH, height: obs.gapY };
+            const bottomPipeRect = { x: obs.x, y: obs.gapY + OBSTACLE_GAP, width: OBSTACLE_WIDTH, height: GAME_HEIGHT };
+
+            if (
+                playerRect.x < obs.x + OBSTACLE_WIDTH && playerRect.x + playerRect.width > obs.x &&
+                (playerRect.y < topPipeRect.y + topPipeRect.height || playerRect.y + playerRect.height > bottomPipeRect.y)
+            ) {
+                setIsGameOver(true);
+                setIsRunning(false);
+                return [];
+            }
         }
 
-        // Scoring
-        const passedObstacle = prevObstacles.find(obs => obs.x + OBSTACLE_WIDTH < playerRect.x && obs.x + OBSTACLE_WIDTH > playerRect.x - OBSTACLE_SPEED);
+        const passedObstacle = prevObstacles.find(obs => obs.x + OBSTACLE_WIDTH < playerRect.x && obs.x + OBSTACLE_WIDTH >= playerRect.x - (OBSTACLE_SPEED * deltaTime));
         if(passedObstacle) {
-            setScore(s => s + 1);
+            newScore++;
         }
+        setScore(newScore);
 
         return newObstacles;
-      });
-    }, 20);
+    });
+    // --- End Game Logic ---
 
-    return () => clearInterval(gameLoop);
-  }, [isRunning, isGameOver, playerY, velocityY]);
+    lastTimeRef.current = time;
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+  }, [velocityY, playerY, score]);
 
   useEffect(() => {
-    if (!isRunning || isGameOver) return;
+    if (isRunning && !isGameOver) {
+      lastTimeRef.current = undefined; // Reset time for new game loop
+      lastObstacleTimeRef.current = performance.now();
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    } else {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+      }
+    }
 
-    const obstacleGenerator = setInterval(() => {
-      const gapY = Math.random() * (GAME_HEIGHT - OBSTACLE_GAP - 100) + 50;
-      setObstacles(prev => [...prev, { x: 500, gapY }]);
-    }, OBSTACLE_INTERVAL);
-
-    return () => clearInterval(obstacleGenerator);
-  }, [isRunning, isGameOver]);
+    return () => {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+      }
+    };
+  }, [isRunning, isGameOver, gameLoop]);
 
   const handleInteraction = useCallback(() => {
     if (!isRunning && isGameOver) {

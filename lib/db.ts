@@ -18,6 +18,10 @@ export const keys = {
   gridSlides: () => 'grid_slides', // HASH "x,y" -> slideId
 
   comment: (commentId: string) => `comment:${commentId}`,
+  commentLikes: (commentId: string) => `comment_likes:${commentId}`,
+
+  notification: (notificationId: string) => `notification:${notificationId}`,
+  userNotifications: (userId: string) => `user_notifications:${userId}`,
 };
 
 export * from './db.interfaces';
@@ -201,6 +205,40 @@ export const db = {
     return { ...newComment, user: { displayName: user.displayName, avatar: user.avatar } };
   },
 
+  async toggleCommentLike(commentId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked' }> {
+    const commentKey = keys.comment(commentId);
+    const commentLikesKey = keys.commentLikes(commentId);
+
+    const [comment, isLiked] = await Promise.all([
+      kv!.get<Comment>(commentKey),
+      kv!.sismember(commentLikesKey, userId),
+    ]);
+
+    if (!comment) {
+      throw new Error('Comment not found');
+    }
+
+    const tx = kv!.multi();
+    let newStatus: 'liked' | 'unliked';
+
+    if (isLiked) {
+      tx.srem(commentLikesKey, userId);
+      // Also remove from the denormalized list on the comment object
+      const updatedLikedBy = comment.likedBy.filter(id => id !== userId);
+      tx.set(commentKey, { ...comment, likedBy: updatedLikedBy });
+      newStatus = 'unliked';
+    } else {
+      tx.sadd(commentLikesKey, userId);
+      // Also add to the denormalized list on the comment object
+      const updatedLikedBy = [...comment.likedBy, userId];
+      tx.set(commentKey, { ...comment, likedBy: updatedLikedBy });
+      newStatus = 'liked';
+    }
+
+    await tx.exec();
+    return { newStatus };
+  },
+
   async hydrateCommentsWithUserInfo(comments: Comment[]) {
     if (!comments.length) return [];
     const userIds = [...new Set(comments.map(c => c.userId))];
@@ -214,5 +252,58 @@ export const db = {
       ...comment,
       user: usersById.get(comment.userId) ?? { displayName: 'Unknown User', avatar: '' }
     }));
+  },
+
+  // --- Notification Functions ---
+  async createNotification(notificationData: Omit<Notification, 'id' | 'createdAt' | 'read'>) {
+    const id = `notif_${crypto.randomUUID()}`;
+    const createdAt = Date.now();
+    const notification: Notification = {
+      id,
+      createdAt,
+      read: false,
+      userId: notificationData.userId,
+      type: notificationData.type,
+      text: notificationData.text,
+      link: notificationData.link,
+      fromUser: notificationData.fromUser,
+    };
+
+    const tx = kv!.multi();
+    tx.set(keys.notification(id), notification);
+    tx.zadd(keys.userNotifications(notification.userId), { score: createdAt, member: id });
+    await tx.exec();
+
+    return notification;
+  },
+
+  async getNotifications(userId: string, options: { start?: number, count?: number } = {}) {
+    const { start = 0, count = 20 } = options;
+    const notificationIds = await kv!.zrange(keys.userNotifications(userId), start, start + count - 1, { rev: true });
+    if (!notificationIds.length) return [];
+
+    const pipe = kv!.multi();
+    for (const id of notificationIds) {
+      pipe.get(keys.notification(id as string));
+    }
+    const results = await pipe.exec() as (Notification | null)[];
+    return results.filter(Boolean) as Notification[];
+  },
+
+  async markNotificationAsRead(notificationId: string): Promise<Notification | null> {
+    const notifKey = keys.notification(notificationId);
+    const notification = await kv!.get<Notification>(notifKey);
+    if (!notification) return null;
+
+    if (notification.read) return notification; // No update needed
+
+    const updatedNotification = { ...notification, read: true };
+    await kv!.set(notifKey, updatedNotification);
+    return updatedNotification;
+  },
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const allNotifications = await this.getNotifications(userId, { count: 100 }); // Check latest 100
+    return allNotifications.filter(n => !n.read).length;
   }
 };

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/mock-db';
+import { db } from '@/lib/db';
+import { verifySession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
-import { verifySession } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -12,10 +12,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'slideId is required' }, { status: 400 });
   }
 
-  // The mock logic was removed because it depended on the deleted mock-db.ts
-  // The main API mock in app/api/slides/route.ts will handle mock mode.
-
   try {
+    // Fetch comments using the real db now
     const comments = await db.getComments(slideId);
     return NextResponse.json({ success: true, comments });
   } catch (error) {
@@ -32,7 +30,7 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { slideId, text, parentId } = await request.json();
+    const { slideId, text } = await request.json(); // parentId is not supported by the real db function
 
     if (!slideId || !text) {
       return NextResponse.json({ success: false, message: 'slideId and text are required' }, { status: 400 });
@@ -42,9 +40,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Comment text cannot be empty.' }, { status: 400 });
     }
 
-    // The mock logic was removed because it depended on the deleted mock-db.ts
-
-    const newComment = await db.addComment(slideId, currentUser.id, text.trim(), parentId);
+    // Use the real db.addComment
+    const newComment = await db.addComment(slideId, currentUser.id, text.trim());
 
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
 

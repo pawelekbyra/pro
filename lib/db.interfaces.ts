@@ -29,3 +29,18 @@ export interface Comment {
     avatar: string;
   }
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'like' | 'comment' | 'follow' | 'system';
+  text: string;
+  link: string; // e.g., /slide/slide_id?comment=comment_id
+  createdAt: number;
+  read: boolean;
+  fromUser?: {
+    id: string;
+    displayName: string;
+    avatar: string;
+  };
+}

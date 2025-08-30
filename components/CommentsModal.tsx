@@ -236,6 +236,37 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
     }
   };
 
+  const removeCommentOptimistically = (commentId: string) => {
+    setComments(prev => {
+        const filterReplies = (comments: Comment[]): Comment[] => {
+            return comments.filter(c => c.id !== commentId).map(c => {
+                if (c.replies) {
+                    return { ...c, replies: filterReplies(c.replies) };
+                }
+                return c;
+            });
+        };
+        return filterReplies(prev);
+    });
+  };
+
+  const replaceTempComment = (tempId: string, realComment: Comment) => {
+    setComments(prev => {
+        const replaceInReplies = (comments: Comment[]): Comment[] => {
+            return comments.map(c => {
+                if (c.id === tempId) {
+                    return realComment;
+                }
+                if (c.replies) {
+                    return { ...c, replies: replaceInReplies(c.replies) };
+                }
+                return c;
+            });
+        };
+        return replaceInReplies(prev);
+    });
+  };
+
   const handleReplySubmit = async (parentId: string, text: string) => {
     if (!text.trim() || !user || !videoId) return;
 
@@ -257,13 +288,17 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId, text, parentId }),
       });
-      if (!res.ok) throw new Error('Failed to post reply');
-      // Here you might want to replace the temp comment with the real one from the server
+      if (!res.ok) {
+        throw new Error('Failed to post reply');
+      }
+      const data = await res.json();
+      replaceTempComment(tempId, data.comment);
+
     } catch (err: any) {
       setError(err.message);
       // Revert optimistic update on failure
-      // This is complex, for now, we'll just log the error
-      console.error("Failed to post reply, optimistic update not reverted.");
+      removeCommentOptimistically(tempId);
+      console.error("Failed to post reply, optimistic update reverted.");
     }
   };
 

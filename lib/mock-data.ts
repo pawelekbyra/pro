@@ -2,46 +2,87 @@ import type { Grid, Slide } from './types';
 
 // The Labyrinth - A more complex and interconnected grid of slides
 export const mockGrid: Grid = {
-  // 1. Start: The Company Pitch (Center of the first room)
+  // Main Vertical Video Feed (x=0)
   '0,0': {
-    id: 'company_pitch_1',
-    type: 'html',
+    id: 'video_feed_1',
+    type: 'video',
     x: 0, y: 0,
-    userId: 'corp_user', username: 'TheCorporation', avatar: 'https://i.pravatar.cc/150?u=corp',
-    access: 'public', createdAt: Date.now(), initialLikes: 2024, isLiked: false, initialComments: 10,
+    userId: 'video_creator_1', username: 'NatureVibes', avatar: 'https://i.pravatar.cc/150?u=nature',
+    access: 'public', createdAt: Date.now(), initialLikes: 1520, isLiked: false, initialComments: 34,
     data: {
-      type: 'COMPANY_PITCH',
-      description: "Welcome to Our Labyrinth! Choose a door.",
+      description: 'A beautiful waterfall. #nature #waterfall #travel',
+      mp4Url: 'https://vod-progressive.pexels.com/video/857195/free-video-857195.mp4',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
   },
-
-  // 2. Down from Start: The Typing Challenge
   '0,1': {
-    id: 'typing_challenge_1',
-    type: 'html',
+    id: 'video_feed_2',
+    type: 'video',
     x: 0, y: 1,
-    userId: 'user_typing', username: 'SpeedyKeys', avatar: 'https://i.pravatar.cc/150?u=speedy',
-    access: 'public', createdAt: Date.now(), initialLikes: 1337, isLiked: false, initialComments: 88,
+    userId: 'video_creator_2', username: 'CityScapes', avatar: 'https://i.pravatar.cc/150?u=city',
+    access: 'public', createdAt: Date.now(), initialLikes: 2100, isLiked: true, initialComments: 56,
     data: {
-      type: 'TYPING_CHALLENGE',
-      description: 'Prove your worth, typist!',
-      challengeData: {
-        phrases: [
-          'The labyrinth is full of secrets.',
-          'Navigate wisely through the digital corridors.',
-          'Every choice leads to a new discovery.',
-        ],
-        titles: {
-          slow: 'Cautious Explorer',
-          average: 'Adept Navigator',
-          fast: 'Labyrinth Runner',
-          insane: 'Master of the Maze',
-        },
-      },
+      description: 'Stunning city view from above. #city #drone #architecture',
+      mp4Url: 'https://vod-progressive.pexels.com/video/854386/free-video-854386.mp4',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/854386/free-video-854386.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    },
+  },
+  '0,2': {
+    id: 'video_reward_1', // This one was already here
+    type: 'video',
+    x: 0, y: 2,
+    userId: 'user_mock_1', username: 'TestUser', avatar: 'https://i.pravatar.cc/150?u=user_mock_1',
+    access: 'public', createdAt: Date.now(), initialLikes: 500, isLiked: false, initialComments: 20,
+    data: {
+      description: 'You have successfully navigated a part of the maze!',
+      mp4Url: 'https://vod-progressive.pexels.com/video/857195/free-video-857195.mp4',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    },
+  },
+  '0,-1': {
+    id: 'video_feed_3',
+    type: 'video',
+    x: 0, y: -1,
+    userId: 'cat_lover', username: 'Kociara', avatar: 'https://i.pravatar.cc/150?u=cat_lover',
+    access: 'public', createdAt: Date.now(), initialLikes: 999, isLiked: false, initialComments: 100,
+    data: {
+      description: 'Funny cat chasing a laser. You have to see this! #cats #funny',
+      mp4Url: 'https://vod-progressive.pexels.com/video/2022395/free-video-2022395.mp4',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    },
+  },
+  '0,-2': {
+    id: 'video_cat_1', // This one was already here
+    type: 'video',
+    x: 0, y: -2,
+    userId: 'cat_lover', username: 'Kociara', avatar: 'https://i.pravatar.cc/150?u=cat_lover',
+    access: 'public', createdAt: Date.now(), initialLikes: 999, isLiked: false, initialComments: 100,
+    data: {
+      description: 'Funny cat chasing a laser. You have to see this!',
+      mp4Url: 'https://vod-progressive.pexels.com/video/2022395/free-video-2022395.mp4',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    },
+  },
+  '0,-3': {
+    id: 'video_feed_4',
+    type: 'video',
+    x: 0, y: -3,
+    userId: 'video_creator_3', username: 'Techie', avatar: 'https://i.pravatar.cc/150?u=tech',
+    access: 'public', createdAt: Date.now(), initialLikes: 3000, isLiked: false, initialComments: 150,
+    data: {
+      description: 'Code compiling on a screen. #programming #code #tech',
+      mp4Url: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
+      hlsUrl: null,
+      poster: 'https://i.imgflip.com/2fm6x.jpg',
     },
   },
 
-  // 3. Right from Start: The Quiz
+  // Other slides, moved or new
   '1,0': {
     id: 'quiz_1',
     type: 'html',
@@ -60,8 +101,6 @@ export const mockGrid: Grid = {
       },
     },
   },
-
-  // 4. Up from Quiz: Data Visualization
   '1,-1': {
     id: 'data_viz_1',
     type: 'html',
@@ -75,8 +114,6 @@ export const mockGrid: Grid = {
       posterUrl: 'https://images.pexels.com/videos/854386/free-video-854386.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
   },
-
-  // 5. Right from Quiz: Parallax Experience
   '2,0': {
     id: 'parallax_1',
     type: 'html',
@@ -86,23 +123,8 @@ export const mockGrid: Grid = {
     data: {
       type: 'PARALLAX',
       description: 'A journey through layers of reality.',
-      videoUrl: '', // Not needed for this implementation, using poster
+      videoUrl: '',
       posterUrl: 'https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-    },
-  },
-
-  // 6. Below Typing Challenge: A normal video as a reward
-  '0,2': {
-    id: 'video_reward_1',
-    type: 'video',
-    x: 0, y: 2,
-    userId: 'user_mock_1', username: 'TestUser', avatar: 'https://i.pravatar.cc/150?u=user_mock_1',
-    access: 'public', createdAt: Date.now(), initialLikes: 500, isLiked: false, initialComments: 20,
-    data: {
-      description: 'You have successfully navigated a part of the maze!',
-      mp4Url: 'https://vod-progressive.pexels.com/video/857195/free-video-857195.mp4',
-      hlsUrl: null,
-      poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
   },
   '-1,0': {
@@ -122,7 +144,7 @@ export const mockGrid: Grid = {
       description: 'Jak powstają memy? Krótki film instruktażowy. (-1,0)',
       mp4Url: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
       hlsUrl: null,
-      poster: 'https://i.imgflip.com/2fm6x.jpg', // Drake Hotline Bling meme poster
+      poster: 'https://i.imgflip.com/2fm6x.jpg',
     },
   },
   '-1,1': {
@@ -142,28 +164,6 @@ export const mockGrid: Grid = {
       description: 'Zagraj w Flappy Div! (-1,1)',
     },
   },
-
-  // 7. Up from Start: The Story Branch
-  '0,-1': {
-    id: 'story_1',
-    type: 'html',
-    x: 0, y: -1,
-    userId: 'story_teller', username: 'TheNarrator', avatar: 'https://i.pravatar.cc/150?u=narrator',
-    access: 'public', createdAt: Date.now(), initialLikes: 300, isLiked: false, initialComments: 15,
-    data: {
-      type: 'STORY',
-      description: 'A new path unfolds...',
-      storyData: {
-        text: 'You stand at a crossroads in the digital maze. To the left, a path hums with ancient data streams. To the right, a faint, rhythmic pulse suggests a hidden game.',
-        choices: [
-          { text: 'Follow the data streams', nextSlide: { x: -1, y: 0 } }, // Leads to Meme Video
-          { text: 'Investigate the pulse', nextSlide: { x: 1, y: 1 } },    // Leads to Pope Game
-        ],
-      },
-    },
-  },
-
-  // 8. Below Quiz: The Pope Game
   '1,1': {
     id: 'pope_game_1',
     type: 'html',
@@ -182,8 +182,6 @@ export const mockGrid: Grid = {
       },
     },
   },
-
-  // 9. Right of Pope Game: The Poll
   '2,1': {
     id: 'poll_1',
     type: 'html',
@@ -199,48 +197,78 @@ export const mockGrid: Grid = {
       },
     },
   },
-
-  // 10. New Poll Slide
-  '3,1': {
-    id: 'poll_2',
+  // --- My Creative Slides ---
+  '2,-1': {
+    id: 'creative_quiz_1',
     type: 'html',
-    x: 3, y: 1,
-    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=jules_ai_poll',
-    access: 'public', createdAt: Date.now(), initialLikes: 42, isLiked: false, initialComments: 7,
+    x: 2, y: -1,
+    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=jules_creative',
+    access: 'public', createdAt: Date.now(), initialLikes: 42, isLiked: false, initialComments: 13,
     data: {
-      type: 'POLL',
-      description: 'Ankieta od AI',
-      pollData: {
-        question: 'Czy ananasy pasują do pizzy?',
-        options: ['Tak, to dar bogów', 'Absolutnie nie!', 'Wolę nie myśleć o tym'],
+      type: 'QUIZ',
+      description: 'A quiz from your friendly AI assistant!',
+      quizData: {
+        question: 'Which programming paradigm is superior?',
+        answers: [
+          { text: 'Object-Oriented', nextSlide: { x: 2, y: -2 } },
+          { text: 'Functional', nextSlide: { x: 3, y: -1 } },
+          { text: 'Procedural', nextSlide: { x: 2, y: -2 } },
+        ],
       },
     },
   },
-
-  // 11. New Game Slide
-  '1,2': {
-    id: 'game_2',
-    type: 'game',
-    x: 1, y: 2,
-    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=jules_ai_game',
-    access: 'public', createdAt: Date.now(), initialLikes: 123, isLiked: true, initialComments: 3,
+  '-1,-1': {
+    id: 'creative_story_1',
+    type: 'html',
+    x: -1, y: -1,
+    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=jules_creative',
+    access: 'public', createdAt: Date.now(), initialLikes: 88, isLiked: true, initialComments: 22,
     data: {
-      description: 'Zagraj w nową grę!',
+      type: 'STORY',
+      description: 'A choice for the brave.',
+      storyData: {
+        text: 'You find a dusty old server rack in a forgotten corner of the internet. It whirs softly. A single terminal glows with a question: "Reboot the old web, or build the new one?"',
+        choices: [
+          { text: 'Reboot (Legacy Mode)', nextSlide: { x: -2, y: -1 } },
+          { text: 'Build (Future Mode)', nextSlide: { x: -1, y: -2 } },
+        ],
+      },
     },
   },
-
-  // 12. Funny Cat Video
-  '0,-2': {
-    id: 'video_cat_1',
-    type: 'video',
-    x: 0, y: -2,
-    userId: 'cat_lover', username: 'Kociara', avatar: 'https://i.pravatar.cc/150?u=cat_lover',
-    access: 'public', createdAt: Date.now(), initialLikes: 999, isLiked: false, initialComments: 100,
+  // --- Moved original slides ---
+  '1,-2': {
+    id: 'company_pitch_1',
+    type: 'html',
+    x: 1, y: -2,
+    userId: 'corp_user', username: 'TheCorporation', avatar: 'https://i.pravatar.cc/150?u=corp',
+    access: 'public', createdAt: Date.now(), initialLikes: 2024, isLiked: false, initialComments: 10,
     data: {
-      description: 'Śmieszny kot goni laser. Musisz to zobaczyć!',
-      mp4Url: 'https://vod-progressive.pexels.com/video/2022395/free-video-2022395.mp4',
-      hlsUrl: null,
-      poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+      type: 'COMPANY_PITCH',
+      description: "Welcome to Our Labyrinth! Choose a door.",
+    },
+  },
+  '2,-2': {
+    id: 'typing_challenge_1',
+    type: 'html',
+    x: 2, y: -2,
+    userId: 'user_typing', username: 'SpeedyKeys', avatar: 'https://i.pravatar.cc/150?u=speedy',
+    access: 'public', createdAt: Date.now(), initialLikes: 1337, isLiked: false, initialComments: 88,
+    data: {
+      type: 'TYPING_CHALLENGE',
+      description: 'Prove your worth, typist!',
+      challengeData: {
+        phrases: [
+          'The labyrinth is full of secrets.',
+          'Navigate wisely through the digital corridors.',
+          'Every choice leads to a new discovery.',
+        ],
+        titles: {
+          slow: 'Cautious Explorer',
+          average: 'Adept Navigator',
+          fast: 'Labyrinth Runner',
+          insane: 'Master of the Maze',
+        },
+      },
     },
   },
 };

@@ -80,12 +80,9 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   return (
     <div
       className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white px-3"
-      style={{
-        paddingTop: '10px',
-        paddingBottom: 'calc(10px + var(--safe-area-bottom))',
-        minHeight: 'var(--bottombar-base-height)',
-        background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
-      }}
+      // Używamy flexbox i paddingu, aby zawartość była zawsze widoczna
+      // i dostosowywała się do rozmiaru ekranu
+      style={{ paddingBottom: 'calc(10px + var(--safe-area-bottom))', background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)' }}
     >
       {/* This div represents the '.video-progress' container from the prototype */}
       <div
@@ -94,7 +91,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         className="absolute left-0 w-full h-10 cursor-pointer group"
-        style={{ top: '-16px' }} // Reduced the gap
+        style={{ top: '-8px' }} // Zmniejszony odstęp, by był częścią paska
         role="slider"
         aria-valuemin={0}
         aria-valuemax={100}
