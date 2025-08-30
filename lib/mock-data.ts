@@ -142,4 +142,61 @@ export const mockGrid: Grid = {
       description: 'Zagraj w Flappy Div! (-1,1)',
     },
   },
+
+  // 7. Up from Start: The Story Branch
+  '0,-1': {
+    id: 'story_1',
+    type: 'html',
+    x: 0, y: -1,
+    userId: 'story_teller', username: 'TheNarrator', avatar: 'https://i.pravatar.cc/150?u=narrator',
+    access: 'public', createdAt: Date.now(), initialLikes: 300, isLiked: false, initialComments: 15,
+    data: {
+      type: 'STORY',
+      description: 'A new path unfolds...',
+      storyData: {
+        text: 'You stand at a crossroads in the digital maze. To the left, a path hums with ancient data streams. To the right, a faint, rhythmic pulse suggests a hidden game.',
+        choices: [
+          { text: 'Follow the data streams', nextSlide: { x: -1, y: 0 } }, // Leads to Meme Video
+          { text: 'Investigate the pulse', nextSlide: { x: 1, y: 1 } },    // Leads to Pope Game
+        ],
+      },
+    },
+  },
+
+  // 8. Below Quiz: The Pope Game
+  '1,1': {
+    id: 'pope_game_1',
+    type: 'html',
+    x: 1, y: 1,
+    userId: 'pope_dev', username: 'DivineGames', avatar: 'https://i.pravatar.cc/150?u=pope',
+    access: 'public', createdAt: Date.now(), initialLikes: 2137, isLiked: true, initialComments: 420,
+    data: {
+      type: 'GAME_POPE',
+      description: 'Be nice. Or not. Your choice.',
+      gameData: {
+        scenarios: [
+          { text: "A child spills ice cream on your new shoes. What do you do?", choices: { dopyskuj: "Sigh loudly", powiedz_milo: "Smile warmly" } },
+          { text: "A pigeon lands on your head during a sermon.", choices: { dopyskuj: "Shoo it away angrily", powiedz_milo: "Offer it a blessing" } },
+        ],
+        bossFight: { text: "A tourist asks if you know the 'Macarena'.", choices: { dopyskuj: "Stare in silence", powiedz_milo: "Begin dancing" } },
+      },
+    },
+  },
+
+  // 9. Right of Pope Game: The Poll
+  '2,1': {
+    id: 'poll_1',
+    type: 'html',
+    x: 2, y: 1,
+    userId: 'pollster', username: 'DataCollector', avatar: 'https://i.pravatar.cc/150?u=poll',
+    access: 'public', createdAt: Date.now(), initialLikes: 50, isLiked: false, initialComments: 30,
+    data: {
+      type: 'POLL',
+      description: 'Your opinion matters to us (maybe).',
+      pollData: {
+        question: 'What is the best type of web content?',
+        options: ['Funny Videos', 'Absurd Games', 'Interactive Stories'],
+      },
+    },
+  },
 };

@@ -16,6 +16,8 @@ const VideoGrid: React.FC = () => {
   const [grid, setGrid] = useState<Grid>({});
   const [activeCoordinates, setActiveCoordinates] = useState({ x: 0, y: 0 });
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [swipeTranslation, setSwipeTranslation] = useState({ x: 0, y: 0 });
 
   // Data fetching state
   const [page, setPage] = useState(1);
@@ -68,31 +70,64 @@ const VideoGrid: React.FC = () => {
   const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen || isTopBarModalOpen;
 
   const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    if (isAnyModalOpen) return;
     setTouchStart({
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
     });
+    setIsSwiping(true);
+  };
+
+  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    if (!touchStart || isAnyModalOpen) return;
+
+    let deltaX = e.targetTouches[0].clientX - touchStart.x;
+    let deltaY = e.targetTouches[0].clientY - touchStart.y;
+
+    // Determine if the swipe is primarily horizontal or vertical
+    // and if we are already in a swipe gesture.
+    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
+
+    if (isHorizontalSwipe) {
+      deltaY = 0; // Lock vertical movement
+      // Check if there's a slide in the swipe direction
+      const targetX = activeCoordinates.x + (deltaX > 0 ? -1 : 1);
+      if (!grid[`${targetX},${activeCoordinates.y}`]) {
+        // If no slide, reduce the swipe effect to give a "bouncy" resistance feel
+        deltaX *= 0.2;
+      }
+    } else {
+      deltaX = 0; // Lock horizontal movement
+      // Check if there's a slide in the swipe direction
+      const targetY = activeCoordinates.y + (deltaY > 0 ? -1 : 1);
+      if (!grid[`${activeCoordinates.x},${targetY}`]) {
+        // If no slide, reduce the swipe effect
+        deltaY *= 0.2;
+      }
+    }
+    setSwipeTranslation({ x: deltaX, y: deltaY });
   };
 
   const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
-    if (!touchStart) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
-    const deltaX = touchEndX - touchStart.x;
-    const deltaY = touchEndY - touchStart.y;
+    if (!touchStart || isAnyModalOpen) return;
 
-    if (!isAnyModalOpen) {
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-          if (deltaX > 0) move('left'); else move('right');
-        }
-      } else {
-        if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-          if (deltaY > 0) move('up'); else move('down');
-        }
+    const { x: deltaX, y: deltaY } = swipeTranslation;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        if (deltaX > 0) move('left');
+        else move('right');
+      }
+    } else {
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        if (deltaY > 0) move('up');
+        else move('down');
       }
     }
+
     setTouchStart(null);
+    setIsSwiping(false);
+    setSwipeTranslation({ x: 0, y: 0 });
   };
 
   const move = (direction?: 'up' | 'down' | 'left' | 'right', coordinates?: { x: number, y: number }) => {
@@ -165,16 +200,28 @@ const VideoGrid: React.FC = () => {
     );
   }
 
+  const getTransformStyle = () => {
+    const baseX = -activeCoordinates.x * 100;
+    const baseY = -activeCoordinates.y * 100;
+    const { x: translateX, y: translateY } = swipeTranslation;
+
+    return `translateX(calc(${baseX}% + ${translateX}px)) translateY(calc(${baseY}% + ${translateY}px))`;
+  };
+
   return (
     <div
       className="relative h-screen w-screen overflow-hidden bg-black"
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {activeSlide && (
         <div
-          className="relative h-full w-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(${-activeCoordinates.x * 100}%) translateY(${-activeCoordinates.y * 100}%)` }}
+          className="relative h-full w-full"
+          style={{
+            transform: getTransformStyle(),
+            transition: isSwiping ? 'none' : 'transform 0.3s ease-out',
+          }}
         >
           {slidesToRender.map((slide) => (
             <div

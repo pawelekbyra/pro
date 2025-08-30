@@ -1,26 +1,31 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Bell, Mail, User, Tag, ChevronDown } from 'lucide-react';
+import { X, Bell, Mail, User, Tag, ChevronDown, Loader2 } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
 
-// Enhanced mock data with full details and types
-const mockNotificationsData = [
-  { id: 1, type: 'message' as const, preview: 'New message from Admin', time: '2 mins ago', full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', unread: true, expanded: false },
-  { id: 2, type: 'profile' as const, preview: 'Your profile has been updated', time: '10 mins ago', full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', unread: true, expanded: false },
-  { id: 3, type: 'offer' as const, preview: 'A special offer is waiting for you!', time: '1 hour ago', full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', unread: false, expanded: false },
-];
+type NotificationType = 'message' | 'profile' | 'offer';
 
-type Notification = typeof mockNotificationsData[0];
+// Define a more robust Notification type based on backend schema
+interface Notification {
+  id: string; // Use string for UUIDs from DB
+  type: NotificationType;
+  preview: string;
+  time: string; // This could be a string like "2 mins ago" or an ISO string
+  full: string;
+  unread: boolean;
+  expanded?: boolean; // Keep expanded state on the client
+}
 
-const iconMap = {
+const iconMap: Record<NotificationType, React.ReactNode> = {
   message: <Mail size={24} className="text-white/80" />,
   profile: <User size={24} className="text-white/80" />,
   offer: <Tag size={24} className="text-white/80" />,
 };
 
 // Sub-component for a single notification item
-const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: number) => void }> = ({ notification, onToggle }) => {
+const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: string) => void }> = ({ notification, onToggle }) => {
   return (
     <motion.li
       layout
@@ -68,13 +73,81 @@ interface NotificationPopupProps {
 }
 
 const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotificationsData);
+  const { t, language } = useTranslation();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleToggle = (id: number) => {
+  useEffect(() => {
+    if (isOpen) {
+      const fetchNotifications = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const res = await fetch(`/api/notifications?lang=${language}`);
+          if (!res.ok) throw new Error('Failed to fetch notifications');
+          const data = await res.json();
+          // Add client-side 'expanded' state
+          setNotifications(data.notifications.map((n: Notification) => ({ ...n, expanded: false })));
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchNotifications();
+    }
+  }, [isOpen, language]);
+
+  const handleToggle = (id: string) => {
+    const notifToUpdate = notifications.find(n => n.id === id);
+    if (notifToUpdate && notifToUpdate.unread) {
+      // Mark as read on the backend
+      fetch('/api/notifications/mark-as-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: id }),
+      }).catch(err => console.error("Failed to mark notification as read:", err));
+    }
+
     setNotifications(
       notifications.map(n =>
         n.id === id ? { ...n, expanded: !n.expanded, unread: false } : n
       )
+    );
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex-grow flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white/40" />
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <div className="text-center py-10 text-red-400">
+          <p>{t('notificationsError')}</p>
+        </div>
+      );
+    }
+    if (notifications.length === 0) {
+      return (
+        <div className="text-center py-10 text-white/60 flex flex-col items-center gap-4">
+          <Bell size={48} className="opacity-50" />
+          <p>{t('notificationsAllCaughtUp')}</p>
+        </div>
+      );
+    }
+    return (
+      <ul className="flex-grow p-2 max-h-[45vh] overflow-y-auto">
+        <AnimatePresence>
+          {notifications.map((notif) => (
+            <NotificationItem key={notif.id} notification={notif} onToggle={handleToggle} />
+          ))}
+        </AnimatePresence>
+      </ul>
     );
   };
 
@@ -94,25 +167,12 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
           transition={{ duration: 0.2, ease: 'easeOut' }}
         >
           <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
-            <h3 className="font-semibold text-base">Powiadomienia</h3>
+            <h3 className="font-semibold text-base">{t('notificationsTitle')}</h3>
             <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
               <X size={20} />
             </button>
           </div>
-          <ul className="flex-grow p-2 max-h-[45vh] overflow-y-auto">
-            {notifications.length > 0 ? (
-              <AnimatePresence>
-                {notifications.map((notif) => (
-                  <NotificationItem key={notif.id} notification={notif} onToggle={handleToggle} />
-                ))}
-              </AnimatePresence>
-            ) : (
-              <div className="text-center py-10 text-white/60 flex flex-col items-center gap-4">
-                <Bell size={48} className="opacity-50" />
-                <p>Wszystko na bieżąco!</p>
-              </div>
-            )}
-          </ul>
+          {renderContent()}
         </motion.div>
       )}
     </AnimatePresence>

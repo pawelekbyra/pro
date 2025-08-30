@@ -10,6 +10,8 @@ import Quiz from './Quiz';
 import CompanyPitch from './CompanyPitch';
 import DataViz from './DataViz';
 import Parallax from './Parallax';
+import Poll from './Poll';
+import Story from './Story';
 
 interface HtmlContentProps {
   data: HtmlSlideData;
@@ -39,6 +41,10 @@ const HtmlContent: React.FC<HtmlContentProps> = ({ data, username, onNavigate })
       return <DataViz videoUrl={data.videoUrl} posterUrl={data.posterUrl} />;
     case 'PARALLAX':
         return <Parallax videoUrl={data.videoUrl} posterUrl={data.posterUrl} />;
+    case 'POLL':
+      return <Poll pollData={data.pollData} />;
+    case 'STORY':
+      return <Story storyData={data.storyData} onNavigate={onNavigate} />;
     default: {
       return (
         <div className="h-full w-full relative bg-black overflow-y-auto">

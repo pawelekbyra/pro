@@ -66,6 +66,21 @@ export interface QuizData {
   }[];
 }
 
+// Specific data for Poll
+export interface PollData {
+  question: string;
+  options: string[];
+}
+
+// Specific data for Story
+export interface StoryData {
+  text: string;
+  choices: {
+    text: string;
+    nextSlide: { x: number; y: number };
+  }[];
+}
+
 // Specific data for DataViz and Parallax
 export interface MediaData {
     videoUrl: string;
@@ -110,6 +125,16 @@ export type HtmlSlideData = {
       type: 'PARALLAX';
       videoUrl: string;
       posterUrl: string;
+    }
+  | {
+      htmlContent?: never;
+      type: 'POLL';
+      pollData: PollData;
+    }
+  | {
+      htmlContent?: never;
+      type: 'STORY';
+      storyData: StoryData;
     }
 );
 
