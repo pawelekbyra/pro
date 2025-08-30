@@ -1,5 +1,7 @@
 import { db, Slide } from '@/lib/db';
 import React from 'react';
+
+export const dynamic = 'force-dynamic';
 import { revalidatePath } from 'next/cache';
 import VideoManagementClient from './VideoManagementClient';
 
