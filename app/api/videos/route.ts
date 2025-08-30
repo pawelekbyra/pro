@@ -21,6 +21,7 @@ export async function GET() {
     const videos = await db.getVideos({ currentUserId: userId });
 
     // Return the data under a 'videos' key
+    // This part will need to be updated in Phase 2 to return grid data from the DB
     return NextResponse.json({ videos });
 
   } catch (error) {
