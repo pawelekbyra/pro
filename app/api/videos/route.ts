@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
-import { mockVideos } from '@/lib/mock-data';
+import { mockDb } from '@/lib/mock-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,7 @@ export async function GET() {
   if (process.env.MOCK_API === 'true') {
     // We add a short delay to simulate network latency
     await new Promise(resolve => setTimeout(resolve, 500));
-    return NextResponse.json({ videos: mockVideos });
+    return NextResponse.json({ videos: mockDb.videos });
   }
 
   try {
