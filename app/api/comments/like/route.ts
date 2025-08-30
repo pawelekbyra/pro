@@ -18,7 +18,11 @@ export async function POST(request: NextRequest) {
 
     const result = await db.toggleCommentLike(commentId, userId);
 
-    return NextResponse.json({ success: true, status: result.newStatus });
+    return NextResponse.json({
+      success: true,
+      status: result.newStatus,
+      likeCount: result.likeCount,
+    });
 
   } catch (error) {
     console.error('Error liking comment:', error);
