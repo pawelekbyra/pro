@@ -177,6 +177,38 @@ export const db = {
     return true;
   },
 
+  async createSlide(slideData: Omit<Slide, 'id' | 'likeId'>): Promise<Slide> {
+    const slides = await kv.get<Slide[]>('slides') ?? [];
+
+    // Find the highest existing likeId to avoid collisions
+    const maxLikeId = slides.reduce((max, s) => Math.max(max, parseInt(s.likeId, 10) || 0), 0);
+
+    const newSlide: Slide = {
+      ...slideData,
+      id: `slide-${crypto.randomUUID()}`,
+      likeId: (maxLikeId + 1).toString(),
+    };
+
+    slides.push(newSlide);
+    await kv.set('slides', slides);
+    return newSlide;
+  },
+
+  async updateSlide(slideId: string, updates: Partial<Omit<Slide, 'id' | 'likeId'>>): Promise<Slide | null> {
+    const slides = await kv.get<Slide[]>('slides') ?? [];
+    const slideIndex = slides.findIndex(s => s.id === slideId);
+
+    if (slideIndex === -1) {
+      return null;
+    }
+
+    const updatedSlide = { ...slides[slideIndex], ...updates };
+    slides[slideIndex] = updatedSlide;
+
+    await kv.set('slides', slides);
+    return updatedSlide;
+  },
+
   async toggleLike(slideId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked', likeCount: number }> {
     const likes = await kv.get<Like[]>('likes') ?? [];
     const likeIndex = likes.findIndex(like => like.slideId === slideId && like.userId === userId);

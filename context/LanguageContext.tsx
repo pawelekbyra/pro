@@ -132,7 +132,8 @@ const translations: Record<string, Record<string, string>> = {
         zoomSliderAriaLabel: 'Suwak powiększenia',
         zoomInAriaLabel: 'Powiększ',
         saveAvatarAriaLabel: 'Zapisz nowy awatar',
-        saveAvatarButton: 'Zapisz Awatar'
+        saveAvatarButton: 'Zapisz Awatar',
+        adminPanel: 'Panel Admina'
     },
     en: {
         loggedOutText: "You don't have the guts to log in",
@@ -263,7 +264,8 @@ const translations: Record<string, Record<string, string>> = {
         zoomSliderAriaLabel: 'Zoom slider',
         zoomInAriaLabel: 'Zoom in',
         saveAvatarAriaLabel: 'Save new avatar',
-        saveAvatarButton: 'Save Avatar'
+        saveAvatarButton: 'Save Avatar',
+        adminPanel: 'Admin Panel'
     }
 };
 

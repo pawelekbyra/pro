@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "user-1",
+      "username": "admin",
+      "email": "admin@example.com",
+      "passwordHash": "$2a$10$fJ9.iVunpM9f9bO8.p7.a.fl5R3z5s5t5w5w5w5w5w5w5w5w5w5w5",
+      "firstName": "Admin",
+      "lastName": "User",
+      "displayName": "Administrator",
+      "avatar": "https://i.pravatar.cc/150?u=admin",
+      "sessionVersion": 1,
+      "role": "admin"
+    },
+    {
+      "id": "user-2",
+      "username": "testuser",
+      "email": "test@example.com",
+      "passwordHash": "$2a$10$fJ9.iVunpM9f9bO8.p7.a.fl5R3z5s5t5w5w5w5w5w5w5w5w5w5w5",
+      "firstName": "Test",
+      "lastName": "User",
+      "displayName": "Test User",
+      "avatar": "https://i.pravatar.cc/150?u=testuser",
+      "sessionVersion": 1,
+      "role": "user"
+    }
+  ],
+  "slides": [
+    {
+      "id": "slide-001",
+      "likeId": "1",
+      "user": "Paweł Polutek",
+      "description": "To jest dynamicznie załadowany opis dla pierwszego slajdu. Działa!",
+      "mp4Url": "https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4",
+      "hlsUrl": null,
+      "poster": "",
+      "avatar": "https://i.pravatar.cc/100?u=pawel",
+      "access": "public"
+    }
+  ],
+  "likes": [],
+  "comments": []
+}

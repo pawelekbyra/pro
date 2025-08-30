@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "tsx scripts/seed-kv.ts"
+    "db:seed": "tsx scripts/seed-kv.ts",
+    "admin:create": "dotenv -e .env.local -- tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
@@ -35,6 +36,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "bcryptjs": "^3.0.2",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
     "postcss": "^8.5.6",
