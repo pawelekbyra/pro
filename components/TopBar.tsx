@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import LoginForm from './LoginForm';
 import NotificationPopup from './NotificationPopup';
 import { useUser } from '@/context/UserContext';
@@ -134,7 +135,12 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
             {isLoggedIn && (
               <>
                 <button onClick={handleOpenAccountPanel} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('account')}</button>
-                <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('logout')}</button>
+                {user?.role === 'admin' && (
+                  <Link href="/admin">
+                    <button className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10">{t('adminPanel')}</button>
+                  </Link>
+                )}
+                <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10">{t('logout')}</button>
               </>
             )}
           </motion.div>
