@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useVideoPlayback } from '@/lib/useVideoPlayback';
 import VideoPlayer from './VideoPlayer';
 import Sidebar from './Sidebar';
 import BottomBar from './BottomBar';
@@ -33,12 +34,14 @@ interface VideoProps {
   openInfoModal: () => void;
   onTimeUpdate: (videoId: string, time: number) => void;
   startTime: number;
+  onPlaybackFailure: () => void;
 }
 
-const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal, onTimeUpdate, startTime }) => {
+const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal, onTimeUpdate, startTime, onPlaybackFailure }) => {
   const { isLoggedIn, isLoading } = useUser();
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { isPlaying } = useVideoPlayback(videoRef);
 
   const isSecret = video.access === 'secret';
   // Don't show the overlay while the user state is loading
@@ -60,6 +63,8 @@ const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAcco
           videoId={video.id} // Pass videoId instead of likeId
           onTimeUpdate={onTimeUpdate}
           startTime={startTime}
+          onPlaybackFailure={onPlaybackFailure}
+          isPlaying={isPlaying}
         />
 
         {showSecretOverlay && (
