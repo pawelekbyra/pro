@@ -105,7 +105,7 @@ export const mockGrid: Grid = {
       poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
   },
-  '1,0': {
+  '-1,0': {
     id: 'video_mock_meme',
     type: 'video',
     userId: 'user_mock_ai',
@@ -116,10 +116,10 @@ export const mockGrid: Grid = {
     initialLikes: 2048,
     isLiked: false,
     initialComments: 256,
-    x: 1,
+    x: -1,
     y: 0,
     data: {
-      description: 'Jak powstają memy? Krótki film instruktażowy. (1,0)',
+      description: 'Jak powstają memy? Krótki film instruktażowy. (-1,0)',
       mp4Url: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
       hlsUrl: null,
       poster: 'https://i.imgflip.com/2fm6x.jpg', // Drake Hotline Bling meme poster
