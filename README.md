@@ -47,12 +47,6 @@ Jeśli chcesz wypełnić swoją bazę danych początkowymi danymi, możesz uży�
     npm run db:seed
     ```
 
-## Dalszy Plan Rozwoju (Etap 2)
+## Panel Administratora
 
-Obecna wersja aplikacji zawiera w pełni funkcjonalny prototyp nawigacji po siatce 2D, działający na danych testowych. Następny etap prac skupi się na pełnej integracji tej funkcjonalności z backendem i bazą danych.
-
-Kluczowe zadania na Etap 2:
-
-1.  **Modyfikacja Bazy Danych:** Dostosowanie struktury bazy danych (Vercel KV) do przechowywania slajdów wraz z ich współrzędnymi (x, y), co pozwoli na trwałe zapisywanie układu siatki.
-2.  **Aktualizacja API:** Przebudowa endpointu `/api/videos` w celu pobierania danych z bazy danych zamiast z plików testowych. Implementacja dynamicznego doładowywania kolejnych fragmentów siatki w miarę nawigacji przez użytkownika.
-3.  **Panel Administratora:** Stworzenie interfejsu w panelu admina, który umożliwi wizualne zarządzanie siatką, dodawanie nowych slajdów na konkretnych współrzędnych i podgląd całej "mapy" treści.
+Aplikacja zawiera panel administratora, który w przyszłości zostanie rozbudowany o funkcje zarządzania treścią, w tym wizualne zarządzanie siatką slajdów.
