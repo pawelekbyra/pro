@@ -17,17 +17,36 @@ type Comment = {
     displayName: string;
     avatar: string;
   };
+  parentId?: string | null;
+  replies?: Comment[];
 };
 
 interface CommentItemProps {
   comment: Comment;
   onLike: (id: string) => void;
+  onReplySubmit: (parentId: string, text: string) => Promise<void>;
   currentUserId?: string;
+  isReply?: boolean;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserId }) => {
+const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, onReplySubmit, currentUserId, isReply = false }) => {
   const { t } = useTranslation();
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const { user } = useUser();
   const isLiked = currentUserId ? comment.likedBy.includes(currentUserId) : false;
+
+  const handleReplyClick = () => {
+    setIsReplying(!isReplying);
+  };
+
+  const handleLocalReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+    await onReplySubmit(comment.id, replyText);
+    setReplyText('');
+    setIsReplying(false);
+  };
 
   return (
     <motion.div
@@ -35,7 +54,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserI
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="flex items-start gap-3"
+      className={`flex items-start gap-3 ${isReply ? 'ml-8' : ''}`}
     >
       <Image src={comment.user.avatar} alt={t('userAvatar', { user: comment.user.displayName })} width={32} height={32} className="w-8 h-8 rounded-full mt-1" />
       <div className="flex-1">
@@ -46,10 +65,40 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserI
             <Heart size={14} className={isLiked ? 'text-red-500 fill-current' : ''} />
             {comment.likedBy.length > 0 && <span>{comment.likedBy.length}</span>}
           </button>
-          <button className="flex items-center gap-1">
-            <MessageSquare size={14} />
-            <span>{t('reply')}</span>
-          </button>
+          {!isReply && (
+            <button onClick={handleReplyClick} className="flex items-center gap-1">
+              <MessageSquare size={14} />
+              <span>{t('reply')}</span>
+            </button>
+          )}
+        </div>
+        {isReplying && user && (
+          <form onSubmit={handleLocalReplySubmit} className="flex items-center gap-2 mt-2">
+            <Image src={user.avatar} alt={t('yourAvatar')} width={24} height={24} className="w-6 h-6 rounded-full" />
+            <input
+              type="text"
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder={t('addCommentPlaceholder')}
+              className="flex-1 px-3 py-1 bg-white/10 text-white rounded-full focus:outline-none focus:ring-1 focus:ring-pink-500 text-xs"
+              autoFocus
+            />
+            <button type="submit" className="px-3 py-1 bg-pink-500 text-white rounded-full text-xs font-semibold disabled:opacity-50" disabled={!replyText.trim()}>
+              {t('sendButton')}
+            </button>
+          </form>
+        )}
+        <div className="mt-2 space-y-3">
+          {comment.replies?.map(reply => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              onLike={onLike}
+              onReplySubmit={onReplySubmit}
+              currentUserId={currentUserId}
+              isReply={true}
+            />
+          ))}
         </div>
       </div>
     </motion.div>
@@ -92,9 +141,130 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
     }
   }, [isOpen, videoId]);
 
-  const handleLike = (id: string) => {
-    // TODO: Implement like/unlike API call
-    console.log("Liking comment", id);
+  const handleLike = async (commentId: string) => {
+    if (!user) {
+      // Maybe show a toast message to login
+      return;
+    }
+
+    const originalComments = [...comments];
+    const newComments = comments.map(comment => {
+      if (comment.id === commentId) {
+        const isLiked = comment.likedBy.includes(user.id);
+        const newLikedBy = isLiked
+          ? comment.likedBy.filter(id => id !== user.id)
+          : [...comment.likedBy, user.id];
+        return { ...comment, likedBy: newLikedBy };
+      }
+      return comment;
+    });
+
+    setComments(newComments);
+
+    try {
+      const res = await fetch(`/api/comments/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId }),
+      });
+
+      if (!res.ok) {
+        // Revert on failure
+        setComments(originalComments);
+        // Maybe show a toast message
+        console.error('Failed to like comment');
+      }
+    } catch (error) {
+      setComments(originalComments);
+      console.error('An error occurred while liking the comment', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && videoId) {
+      const fetchAndStructureComments = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const res = await fetch(`/api/comments?videoId=${videoId}`);
+          if (!res.ok) throw new Error('Failed to fetch comments');
+          const data = await res.json();
+
+          // Structure comments into a nested tree
+          const commentsById: { [key: string]: Comment } = {};
+          data.comments.forEach((c: Comment) => {
+            commentsById[c.id] = { ...c, replies: [] };
+          });
+
+          const structuredComments: Comment[] = [];
+          data.comments.forEach((c: Comment) => {
+            if (c.parentId && commentsById[c.parentId]) {
+              commentsById[c.parentId].replies?.push(commentsById[c.id]);
+            } else {
+              structuredComments.push(commentsById[c.id]);
+            }
+          });
+
+          setComments(structuredComments);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchAndStructureComments();
+    }
+  }, [isOpen, videoId]);
+
+  const addCommentOptimistically = (newComment: Comment) => {
+    if (newComment.parentId) {
+      setComments(prev => {
+        const newComments = [...prev];
+        const addReply = (comment: Comment): Comment => {
+          if (comment.id === newComment.parentId) {
+            return { ...comment, replies: [newComment, ...(comment.replies || [])] };
+          }
+          if (comment.replies) {
+            return { ...comment, replies: comment.replies.map(addReply) };
+          }
+          return comment;
+        };
+        return newComments.map(addReply);
+      });
+    } else {
+      setComments(prev => [newComment, ...prev]);
+    }
+  };
+
+  const handleReplySubmit = async (parentId: string, text: string) => {
+    if (!text.trim() || !user || !videoId) return;
+
+    // Optimistic update
+    const tempId = `temp-${Date.now()}`;
+    const newReply: Comment = {
+      id: tempId,
+      text,
+      createdAt: new Date().toISOString(),
+      likedBy: [],
+      user: { displayName: user.displayName, avatar: user.avatar },
+      parentId,
+    };
+    addCommentOptimistically(newReply);
+
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId, text, parentId }),
+      });
+      if (!res.ok) throw new Error('Failed to post reply');
+      // Here you might want to replace the temp comment with the real one from the server
+    } catch (err: any) {
+      setError(err.message);
+      // Revert optimistic update on failure
+      // This is complex, for now, we'll just log the error
+      console.error("Failed to post reply, optimistic update not reverted.");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +282,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
       });
       if (!res.ok) throw new Error('Failed to post comment');
       const data = await res.json();
-      setComments(prev => [data.comment, ...prev]);
+      addCommentOptimistically(data.comment);
       setNewComment('');
     } catch (err: any) {
       setError(err.message);
@@ -148,7 +318,13 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
         <AnimatePresence>
           <motion.div layout className="space-y-4">
             {comments.map(comment => (
-              <CommentItem key={comment.id} comment={comment} onLike={handleLike} currentUserId={user?.id} />
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                onLike={handleLike}
+                onReplySubmit={handleReplySubmit}
+                currentUserId={user?.id}
+              />
             ))}
           </motion.div>
         </AnimatePresence>

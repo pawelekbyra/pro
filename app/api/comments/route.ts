@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db } from '@/lib/mock-db';
 
 export const dynamic = 'force-dynamic';
 import { verifySession } from '@/lib/auth';
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { slideId, text } = await request.json();
+    const { slideId, text, parentId } = await request.json();
 
     if (!slideId || !text) {
       return NextResponse.json({ success: false, message: 'slideId and text are required' }, { status: 400 });
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // The mock logic was removed because it depended on the deleted mock-db.ts
 
-    const newComment = await db.addComment(slideId, currentUser.id, text.trim());
+    const newComment = await db.addComment(slideId, currentUser.id, text.trim(), parentId);
 
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
 

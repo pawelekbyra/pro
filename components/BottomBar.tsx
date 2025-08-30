@@ -79,9 +79,10 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   // The main container for the bottom bar, styled to match the prototype
   return (
     <div
-      className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white"
+      className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white px-3"
       style={{
-        padding: '10px 12px',
+        paddingTop: '10px',
+        paddingBottom: 'calc(10px + var(--safe-area-bottom))',
         minHeight: 'var(--bottombar-base-height)',
         background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
       }}
@@ -122,26 +123,31 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
 
       {/* New Button Panel */}
       <div className="flex justify-around items-center pt-2">
-        {/* Gierki Button */}
-        <button onClick={() => { /* Placeholder for Gierki action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Gamepad2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">Gierki</span>
-        </button>
-        {/* Monsta Button */}
-        <button onClick={() => { /* Placeholder for Monsta action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Rat size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">Monsta</span>
-        </button>
-        {/* Robert Button */}
-        <button onClick={() => { /* Placeholder for Robert action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Bot size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">Robert</span>
-        </button>
-        {/* Tip Button */}
-        <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
-          <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
-          <span className="icon-label">{t('tipText') || 'Tip'}</span>
-        </button>
+        {/* Using a wrapper for each button to control touch area and alignment easily */}
+        <div className="flex-1 flex justify-center">
+          <button onClick={() => { /* Placeholder for Gierki action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+            <Gamepad2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+            <span className="icon-label">Gierki</span>
+          </button>
+        </div>
+        <div className="flex-1 flex justify-center">
+          <button onClick={() => { /* Placeholder for Monsta action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+            <Rat size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+            <span className="icon-label">Monsta</span>
+          </button>
+        </div>
+        <div className="flex-1 flex justify-center">
+          <button onClick={() => { /* Placeholder for Robert action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+            <Bot size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+            <span className="icon-label">Robert</span>
+          </button>
+        </div>
+        <div className="flex-1 flex justify-center">
+          <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+            <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
+            <span className="icon-label">{t('tipText') || 'Tip'}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

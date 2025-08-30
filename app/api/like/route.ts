@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db } from '@/lib/mock-db'; // Using the mock DB directly
 import { verifySession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -12,29 +12,17 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { slideId } = await request.json();
+    const { videoId } = await request.json(); // The client sends videoId, which maps to slideId
 
-    if (!slideId) {
-      return NextResponse.json({ success: false, message: 'slideId is required' }, { status: 400 });
+    if (!videoId) {
+      return NextResponse.json({ success: false, message: 'videoId (slideId) is required' }, { status: 400 });
     }
 
-    // --- MOCK API LOGIC (currently broken due to refactor) ---
-    if (process.env.MOCK_API === 'true') {
-      // This part is hard to mock without a full mock DB state.
-      // We'll just return a successful response for now.
-      return NextResponse.json({
-        success: true,
-        isLiked: true,
-        likeCount: 1,
-      });
-    }
-    // --- END MOCK API LOGIC ---
-
-    const result = await db.toggleLike(slideId, currentUser.id);
+    const result = await db.toggleLike(videoId, currentUser.id);
 
     return NextResponse.json({
       success: true,
-      isLiked: result.newStatus === 'liked',
+      newStatus: result.newStatus,
       likeCount: result.likeCount,
     });
 
