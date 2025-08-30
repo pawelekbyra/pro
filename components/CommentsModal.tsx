@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,9 +25,15 @@ interface CommentItemProps {
   currentUserId?: string;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserId }) => {
+const CommentItem: React.FC<CommentItemProps> = ({
+  comment,
+  onLike,
+  currentUserId,
+}) => {
   const { t } = useTranslation();
-  const isLiked = currentUserId ? comment.likedBy.includes(currentUserId) : false;
+  const isLiked = currentUserId
+    ? comment.likedBy.includes(currentUserId)
+    : false;
 
   return (
     <motion.div
@@ -37,14 +43,30 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserI
       exit={{ opacity: 0, y: -20 }}
       className="flex items-start gap-3"
     >
-      <Image src={comment.user.avatar} alt={t('userAvatar', { user: comment.user.displayName })} width={32} height={32} className="w-8 h-8 rounded-full mt-1" />
+      <Image
+        src={comment.user.avatar}
+        alt={t('userAvatar', { user: comment.user.displayName })}
+        width={32}
+        height={32}
+        className="w-8 h-8 rounded-full mt-1"
+      />
       <div className="flex-1">
-        <p className="text-xs font-bold text-white/80">{comment.user.displayName}</p>
+        <p className="text-xs font-bold text-white/80">
+          {comment.user.displayName}
+        </p>
         <p className="text-sm text-white">{comment.text}</p>
         <div className="flex items-center gap-4 text-xs text-white/60 mt-1">
-          <button onClick={() => onLike(comment.id)} className="flex items-center gap-1">
-            <Heart size={14} className={isLiked ? 'text-red-500 fill-current' : ''} />
-            {comment.likedBy.length > 0 && <span>{comment.likedBy.length}</span>}
+          <button
+            onClick={() => onLike(comment.id)}
+            className="flex items-center gap-1"
+          >
+            <Heart
+              size={14}
+              className={isLiked ? 'text-red-500 fill-current' : ''}
+            />
+            {comment.likedBy.length > 0 && (
+              <span>{comment.likedBy.length}</span>
+            )}
           </button>
           <button className="flex items-center gap-1">
             <MessageSquare size={14} />
@@ -63,7 +85,12 @@ interface CommentsModalProps {
   initialCommentsCount: number;
 }
 
-const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId, initialCommentsCount }) => {
+const CommentsModal: React.FC<CommentsModalProps> = ({
+  isOpen,
+  onClose,
+  slideId,
+  initialCommentsCount,
+}) => {
   const { t } = useTranslation();
   const { user } = useUser();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -94,7 +121,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
 
   const handleLike = (id: string) => {
     // TODO: Implement like/unlike API call
-    console.log("Liking comment", id);
+    console.log('Liking comment', id);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +139,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
       });
       if (!res.ok) throw new Error('Failed to post comment');
       const data = await res.json();
-      setComments(prev => [data.comment, ...prev]);
+      setComments((prev) => [data.comment, ...prev]);
       setNewComment('');
     } catch (err: any) {
       setError(err.message);
@@ -137,18 +164,23 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
       );
     }
     if (comments.length === 0) {
-        return (
-            <div className="flex-1 flex items-center justify-center text-center text-white/60 p-4">
-                {t('noCommentsYet')}
-            </div>
-        );
+      return (
+        <div className="flex-1 flex items-center justify-center text-center text-white/60 p-4">
+          {t('noCommentsYet')}
+        </div>
+      );
     }
     return (
       <div className="flex-1 overflow-y-auto p-4">
         <AnimatePresence>
           <motion.div layout className="space-y-4">
-            {comments.map(comment => (
-              <CommentItem key={comment.id} comment={comment} onLike={handleLike} currentUserId={user?.id} />
+            {comments.map((comment) => (
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                onLike={handleLike}
+                currentUserId={user?.id}
+              />
             ))}
           </motion.div>
         </AnimatePresence>
@@ -177,8 +209,15 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex-shrink-0 relative flex items-center justify-center p-4 border-b border-white/10">
-              <h2 className="text-base font-semibold text-white">{t('commentsTitle', { count: (comments.length || initialCommentsCount).toString() })}</h2>
-              <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white">
+              <h2 className="text-base font-semibold text-white">
+                {t('commentsTitle', {
+                  count: (comments.length || initialCommentsCount).toString(),
+                })}
+              </h2>
+              <button
+                onClick={onClose}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -187,8 +226,17 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
 
             {user && (
               <div className="flex-shrink-0 p-2 border-t border-white/10 bg-black/50">
-                <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                  <Image src={user.avatar} alt={t('yourAvatar')} width={32} height={32} className="w-8 h-8 rounded-full" />
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex items-center gap-2"
+                >
+                  <Image
+                    src={user.avatar}
+                    alt={t('yourAvatar')}
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 rounded-full"
+                  />
                   <input
                     type="text"
                     value={newComment}
@@ -197,8 +245,16 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
                     className="flex-1 px-4 py-2 bg-white/10 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
                     disabled={isSubmitting}
                   />
-                  <button type="submit" className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-semibold disabled:opacity-50 flex items-center justify-center w-[80px]" disabled={!newComment.trim() || isSubmitting}>
-                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('sendButton')}
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-semibold disabled:opacity-50 flex items-center justify-center w-[80px]"
+                    disabled={!newComment.trim() || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t('sendButton')
+                    )}
                   </button>
                 </form>
               </div>

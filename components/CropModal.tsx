@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,7 +6,6 @@ import { Button } from './ui/button';
 import { X, ZoomIn, ZoomOut, Check, Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { useTranslation } from '@/context/LanguageContext';
-
 
 interface CropModalProps {
   isOpen: boolean;
@@ -17,7 +16,12 @@ interface CropModalProps {
 
 const CROP_AREA_SIZE = 200; // The size of the circular crop area
 
-const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCropComplete }) => {
+const CropModal: React.FC<CropModalProps> = ({
+  isOpen,
+  onClose,
+  imageSrc,
+  onCropComplete,
+}) => {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(new Image());
@@ -39,7 +43,10 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
         if (!ctx) return;
 
         const canvasRect = canvas.getBoundingClientRect();
-        const minScale = Math.max(canvasRect.width / img.width, canvasRect.height / img.height);
+        const minScale = Math.max(
+          canvasRect.width / img.width,
+          canvasRect.height / img.height
+        );
 
         setScale(minScale);
         setOffset({ x: 0, y: 0 });
@@ -49,15 +56,20 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
   }, [imageSrc]);
 
   useEffect(() => {
-      const canvas = canvasRef.current;
-      const img = imageRef.current;
-      if (!canvas || !img.src) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      drawCanvas(ctx, img, scale, offset);
+    const canvas = canvasRef.current;
+    const img = imageRef.current;
+    if (!canvas || !img.src) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    drawCanvas(ctx, img, scale, offset);
   }, [scale, offset]);
 
-  const drawCanvas = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, currentScale: number, currentOffset: {x: number, y: number}) => {
+  const drawCanvas = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    currentScale: number,
+    currentOffset: { x: number; y: number }
+  ) => {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const imgWidth = img.width * currentScale;
@@ -68,16 +80,16 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-      setIsDragging(true);
-      lastMousePos.current = { x: e.clientX, y: e.clientY };
+    setIsDragging(true);
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-      if (!isDragging) return;
-      const deltaX = e.clientX - lastMousePos.current.x;
-      const deltaY = e.clientY - lastMousePos.current.y;
-      lastMousePos.current = { x: e.clientX, y: e.clientY };
-      setOffset(prev => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
+    if (!isDragging) return;
+    const deltaX = e.clientX - lastMousePos.current.x;
+    const deltaY = e.clientY - lastMousePos.current.y;
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
+    setOffset((prev) => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
   };
 
   const handleMouseUp = () => setIsDragging(false);
@@ -104,20 +116,40 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
     const cropAreaDeviceSize = CROP_AREA_SIZE;
     const cropAreaSourceSize = cropAreaDeviceSize / scale;
 
-    const sourceX = (img.width / 2) - (canvasCenterX - (canvasCenterX + offset.x)) / scale - (cropAreaSourceSize / 2);
-    const sourceY = (img.height / 2) - (canvasCenterY - (canvasCenterY + offset.y)) / scale - (cropAreaSourceSize / 2);
+    const sourceX =
+      img.width / 2 -
+      (canvasCenterX - (canvasCenterX + offset.x)) / scale -
+      cropAreaSourceSize / 2;
+    const sourceY =
+      img.height / 2 -
+      (canvasCenterY - (canvasCenterY + offset.y)) / scale -
+      cropAreaSourceSize / 2;
 
-    ctx.drawImage(img, sourceX, sourceY, cropAreaSourceSize, cropAreaSourceSize, 0, 0, finalSize, finalSize);
+    ctx.drawImage(
+      img,
+      sourceX,
+      sourceY,
+      cropAreaSourceSize,
+      cropAreaSourceSize,
+      0,
+      0,
+      finalSize,
+      finalSize
+    );
 
-    outputCanvas.toBlob((blob) => {
+    outputCanvas.toBlob(
+      (blob) => {
         if (blob) {
-            onCropComplete(blob);
+          onCropComplete(blob);
         } else {
-            console.error("Canvas to Blob conversion failed.");
-            onCropComplete(null);
+          console.error('Canvas to Blob conversion failed.');
+          onCropComplete(null);
         }
         setIsSaving(false);
-    }, 'image/png', 0.9);
+      },
+      'image/png',
+      0.9
+    );
   };
 
   return (
@@ -137,8 +169,16 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
             transition={{ duration: 0.3 }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-white">{t('cropAvatarTitle')}</h3>
-              <Button variant="ghost" size="icon" onClick={onClose} disabled={isSaving} aria-label={t('closeCropModalAriaLabel')}>
+              <h3 className="text-lg font-semibold text-white">
+                {t('cropAvatarTitle')}
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                disabled={isSaving}
+                aria-label={t('closeCropModalAriaLabel')}
+              >
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -160,21 +200,48 @@ const CropModal: React.FC<CropModalProps> = ({ isOpen, onClose, imageSrc, onCrop
             </div>
 
             <div className="flex items-center gap-3 mb-5">
-              <Button variant="outline" size="icon" onClick={() => setScale(s => s * 0.9)} disabled={isSaving} aria-label={t('zoomOutAriaLabel')}><ZoomOut className="h-5 w-5" /></Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setScale((s) => s * 0.9)}
+                disabled={isSaving}
+                aria-label={t('zoomOutAriaLabel')}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </Button>
               <Input
                 type="range"
-                min={0.1} max={3} step="0.01"
+                min={0.1}
+                max={3}
+                step="0.01"
                 value={scale}
                 onChange={(e) => setScale(parseFloat(e.target.value))}
                 className="w-full"
                 disabled={isSaving}
                 aria-label={t('zoomSliderAriaLabel')}
               />
-              <Button variant="outline" size="icon" onClick={() => setScale(s => s * 1.1)} disabled={isSaving} aria-label={t('zoomInAriaLabel')}><ZoomIn className="h-5 w-5" /></Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setScale((s) => s * 1.1)}
+                disabled={isSaving}
+                aria-label={t('zoomInAriaLabel')}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </Button>
             </div>
 
-            <Button onClick={handleSave} className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold" disabled={isSaving} aria-label={t('saveAvatarAriaLabel')}>
-              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+            <Button
+              onClick={handleSave}
+              className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold"
+              disabled={isSaving}
+              aria-label={t('saveAvatarAriaLabel')}
+            >
+              {isSaving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-2 h-4 w-4" />
+              )}
               {isSaving ? t('saving') : t('saveAvatarButton')}
             </Button>
           </motion.div>

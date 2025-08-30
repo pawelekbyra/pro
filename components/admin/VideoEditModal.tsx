@@ -60,46 +60,122 @@ export default function VideoEditModal({
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-full overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Video' : 'Create New Video'}</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {isEditing ? 'Edit Video' : 'Create New Video'}
+        </h2>
         <form ref={formRef} action={handleFormAction}>
           {isEditing && <input type="hidden" name="slideId" value={video.id} />}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="mb-4">
-              <label htmlFor="user" className="block text-sm font-medium text-gray-300 mb-1">Uploader Name</label>
-              <input type="text" id="user" name="user" defaultValue={video?.user || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+              <label
+                htmlFor="user"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
+                Uploader Name
+              </label>
+              <input
+                type="text"
+                id="user"
+                name="user"
+                defaultValue={video?.user || ''}
+                required
+                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+              />
             </div>
             <div className="mb-4">
-              <label htmlFor="avatar" className="block text-sm font-medium text-gray-300 mb-1">Uploader Avatar URL</label>
-              <input type="url" id="avatar" name="avatar" defaultValue={video?.avatar || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+              <label
+                htmlFor="avatar"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
+                Uploader Avatar URL
+              </label>
+              <input
+                type="url"
+                id="avatar"
+                name="avatar"
+                defaultValue={video?.avatar || ''}
+                required
+                className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+              />
             </div>
           </div>
 
           <div className="mb-4">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">Description</label>
-            <textarea id="description" name="description" defaultValue={video?.description || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" rows={3} />
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              defaultValue={video?.description || ''}
+              required
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+              rows={3}
+            />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="mp4Url" className="block text-sm font-medium text-gray-300 mb-1">MP4 URL</label>
-            <input type="url" id="mp4Url" name="mp4Url" defaultValue={video?.mp4Url || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+            <label
+              htmlFor="mp4Url"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              MP4 URL
+            </label>
+            <input
+              type="url"
+              id="mp4Url"
+              name="mp4Url"
+              defaultValue={video?.mp4Url || ''}
+              required
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+            />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="poster" className="block text-sm font-medium text-gray-300 mb-1">Poster Image URL</label>
-            <input type="url" id="poster" name="poster" defaultValue={video?.poster || ''} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+            <label
+              htmlFor="poster"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Poster Image URL
+            </label>
+            <input
+              type="url"
+              id="poster"
+              name="poster"
+              defaultValue={video?.poster || ''}
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+            />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="access" className="block text-sm font-medium text-gray-300 mb-1">Access</label>
-            <select id="access" name="access" defaultValue={video?.access || 'public'} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white">
+            <label
+              htmlFor="access"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Access
+            </label>
+            <select
+              id="access"
+              name="access"
+              defaultValue={video?.access || 'public'}
+              required
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white"
+            >
               <option value="public">Public</option>
               <option value="secret">Secret</option>
             </select>
           </div>
 
           <div className="flex justify-end gap-4 mt-6">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-500 text-white">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-500 text-white"
+            >
               Cancel
             </button>
             <SubmitButton isEditing={isEditing} />

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { UserProvider } from '@/context/UserContext';
 import { LanguageProvider } from '@/context/LanguageContext';
@@ -9,9 +9,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <LanguageProvider>
       <UserProvider>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <ToastProvider>{children}</ToastProvider>
       </UserProvider>
     </LanguageProvider>
   );

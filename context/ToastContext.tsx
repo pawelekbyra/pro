@@ -1,6 +1,12 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
 
@@ -51,7 +57,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="fixed top-0 inset-x-0 z-[100] flex flex-col items-center gap-2 pointer-events-none" style={{ paddingTop: 'calc(var(--topbar-height) + 20px)' }}>
+      <div
+        className="fixed top-0 inset-x-0 z-[100] flex flex-col items-center gap-2 pointer-events-none"
+        style={{ paddingTop: 'calc(var(--topbar-height) + 20px)' }}
+      >
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -63,9 +72,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className="pointer-events-auto"
             >
-              <div
-                className="flex items-center gap-3 bg-black/80 backdrop-blur-md text-white shadow-lg rounded-full py-2 px-4"
-              >
+              <div className="flex items-center gap-3 bg-black/80 backdrop-blur-md text-white shadow-lg rounded-full py-2 px-4">
                 {ToastIcons[toast.type]}
                 <span className="text-sm font-medium">{toast.message}</span>
               </div>

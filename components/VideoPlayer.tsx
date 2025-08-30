@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useHls } from '@/lib/useHls';
@@ -15,7 +15,15 @@ interface VideoPlayerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, likeId, videoRef }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  hlsSrc,
+  mp4Src,
+  poster,
+  isActive,
+  isSecretActive,
+  likeId,
+  videoRef,
+}) => {
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -49,7 +57,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     if (!video) return;
 
     if (isActive) {
-      video.play().catch(error => console.error("Autoplay was prevented:", error));
+      video
+        .play()
+        .catch((error) => console.error('Autoplay was prevented:', error));
     } else {
       video.pause();
       video.currentTime = 0;
@@ -61,21 +71,23 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     return () => {
       video.removeEventListener('play', updatePlayingState);
       video.removeEventListener('pause', updatePlayingState);
-    }
+    };
   }, [isActive, videoRef]);
 
   const triggerLikeAnimation = () => {
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
     // Find the actual like button and click it
-    const likeButton = document.querySelector(`[data-like-id="${likeId}"]`) as HTMLButtonElement;
+    const likeButton = document.querySelector(
+      `[data-like-id="${likeId}"]`
+    ) as HTMLButtonElement;
     likeButton?.click();
   };
 
   const triggerPauseAnimation = () => {
     setShowPause(true);
     setTimeout(() => setShowPause(false), 500);
-  }
+  };
 
   // FIX #5 & #6: Single and Double Tap Gesture Logic
   const handleVideoClick = () => {
@@ -141,10 +153,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
             className="absolute left-0 w-full flex items-center justify-center pointer-events-none"
             style={{
               top: 'var(--topbar-height)',
-              height: 'calc(100% - var(--topbar-height) - var(--bottombar-height))'
+              height:
+                'calc(100% - var(--topbar-height) - var(--bottombar-height))',
             }}
           >
-            <Pause size={60} className="text-white/80 fill-white/30 drop-shadow-lg" />
+            <Pause
+              size={60}
+              className="text-white/80 fill-white/30 drop-shadow-lg"
+            />
           </motion.div>
         )}
       </AnimatePresence>

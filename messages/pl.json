@@ -1,0 +1,24 @@
+{
+  "LoginForm": {
+    "usernamePlaceholder": "Nazwa użytkownika",
+    "passwordPlaceholder": "Hasło",
+    "loginButton": "WEJDŹ",
+    "loadingButton": "Logowanie...",
+    "unknownError": "Wystąpił nieznany błąd."
+  },
+  "TopBar": {
+    "loading": "Ładowanie...",
+    "loggedInWelcome": "Witaj, {name}!",
+    "loggedOutText": "Kliknij, aby się zalogować",
+    "menuAccessAlert": "Musisz być zalogowany, aby uzyskać dostęp do menu.",
+    "account": "Moje konto",
+    "adminPanel": "Panel admina",
+    "logout": "Wyloguj się"
+  },
+  "BottomBar": {
+    "games": "Gierki",
+    "monster": "Monsta",
+    "robot": "Robert",
+    "tip": "Napiwek"
+  }
+}

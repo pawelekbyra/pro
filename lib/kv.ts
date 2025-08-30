@@ -1,7 +1,7 @@
-import { createClient } from "@vercel/kv";
+import { createClient } from '@vercel/kv';
 
 if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) {
-  throw new Error("Missing Vercel KV REST API environment variables");
+  throw new Error('Missing Vercel KV REST API environment variables');
 }
 
 export const kv = createClient({

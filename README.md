@@ -1,4 +1,5 @@
 # pro
+
 ting tong professional
 
 ## Wdrożenie na Vercel
@@ -11,17 +12,17 @@ Przed wdrożeniem, musisz skonfigurować następujące zmienne środowiskowe w u
 
 #### Klucz JWT
 
--   `JWT_SECRET`: Tajny klucz do podpisywania tokenów autoryzacyjnych. Możesz wygenerować bezpieczny klucz za pomocą poniższej komendy:
-    ```bash
-    openssl rand -hex 32
-    ```
+- `JWT_SECRET`: Tajny klucz do podpisywania tokenów autoryzacyjnych. Możesz wygenerować bezpieczny klucz za pomocą poniższej komendy:
+  ```bash
+  openssl rand -hex 32
+  ```
 
 #### Baza danych Vercel KV
 
 Aplikacja używa **Vercel KV** jako bazy danych do przechowywania wszystkich danych, w tym użytkowników, filmów i interakcji. Aby połączyć się z bazą danych, musisz utworzyć nową bazę Vercel KV w panelu Vercel i dodać następujące zmienne środowiskowe do swojego projektu:
 
--   `KV_REST_API_URL`: Adres URL Twojej bazy danych KV.
--   `KV_REST_API_TOKEN`: Token dostępowy do Twojej bazy danych KV.
+- `KV_REST_API_URL`: Adres URL Twojej bazy danych KV.
+- `KV_REST_API_TOKEN`: Token dostępowy do Twojej bazy danych KV.
 
 Po ustawieniu powyższych zmiennych, aplikacja będzie w pełni funkcjonalna i gotowa do wdrożenia.
 

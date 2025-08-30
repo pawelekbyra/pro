@@ -1,0 +1,24 @@
+{
+  "LoginForm": {
+    "usernamePlaceholder": "Username",
+    "passwordPlaceholder": "Password",
+    "loginButton": "Enter",
+    "loadingButton": "Logging in...",
+    "unknownError": "An unknown error occurred."
+  },
+  "TopBar": {
+    "loading": "Loading...",
+    "loggedInWelcome": "Welcome, {name}!",
+    "loggedOutText": "Click here to log in",
+    "menuAccessAlert": "You must be logged in to access the menu.",
+    "account": "My Account",
+    "adminPanel": "Admin Panel",
+    "logout": "Log Out"
+  },
+  "BottomBar": {
+    "games": "Games",
+    "monster": "Monster",
+    "robot": "Robot",
+    "tip": "Tip"
+  }
+}

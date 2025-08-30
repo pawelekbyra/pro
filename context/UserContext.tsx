@@ -1,6 +1,12 @@
-"use client";
+'use client';
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { User } from '@/lib/db';
 
 interface UserContextType {
@@ -34,7 +40,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       }
     } catch (error) {
-      console.error("Failed to check user status", error);
+      console.error('Failed to check user status', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -47,24 +53,24 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (loginData: any) => {
     const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginData),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(loginData),
     });
     const data = await res.json();
     if (data.success) {
-        setUser(data.user);
+      setUser(data.user);
     } else {
-        throw new Error(data.message || 'Login failed');
+      throw new Error(data.message || 'Login failed');
     }
   };
 
   const logout = async () => {
     const res = await fetch('/api/logout', { method: 'POST' });
     if (res.ok) {
-        setUser(null);
+      setUser(null);
     } else {
-        console.error("Logout failed");
+      console.error('Logout failed');
     }
   };
 
@@ -77,11 +83,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     checkUserStatus,
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {

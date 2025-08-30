@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
@@ -12,11 +12,16 @@ const DeleteTab: React.FC = () => {
   const DELETE_CONFIRM_TEXT = t('deleteAccountConfirmText');
 
   const [confirmation, setConfirmation] = useState('');
-  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [status, setStatus] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { logout } = useUser();
 
-  const handleDeleteSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleDeleteSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     if (confirmation !== DELETE_CONFIRM_TEXT) {
       setStatus({ type: 'error', message: t('deleteAccountConfirmError') });
@@ -52,16 +57,23 @@ const DeleteTab: React.FC = () => {
   return (
     <div className="tab-pane active p-4" id="delete-tab">
       <div className="profile-section bg-white/5 border border-white/10 rounded-xl p-5">
-        <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3"><span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>{t('deleteAccountTitle')}</h3>
+        <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3">
+          <span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>
+          {t('deleteAccountTitle')}
+        </h3>
         <div className="bg-red-900/50 border border-red-700 rounded-lg p-4 mb-6">
-          <h4 className="text-red-400 font-bold mb-3 text-base">{t('warningTitle')}</h4>
+          <h4 className="text-red-400 font-bold mb-3 text-base">
+            {t('warningTitle')}
+          </h4>
           <p className="text-white/80 text-sm leading-relaxed">
             {t('deleteAccountWarning')}
           </p>
         </div>
         <form id="deleteForm" onSubmit={handleDeleteSubmit}>
           <div className="form-group mb-4">
-            <label className="form-label text-sm font-medium mb-2 block">{t('deleteAccountPrompt')} <strong>{DELETE_CONFIRM_TEXT}</strong></label>
+            <label className="form-label text-sm font-medium mb-2 block">
+              {t('deleteAccountPrompt')} <strong>{DELETE_CONFIRM_TEXT}</strong>
+            </label>
             <Input
               type="text"
               placeholder={DELETE_CONFIRM_TEXT}
@@ -79,11 +91,15 @@ const DeleteTab: React.FC = () => {
             className="w-full mt-4"
             disabled={confirmation !== DELETE_CONFIRM_TEXT || isSaving}
           >
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             {isSaving ? t('deleting') : t('deleteAccountButton')}
           </Button>
           {status && (
-            <div className={`mt-4 text-sm p-3 rounded-md ${status.type === 'success' ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`}>
+            <div
+              className={`mt-4 text-sm p-3 rounded-md ${status.type === 'success' ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`}
+            >
               {status.message}
             </div>
           )}

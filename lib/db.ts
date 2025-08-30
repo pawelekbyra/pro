@@ -34,7 +34,7 @@ export interface Like {
 }
 
 export interface Comment {
-  id:string;
+  id: string;
   slideId: string;
   userId: string;
   text: string;
@@ -53,17 +53,19 @@ export interface DbData {
 
 export const db = {
   async findUserByEmail(email: string): Promise<User | undefined> {
-    const users = await kv.get<User[]>('users') ?? [];
-    return users.find(user => user.email.toLowerCase() === email.toLowerCase());
+    const users = (await kv.get<User[]>('users')) ?? [];
+    return users.find(
+      (user) => user.email.toLowerCase() === email.toLowerCase()
+    );
   },
 
   async findUserById(id: string): Promise<User | undefined> {
-    const users = await kv.get<User[]>('users') ?? [];
-    return users.find(user => user.id === id);
+    const users = (await kv.get<User[]>('users')) ?? [];
+    return users.find((user) => user.id === id);
   },
 
   async getAllUsers(): Promise<User[]> {
-    return await kv.get<User[]>('users') ?? [];
+    return (await kv.get<User[]>('users')) ?? [];
   },
 
   async getSlides(userId?: string) {
@@ -75,12 +77,16 @@ export const db = {
     const safeSlides = slides ?? [];
     const safeLikes = likes ?? [];
 
-    const slidesWithDynamicData = safeSlides.map(slide => {
-      const likesForSlide = safeLikes.filter(like => like.slideId === slide.likeId);
+    const slidesWithDynamicData = safeSlides.map((slide) => {
+      const likesForSlide = safeLikes.filter(
+        (like) => like.slideId === slide.likeId
+      );
       return {
         ...slide,
         initialLikes: likesForSlide.length,
-        isLiked: userId ? safeLikes.some(like => like.userId === userId) : false,
+        isLiked: userId
+          ? safeLikes.some((like) => like.userId === userId)
+          : false,
         initialComments: 0,
       };
     });
@@ -89,15 +95,20 @@ export const db = {
   },
 
   async isEmailInUse(email: string, excludeUserId?: string): Promise<boolean> {
-    const users = await kv.get<User[]>('users') ?? [];
-    return users.some(user =>
-      user.email.toLowerCase() === email.toLowerCase() && user.id !== excludeUserId
+    const users = (await kv.get<User[]>('users')) ?? [];
+    return users.some(
+      (user) =>
+        user.email.toLowerCase() === email.toLowerCase() &&
+        user.id !== excludeUserId
     );
   },
 
-  async updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
-    const users = await kv.get<User[]>('users') ?? [];
-    const userIndex = users.findIndex(u => u.id === userId);
+  async updateUser(
+    userId: string,
+    updates: Partial<User>
+  ): Promise<User | null> {
+    const users = (await kv.get<User[]>('users')) ?? [];
+    const userIndex = users.findIndex((u) => u.id === userId);
 
     if (userIndex === -1) {
       return null;
@@ -113,9 +124,12 @@ export const db = {
     return updatedUser;
   },
 
-  async updateUserPassword(userId: string, newPasswordHash: string): Promise<boolean> {
-    const users = await kv.get<User[]>('users') ?? [];
-    const userIndex = users.findIndex(u => u.id === userId);
+  async updateUserPassword(
+    userId: string,
+    newPasswordHash: string
+  ): Promise<boolean> {
+    const users = (await kv.get<User[]>('users')) ?? [];
+    const userIndex = users.findIndex((u) => u.id === userId);
 
     if (userIndex === -1) {
       return false;
@@ -137,12 +151,12 @@ export const db = {
     const safeLikes = likes ?? [];
     const safeComments = comments ?? [];
 
-    const userIndex = safeUsers.findIndex(u => u.id === userId);
+    const userIndex = safeUsers.findIndex((u) => u.id === userId);
     if (userIndex === -1) return false;
 
-    const newUsers = safeUsers.filter(u => u.id !== userId);
-    const newLikes = safeLikes.filter(l => l.userId !== userId);
-    const newComments = safeComments.filter(c => c.userId !== userId);
+    const newUsers = safeUsers.filter((u) => u.id !== userId);
+    const newLikes = safeLikes.filter((l) => l.userId !== userId);
+    const newComments = safeComments.filter((c) => c.userId !== userId);
 
     const tx = kv.multi();
     tx.set('users', newUsers);
@@ -155,23 +169,23 @@ export const db = {
 
   async deleteSlide(slideId: string): Promise<boolean> {
     const [slides, likes, comments] = await Promise.all([
-        kv.get<Slide[]>('slides'),
-        kv.get<Like[]>('likes'),
-        kv.get<Comment[]>('comments'),
+      kv.get<Slide[]>('slides'),
+      kv.get<Like[]>('likes'),
+      kv.get<Comment[]>('comments'),
     ]);
 
     const safeSlides = slides ?? [];
     const safeLikes = likes ?? [];
     const safeComments = comments ?? [];
 
-    const slideIndex = safeSlides.findIndex(s => s.id === slideId);
+    const slideIndex = safeSlides.findIndex((s) => s.id === slideId);
     if (slideIndex === -1) return false;
 
     const slideLikeId = safeSlides[slideIndex].likeId;
 
-    const newSlides = safeSlides.filter(s => s.id !== slideId);
-    const newLikes = safeLikes.filter(l => l.slideId !== slideLikeId);
-    const newComments = safeComments.filter(c => c.slideId !== slideId);
+    const newSlides = safeSlides.filter((s) => s.id !== slideId);
+    const newLikes = safeLikes.filter((l) => l.slideId !== slideLikeId);
+    const newComments = safeComments.filter((c) => c.slideId !== slideId);
 
     const tx = kv.multi();
     tx.set('slides', newSlides);
@@ -183,8 +197,11 @@ export const db = {
   },
 
   async createSlide(slideData: Omit<Slide, 'id' | 'likeId'>): Promise<Slide> {
-    const slides = await kv.get<Slide[]>('slides') ?? [];
-    const maxLikeId = slides.reduce((max, s) => Math.max(max, parseInt(s.likeId, 10) || 0), 0);
+    const slides = (await kv.get<Slide[]>('slides')) ?? [];
+    const maxLikeId = slides.reduce(
+      (max, s) => Math.max(max, parseInt(s.likeId, 10) || 0),
+      0
+    );
     const newSlide: Slide = {
       ...slideData,
       id: `slide-${crypto.randomUUID()}`,
@@ -195,9 +212,12 @@ export const db = {
     return newSlide;
   },
 
-  async updateSlide(slideId: string, updates: Partial<Omit<Slide, 'id' | 'likeId'>>): Promise<Slide | null> {
-    const slides = await kv.get<Slide[]>('slides') ?? [];
-    const slideIndex = slides.findIndex(s => s.id === slideId);
+  async updateSlide(
+    slideId: string,
+    updates: Partial<Omit<Slide, 'id' | 'likeId'>>
+  ): Promise<Slide | null> {
+    const slides = (await kv.get<Slide[]>('slides')) ?? [];
+    const slideIndex = slides.findIndex((s) => s.id === slideId);
 
     if (slideIndex === -1) {
       return null;
@@ -210,9 +230,14 @@ export const db = {
     return updatedSlide;
   },
 
-  async toggleLike(slideId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked', likeCount: number }> {
-    const likes = await kv.get<Like[]>('likes') ?? [];
-    const likeIndex = likes.findIndex(like => like.slideId === slideId && like.userId === userId);
+  async toggleLike(
+    slideId: string,
+    userId: string
+  ): Promise<{ newStatus: 'liked' | 'unliked'; likeCount: number }> {
+    const likes = (await kv.get<Like[]>('likes')) ?? [];
+    const likeIndex = likes.findIndex(
+      (like) => like.slideId === slideId && like.userId === userId
+    );
 
     if (likeIndex > -1) {
       likes.splice(likeIndex, 1);
@@ -221,17 +246,18 @@ export const db = {
     }
 
     await kv.set('likes', likes);
-    const likeCount = likes.filter(l => l.slideId === slideId).length;
+    const likeCount = likes.filter((l) => l.slideId === slideId).length;
     return { newStatus: likeIndex > -1 ? 'unliked' : 'liked', likeCount };
   },
 
   async incrementSessionVersion(userId: string): Promise<boolean> {
-    const users = await kv.get<User[]>('users') ?? [];
-    const userIndex = users.findIndex(u => u.id === userId);
+    const users = (await kv.get<User[]>('users')) ?? [];
+    const userIndex = users.findIndex((u) => u.id === userId);
 
     if (userIndex === -1) return false;
 
-    users[userIndex].sessionVersion = (users[userIndex].sessionVersion || 1) + 1;
+    users[userIndex].sessionVersion =
+      (users[userIndex].sessionVersion || 1) + 1;
     await kv.set('users', users);
     return true;
   },
@@ -245,29 +271,34 @@ export const db = {
     const safeComments = comments ?? [];
     const safeUsers = users ?? [];
 
-    const commentsForSlide = safeComments.filter(c => c.slideId === slideId);
+    const commentsForSlide = safeComments.filter((c) => c.slideId === slideId);
 
-    const commentsWithUserInfo = commentsForSlide.map(comment => {
-      const user = safeUsers.find(u => u.id === comment.userId);
+    const commentsWithUserInfo = commentsForSlide.map((comment) => {
+      const user = safeUsers.find((u) => u.id === comment.userId);
       return {
         ...comment,
-        user: user ? { displayName: user.displayName, avatar: user.avatar } : { displayName: 'Unknown User', avatar: '' }
+        user: user
+          ? { displayName: user.displayName, avatar: user.avatar }
+          : { displayName: 'Unknown User', avatar: '' },
       };
     });
 
-    return commentsWithUserInfo.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return commentsWithUserInfo.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   },
 
   async addComment(slideId: string, userId: string, text: string) {
     const [comments, users] = await Promise.all([
-        kv.get<Comment[]>('comments'),
-        kv.get<User[]>('users'),
+      kv.get<Comment[]>('comments'),
+      kv.get<User[]>('users'),
     ]);
 
     const safeComments = comments ?? [];
     const safeUsers = users ?? [];
 
-    const user = safeUsers.find(u => u.id === userId);
+    const user = safeUsers.find((u) => u.id === userId);
     if (!user) {
       throw new Error('User not found to add comment.');
     }
@@ -289,7 +320,7 @@ export const db = {
       user: {
         displayName: user.displayName,
         avatar: user.avatar,
-      }
+      },
     };
-  }
+  },
 };

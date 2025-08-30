@@ -13,7 +13,12 @@ async function seed() {
     const data = JSON.parse(fileContents) as DbData;
 
     // Ensure all keys are present, providing defaults if necessary
-    const requiredKeys: (keyof DbData)[] = ['users', 'slides', 'likes', 'comments'];
+    const requiredKeys: (keyof DbData)[] = [
+      'users',
+      'slides',
+      'likes',
+      'comments',
+    ];
     for (const key of requiredKeys) {
       if (!data[key]) {
         (data as any)[key] = [];
@@ -30,13 +35,14 @@ async function seed() {
       kv.set('comments', data.comments),
     ]);
 
-    console.log('Successfully seeded Vercel KV with the following keys: users, slides, likes, comments.');
+    console.log(
+      'Successfully seeded Vercel KV with the following keys: users, slides, likes, comments.'
+    );
     console.log(`- ${data.users.length} users`);
     console.log(`- ${data.slides.length} slides`);
     console.log(`- ${data.likes.length} likes`);
     console.log(`- ${data.comments.length} comments`);
     console.log('Seeding complete! ✅');
-
   } catch (error) {
     console.error('Error during seeding:', error);
     process.exit(1);

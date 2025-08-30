@@ -1,0 +1,18 @@
+# Dependencies
+/node_modules
+
+# Next.js build output
+/.next/
+
+# Test coverage
+/coverage/
+
+# Log files
+*.log
+
+# Lockfiles
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env.local

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -58,7 +58,10 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-sm">
                   {t('infoModalBodyTip') || 'Enjoying the app? Leave a tip...'}
                 </p>
-                <button onClick={handleShowTipJar} className="mt-3 bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-pink-600">
+                <button
+                  onClick={handleShowTipJar}
+                  className="mt-3 bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-pink-600"
+                >
                   {t('tipText') || 'Tip'}
                 </button>
               </div>

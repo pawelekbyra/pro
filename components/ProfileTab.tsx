@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
@@ -14,14 +14,19 @@ const ProfileTab: React.FC = () => {
   const { user: profile, checkUserStatus } = useUser();
   const { t, setLanguage, lang } = useTranslation();
   const [emailConsent, setEmailConsent] = useState(true);
-  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [status, setStatus] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleProfileSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     setIsSubmitting(true);
     setStatus(null);
@@ -43,7 +48,6 @@ const ProfileTab: React.FC = () => {
 
       setStatus({ type: 'success', message: t('profileUpdateSuccess') });
       await checkUserStatus();
-
     } catch (error: any) {
       setStatus({ type: 'error', message: error.message });
     } finally {
@@ -108,89 +112,169 @@ const ProfileTab: React.FC = () => {
     <>
       <div className="tab-pane active p-4" id="profile-tab">
         {status && (
-          <div className={`p-3 rounded-md mb-4 text-sm ${status.type === 'success' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+          <div
+            className={`p-3 rounded-md mb-4 text-sm ${status.type === 'success' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}
+          >
             {status.message}
           </div>
         )}
 
         <div className="avatar-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4 flex flex-col items-center text-center">
-            <div className="relative w-20 h-20 mb-3">
-                <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg">
-                    <Image src={profile.avatar} alt={t('avatarAlt')} width={80} height={80} className="w-full h-full object-cover" id="userAvatar" />
-                </div>
-                <button onClick={handleAvatarEditClick} className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 bg-pink-600 border-2 border-[#2d2d2d] rounded-full text-white text-lg font-bold flex items-center justify-center" id="avatarEditBtn" title={t('changeAvatarTitle')}>
-                    +
-                </button>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    accept="image/png, image/jpeg, image/webp"
-                />
+          <div className="relative w-20 h-20 mb-3">
+            <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg">
+              <Image
+                src={profile.avatar}
+                alt={t('avatarAlt')}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                id="userAvatar"
+              />
             </div>
-            <div className="flex flex-col items-center gap-1">
-                <h3 className="text-lg font-bold" id="displayName">{profile.displayName}</h3>
-                <p className="text-sm text-white/60" id="userEmail">{profile.email}</p>
-                <div className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-bold shadow-md mt-1">
-                    <Crown size={14} />
-                    <span>{t('patronTier')}</span>
-                </div>
+            <button
+              onClick={handleAvatarEditClick}
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 bg-pink-600 border-2 border-[#2d2d2d] rounded-full text-white text-lg font-bold flex items-center justify-center"
+              id="avatarEditBtn"
+              title={t('changeAvatarTitle')}
+            >
+              +
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+              accept="image/png, image/jpeg, image/webp"
+            />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <h3 className="text-lg font-bold" id="displayName">
+              {profile.displayName}
+            </h3>
+            <p className="text-sm text-white/60" id="userEmail">
+              {profile.email}
+            </p>
+            <div className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-3 py-1 rounded-full text-xs font-bold shadow-md mt-1">
+              <Crown size={14} />
+              <span>{t('patronTier')}</span>
             </div>
+          </div>
         </div>
 
         <div className="form-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4">
-          <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3"><span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>{t('personalData')}</h3>
+          <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3">
+            <span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>
+            {t('personalData')}
+          </h3>
           <form id="profileForm" onSubmit={handleProfileSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="form-group">
-                <label className="form-label text-sm font-medium mb-2 block">{t('firstName')}</label>
-                <Input type="text" name="firstName" defaultValue={profile.firstName} placeholder={t('firstNamePlaceholder')} disabled={isSubmitting} />
+                <label className="form-label text-sm font-medium mb-2 block">
+                  {t('firstName')}
+                </label>
+                <Input
+                  type="text"
+                  name="firstName"
+                  defaultValue={profile.firstName}
+                  placeholder={t('firstNamePlaceholder')}
+                  disabled={isSubmitting}
+                />
               </div>
               <div className="form-group">
-                <label className="form-label text-sm font-medium mb-2 block">{t('lastName')}</label>
-                <Input type="text" name="lastName" defaultValue={profile.lastName} placeholder={t('lastNamePlaceholder')} disabled={isSubmitting} />
+                <label className="form-label text-sm font-medium mb-2 block">
+                  {t('lastName')}
+                </label>
+                <Input
+                  type="text"
+                  name="lastName"
+                  defaultValue={profile.lastName}
+                  placeholder={t('lastNamePlaceholder')}
+                  disabled={isSubmitting}
+                />
               </div>
             </div>
             <div className="form-group mb-4">
-              <label className="form-label text-sm font-medium mb-2 block">{t('email')}</label>
-              <Input type="email" name="email" defaultValue={profile.email} placeholder={t('emailPlaceholder')} disabled={isSubmitting} />
+              <label className="form-label text-sm font-medium mb-2 block">
+                {t('email')}
+              </label>
+              <Input
+                type="email"
+                name="email"
+                defaultValue={profile.email}
+                placeholder={t('emailPlaceholder')}
+                disabled={isSubmitting}
+              />
             </div>
-            <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full bg-pink-600 hover:bg-pink-700"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? t('saving') : t('saveChanges')}
             </Button>
           </form>
         </div>
 
         <div className="settings-section bg-white/5 border border-white/10 rounded-xl p-5">
-          <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3"><span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>{t('settings')}</h3>
-          <form onSubmit={(e) => {
+          <h3 className="section-title text-lg font-bold mb-5 flex items-center gap-3">
+            <span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>
+            {t('settings')}
+          </h3>
+          <form
+            onSubmit={(e) => {
               e.preventDefault();
               setIsSubmitting(true);
               setStatus(null);
               setTimeout(() => {
                 try {
                   console.log('Saving settings:', { emailConsent, lang });
-                  setStatus({ type: 'success', message: t('settingsSaveSuccess') });
+                  setStatus({
+                    type: 'success',
+                    message: t('settingsSaveSuccess'),
+                  });
                 } catch (error: any) {
                   setStatus({ type: 'error', message: error.message });
                 } finally {
                   setIsSubmitting(false);
                 }
               }, 1000);
-          }}>
+            }}
+          >
             <div className="flex items-center justify-between mb-4">
               <label className="form-label text-sm">{t('emailConsent')}</label>
-              <ToggleSwitch isActive={emailConsent} onToggle={() => setEmailConsent(p => !p)} />
+              <ToggleSwitch
+                isActive={emailConsent}
+                onToggle={() => setEmailConsent((p) => !p)}
+              />
             </div>
             <div className="form-group">
-                <label className="form-label text-sm font-medium mb-2 block">{t('emailLanguage')}</label>
-                <div className="flex gap-2">
-                    <Button type="button" variant={lang === 'pl' ? 'secondary' : 'outline'} onClick={() => setLanguage('pl')} className="flex-1">{t('polish')}</Button>
-                    <Button type="button" variant={lang === 'en' ? 'secondary' : 'outline'} onClick={() => setLanguage('en')} className="flex-1">{t('english')}</Button>
-                </div>
+              <label className="form-label text-sm font-medium mb-2 block">
+                {t('emailLanguage')}
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={lang === 'pl' ? 'secondary' : 'outline'}
+                  onClick={() => setLanguage('pl')}
+                  className="flex-1"
+                >
+                  {t('polish')}
+                </Button>
+                <Button
+                  type="button"
+                  variant={lang === 'en' ? 'secondary' : 'outline'}
+                  onClick={() => setLanguage('en')}
+                  className="flex-1"
+                >
+                  {t('english')}
+                </Button>
+              </div>
             </div>
-            <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700 mt-4" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full bg-pink-600 hover:bg-pink-700 mt-4"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? t('saving') : t('saveSettings')}
             </Button>
           </form>
@@ -199,10 +283,10 @@ const ProfileTab: React.FC = () => {
 
       {isCropModalOpen && (
         <CropModal
-            isOpen={isCropModalOpen}
-            onClose={() => setIsCropModalOpen(false)}
-            imageSrc={imageToCrop}
-            onCropComplete={handleCropComplete}
+          isOpen={isCropModalOpen}
+          onClose={() => setIsCropModalOpen(false)}
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
         />
       )}
     </>

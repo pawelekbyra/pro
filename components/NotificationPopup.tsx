@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,12 +6,36 @@ import { X, Bell, Mail, User, Tag, ChevronDown } from 'lucide-react';
 
 // Enhanced mock data with full details and types
 const mockNotificationsData = [
-  { id: 1, type: 'message' as const, preview: 'New message from Admin', time: '2 mins ago', full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', unread: true, expanded: false },
-  { id: 2, type: 'profile' as const, preview: 'Your profile has been updated', time: '10 mins ago', full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', unread: true, expanded: false },
-  { id: 3, type: 'offer' as const, preview: 'A special offer is waiting for you!', time: '1 hour ago', full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', unread: false, expanded: false },
+  {
+    id: 1,
+    type: 'message' as const,
+    preview: 'New message from Admin',
+    time: '2 mins ago',
+    full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!',
+    unread: true,
+    expanded: false,
+  },
+  {
+    id: 2,
+    type: 'profile' as const,
+    preview: 'Your profile has been updated',
+    time: '10 mins ago',
+    full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.',
+    unread: true,
+    expanded: false,
+  },
+  {
+    id: 3,
+    type: 'offer' as const,
+    preview: 'A special offer is waiting for you!',
+    time: '1 hour ago',
+    full: "Don't miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.",
+    unread: false,
+    expanded: false,
+  },
 ];
 
-type Notification = typeof mockNotificationsData[0];
+type Notification = (typeof mockNotificationsData)[0];
 
 const iconMap = {
   message: <Mail size={24} className="text-white/80" />,
@@ -20,7 +44,10 @@ const iconMap = {
 };
 
 // Sub-component for a single notification item
-const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: number) => void }> = ({ notification, onToggle }) => {
+const NotificationItem: React.FC<{
+  notification: Notification;
+  onToggle: (id: number) => void;
+}> = ({ notification, onToggle }) => {
   return (
     <motion.li
       layout
@@ -34,12 +61,21 @@ const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: nu
         <div className="notif-icon">{iconMap[notification.type]}</div>
         <div className="flex-1 flex justify-between items-center">
           <div className="flex flex-col">
-            <span className={`text-sm ${notification.unread ? 'font-semibold' : 'font-normal'}`}>{notification.preview}</span>
+            <span
+              className={`text-sm ${notification.unread ? 'font-semibold' : 'font-normal'}`}
+            >
+              {notification.preview}
+            </span>
             <span className="text-xs text-white/60">{notification.time}</span>
           </div>
           <div className="flex items-center gap-2">
-            {notification.unread && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
-            <ChevronDown size={16} className={`text-white/60 transition-transform ${notification.expanded ? 'rotate-180' : ''}`} />
+            {notification.unread && (
+              <div className="w-2 h-2 bg-pink-500 rounded-full" />
+            )}
+            <ChevronDown
+              size={16}
+              className={`text-white/60 transition-transform ${notification.expanded ? 'rotate-180' : ''}`}
+            />
           </div>
         </div>
       </div>
@@ -67,12 +103,17 @@ interface NotificationPopupProps {
   onClose: () => void;
 }
 
-const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotificationsData);
+const NotificationPopup: React.FC<NotificationPopupProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const [notifications, setNotifications] = useState<Notification[]>(
+    mockNotificationsData
+  );
 
   const handleToggle = (id: number) => {
     setNotifications(
-      notifications.map(n =>
+      notifications.map((n) =>
         n.id === id ? { ...n, expanded: !n.expanded, unread: false } : n
       )
     );
@@ -95,7 +136,10 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
         >
           <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
             <h3 className="font-semibold text-base">Powiadomienia</h3>
-            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+            <button
+              onClick={onClose}
+              className="text-white/70 hover:text-white transition-colors"
+            >
               <X size={20} />
             </button>
           </div>
@@ -103,7 +147,11 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
             {notifications.length > 0 ? (
               <AnimatePresence>
                 {notifications.map((notif) => (
-                  <NotificationItem key={notif.id} notification={notif} onToggle={handleToggle} />
+                  <NotificationItem
+                    key={notif.id}
+                    notification={notif}
+                    onToggle={handleToggle}
+                  />
                 ))}
               </AnimatePresence>
             ) : (

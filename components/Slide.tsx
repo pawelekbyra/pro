@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useRef } from 'react';
 import { useUser } from '@/context/UserContext';
@@ -33,7 +33,14 @@ interface SlideProps {
   openInfoModal: () => void;
 }
 
-const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal }) => {
+const Slide: React.FC<SlideProps> = ({
+  slide,
+  isActive,
+  setIsModalOpen,
+  openAccountPanel,
+  openCommentsModal,
+  openInfoModal,
+}) => {
   const { isLoggedIn, isLoading } = useUser();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -81,7 +88,10 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           openInfoModal={openInfoModal}
         />
         <VideoInfo user={slide.user} description={slide.description} />
-        <BottomBar videoRef={videoRef} isActive={isActive && !showSecretOverlay} />
+        <BottomBar
+          videoRef={videoRef}
+          isActive={isActive && !showSecretOverlay}
+        />
       </div>
     </div>
   );

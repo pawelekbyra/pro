@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Menu, Bell } from 'lucide-react';
@@ -7,17 +7,20 @@ import Link from 'next/link';
 import LoginForm from './LoginForm';
 import NotificationPopup from './NotificationPopup';
 import { useUser } from '@/context/UserContext';
-import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
+import { useTranslations } from 'next-intl';
 
 interface TopBarProps {
   setIsModalOpen: (isOpen: boolean) => void;
   openAccountPanel: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => {
+const TopBar: React.FC<TopBarProps> = ({
+  setIsModalOpen,
+  openAccountPanel,
+}) => {
   const { user, isLoggedIn, isLoading, logout } = useUser();
-  const { t } = useTranslation();
+  const t = useTranslations('TopBar');
   const { addToast } = useToast();
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
   const [isNotifPanelOpen, setIsNotifPanelOpen] = useState(false);
@@ -40,7 +43,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen(prev => !prev);
+    setIsMenuOpen((prev) => !prev);
   };
 
   const handleMenuClick = () => {
@@ -56,11 +59,6 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
     openAccountPanel();
   };
 
-  const handleOpenLoginPanelFromMenu = () => {
-    setIsMenuOpen(false);
-    toggleLoginPanel();
-  }
-
   useEffect(() => {
     const isAnyPanelOpen = isLoginPanelOpen || isNotifPanelOpen || isMenuOpen;
     setIsModalOpen(isAnyPanelOpen);
@@ -68,9 +66,10 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
 
   const getTopBarText = () => {
     if (isLoading) return t('loading');
-    if (isLoggedIn) return t('loggedInWelcome', { name: user?.displayName || 'User' });
+    if (isLoggedIn)
+      return t('loggedInWelcome', { name: user?.displayName || 'User' });
     return t('loggedOutText');
-  }
+  };
 
   return (
     <>
@@ -79,22 +78,31 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
         style={{
           height: 'var(--topbar-height)',
           paddingTop: 'var(--safe-area-top)',
-          textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+          textShadow:
+            '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
           background: 'rgba(0, 0, 0, 0.6)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
-          borderColor: isLoginPanelOpen ? 'transparent' : 'rgba(255, 255, 255, 0.15)',
+          borderColor: isLoginPanelOpen
+            ? 'transparent'
+            : 'rgba(255, 255, 255, 0.15)',
         }}
       >
-        <button onClick={handleMenuClick} className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
+        <button
+          onClick={handleMenuClick}
+          className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center"
+          disabled={isLoading}
+        >
           <Menu size={24} />
         </button>
 
         <div className="relative">
-          <button onClick={toggleLoginPanel} className="flex items-center gap-1.5" disabled={isLoading || isLoggedIn}>
-            <span className="text-sm font-medium">
-              {getTopBarText()}
-            </span>
+          <button
+            onClick={toggleLoginPanel}
+            className="flex items-center gap-1.5"
+            disabled={isLoading || isLoggedIn}
+          >
+            <span className="text-sm font-medium">{getTopBarText()}</span>
             {!isLoggedIn && !isLoading && (
               <motion.span
                 className="text-xs opacity-80"
@@ -108,7 +116,11 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
           </button>
         </div>
 
-        <button onClick={toggleNotifPanel} className="absolute top-1/2 -translate-y-1/2 right-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
+        <button
+          onClick={toggleNotifPanel}
+          className="absolute top-1/2 -translate-y-1/2 right-0 w-10 h-10 flex items-center justify-center"
+          disabled={isLoading}
+        >
           <Bell size={22} />
           {isLoggedIn && hasUnread && (
             <div
@@ -117,7 +129,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
                 top: '10px',
                 right: '11px',
                 backgroundColor: 'hsl(var(--primary))',
-                borderColor: '#6F6F6F'
+                borderColor: '#6F6F6F',
               }}
             ></div>
           )}
@@ -134,13 +146,25 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
           >
             {isLoggedIn && (
               <>
-                <button onClick={handleOpenAccountPanel} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('account')}</button>
+                <button
+                  onClick={handleOpenAccountPanel}
+                  className="block text-left w-full text-white px-4 py-3 hover:bg-white/10"
+                >
+                  {t('account')}
+                </button>
                 {user?.role === 'admin' && (
                   <Link href="/admin">
-                    <button className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10">{t('adminPanel')}</button>
+                    <button className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10">
+                      {t('adminPanel')}
+                    </button>
                   </Link>
                 )}
-                <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10">{t('logout')}</button>
+                <button
+                  onClick={handleLogout}
+                  className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10"
+                >
+                  {t('logout')}
+                </button>
               </>
             )}
           </motion.div>
@@ -160,7 +184,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
               background: 'rgba(0,0,0,0.6)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
-              paddingTop: '10px'
+              paddingTop: '10px',
             }}
           >
             <LoginForm onLoginSuccess={() => setIsLoginPanelOpen(false)} />
@@ -169,7 +193,12 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
       </AnimatePresence>
 
       <AnimatePresence>
-        {isNotifPanelOpen && <NotificationPopup isOpen={isNotifPanelOpen} onClose={() => setIsNotifPanelOpen(false)} />}
+        {isNotifPanelOpen && (
+          <NotificationPopup
+            isOpen={isNotifPanelOpen}
+            onClose={() => setIsNotifPanelOpen(false)}
+          />
+        )}
       </AnimatePresence>
     </>
   );

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,17 +14,22 @@ const Preloader: React.FC = () => {
     // 1. Unlock audio
     const videos = document.querySelectorAll('video');
     let unlocked = false;
-    videos.forEach(video => {
+    videos.forEach((video) => {
       if (!unlocked) {
         video.muted = false;
         const playPromise = video.play();
         if (playPromise !== undefined) {
-          playPromise.then(() => {
-            // Autoplay started!
-            video.pause(); // Immediately pause it, we just wanted the gesture
-          }).catch(error => {
-            console.warn("Audio unlock failed, user may need to tap video.", error);
-          });
+          playPromise
+            .then(() => {
+              // Autoplay started!
+              video.pause(); // Immediately pause it, we just wanted the gesture
+            })
+            .catch((error) => {
+              console.warn(
+                'Audio unlock failed, user may need to tap video.',
+                error
+              );
+            });
         }
         unlocked = true;
       }
@@ -78,7 +83,9 @@ const Preloader: React.FC = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
           >
-            <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
+            <h2 className="text-xl font-semibold text-white mb-6">
+              {t('selectLang')}
+            </h2>
             <div className="flex flex-col gap-4 w-64">
               <Button
                 onClick={() => handleLangSelect('pl')}

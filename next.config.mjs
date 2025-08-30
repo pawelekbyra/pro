@@ -1,8 +1,8 @@
-import withSerwistInit from "@serwist/next";
+import withSerwistInit from '@serwist/next';
 
 const withSerwist = withSerwistInit({
-  swSrc: "app/sw.ts",
-  swDest: "public/sw.js",
+  swSrc: 'app/sw.ts',
+  swDest: 'public/sw.js',
 });
 
 /** @type {import('next').NextConfig} */
@@ -20,7 +20,7 @@ const nextConfig = {
         hostname: 'pawelperfect.pl',
         port: '',
         pathname: '/wp-content/uploads/**',
-      }
+      },
     ],
   },
 };
