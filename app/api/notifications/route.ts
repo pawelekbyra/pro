@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/mock-db';
+import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const payload = await verifySession();
   if (!payload || !payload.user) {
-    // Return empty array if not logged in, as notifications are protected
-    return NextResponse.json({ notifications: [] });
+    return NextResponse.json({ success: false, message: 'Authentication required.' }, { status: 401 });
   }
+  const userId = payload.user.id;
 
-  const { searchParams } = new URL(request.url);
-  const lang = searchParams.get('lang') || 'en';
+  try {
+    const notifications = await db.getNotifications(userId);
+    const unreadCount = await db.getUnreadNotificationCount(userId);
 
-  const notifications = await db.getNotifications(payload.user.id, lang);
-
-  return NextResponse.json({ notifications });
+    return NextResponse.json({ success: true, notifications, unreadCount });
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
+  }
 }

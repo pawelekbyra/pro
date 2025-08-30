@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/mock-db';
+import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -12,19 +12,19 @@ export async function POST(request: NextRequest) {
   try {
     const { commentId } = await request.json();
 
-    if (!commentId) {
-      return NextResponse.json({ success: false, message: 'commentId is required' }, { status: 400 });
+    if (!commentId || typeof commentId !== 'string') {
+      return NextResponse.json({ success: false, message: 'commentId is required and must be a string' }, { status: 400 });
     }
 
-    // This will be implemented in the mock db layer later.
-    // For now, we assume it exists and works.
-    // const result = await db.toggleCommentLike(commentId, userId);
+    const result = await db.toggleCommentLike(commentId, userId);
 
-    // For now, just return success
-    return NextResponse.json({ success: true, status: 'toggled' });
+    return NextResponse.json({ success: true, status: result.newStatus });
 
   } catch (error) {
     console.error('Error liking comment:', error);
+    if (error instanceof Error && error.message === 'Comment not found') {
+        return NextResponse.json({ success: false, message: 'Comment not found' }, { status: 404 });
+    }
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
   }
 }
