@@ -87,22 +87,40 @@ export default function Home() {
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-black">
         {/* Top Bar Skeleton */}
-        <div className="absolute top-0 left-0 w-full z-30 flex justify-center items-center" style={{height: 'var(--topbar-height)', paddingTop: 'var(--safe-area-top)'}}>
-            <Skeleton className="h-4 w-28" />
+        <div className="absolute top-0 left-0 right-0 z-30 flex justify-center items-center" style={{height: 'var(--topbar-height)', paddingTop: 'var(--safe-area-top)'}}>
+            <div className="flex items-center gap-4">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+            </div>
         </div>
 
         {/* Sidebar Skeleton */}
-        <div className="absolute right-2 flex flex-col items-center gap-4 z-20" style={{top: '50%', transform: 'translateY(-50%)'}}>
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-10 w-10" />
-            <Skeleton className="h-10 w-10" />
+        <div className="absolute right-2 flex flex-col items-center gap-6 z-20" style={{top: '50%', transform: 'translateY(-50%)'}}>
+            <Skeleton className="h-12 w-12 rounded-full border-2 border-white" />
+            <div className="flex flex-col items-center gap-2">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-3 w-8" />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-3 w-8" />
+            </div>
+            <div className="flex flex-col items-center gap-2">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-3 w-8" />
+            </div>
         </div>
 
-        {/* Bottom Bar Skeleton */}
-        <div className="absolute bottom-0 left-0 w-full z-20 p-4" style={{paddingBottom: 'calc(10px + var(--safe-area-bottom))'}}>
-            <Skeleton className="h-4 w-32 mb-2" />
-            <Skeleton className="h-4 w-48" />
+        {/* Video Info Skeleton */}
+        <div className="absolute bottom-0 left-0 w-full z-20 p-4" style={{paddingBottom: 'calc(20px + var(--safe-area-bottom))'}}>
+            <Skeleton className="h-5 w-32 mb-2" />
+            <Skeleton className="h-4 w-48 mb-1" />
+            <Skeleton className="h-4 w-40" />
+        </div>
+
+        {/* Bottom Bar (Progress) Skeleton */}
+        <div className="absolute bottom-0 left-0 w-full h-1 z-20" style={{bottom: 'var(--safe-area-bottom)'}}>
+          <Skeleton className="h-full w-1/3" />
         </div>
       </div>
     );
