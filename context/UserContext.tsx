@@ -9,6 +9,7 @@ interface User {
   avatar: string;
   firstName: string;
   lastName: string;
+  role?: string;
 }
 
 interface UserContextType {
