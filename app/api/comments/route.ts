@@ -4,26 +4,19 @@ import { db } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 import { verifySession } from '@/lib/auth';
 
-import { mockDb } from '@/lib/mock-db';
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const videoId = searchParams.get('videoId');
+  const slideId = searchParams.get('slideId');
 
-  if (!videoId) {
-    return NextResponse.json({ success: false, message: 'videoId is required' }, { status: 400 });
+  if (!slideId) {
+    return NextResponse.json({ success: false, message: 'slideId is required' }, { status: 400 });
   }
 
-  // --- MOCK API LOGIC ---
-  if (process.env.MOCK_API === 'true') {
-    const comments = mockDb.comments.filter(c => c.videoId === videoId);
-    return NextResponse.json({ success: true, comments });
-  }
-  // --- END MOCK API LOGIC ---
+  // The mock logic was removed because it depended on the deleted mock-db.ts
+  // The main API mock in app/api/slides/route.ts will handle mock mode.
 
   try {
-    // The db function is already refactored, just need to pass videoId.
-    const comments = await db.getComments(videoId);
+    const comments = await db.getComments(slideId);
     return NextResponse.json({ success: true, comments });
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -39,44 +32,19 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { videoId, text } = await request.json();
+    const { slideId, text } = await request.json();
 
-    if (!videoId || !text) {
-      return NextResponse.json({ success: false, message: 'videoId and text are required' }, { status: 400 });
+    if (!slideId || !text) {
+      return NextResponse.json({ success: false, message: 'slideId and text are required' }, { status: 400 });
     }
 
     if (typeof text !== 'string' || text.trim().length === 0) {
         return NextResponse.json({ success: false, message: 'Comment text cannot be empty.' }, { status: 400 });
     }
 
-    // --- MOCK API LOGIC ---
-    if (process.env.MOCK_API === 'true') {
-        const newComment = {
-            id: `comment_mock_${Date.now()}`,
-            videoId,
-            userId: currentUser.id,
-            text: text.trim(),
-            createdAt: Date.now(),
-            likedBy: [],
-            user: {
-                displayName: currentUser.displayName,
-                avatar: currentUser.avatar,
-            }
-        };
-        mockDb.comments.unshift(newComment); // Add to the beginning of the array
+    // The mock logic was removed because it depended on the deleted mock-db.ts
 
-        // Also increment the comment count on the video
-        const video = mockDb.videos.find(v => v.id === videoId);
-        if (video) {
-            video.initialComments += 1;
-        }
-
-        return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
-    }
-    // --- END MOCK API LOGIC ---
-
-    // The db function is already refactored, just need to pass videoId.
-    const newComment = await db.addComment(videoId, currentUser.id, text.trim());
+    const newComment = await db.addComment(slideId, currentUser.id, text.trim());
 
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
 

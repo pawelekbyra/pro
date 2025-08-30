@@ -11,14 +11,22 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ isLoggedIn: false, user: null });
     }
 
-    // Optionally, you could return the full, fresh user object from the DB
-    // instead of the one from the token, in case details have changed.
+    // --- MOCK API LOGIC ---
+    if (process.env.MOCK_API === 'true') {
+        // If in mock mode and there's a valid session, we can assume it's the mock admin.
+        // In a more complex mock setup, we might check the user ID from the payload.
+        if (payload.user.id === 'user_mock_admin') {
+             return NextResponse.json({ isLoggedIn: true, user: payload.user });
+        }
+    }
+    // --- END MOCK API LOGIC ---
+
     const freshUser = await db.findUserById(payload.user.id);
     if (!freshUser) {
+        // This can happen if the user was deleted but the cookie remains.
         return NextResponse.json({ isLoggedIn: false, user: null });
     }
     const { passwordHash, ...userPayload } = freshUser;
-
 
     return NextResponse.json({ isLoggedIn: true, user: userPayload });
 }

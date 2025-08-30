@@ -2,15 +2,16 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Video, User } from '@/lib/db';
+import { Slide, VideoSlide } from '@/lib/types'; // Updated import
+import { User } from '@/lib/db.interfaces';
 
-interface VideoEditModalProps {
+interface SlideEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  video: Video | null;
-  users: User[]; // Pass users for the creation form
-  createVideoAction: (formData: FormData) => Promise<void>;
-  updateVideoAction: (formData: FormData) => Promise<void>;
+  slide: Slide | null;
+  users: User[];
+  createSlideAction: (formData: FormData) => Promise<void>;
+  updateSlideAction: (formData: FormData) => Promise<void>;
 }
 
 function SubmitButton({ isEditing }: { isEditing: boolean }) {
@@ -22,37 +23,37 @@ function SubmitButton({ isEditing }: { isEditing: boolean }) {
       disabled={pending}
       className="px-4 py-2 rounded-md bg-pink-600 hover:bg-pink-700 text-white disabled:bg-pink-800 disabled:opacity-70"
     >
-      {pending ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Video'}
+      {pending ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Slide'}
     </button>
   );
 }
 
-export default function VideoEditModal({
+export default function SlideEditModal({
   isOpen,
   onClose,
-  video,
+  slide,
   users,
-  createVideoAction,
-  updateVideoAction,
-}: VideoEditModalProps) {
+  createSlideAction,
+  updateSlideAction,
+}: SlideEditModalProps) {
   const formRef = useRef<HTMLFormElement>(null);
-  const isEditing = video !== null;
+  const isEditing = slide !== null;
+  const videoData = isEditing && slide?.type === 'video' ? (slide as VideoSlide).data : null;
 
   useEffect(() => {
-    // Reset form when modal is closed or video data changes
     if (!isOpen) {
       formRef.current?.reset();
     }
-  }, [isOpen, video]);
+  }, [isOpen, slide]);
 
   const handleFormAction = async (formData: FormData) => {
     if (isEditing) {
-      await updateVideoAction(formData);
+      await updateSlideAction(formData);
     } else {
-      await createVideoAction(formData);
+      await createSlideAction(formData);
     }
     formRef.current?.reset();
-    onClose(); // Close modal on success
+    onClose();
   };
 
   if (!isOpen) {
@@ -62,9 +63,12 @@ export default function VideoEditModal({
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-full overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Video' : 'Create New Video'}</h2>
+        <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Slide' : 'Create New Slide'}</h2>
         <form ref={formRef} action={handleFormAction}>
-          {isEditing && <input type="hidden" name="videoId" value={video.id} />}
+          {isEditing && <input type="hidden" name="slideId" value={slide.id} />}
+
+          {/* We can only create video slides for now */}
+          <input type="hidden" name="type" value="video" />
 
           {!isEditing && (
             <div className="mb-4">
@@ -81,28 +85,39 @@ export default function VideoEditModal({
           {isEditing && (
              <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-1">Uploader</label>
-                <p className="p-2 text-gray-400">{video.username}</p>
+                <p className="p-2 text-gray-400">{slide.username}</p>
              </div>
           )}
 
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label htmlFor="x" className="block text-sm font-medium text-gray-300 mb-1">Coordinate X</label>
+                <input type="number" id="x" name="x" defaultValue={slide?.x ?? ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+            </div>
+            <div>
+                <label htmlFor="y" className="block text-sm font-medium text-gray-300 mb-1">Coordinate Y</label>
+                <input type="number" id="y" name="y" defaultValue={slide?.y ?? ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+            </div>
+          </div>
+
           <div className="mb-4">
             <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">Description</label>
-            <textarea id="description" name="description" defaultValue={video?.description || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" rows={3} />
+            <textarea id="description" name="description" defaultValue={videoData?.description || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" rows={3} />
           </div>
 
           <div className="mb-4">
             <label htmlFor="mp4Url" className="block text-sm font-medium text-gray-300 mb-1">MP4 URL</label>
-            <input type="url" id="mp4Url" name="mp4Url" defaultValue={video?.mp4Url || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+            <input type="url" id="mp4Url" name="mp4Url" defaultValue={videoData?.mp4Url || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
           </div>
 
           <div className="mb-4">
             <label htmlFor="poster" className="block text-sm font-medium text-gray-300 mb-1">Poster Image URL</label>
-            <input type="url" id="poster" name="poster" defaultValue={video?.poster || ''} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+            <input type="url" id="poster" name="poster" defaultValue={videoData?.poster || ''} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
           </div>
 
           <div className="mb-4">
             <label htmlFor="access" className="block text-sm font-medium text-gray-300 mb-1">Access</label>
-            <select id="access" name="access" defaultValue={video?.access || 'public'} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white">
+            <select id="access" name="access" defaultValue={slide?.access || 'public'} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white">
               <option value="public">Public</option>
               <option value="secret">Secret</option>
             </select>

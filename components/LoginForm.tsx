@@ -24,7 +24,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      await login({ username, password });
+      await login({ email: username, password });
       onLoginSuccess?.();
     } catch (err: any) {
       setError(err.message || t('loginUnknownError'));

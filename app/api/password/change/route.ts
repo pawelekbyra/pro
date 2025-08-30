@@ -40,11 +40,12 @@ export async function POST(request: NextRequest) {
     }
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
-    await db.updateUserPassword(payload.user.id, newPasswordHash);
-    await db.incrementSessionVersion(payload.user.id);
 
-    // Fetch the latest user data to get the new session version
-    const updatedUser = await db.findUserById(payload.user.id);
+    // Update password and session version in one call
+    const updatedUser = await db.updateUser(payload.user.id, {
+        passwordHash: newPasswordHash,
+        sessionVersion: (userFromDb.sessionVersion || 1) + 1,
+    });
     if (!updatedUser) {
         // This should not happen, but handle it just in case
         cookies().delete(COOKIE_NAME);
