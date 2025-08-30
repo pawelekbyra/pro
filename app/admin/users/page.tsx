@@ -3,6 +3,8 @@ import React from 'react';
 import { revalidatePath } from 'next/cache';
 import UserManagementClient from './UserManagementClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UserManagementPage() {
   const users = await db.getAllUsers();
 

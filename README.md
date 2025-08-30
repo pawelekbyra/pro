@@ -7,27 +7,30 @@ Ten projekt Next.js jest skonfigurowany do wdrożenia na platformie [Vercel](htt
 
 ### Zmienne środowiskowe
 
-Przed wdrożeniem, musisz ustawić następującą zmienną środowiskową w ustawieniach swojego projektu na Vercel:
+Przed wdrożeniem, musisz skonfigurować następujące zmienne środowiskowe w ustawieniach swojego projektu na Vercel:
+
+#### Klucz JWT
 
 -   `JWT_SECRET`: Tajny klucz do podpisywania tokenów autoryzacyjnych. Możesz wygenerować bezpieczny klucz za pomocą poniższej komendy:
     ```bash
     openssl rand -hex 32
     ```
 
-Zmienną tę możesz ustawić w panelu Vercel w zakładce "Settings" -> "Environment Variables".
+#### Baza danych Vercel KV
 
-### Baza danych
+Aplikacja używa **Vercel KV** jako bazy danych do przechowywania wszystkich danych, w tym użytkowników, filmów i interakcji. Aby połączyć się z bazą danych, musisz utworzyć nową bazę Vercel KV w panelu Vercel i dodać następujące zmienne środowiskowe do swojego projektu:
 
-Projekt obecnie używa lokalnego pliku `data.json` jako bazy danych. Proszę, zwróć uwagę na następujące ograniczenie podczas wdrażania na Vercel:
+-   `KV_REST_API_URL`: Adres URL Twojej bazy danych KV.
+-   `KV_REST_API_TOKEN`: Token dostępowy do Twojej bazy danych KV.
 
--   **Efemeryczny system plików:** Bezserwerowe środowisko Vercela ma efemeryczny (tymczasowy) system plików. Oznacza to, że wszelkie zmiany zapisane w pliku `data.json` (np. nowi użytkownicy, polubienia czy komentarze) zostaną utracone przy każdym nowym wdrożeniu lub po restarcie serwera.
+Po ustawieniu powyższych zmiennych, aplikacja będzie w pełni funkcjonalna i gotowa do wdrożenia.
 
-Z tego powodu, aplikacja na Vercelu będzie działać w trybie **"tylko do odczytu"**.
+### Zasilanie bazy danych (Opcjonalnie)
 
-#### Możliwe ulepszenia w przyszłości
+Jeśli chcesz wypełnić swoją bazę danych początkowymi danymi, możesz użyć skryptu `db:seed`. Skrypt odczytuje dane z lokalnego pliku `data.json` i zapisuje je w Twojej bazie Vercel KV.
 
-Aby uzyskać w pełni funkcjonalną aplikację z trwałym zapisem danych, warto rozważyć migrację do usługi bazodanowej. Oto kilka polecanych opcji, które dobrze integrują się z Vercelem:
-
--   **Vercel KV:** Prosta i szybka baza danych typu klucz-wartość, oferowana przez Vercel. To dobry zamiennik dla obecnego pliku `data.json`.
--   **Vercel Postgres:** Pełnoprawna baza danych PostgreSQL, odpowiednia dla bardziej złożonych aplikacji.
--   **Zewnętrzna baza danych:** Możesz również połączyć się z zewnętrzną usługą, taką jak PlanetScale, Neon, lub Twoją własną bazą MySQL.
+1.  Upewnij się, że masz skonfigurowane zmienne środowiskowe w pliku `.env.local`.
+2.  Uruchom komendę:
+    ```bash
+    npm run db:seed
+    ```
