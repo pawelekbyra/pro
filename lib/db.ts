@@ -64,7 +64,7 @@ export interface Comment {
 export const db = {
   // --- User Functions ---
   async findUserByEmail(email: string): Promise<User | undefined> {
-    const userId = await kv.get<string>(keys.emailToId(email));
+    const userId = await kv!.get<string>(keys.emailToId(email));
     if (!userId) {
       return undefined;
     }
@@ -72,16 +72,16 @@ export const db = {
   },
 
   async findUserById(id: string): Promise<User | undefined> {
-    const user = await kv.get<User>(keys.user(id));
+    const user = await kv!.get<User>(keys.user(id));
     return user ?? undefined;
   },
 
   async getAllUsers(): Promise<User[]> {
-    const userKeys = await kv.keys('user:*');
+    const userKeys = await kv!.keys('user:*');
     if (!userKeys.length) {
       return [];
     }
-    const users = await kv.mget<User[]>(...userKeys);
+    const users = await kv!.mget<User[]>(...userKeys);
     return users.filter(Boolean) as User[];
   },
 
@@ -93,7 +93,7 @@ export const db = {
       sessionVersion: 1,
     };
 
-    const tx = kv.multi();
+    const tx = kv!.multi();
     tx.set(keys.user(id), user);
     tx.set(keys.emailToId(user.email), id);
     tx.set(keys.usernameToId(user.username), id);
@@ -103,12 +103,12 @@ export const db = {
   },
 
   async isEmailInUse(email: string, excludeUserId?: string): Promise<boolean> {
-    const userId = await kv.get<string>(keys.emailToId(email));
+    const userId = await kv!.get<string>(keys.emailToId(email));
     return userId ? userId !== excludeUserId : false;
   },
 
   async isUsernameInUse(username: string, excludeUserId?: string): Promise<boolean> {
-    const userId = await kv.get<string>(keys.usernameToId(username));
+    const userId = await kv!.get<string>(keys.usernameToId(username));
     return userId ? userId !== excludeUserId : false;
   },
 
@@ -125,7 +125,7 @@ export const db = {
     delete updates.username; // Username changes should have a dedicated process
 
     const updatedUser = { ...user, ...updates };
-    await kv.set(keys.user(userId), updatedUser);
+    await kv!.set(keys.user(userId), updatedUser);
     return updatedUser;
   },
 
@@ -135,7 +135,7 @@ export const db = {
       return false;
     }
     user.passwordHash = newPasswordHash;
-    await kv.set(keys.user(userId), user);
+    await kv!.set(keys.user(userId), user);
     return true;
   },
 
@@ -147,7 +147,7 @@ export const db = {
 
     // This is a simplified deletion. In a real app, you'd also have to
     // handle content created by the user (videos, comments, etc.)
-    const tx = kv.multi();
+    const tx = kv!.multi();
     tx.del(keys.user(userId));
     tx.del(keys.emailToId(user.email));
     tx.del(keys.usernameToId(user.username));
@@ -162,7 +162,7 @@ export const db = {
       return false;
     }
     user.sessionVersion = (user.sessionVersion || 1) + 1;
-    await kv.set(keys.user(userId), user);
+    await kv!.set(keys.user(userId), user);
     return true;
   },
 
@@ -172,14 +172,14 @@ export const db = {
     const { currentUserId, start = 0, count = 10 } = options;
 
     // 1. Fetch a page of video IDs from the sorted set
-    const videoIds = await kv.zrange(keys.allVideos(), start, start + count - 1, { rev: true });
+    const videoIds = await kv!.zrange(keys.allVideos(), start, start + count - 1, { rev: true });
 
     if (!videoIds.length) {
       return [];
     }
 
     // 2. Create a pipeline to fetch all video data and their like counts
-    const pipe = kv.multi();
+    const pipe = kv!.multi();
     for (const id of videoIds) {
       pipe.get(keys.video(id as string));
       pipe.scard(keys.videoLikes(id as string));
@@ -222,7 +222,7 @@ export const db = {
       createdAt,
     };
 
-    const tx = kv.multi();
+    const tx = kv!.multi();
     tx.set(keys.video(id), newVideo);
     tx.zadd(keys.allVideos(), { score: createdAt, member: id });
     await tx.exec();
@@ -231,22 +231,22 @@ export const db = {
   },
 
   async updateVideo(videoId: string, updates: Partial<Omit<Video, 'id' | 'createdAt' | 'userId' | 'username'>>): Promise<Video | null> {
-    const video = await kv.get<Video>(keys.video(videoId));
+    const video = await kv!.get<Video>(keys.video(videoId));
     if (!video) {
       return null;
     }
     const updatedVideo = { ...video, ...updates };
-    await kv.set(keys.video(videoId), updatedVideo);
+    await kv!.set(keys.video(videoId), updatedVideo);
     return updatedVideo;
   },
 
   async deleteVideo(videoId: string): Promise<boolean> {
-    const video = await kv.get<Video>(keys.video(videoId));
+    const video = await kv!.get<Video>(keys.video(videoId));
     if (!video) {
       return false;
     }
 
-    const tx = kv.multi();
+    const tx = kv!.multi();
     tx.del(keys.video(videoId)); // Delete video object
     tx.del(keys.videoLikes(videoId)); // Delete likes set
     tx.del(keys.videoComments(videoId)); // Delete comments list
@@ -261,9 +261,9 @@ export const db = {
     const videoLikesKey = keys.videoLikes(videoId);
     const userLikesKey = keys.userLikes(userId);
 
-    const isLiked = await kv.sismember(videoLikesKey, userId);
+    const isLiked = await kv!.sismember(videoLikesKey, userId);
 
-    const tx = kv.multi();
+    const tx = kv!.multi();
     if (isLiked) {
       // User is unliking the video
       tx.srem(videoLikesKey, userId);
@@ -275,7 +275,7 @@ export const db = {
     }
     await tx.exec();
 
-    const likeCount = await kv.scard(videoLikesKey);
+    const likeCount = await kv!.scard(videoLikesKey);
 
     return { newStatus: isLiked ? 'unliked' : 'liked', likeCount };
   },
@@ -283,13 +283,13 @@ export const db = {
   // --- Comment Functions ---
   async getComments(videoId: string, options: { start?: number, count?: number } = {}) {
     const { start = 0, count = 20 } = options;
-    const commentIds = await kv.lrange(keys.videoComments(videoId), start, start + count - 1);
+    const commentIds = await kv!.lrange(keys.videoComments(videoId), start, start + count - 1);
 
     if (!commentIds.length) {
       return [];
     }
 
-    const pipe = kv.multi();
+    const pipe = kv!.multi();
     for (const id of commentIds) {
       pipe.get(keys.comment(id as string));
     }
@@ -320,7 +320,7 @@ export const db = {
       likedBy: [], // This feature might need its own refactor
     };
 
-    const tx = kv.multi();
+    const tx = kv!.multi();
     tx.set(keys.comment(commentId), newComment);
     tx.lpush(keys.videoComments(videoId), commentId);
     await tx.exec();
@@ -340,7 +340,7 @@ export const db = {
       return [];
     }
     const userIds = [...new Set(comments.map(c => c.userId))];
-    const pipe = kv.multi();
+    const pipe = kv!.multi();
     for (const userId of userIds) {
       pipe.get(keys.user(userId));
     }
