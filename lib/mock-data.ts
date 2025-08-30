@@ -1,4 +1,4 @@
-import type { Grid } from './types';
+import type { Grid, Slide } from './types';
 
 // Create a grid of mock slides with different types
 export const mockGrid: Grid = {
@@ -89,3 +89,92 @@ export const mockGrid: Grid = {
     },
   },
 };
+
+const papiezGameSlide: Slide = {
+    id: 'papiez-game',
+    type: 'html', // It's an html slide, so it will be rendered by HtmlContent
+    userId: 'user_pope_game',
+    username: 'Papież Programista',
+    avatar: 'https://i.pravatar.cc/150?u=user_pope_game',
+    access: 'public',
+    createdAt: Date.now(),
+    initialLikes: 2137,
+    isLiked: false,
+    initialComments: 37,
+    x: 3,
+    y: 3,
+    data: {
+        description: 'Papież: Gra w bycie miłym',
+        type: 'GAME_POPE', // The new custom type inside data
+        gameData: {
+            scenarios: [
+                {
+                    text: 'Ktoś próbuje Ci wcisnąć zestaw naczyń „Ceper”. Na koniec mówi, że to dar od Niebios.',
+                    choices: {
+                        'dopyskuj': '+3 punkty',
+                        'powiedz_milo': '+5 punktów'
+                    }
+                },
+                {
+                    text: 'Idziesz w tłumie, a jakiś typ daje Ci kuksańca, po czym krzyczy, że to pozdrowienie od kibiców z Krakowa.',
+                    choices: {
+                        'dopyskuj': '+3 punkty',
+                        'powiedz_milo': '+5 punktów'
+                    }
+                },
+                {
+                    text: 'Młody chłopak podchodzi do Ciebie i pyta, czy masz 2 złote na bułkę. W tle słychać, jak jego kolega szepcze: „na browara mu daj!”',
+                    choices: {
+                        'dopyskuj': '+3 punkty',
+                        'powiedz_milo': '+5 punktów'
+                    }
+                },
+            ],
+            bossFight: {
+                text: '„Boss Fight”: Zbliża się do Ciebie Kardynał i pyta: „Co właściwie robisz na Tingtongu?”',
+                choices: {
+                    'dopyskuj': '+3 punkty',
+                    'powiedz_milo': '+5 punktów'
+                }
+            }
+        }
+    }
+};
+
+mockGrid['3,3'] = papiezGameSlide;
+
+const typingChallengeSlide: Slide = {
+    id: 'typing-challenge',
+    type: 'html',
+    userId: 'user_typing_challenge',
+    username: 'Klawiaturowy Mistrz',
+    avatar: 'https://i.pravatar.cc/150?u=user_typing_challenge',
+    access: 'public',
+    createdAt: Date.now(),
+    initialLikes: 1337,
+    isLiked: false,
+    initialComments: 101,
+    x: 3,
+    y: 4,
+    data: {
+        description: 'Wielki Test Szybkości Pisania',
+        type: 'TYPING_CHALLENGE',
+        challengeData: {
+            phrases: [
+                'Jednorożce programują w C++',
+                'Moja grzywka jest binarna i na dodatek gubi pakiety.',
+                'Kot Schrödingera zagrał w szachy z Einsteinem i obaj byli martwi.',
+                'Wczorajsze pierogi są dziś chmurą obliczeniową.',
+                'AI oskarżyło mnie o zbyt dużą kreatywność i zaczęło mrugać literą B.',
+            ],
+            titles: {
+                slow: 'Programista-Poeta (pisze wolno, ale z uczuciem)',
+                average: 'Mistrz Klawiatury (zrobi to, ale bez fajerwerków)',
+                fast: 'Turbo-Pikselowy Ninja (szybszy niż błąd w kompilacji)',
+                insane: 'AI-Szybki Klawiaturowy Absurdysta!',
+            }
+        }
+    }
+};
+
+mockGrid['3,4'] = typingChallengeSlide;
