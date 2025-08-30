@@ -95,14 +95,19 @@ const VideoGrid: React.FC = () => {
     setTouchStart(null);
   };
 
-  const move = (direction: 'up' | 'down' | 'left' | 'right') => {
-    const { x, y } = activeCoordinates;
-    let nextCoords = { x, y };
+  const move = (direction?: 'up' | 'down' | 'left' | 'right', coordinates?: { x: number, y: number }) => {
+    let nextCoords;
 
-    if (direction === 'up') nextCoords = { x, y: y - 1 };
-    if (direction === 'down') nextCoords = { x, y: y + 1 };
-    if (direction === 'left') nextCoords = { x: x - 1, y };
-    if (direction === 'right') nextCoords = { x: x + 1, y };
+    if (coordinates) {
+      nextCoords = coordinates;
+    } else {
+      const { x, y } = activeCoordinates;
+      nextCoords = { x, y };
+      if (direction === 'up') nextCoords = { x, y: y - 1 };
+      if (direction === 'down') nextCoords = { x, y: y + 1 };
+      if (direction === 'left') nextCoords = { x: x - 1, y };
+      if (direction === 'right') nextCoords = { x: x + 1, y };
+    }
 
     if (grid[`${nextCoords.x},${nextCoords.y}`]) {
       setActiveCoordinates(nextCoords);
@@ -186,6 +191,7 @@ const VideoGrid: React.FC = () => {
                 openInfoModal={openInfoModal}
                 onTimeUpdate={handleTimeUpdate}
                 startTime={playbackTimes[slide.id] || 0}
+                onNavigate={({ x, y }) => move(undefined, { x, y })}
                 onPlaybackFailure={() => {
                   console.log("Playback failed for the current slide. Moving to the next one.");
                   // The hasMore logic is removed for now, but we can add it back if we re-introduce pagination
