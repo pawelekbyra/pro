@@ -18,6 +18,7 @@ interface CommonSlideProps {
   onTimeUpdate: (videoId: string, time: number) => void;
   startTime: number;
   onPlaybackFailure: () => void;
+  onNavigate: (coordinates: { x: number; y: number }) => void;
 }
 
 interface SlideRendererProps extends CommonSlideProps {
@@ -45,15 +46,17 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, ...commonProps }) 
         };
         return <Video video={videoDataForComponent} {...commonProps} />;
       case 'html':
-        return <HtmlContent data={slide.data} username={slide.username} />;
+        return <HtmlContent data={slide.data} username={slide.username} onNavigate={commonProps.onNavigate} />;
       default:
         // You can return a default component or null if the type is unknown
         return <div className="text-white">Unsupported slide type</div>;
     }
   };
 
+  const containerClass = slide.type === 'html' ? 'overflow-y-auto' : 'overflow-hidden';
+
   return (
-    <div className="webyx-section h-full w-full relative overflow-hidden">
+    <div className={`webyx-section h-full w-full relative ${containerClass}`}>
         <div
             className={`tiktok-symulacja h-full w-full relative`}
             style={{ paddingBottom: 'var(--safe-area-bottom)' }}
