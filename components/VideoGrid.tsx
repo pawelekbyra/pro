@@ -29,7 +29,7 @@ const VideoGrid: React.FC = () => {
   const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
 
-  const fetchVideos = useCallback(async () => {
+  const fetchMoreVideos = useCallback(async () => {
     if (!hasMore || isLoading) return;
     console.log(`Fetching page ${page}`);
     setIsLoading(true);
@@ -46,16 +46,34 @@ const VideoGrid: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to fetch videos:", error);
-      // Optionally, handle fetch errors in the UI
     } finally {
       setIsLoading(false);
     }
   }, [page, hasMore, isLoading]);
 
   useEffect(() => {
-    // Fetch initial data
-    fetchVideos();
-  }, [fetchVideos]);
+    const fetchInitialVideos = async () => {
+      try {
+        const response = await fetch(`/api/videos?page=1&limit=5`);
+        if (!response.ok) throw new Error('Failed to fetch initial videos');
+        const data = await response.json();
+
+        if (Object.keys(data.grid).length === 0) {
+          setHasMore(false);
+        } else {
+          setGrid(data.grid);
+          setPage(2);
+        }
+      } catch (error) {
+        console.error("Failed to fetch initial videos:", error);
+        setHasMore(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInitialVideos();
+  }, []);
 
   const handleTimeUpdate = (videoId: string, time: number) => {
     if (time > 0.1) {
@@ -117,7 +135,7 @@ const VideoGrid: React.FC = () => {
       // Check if we need to prefetch more videos
       const currentMaxY = (page - 1) * 5 - 1;
       if (direction === 'down' && nextCoords.y >= currentMaxY - PREFETCH_THRESHOLD) {
-        fetchVideos();
+        fetchMoreVideos();
       }
     }
   };
@@ -196,6 +214,14 @@ const VideoGrid: React.FC = () => {
                 openInfoModal={openInfoModal}
                 onTimeUpdate={handleTimeUpdate}
                 startTime={playbackTimes[slide.id] || 0}
+                onPlaybackFailure={() => {
+                  console.log("Playback failed for the current video. Moving to the next one.");
+                  if (grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] || hasMore) {
+                    move('down');
+                  } else {
+                    console.error("Playback failed and no next video to move to.");
+                  }
+                }}
               />
             </div>
           ))}

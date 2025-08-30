@@ -39,11 +39,16 @@ export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
       hlsRef.current = hls;
 
       hls.on(Hls.Events.ERROR, (event, data) => {
+        // Log all errors for better diagnostics, not just fatal ones.
+        console.log('HLS.js error:', {
+          type: data.type,
+          details: data.details,
+          fatal: data.fatal,
+        });
+
         if (data.fatal) {
-          console.error('HLS fatal error:', data.details);
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              // Try to recover network errors
               console.log('Attempting to recover from HLS network error...');
               hls.startLoad();
               break;
@@ -52,8 +57,7 @@ export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
               hls.recoverMediaError();
               break;
             default:
-              // Cannot recover, trigger fallback
-              console.log('Unrecoverable HLS error, triggering fallback.');
+              console.error('Unrecoverable HLS error. Triggering fallback.');
               onFatalError?.();
               hls.destroy();
               break;

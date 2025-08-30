@@ -15,14 +15,17 @@ interface VideoPlayerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   onTimeUpdate: (videoId: string, time: number) => void;
   startTime: number;
+  onPlaybackFailure: () => void;
+  isPlaying: boolean;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, videoRef, onTimeUpdate, startTime }) => {
+const DOUBLE_CLICK_DELAY_MS = 200;
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, videoRef, onTimeUpdate, startTime, onPlaybackFailure, isPlaying }) => {
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
   // State for player UI
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [showPause, setShowPause] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -64,14 +67,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
       }
       video.pause();
     }
-
-    const updatePlayingState = () => setIsPlaying(!video.paused);
-    video.addEventListener('play', updatePlayingState);
-    video.addEventListener('pause', updatePlayingState);
-    return () => {
-      video.removeEventListener('play', updatePlayingState);
-      video.removeEventListener('pause', updatePlayingState);
-    }
   }, [isActive, videoRef, onTimeUpdate, startTime, videoId]);
 
   const triggerLikeAnimation = () => {
@@ -108,13 +103,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
           }
         }
         clickTimeout.current = null;
-      }, 250);
+      }, DOUBLE_CLICK_DELAY_MS);
     }
   };
 
   const videoWrapperClassName = 'absolute top-0 left-0 w-full h-full';
 
   const videoClassName = `videoPlayer w-full h-full object-cover ${isSecretActive ? 'secret-active' : ''}`;
+
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    // If an error occurs and we are already on the MP4 fallback,
+    // it means both HLS and MP4 have failed. Time to give up on this video.
+    if (!isHls) {
+      console.error("MP4 fallback also failed. Triggering playback failure handler.");
+      onPlaybackFailure();
+    }
+  };
 
   return (
     <div className={videoWrapperClassName} onClick={handleVideoClick}>
@@ -126,8 +130,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
         loop
         playsInline
         webkit-playsinline="true"
-        preload="metadata"
+        preload={isActive ? 'metadata' : 'auto'}
         key={currentSrc}
+        onError={handleVideoError}
       />
       <AnimatePresence>
         {showHeart && (

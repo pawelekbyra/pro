@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Coffee, Bot, Rat, Gamepad2 } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
+import { debounce } from '@/lib/utils';
 
 interface BottomBarProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -29,14 +30,16 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
     if (!video || !isActive) return;
 
     const handleTimeUpdate = () => {
-      if (!isDragging && video.duration) {
+      if (!isDragging && video.duration && isFinite(video.duration)) {
         setProgress((video.currentTime / video.duration) * 100);
       }
     };
 
-    video.addEventListener('timeupdate', handleTimeUpdate);
+    const debouncedTimeUpdate = debounce(handleTimeUpdate, 100);
+
+    video.addEventListener('timeupdate', debouncedTimeUpdate);
     return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('timeupdate', debouncedTimeUpdate);
     };
   }, [videoRef, isActive, isDragging]);
 
