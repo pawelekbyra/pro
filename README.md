@@ -1,3 +1,15 @@
+## Dziennik Pokładowy Absurdu
+
+**Zasada #1: Każda nowa funkcja musi być co najmniej o 10% bardziej absurdalna od poprzedniej. Mierzymy to w jednostkach "WTF na sekundę". Celem jest osiągnięcie kwantowej superpozycji chaosu i użyteczności.**
+
+---
+
+### Wpisy:
+
+*   **Wpis #1 (Data Gwiezdna: ...jakaś):** Pacjent zero (ta apka) wykazywał objawy śmiertelnej nudy. Terapia szokowa: wstrzyknięto rozszerzoną siatkę slajdów, tworząc labirynt godny cyfrowego Minotaura. Jako wisienkę na torcie dodano mini-grę "Flappy Div", udowadniając, że nawet `<div>` potrafi marzyć o lataniu. Poziom absurdu: **podniesiony.**
+
+---
+
 # pro
 ting tong professional
 

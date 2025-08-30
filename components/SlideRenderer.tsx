@@ -4,6 +4,7 @@ import React from 'react';
 import { Slide } from '@/lib/types';
 import Video from './Video';
 import HtmlContent from './HtmlContent';
+import FlappyDivGame from './FlappyDivGame';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
@@ -47,6 +48,8 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, ...commonProps }) 
         return <Video video={videoDataForComponent} {...commonProps} />;
       case 'html':
         return <HtmlContent data={slide.data} username={slide.username} onNavigate={commonProps.onNavigate} />;
+      case 'game':
+        return <FlappyDivGame slide={slide} />;
       default:
         // You can return a default component or null if the type is unknown
         return <div className="text-white">Unsupported slide type</div>;
