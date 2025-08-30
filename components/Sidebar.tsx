@@ -12,7 +12,7 @@ interface SidebarProps {
   avatarUrl:string;
   initialLikes: number;
   isLiked: boolean;
-  likeId: string;
+  videoId: string;
   commentsCount: number;
   openCommentsModal: () => void;
   openAccountPanel: () => void;
@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   avatarUrl,
   initialLikes,
   isLiked: initialIsLiked,
-  likeId,
+  videoId,
   commentsCount,
   openCommentsModal,
   openAccountPanel,
@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       const response = await fetch('/api/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ likeId }),
+        body: JSON.stringify({ videoId }),
       });
       if (!response.ok) throw new Error('Failed to like post');
       addToast(newIsLiked ? (t('likedToast') || 'Liked!') : (t('unlikedToast') || 'Unliked'), 'success');
@@ -103,7 +103,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      <button onClick={handleLike} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button
+        onClick={handleLike}
+        className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold"
+        data-video-id={videoId}
+      >
         <HeartCrack
           size={32}
           strokeWidth={1.4}

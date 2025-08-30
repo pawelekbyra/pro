@@ -9,10 +9,10 @@ import VideoInfo from './VideoInfo';
 import TopBar from './TopBar';
 import { Lock } from 'lucide-react';
 
-export type SlideData = {
+// This type should align with what the API returns for a single video
+export type VideoData = {
   id: string;
-  likeId: string;
-  user: string;
+  username: string;
   description: string;
   mp4Url: string;
   hlsUrl: string | null;
@@ -24,8 +24,8 @@ export type SlideData = {
   initialComments: number;
 };
 
-interface SlideProps {
-  slide: SlideData;
+interface VideoProps {
+  video: VideoData;
   isActive: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
   openAccountPanel: () => void;
@@ -33,12 +33,12 @@ interface SlideProps {
   openInfoModal: () => void;
 }
 
-const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal }) => {
+const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal }) => {
   const { isLoggedIn, isLoading } = useUser();
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const isSecret = slide.access === 'secret';
+  const isSecret = video.access === 'secret';
   // Don't show the overlay while the user state is loading
   const showSecretOverlay = isSecret && !isLoading && !isLoggedIn;
 
@@ -49,13 +49,13 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
         style={{ paddingBottom: 'var(--safe-area-bottom)' }}
       >
         <VideoPlayer
-          hlsSrc={slide.hlsUrl}
-          mp4Src={slide.mp4Url}
-          poster={slide.poster}
+          hlsSrc={video.hlsUrl}
+          mp4Src={video.mp4Url}
+          poster={video.poster}
           videoRef={videoRef}
           isActive={isActive && !showSecretOverlay}
           isSecretActive={showSecretOverlay}
-          likeId={slide.likeId}
+          videoId={video.id} // Pass videoId instead of likeId
         />
 
         {showSecretOverlay && (
@@ -71,20 +71,20 @@ const Slide: React.FC<SlideProps> = ({ slide, isActive, setIsModalOpen, openAcco
           openAccountPanel={openAccountPanel}
         />
         <Sidebar
-          avatarUrl={slide.avatar}
-          initialLikes={slide.initialLikes}
-          isLiked={slide.isLiked}
-          likeId={slide.likeId}
-          commentsCount={slide.initialComments}
+          avatarUrl={video.avatar}
+          initialLikes={video.initialLikes}
+          isLiked={video.isLiked}
+          videoId={video.id} // Pass videoId instead of likeId
+          commentsCount={video.initialComments}
           openCommentsModal={openCommentsModal}
           openAccountPanel={openAccountPanel}
           openInfoModal={openInfoModal}
         />
-        <VideoInfo user={slide.user} description={slide.description} />
+        <VideoInfo user={video.username} description={video.description} />
         <BottomBar videoRef={videoRef} isActive={isActive && !showSecretOverlay} />
       </div>
     </div>
   );
 };
 
-export default Slide;
+export default Video;

@@ -1,5 +1,4 @@
-import { kv } from '../lib/kv';
-import { User } from '../lib/db';
+import { db } from '../lib/db';
 import bcrypt from 'bcryptjs';
 
 async function createAdmin() {
@@ -10,29 +9,26 @@ async function createAdmin() {
     const adminEmail = 'admin@example.com';
     const adminPassword = 'password'; // Simple password for local dev
 
-    // 1. Hash the password
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(adminPassword, saltRounds);
-    console.log('Password hashed successfully.');
+    // 1. Check if admin user already exists
+    let adminUser = await db.findUserByEmail(adminEmail);
 
-    // 2. Fetch current users from KV
-    const users = await kv.get<User[]>('users') ?? [];
-    console.log(`Found ${users.length} existing users.`);
-
-    // 3. Check if admin user exists
-    const adminUserIndex = users.findIndex(u => u.username === adminUsername);
-
-    if (adminUserIndex > -1) {
-      // 4a. Admin exists, update their role and password if needed
-      console.log(`User '${adminUsername}' already exists. Updating role to 'admin'.`);
-      users[adminUserIndex].role = 'admin';
-      // Optional: uncomment to reset password on every run
-      // users[adminUserIndex].passwordHash = passwordHash;
+    if (adminUser) {
+      console.log(`User '${adminUsername}' already exists.`);
+      // 2a. If user exists, ensure their role is 'admin'
+      if (adminUser.role !== 'admin') {
+        console.log("Updating user to have 'admin' role.");
+        await db.updateUser(adminUser.id, { role: 'admin' });
+      } else {
+        console.log("User is already an admin.");
+      }
     } else {
-      // 4b. Admin does not exist, create a new user
+      // 2b. If user does not exist, create them
       console.log(`User '${adminUsername}' not found. Creating new admin user.`);
-      const newAdmin: User = {
-        id: crypto.randomUUID(),
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(adminPassword, saltRounds);
+      console.log('Password hashed successfully.');
+
+      adminUser = await db.createUser({
         username: adminUsername,
         email: adminEmail,
         passwordHash,
@@ -41,22 +37,16 @@ async function createAdmin() {
         lastName: 'User',
         displayName: 'Administrator',
         avatar: 'https://i.pravatar.cc/150?u=admin',
-        sessionVersion: 1,
-      };
-      users.push(newAdmin);
+      });
+      console.log('Admin user created successfully.');
     }
 
-    // 5. Save the updated users array back to KV
-    await kv.set('users', users);
-    console.log('Successfully updated users in Vercel KV.');
-
-    // 6. Verify by fetching the user
-    const allUsers = await kv.get<User[]>('users') ?? [];
-    const admin = allUsers.find(u => u.username === adminUsername);
-    if (admin && admin.role === 'admin') {
-        console.log('Verification successful: Admin user is configured correctly.');
+    // 3. Verify the user
+    const verifiedUser = await db.findUserById(adminUser.id);
+    if (verifiedUser && verifiedUser.role === 'admin') {
+      console.log('Verification successful: Admin user is configured correctly.');
     } else {
-        throw new Error('Verification failed: Could not find admin user with admin role after update.');
+      throw new Error('Verification failed: Could not find admin user with admin role after update.');
     }
 
     console.log('Admin user script finished successfully! ✅');

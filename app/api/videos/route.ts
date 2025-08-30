@@ -9,13 +9,14 @@ export async function GET() {
     const payload = await verifySession();
     const userId = payload?.user?.id;
 
-    const slidesWithDynamicData = await db.getSlides(userId || undefined);
+    // Use the new, refactored db function
+    const videos = await db.getVideos({ currentUserId: userId });
 
-    // The db layer now returns the full structure, so we just need the slides part
-    return NextResponse.json({ slides: slidesWithDynamicData });
+    // Return the data under a 'videos' key
+    return NextResponse.json({ videos });
 
   } catch (error) {
-    console.error('Error reading slides data:', error);
+    console.error('Error reading videos data:', error);
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });
   }
 }

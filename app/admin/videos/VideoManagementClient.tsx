@@ -1,20 +1,21 @@
 'use client';
 
-import { Slide } from '@/lib/db';
+import { Video, User } from '@/lib/db'; // Changed from Slide
 import React, { useState } from 'react';
 import VideoEditModal from '@/components/admin/VideoEditModal';
 
 interface VideoManagementClientProps {
-  videos: Slide[];
+  videos: Video[]; // Changed from Slide[]
+  users: User[];
   createVideoAction: (formData: FormData) => Promise<void>;
   updateVideoAction: (formData: FormData) => Promise<void>;
   deleteVideoAction: (formData: FormData) => Promise<void>;
 }
 
-export default function VideoManagementClient({ videos, createVideoAction, updateVideoAction, deleteVideoAction }: VideoManagementClientProps) {
+export default function VideoManagementClient({ videos, users, createVideoAction, updateVideoAction, deleteVideoAction }: VideoManagementClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<Slide | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null); // Changed from Slide
 
   const handleOpenCreateModal = () => {
     setModalMode('create');
@@ -22,7 +23,7 @@ export default function VideoManagementClient({ videos, createVideoAction, updat
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (video: Slide) => {
+  const handleOpenEditModal = (video: Video) => { // Changed from Slide
     setModalMode('edit');
     setSelectedVideo(video);
     setIsModalOpen(true);
@@ -59,7 +60,7 @@ export default function VideoManagementClient({ videos, createVideoAction, updat
               <tr key={video.id} className="border-b border-gray-700 hover:bg-gray-700/50">
                 <td className="p-2 truncate" title={video.id}>{video.id.substring(0, 8)}...</td>
                 <td className="p-2">{video.description}</td>
-                <td className="p-2">{video.user}</td>
+                <td className="p-2">{video.username}</td>
                 <td className="p-2 flex gap-2">
                   <button
                     onClick={() => handleOpenEditModal(video)}
@@ -68,7 +69,7 @@ export default function VideoManagementClient({ videos, createVideoAction, updat
                     Edit
                   </button>
                   <form action={deleteVideoAction}>
-                    <input type="hidden" name="slideId" value={video.id} />
+                    <input type="hidden" name="videoId" value={video.id} />
                     <button
                       type="submit"
                       className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
@@ -86,6 +87,7 @@ export default function VideoManagementClient({ videos, createVideoAction, updat
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         video={selectedVideo}
+        users={users}
         createVideoAction={createVideoAction}
         updateVideoAction={updateVideoAction}
       />
