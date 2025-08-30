@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 
 interface TypingChallengeProps {
   challengeData: TypingChallengeData;
+  onChallengeComplete: () => void;
 }
 
-const TypingChallenge: React.FC<TypingChallengeProps> = ({ challengeData }) => {
+const TypingChallenge: React.FC<TypingChallengeProps> = ({ challengeData, onChallengeComplete }) => {
   const [currentPhrase, setCurrentPhrase] = useState('');
   const [userInput, setUserInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -26,6 +27,15 @@ const TypingChallenge: React.FC<TypingChallengeProps> = ({ challengeData }) => {
   useEffect(() => {
     selectNewPhrase();
   }, [selectNewPhrase]);
+
+  useEffect(() => {
+    if (isFinished) {
+      const timer = setTimeout(() => {
+        onChallengeComplete();
+      }, 2000); // Wait 2 seconds before navigating
+      return () => clearTimeout(timer);
+    }
+  }, [isFinished, onChallengeComplete]);
 
   const resetTest = () => {
     selectNewPhrase();

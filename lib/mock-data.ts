@@ -1,91 +1,108 @@
 import type { Grid, Slide } from './types';
 
-// Create a grid of mock slides with different types
+// The Labyrinth - A more complex and interconnected grid of slides
 export const mockGrid: Grid = {
+  // 1. Start: The Company Pitch (Center of the first room)
   '0,0': {
-    id: 'video_mock_1',
-    type: 'video',
-    userId: 'user_mock_1',
-    username: 'TestUser',
-    avatar: 'https://i.pravatar.cc/150?u=user_mock_1',
-    access: 'public',
-    createdAt: Date.now(),
-    initialLikes: 1337,
-    isLiked: false,
-    initialComments: 42,
-    x: 0,
-    y: 0,
-    data: {
-      description: 'Pionowy slajd 1 (0,0). Przesuń w dół!',
-      mp4Url: 'https://vod-progressive.pexels.com/video/856077/free-video-856077.mp4',
-      hlsUrl: 'https://content.jwplatform.com/manifests/vM7nH0Kl.m3u8',
-      poster: 'https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217',
-    },
-  },
-  '0,1': {
-    id: 'video_mock_2',
-    type: 'video',
-    userId: 'user_mock_2',
-    username: 'AnotherDev',
-    avatar: 'https://i.pravatar.cc/150?u=user_mock_2',
-    access: 'public',
-    createdAt: Date.now() - 1000 * 60 * 5, // 5 minutes ago
-    initialLikes: 9001,
-    isLiked: true,
-    initialComments: 128,
-    x: 0,
-    y: 1,
-    data: {
-      description: 'Centrum świata (0,1). Możesz iść w każdym kierunku!',
-      mp4Url: 'https://vod-progressive.pexels.com/video/854386/free-video-854386.mp4',
-      hlsUrl: 'https://test-streams.mux.dev/tos_ismc/main.m3u8',
-      poster: 'https://durian.blender.org/wp-content/uploads/2010/06/poster_sintel_web.jpg',
-    },
-  },
-  '1,1': {
-    id: 'html_mock_1',
+    id: 'company_pitch_1',
     type: 'html',
-    userId: 'user_mock_html',
-    username: 'HtmlWizard',
-    avatar: 'https://i.pravatar.cc/150?u=user_mock_html',
-    access: 'public',
-    createdAt: Date.now() - 1000 * 60 * 6, // 6 minutes ago
-    initialLikes: 100,
-    isLiked: false,
-    initialComments: 10,
-    x: 1,
-    y: 1,
+    x: 0, y: 0,
+    userId: 'corp_user', username: 'TheCorporation', avatar: 'https://i.pravatar.cc/150?u=corp',
+    access: 'public', createdAt: Date.now(), initialLikes: 2024, isLiked: false, initialComments: 10,
     data: {
-      description: 'Interaktywny slajd HTML (1,1).',
-      htmlContent: `
-        <div style="background-color: #2c3e50; color: white; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;">
-          <h1>Witaj na moim interaktywnym slajdzie!</h1>
-          <p>To jest prosty tekst HTML, który będzie renderowany bezpośrednio w aplikacji.</p>
-          <button onclick="alert('Kliknąłeś przycisk!')" style="padding: 10px 20px; font-size: 16px; margin-top: 20px; cursor: pointer; border: none; background-color: #3498db; color: white; border-radius: 5px;">
-            Kliknij mnie!
-          </button>
-        </div>
-      `,
+      type: 'COMPANY_PITCH',
+      description: "Welcome to Our Labyrinth! Choose a door.",
     },
   },
-  '0,2': {
-    id: 'video_mock_3',
-    type: 'video',
-    userId: 'user_mock_1',
-    username: 'TestUser',
-    avatar: 'https://i.pravatar.cc/150?u=user_mock_1',
-    access: 'public',
-    createdAt: Date.now() - 1000 * 60 * 10, // 10 minutes ago
-    initialLikes: 420,
-    isLiked: false,
-    initialComments: 69,
-    x: 0,
-    y: 2,
+
+  // 2. Down from Start: The Typing Challenge
+  '0,1': {
+    id: 'typing_challenge_1',
+    type: 'html',
+    x: 0, y: 1,
+    userId: 'user_typing', username: 'SpeedyKeys', avatar: 'https://i.pravatar.cc/150?u=speedy',
+    access: 'public', createdAt: Date.now(), initialLikes: 1337, isLiked: false, initialComments: 88,
     data: {
-      description: 'Pionowy slajd 3 (0,2). Tylko w górę!',
+      type: 'TYPING_CHALLENGE',
+      description: 'Prove your worth, typist!',
+      challengeData: {
+        phrases: [
+          'The labyrinth is full of secrets.',
+          'Navigate wisely through the digital corridors.',
+          'Every choice leads to a new discovery.',
+        ],
+        titles: {
+          slow: 'Cautious Explorer',
+          average: 'Adept Navigator',
+          fast: 'Labyrinth Runner',
+          insane: 'Master of the Maze',
+        },
+      },
+    },
+  },
+
+  // 3. Right from Start: The Quiz
+  '1,0': {
+    id: 'quiz_1',
+    type: 'html',
+    x: 1, y: 0,
+    userId: 'quiz_master', username: 'TheInquisitor', avatar: 'https://i.pravatar.cc/150?u=quiz',
+    access: 'public', createdAt: Date.now(), initialLikes: 101, isLiked: true, initialComments: 42,
+    data: {
+      type: 'QUIZ',
+      description: 'Your choice determines your path.',
+      quizData: {
+        question: 'What do you seek?',
+        answers: [
+          { text: 'Knowledge', nextSlide: { x: 1, y: -1 } }, // Leads to Data Viz
+          { text: 'Wonder', nextSlide: { x: 2, y: 0 } },    // Leads to Parallax
+        ],
+      },
+    },
+  },
+
+  // 4. Up from Quiz: Data Visualization
+  '1,-1': {
+    id: 'data_viz_1',
+    type: 'html',
+    x: 1, y: -1,
+    userId: 'data_scientist', username: 'Dr. Charts', avatar: 'https://i.pravatar.cc/150?u=charts',
+    access: 'public', createdAt: Date.now(), initialLikes: 789, isLiked: false, initialComments: 5,
+    data: {
+      type: 'DATA_VIZ',
+      description: 'The data behind the curtain.',
+      videoUrl: 'https://vod-progressive.pexels.com/video/854386/free-video-854386.mp4',
+      posterUrl: 'https://images.pexels.com/videos/854386/free-video-854386.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    },
+  },
+
+  // 5. Right from Quiz: Parallax Experience
+  '2,0': {
+    id: 'parallax_1',
+    type: 'html',
+    x: 2, y: 0,
+    userId: 'artist', username: 'VisualDreamer', avatar: 'https://i.pravatar.cc/150?u=dreamer',
+    access: 'public', createdAt: Date.now(), initialLikes: 404, isLiked: false, initialComments: 12,
+    data: {
+      type: 'PARALLAX',
+      description: 'A journey through layers of reality.',
+      videoUrl: '', // Not needed for this implementation, using poster
+      posterUrl: 'https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    },
+  },
+
+  // 6. Below Typing Challenge: A normal video as a reward
+  '0,2': {
+    id: 'video_reward_1',
+    type: 'video',
+    x: 0, y: 2,
+    userId: 'user_mock_1', username: 'TestUser', avatar: 'https://i.pravatar.cc/150?u=user_mock_1',
+    access: 'public', createdAt: Date.now(), initialLikes: 500, isLiked: false, initialComments: 20,
+    data: {
+      description: 'You have successfully navigated a part of the maze!',
       mp4Url: 'https://vod-progressive.pexels.com/video/857195/free-video-857195.mp4',
-      hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-      poster: 'https://orange.blender.org/wp-content/themes/orange/images/splash.jpg',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
   },
   '1,0': {
@@ -126,92 +143,3 @@ export const mockGrid: Grid = {
     },
   },
 };
-
-const papiezGameSlide: Slide = {
-    id: 'papiez-game',
-    type: 'html', // It's an html slide, so it will be rendered by HtmlContent
-    userId: 'user_pope_game',
-    username: 'Papież Programista',
-    avatar: 'https://i.pravatar.cc/150?u=user_pope_game',
-    access: 'public',
-    createdAt: Date.now(),
-    initialLikes: 2137,
-    isLiked: false,
-    initialComments: 37,
-    x: 3,
-    y: 3,
-    data: {
-        description: 'Papież: Gra w bycie miłym',
-        type: 'GAME_POPE', // The new custom type inside data
-        gameData: {
-            scenarios: [
-                {
-                    text: 'Ktoś próbuje Ci wcisnąć zestaw naczyń „Ceper”. Na koniec mówi, że to dar od Niebios.',
-                    choices: {
-                        'dopyskuj': '+3 punkty',
-                        'powiedz_milo': '+5 punktów'
-                    }
-                },
-                {
-                    text: 'Idziesz w tłumie, a jakiś typ daje Ci kuksańca, po czym krzyczy, że to pozdrowienie od kibiców z Krakowa.',
-                    choices: {
-                        'dopyskuj': '+3 punkty',
-                        'powiedz_milo': '+5 punktów'
-                    }
-                },
-                {
-                    text: 'Młody chłopak podchodzi do Ciebie i pyta, czy masz 2 złote na bułkę. W tle słychać, jak jego kolega szepcze: „na browara mu daj!”',
-                    choices: {
-                        'dopyskuj': '+3 punkty',
-                        'powiedz_milo': '+5 punktów'
-                    }
-                },
-            ],
-            bossFight: {
-                text: '„Boss Fight”: Zbliża się do Ciebie Kardynał i pyta: „Co właściwie robisz na Tingtongu?”',
-                choices: {
-                    'dopyskuj': '+3 punkty',
-                    'powiedz_milo': '+5 punktów'
-                }
-            }
-        }
-    }
-};
-
-mockGrid['3,3'] = papiezGameSlide;
-
-const typingChallengeSlide: Slide = {
-    id: 'typing-challenge',
-    type: 'html',
-    userId: 'user_typing_challenge',
-    username: 'Klawiaturowy Mistrz',
-    avatar: 'https://i.pravatar.cc/150?u=user_typing_challenge',
-    access: 'public',
-    createdAt: Date.now(),
-    initialLikes: 1337,
-    isLiked: false,
-    initialComments: 101,
-    x: 3,
-    y: 4,
-    data: {
-        description: 'Wielki Test Szybkości Pisania',
-        type: 'TYPING_CHALLENGE',
-        challengeData: {
-            phrases: [
-                'Jednorożce programują w C++',
-                'Moja grzywka jest binarna i na dodatek gubi pakiety.',
-                'Kot Schrödingera zagrał w szachy z Einsteinem i obaj byli martwi.',
-                'Wczorajsze pierogi są dziś chmurą obliczeniową.',
-                'AI oskarżyło mnie o zbyt dużą kreatywność i zaczęło mrugać literą B.',
-            ],
-            titles: {
-                slow: 'Programista-Poeta (pisze wolno, ale z uczuciem)',
-                average: 'Mistrz Klawiatury (zrobi to, ale bez fajerwerków)',
-                fast: 'Turbo-Pikselowy Ninja (szybszy niż błąd w kompilacji)',
-                insane: 'AI-Szybki Klawiaturowy Absurdysta!',
-            }
-        }
-    }
-};
-
-mockGrid['3,4'] = typingChallengeSlide;

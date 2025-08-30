@@ -57,6 +57,21 @@ export interface TypingChallengeData {
   };
 }
 
+// Specific data for Quiz
+export interface QuizData {
+  question: string;
+  answers: {
+    text: string;
+    nextSlide: { x: number; y: number };
+  }[];
+}
+
+// Specific data for DataViz and Parallax
+export interface MediaData {
+    videoUrl: string;
+    posterUrl: string;
+}
+
 // Specific data for an HTML slide, which can be regular HTML or a game
 export type HtmlSlideData = {
   description?: string; // Optional description for HTML slides
@@ -74,6 +89,27 @@ export type HtmlSlideData = {
       htmlContent?: never;
       type: 'TYPING_CHALLENGE';
       challengeData: TypingChallengeData;
+    }
+  | {
+      htmlContent?: never;
+      type: 'QUIZ';
+      quizData: QuizData;
+    }
+  | {
+      htmlContent?: never;
+      type: 'COMPANY_PITCH';
+    }
+  | {
+      htmlContent?: never;
+      type: 'DATA_VIZ';
+      videoUrl: string;
+      posterUrl: string;
+    }
+  | {
+      htmlContent?: never;
+      type: 'PARALLAX';
+      videoUrl: string;
+      posterUrl: string;
     }
 );
 
