@@ -13,9 +13,11 @@ interface VideoPlayerProps {
   isSecretActive: boolean;
   videoId: string;
   videoRef: React.RefObject<HTMLVideoElement>;
+  onTimeUpdate: (videoId: string, time: number) => void;
+  startTime: number;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, videoRef }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, videoRef, onTimeUpdate, startTime }) => {
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -49,10 +51,18 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     if (!video) return;
 
     if (isActive) {
+      // If we have a saved start time, apply it.
+      // The check ensures we don't seek unnecessarily if already close to the time.
+      if (startTime > 0 && Math.abs(video.currentTime - startTime) > 0.5) {
+        video.currentTime = startTime;
+      }
       video.play().catch(error => console.error("Autoplay was prevented:", error));
     } else {
+      // When video becomes inactive, save its current time and pause it.
+      if (!video.paused && video.currentTime > 0) {
+        onTimeUpdate(videoId, video.currentTime);
+      }
       video.pause();
-      video.currentTime = 0;
     }
 
     const updatePlayingState = () => setIsPlaying(!video.paused);
@@ -62,7 +72,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
       video.removeEventListener('play', updatePlayingState);
       video.removeEventListener('pause', updatePlayingState);
     }
-  }, [isActive, videoRef]);
+  }, [isActive, videoRef, onTimeUpdate, startTime, videoId]);
 
   const triggerLikeAnimation = () => {
     setShowHeart(true);
@@ -92,6 +102,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
           if (video.paused) {
             video.play();
           } else {
+            onTimeUpdate(videoId, video.currentTime); // Save time on manual pause
             video.pause();
             triggerPauseAnimation();
           }

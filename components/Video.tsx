@@ -31,9 +31,11 @@ interface VideoProps {
   openAccountPanel: () => void;
   openCommentsModal: () => void;
   openInfoModal: () => void;
+  onTimeUpdate: (videoId: string, time: number) => void;
+  startTime: number;
 }
 
-const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal }) => {
+const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal, onTimeUpdate, startTime }) => {
   const { isLoggedIn, isLoading } = useUser();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -56,6 +58,8 @@ const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAcco
           isActive={isActive && !showSecretOverlay}
           isSecretActive={showSecretOverlay}
           videoId={video.id} // Pass videoId instead of likeId
+          onTimeUpdate={onTimeUpdate}
+          startTime={startTime}
         />
 
         {showSecretOverlay && (

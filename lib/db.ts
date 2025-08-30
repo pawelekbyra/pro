@@ -5,7 +5,9 @@ export const keys = {
   user: (userId: string) => `user:${userId}`,
   emailToId: (email: string) => `email_to_id:${email.toLowerCase()}`,
   usernameToId: (username: string) => `username_to_id:${username.toLowerCase()}`,
-  userLikes: (userId: string) => `user_likes:${userId}`, // Set of slide IDs
+  userLikes: (userId: string) => `user_likes:${userId}`, // Set of video IDs
+  userVideos: (userId: string) => `user_videos:${userId}`, // Set of video IDs
+  userComments: (userId: string) => `user_comments:${userId}`, // Set of comment IDs
 
   video: (videoId: string) => `video:${videoId}`,
   videoLikes: (videoId: string) => `video_likes:${videoId}`, // Set of user IDs
@@ -145,13 +147,51 @@ export const db = {
       return false;
     }
 
-    // This is a simplified deletion. In a real app, you'd also have to
-    // handle content created by the user (videos, comments, etc.)
-    const tx = kv!.multi();
-    tx.del(keys.user(userId));
-    tx.del(keys.emailToId(user.email));
-    tx.del(keys.usernameToId(user.username));
-    await tx.exec();
+    // 1. Delete all videos created by the user
+    const videoIds = await kv!.smembers(keys.userVideos(userId));
+    for (const videoId of videoIds) {
+      await this.deleteVideo(videoId as string);
+    }
+
+    // 2. Delete all comments made by the user
+    const commentIds = await kv!.smembers(keys.userComments(userId));
+    if (commentIds.length > 0) {
+      const commentKeys = commentIds.map(id => keys.comment(id as string));
+      const comments = await kv!.mget<Comment[]>(...commentKeys);
+      const deleteCommentsTx = kv!.multi();
+      for (const comment of comments) {
+        if (comment) {
+          // Remove comment ID from the video's list of comments
+          deleteCommentsTx.lrem(keys.videoComments(comment.videoId), 0, comment.id);
+        }
+      }
+      // Delete all comment objects from this user
+      deleteCommentsTx.del(...commentKeys);
+      // Delete the user's set of comments
+      deleteCommentsTx.del(keys.userComments(userId));
+      await deleteCommentsTx.exec();
+    }
+
+    // 3. Clean up all likes given by the user
+    const likedVideoIds = await kv!.smembers(keys.userLikes(userId));
+    if (likedVideoIds.length > 0) {
+      const deleteLikesTx = kv!.multi();
+      for (const videoId of likedVideoIds) {
+        // Remove user's ID from each video's like set
+        deleteLikesTx.srem(keys.videoLikes(videoId as string), userId);
+      }
+      // Delete the user's set of likes
+      deleteLikesTx.del(keys.userLikes(userId));
+      await deleteLikesTx.exec();
+    }
+
+    // 4. Delete the user object and their indices
+    const finalDeleteTx = kv!.multi();
+    finalDeleteTx.del(keys.user(userId));
+    finalDeleteTx.del(keys.emailToId(user.email));
+    finalDeleteTx.del(keys.usernameToId(user.username));
+    finalDeleteTx.del(keys.userVideos(userId)); // Clean up the user's video set key
+    await finalDeleteTx.exec();
 
     return true;
   },
@@ -225,6 +265,7 @@ export const db = {
     const tx = kv!.multi();
     tx.set(keys.video(id), newVideo);
     tx.zadd(keys.allVideos(), { score: createdAt, member: id });
+    tx.sadd(keys.userVideos(newVideo.userId), id); // Add video to user's video set
     await tx.exec();
 
     return newVideo;
@@ -246,12 +287,29 @@ export const db = {
       return false;
     }
 
+    // Get associated data IDs before starting the transaction
+    const commentIds = await kv!.lrange(keys.videoComments(videoId), 0, -1);
+    const userIdsWhoLiked = await kv!.smembers(keys.videoLikes(videoId));
+
     const tx = kv!.multi();
+
+    // 1. Delete all individual comment objects
+    if (commentIds.length > 0) {
+      const commentKeys = commentIds.map(id => keys.comment(id as string));
+      tx.del(...commentKeys);
+    }
+
+    // 2. Remove this video from each user's set of liked videos
+    for (const userId of userIdsWhoLiked) {
+      tx.srem(keys.userLikes(userId as string), videoId);
+    }
+
+    // 3. Delete the core video data
     tx.del(keys.video(videoId)); // Delete video object
-    tx.del(keys.videoLikes(videoId)); // Delete likes set
-    tx.del(keys.videoComments(videoId)); // Delete comments list
-    tx.zrem(keys.allVideos(), videoId); // Remove from sorted set
-    // Note: We are not deleting individual comment objects here, which might be desired
+    tx.del(keys.videoLikes(videoId)); // Delete the set of likes for this video
+    tx.del(keys.videoComments(videoId)); // Delete the list of comments for this video
+    tx.zrem(keys.allVideos(), videoId); // Remove from the global sorted set of videos
+
     await tx.exec();
 
     return true;
@@ -323,6 +381,7 @@ export const db = {
     const tx = kv!.multi();
     tx.set(keys.comment(commentId), newComment);
     tx.lpush(keys.videoComments(videoId), commentId);
+    tx.sadd(keys.userComments(userId), commentId); // Add comment to user's comment set
     await tx.exec();
 
     // Return the comment hydrated with user info

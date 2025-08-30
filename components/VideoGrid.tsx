@@ -1,29 +1,67 @@
 "use client";
 
-import React, { useState, TouchEvent } from 'react';
+import React, { useState, TouchEvent, useEffect, useCallback } from 'react';
 import { Grid, Slide } from '@/lib/mock-data';
 import Video from './Video';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import AccountPanel from './AccountPanel';
 import CommentsModal from './CommentsModal';
 import InfoModal from './InfoModal';
-
-interface VideoGridProps {
-  initialGrid: Grid;
-}
+import { Skeleton } from './ui/skeleton';
 
 const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe in pixels
+const PREFETCH_THRESHOLD = 2; // How many videos away from the end to trigger a new fetch
 
-const VideoGrid: React.FC<VideoGridProps> = ({ initialGrid }) => {
-  const [grid] = useState<Grid>(initialGrid);
+const VideoGrid: React.FC = () => {
+  const [grid, setGrid] = useState<Grid>({});
   const [activeCoordinates, setActiveCoordinates] = useState({ x: 0, y: 0 });
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+
+  // Data fetching state
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
 
   // State and handlers for modals
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
+  const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
+
+  const fetchVideos = useCallback(async () => {
+    if (!hasMore || isLoading) return;
+    console.log(`Fetching page ${page}`);
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/videos?page=${page}&limit=5`);
+      if (!response.ok) throw new Error('Failed to fetch videos');
+      const data = await response.json();
+
+      if (Object.keys(data.grid).length === 0) {
+        setHasMore(false);
+      } else {
+        setGrid(prevGrid => ({ ...prevGrid, ...data.grid }));
+        setPage(prevPage => prevPage + 1);
+      }
+    } catch (error) {
+      console.error("Failed to fetch videos:", error);
+      // Optionally, handle fetch errors in the UI
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, hasMore, isLoading]);
+
+  useEffect(() => {
+    // Fetch initial data
+    fetchVideos();
+  }, [fetchVideos]);
+
+  const handleTimeUpdate = (videoId: string, time: number) => {
+    if (time > 0.1) {
+      setPlaybackTimes(prev => ({ ...prev, [videoId]: time }));
+    }
+  };
 
   const openAccountPanel = () => setIsAccountPanelOpen(true);
   const closeAccountPanel = () => setIsAccountPanelOpen(false);
@@ -37,7 +75,6 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialGrid }) => {
   const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen || isTopBarModalOpen;
 
   const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-    if (isAnyModalOpen) return;
     setTouchStart({
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
@@ -45,21 +82,21 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialGrid }) => {
   };
 
   const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
-    if (!touchStart || isAnyModalOpen) return;
-
+    if (!touchStart) return;
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
-
     const deltaX = touchEndX - touchStart.x;
     const deltaY = touchEndY - touchStart.y;
 
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-        if (deltaX > 0) move('left'); else move('right');
-      }
-    } else {
-      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-        if (deltaY > 0) move('up'); else move('down');
+    if (!isAnyModalOpen) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+          if (deltaX > 0) move('left'); else move('right');
+        }
+      } else {
+        if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+          if (deltaY > 0) move('up'); else move('down');
+        }
       }
     }
     setTouchStart(null);
@@ -76,6 +113,12 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialGrid }) => {
 
     if (grid[`${nextCoords.x},${nextCoords.y}`]) {
       setActiveCoordinates(nextCoords);
+
+      // Check if we need to prefetch more videos
+      const currentMaxY = (page - 1) * 5 - 1;
+      if (direction === 'down' && nextCoords.y >= currentMaxY - PREFETCH_THRESHOLD) {
+        fetchVideos();
+      }
     }
   };
 
@@ -95,13 +138,34 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialGrid }) => {
     return slidesToRender;
   };
 
+  // Initial loading skeleton
+  if (isLoading && page === 1) {
+    return (
+      <div className="relative h-screen w-screen overflow-hidden bg-black" style={{ height: 'var(--app-height)' }}>
+        <div className="absolute top-0 left-0 w-full z-30 flex justify-center items-center" style={{ height: 'var(--topbar-height)', paddingTop: 'var(--safe-area-top)' }}>
+          <Skeleton className="h-4 w-28" />
+        </div>
+        <div className="absolute right-2 flex flex-col items-center gap-4 z-20" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-10 w-10" />
+        </div>
+        <div className="absolute bottom-0 left-0 w-full z-20 p-4" style={{ paddingBottom: 'calc(10px + var(--safe-area-bottom))' }}>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+      </div>
+    );
+  }
+
   const slidesToRender = getRenderableSlides();
   const activeSlide = slidesToRender.find(s => s.x === activeCoordinates.x && s.y === activeCoordinates.y);
 
-  if (!activeSlide) {
+  if (!activeSlide && !isLoading) {
     return (
       <div className="h-screen w-screen bg-black flex items-center justify-center text-white">
-        Error: Slide not found at ({activeCoordinates.x}, {activeCoordinates.y}).
+        No videos found.
       </div>
     );
   }
@@ -112,53 +176,62 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialGrid }) => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <div
-        className="relative h-full w-full transition-transform duration-300 ease-in-out"
-        style={{ transform: `translateX(${-activeCoordinates.x * 100}%) translateY(${-activeCoordinates.y * 100}%)` }}
-      >
-        {slidesToRender.map((slide) => (
-          <div
-            className="absolute h-full w-full"
-            key={slide.id}
-            style={{ left: `${slide.x * 100}%`, top: `${slide.y * 100}%` }}
-          >
-            <Video
-              video={slide}
-              isActive={slide.x === activeCoordinates.x && slide.y === activeCoordinates.y && !isAnyModalOpen}
-              setIsModalOpen={setIsTopBarModalOpen}
-              openAccountPanel={openAccountPanel}
-              openCommentsModal={openCommentsModal}
-              openInfoModal={openInfoModal}
-            />
-          </div>
-        ))}
-      </div>
+      {activeSlide && (
+        <div
+          className="relative h-full w-full transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(${-activeCoordinates.x * 100}%) translateY(${-activeCoordinates.y * 100}%)` }}
+        >
+          {slidesToRender.map((slide) => (
+            <div
+              className="absolute h-full w-full"
+              key={slide.id}
+              style={{ left: `${slide.x * 100}%`, top: `${slide.y * 100}%` }}
+            >
+              <Video
+                video={slide}
+                isActive={slide.x === activeCoordinates.x && slide.y === activeCoordinates.y && !isAnyModalOpen}
+                setIsModalOpen={setIsTopBarModalOpen}
+                openAccountPanel={openAccountPanel}
+                openCommentsModal={openCommentsModal}
+                openInfoModal={openInfoModal}
+                onTimeUpdate={handleTimeUpdate}
+                startTime={playbackTimes[slide.id] || 0}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Navigation Arrows Overlay */}
-      <div className="absolute inset-0 pointer-events-none text-white/50 z-10">
-        {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && (
-          <ArrowUp className="absolute top-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
-        )}
-        {grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] && (
-          <ArrowDown className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
-        )}
-        {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && (
-          <ArrowLeft className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />
-        )}
-        {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && (
-          <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />
-        )}
-      </div>
+      {activeSlide && (
+        <div className="absolute inset-0 pointer-events-none text-white/50 z-10">
+          {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && (
+            <ArrowUp className="absolute top-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
+          )}
+          {(grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] || hasMore) && (
+            <ArrowDown className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
+          )}
+          {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && (
+            <ArrowLeft className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />
+          )}
+          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && (
+            <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />
+          )}
+        </div>
+      )}
 
-      {/* Modals */}
-      <AccountPanel isOpen={isAccountPanelOpen} onClose={closeAccountPanel} />
-      <CommentsModal
-        isOpen={isCommentsModalOpen}
-        onClose={closeCommentsModal}
-        videoId={activeSlide.id}
-        initialCommentsCount={activeSlide.initialComments}
-      />
-      <InfoModal isOpen={isInfoModalOpen} onClose={closeInfoModal} />
+      {activeSlide && (
+        <>
+          <AccountPanel isOpen={isAccountPanelOpen} onClose={closeAccountPanel} />
+          <CommentsModal
+            isOpen={isCommentsModalOpen}
+            onClose={closeCommentsModal}
+            videoId={activeSlide.id}
+            initialCommentsCount={activeSlide.initialComments}
+          />
+          <InfoModal isOpen={isInfoModalOpen} onClose={closeInfoModal} />
+        </>
+      )}
     </div>
   );
 };
