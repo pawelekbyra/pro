@@ -44,8 +44,19 @@ export interface HtmlSlide extends BaseSlide {
   data: HtmlSlideData;
 }
 
+// Specific data for a game slide
+export interface GameSlideData {
+  description?: string;
+}
+
+// Game slide type
+export interface GameSlide extends BaseSlide {
+  type: 'game';
+  data: GameSlideData;
+}
+
 // A union type for any possible slide
-export type Slide = VideoSlide | HtmlSlide;
+export type Slide = VideoSlide | HtmlSlide | GameSlide;
 
 // The grid will be a dictionary of slides
 export type Grid = {
