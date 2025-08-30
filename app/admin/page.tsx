@@ -5,7 +5,7 @@ export default function AdminPage() {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Welcome to the Admin Dashboard</h2>
-      <p className="mb-6">This is where you can manage users and videos.</p>
+      <p className="mb-6">This is where you can manage users and slides.</p>
       <nav>
         <ul className="space-y-2">
           <li>
@@ -14,8 +14,8 @@ export default function AdminPage() {
             </Link>
           </li>
           <li>
-            <Link href="/admin/videos" className="text-lg text-pink-400 hover:underline">
-              Manage Videos
+            <Link href="/admin/slides" className="text-lg text-pink-400 hover:underline">
+              Manage Slides
             </Link>
           </li>
         </ul>

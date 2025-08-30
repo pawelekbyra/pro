@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Slide, VideoSlide } from '@/lib/types'; // Updated import
+import { Slide, VideoSlide } from '@/lib/types';
 import { User } from '@/lib/db.interfaces';
+
+type ActionResponse = { success: boolean; error?: string };
 
 interface SlideEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   slide: Slide | null;
   users: User[];
-  createSlideAction: (formData: FormData) => Promise<void>;
-  updateSlideAction: (formData: FormData) => Promise<void>;
+  createSlideAction: (formData: FormData) => Promise<ActionResponse>;
+  updateSlideAction: (formData: FormData) => Promise<ActionResponse>;
 }
 
 function SubmitButton({ isEditing }: { isEditing: boolean }) {
@@ -37,23 +39,28 @@ export default function SlideEditModal({
   updateSlideAction,
 }: SlideEditModalProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [error, setError] = useState<string | null>(null);
   const isEditing = slide !== null;
   const videoData = isEditing && slide?.type === 'video' ? (slide as VideoSlide).data : null;
 
   useEffect(() => {
     if (!isOpen) {
       formRef.current?.reset();
+      setError(null);
     }
   }, [isOpen, slide]);
 
   const handleFormAction = async (formData: FormData) => {
-    if (isEditing) {
-      await updateSlideAction(formData);
+    const action = isEditing ? updateSlideAction : createSlideAction;
+    const result = await action(formData);
+
+    if (result.success) {
+      formRef.current?.reset();
+      setError(null);
+      onClose();
     } else {
-      await createSlideAction(formData);
+      setError(result.error || 'An unknown error occurred.');
     }
-    formRef.current?.reset();
-    onClose();
   };
 
   if (!isOpen) {
@@ -92,11 +99,11 @@ export default function SlideEditModal({
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
                 <label htmlFor="x" className="block text-sm font-medium text-gray-300 mb-1">Coordinate X</label>
-                <input type="number" id="x" name="x" defaultValue={slide?.x ?? ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+                <input type="number" id="x" name="x" defaultValue={slide?.x ?? ''} required disabled={isEditing} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white disabled:bg-gray-600 disabled:cursor-not-allowed" />
             </div>
             <div>
                 <label htmlFor="y" className="block text-sm font-medium text-gray-300 mb-1">Coordinate Y</label>
-                <input type="number" id="y" name="y" defaultValue={slide?.y ?? ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+                <input type="number" id="y" name="y" defaultValue={slide?.y ?? ''} required disabled={isEditing} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white disabled:bg-gray-600 disabled:cursor-not-allowed" />
             </div>
           </div>
 
@@ -122,6 +129,13 @@ export default function SlideEditModal({
               <option value="secret">Secret</option>
             </select>
           </div>
+
+          {error && (
+            <div className="bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md mb-4">
+              <p className="font-bold">Error</p>
+              <p>{error}</p>
+            </div>
+          )}
 
           <div className="flex justify-end gap-4 mt-6">
             <button type="button" onClick={onClose} className="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-500 text-white">

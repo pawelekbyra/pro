@@ -5,18 +5,32 @@ import { User } from '@/lib/db.interfaces';
 import React, { useState } from 'react';
 import SlideEditModal from '@/components/admin/SlideEditModal';
 
+type ActionResponse = { success: boolean; error?: string };
+
 interface SlideManagementClientProps {
   slides: Slide[];
   users: User[];
-  createSlideAction: (formData: FormData) => Promise<void>;
-  updateSlideAction: (formData: FormData) => Promise<void>;
-  deleteSlideAction: (formData: FormData) => Promise<void>;
+  createSlideAction: (formData: FormData) => Promise<ActionResponse>;
+  updateSlideAction: (formData: FormData) => Promise<ActionResponse>;
+  deleteSlideAction: (formData: FormData) => Promise<ActionResponse>;
 }
 
 export default function SlideManagementClient({ slides, users, createSlideAction, updateSlideAction, deleteSlideAction }: SlideManagementClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [selectedSlide, setSelectedSlide] = useState<Slide | null>(null);
+
+  const handleDelete = async (slideId: string) => {
+    if (confirm('Are you sure you want to delete this slide?')) {
+      const formData = new FormData();
+      formData.append('slideId', slideId);
+      const result = await deleteSlideAction(formData);
+      if (!result.success) {
+        alert(`Error deleting slide: ${result.error}`);
+      }
+      // The page will be revalidated by the server action on success
+    }
+  };
 
   const handleOpenCreateModal = () => {
     setModalMode('create');
@@ -81,15 +95,12 @@ export default function SlideManagementClient({ slides, users, createSlideAction
                   >
                     Edit
                   </button>
-                  <form action={deleteSlideAction}>
-                    <input type="hidden" name="slideId" value={slide.id} />
-                    <button
-                      type="submit"
-                      className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
-                    >
-                      Delete
-                    </button>
-                  </form>
+                  <button
+                    onClick={() => handleDelete(slide.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

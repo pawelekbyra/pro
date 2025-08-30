@@ -1,6 +1,6 @@
 import { kv } from './kv';
 import { Slide } from './types';
-import { User, Comment } from './db.interfaces';
+import { User, Comment, Notification } from './db.interfaces';
 
 // --- Key Generation Functions ---
 export const keys = {
