@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import VideoPlayer from './VideoPlayer';
@@ -20,9 +20,22 @@ interface DataVizProps {
 }
 
 const DataViz: React.FC<DataVizProps> = ({ videoUrl, posterUrl }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   return (
     <div className="relative h-full w-full bg-black">
-      <VideoPlayer src={videoUrl} poster={posterUrl} isVisible={true} onTimeUpdate={() => {}} startTime={0} onPlaybackFailure={() => {}} />
+      <VideoPlayer
+        mp4Src={videoUrl}
+        poster={posterUrl}
+        isActive={true}
+        isSecretActive={false}
+        videoId="dataviz-video"
+        videoRef={videoRef}
+        onTimeUpdate={() => {}}
+        startTime={0}
+        onPlaybackFailure={() => {}}
+        isPlaying={true}
+      />
       <motion.div
         className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-black bg-opacity-50 p-4 rounded-lg"
         initial={{ opacity: 0, y: 50 }}
