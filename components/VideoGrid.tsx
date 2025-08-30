@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, TouchEvent, useEffect, useCallback } from 'react';
-import { Grid, Slide } from '@/lib/mock-data';
-import Video from './Video';
+import { Grid, Slide } from '@/lib/types';
+import SlideRenderer from './SlideRenderer';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import AccountPanel from './AccountPanel';
 import CommentsModal from './CommentsModal';
@@ -29,50 +29,25 @@ const VideoGrid: React.FC = () => {
   const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
 
-  const fetchMoreVideos = useCallback(async () => {
-    if (!hasMore || isLoading) return;
-    console.log(`Fetching page ${page}`);
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/videos?page=${page}&limit=5`);
-      if (!response.ok) throw new Error('Failed to fetch videos');
-      const data = await response.json();
-
-      if (Object.keys(data.grid).length === 0) {
-        setHasMore(false);
-      } else {
-        setGrid(prevGrid => ({ ...prevGrid, ...data.grid }));
-        setPage(prevPage => prevPage + 1);
-      }
-    } catch (error) {
-      console.error("Failed to fetch videos:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, hasMore, isLoading]);
-
+  // The new endpoint `/api/slides` currently returns the entire mock grid at once.
+  // The logic for pagination (`fetchMoreVideos`, `page`, `hasMore`) is kept here
+  // commented out, in case we want to re-introduce pagination later.
   useEffect(() => {
-    const fetchInitialVideos = async () => {
+    const fetchSlides = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch(`/api/videos?page=1&limit=5`);
-        if (!response.ok) throw new Error('Failed to fetch initial videos');
+        const response = await fetch('/api/slides');
+        if (!response.ok) throw new Error('Failed to fetch slides');
         const data = await response.json();
-
-        if (Object.keys(data.grid).length === 0) {
-          setHasMore(false);
-        } else {
-          setGrid(data.grid);
-          setPage(2);
-        }
+        setGrid(data.grid);
       } catch (error) {
-        console.error("Failed to fetch initial videos:", error);
-        setHasMore(false);
+        console.error("Failed to fetch slides:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchInitialVideos();
+    fetchSlides();
   }, []);
 
   const handleTimeUpdate = (videoId: string, time: number) => {
@@ -132,11 +107,8 @@ const VideoGrid: React.FC = () => {
     if (grid[`${nextCoords.x},${nextCoords.y}`]) {
       setActiveCoordinates(nextCoords);
 
-      // Check if we need to prefetch more videos
-      const currentMaxY = (page - 1) * 5 - 1;
-      if (direction === 'down' && nextCoords.y >= currentMaxY - PREFETCH_THRESHOLD) {
-        fetchMoreVideos();
-      }
+      // The prefetching logic is removed for now. It can be re-introduced
+      // if we bring back pagination for the slides.
     }
   };
 
@@ -205,8 +177,8 @@ const VideoGrid: React.FC = () => {
               key={slide.id}
               style={{ left: `${slide.x * 100}%`, top: `${slide.y * 100}%` }}
             >
-              <Video
-                video={slide}
+              <SlideRenderer
+                slide={slide}
                 isActive={slide.x === activeCoordinates.x && slide.y === activeCoordinates.y && !isAnyModalOpen}
                 setIsModalOpen={setIsTopBarModalOpen}
                 openAccountPanel={openAccountPanel}
@@ -215,11 +187,12 @@ const VideoGrid: React.FC = () => {
                 onTimeUpdate={handleTimeUpdate}
                 startTime={playbackTimes[slide.id] || 0}
                 onPlaybackFailure={() => {
-                  console.log("Playback failed for the current video. Moving to the next one.");
-                  if (grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] || hasMore) {
+                  console.log("Playback failed for the current slide. Moving to the next one.");
+                  // The hasMore logic is removed for now, but we can add it back if we re-introduce pagination
+                  if (grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`]) {
                     move('down');
                   } else {
-                    console.error("Playback failed and no next video to move to.");
+                    console.error("Playback failed and no next slide to move to.");
                   }
                 }}
               />
@@ -234,7 +207,7 @@ const VideoGrid: React.FC = () => {
           {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && (
             <ArrowUp className="absolute top-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
           )}
-          {(grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] || hasMore) && (
+          {grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] && (
             <ArrowDown className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
           )}
           {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && (
