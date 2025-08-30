@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
-import { mockGrid } from '@/lib/mock-data';
+import { mockGrid, Grid, Slide, HydratedVideo } from '@/lib/mock-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,9 +20,19 @@ export async function GET() {
     // Use the new, refactored db function
     const videos = await db.getVideos({ currentUserId: userId });
 
-    // Return the data under a 'videos' key
-    // This part will need to be updated in Phase 2 to return grid data from the DB
-    return NextResponse.json({ videos });
+    // Transform the videos array into a grid
+    const grid: Grid = {};
+    videos.forEach((video, index) => {
+      const slide: Slide = {
+        ...(video as HydratedVideo),
+        x: 0,
+        y: index,
+      };
+      grid[`0,${index}`] = slide;
+    });
+
+    // Return the data in grid format
+    return NextResponse.json({ grid });
 
   } catch (error) {
     console.error('Error reading videos data:', error);
