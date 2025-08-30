@@ -1,17 +1,34 @@
 import { db, Video, User } from '@/lib/db';
 import React from 'react';
-
-export const dynamic = 'force-dynamic';
+import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import VideoManagementClient from './VideoManagementClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function VideoManagementPage() {
-  // Assuming getVideos doesn't need arguments for the admin view for now
-  const videos = await db.getVideos({ count: 100 }); // Fetch up to 100 videos for admin page
-  const users = await db.getAllUsers(); // We need users for the form
+  const session = await verifySession();
+  if (!session || session.user.role !== 'admin') {
+    return (
+        <div className="p-4">
+            <h2 className="text-2xl font-semibold mb-4">Unauthorized</h2>
+            <p>You must be an admin to view this page.</p>
+        </div>
+    );
+  }
+
+  const videos = await db.getVideos({ count: 100 });
+  const users = await db.getAllUsers();
 
   async function createVideoAction(formData: FormData) {
     'use server';
+
+    // Re-verify for the server action just in case
+    const currentSession = await verifySession();
+    if (!currentSession || currentSession.user.role !== 'admin') {
+      console.error('Unauthorized: Only admins can create videos.');
+      return;
+    }
 
     const authorId = formData.get('userId') as string;
     const author = users.find(u => u.id === authorId);
@@ -42,6 +59,13 @@ export default async function VideoManagementPage() {
 
   async function updateVideoAction(formData: FormData) {
     'use server';
+
+    const currentSession = await verifySession();
+    if (!currentSession || currentSession.user.role !== 'admin') {
+      console.error('Unauthorized: Only admins can update videos.');
+      return;
+    }
+
     const videoId = formData.get('videoId') as string;
     if (!videoId) return;
 
@@ -62,6 +86,13 @@ export default async function VideoManagementPage() {
 
   async function deleteVideoAction(formData: FormData) {
     'use server';
+
+    const currentSession = await verifySession();
+    if (!currentSession || currentSession.user.role !== 'admin') {
+      console.error('Unauthorized: Only admins can delete videos.');
+      return;
+    }
+
     const videoId = formData.get('videoId') as string;
     if (!videoId) {
       return;
