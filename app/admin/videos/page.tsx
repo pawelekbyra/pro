@@ -1,4 +1,4 @@
-import { db, Slide } from '@/lib/db';
+import { db, Video, User } from '@/lib/db';
 import React from 'react';
 
 export const dynamic = 'force-dynamic';
@@ -6,46 +6,54 @@ import { revalidatePath } from 'next/cache';
 import VideoManagementClient from './VideoManagementClient';
 
 export default async function VideoManagementPage() {
-  const videos = await db.getSlides();
+  // Assuming getVideos doesn't need arguments for the admin view for now
+  const videos = await db.getVideos({ count: 100 }); // Fetch up to 100 videos for admin page
+  const users = await db.getAllUsers(); // We need users for the form
 
   async function createVideoAction(formData: FormData) {
     'use server';
-    // Basic data extraction, needs more robust validation
-    const newSlideData: Omit<Slide, 'id' | 'likeId'> = {
-      user: formData.get('user') as string,
+
+    const authorId = formData.get('userId') as string;
+    const author = users.find(u => u.id === authorId);
+
+    if (!author) {
+      console.error('Author not found');
+      return;
+    }
+
+    const newVideoData: Omit<Video, 'id' | 'createdAt'> = {
+      userId: author.id,
+      username: author.username,
       description: formData.get('description') as string,
       mp4Url: formData.get('mp4Url') as string,
-      hlsUrl: null, // HLS URL can be left null for now
+      hlsUrl: null,
       poster: formData.get('poster') as string || '',
-      avatar: formData.get('avatar') as string,
+      avatar: author.avatar,
       access: formData.get('access') as 'public' | 'secret',
     };
 
     try {
-      await db.createSlide(newSlideData);
+      await db.createVideo(newVideoData);
       revalidatePath('/admin/videos');
     } catch (error) {
       console.error('Failed to create video:', error);
-      // Can return an error message
     }
   }
 
   async function updateVideoAction(formData: FormData) {
     'use server';
-    const slideId = formData.get('slideId') as string;
-    if (!slideId) return;
+    const videoId = formData.get('videoId') as string;
+    if (!videoId) return;
 
-    const updates: Partial<Omit<Slide, 'id' | 'likeId'>> = {
-      user: formData.get('user') as string,
+    const updates: Partial<Omit<Video, 'id' | 'createdAt' | 'userId' | 'username'>> = {
       description: formData.get('description') as string,
       mp4Url: formData.get('mp4Url') as string,
       poster: formData.get('poster') as string,
-      avatar: formData.get('avatar') as string,
       access: formData.get('access') as 'public' | 'secret',
     };
 
     try {
-      await db.updateSlide(slideId, updates);
+      await db.updateVideo(videoId, updates);
       revalidatePath('/admin/videos');
     } catch (error) {
       console.error('Failed to update video:', error);
@@ -54,13 +62,13 @@ export default async function VideoManagementPage() {
 
   async function deleteVideoAction(formData: FormData) {
     'use server';
-    const slideId = formData.get('slideId') as string;
-    if (!slideId) {
+    const videoId = formData.get('videoId') as string;
+    if (!videoId) {
       return;
     }
 
     try {
-      await db.deleteSlide(slideId);
+      await db.deleteVideo(videoId);
       revalidatePath('/admin/videos');
     } catch (error) {
       console.error('Failed to delete video:', error);
@@ -72,6 +80,7 @@ export default async function VideoManagementPage() {
       <h2 className="text-2xl font-semibold mb-4">Video Management</h2>
       <VideoManagementClient
         videos={videos}
+        users={users}
         createVideoAction={createVideoAction}
         updateVideoAction={updateVideoAction}
         deleteVideoAction={deleteVideoAction}

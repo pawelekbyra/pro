@@ -6,16 +6,15 @@ import { verifySession } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const slideId = searchParams.get('slideId');
+  const videoId = searchParams.get('videoId');
 
-  if (!slideId) {
-    return NextResponse.json({ success: false, message: 'slideId is required' }, { status: 400 });
+  if (!videoId) {
+    return NextResponse.json({ success: false, message: 'videoId is required' }, { status: 400 });
   }
 
   try {
-    // I'm assuming db.getComments and the structure of the returned comments.
-    // This might need adjustment based on lib/db.ts.
-    const comments = await db.getComments(slideId);
+    // The db function is already refactored, just need to pass videoId.
+    const comments = await db.getComments(videoId);
     return NextResponse.json({ success: true, comments });
   } catch (error) {
     console.error('Error fetching comments:', error);
@@ -31,18 +30,18 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { slideId, text } = await request.json();
+    const { videoId, text } = await request.json();
 
-    if (!slideId || !text) {
-      return NextResponse.json({ success: false, message: 'slideId and text are required' }, { status: 400 });
+    if (!videoId || !text) {
+      return NextResponse.json({ success: false, message: 'videoId and text are required' }, { status: 400 });
     }
 
     if (typeof text !== 'string' || text.trim().length === 0) {
         return NextResponse.json({ success: false, message: 'Comment text cannot be empty.' }, { status: 400 });
     }
 
-    // Assuming db.addComment returns the newly created comment.
-    const newComment = await db.addComment(slideId, currentUser.id, text.trim());
+    // The db function is already refactored, just need to pass videoId.
+    const newComment = await db.addComment(videoId, currentUser.id, text.trim());
 
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
 

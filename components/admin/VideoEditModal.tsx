@@ -2,12 +2,13 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Slide } from '@/lib/db';
+import { Video, User } from '@/lib/db';
 
 interface VideoEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  video: Slide | null;
+  video: Video | null;
+  users: User[]; // Pass users for the creation form
   createVideoAction: (formData: FormData) => Promise<void>;
   updateVideoAction: (formData: FormData) => Promise<void>;
 }
@@ -30,6 +31,7 @@ export default function VideoEditModal({
   isOpen,
   onClose,
   video,
+  users,
   createVideoAction,
   updateVideoAction,
 }: VideoEditModalProps) {
@@ -62,18 +64,26 @@ export default function VideoEditModal({
       <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-full overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Video' : 'Create New Video'}</h2>
         <form ref={formRef} action={handleFormAction}>
-          {isEditing && <input type="hidden" name="slideId" value={video.id} />}
+          {isEditing && <input type="hidden" name="videoId" value={video.id} />}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {!isEditing && (
             <div className="mb-4">
-              <label htmlFor="user" className="block text-sm font-medium text-gray-300 mb-1">Uploader Name</label>
-              <input type="text" id="user" name="user" defaultValue={video?.user || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
+              <label htmlFor="userId" className="block text-sm font-medium text-gray-300 mb-1">Uploader</label>
+              <select id="userId" name="userId" required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white">
+                <option value="">Select a user</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.displayName} ({user.username})</option>
+                ))}
+              </select>
             </div>
-            <div className="mb-4">
-              <label htmlFor="avatar" className="block text-sm font-medium text-gray-300 mb-1">Uploader Avatar URL</label>
-              <input type="url" id="avatar" name="avatar" defaultValue={video?.avatar || ''} required className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white" />
-            </div>
-          </div>
+          )}
+
+          {isEditing && (
+             <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-1">Uploader</label>
+                <p className="p-2 text-gray-400">{video.username}</p>
+             </div>
+          )}
 
           <div className="mb-4">
             <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">Description</label>

@@ -12,13 +12,13 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { likeId } = await request.json();
+    const { videoId } = await request.json();
 
-    if (!likeId) {
-      return NextResponse.json({ success: false, message: 'likeId is required' }, { status: 400 });
+    if (!videoId) {
+      return NextResponse.json({ success: false, message: 'videoId is required' }, { status: 400 });
     }
 
-    const result = await db.toggleLike(likeId, currentUser.id);
+    const result = await db.toggleLike(videoId, currentUser.id);
 
     return NextResponse.json({
       success: true,

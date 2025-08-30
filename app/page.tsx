@@ -1,35 +1,35 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import Slide, { SlideData } from '@/components/Slide';
+import Video, { VideoData } from '@/components/Video'; // Renamed Slide to Video
 import AccountPanel from '@/components/AccountPanel';
 import CommentsModal from '@/components/CommentsModal';
 import InfoModal from '@/components/InfoModal';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  const [slides, setSlides] = useState<SlideData[]>([]);
+  const [videos, setVideos] = useState<VideoData[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const fetchSlides = async () => {
+    const fetchVideos = async () => {
       try {
-        const response = await fetch('/api/slides');
-        if (!response.ok) throw new Error('Failed to fetch slides');
+        const response = await fetch('/api/videos');
+        if (!response.ok) throw new Error('Failed to fetch videos');
         const data = await response.json();
-        setSlides(data.slides);
-        slideRefs.current = slideRefs.current.slice(0, data.slides.length);
+        setVideos(data.videos);
+        videoRefs.current = videoRefs.current.slice(0, data.videos.length);
       } catch (error) {
-        console.error("Failed to fetch slides:", error);
+        console.error("Failed to fetch videos:", error);
       }
     };
-    fetchSlides();
+    fetchVideos();
   }, []);
 
   // Fix 1: Dynamically set app height for mobile browsers
@@ -47,7 +47,7 @@ export default function Home() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const index = slideRefs.current.indexOf(entry.target as HTMLDivElement);
+            const index = videoRefs.current.indexOf(entry.target as HTMLDivElement);
             if (index !== -1) {
               setActiveIndex(index);
             }
@@ -60,7 +60,7 @@ export default function Home() {
       }
     );
 
-    const currentRefs = slideRefs.current;
+    const currentRefs = videoRefs.current;
     currentRefs.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
@@ -70,7 +70,7 @@ export default function Home() {
         if (ref) observer.unobserve(ref);
       });
     };
-  }, [slides]);
+  }, [videos]);
 
   const openAccountPanel = () => setIsAccountPanelOpen(true);
   const closeAccountPanel = () => setIsAccountPanelOpen(false);
@@ -83,7 +83,7 @@ export default function Home() {
 
   const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen || isTopBarModalOpen;
 
-  if (slides.length === 0) {
+  if (videos.length === 0) {
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-black">
         {/* Top Bar Skeleton */}
@@ -114,14 +114,14 @@ export default function Home() {
       className="relative w-screen overflow-y-auto snap-y snap-mandatory"
       style={{ height: 'var(--app-height)' }}
     >
-      {slides.map((slide, index) => (
+      {videos.map((video, index) => (
         <div
-          key={slide.id}
-          ref={(el) => { slideRefs.current[index] = el; }}
+          key={video.id}
+          ref={(el) => { videoRefs.current[index] = el; }}
           className="h-full w-full snap-start flex-shrink-0"
         >
-          <Slide
-            slide={slide}
+          <Video
+            video={video}
             isActive={index === activeIndex && !isAnyModalOpen}
             setIsModalOpen={setIsTopBarModalOpen}
             openAccountPanel={openAccountPanel}
@@ -135,8 +135,8 @@ export default function Home() {
       <CommentsModal
         isOpen={isCommentsModalOpen}
         onClose={closeCommentsModal}
-        slideId={slides[activeIndex]?.id}
-        initialCommentsCount={slides[activeIndex]?.initialComments || 0}
+        videoId={videos[activeIndex]?.id}
+        initialCommentsCount={videos[activeIndex]?.initialComments || 0}
       />
       <InfoModal isOpen={isInfoModalOpen} onClose={closeInfoModal} />
     </main>

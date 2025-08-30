@@ -11,11 +11,11 @@ interface VideoPlayerProps {
   poster: string;
   isActive: boolean;
   isSecretActive: boolean;
-  likeId: string;
+  videoId: string;
   videoRef: React.RefObject<HTMLVideoElement>;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, likeId, videoRef }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, videoRef }) => {
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -68,7 +68,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
     // Find the actual like button and click it
-    const likeButton = document.querySelector(`[data-like-id="${likeId}"]`) as HTMLButtonElement;
+    const likeButton = document.querySelector(`[data-video-id="${videoId}"]`) as HTMLButtonElement;
     likeButton?.click();
   };
 

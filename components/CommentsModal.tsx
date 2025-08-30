@@ -59,11 +59,11 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, currentUserI
 interface CommentsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  slideId?: string;
+  videoId?: string;
   initialCommentsCount: number;
 }
 
-const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId, initialCommentsCount }) => {
+const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId, initialCommentsCount }) => {
   const { t } = useTranslation();
   const { user } = useUser();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -73,12 +73,12 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen && slideId) {
+    if (isOpen && videoId) {
       const fetchComments = async () => {
         setIsLoading(true);
         setError(null);
         try {
-          const res = await fetch(`/api/comments?slideId=${slideId}`);
+          const res = await fetch(`/api/comments?videoId=${videoId}`);
           if (!res.ok) throw new Error('Failed to fetch comments');
           const data = await res.json();
           setComments(data.comments);
@@ -90,7 +90,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
       };
       fetchComments();
     }
-  }, [isOpen, slideId]);
+  }, [isOpen, videoId]);
 
   const handleLike = (id: string) => {
     // TODO: Implement like/unlike API call
@@ -100,7 +100,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedComment = newComment.trim();
-    if (!trimmedComment || !user || !slideId) return;
+    if (!trimmedComment || !user || !videoId) return;
 
     setIsSubmitting(true);
     setError(null);
@@ -108,7 +108,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slideId, text: trimmedComment }),
+        body: JSON.stringify({ videoId, text: trimmedComment }),
       });
       if (!res.ok) throw new Error('Failed to post comment');
       const data = await res.json();

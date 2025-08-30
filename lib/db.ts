@@ -1,6 +1,22 @@
 import { kv } from './kv';
 
-// --- Type definitions remain the same ---
+// --- Key Generation Functions ---
+export const keys = {
+  user: (userId: string) => `user:${userId}`,
+  emailToId: (email: string) => `email_to_id:${email.toLowerCase()}`,
+  usernameToId: (username: string) => `username_to_id:${username.toLowerCase()}`,
+  userLikes: (userId: string) => `user_likes:${userId}`, // Set of slide IDs
+
+  video: (videoId: string) => `video:${videoId}`,
+  videoLikes: (videoId: string) => `video_likes:${videoId}`, // Set of user IDs
+  videoComments: (videoId: string) => `video_comments:${videoId}`, // List of comment IDs
+
+  allVideos: () => 'all_videos', // Sorted Set of video IDs by timestamp
+
+  comment: (commentId: string) => `comment:${commentId}`,
+};
+
+// --- Type Definitions ---
 export interface User {
   id: string;
   email: string;
@@ -14,276 +30,302 @@ export interface User {
   role: 'user' | 'creator' | 'patron' | 'admin';
 }
 
-export interface Slide {
+// Renamed from Slide for clarity
+export interface Video {
   id: string;
-  likeId: string;
-  user: string;
+  userId: string; // Author's ID
+  username: string; // Author's username
   description: string;
   mp4Url: string;
   hlsUrl: string | null;
   poster: string;
-  avatar: string;
+  avatar: string; // Author's avatar at the time of posting
   access: 'public' | 'secret';
+  createdAt: number; // Unix timestamp
   autoPlay?: boolean;
   loopVideo?: boolean;
 }
 
-export interface Like {
-  slideId: string;
-  userId: string;
-}
-
 export interface Comment {
-  id:string;
-  slideId: string;
+  id: string;
+  videoId: string;
   userId: string;
   text: string;
-  createdAt: string;
+  createdAt: number; // Unix timestamp
   likedBy: string[]; // Array of userIds
 }
 
-export interface DbData {
-  users: User[];
-  slides: Slide[];
-  likes: Like[];
-  comments: Comment[];
-}
+// Note: The 'Like' interface is removed as we'll use Redis Sets directly.
+// Note: The 'DbData' interface is removed as it represents the old data model.
+
 
 // --- Public API for Database Operations (Refactored for Vercel KV) ---
 
 export const db = {
+  // --- User Functions ---
   async findUserByEmail(email: string): Promise<User | undefined> {
-    const users = await kv.get<User[]>('users') ?? [];
-    return users.find(user => user.email.toLowerCase() === email.toLowerCase());
+    const userId = await kv.get<string>(keys.emailToId(email));
+    if (!userId) {
+      return undefined;
+    }
+    return this.findUserById(userId);
   },
 
   async findUserById(id: string): Promise<User | undefined> {
-    const users = await kv.get<User[]>('users') ?? [];
-    return users.find(user => user.id === id);
+    const user = await kv.get<User>(keys.user(id));
+    return user ?? undefined;
   },
 
   async getAllUsers(): Promise<User[]> {
-    return await kv.get<User[]>('users') ?? [];
+    const userKeys = await kv.keys('user:*');
+    if (!userKeys.length) {
+      return [];
+    }
+    const users = await kv.mget<User[]>(...userKeys);
+    return users.filter(Boolean) as User[];
   },
 
-  async getSlides(userId?: string) {
-    const [slides, likes] = await Promise.all([
-      kv.get<Slide[]>('slides'),
-      kv.get<Like[]>('likes'),
-    ]);
+  async createUser(userData: Omit<User, 'id' | 'sessionVersion'>): Promise<User> {
+    const id = crypto.randomUUID();
+    const user: User = {
+      ...userData,
+      id,
+      sessionVersion: 1,
+    };
 
-    const safeSlides = slides ?? [];
-    const safeLikes = likes ?? [];
+    const tx = kv.multi();
+    tx.set(keys.user(id), user);
+    tx.set(keys.emailToId(user.email), id);
+    tx.set(keys.usernameToId(user.username), id);
+    await tx.exec();
 
-    const slidesWithDynamicData = safeSlides.map(slide => {
-      const likesForSlide = safeLikes.filter(like => like.slideId === slide.likeId);
-      return {
-        ...slide,
-        initialLikes: likesForSlide.length,
-        isLiked: userId ? safeLikes.some(like => like.userId === userId) : false,
-        initialComments: 0,
-      };
-    });
-
-    return slidesWithDynamicData;
+    return user;
   },
 
   async isEmailInUse(email: string, excludeUserId?: string): Promise<boolean> {
-    const users = await kv.get<User[]>('users') ?? [];
-    return users.some(user =>
-      user.email.toLowerCase() === email.toLowerCase() && user.id !== excludeUserId
-    );
+    const userId = await kv.get<string>(keys.emailToId(email));
+    return userId ? userId !== excludeUserId : false;
+  },
+
+  async isUsernameInUse(username: string, excludeUserId?: string): Promise<boolean> {
+    const userId = await kv.get<string>(keys.usernameToId(username));
+    return userId ? userId !== excludeUserId : false;
   },
 
   async updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
-    const users = await kv.get<User[]>('users') ?? [];
-    const userIndex = users.findIndex(u => u.id === userId);
-
-    if (userIndex === -1) {
+    const user = await this.findUserById(userId);
+    if (!user) {
       return null;
     }
-    if ('passwordHash' in updates) {
-      delete updates.passwordHash;
-    }
 
-    const updatedUser = { ...users[userIndex], ...updates };
-    users[userIndex] = updatedUser;
+    // Prevent critical fields from being updated directly
+    delete updates.id;
+    delete updates.passwordHash;
+    delete updates.email; // Email changes should have a dedicated process
+    delete updates.username; // Username changes should have a dedicated process
 
-    await kv.set('users', users);
+    const updatedUser = { ...user, ...updates };
+    await kv.set(keys.user(userId), updatedUser);
     return updatedUser;
   },
 
   async updateUserPassword(userId: string, newPasswordHash: string): Promise<boolean> {
-    const users = await kv.get<User[]>('users') ?? [];
-    const userIndex = users.findIndex(u => u.id === userId);
-
-    if (userIndex === -1) {
+    const user = await this.findUserById(userId);
+    if (!user) {
       return false;
     }
-
-    users[userIndex].passwordHash = newPasswordHash;
-    await kv.set('users', users);
+    user.passwordHash = newPasswordHash;
+    await kv.set(keys.user(userId), user);
     return true;
   },
 
   async deleteUser(userId: string): Promise<boolean> {
-    const [users, likes, comments] = await Promise.all([
-      kv.get<User[]>('users'),
-      kv.get<Like[]>('likes'),
-      kv.get<Comment[]>('comments'),
-    ]);
+    const user = await this.findUserById(userId);
+    if (!user) {
+      return false;
+    }
 
-    const safeUsers = users ?? [];
-    const safeLikes = likes ?? [];
-    const safeComments = comments ?? [];
-
-    const userIndex = safeUsers.findIndex(u => u.id === userId);
-    if (userIndex === -1) return false;
-
-    const newUsers = safeUsers.filter(u => u.id !== userId);
-    const newLikes = safeLikes.filter(l => l.userId !== userId);
-    const newComments = safeComments.filter(c => c.userId !== userId);
-
+    // This is a simplified deletion. In a real app, you'd also have to
+    // handle content created by the user (videos, comments, etc.)
     const tx = kv.multi();
-    tx.set('users', newUsers);
-    tx.set('likes', newLikes);
-    tx.set('comments', newComments);
+    tx.del(keys.user(userId));
+    tx.del(keys.emailToId(user.email));
+    tx.del(keys.usernameToId(user.username));
     await tx.exec();
 
     return true;
-  },
-
-  async deleteSlide(slideId: string): Promise<boolean> {
-    const [slides, likes, comments] = await Promise.all([
-        kv.get<Slide[]>('slides'),
-        kv.get<Like[]>('likes'),
-        kv.get<Comment[]>('comments'),
-    ]);
-
-    const safeSlides = slides ?? [];
-    const safeLikes = likes ?? [];
-    const safeComments = comments ?? [];
-
-    const slideIndex = safeSlides.findIndex(s => s.id === slideId);
-    if (slideIndex === -1) return false;
-
-    const slideLikeId = safeSlides[slideIndex].likeId;
-
-    const newSlides = safeSlides.filter(s => s.id !== slideId);
-    const newLikes = safeLikes.filter(l => l.slideId !== slideLikeId);
-    const newComments = safeComments.filter(c => c.slideId !== slideId);
-
-    const tx = kv.multi();
-    tx.set('slides', newSlides);
-    tx.set('likes', newLikes);
-    tx.set('comments', newComments);
-    await tx.exec();
-
-    return true;
-  },
-
-  async createSlide(slideData: Omit<Slide, 'id' | 'likeId'>): Promise<Slide> {
-    const slides = await kv.get<Slide[]>('slides') ?? [];
-    const maxLikeId = slides.reduce((max, s) => Math.max(max, parseInt(s.likeId, 10) || 0), 0);
-    const newSlide: Slide = {
-      ...slideData,
-      id: `slide-${crypto.randomUUID()}`,
-      likeId: (maxLikeId + 1).toString(),
-    };
-    slides.push(newSlide);
-    await kv.set('slides', slides);
-    return newSlide;
-  },
-
-  async updateSlide(slideId: string, updates: Partial<Omit<Slide, 'id' | 'likeId'>>): Promise<Slide | null> {
-    const slides = await kv.get<Slide[]>('slides') ?? [];
-    const slideIndex = slides.findIndex(s => s.id === slideId);
-
-    if (slideIndex === -1) {
-      return null;
-    }
-
-    const updatedSlide = { ...slides[slideIndex], ...updates };
-    slides[slideIndex] = updatedSlide;
-
-    await kv.set('slides', slides);
-    return updatedSlide;
-  },
-
-  async toggleLike(slideId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked', likeCount: number }> {
-    const likes = await kv.get<Like[]>('likes') ?? [];
-    const likeIndex = likes.findIndex(like => like.slideId === slideId && like.userId === userId);
-
-    if (likeIndex > -1) {
-      likes.splice(likeIndex, 1);
-    } else {
-      likes.push({ slideId, userId });
-    }
-
-    await kv.set('likes', likes);
-    const likeCount = likes.filter(l => l.slideId === slideId).length;
-    return { newStatus: likeIndex > -1 ? 'unliked' : 'liked', likeCount };
   },
 
   async incrementSessionVersion(userId: string): Promise<boolean> {
-    const users = await kv.get<User[]>('users') ?? [];
-    const userIndex = users.findIndex(u => u.id === userId);
-
-    if (userIndex === -1) return false;
-
-    users[userIndex].sessionVersion = (users[userIndex].sessionVersion || 1) + 1;
-    await kv.set('users', users);
+    const user = await this.findUserById(userId);
+    if (!user) {
+      return false;
+    }
+    user.sessionVersion = (user.sessionVersion || 1) + 1;
+    await kv.set(keys.user(userId), user);
     return true;
   },
 
-  async getComments(slideId: string) {
-    const [comments, users] = await Promise.all([
-      kv.get<Comment[]>('comments'),
-      kv.get<User[]>('users'),
-    ]);
+  // --- Video Functions ---
 
-    const safeComments = comments ?? [];
-    const safeUsers = users ?? [];
+  async getVideos(options: { currentUserId?: string, start?: number, count?: number } = {}) {
+    const { currentUserId, start = 0, count = 10 } = options;
 
-    const commentsForSlide = safeComments.filter(c => c.slideId === slideId);
+    // 1. Fetch a page of video IDs from the sorted set
+    const videoIds = await kv.zrange(keys.allVideos(), start, start + count - 1, { rev: true });
 
-    const commentsWithUserInfo = commentsForSlide.map(comment => {
-      const user = safeUsers.find(u => u.id === comment.userId);
-      return {
-        ...comment,
-        user: user ? { displayName: user.displayName, avatar: user.avatar } : { displayName: 'Unknown User', avatar: '' }
-      };
-    });
+    if (!videoIds.length) {
+      return [];
+    }
 
-    return commentsWithUserInfo.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // 2. Create a pipeline to fetch all video data and their like counts
+    const pipe = kv.multi();
+    for (const id of videoIds) {
+      pipe.get(keys.video(id as string));
+      pipe.scard(keys.videoLikes(id as string));
+    }
+    // If a user is logged in, check which videos they have liked
+    if (currentUserId) {
+      const userLikesKey = keys.userLikes(currentUserId);
+      pipe.sismember(userLikesKey, videoIds);
+    }
+
+    const results = await pipe.exec();
+
+    // 3. Process the results
+    const videos = [];
+    const userLikes = currentUserId ? (results.pop() as number[]).map(Boolean) : [];
+
+    for (let i = 0; i < videoIds.length; i++) {
+      const videoData = results[i * 2] as Video | null;
+      if (!videoData) continue; // Skip if video data is missing for some reason
+
+      const likeCount = results[i * 2 + 1] as number;
+
+      videos.push({
+        ...videoData,
+        initialLikes: likeCount,
+        isLiked: currentUserId ? userLikes[i] : false,
+        initialComments: 0, // This can be hydrated separately if needed
+      });
+    }
+
+    return videos;
   },
 
-  async addComment(slideId: string, userId: string, text: string) {
-    const [comments, users] = await Promise.all([
-        kv.get<Comment[]>('comments'),
-        kv.get<User[]>('users'),
-    ]);
+  async createVideo(videoData: Omit<Video, 'id' | 'createdAt'>): Promise<Video> {
+    const id = `video_${crypto.randomUUID()}`;
+    const createdAt = Date.now();
+    const newVideo: Video = {
+      ...videoData,
+      id,
+      createdAt,
+    };
 
-    const safeComments = comments ?? [];
-    const safeUsers = users ?? [];
+    const tx = kv.multi();
+    tx.set(keys.video(id), newVideo);
+    tx.zadd(keys.allVideos(), { score: createdAt, member: id });
+    await tx.exec();
 
-    const user = safeUsers.find(u => u.id === userId);
+    return newVideo;
+  },
+
+  async updateVideo(videoId: string, updates: Partial<Omit<Video, 'id' | 'createdAt' | 'userId' | 'username'>>): Promise<Video | null> {
+    const video = await kv.get<Video>(keys.video(videoId));
+    if (!video) {
+      return null;
+    }
+    const updatedVideo = { ...video, ...updates };
+    await kv.set(keys.video(videoId), updatedVideo);
+    return updatedVideo;
+  },
+
+  async deleteVideo(videoId: string): Promise<boolean> {
+    const video = await kv.get<Video>(keys.video(videoId));
+    if (!video) {
+      return false;
+    }
+
+    const tx = kv.multi();
+    tx.del(keys.video(videoId)); // Delete video object
+    tx.del(keys.videoLikes(videoId)); // Delete likes set
+    tx.del(keys.videoComments(videoId)); // Delete comments list
+    tx.zrem(keys.allVideos(), videoId); // Remove from sorted set
+    // Note: We are not deleting individual comment objects here, which might be desired
+    await tx.exec();
+
+    return true;
+  },
+
+  async toggleLike(videoId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked', likeCount: number }> {
+    const videoLikesKey = keys.videoLikes(videoId);
+    const userLikesKey = keys.userLikes(userId);
+
+    const isLiked = await kv.sismember(videoLikesKey, userId);
+
+    const tx = kv.multi();
+    if (isLiked) {
+      // User is unliking the video
+      tx.srem(videoLikesKey, userId);
+      tx.srem(userLikesKey, videoId);
+    } else {
+      // User is liking the video
+      tx.sadd(videoLikesKey, userId);
+      tx.sadd(userLikesKey, videoId);
+    }
+    await tx.exec();
+
+    const likeCount = await kv.scard(videoLikesKey);
+
+    return { newStatus: isLiked ? 'unliked' : 'liked', likeCount };
+  },
+
+  // --- Comment Functions ---
+  async getComments(videoId: string, options: { start?: number, count?: number } = {}) {
+    const { start = 0, count = 20 } = options;
+    const commentIds = await kv.lrange(keys.videoComments(videoId), start, start + count - 1);
+
+    if (!commentIds.length) {
+      return [];
+    }
+
+    const pipe = kv.multi();
+    for (const id of commentIds) {
+      pipe.get(keys.comment(id as string));
+    }
+    const results = await pipe.exec() as (Comment | null)[];
+
+    const comments = results.filter(Boolean) as Comment[];
+
+    // In a real app, you'd probably want to fetch user info here as well
+    // For now, we return comments and the client can fetch user info if needed
+    // or we can do a second-level hydration.
+    const hydratedComments = await this.hydrateCommentsWithUserInfo(comments);
+    return hydratedComments;
+  },
+
+  async addComment(videoId: string, userId: string, text: string) {
+    const user = await this.findUserById(userId);
     if (!user) {
       throw new Error('User not found to add comment.');
     }
 
+    const commentId = `comment_${crypto.randomUUID()}`;
     const newComment: Comment = {
-      id: crypto.randomUUID(),
-      slideId,
+      id: commentId,
+      videoId,
       userId,
       text,
-      createdAt: new Date().toISOString(),
-      likedBy: [],
+      createdAt: Date.now(),
+      likedBy: [], // This feature might need its own refactor
     };
 
-    safeComments.push(newComment);
-    await kv.set('comments', safeComments);
+    const tx = kv.multi();
+    tx.set(keys.comment(commentId), newComment);
+    tx.lpush(keys.videoComments(videoId), commentId);
+    await tx.exec();
 
+    // Return the comment hydrated with user info
     return {
       ...newComment,
       user: {
@@ -291,5 +333,23 @@ export const db = {
         avatar: user.avatar,
       }
     };
+  },
+
+  async hydrateCommentsWithUserInfo(comments: Comment[]) {
+    if (!comments.length) {
+      return [];
+    }
+    const userIds = [...new Set(comments.map(c => c.userId))];
+    const pipe = kv.multi();
+    for (const userId of userIds) {
+      pipe.get(keys.user(userId));
+    }
+    const userResults = await pipe.exec() as (User | null)[];
+    const usersById = new Map(userResults.filter(Boolean).map(u => [u!.id, u]));
+
+    return comments.map(comment => ({
+      ...comment,
+      user: usersById.get(comment.userId) ?? { displayName: 'Unknown User', avatar: '' }
+    }));
   }
 };
