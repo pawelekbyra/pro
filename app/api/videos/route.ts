@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
+import { mockGrid, Grid, Slide, HydratedVideo } from '@/lib/mock-data';
 import { mockDb } from '@/lib/mock-db';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +11,7 @@ export async function GET() {
   if (process.env.MOCK_API === 'true') {
     // We add a short delay to simulate network latency
     await new Promise(resolve => setTimeout(resolve, 500));
-    return NextResponse.json({ videos: mockDb.videos });
+    return NextResponse.json({ grid: mockGrid, videos: mockDb.videos });
   }
 
   try {
@@ -20,8 +21,19 @@ export async function GET() {
     // Use the new, refactored db function
     const videos = await db.getVideos({ currentUserId: userId });
 
-    // Return the data under a 'videos' key
-    return NextResponse.json({ videos });
+    // Transform the videos array into a grid
+    const grid: Grid = {};
+    videos.forEach((video, index) => {
+      const slide: Slide = {
+        ...(video as HydratedVideo),
+        x: 0,
+        y: index,
+      };
+      grid[`0,${index}`] = slide;
+    });
+
+    // Return the data in grid format
+    return NextResponse.json({ grid, videos });
 
   } catch (error) {
     console.error('Error reading videos data:', error);

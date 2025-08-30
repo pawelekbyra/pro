@@ -1,10 +1,13 @@
-import { mockVideos as originalMockVideos, HydratedVideo } from './mock-data';
-import { Comment, User } from './db';
+import { mockGrid, Grid, Slide, HydratedVideo } from './mock-data';
+import type { Video, Comment, User } from './db'; // Używamy typów z 'db'
 
-// Create a mutable copy of the mock data to simulate a database in memory.
-let mockVideos: HydratedVideo[] = JSON.parse(JSON.stringify(originalMockVideos));
+// Flatten the grid into a simple array for the mock DB
+const initialVideos: HydratedVideo[] = Object.values(mockGrid);
 
-// We can also store other mock data here, like users, comments, etc.
+// Tworzymy mutowalną kopię danych, aby symulować bazę danych w pamięci.
+let mockVideos: HydratedVideo[] = JSON.parse(JSON.stringify(initialVideos));
+
+// Tutaj możemy przechowywać inne dane, takie jak komentarze
 const mockComments: (Comment & { user: Partial<User> })[] = [
     {
         id: 'comment_mock_1',
@@ -32,26 +35,33 @@ const mockComments: (Comment & { user: Partial<User> })[] = [
     }
 ];
 
+class MockDB {
+  videos: HydratedVideo[];
+  comments: (Comment & { user: Partial<User> })[];
 
-export const mockDb = {
-  videos: mockVideos,
-  comments: mockComments,
-  createVideo: (video: Omit<HydratedVideo, 'initialLikes' | 'isLiked' | 'initialComments'>) => {
+  constructor(initialData: HydratedVideo[]) {
+    this.videos = JSON.parse(JSON.stringify(initialData));
+    this.comments = JSON.parse(JSON.stringify(mockComments));
+  }
+
+  createVideo(videoData: Omit<Video, 'id' | 'createdAt'> & { id?: string; createdAt?: number }) {
     const newVideo: HydratedVideo = {
-      ...video,
+      ...videoData,
+      id: videoData.id || `video_mock_${Date.now()}`,
+      createdAt: videoData.createdAt || Date.now(),
       initialLikes: 0,
       isLiked: false,
       initialComments: 0,
     };
-    mockVideos.unshift(newVideo);
+    this.videos.unshift(newVideo); // Dodajemy na początek tablicy
     return newVideo;
   }
-};
+}
 
-// Function to reset the mock database to its initial state.
-// This can be useful for testing.
+export const mockDb = new MockDB(initialVideos);
+
+// Funkcja resetująca mockową bazę danych do stanu początkowego
 export function resetMockDb() {
-  mockVideos = JSON.parse(JSON.stringify(originalMockVideos));
-  mockDb.videos = mockVideos;
-  // We might want to reset comments as well if we add more functionality
+  mockDb.videos = JSON.parse(JSON.stringify(initialVideos));
+  mockDb.comments = JSON.parse(JSON.stringify(mockComments));
 }
