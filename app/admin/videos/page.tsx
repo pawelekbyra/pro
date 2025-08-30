@@ -53,7 +53,7 @@ export default async function VideoManagementPage() {
       };
       mockDb.createVideo(newVideoData);
       revalidatePath('/admin/videos');
-      revalidatePath('/'); // also revalidate the home page
+      revalidatePath('/');
       return;
     }
 

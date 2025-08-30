@@ -16,6 +16,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Email and password are required' }, { status: 400 });
     }
 
+    // --- MOCK API LOGIC ---
+    if (process.env.MOCK_API === 'true') {
+      if (email === 'admin' && password === 'admin') {
+        const mockAdminUser = {
+          id: 'user_mock_admin',
+          email: 'admin@example.com',
+          username: 'admin',
+          firstName: 'Mock',
+          lastName: 'Admin',
+          displayName: 'Mock Admin',
+          avatar: 'https://i.pravatar.cc/150?u=user_mock_admin',
+          sessionVersion: 1,
+          role: 'admin' as const,
+        };
+
+        const token = await new SignJWT({ user: mockAdminUser })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime('24h')
+          .sign(JWT_SECRET);
+
+        cookies().set(COOKIE_NAME, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24, // 1 day
+        });
+
+        return NextResponse.json({ success: true, user: mockAdminUser });
+      } else {
+        // In mock mode, only admin/admin is valid
+        return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 });
+      }
+    }
+    // --- END MOCK API LOGIC ---
+
+
     const user = await db.findUserByEmail(email);
 
     if (!user) {

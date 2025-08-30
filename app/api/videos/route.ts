@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 import { mockGrid, Grid, Slide, HydratedVideo } from '@/lib/mock-data';
+import { mockDb } from '@/lib/mock-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,7 @@ export async function GET() {
   if (process.env.MOCK_API === 'true') {
     // We add a short delay to simulate network latency
     await new Promise(resolve => setTimeout(resolve, 500));
-    return NextResponse.json({ grid: mockGrid });
+    return NextResponse.json({ grid: mockGrid, videos: mockDb.videos });
   }
 
   try {
@@ -32,7 +33,7 @@ export async function GET() {
     });
 
     // Return the data in grid format
-    return NextResponse.json({ grid });
+    return NextResponse.json({ grid, videos });
 
   } catch (error) {
     console.error('Error reading videos data:', error);
