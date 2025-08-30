@@ -32,11 +32,50 @@ export interface VideoSlide extends BaseSlide {
   data: VideoSlideData;
 }
 
-// Specific data for an HTML slide
-export interface HtmlSlideData {
-  htmlContent: string;
-  description?: string; // Optional description for HTML slides
+// Specific data for the Pope Game
+interface PopeGameScenario {
+  text: string;
+  choices: {
+    dopyskuj: string;
+    powiedz_milo: string;
+  };
 }
+
+export interface PopeGameData {
+  scenarios: PopeGameScenario[];
+  bossFight: PopeGameScenario;
+}
+
+// Specific data for the Typing Challenge
+export interface TypingChallengeData {
+  phrases: string[];
+  titles: {
+    slow: string;
+    average: string;
+    fast: string;
+    insane: string;
+  };
+}
+
+// Specific data for an HTML slide, which can be regular HTML or a game
+export type HtmlSlideData = {
+  description?: string; // Optional description for HTML slides
+} & (
+  | {
+      htmlContent: string;
+      type?: undefined; // Regular HTML slides don't have a 'type' in data
+    }
+  | {
+      htmlContent?: never;
+      type: 'GAME_POPE';
+      gameData: PopeGameData;
+    }
+  | {
+      htmlContent?: never;
+      type: 'TYPING_CHALLENGE';
+      challengeData: TypingChallengeData;
+    }
+);
 
 // HTML slide type
 export interface HtmlSlide extends BaseSlide {
