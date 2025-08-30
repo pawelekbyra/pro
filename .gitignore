@@ -29,8 +29,3 @@ test-db.ts
 cookie.txt
 package-lock.json
 
-# Project-specific temp files
-manifesto.txt
-tingtong.txt
-PEHAPE.txt
-data.json
