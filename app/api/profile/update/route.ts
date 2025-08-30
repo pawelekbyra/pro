@@ -26,12 +26,9 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({ success: false, message: 'All fields are required.' }, { status: 400 });
         }
 
-        const currentEmail = (await db.findUserById(currentUser.id))?.email;
-        if (email.toLowerCase() !== currentEmail?.toLowerCase()) {
-            const emailInUse = await db.isEmailInUse(email, currentUser.id);
-            if (emailInUse) {
-                return NextResponse.json({ success: false, message: 'This email is already in use.' }, { status: 409 });
-            }
+        const existingUser = await db.findUserByEmail(email);
+        if (existingUser && existingUser.id !== currentUser.id) {
+            return NextResponse.json({ success: false, message: 'This email is already in use.' }, { status: 409 });
         }
 
         const updates: Partial<User> = {
