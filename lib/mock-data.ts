@@ -199,4 +199,48 @@ export const mockGrid: Grid = {
       },
     },
   },
+
+  // 10. New Poll Slide
+  '3,1': {
+    id: 'poll_2',
+    type: 'html',
+    x: 3, y: 1,
+    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=jules_ai_poll',
+    access: 'public', createdAt: Date.now(), initialLikes: 42, isLiked: false, initialComments: 7,
+    data: {
+      type: 'POLL',
+      description: 'Ankieta od AI',
+      pollData: {
+        question: 'Czy ananasy pasują do pizzy?',
+        options: ['Tak, to dar bogów', 'Absolutnie nie!', 'Wolę nie myśleć o tym'],
+      },
+    },
+  },
+
+  // 11. New Game Slide
+  '1,2': {
+    id: 'game_2',
+    type: 'game',
+    x: 1, y: 2,
+    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=jules_ai_game',
+    access: 'public', createdAt: Date.now(), initialLikes: 123, isLiked: true, initialComments: 3,
+    data: {
+      description: 'Zagraj w nową grę!',
+    },
+  },
+
+  // 12. Funny Cat Video
+  '0,-2': {
+    id: 'video_cat_1',
+    type: 'video',
+    x: 0, y: -2,
+    userId: 'cat_lover', username: 'Kociara', avatar: 'https://i.pravatar.cc/150?u=cat_lover',
+    access: 'public', createdAt: Date.now(), initialLikes: 999, isLiked: false, initialComments: 100,
+    data: {
+      description: 'Śmieszny kot goni laser. Musisz to zobaczyć!',
+      mp4Url: 'https://vod-progressive.pexels.com/video/2022395/free-video-2022395.mp4',
+      hlsUrl: null,
+      poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    },
+  },
 };

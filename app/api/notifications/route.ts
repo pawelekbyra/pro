@@ -12,11 +12,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const lang = searchParams.get('lang') || 'en';
 
-  // In the future, this would fetch from a real DB
-  // const notifications = await db.getNotifications(payload.user.id, lang);
-
-  // For now, returning an empty array as we'll use a mock DB layer
-  const notifications: any[] = [];
+  const notifications = await db.getNotifications(payload.user.id, lang);
 
   return NextResponse.json({ notifications });
 }

@@ -73,7 +73,7 @@ interface NotificationPopupProps {
 }
 
 const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }) => {
-  const { t, language } = useTranslation();
+  const { t, lang } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +84,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
         setIsLoading(true);
         setError(null);
         try {
-          const res = await fetch(`/api/notifications?lang=${language}`);
+          const res = await fetch(`/api/notifications?lang=${lang}`);
           if (!res.ok) throw new Error('Failed to fetch notifications');
           const data = await res.json();
           // Add client-side 'expanded' state
@@ -97,7 +97,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
       };
       fetchNotifications();
     }
-  }, [isOpen, language]);
+  }, [isOpen, lang]);
 
   const handleToggle = (id: string) => {
     const notifToUpdate = notifications.find(n => n.id === id);

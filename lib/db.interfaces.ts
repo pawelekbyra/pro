@@ -21,6 +21,8 @@ export interface Comment {
   text: string;
   createdAt: number; // Unix timestamp
   likedBy: string[]; // Array of userIds
+  parentId?: string | null;
+  replies?: Comment[];
   // This can be hydrated with user info
   user?: {
     displayName: string;

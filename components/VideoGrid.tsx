@@ -256,12 +256,18 @@ const VideoGrid: React.FC = () => {
 
       {/* Navigation Arrows Overlay */}
       {activeSlide && (
-        <div className="absolute inset-0 pointer-events-none text-white/50 z-10">
+        <div
+          className="absolute inset-0 pointer-events-none text-white/50 z-10"
+          style={{
+            paddingTop: 'var(--topbar-height)',
+            paddingBottom: 'var(--bottombar-height)',
+          }}
+        >
           {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && (
-            <ArrowUp className="absolute top-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
+            <ArrowUp className="absolute top-[calc(var(--topbar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />
           )}
           {grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] && (
-            <ArrowDown className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-pulse" size={48} />
+            <ArrowDown className="absolute bottom-[calc(var(--bottombar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />
           )}
           {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && (
             <ArrowLeft className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />
