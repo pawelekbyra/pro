@@ -187,14 +187,17 @@ export const db = {
     // If a user is logged in, check which videos they have liked
     if (currentUserId) {
       const userLikesKey = keys.userLikes(currentUserId);
-      pipe.sismember(userLikesKey, videoIds);
+      // Use SMISMEMBER to check for multiple members in a single command
+      pipe.smismember(userLikesKey, videoIds as string[]);
     }
 
     const results = await pipe.exec();
 
     // 3. Process the results
     const videos = [];
-    const userLikes = currentUserId ? (results.pop() as number[]).map(Boolean) : [];
+    // Pop the result of smismember if it exists
+    const userLikesResult = currentUserId ? (results.pop() as number[]) : null;
+    const userLikes = userLikesResult ? userLikesResult.map(Boolean) : [];
 
     for (let i = 0; i < videoIds.length; i++) {
       const videoData = results[i * 2] as Video | null;

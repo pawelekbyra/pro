@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "tsx scripts/seed-kv.ts",
+    "db:seed": "dotenv -e .env.local -- tsx scripts/seed-kv.ts",
     "admin:create": "dotenv -e .env.local -- tsx scripts/create-admin.ts"
   },
   "dependencies": {

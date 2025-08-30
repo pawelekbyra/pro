@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": "user1",
+      "email": "test@test.com",
+      "username": "testuser",
+      "passwordHash": "password",
+      "firstName": "Test",
+      "lastName": "User",
+      "displayName": "Test User",
+      "avatar": "/avatars/default.png",
+      "sessionVersion": 1,
+      "role": "user"
+    }
+  ],
+  "slides": [
+    {
+      "id": "slide1",
+      "likeId": "like1",
+      "user": "testuser",
+      "description": "This is a test video.",
+      "mp4Url": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+      "hlsUrl": null,
+      "poster": "https://via.placeholder.com/150",
+      "avatar": "/avatars/default.png",
+      "access": "public"
+    }
+  ],
+  "likes": [],
+  "comments": []
+}

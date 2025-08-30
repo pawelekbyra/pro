@@ -33,6 +33,21 @@ interface OldDbData {
 }
 
 
+import { store, sets, sortedSets, lists } from '../lib/kv-mock';
+
+async function saveMockDb() {
+  console.log('Saving mock database to mock-db.json...');
+  const data = {
+    store: Array.from(store.entries()),
+    sets: Array.from(sets.entries()).map(([key, set]) => [key, Array.from(set)]),
+    sortedSets: Array.from(sortedSets.entries()).map(([key, map]) => [key, Array.from(map.entries())]),
+    lists: Array.from(lists.entries()),
+  };
+  const dbPath = path.join(process.cwd(), 'mock-db.json');
+  await fs.writeFile(dbPath, JSON.stringify(data, null, 2), 'utf8');
+  console.log('Mock database saved successfully.');
+}
+
 async function seed() {
   console.log('Starting database seed with new structure...');
 
@@ -112,10 +127,23 @@ async function seed() {
 
     console.log('Seeding complete! ✅');
 
+    await saveMockDb();
+
   } catch (error) {
     console.error('Error during seeding:', error);
     process.exit(1);
   }
 }
 
-seed();
+async function run() {
+  const { kv } = await import('../lib/kv');
+  // @ts-ignore
+  if (kv.flushall) {
+    // @ts-ignore
+    await kv.flushall();
+    console.log('Mock database flushed.');
+  }
+  await seed();
+}
+
+run();

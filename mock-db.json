@@ -1,0 +1,55 @@
+{
+  "store": [
+    [
+      "user:b383e952-53a0-4b68-b3c0-d808bc01d3f5",
+      {
+        "id": "b383e952-53a0-4b68-b3c0-d808bc01d3f5",
+        "email": "test@test.com",
+        "username": "testuser",
+        "passwordHash": "$2b$10$qOwAPL3BEoACV2yx/4lGDuWB6rdh3DbhyPT4J21XQXF1Sg0jd.N/u",
+        "firstName": "Test",
+        "lastName": "User",
+        "displayName": "Test User",
+        "avatar": "/avatars/default.png",
+        "sessionVersion": 1,
+        "role": "user"
+      }
+    ],
+    [
+      "email_to_id:test@test.com",
+      "b383e952-53a0-4b68-b3c0-d808bc01d3f5"
+    ],
+    [
+      "username_to_id:testuser",
+      "b383e952-53a0-4b68-b3c0-d808bc01d3f5"
+    ],
+    [
+      "video:video_55e7e701-a2e4-4c3a-a6c8-a427a4df19b7",
+      {
+        "userId": "b383e952-53a0-4b68-b3c0-d808bc01d3f5",
+        "username": "testuser",
+        "description": "This is a test video.",
+        "mp4Url": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+        "hlsUrl": null,
+        "poster": "https://via.placeholder.com/150",
+        "avatar": "/avatars/default.png",
+        "access": "public",
+        "id": "video_55e7e701-a2e4-4c3a-a6c8-a427a4df19b7",
+        "createdAt": 1756525409321
+      }
+    ]
+  ],
+  "sets": [],
+  "sortedSets": [
+    [
+      "all_videos",
+      [
+        [
+          "video_55e7e701-a2e4-4c3a-a6c8-a427a4df19b7",
+          1756525409321
+        ]
+      ]
+    ]
+  ],
+  "lists": []
+}
