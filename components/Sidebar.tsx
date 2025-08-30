@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { HeartCrack, MessageSquare, Rat, FileQuestion } from 'lucide-react';
+import { Heart, MessageSquare, Rat, FileQuestion } from 'lucide-react';
 import { PiShareFat } from 'react-icons/pi';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
@@ -108,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold"
         data-video-id={videoId}
       >
-        <HeartCrack
+        <Heart
           size={32}
           strokeWidth={1.4}
           className={`transition-colors duration-200 ${isLiked ? 'fill-red-500 stroke-red-500' : 'fill-transparent stroke-white'}`}
