@@ -1,8 +1,33 @@
-import { mockGrid, Grid, Slide, HydratedVideo } from './mock-data';
+import { mockGrid } from './mock-data';
 import type { Video, Comment, User } from './db'; // Używamy typów z 'db'
+import { VideoSlide } from './types';
+
+// These types are redefined here for the mock database.
+// This is a simplified version for the old video-only logic.
+type HydratedVideo = Video & {
+  initialLikes: number;
+  isLiked: boolean;
+  initialComments: number;
+};
 
 // Flatten the grid into a simple array for the mock DB
-const initialVideos: HydratedVideo[] = Object.values(mockGrid);
+const initialVideos: HydratedVideo[] = Object.values(mockGrid)
+  .filter((slide): slide is VideoSlide => slide.type === 'video')
+  .map(slide => ({
+    id: slide.id,
+    userId: slide.userId,
+    username: slide.username,
+    description: slide.data.description,
+    mp4Url: slide.data.mp4Url,
+    hlsUrl: slide.data.hlsUrl,
+    poster: slide.data.poster,
+    avatar: slide.avatar,
+    access: slide.access,
+    createdAt: slide.createdAt,
+    initialLikes: slide.initialLikes,
+    isLiked: slide.isLiked,
+    initialComments: slide.initialComments,
+  }));
 
 // Tworzymy mutowalną kopię danych, aby symulować bazę danych w pamięci.
 let mockVideos: HydratedVideo[] = JSON.parse(JSON.stringify(initialVideos));

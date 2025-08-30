@@ -1,10 +1,48 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
-import { mockGrid, Grid, Slide, HydratedVideo } from '@/lib/mock-data';
 import { mockDb } from '@/lib/mock-db';
+import { Video } from '@/lib/db';
+
+// These types are now defined locally to keep this old endpoint functional
+// after the main data model refactoring.
+type HydratedVideo = Video & {
+  initialLikes: number;
+  isLiked: boolean;
+  initialComments: number;
+};
+type Slide = HydratedVideo & {
+  x: number;
+  y: number;
+};
+type Grid = {
+  [key: string]: Slide;
+};
+
 
 export const dynamic = 'force-dynamic';
+
+// A mock grid is needed for the MOCK_API case.
+// We'll create a simple one here.
+const mockGrid: Grid = {
+  '0,0': {
+    id: 'video_mock_1',
+    userId: 'user_mock_1',
+    username: 'TestUser',
+    description: 'Pionowy slajd 1 (0,0). Przesuń w dół!',
+    mp4Url: 'https://vod-progressive.pexels.com/video/856077/free-video-856077.mp4',
+    hlsUrl: 'https://content.jwplatform.com/manifests/vM7nH0Kl.m3u8',
+    poster: 'https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217',
+    avatar: 'https://i.pravatar.cc/150?u=user_mock_1',
+    access: 'public',
+    createdAt: Date.now(),
+    initialLikes: 1337,
+    isLiked: false,
+    initialComments: 42,
+    x: 0,
+    y: 0,
+  }
+};
 
 export async function GET(request: NextRequest) {
   // If mock API is enabled, return mock data
