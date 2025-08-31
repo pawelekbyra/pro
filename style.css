@@ -1,0 +1,99 @@
+.reveal .slides .description {
+	font-size: 0.6em;
+	position: absolute;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 90%;
+	text-align: center;
+}
+
+.reveal .slides section.bg-1-1 { background-color: #FFADAD; }
+.reveal .slides section.bg-1-2 { background-color: #FFD6A5; }
+.reveal .slides section.bg-1-3 { background-color: #FDFFB6; }
+.reveal .slides section.bg-1-4 { background-color: #CAFFBF; }
+.reveal .slides section.bg-1-5 { background-color: #9BF6FF; }
+.reveal .slides section.bg-1-6 { background-color: #A0C4FF; }
+.reveal .slides section.bg-1-7 { background-color: #BDB2FF; }
+.reveal .slides section.bg-1-8 { background-color: #FFC6FF; }
+.reveal .slides section.bg-1-9 { background-color: #FFFFFC; }
+
+.reveal .slides section.bg-2-1 { background-color: #FFC6FF; }
+.reveal .slides section.bg-2-2 { background-color: #BDB2FF; }
+.reveal .slides section.bg-2-3 { background-color: #A0C4FF; }
+.reveal .slides section.bg-2-4 { background-color: #9BF6FF; }
+.reveal .slides section.bg-2-5 { background-color: #CAFFBF; }
+.reveal .slides section.bg-2-6 { background-color: #FDFFB6; }
+.reveal .slides section.bg-2-7 { background-color: #FFD6A5; }
+.reveal .slides section.bg-2-8 { background-color: #FFADAD; }
+.reveal .slides section.bg-2-9 { background-color: #EAE4E9; }
+
+.reveal .slides section.bg-3-1 { background-color: #FFD6A5; }
+.reveal .slides section.bg-3-2 { background-color: #FDFFB6; }
+.reveal .slides section.bg-3-3 { background-color: #CAFFBF; }
+.reveal .slides section.bg-3-4 { background-color: #9BF6FF; }
+.reveal .slides section.bg-3-5 { background-color: #A0C4FF; }
+.reveal .slides section.bg-3-6 { background-color: #BDB2FF; }
+.reveal .slides section.bg-3-7 { background-color: #FFC6FF; }
+.reveal .slides section.bg-3-8 { background-color: #FFADAD; }
+.reveal .slides section.bg-3-9 { background-color: #FFF1E6; }
+
+.reveal .slides section.bg-4-1 { background-color: #CAFFBF; }
+.reveal .slides section.bg-4-2 { background-color: #9BF6FF; }
+.reveal .slides section.bg-4-3 { background-color: #A0C4FF; }
+.reveal .slides section.bg-4-4 { background-color: #BDB2FF; }
+.reveal .slides section.bg-4-5 { background-color: #FFC6FF; }
+.reveal .slides section.bg-4-6 { background-color: #FFADAD; }
+.reveal .slides section.bg-4-7 { background-color: #FFD6A5; }
+.reveal .slides section.bg-4-8 { background-color: #FDFFB6; }
+.reveal .slides section.bg-4-9 { background-color: #F0EFEB; }
+
+.reveal .slides section.bg-5-1 { background-color: #A0C4FF; }
+.reveal .slides section.bg-5-2 { background-color: #BDB2FF; }
+.reveal .slides section.bg-5-3 { background-color: #FFC6FF; }
+.reveal .slides section.bg-5-4 { background-color: #FFADAD; }
+.reveal .slides section.bg-5-5 { background-color: #FFD6A5; }
+.reveal .slides section.bg-5-6 { background-color: #FDFFB6; }
+.reveal .slides section.bg-5-7 { background-color: #CAFFBF; }
+.reveal .slides section.bg-5-8 { background-color: #9BF6FF; }
+.reveal .slides section.bg-5-9 { background-color: #E1EFE6; }
+
+.reveal .slides section.bg-6-1 { background-color: #FFC6FF; }
+.reveal .slides section.bg-6-2 { background-color: #FFADAD; }
+.reveal .slides section.bg-6-3 { background-color: #FFD6A5; }
+.reveal .slides section.bg-6-4 { background-color: #FDFFB6; }
+.reveal .slides section.bg-6-5 { background-color: #CAFFBF; }
+.reveal .slides section.bg-6-6 { background-color: #9BF6FF; }
+.reveal .slides section.bg-6-7 { background-color: #A0C4FF; }
+.reveal .slides section.bg-6-8 { background-color: #BDB2FF; }
+.reveal .slides section.bg-6-9 { background-color: #F4E1E1; }
+
+.reveal .slides section.bg-7-1 { background-color: #FFADAD; }
+.reveal .slides section.bg-7-2 { background-color: #FFD6A5; }
+.reveal .slides section.bg-7-3 { background-color: #FDFFB6; }
+.reveal .slides section.bg-7-4 { background-color: #CAFFBF; }
+.reveal .slides section.bg-7-5 { background-color: #9BF6FF; }
+.reveal .slides section.bg-7-6 { background-color: #A0C4FF; }
+.reveal .slides section.bg-7-7 { background-color: #BDB2FF; }
+.reveal .slides section.bg-7-8 { background-color: #FFC6FF; }
+.reveal .slides section.bg-7-9 { background-color: #E6E6FA; }
+
+.reveal .slides section.bg-8-1 { background-color: #BDB2FF; }
+.reveal .slides section.bg-8-2 { background-color: #A0C4FF; }
+.reveal .slides section.bg-8-3 { background-color: #9BF6FF; }
+.reveal .slides section.bg-8-4 { background-color: #CAFFBF; }
+.reveal .slides section.bg-8-5 { background-color: #FDFFB6; }
+.reveal .slides section.bg-8-6 { background-color: #FFD6A5; }
+.reveal .slides section.bg-8-7 { background-color: #FFADAD; }
+.reveal .slides section.bg-8-8 { background-color: #FFC6FF; }
+.reveal .slides section.bg-8-9 { background-color: #FAFAD2; }
+
+.reveal .slides section.bg-9-1 { background-color: #9BF6FF; }
+.reveal .slides section.bg-9-2 { background-color: #CAFFBF; }
+.reveal .slides section.bg-9-3 { background-color: #FDFFB6; }
+.reveal .slides section.bg-9-4 { background-color: #FFD6A5; }
+.reveal .slides section.bg-9-5 { background-color: #FFADAD; }
+.reveal .slides section.bg-9-6 { background-color: #FFC6FF; }
+.reveal .slides section.bg-9-7 { background-color: #BDB2FF; }
+.reveal .slides section.bg-9-8 { background-color: #A0C4FF; }
+.reveal .slides section.bg-9-9 { background-color: #F5F5DC; }
