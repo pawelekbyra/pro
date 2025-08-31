@@ -11,23 +11,38 @@ if (process.env.VAPID_SUBJECT && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && pro
     );
 }
 
-
 export async function POST(request: NextRequest) {
   const payload = await verifySession();
   if (!payload || !payload.user || payload.user.user_type !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 403 });
   }
 
-  const { userId, userType, title, body, url } = await request.json();
+  const { userId, userType, targetPwa, targetBrowser, title, body, url } = await request.json();
 
   try {
-    let subscriptions;
-    if (userId || userType) {
-        subscriptions = await db.getPushSubscriptions({ userId, userType });
-    } else {
-        return NextResponse.json({ success: false, message: 'Target user or userType is required.' }, { status: 400 });
-    }
+    const options: { userId?: string, userType?: string, isPwaInstalled?: boolean } = {};
+    let subscriptions = [];
 
+    if (userId) {
+        options.userId = userId;
+        subscriptions = await db.getPushSubscriptions(options);
+    } else if (userType) {
+        options.userType = userType;
+        subscriptions = await db.getPushSubscriptions(options);
+    } else if (targetPwa || targetBrowser) {
+        if (targetPwa && targetBrowser) {
+            // Get all users, no isPwaInstalled filter
+            subscriptions = await db.getPushSubscriptions({});
+        } else if (targetPwa) {
+            options.isPwaInstalled = true;
+            subscriptions = await db.getPushSubscriptions(options);
+        } else { // targetBrowser
+            options.isPwaInstalled = false;
+            subscriptions = await db.getPushSubscriptions(options);
+        }
+    } else {
+        return NextResponse.json({ success: false, message: 'Target user, userType, or a PWA/browser group is required.' }, { status: 400 });
+    }
 
     if (!subscriptions || subscriptions.length === 0) {
       return NextResponse.json({ success: false, message: 'No subscriptions found for the target.' }, { status: 404 });

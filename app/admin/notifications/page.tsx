@@ -8,6 +8,8 @@ export default function AdminNotificationsPage() {
   const [userId, setUserId] = useState('');
   const [userType, setUserType] = useState('');
   const [url, setUrl] = useState('/');
+  const [targetPwa, setTargetPwa] = useState(false);
+  const [targetBrowser, setTargetBrowser] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -20,7 +22,7 @@ export default function AdminNotificationsPage() {
       const response = await fetch('/api/notifications/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body, userId, userType, url }),
+        body: JSON.stringify({ title, body, userId, userType, url, targetPwa, targetBrowser }),
       });
 
       const data = await response.json();
@@ -31,6 +33,8 @@ export default function AdminNotificationsPage() {
         setUserId('');
         setUserType('');
         setUrl('/');
+        setTargetPwa(false);
+        setTargetBrowser(false);
       } else {
         setMessage(data.message || 'Failed to send notification.');
       }
@@ -77,31 +81,44 @@ export default function AdminNotificationsPage() {
           />
         </div>
         <div className="border-t border-gray-600 pt-4">
-          <p className="text-sm text-gray-400 mb-2">Targeting (choose one):</p>
-          <div>
-            <label className="block mb-1 font-medium" htmlFor="userId">User ID</label>
-            <input
-              id="userId"
-              type="text"
-              value={userId}
-              onChange={(e) => { setUserId(e.target.value); setUserType(''); }}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-              placeholder="e.g., 7bfdb7c9-3d8f-4b70-ac77-92741d889861"
-            />
-          </div>
-          <div className="my-2 text-center text-gray-400">OR</div>
-          <div>
-            <label className="block mb-1 font-medium" htmlFor="userType">User Type</label>
-            <select
-              id="userType"
-              value={userType}
-              onChange={(e) => { setUserType(e.target.value); setUserId(''); }}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-            >
-              <option value="">Select Type</option>
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
+          <p className="text-sm text-gray-400 mb-2">Targeting:</p>
+          <div className="flex flex-col gap-2">
+            <div>
+              <label className="block mb-1 font-medium" htmlFor="userId">User ID</label>
+              <input
+                id="userId"
+                type="text"
+                value={userId}
+                onChange={(e) => { setUserId(e.target.value); setUserType(''); setTargetPwa(false); setTargetBrowser(false); }}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                placeholder="e.g., 7bfdb7c9-3d8f-4b70-ac77-92741d889861"
+              />
+            </div>
+            <div className="my-2 text-center text-gray-400">OR</div>
+            <div>
+              <label className="block mb-1 font-medium" htmlFor="userType">User Type</label>
+              <select
+                id="userType"
+                value={userType}
+                onChange={(e) => { setUserType(e.target.value); setUserId(''); setTargetPwa(false); setTargetBrowser(false); }}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+              >
+                <option value="">Select Type</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+             <div className="my-2 text-center text-gray-400">OR</div>
+             <div className="flex gap-4 justify-center">
+                 <label className="flex items-center gap-2 text-gray-300">
+                     <input type="checkbox" checked={targetPwa} onChange={(e) => { setTargetPwa(e.target.checked); setUserId(''); setUserType(''); }} />
+                     PWA Users
+                 </label>
+                 <label className="flex items-center gap-2 text-gray-300">
+                     <input type="checkbox" checked={targetBrowser} onChange={(e) => { setTargetBrowser(e.target.checked); setUserId(''); setUserType(''); }} />
+                     Browser Users
+                 </label>
+             </div>
           </div>
         </div>
         {message && <p className="text-sm mt-4">{message}</p>}
