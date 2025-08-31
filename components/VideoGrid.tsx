@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, TouchEvent, useEffect, useCallback } from 'react';
+import React, { useState, TouchEvent, useEffect, useCallback, useRef, MouseEvent } from 'react';
 import { Grid, Slide } from '@/lib/types';
 import SlideRenderer from './SlideRenderer';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -151,14 +151,14 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
   };
 
   // Mouse Handlers
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (isAnyModalOpen) return;
     e.preventDefault();
     setTouchStart({ x: e.clientX, y: e.clientY });
     setIsDragging(true);
   };
 
-  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseUp = (e: MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !touchStart) return;
     const deltaX = e.clientX - touchStart.x;
     const deltaY = e.clientY - touchStart.y;
@@ -216,7 +216,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
       onMouseLeave={handleMouseUp}
     >
       {activeSlide && (
-        <div className="relative h-full w-full" style={{ transform: getTransformStyle(), transition: isSwiping || isDragging ? 'none' : 'transform 0.3s ease-out' }}>
+        <div className="relative h-full w-full" style={{ transform: getTransformStyle(), transition: 'transform 0.3s ease-out' }}>
           {slidesToRender.map((slide) => (
             <div className="absolute h-full w-full" key={slide.id} style={{ left: `${slide.x * 100}%`, top: `${slide.y * 100}%` }}>
               <SlideRenderer
@@ -246,7 +246,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
           {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && <ArrowUp className="absolute top-[calc(var(--topbar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />}
           {grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] && <ArrowDown className="absolute bottom-[calc(var(--bottombar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />}
           {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && <ArrowLeft className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />}
-          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />}
+          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate={pulse" size={48} />}
         </div>
       )}
       {activeSlide && (
