@@ -47,9 +47,9 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, ...commonProps }) 
         };
         return <Video video={videoDataForComponent} {...commonProps} />;
       case 'html':
-        return <HtmlContent data={slide.data} username={slide.username} onNavigate={commonProps.onNavigate} />;
+        return <div onTouchStart={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}><HtmlContent data={slide.data} username={slide.username} onNavigate={commonProps.onNavigate} /></div>;
       case 'game':
-        return <FlappyDivGame slide={slide} />;
+        return <div onTouchStart={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}><FlappyDivGame slide={slide} /></div>;
       default:
         // You can return a default component or null if the type is unknown
         return <div className="text-white">Unsupported slide type</div>;

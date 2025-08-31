@@ -12,15 +12,17 @@ import { Skeleton } from './ui/skeleton';
 const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe in pixels
 const PREFETCH_THRESHOLD = 2; // How many videos away from the end to trigger a new fetch
 
-const VideoGrid: React.FC = () => {
+interface VideoGridProps {
+  initialCoordinates?: { x: number; y: number };
+}
+
+const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0 } }) => {
   // --- State Declarations ---
   const [grid, setGrid] = useState<Grid>({});
-  const [activeCoordinates, setActiveCoordinates] = useState({ x: 0, y: 0 });
+  const [activeCoordinates, setActiveCoordinates] = useState(initialCoordinates);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [swipeTranslation, setSwipeTranslation] = useState({ x: 0, y: 0 });
-  const [scrollDirection, setScrollDirection] = useState<'horizontal' | 'vertical' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedBounds, setLoadedBounds] = useState({ minX: -1, maxX: 1, minY: -1, maxY: 1 });
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
@@ -125,83 +127,53 @@ const VideoGrid: React.FC = () => {
   // Touch Handlers
   const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     if (isAnyModalOpen) return;
-    setScrollDirection(null);
     setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     setIsSwiping(true);
   };
 
-  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+  const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
     if (!touchStart || isAnyModalOpen) return;
-    const deltaX = e.targetTouches[0].clientX - touchStart.x;
-    const deltaY = e.targetTouches[0].clientY - touchStart.y;
+    const deltaX = e.changedTouches[0].clientX - touchStart.x;
+    const deltaY = e.changedTouches[0].clientY - touchStart.y;
 
-    let localScrollDirection = scrollDirection;
-    if (!localScrollDirection && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
-      localScrollDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
-      setScrollDirection(localScrollDirection);
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        if (deltaX > 0) move('left'); else move('right');
+      }
+    } else {
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        if (deltaY > 0) move('up'); else move('down');
+      }
     }
 
-    if (localScrollDirection === 'horizontal') {
-      setSwipeTranslation({ x: deltaX, y: 0 });
-    } else if (localScrollDirection === 'vertical') {
-      setSwipeTranslation({ x: 0, y: deltaY });
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || isAnyModalOpen) return;
-    const { x: deltaX, y: deltaY } = swipeTranslation;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      if (deltaX > 0) move('left'); else move('right');
-    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
-      if (deltaY > 0) move('down'); else move('up');
-    }
     setTouchStart(null);
     setIsSwiping(false);
-    setSwipeTranslation({ x: 0, y: 0 });
-    setScrollDirection(null);
   };
 
   // Mouse Handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isAnyModalOpen) return;
     e.preventDefault();
-    setScrollDirection(null);
     setTouchStart({ x: e.clientX, y: e.clientY });
     setIsDragging(true);
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !touchStart) return;
-    e.preventDefault();
     const deltaX = e.clientX - touchStart.x;
     const deltaY = e.clientY - touchStart.y;
 
-    let localScrollDirection = scrollDirection;
-    if (!localScrollDirection && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
-        localScrollDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
-        setScrollDirection(localScrollDirection);
-    }
-
-    if (localScrollDirection === 'horizontal') {
-        setSwipeTranslation({ x: deltaX, y: 0 });
-    } else if (localScrollDirection === 'vertical') {
-        setSwipeTranslation({ x: 0, y: deltaY });
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging || !touchStart) return;
-    const { x: deltaX, y: deltaY } = swipeTranslation;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      if (deltaX > 0) move('left'); else move('right');
-    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
-      if (deltaY > 0) move('down'); else move('up');
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        if (deltaX > 0) move('left'); else move('right');
+      }
+    } else {
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        if (deltaY > 0) move('up'); else move('down');
+      }
     }
     setIsDragging(false);
     setTouchStart(null);
-    setSwipeTranslation({ x: 0, y: 0 });
-    setScrollDirection(null);
   };
 
   // --- Render Logic ---
@@ -232,16 +204,14 @@ const VideoGrid: React.FC = () => {
     return <div className="h-screen w-screen bg-black flex items-center justify-center text-white">No videos found.</div>;
   }
 
-  const getTransformStyle = () => `translateX(calc(${-activeCoordinates.x * 100}% + ${swipeTranslation.x}px)) translateY(calc(${-activeCoordinates.y * 100}% + ${swipeTranslation.y}px))`;
+  const getTransformStyle = () => `translateX(${-activeCoordinates.x * 100}%) translateY(${-activeCoordinates.y * 100}%)`;
 
   return (
     <div
       className="relative h-screen w-screen overflow-hidden bg-black"
       onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >

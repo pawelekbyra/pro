@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <main style={{ height: 'var(--app-height)' }}>
-      <VideoGrid />
+      <VideoGrid initialCoordinates={{ x: 1, y: 0 }} />
     </main>
   );
 }
