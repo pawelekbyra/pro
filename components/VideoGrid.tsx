@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, TouchEvent, useEffect, useCallback } from 'react';
+import React, { useState, TouchEvent, useEffect, useCallback, useRef, MouseEvent } from 'react';
 import { Grid, Slide } from '@/lib/types';
 import SlideRenderer from './SlideRenderer';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -12,15 +12,20 @@ import { Skeleton } from './ui/skeleton';
 const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe in pixels
 const PREFETCH_THRESHOLD = 2; // How many videos away from the end to trigger a new fetch
 
-const VideoGrid: React.FC = () => {
+interface VideoGridProps {
+  initialCoordinates?: { x: number; y: number };
+}
+
+const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0 } }) => {
   // --- State Declarations ---
   const [grid, setGrid] = useState<Grid>({});
-  const [activeCoordinates, setActiveCoordinates] = useState({ x: 0, y: 0 });
+  const [activeCoordinates, setActiveCoordinates] = useState(initialCoordinates);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedBounds, setLoadedBounds] = useState({ minX: -1, maxX: 1, minY: -1, maxY: 1 });
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
-  const [gestureStart, setGestureStart] = useState<{ x: number, y: number, time: number } | null>(null);
-  const isGesturing = React.useRef(false);
 
   // Modal States
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
@@ -119,32 +124,56 @@ const VideoGrid: React.FC = () => {
   const openInfoModal = () => setIsInfoModalOpen(true);
   const closeInfoModal = () => setIsInfoModalOpen(false);
 
-  const handleGestureStart = (x: number, y: number) => {
-    if (isAnyModalOpen || isGesturing.current) return;
-    setGestureStart({ x, y, time: Date.now() });
+  // Touch Handlers
+  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    if (isAnyModalOpen) return;
+    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+    setIsSwiping(true);
   };
 
-  const handleGestureEnd = (x: number, y: number) => {
-    if (!gestureStart || isAnyModalOpen || isGesturing.current) return;
+  const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+    if (!touchStart || isAnyModalOpen) return;
+    const deltaX = e.changedTouches[0].clientX - touchStart.x;
+    const deltaY = e.changedTouches[0].clientY - touchStart.y;
 
-    isGesturing.current = true;
-
-    const deltaX = x - gestureStart.x;
-    const deltaY = y - gestureStart.y;
-    const deltaTime = Date.now() - gestureStart.time;
-
-    if (deltaTime < 800) { // Only count as swipe if it's fast enough
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
         if (deltaX > 0) move('left'); else move('right');
-      } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
+      }
+    } else {
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
         if (deltaY > 0) move('up'); else move('down');
       }
     }
 
-    setGestureStart(null);
-    setTimeout(() => {
-      isGesturing.current = false;
-    }, 300); // Cooldown to prevent rapid swiping
+    setTouchStart(null);
+    setIsSwiping(false);
+  };
+
+  // Mouse Handlers
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    if (isAnyModalOpen) return;
+    e.preventDefault();
+    setTouchStart({ x: e.clientX, y: e.clientY });
+    setIsDragging(true);
+  };
+
+  const handleMouseUp = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !touchStart) return;
+    const deltaX = e.clientX - touchStart.x;
+    const deltaY = e.clientY - touchStart.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        if (deltaX > 0) move('left'); else move('right');
+      }
+    } else {
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        if (deltaY > 0) move('up'); else move('down');
+      }
+    }
+    setIsDragging(false);
+    setTouchStart(null);
   };
 
   // --- Render Logic ---
@@ -180,10 +209,11 @@ const VideoGrid: React.FC = () => {
   return (
     <div
       className="relative h-screen w-screen overflow-hidden bg-black"
-      onTouchStart={(e) => handleGestureStart(e.targetTouches[0].clientX, e.targetTouches[0].clientY)}
-      onTouchEnd={(e) => handleGestureEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
-      onMouseDown={(e) => handleGestureStart(e.clientX, e.clientY)}
-      onMouseUp={(e) => handleGestureEnd(e.clientX, e.clientY)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
     >
       {activeSlide && (
         <div className="relative h-full w-full" style={{ transform: getTransformStyle(), transition: 'transform 0.3s ease-out' }}>
@@ -216,7 +246,7 @@ const VideoGrid: React.FC = () => {
           {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && <ArrowUp className="absolute top-[calc(var(--topbar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />}
           {grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] && <ArrowDown className="absolute bottom-[calc(var(--bottombar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />}
           {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && <ArrowLeft className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />}
-          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />}
+          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate={pulse" size={48} />}
         </div>
       )}
       {activeSlide && (
