@@ -35,8 +35,41 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
     setIsMenuOpen(false);
   };
 
-  const toggleNotifPanel = () => {
-    setIsNotifPanelOpen((prev) => !prev);
+  const subscribeToPush = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(subscription),
+      });
+    } catch (error) {
+      console.error('Error subscribing to push notifications', error);
+    }
+  };
+
+  const toggleNotifPanel = async () => {
+    if (isNotifPanelOpen) {
+      setIsNotifPanelOpen(false);
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      setIsNotifPanelOpen(true);
+    } else if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        await subscribeToPush();
+        setIsNotifPanelOpen(true);
+      }
+    }
   };
 
   const toggleMenu = () => {
@@ -65,6 +98,21 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
     const isAnyPanelOpen = isLoginPanelOpen || isNotifPanelOpen || isMenuOpen;
     setIsModalOpen(isAnyPanelOpen);
   }, [isLoginPanelOpen, isNotifPanelOpen, isMenuOpen, setIsModalOpen]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetch('/api/notifications')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setHasUnread(data.unreadCount > 0);
+            if (navigator.setAppBadge) {
+              navigator.setAppBadge(data.unreadCount);
+            }
+          }
+        });
+    }
+  }, [isLoggedIn]);
 
   const getTopBarText = () => {
     if (isLoading) return t('loading');

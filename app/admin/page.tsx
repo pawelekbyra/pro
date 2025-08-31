@@ -18,6 +18,11 @@ export default function AdminPage() {
               Manage Slides
             </Link>
           </li>
+          <li>
+            <Link href="/admin/notifications" className="text-lg text-pink-400 hover:underline">
+              Send Notifications
+            </Link>
+          </li>
         </ul>
       </nav>
     </div>

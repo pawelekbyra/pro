@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
-import { mockComments } from '@/lib/mock-data';
-
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -14,8 +12,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Return mock comments for any slideId
-    return NextResponse.json({ success: true, comments: mockComments });
+    const comments = await db.getComments(slideId);
+    return NextResponse.json({ success: true, comments });
   } catch (error) {
     console.error('Error fetching comments:', error);
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });

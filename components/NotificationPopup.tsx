@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bell, Mail, User, Tag, ChevronDown, Loader2, Heart, MessageSquare, UserPlus } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
-import { mockNotifications } from '@/lib/mock-data';
 import { formatDistanceToNow } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import Image from 'next/image';
@@ -73,20 +72,36 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
     if (isOpen) {
       setIsLoading(true);
       setError(null);
-      setTimeout(() => {
-        const transformedNotifications = mockNotifications.map(n => ({
-          id: n.id,
-          type: n.type as NotificationType,
-          preview: n.text.split(':')[0], // Extract the action text
-          time: formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: lang === 'pl' ? pl : undefined }),
-          full: n.text,
-          unread: !n.read,
-          expanded: false,
-          user: n.user,
-        }));
-        setNotifications(transformedNotifications);
-        setIsLoading(false);
-      }, 500);
+      fetch('/api/notifications')
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch notifications');
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const transformedNotifications = data.notifications.map((n: any) => ({
+                    id: n.id,
+                    type: n.type as NotificationType,
+                    preview: n.text.split(':')[0],
+                    time: formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: lang === 'pl' ? pl : undefined }),
+                    full: n.text,
+                    unread: !n.read,
+                    expanded: false,
+                    user: n.fromUser || { displayName: 'System', avatar: '/icons/icon-192x192.png' },
+                }));
+                setNotifications(transformedNotifications);
+            } else {
+                throw new Error(data.message || 'Failed to fetch notifications');
+            }
+        })
+        .catch(err => {
+            setError(err.message);
+        })
+        .finally(() => {
+            setIsLoading(false);
+        });
     }
   }, [isOpen, lang]);
 

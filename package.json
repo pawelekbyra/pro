@@ -8,13 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "db:seed": "tsx scripts/seed-kv.ts",
+    "db:init": "dotenv -e .env.local -- tsx scripts/init-db.ts",
     "admin:create": "dotenv -e .env.local -- tsx scripts/create-admin.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
     "@radix-ui/react-slot": "^1.2.3",
-    "@serwist/next": "^9.1.1",
-    "@serwist/precaching": "^9.1.1",
-    "@serwist/sw": "^9.1.1",
+    "@serwist/next": "^9.2.0",
     "@upstash/redis": "^1.35.3",
     "@vercel/kv": "^3.0.0",
     "autoprefixer": "^10.4.21",
@@ -32,7 +32,8 @@
     "react-icons": "^5.5.0",
     "recharts": "^3.1.2",
     "tailwind-merge": "^2.3.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/Providers";
 import AppLayout from "@/components/AppLayout";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,6 +30,7 @@ export default function RootLayout({
         <Providers>
           <AppLayout>{children}</AppLayout>
         </Providers>
+        <PWAInstallPrompt />
         <Script
           data-name="BMC-Widget"
           data-cfasync="false"

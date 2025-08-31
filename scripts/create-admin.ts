@@ -7,7 +7,7 @@ async function createAdmin() {
   try {
     const adminUsername = 'admin';
     const adminEmail = 'admin@example.com';
-    const adminPassword = 'password'; // Simple password for local dev
+    const adminPassword = 'admin'; // Simple password for local dev
 
     // 1. Check if admin user already exists
     let adminUser = await db.findUserByEmail(adminEmail);
@@ -31,19 +31,21 @@ async function createAdmin() {
       adminUser = await db.createUser({
         username: adminUsername,
         email: adminEmail,
-        passwordHash,
-        role: 'admin',
-        firstName: 'Admin',
-        lastName: 'User',
+        password: passwordHash,
+        user_type: 'admin',
         displayName: 'Administrator',
         avatar: 'https://i.pravatar.cc/150?u=admin',
-      });
+      } as any);
       console.log('Admin user created successfully.');
     }
 
+    console.log('Admin user object after creation/update:', adminUser);
+
     // 3. Verify the user
     const verifiedUser = await db.findUserById(adminUser.id);
-    if (verifiedUser && verifiedUser.role === 'admin') {
+    console.log('Verified user object from DB:', verifiedUser);
+
+    if (verifiedUser && verifiedUser.user_type === 'admin') {
       console.log('Verification successful: Admin user is configured correctly.');
     } else {
       throw new Error('Verification failed: Could not find admin user with admin role after update.');
