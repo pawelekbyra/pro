@@ -101,6 +101,16 @@ export const mockGrid: Grid = {
       },
     },
   },
+  '-2,0': {
+    id: 'game_pope_1',
+    type: 'game',
+    x: -2, y: 0,
+    userId: 'pope_dev', username: 'DivineGames', avatar: 'https://i.pravatar.cc/150?u=pope',
+    access: 'public', createdAt: Date.now(), initialLikes: 2137, isLiked: true, initialComments: 420,
+    data: {
+      description: 'Be nice. Or not. Your choice.',
+    },
+  },
   '1,-1': {
     id: 'data_viz_1',
     type: 'html',
