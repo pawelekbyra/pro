@@ -1,35 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { verifySession } from '@/lib/auth';
+import { NextResponse } from 'next/server';
+import { Grid } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const x = parseInt(searchParams.get('x') || '0', 10);
-  const y = parseInt(searchParams.get('y') || '0', 10);
-  const width = parseInt(searchParams.get('width') || '3', 10);
-  const height = parseInt(searchParams.get('height') || '3', 10);
+function generateRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
 
-  const session = await verifySession();
-  const currentUserId = session?.user?.id;
+export async function GET() {
+  const grid: Grid = {};
+  const size = 9;
 
-  if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) {
-    return NextResponse.json({ error: 'Invalid query parameters' }, { status: 400 });
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const key = `${x},${y}`;
+      grid[key] = {
+        id: `slide-${x}-${y}`,
+        x,
+        y,
+        content: {
+          type: 'text',
+          title: `Slide ${x},${y}`,
+          text: `Coordinates: ${x}, ${y}`,
+          backgroundColor: generateRandomColor(),
+        },
+        video_url: '', // Not needed for this test
+        user_id: '',
+        user_name: '',
+        user_avatar_url: '',
+        likes: 0,
+        is_liked: false,
+        initialComments: [],
+        comments_count: 0,
+        shares: 0,
+        created_at: new Date().toISOString(),
+      };
+    }
   }
 
-  try {
-    const slides = await db.getSlidesInView({ x, y, width, height, currentUserId });
-
-    const grid: { [key: string]: any } = {};
-    slides.forEach(slide => {
-      const key = `${slide.x},${slide.y}`;
-      grid[key] = slide;
-    });
-
-    return NextResponse.json({ grid });
-  } catch (error) {
-    console.error('Error fetching slides:', error);
-    return NextResponse.json({ error: 'An unknown error occurred' }, { status: 500 });
-  }
+  return NextResponse.json({ grid });
 }
