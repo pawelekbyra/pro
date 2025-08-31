@@ -16,14 +16,11 @@ const VideoGrid: React.FC = () => {
   // --- State Declarations ---
   const [grid, setGrid] = useState<Grid>({});
   const [activeCoordinates, setActiveCoordinates] = useState({ x: 0, y: 0 });
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [swipeTranslation, setSwipeTranslation] = useState({ x: 0, y: 0 });
-  const [scrollDirection, setScrollDirection] = useState<'horizontal' | 'vertical' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedBounds, setLoadedBounds] = useState({ minX: -1, maxX: 1, minY: -1, maxY: 1 });
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
+  const [gestureStart, setGestureStart] = useState<{ x: number, y: number, time: number } | null>(null);
+  const isGesturing = React.useRef(false);
 
   // Modal States
   const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
@@ -122,86 +119,32 @@ const VideoGrid: React.FC = () => {
   const openInfoModal = () => setIsInfoModalOpen(true);
   const closeInfoModal = () => setIsInfoModalOpen(false);
 
-  // Touch Handlers
-  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-    if (isAnyModalOpen) return;
-    setScrollDirection(null);
-    setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
-    setIsSwiping(true);
+  const handleGestureStart = (x: number, y: number) => {
+    if (isAnyModalOpen || isGesturing.current) return;
+    setGestureStart({ x, y, time: Date.now() });
   };
 
-  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
-    if (!touchStart || isAnyModalOpen) return;
-    const deltaX = e.targetTouches[0].clientX - touchStart.x;
-    const deltaY = e.targetTouches[0].clientY - touchStart.y;
+  const handleGestureEnd = (x: number, y: number) => {
+    if (!gestureStart || isAnyModalOpen || isGesturing.current) return;
 
-    let localScrollDirection = scrollDirection;
-    if (!localScrollDirection && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
-      localScrollDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
-      setScrollDirection(localScrollDirection);
+    isGesturing.current = true;
+
+    const deltaX = x - gestureStart.x;
+    const deltaY = y - gestureStart.y;
+    const deltaTime = Date.now() - gestureStart.time;
+
+    if (deltaTime < 800) { // Only count as swipe if it's fast enough
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+        if (deltaX > 0) move('left'); else move('right');
+      } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        if (deltaY > 0) move('up'); else move('down');
+      }
     }
 
-    if (localScrollDirection === 'horizontal') {
-      setSwipeTranslation({ x: deltaX, y: 0 });
-    } else if (localScrollDirection === 'vertical') {
-      setSwipeTranslation({ x: 0, y: deltaY });
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || isAnyModalOpen) return;
-    const { x: deltaX, y: deltaY } = swipeTranslation;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      if (deltaX > 0) move('left'); else move('right');
-    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
-      if (deltaY > 0) move('down'); else move('up');
-    }
-    setTouchStart(null);
-    setIsSwiping(false);
-    setSwipeTranslation({ x: 0, y: 0 });
-    setScrollDirection(null);
-  };
-
-  // Mouse Handlers
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isAnyModalOpen) return;
-    e.preventDefault();
-    setScrollDirection(null);
-    setTouchStart({ x: e.clientX, y: e.clientY });
-    setIsDragging(true);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !touchStart) return;
-    e.preventDefault();
-    const deltaX = e.clientX - touchStart.x;
-    const deltaY = e.clientY - touchStart.y;
-
-    let localScrollDirection = scrollDirection;
-    if (!localScrollDirection && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
-        localScrollDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
-        setScrollDirection(localScrollDirection);
-    }
-
-    if (localScrollDirection === 'horizontal') {
-        setSwipeTranslation({ x: deltaX, y: 0 });
-    } else if (localScrollDirection === 'vertical') {
-        setSwipeTranslation({ x: 0, y: deltaY });
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging || !touchStart) return;
-    const { x: deltaX, y: deltaY } = swipeTranslation;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      if (deltaX > 0) move('left'); else move('right');
-    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
-      if (deltaY > 0) move('down'); else move('up');
-    }
-    setIsDragging(false);
-    setTouchStart(null);
-    setSwipeTranslation({ x: 0, y: 0 });
-    setScrollDirection(null);
+    setGestureStart(null);
+    setTimeout(() => {
+      isGesturing.current = false;
+    }, 300); // Cooldown to prevent rapid swiping
   };
 
   // --- Render Logic ---
@@ -232,21 +175,18 @@ const VideoGrid: React.FC = () => {
     return <div className="h-screen w-screen bg-black flex items-center justify-center text-white">No videos found.</div>;
   }
 
-  const getTransformStyle = () => `translateX(calc(${-activeCoordinates.x * 100}% + ${swipeTranslation.x}px)) translateY(calc(${-activeCoordinates.y * 100}% + ${swipeTranslation.y}px))`;
+  const getTransformStyle = () => `translateX(${-activeCoordinates.x * 100}%) translateY(${-activeCoordinates.y * 100}%)`;
 
   return (
     <div
       className="relative h-screen w-screen overflow-hidden bg-black"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onTouchStart={(e) => handleGestureStart(e.targetTouches[0].clientX, e.targetTouches[0].clientY)}
+      onTouchEnd={(e) => handleGestureEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+      onMouseDown={(e) => handleGestureStart(e.clientX, e.clientY)}
+      onMouseUp={(e) => handleGestureEnd(e.clientX, e.clientY)}
     >
       {activeSlide && (
-        <div className="relative h-full w-full" style={{ transform: getTransformStyle(), transition: isSwiping || isDragging ? 'none' : 'transform 0.3s ease-out' }}>
+        <div className="relative h-full w-full" style={{ transform: getTransformStyle(), transition: 'transform 0.3s ease-out' }}>
           {slidesToRender.map((slide) => (
             <div className="absolute h-full w-full" key={slide.id} style={{ left: `${slide.x * 100}%`, top: `${slide.y * 100}%` }}>
               <SlideRenderer
