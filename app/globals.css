@@ -68,6 +68,13 @@
     user-select: none;
     -webkit-user-select: none;
   }
+body {
+    @apply bg-zinc-900 text-foreground;
+    background-image: url('/public/bg-pattern.jpg'); /* Zakładamy, że taki plik tła istnieje */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
   body::-webkit-scrollbar, #webyx-container::-webkit-scrollbar {
       display: none;
   }
