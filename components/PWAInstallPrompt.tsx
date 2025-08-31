@@ -2,14 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Share, PlusSquare, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/context/LanguageContext';
 
 const PWAInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true);
+    }
+
+    const userAgent = window.navigator.userAgent;
+    if (/iPhone|iPad|iPod/i.test(userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+      setIsIOS(true);
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -25,34 +36,66 @@ const PWAInstallPrompt = () => {
   }, []);
 
   const handleInstallClick = () => {
-    if (!installPrompt) {
-      return;
+    if (installPrompt) {
+      installPrompt.prompt();
+      installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setInstallPrompt(null);
+      });
+    } else if (isIOS) {
+      setShowInstructions(true);
     }
-    installPrompt.prompt();
-    installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-      setInstallPrompt(null);
-    });
   };
 
-  if (isStandalone || !installPrompt) {
+  const handleCloseInstructions = () => {
+    setShowInstructions(false);
+  };
+
+  if (isStandalone || (!installPrompt && !isIOS)) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center z-50">
-      <div>
-        <p className="font-bold">Install the App!</p>
-        <p>Get the full experience. Install our app on your device.</p>
+    <>
+      <AnimatePresence>
+        {showInstructions && isIOS && (
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md text-white p-4 flex flex-col justify-between items-center z-50 rounded-t-2xl"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+          >
+            <div className="flex w-full justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Jak zainstalować aplikację</h3>
+              <Button variant="ghost" size="icon" onClick={handleCloseInstructions}>
+                <X />
+              </Button>
+            </div>
+            <div className="flex flex-col items-center space-y-4 text-center text-sm">
+              <p>1. Stuknij ikonę **udostępniania** na pasku przeglądarki Safari.</p>
+              <Share size={32} className="text-white drop-shadow-lg" />
+              <p>2. Z menu, które się pojawi, wybierz **"Dodaj do ekranu początkowego"**.</p>
+              <PlusSquare size={32} className="text-white drop-shadow-lg" />
+              <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center z-50">
+        <div>
+          <p className="font-bold">Zainstaluj aplikację!</p>
+          <p>Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
+        </div>
+        <Button onClick={handleInstallClick}>
+          Zainstaluj
+        </Button>
       </div>
-      <Button onClick={handleInstallClick}>
-        Install
-      </Button>
-    </div>
+    </>
   );
 };
 
