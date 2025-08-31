@@ -6,8 +6,6 @@ import { X, Heart, MessageSquare, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslation } from '@/context/LanguageContext';
 import { useUser } from '@/context/UserContext';
-import { mockComments } from '@/lib/mock-data';
-
 // This type is now aligned with the backend response
 type Comment = {
   id: string;
@@ -123,17 +121,31 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && videoId) {
       setIsLoading(true);
       setError(null);
-      // Simulate API call delay
-      setTimeout(() => {
-        // The mock data is already structured, so we can use it directly
-        setComments(mockComments);
-        setIsLoading(false);
-      }, 500);
+      fetch(`/api/comments?slideId=${videoId}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch comments');
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data.success) {
+            setComments(data.comments);
+          } else {
+            throw new Error(data.message || 'Failed to fetch comments');
+          }
+        })
+        .catch(err => {
+          setError(err.message);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-  }, [isOpen]);
+  }, [isOpen, videoId]);
 
   const handleLike = async (commentId: string) => {
     if (!user) {
