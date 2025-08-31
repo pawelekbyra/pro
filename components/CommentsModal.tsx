@@ -6,6 +6,7 @@ import { X, Heart, MessageSquare, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslation } from '@/context/LanguageContext';
 import { useUser } from '@/context/UserContext';
+import { mockComments } from '@/lib/mock-data';
 
 // This type is now aligned with the backend response
 type Comment = {
@@ -122,24 +123,17 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen && videoId) {
-      const fetchComments = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const res = await fetch(`/api/comments?videoId=${videoId}`);
-          if (!res.ok) throw new Error('Failed to fetch comments');
-          const data = await res.json();
-          setComments(data.comments);
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchComments();
+    if (isOpen) {
+      setIsLoading(true);
+      setError(null);
+      // Simulate API call delay
+      setTimeout(() => {
+        // The mock data is already structured, so we can use it directly
+        setComments(mockComments);
+        setIsLoading(false);
+      }, 500);
     }
-  }, [isOpen, videoId]);
+  }, [isOpen]);
 
   const handleLike = async (commentId: string) => {
     if (!user) {
@@ -179,42 +173,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
       console.error('An error occurred while liking the comment', error);
     }
   };
-
-  useEffect(() => {
-    if (isOpen && videoId) {
-      const fetchAndStructureComments = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const res = await fetch(`/api/comments?videoId=${videoId}`);
-          if (!res.ok) throw new Error('Failed to fetch comments');
-          const data = await res.json();
-
-          // Structure comments into a nested tree
-          const commentsById: { [key: string]: Comment } = {};
-          data.comments.forEach((c: Comment) => {
-            commentsById[c.id] = { ...c, replies: [] };
-          });
-
-          const structuredComments: Comment[] = [];
-          data.comments.forEach((c: Comment) => {
-            if (c.parentId && commentsById[c.parentId]) {
-              commentsById[c.parentId].replies?.push(commentsById[c.id]);
-            } else {
-              structuredComments.push(commentsById[c.id]);
-            }
-          });
-
-          setComments(structuredComments);
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchAndStructureComments();
-    }
-  }, [isOpen, videoId]);
 
   const addCommentOptimistically = (newComment: Comment) => {
     if (newComment.parentId) {
