@@ -23,22 +23,18 @@ export async function GET() {
         id: `slide-${x}-${y}`,
         x,
         y,
-        content: {
-          type: 'text',
-          title: `Slide ${x},${y}`,
-          text: `Coordinates: ${x}, ${y}`,
-          backgroundColor: generateRandomColor(),
+        type: 'html',
+        data: {
+          htmlContent: `<div style="background-color:${generateRandomColor()};color:white;display:flex;justify-content:center;align-items:center;width:100%;height:100%"><h1>Slide ${x},${y}</h1></div>`
         },
-        video_url: '', // Not needed for this test
-        user_id: '',
-        user_name: '',
-        user_avatar_url: '',
-        likes: 0,
-        is_liked: false,
-        initialComments: [],
-        comments_count: 0,
-        shares: 0,
-        created_at: new Date().toISOString(),
+        userId: 'mock-user-id',
+        username: 'mock-user',
+        avatar: 'https://i.pravatar.cc/150',
+        access: 'public',
+        createdAt: Date.now(),
+        initialLikes: 0,
+        isLiked: false,
+        initialComments: 0,
       };
     }
   }
