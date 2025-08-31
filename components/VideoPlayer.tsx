@@ -59,7 +59,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
       if (startTime > 0 && Math.abs(video.currentTime - startTime) > 0.5) {
         video.currentTime = startTime;
       }
-      video.play().catch(error => console.error("Autoplay was prevented:", error));
+      video.play().catch(error => {
+        console.error("Autoplay was prevented:", error);
+        onPlaybackFailure();
+      });
     } else {
       // When video becomes inactive, save its current time and pause it.
       if (!video.paused && video.currentTime > 0) {
@@ -67,7 +70,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
       }
       video.pause();
     }
-  }, [isActive, videoRef, onTimeUpdate, startTime, videoId]);
+  }, [isActive, videoRef, onTimeUpdate, startTime, videoId, onPlaybackFailure]);
 
   const triggerLikeAnimation = () => {
     setShowHeart(true);

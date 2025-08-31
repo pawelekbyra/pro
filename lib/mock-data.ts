@@ -11,7 +11,7 @@ export const mockGrid: Grid = {
     access: 'public', createdAt: Date.now(), initialLikes: 1520, isLiked: false, initialComments: 34,
     data: {
       description: 'A beautiful waterfall. #nature #waterfall #travel',
-      mp4Url: 'https://vod-progressive.pexels.com/video/857195/free-video-857195.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2021/04/16/74542-535359404_large.mp4',
       hlsUrl: null,
       poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
@@ -24,7 +24,7 @@ export const mockGrid: Grid = {
     access: 'public', createdAt: Date.now(), initialLikes: 2100, isLiked: true, initialComments: 56,
     data: {
       description: 'Stunning city view from above. #city #drone #architecture',
-      mp4Url: 'https://vod-progressive.pexels.com/video/854386/free-video-854386.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2021/04/16/74542-535359404_large.mp4',
       hlsUrl: null,
       poster: 'https://images.pexels.com/videos/854386/free-video-854386.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
@@ -37,7 +37,7 @@ export const mockGrid: Grid = {
     access: 'public', createdAt: Date.now(), initialLikes: 500, isLiked: false, initialComments: 20,
     data: {
       description: 'You have successfully navigated a part of the maze!',
-      mp4Url: 'https://vod-progressive.pexels.com/video/857195/free-video-857195.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2021/04/16/74542-535359404_large.mp4',
       hlsUrl: null,
       poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
@@ -50,7 +50,7 @@ export const mockGrid: Grid = {
     access: 'public', createdAt: Date.now(), initialLikes: 999, isLiked: false, initialComments: 100,
     data: {
       description: 'Funny cat chasing a laser. You have to see this! #cats #funny',
-      mp4Url: 'https://vod-progressive.pexels.com/video/2022395/free-video-2022395.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2024/07/04/210355-103350293_large.mp4',
       hlsUrl: null,
       poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
@@ -63,7 +63,7 @@ export const mockGrid: Grid = {
     access: 'public', createdAt: Date.now(), initialLikes: 999, isLiked: false, initialComments: 100,
     data: {
       description: 'Funny cat chasing a laser. You have to see this!',
-      mp4Url: 'https://vod-progressive.pexels.com/video/2022395/free-video-2022395.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2024/07/04/210355-103350293_large.mp4',
       hlsUrl: null,
       poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
@@ -76,7 +76,7 @@ export const mockGrid: Grid = {
     access: 'public', createdAt: Date.now(), initialLikes: 3000, isLiked: false, initialComments: 150,
     data: {
       description: 'Code compiling on a screen. #programming #code #tech',
-      mp4Url: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2022/02/10/106399-684499881_large.mp4',
       hlsUrl: null,
       poster: 'https://i.imgflip.com/2fm6x.jpg',
     },
@@ -120,7 +120,7 @@ export const mockGrid: Grid = {
     data: {
       type: 'DATA_VIZ',
       description: 'The data behind the curtain.',
-      videoUrl: 'https://vod-progressive.pexels.com/video/854386/free-video-854386.mp4',
+      videoUrl: 'https://cdn.pixabay.com/video/2021/04/16/74542-535359404_large.mp4',
       posterUrl: 'https://images.pexels.com/videos/854386/free-video-854386.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
     },
   },
@@ -152,7 +152,7 @@ export const mockGrid: Grid = {
     y: 0,
     data: {
       description: 'Jak powstają memy? Krótki film instruktażowy. (-1,0)',
-      mp4Url: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
+      mp4Url: 'https://cdn.pixabay.com/video/2022/02/10/106399-684499881_large.mp4',
       hlsUrl: null,
       poster: 'https://i.imgflip.com/2fm6x.jpg',
     },
