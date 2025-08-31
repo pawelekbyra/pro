@@ -89,42 +89,41 @@ const PWAInstallPrompt = () => {
     }
 
   return (
-    <>
-      <AnimatePresence>
-        {showInstructions && isIOS && (
-          <motion.div
-            className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md text-white p-4 flex flex-col justify-between items-center z-50 rounded-t-2xl"
-            initial={{ y: '100%', opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: '100%', opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-          >
-            <div className="flex w-full justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Jak zainstalować aplikację</h3>
-              <Button variant="ghost" size="icon" onClick={handleCloseInstructions}>
-                <X />
-              </Button>
-            </div>
-            <div className="flex flex-col items-center space-y-4 text-center text-sm">
-              <p>1. Stuknij ikonę **udostępniania** na pasku przeglądarki Safari.</p>
-              <Share size={32} className="text-white drop-shadow-lg" />
-              <p>2. Z menu, które się pojawi, wybierz **&quot;Dodaj do ekranu początkowego&quot;**.</p>
-              <PlusSquare size={32} className="text-white drop-shadow-lg" />
-              <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center z-50">
-        <div>
-          <p className="font-bold">Zainstaluj aplikację!</p>
-          <p>Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
+    <AnimatePresence>
+      {isIOS && showInstructions ? (
+        <motion.div
+          className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md text-white p-4 flex flex-col justify-between items-center z-50 rounded-t-2xl"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+        >
+          <div className="flex w-full justify-between items-center mb-4">
+            <h3 className="text-lg font-bold">Jak zainstalować aplikację</h3>
+            <Button variant="ghost" size="icon" onClick={handleCloseInstructions}>
+              <X />
+            </Button>
+          </div>
+          <div className="flex flex-col items-center space-y-4 text-center text-sm">
+            <p>1. Stuknij ikonę **udostępniania** na pasku przeglądarki Safari.</p>
+            <Share size={32} className="text-white drop-shadow-lg" />
+            <p>2. Z menu, które się pojawi, wybierz **&quot;Dodaj do ekranu początkowego&quot;**.</p>
+            <PlusSquare size={32} className="text-white drop-shadow-lg" />
+            <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center z-50">
+          <div>
+            <p className="font-bold">Zainstaluj aplikację!</p>
+            <p>Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
+          </div>
+          <Button onClick={handleInstallClick}>
+            Zainstaluj
+          </Button>
         </div>
-        <Button onClick={handleInstallClick}>
-          Zainstaluj
-        </Button>
-      </div>
-    </>
+      )}
+    </AnimatePresence>
   );
 };
 
