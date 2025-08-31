@@ -69,28 +69,30 @@ const VideoGrid: React.FC = () => {
       if (direction === 'right') nextCoords = { x: x + 1, y };
     }
 
-    if (grid[`${nextCoords.x},${nextCoords.y}`]) {
-      setActiveCoordinates(nextCoords);
-      // Prefetching logic
-      if (direction === 'right' && nextCoords.x > loadedBounds.maxX - PREFETCH_THRESHOLD) {
-        fetchSlides(loadedBounds.maxX + 1, nextCoords.y - 1, 3, 3);
-      }
-      if (direction === 'left' && nextCoords.x < loadedBounds.minX + PREFETCH_THRESHOLD) {
-        fetchSlides(loadedBounds.minX - 3, nextCoords.y - 1, 3, 3);
-      }
-      if (direction === 'down' && nextCoords.y > loadedBounds.maxY - PREFETCH_THRESHOLD) {
-        fetchSlides(nextCoords.x - 1, loadedBounds.maxY + 1, 3, 3);
-      }
-      if (direction === 'up' && nextCoords.y < loadedBounds.minY + PREFETCH_THRESHOLD) {
-        fetchSlides(nextCoords.x - 1, loadedBounds.minY - 3, 3, 3);
-      }
+    setActiveCoordinates(nextCoords);
+
+    // Prefetching logic
+    if (direction === 'right' && nextCoords.x > loadedBounds.maxX - PREFETCH_THRESHOLD) {
+      fetchSlides(loadedBounds.maxX + 1, nextCoords.y - 1, 3, 3);
     }
-  }, [activeCoordinates, grid, loadedBounds, fetchSlides]);
+    if (direction === 'left' && nextCoords.x < loadedBounds.minX + PREFETCH_THRESHOLD) {
+      fetchSlides(loadedBounds.minX - 3, nextCoords.y - 1, 3, 3);
+    }
+    if (direction === 'down' && nextCoords.y > loadedBounds.maxY - PREFETCH_THRESHOLD) {
+      fetchSlides(nextCoords.x - 1, loadedBounds.maxY + 1, 3, 3);
+    }
+    if (direction === 'up' && nextCoords.y < loadedBounds.minY + PREFETCH_THRESHOLD) {
+      fetchSlides(nextCoords.x - 1, loadedBounds.minY - 3, 3, 3);
+    }
+  }, [activeCoordinates, loadedBounds, fetchSlides]);
 
   // --- Effect Hooks ---
   useEffect(() => {
-    fetchSlides(-1, -1, 3, 3);
-  }, [fetchSlides]);
+    // Fetch slides if the active slide is not loaded
+    if (!grid[`${activeCoordinates.x},${activeCoordinates.y}`]) {
+      fetchSlides(activeCoordinates.x - 1, activeCoordinates.y - 1, 3, 3);
+    }
+  }, [fetchSlides, activeCoordinates.x, activeCoordinates.y, grid]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
