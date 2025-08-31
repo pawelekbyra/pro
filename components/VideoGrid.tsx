@@ -10,7 +10,6 @@ import InfoModal from './InfoModal';
 import { Skeleton } from './ui/skeleton';
 
 const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe in pixels
-const PREFETCH_THRESHOLD = 2; // How many videos away from the end to trigger a new fetch
 
 interface VideoGridProps {
   initialCoordinates?: { x: number; y: number };
@@ -24,7 +23,6 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
   const [isSwiping, setIsSwiping] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadedBounds, setLoadedBounds] = useState({ minX: -1, maxX: 1, minY: -1, maxY: 1 });
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
 
   // Modal States
@@ -35,21 +33,15 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
   const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen || isTopBarModalOpen;
 
   // --- Callback Declarations ---
-  const fetchSlides = useCallback(async (x: number, y: number, width: number, height: number) => {
+  const fetchGrid = useCallback(async () => {
     setIsLoading(true);
-    const url = `/api/slides?x=${x}&y=${y}&width=${width}&height=${height}`;
+    const url = `/api/slides`;
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch slides');
       const data = await response.json();
       if (Object.keys(data.grid).length > 0) {
-        setGrid(prevGrid => ({ ...prevGrid, ...data.grid }));
-        setLoadedBounds(prev => ({
-            minX: Math.min(prev.minX, x),
-            maxX: Math.max(prev.maxX, x + width - 1),
-            minY: Math.min(prev.minY, y),
-            maxY: Math.max(prev.maxY, y + height - 1),
-        }));
+        setGrid(data.grid);
       }
     } catch (error) {
       console.error("Failed to fetch slides:", error);
@@ -71,30 +63,16 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
       if (direction === 'right') nextCoords = { x: x + 1, y };
     }
 
-    setActiveCoordinates(nextCoords);
-
-    // Prefetching logic
-    if (direction === 'right' && nextCoords.x > loadedBounds.maxX - PREFETCH_THRESHOLD) {
-      fetchSlides(loadedBounds.maxX + 1, nextCoords.y - 1, 3, 3);
+    // Boundary check for 9x9 grid
+    if (nextCoords.x >= 0 && nextCoords.x < 9 && nextCoords.y >= 0 && nextCoords.y < 9) {
+      setActiveCoordinates(nextCoords);
     }
-    if (direction === 'left' && nextCoords.x < loadedBounds.minX + PREFETCH_THRESHOLD) {
-      fetchSlides(loadedBounds.minX - 3, nextCoords.y - 1, 3, 3);
-    }
-    if (direction === 'down' && nextCoords.y > loadedBounds.maxY - PREFETCH_THRESHOLD) {
-      fetchSlides(nextCoords.x - 1, loadedBounds.maxY + 1, 3, 3);
-    }
-    if (direction === 'up' && nextCoords.y < loadedBounds.minY + PREFETCH_THRESHOLD) {
-      fetchSlides(nextCoords.x - 1, loadedBounds.minY - 3, 3, 3);
-    }
-  }, [activeCoordinates, loadedBounds, fetchSlides]);
+  }, [activeCoordinates]);
 
   // --- Effect Hooks ---
   useEffect(() => {
-    // Fetch slides if the active slide is not loaded
-    if (!grid[`${activeCoordinates.x},${activeCoordinates.y}`]) {
-      fetchSlides(activeCoordinates.x - 1, activeCoordinates.y - 1, 3, 3);
-    }
-  }, [fetchSlides, activeCoordinates.x, activeCoordinates.y, grid]);
+    fetchGrid();
+  }, [fetchGrid]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -138,11 +116,11 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-        if (deltaX > 0) move('left'); else move('right');
+        if (deltaX > 0) move('right'); else move('left');
       }
     } else {
       if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-        if (deltaY > 0) move('up'); else move('down');
+        if (deltaY > 0) move('down'); else move('up');
       }
     }
 
@@ -165,11 +143,11 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-        if (deltaX > 0) move('left'); else move('right');
+        if (deltaX > 0) move('right'); else move('left');
       }
     } else {
       if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-        if (deltaY > 0) move('up'); else move('down');
+        if (deltaY > 0) move('down'); else move('up');
       }
     }
     setIsDragging(false);
@@ -246,7 +224,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
           {grid[`${activeCoordinates.x},${activeCoordinates.y - 1}`] && <ArrowUp className="absolute top-[calc(var(--topbar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />}
           {grid[`${activeCoordinates.x},${activeCoordinates.y + 1}`] && <ArrowDown className="absolute bottom-[calc(var(--bottombar-height)+1rem)] left-1/2 -translate-x-1/2 animate-pulse" size={48} />}
           {grid[`${activeCoordinates.x - 1},${activeCoordinates.y}`] && <ArrowLeft className="absolute left-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />}
-          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate={pulse" size={48} />}
+          {grid[`${activeCoordinates.x + 1},${activeCoordinates.y}`] && <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 animate-pulse" size={48} />}
         </div>
       )}
       {activeSlide && (
