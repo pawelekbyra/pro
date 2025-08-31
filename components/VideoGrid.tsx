@@ -139,7 +139,7 @@ const VideoGrid: React.FC = () => {
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
       if (deltaX > 0) move('left'); else move('right');
     } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
-      if (deltaY > 0) move('up'); else move('down');
+      if (deltaY > 0) move('down'); else move('up');
     }
     setTouchStart(null);
     setIsSwiping(false);
@@ -168,7 +168,7 @@ const VideoGrid: React.FC = () => {
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
       if (deltaX > 0) move('left'); else move('right');
     } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
-      if (deltaY > 0) move('up'); else move('down');
+      if (deltaY > 0) move('down'); else move('up');
     }
     setIsDragging(false);
     setTouchStart(null);
