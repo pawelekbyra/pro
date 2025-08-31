@@ -34,7 +34,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'User not found.' }, { status: 404 });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(currentPassword, userFromDb.passwordHash);
+    if (!userFromDb.password) {
+        return NextResponse.json({ success: false, message: 'Incorrect current password.' }, { status: 403 });
+    }
+    const isPasswordCorrect = await bcrypt.compare(currentPassword, userFromDb.password);
     if (!isPasswordCorrect) {
       return NextResponse.json({ success: false, message: 'Incorrect current password.' }, { status: 403 });
     }
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Update password and session version in one call
     const updatedUser = await db.updateUser(payload.user.id, {
-        passwordHash: newPasswordHash,
+        password: newPasswordHash,
         sessionVersion: (userFromDb.sessionVersion || 1) + 1,
     });
     if (!updatedUser) {
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Don't include password hash in the new token payload
-    const { passwordHash: _, ...userPayload } = updatedUser;
+    const { password: _, ...userPayload } = updatedUser;
 
     // Create a new session token with the updated session version
     const newToken = await new SignJWT({ user: userPayload })

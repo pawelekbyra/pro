@@ -3,6 +3,8 @@ import * as postgres from './db-postgres';
 
 const postgresDb = {
     ...postgres,
+    savePushSubscription: postgres.savePushSubscription,
+    getPushSubscriptions: postgres.getPushSubscriptions,
 };
 
 export type Db = typeof postgresDb;

@@ -38,7 +38,7 @@ export default async function SlideManagementPage() {
         type: 'video',
         userId: author.id,
         username: author.username,
-        avatar: author.avatar,
+        avatar: author.avatar || '',
         access: formData.get('access') as 'public' | 'secret',
         x: parseInt(formData.get('x') as string, 10),
         y: parseInt(formData.get('y') as string, 10),

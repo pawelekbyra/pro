@@ -115,8 +115,12 @@ const ProfileTab: React.FC = () => {
 
         <div className="avatar-section bg-white/5 border border-white/10 rounded-xl p-5 mb-4 flex flex-col items-center text-center">
             <div className="relative w-20 h-20 mb-3">
-                <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg">
-                    <Image src={profile.avatar} alt={t('avatarAlt')} width={80} height={80} className="w-full h-full object-cover" id="userAvatar" />
+                <div className="w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-lg bg-gray-800 flex items-center justify-center">
+                    {profile.avatar ? (
+                        <Image src={profile.avatar} alt={t('avatarAlt')} width={80} height={80} className="w-full h-full object-cover" id="userAvatar" />
+                    ) : (
+                        <span className="text-4xl text-gray-500">{profile.displayName?.charAt(0).toUpperCase()}</span>
+                    )}
                 </div>
                 <button onClick={handleAvatarEditClick} className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-7 h-7 bg-pink-600 border-2 border-[#2d2d2d] rounded-full text-white text-lg font-bold flex items-center justify-center" id="avatarEditBtn" title={t('changeAvatarTitle')}>
                     +
@@ -145,11 +149,11 @@ const ProfileTab: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="form-group">
                 <label className="form-label text-sm font-medium mb-2 block">{t('firstName')}</label>
-                <Input type="text" name="firstName" defaultValue={profile.firstName} placeholder={t('firstNamePlaceholder')} disabled={isSubmitting} />
+                <Input type="text" name="firstName" defaultValue={profile.displayName?.split(' ')[0] || ''} placeholder={t('firstNamePlaceholder')} disabled={isSubmitting} />
               </div>
               <div className="form-group">
                 <label className="form-label text-sm font-medium mb-2 block">{t('lastName')}</label>
-                <Input type="text" name="lastName" defaultValue={profile.lastName} placeholder={t('lastNamePlaceholder')} disabled={isSubmitting} />
+                <Input type="text" name="lastName" defaultValue={profile.displayName?.split(' ').slice(1).join(' ') || ''} placeholder={t('lastNamePlaceholder')} disabled={isSubmitting} />
               </div>
             </div>
             <div className="form-group mb-4">

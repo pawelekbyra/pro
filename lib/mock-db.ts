@@ -98,7 +98,7 @@ export const db = {
   },
 
   async addComment(slideId: string, userId: string, text: string, parentId: string | null = null) {
-    const user = await this.findUserById(userId) || { displayName: 'Mock User', avatar: '' };
+    const user = await this.findUserById(userId) || { username: 'mockuser', displayName: 'Mock User', avatar: '' };
     const commentId = `comment_${crypto.randomUUID()}`;
     const newComment: Comment = {
       id: commentId,
@@ -108,7 +108,7 @@ export const db = {
       parentId,
       createdAt: Date.now(),
       likedBy: [],
-      user: { displayName: user.displayName, avatar: user.avatar },
+      user: { displayName: user.displayName || user.username, avatar: user.avatar || '' },
       replies: [],
     };
     comments[commentId] = newComment;

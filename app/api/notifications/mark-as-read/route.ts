@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, keys } from '@/lib/db';
+import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 import { kv } from '@/lib/kv';
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Security check: Ensure the notification belongs to the user trying to mark it as read.
-    const notification = await kv!.get(keys.notification(notificationId));
+    const notification = await kv!.get(`notification:${notificationId}`);
     if (!notification || (notification as any).userId !== userId) {
         return NextResponse.json({ success: false, message: 'Notification not found or access denied.' }, { status: 404 });
     }

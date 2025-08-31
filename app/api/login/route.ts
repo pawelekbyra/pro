@@ -60,14 +60,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!user.password) {
+        // User exists but has no password set (e.g., social login in the future)
+        return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 });
     }
 
     // Don't include password hash in the token payload
-    const { passwordHash, ...userPayload } = user;
+    const { password: _password, ...userPayload } = user;
 
     // Create the session token (JWT)
     const token = await new SignJWT({ user: userPayload })

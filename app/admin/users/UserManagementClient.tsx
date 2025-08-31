@@ -25,7 +25,7 @@ export default function UserManagementClient({ users, deleteUserAction }: UserMa
             <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-700/50">
               <td className="p-2">{user.displayName}</td>
               <td className="p-2">{user.email}</td>
-              <td className="p-2 capitalize">{user.role}</td>
+             <td className="p-2 capitalize">{user.user_type}</td>
               <td className="p-2">
                 <form action={deleteUserAction}>
                   <input type="hidden" name="userId" value={user.id} />
@@ -33,8 +33,8 @@ export default function UserManagementClient({ users, deleteUserAction }: UserMa
                     type="submit"
                     className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded disabled:opacity-50"
                     // Prevent admin from deleting themselves
-                    disabled={user.role === 'admin'}
-                    title={user.role === 'admin' ? "Cannot delete an admin account" : "Delete user"}
+                     disabled={user.user_type === 'admin'}
+                     title={user.user_type === 'admin' ? "Cannot delete an admin account" : "Delete user"}
                   >
                     Delete
                   </button>
