@@ -145,9 +145,9 @@ const VideoGrid: React.FC = () => {
     if (!touchStart || isAnyModalOpen) return;
     const { x: deltaX, y: deltaY } = swipeTranslation;
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > SWIPE_THRESHOLD) { if (deltaX > 0) move('left'); else move('right'); }
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) { if (deltaX > 0) move('right'); else move('left'); }
     } else {
-      if (Math.abs(deltaY) > SWIPE_THRESHOLD) { if (deltaY > 0) move('up'); else move('down'); }
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) { if (deltaY > 0) move('down'); else move('up'); }
     }
     setTouchStart(null);
     setIsSwiping(false);
@@ -182,9 +182,11 @@ const VideoGrid: React.FC = () => {
     if (!isDragging || !touchStart) return;
     const { x: deltaX, y: deltaY } = swipeTranslation;
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > SWIPE_THRESHOLD) { if (deltaX > 0) move('left'); else move('right'); }
+      // Horizontal drag. A positive deltaX means a drag to the right.
+      if (Math.abs(deltaX) > SWIPE_THRESHOLD) { if (deltaX > 0) move('right'); else move('left'); }
     } else {
-      if (Math.abs(deltaY) > SWIPE_THRESHOLD) { if (deltaY > 0) move('up'); else move('down'); }
+      // Vertical drag. A positive deltaY means a drag downwards.
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) { if (deltaY > 0) move('down'); else move('up'); }
     }
     setIsDragging(false);
     setTouchStart(null);
