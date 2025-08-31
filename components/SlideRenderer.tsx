@@ -1,3 +1,4 @@
+// components/SlideRenderer.tsx
 "use client";
 
 import React from 'react';
@@ -68,7 +69,6 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, ...commonProps }) 
 
             {/* Common UI elements for all slide types */}
             <TopBar
-                setIsModalOpen={commonProps.setIsModalOpen}
                 openAccountPanel={commonProps.openAccountPanel}
             />
             <Sidebar
