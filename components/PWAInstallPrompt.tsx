@@ -79,7 +79,7 @@ const PWAInstallPrompt = () => {
             <div className="flex flex-col items-center space-y-4 text-center text-sm">
               <p>1. Stuknij ikonę **udostępniania** na pasku przeglądarki Safari.</p>
               <Share size={32} className="text-white drop-shadow-lg" />
-              <p>2. Z menu, które się pojawi, wybierz **"Dodaj do ekranu początkowego"**.</p>
+              <p>2. Z menu, które się pojawi, wybierz **&quot;Dodaj do ekranu początkowego&quot;**.</p>
               <PlusSquare size={32} className="text-white drop-shadow-lg" />
               <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
             </div>

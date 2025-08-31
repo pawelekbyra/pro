@@ -1,105 +1,228 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
+import { Menu, Bell } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useUser } from '@/context/UserContext';
-import { Button } from '@/components/ui/button';
-import { Bell, Heart, Menu } from 'lucide-react';
+import LoginForm from './LoginForm';
 import NotificationPopup from './NotificationPopup';
+import { useUser } from '@/context/UserContext';
+import { useTranslation } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 
-const TopBar = ({ toggleSidebar, toggleAccountPanel }: { toggleSidebar: () => void; toggleAccountPanel: () => void }) => {
-  const { user, updateUser } = useUser();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifPanel, setShowNotifPanel] = useState(false);
+interface TopBarProps {
+  setIsModalOpen: (isOpen: boolean) => void;
+  openAccountPanel: () => void;
+}
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch('/api/notifications');
-        const data = await response.json();
-        setUnreadCount(data.unreadCount);
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-      }
-    };
-    if (user) {
-      fetchNotifications();
+const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => {
+  const { user, isLoggedIn, isLoading, logout } = useUser();
+  const { t } = useTranslation();
+  const { addToast } = useToast();
+  const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
+  const [isNotifPanelOpen, setIsNotifPanelOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
+
+  const toggleLoginPanel = () => {
+    if (!isLoggedIn) {
+      setIsLoginPanelOpen((prev) => !prev);
     }
-  }, [user]);
+  };
 
-  const handleNotificationClick = async () => {
-    if (!user) {
-      alert('Aby zobaczyć powiadomienia, musisz się zalogować.');
+  const handleLogout = async () => {
+    await logout();
+    setIsMenuOpen(false);
+  };
+
+  const subscribeToPush = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+
+      // Wykrywanie trybu PWA
+      const isPwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
+
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subscription, isPwaInstalled }),
+      });
+    } catch (error) {
+      console.error('Error subscribing to push notifications', error);
+    }
+  };
+
+  const toggleNotifPanel = async () => {
+    if (isNotifPanelOpen) {
+      setIsNotifPanelOpen(false);
       return;
     }
 
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        setShowNotifPanel(!showNotifPanel);
-      } else {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          setShowNotifPanel(true);
-        } else {
-          alert('Powiadomienia zostały zablokowane. Aby je włączyć, przejdź do ustawień przeglądarki.');
-        }
+    if (!isLoggedIn) {
+      addToast(t('notificationAlert'), 'info');
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      setIsNotifPanelOpen(true);
+    } else if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        await subscribeToPush();
+        setIsNotifPanelOpen(true);
       }
-    } else {
-      alert('Twoja przeglądarka nie wspiera powiadomień.');
     }
   };
 
-  const handleMarkAsRead = async () => {
-    try {
-      await fetch('/api/notifications/mark-as-read', { method: 'POST' });
-      setUnreadCount(0);
-    } catch (error) {
-      console.error('Failed to mark notifications as read:', error);
+  const toggleMenu = () => {
+    setIsMenuOpen(prev => !prev);
+  };
+
+  const handleMenuClick = () => {
+    if (isLoggedIn) {
+      toggleMenu();
+    } else {
+      addToast(t('menuAccessAlert'), 'info');
     }
   };
+
+  const handleOpenAccountPanel = () => {
+    setIsMenuOpen(false);
+    openAccountPanel();
+  };
+
+  const handleOpenLoginPanelFromMenu = () => {
+    setIsMenuOpen(false);
+    toggleLoginPanel();
+  }
+
+  useEffect(() => {
+    const isAnyPanelOpen = isLoginPanelOpen || isNotifPanelOpen || isMenuOpen;
+    setIsModalOpen(isAnyPanelOpen);
+  }, [isLoginPanelOpen, isNotifPanelOpen, isMenuOpen, setIsModalOpen]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetch('/api/notifications')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setHasUnread(data.unreadCount > 0);
+            if (navigator.setAppBadge) {
+              navigator.setAppBadge(data.unreadCount);
+            }
+          }
+        });
+    }
+  }, [isLoggedIn]);
+
+  const getTopBarText = () => {
+    if (isLoading) return t('loading');
+    if (isLoggedIn) return t('loggedInWelcome', { name: user?.displayName || 'User' });
+    return t('loggedOutText');
+  }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-zinc-900 border-b dark:border-zinc-700 h-16 flex items-center justify-between px-4">
-      <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
-          <Menu />
-        </Button>
+    <>
+      <div
+        className="absolute top-0 left-0 w-full z-30 flex justify-center items-center border-b transition-colors"
+        style={{
+          height: 'var(--topbar-height)',
+          paddingTop: 'var(--safe-area-top)',
+          textShadow: '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black',
+          background: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          borderColor: isLoginPanelOpen ? 'transparent' : 'rgba(255, 255, 255, 0.15)',
+        }}
+      >
+        <button onClick={handleMenuClick} className="absolute top-1/2 -translate-y-1/2 left-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
+          <Menu size={24} />
+        </button>
+
+        <div className="relative">
+          <button onClick={toggleLoginPanel} className="flex items-center gap-1.5" disabled={isLoading || isLoggedIn}>
+            <span className="text-sm font-medium">
+              {getTopBarText()}
+            </span>
+            {!isLoggedIn && !isLoading && (
+              <motion.span
+                className="text-xs opacity-80"
+                style={{ transform: 'translateY(-1px)' }}
+                animate={{ rotate: isLoginPanelOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                ▼
+              </motion.span>
+            )}
+          </button>
+        </div>
+
+        <button data-testid="notifications-button" onClick={toggleNotifPanel} className="absolute top-1/2 -translate-y-1/2 right-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
+          <Bell size={22} />
+          {isLoggedIn && hasUnread && (
+            <div
+              className="absolute w-2 h-2 rounded-full border-2"
+              style={{
+                top: '10px',
+                right: '11px',
+                backgroundColor: 'hsl(var(--primary))',
+                borderColor: '#6F6F6F'
+              }}
+            ></div>
+          )}
+        </button>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="relative">
-          <Button variant="ghost" size="icon" onClick={handleNotificationClick}>
-            <Bell />
-            {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500" />
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className="logged-in-menu absolute top-[var(--topbar-height)] left-0 z-40 bg-[rgba(20,20,20,0.85)] backdrop-blur-xl border-b-2 border-r-2 border-white/10 rounded-br-lg"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+          >
+            {isLoggedIn && (
+              <>
+                <button onClick={handleOpenAccountPanel} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10">{t('account')}</button>
+                <button onClick={handleLogout} className="block text-left w-full text-white px-4 py-3 hover:bg-white/10 border-t border-white/10">{t('logout')}</button>
+              </>
             )}
-          </Button>
-          {showNotifPanel && (
-            <NotificationPopup
-              onClose={() => setShowNotifPanel(false)}
-              onMarkAsRead={handleMarkAsRead}
-            />
-          )}
-        </div>
-        <Button variant="ghost" size="icon">
-          <Heart />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={toggleAccountPanel}>
-          {user?.avatar_url ? (
-            <Image
-              src={user.avatar_url}
-              alt="Avatar"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-zinc-700" />
-          )}
-        </Button>
-      </div>
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isLoginPanelOpen && (
+          <motion.div
+            className="absolute left-0 w-full z-40 overflow-hidden"
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            style={{
+              top: 'var(--topbar-height)',
+              background: 'rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              paddingTop: '10px'
+            }}
+          >
+            <LoginForm onLoginSuccess={() => setIsLoginPanelOpen(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isNotifPanelOpen && <NotificationPopup isOpen={isNotifPanelOpen} onClose={() => setIsNotifPanelOpen(false)} />}
+      </AnimatePresence>
+    </>
   );
 };
 

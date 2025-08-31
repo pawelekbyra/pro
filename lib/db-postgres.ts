@@ -83,7 +83,8 @@ export async function createTables() {
     CREATE TABLE push_subscriptions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         "userId" UUID REFERENCES users(id) UNIQUE,
-        subscription JSONB NOT NULL
+        subscription JSONB NOT NULL,
+        is_pwa_installed BOOLEAN DEFAULT FALSE
     );
   `;
 }
@@ -287,30 +288,37 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
 }
 
 // --- Push Subscription Functions ---
-export async function savePushSubscription(userId: string, subscription: object): Promise<void> {
+export async function savePushSubscription(userId: string, subscription: object, isPwaInstalled: boolean): Promise<void> {
     const sql = getDb();
     await sql`
-        INSERT INTO push_subscriptions ("userId", subscription)
-        VALUES (${userId}, ${JSON.stringify(subscription)})
+        INSERT INTO push_subscriptions ("userId", subscription, is_pwa_installed)
+        VALUES (${userId}, ${JSON.stringify(subscription)}, ${isPwaInstalled})
         ON CONFLICT ("userId") DO UPDATE
-        SET subscription = ${JSON.stringify(subscription)};
+        SET subscription = EXCLUDED.subscription, is_pwa_installed = EXCLUDED.is_pwa_installed;
     `;
 }
 
-export async function getPushSubscriptions(options: { userId?: string, userType?: string }): Promise<any[]> {
+export async function getPushSubscriptions(options: { userId?: string, userType?: string, isPwaInstalled?: boolean }): Promise<any[]> {
     const sql = getDb();
-    const { userId, userType } = options;
+    const { userId, userType, isPwaInstalled } = options;
+
     if (userId) {
-        return sql`
-            SELECT subscription FROM push_subscriptions WHERE "userId" = ${userId};
-        `;
+        return await sql`SELECT ps.subscription FROM push_subscriptions ps WHERE ps."userId" = ${userId}`;
     }
+
     if (userType) {
-        return sql`
+        return await sql`
             SELECT ps.subscription FROM push_subscriptions ps
             JOIN users u ON ps."userId" = u.id
-            WHERE u.user_type = ${userType};
-        `;
+            WHERE u.user_type = ${userType}`;
     }
-    return [];
+
+    if (isPwaInstalled !== undefined) {
+        return await sql`
+            SELECT ps.subscription FROM push_subscriptions ps
+            WHERE ps.is_pwa_installed = ${isPwaInstalled}`;
+    }
+
+    // This case is for when options is empty, meaning get all subscriptions.
+    return await sql`SELECT ps.subscription FROM push_subscriptions ps`;
 }

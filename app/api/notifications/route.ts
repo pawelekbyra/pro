@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Authentication required.' }, { status: 401 });
     }
 
-    const subscription = await request.json();
+    const { subscription, isPwaInstalled } = await request.json();
 
     try {
-        await db.savePushSubscription(payload.user.id, subscription);
+        await db.savePushSubscription(payload.user.id, subscription, isPwaInstalled);
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error saving push subscription:', error);
