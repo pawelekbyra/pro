@@ -60,6 +60,7 @@ const translations: Record<string, Record<string, string>> = {
         notificationsTitle: 'Powiadomienia',
         closeNotificationsAriaLabel: 'Zamknij powiadomienia',
         notificationsEmpty: 'Wszystko na bieżąco!',
+        notificationsError: 'Błąd ładowania powiadomień.',
         notif1Preview: 'Nowa wiadomość od Admina',
         notif1Time: '2 min temu',
         notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!',
@@ -69,6 +70,11 @@ const translations: Record<string, Record<string, string>> = {
         notif3Preview: 'Specjalna oferta czeka na Ciebie!',
         notif3Time: '1 godz. temu',
         notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.',
+        // Nowe tłumaczenia
+        notificationsFromUser: 'Nowa wiadomość od {name}',
+        likeNotification: '{name} polubił Twój film.',
+        commentNotification: '{name} skomentował Twój film.',
+        followNotification: '{name} zaczął Cię obserwować.',
         loadingProfile: 'Ładowanie profilu...',
         profileUpdateSuccess: 'Profil zaktualizowany pomyślnie!',
         profileUpdateError: 'Błąd aktualizacji profilu.',
@@ -192,6 +198,7 @@ const translations: Record<string, Record<string, string>> = {
         notificationsTitle: 'Notifications',
         closeNotificationsAriaLabel: 'Close notifications',
         notificationsEmpty: 'You are all caught up!',
+        notificationsError: 'Failed to load notifications.',
         notif1Preview: 'New message from Admin',
         notif1Time: '2 mins ago',
         notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!',
@@ -201,6 +208,11 @@ const translations: Record<string, Record<string, string>> = {
         notif3Preview: 'A special offer is waiting for you!',
         notif3Time: '1 hour ago',
         notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.',
+        // Nowe tłumaczenia
+        notificationsFromUser: 'New message from {name}',
+        likeNotification: '{name} liked your video.',
+        commentNotification: '{name} commented on your video.',
+        followNotification: '{name} started following you.',
         loadingProfile: 'Loading profile...',
         profileUpdateSuccess: 'Profile updated successfully!',
         profileUpdateError: 'Failed to update profile.',
@@ -282,6 +294,9 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// This will control whether the preloader is always shown for testing purposes.
+const FORCE_SHOW_PRELOADER = process.env.NEXT_PUBLIC_FORCE_SHOW_PRELOADER === 'true';
+
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState<Language>('pl');
   const [isLangSelected, setIsLangSelected] = useState(false);
@@ -295,6 +310,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // If the flag is on, we simply do nothing. isLangSelected remains false,
+    // which is the desired behavior to force the preloader to show.
+    if (FORCE_SHOW_PRELOADER) {
+      return;
+    }
+
     const savedLang = localStorage.getItem('app_lang');
     if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
       setLanguage(savedLang);
