@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bell, Mail, User, Tag, ChevronDown, Loader2, Heart, MessageSquare, UserPlus } from 'lucide-react';
@@ -8,7 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import Image from 'next/image';
 
-type NotificationType = 'like' | 'comment' | 'follow';
+type NotificationType = 'like' | 'comment' | 'follow' | 'message';
 
 // This type is now aligned with the mock data
 interface Notification {
@@ -29,20 +27,33 @@ const iconMap: Record<NotificationType, React.ReactNode> = {
   like: <Heart size={20} className="text-red-500 fill-current" />,
   comment: <MessageSquare size={20} className="text-white/80" />,
   follow: <UserPlus size={20} className="text-white/80" />,
+  message: <Mail size={20} className="text-white/80" />
 };
 
 const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: string) => void }> = ({ notification, onToggle }) => {
+  const { t, lang } = useTranslation();
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleToggle = () => {
+    setIsExpanded(prev => !prev);
+    onToggle(notification.id);
+  };
+
+  const getFullText = (key: string, user: string) => {
+    let text = t(key, { name: user })
+    return text;
+  }
+
   return (
     <motion.li
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`rounded-lg cursor-pointer transition-colors hover:bg-white/10 mb-1`}
-      onClick={() => onToggle(notification.id)}
+      className={`rounded-lg cursor-pointer transition-colors hover:bg-white/10 mb-1 ${isExpanded ? 'expanded' : ''}`}
     >
-      <div className="flex items-start gap-3 p-3">
-        <Image src={notification.user.avatar} alt={notification.user.displayName} width={40} height={40} className="w-10 h-10 rounded-full" />
+      <div className="flex items-start gap-3 p-3" onClick={handleToggle}>
+        <Image src={notification.user.avatar} alt={t('userAvatar', { user: notification.user.displayName })} width={40} height={40} className="w-10 h-10 rounded-full mt-1" />
         <div className="flex-1 flex flex-col">
           <p className="text-sm">
             <span className="font-bold">{notification.user.displayName}</span> {notification.preview}
@@ -51,8 +62,23 @@ const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: st
         </div>
         <div className="flex items-center gap-2 pt-1">
           {notification.unread && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
+          <ChevronDown size={14} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </div>
       </div>
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <p className="text-sm text-white/80 p-3 pt-0">
+              {getFullText(notification.full, notification.user.displayName)}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.li>
   );
 };
@@ -84,11 +110,10 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
                 const transformedNotifications = data.notifications.map((n: any) => ({
                     id: n.id,
                     type: n.type as NotificationType,
-                    preview: n.text.split(':')[0],
+                    preview: t(n.previewKey),
                     time: formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: lang === 'pl' ? pl : undefined }),
-                    full: n.text,
+                    full: n.fullKey,
                     unread: !n.read,
-                    expanded: false,
                     user: n.fromUser || { displayName: 'System', avatar: '/icons/icon-192x192.png' },
                 }));
                 setNotifications(transformedNotifications);
@@ -103,7 +128,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
             setIsLoading(false);
         });
     }
-  }, [isOpen, lang]);
+  }, [isOpen, lang, t]);
 
   const handleToggle = (id: string) => {
     setNotifications(
@@ -132,7 +157,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
       return (
         <div className="text-center py-10 text-white/60 flex flex-col items-center gap-4 p-4">
           <Bell size={48} className="opacity-50" />
-          <p>{t('notificationsAllCaughtUp')}</p>
+          <p>{t('notificationsEmpty')}</p>
         </div>
       );
     }

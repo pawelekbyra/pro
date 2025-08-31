@@ -1,3 +1,4 @@
+// components/BottomBar.tsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Coffee, Bot, Rat, Gamepad2 } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
@@ -43,7 +44,6 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
     };
   }, [videoRef, isActive, isDragging]);
 
-  // Re-integrate scrubber logic
   const handleScrub = (clientX: number) => {
     const video = videoRef.current;
     const bar = progressBarRef.current;
@@ -76,37 +76,34 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
     }
   };
 
-  // The main container for the bottom bar, styled to match the prototype
   return (
     <div
       className="absolute bottom-0 left-0 w-full z-[105] flex flex-col justify-start text-white px-3"
-      // Używamy flexbox i paddingu, aby zawartość była zawsze widoczna
-      // i dostosowywała się do rozmiaru ekranu
-      style={{ paddingBottom: 'calc(10px + var(--safe-area-bottom))', background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)' }}
+      style={{
+        paddingBottom: 'calc(10px + var(--safe-area-bottom))',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
+        minHeight: 'var(--bottombar-height)',
+      }}
     >
-      {/* This div represents the '.video-progress' container from the prototype */}
       <div
         ref={progressBarRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         className="absolute left-0 w-full h-10 cursor-pointer group"
-        style={{ top: '-8px' }} // Zmniejszony odstęp, by był częścią paska
+        style={{ top: '-18px' }}
         role="slider"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={progress}
         aria-label="Video progress bar"
       >
-        {/* Track for the progress bar */}
         <div className="absolute top-1/2 -translate-y-1/2 w-full h-1 bg-white/20 rounded-[2px] transition-all group-hover:h-[6px]">
-            {/* Filled portion of the progress bar */}
             <div
               className="h-full bg-yellow-400 rounded-[2px]"
               style={{ width: `${progress}%`, transition: isDragging ? 'none' : 'width 0.1s linear' }}
             />
         </div>
-        {/* Draggable dot/handle */}
         <div
           className="absolute top-1/2 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full opacity-100"
           style={{
@@ -118,9 +115,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
         />
       </div>
 
-      {/* New Button Panel */}
       <div className="flex justify-around items-center pt-2">
-        {/* Using a wrapper for each button to control touch area and alignment easily */}
         <div className="flex-1 flex justify-center">
           <button onClick={() => { /* Placeholder for Gierki action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
             <Gamepad2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
