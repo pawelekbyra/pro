@@ -117,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <span className="icon-label">{formatCount(likesCount)}</span>
       </button>
 
-      <button onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button data-testid="comments-button" onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
         <MessageSquare size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
       </button>

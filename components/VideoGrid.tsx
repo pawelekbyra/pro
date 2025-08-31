@@ -20,6 +20,7 @@ const VideoGrid: React.FC = () => {
   const [isSwiping, setIsSwiping] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [swipeTranslation, setSwipeTranslation] = useState({ x: 0, y: 0 });
+  const [scrollDirection, setScrollDirection] = useState<'horizontal' | 'vertical' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedBounds, setLoadedBounds] = useState({ minX: -1, maxX: 1, minY: -1, maxY: 1 });
   const [playbackTimes, setPlaybackTimes] = useState<{ [videoId: string]: number }>({});
@@ -122,6 +123,7 @@ const VideoGrid: React.FC = () => {
   // Touch Handlers
   const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     if (isAnyModalOpen) return;
+    setScrollDirection(null);
     setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     setIsSwiping(true);
   };
@@ -130,7 +132,18 @@ const VideoGrid: React.FC = () => {
     if (!touchStart || isAnyModalOpen) return;
     const deltaX = e.targetTouches[0].clientX - touchStart.x;
     const deltaY = e.targetTouches[0].clientY - touchStart.y;
-    setSwipeTranslation({ x: deltaX, y: deltaY });
+
+    let localScrollDirection = scrollDirection;
+    if (!localScrollDirection && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+      localScrollDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+      setScrollDirection(localScrollDirection);
+    }
+
+    if (localScrollDirection === 'horizontal') {
+      setSwipeTranslation({ x: deltaX, y: 0 });
+    } else if (localScrollDirection === 'vertical') {
+      setSwipeTranslation({ x: 0, y: deltaY });
+    }
   };
 
   const handleTouchEnd = () => {
@@ -144,12 +157,14 @@ const VideoGrid: React.FC = () => {
     setTouchStart(null);
     setIsSwiping(false);
     setSwipeTranslation({ x: 0, y: 0 });
+    setScrollDirection(null);
   };
 
   // Mouse Handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isAnyModalOpen) return;
     e.preventDefault();
+    setScrollDirection(null);
     setTouchStart({ x: e.clientX, y: e.clientY });
     setIsDragging(true);
   };
@@ -159,7 +174,18 @@ const VideoGrid: React.FC = () => {
     e.preventDefault();
     const deltaX = e.clientX - touchStart.x;
     const deltaY = e.clientY - touchStart.y;
-    setSwipeTranslation({ x: deltaX, y: deltaY });
+
+    let localScrollDirection = scrollDirection;
+    if (!localScrollDirection && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+        localScrollDirection = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+        setScrollDirection(localScrollDirection);
+    }
+
+    if (localScrollDirection === 'horizontal') {
+        setSwipeTranslation({ x: deltaX, y: 0 });
+    } else if (localScrollDirection === 'vertical') {
+        setSwipeTranslation({ x: 0, y: deltaY });
+    }
   };
 
   const handleMouseUp = () => {
@@ -173,6 +199,7 @@ const VideoGrid: React.FC = () => {
     setIsDragging(false);
     setTouchStart(null);
     setSwipeTranslation({ x: 0, y: 0 });
+    setScrollDirection(null);
   };
 
   // --- Render Logic ---

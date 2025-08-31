@@ -2,29 +2,36 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Bell, Mail, User, Tag, ChevronDown, Loader2 } from 'lucide-react';
+import { X, Bell, Mail, User, Tag, ChevronDown, Loader2, Heart, MessageSquare, UserPlus } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
+import { mockNotifications } from '@/lib/mock-data';
+import { formatDistanceToNow } from 'date-fns';
+import { pl } from 'date-fns/locale';
+import Image from 'next/image';
 
-type NotificationType = 'message' | 'profile' | 'offer';
+type NotificationType = 'like' | 'comment' | 'follow';
 
-// Define a more robust Notification type based on backend schema
+// This type is now aligned with the mock data
 interface Notification {
-  id: string; // Use string for UUIDs from DB
+  id: string;
   type: NotificationType;
   preview: string;
-  time: string; // This could be a string like "2 mins ago" or an ISO string
+  time: string;
   full: string;
   unread: boolean;
-  expanded?: boolean; // Keep expanded state on the client
+  expanded?: boolean;
+  user: {
+    displayName: string;
+    avatar: string;
+  };
 }
 
 const iconMap: Record<NotificationType, React.ReactNode> = {
-  message: <Mail size={24} className="text-white/80" />,
-  profile: <User size={24} className="text-white/80" />,
-  offer: <Tag size={24} className="text-white/80" />,
+  like: <Heart size={20} className="text-red-500 fill-current" />,
+  comment: <MessageSquare size={20} className="text-white/80" />,
+  follow: <UserPlus size={20} className="text-white/80" />,
 };
 
-// Sub-component for a single notification item
 const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: string) => void }> = ({ notification, onToggle }) => {
   return (
     <motion.li
@@ -35,34 +42,18 @@ const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: st
       className={`rounded-lg cursor-pointer transition-colors hover:bg-white/10 mb-1`}
       onClick={() => onToggle(notification.id)}
     >
-      <div className="flex items-center gap-3 p-3">
-        <div className="notif-icon">{iconMap[notification.type]}</div>
-        <div className="flex-1 flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className={`text-sm ${notification.unread ? 'font-semibold' : 'font-normal'}`}>{notification.preview}</span>
-            <span className="text-xs text-white/60">{notification.time}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {notification.unread && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
-            <ChevronDown size={16} className={`text-white/60 transition-transform ${notification.expanded ? 'rotate-180' : ''}`} />
-          </div>
+      <div className="flex items-start gap-3 p-3">
+        <Image src={notification.user.avatar} alt={notification.user.displayName} width={40} height={40} className="w-10 h-10 rounded-full" />
+        <div className="flex-1 flex flex-col">
+          <p className="text-sm">
+            <span className="font-bold">{notification.user.displayName}</span> {notification.preview}
+          </p>
+          <span className="text-xs text-white/60 mt-1">{notification.time}</span>
+        </div>
+        <div className="flex items-center gap-2 pt-1">
+          {notification.unread && <div className="w-2 h-2 bg-pink-500 rounded-full" />}
         </div>
       </div>
-      <AnimatePresence>
-        {notification.expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
-            <div className="pb-3 px-3 pl-14 text-sm text-white/80">
-              {notification.full}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.li>
   );
 };
@@ -80,39 +71,29 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
 
   useEffect(() => {
     if (isOpen) {
-      const fetchNotifications = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const res = await fetch(`/api/notifications?lang=${lang}`);
-          if (!res.ok) throw new Error('Failed to fetch notifications');
-          const data = await res.json();
-          // Add client-side 'expanded' state
-          setNotifications(data.notifications.map((n: Notification) => ({ ...n, expanded: false })));
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchNotifications();
+      setIsLoading(true);
+      setError(null);
+      setTimeout(() => {
+        const transformedNotifications = mockNotifications.map(n => ({
+          id: n.id,
+          type: n.type as NotificationType,
+          preview: n.text.split(':')[0], // Extract the action text
+          time: formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: lang === 'pl' ? pl : undefined }),
+          full: n.text,
+          unread: !n.read,
+          expanded: false,
+          user: n.user,
+        }));
+        setNotifications(transformedNotifications);
+        setIsLoading(false);
+      }, 500);
     }
   }, [isOpen, lang]);
 
   const handleToggle = (id: string) => {
-    const notifToUpdate = notifications.find(n => n.id === id);
-    if (notifToUpdate && notifToUpdate.unread) {
-      // Mark as read on the backend
-      fetch('/api/notifications/mark-as-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notificationId: id }),
-      }).catch(err => console.error("Failed to mark notification as read:", err));
-    }
-
     setNotifications(
       notifications.map(n =>
-        n.id === id ? { ...n, expanded: !n.expanded, unread: false } : n
+        n.id === id ? { ...n, unread: false } : n
       )
     );
   };
@@ -120,21 +101,21 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex-grow flex items-center justify-center">
+        <div className="flex-grow flex items-center justify-center p-4">
           <Loader2 className="h-8 w-8 animate-spin text-white/40" />
         </div>
       );
     }
     if (error) {
       return (
-        <div className="text-center py-10 text-red-400">
+        <div className="text-center py-10 text-red-400 p-4">
           <p>{t('notificationsError')}</p>
         </div>
       );
     }
     if (notifications.length === 0) {
       return (
-        <div className="text-center py-10 text-white/60 flex flex-col items-center gap-4">
+        <div className="text-center py-10 text-white/60 flex flex-col items-center gap-4 p-4">
           <Bell size={48} className="opacity-50" />
           <p>{t('notificationsAllCaughtUp')}</p>
         </div>
@@ -157,7 +138,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
         <motion.div
           className="absolute right-3 w-[350px] max-w-[calc(100vw-20px)] bg-[rgba(30,30,30,0.9)] border border-white/15 rounded-xl shadow-lg z-40 text-white flex flex-col"
           style={{
-            top: 'calc(var(--topbar-base-height) + var(--safe-area-top) - 10px)',
+            top: 'calc(var(--topbar-base-height) + var(--safe-area-top) + 5px)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
           }}

@@ -108,7 +108,7 @@ const TopBar: React.FC<TopBarProps> = ({ setIsModalOpen, openAccountPanel }) => 
           </button>
         </div>
 
-        <button onClick={toggleNotifPanel} className="absolute top-1/2 -translate-y-1/2 right-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
+        <button data-testid="notifications-button" onClick={toggleNotifPanel} className="absolute top-1/2 -translate-y-1/2 right-0 w-10 h-10 flex items-center justify-center" disabled={isLoading}>
           <Bell size={22} />
           {isLoggedIn && hasUnread && (
             <div
