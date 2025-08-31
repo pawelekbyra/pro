@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
 
@@ -34,43 +34,67 @@ const ToastIcons = {
 };
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [queue, setQueue] = useState<Toast[]>([]);
+  const [currentToast, setCurrentToast] = useState<Toast | null>(null);
+  const isDisplayingRef = useRef(false);
 
-  const addToast = useCallback((message: string, type: ToastType) => {
-    const id = Date.now();
-    setToasts((prevToasts) => [...prevToasts, { id, message, type }]);
-    setTimeout(() => {
-      removeToast(id);
-    }, 4000);
+  const removeToast = useCallback(() => {
+    setCurrentToast(null);
   }, []);
 
-  const removeToast = (id: number) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-  };
+  const addToast = useCallback((message: string, type: ToastType) => {
+    if (
+        (currentToast && currentToast.message === message) ||
+        queue.some(t => t.message === message)
+    ) {
+        return;
+    }
+
+    const id = Date.now();
+    setQueue((prevQueue) => [...prevQueue, { id, message, type }]);
+  }, [queue, currentToast]);
+
+  useEffect(() => {
+    if (!currentToast && queue.length > 0 && !isDisplayingRef.current) {
+        isDisplayingRef.current = true;
+        const [nextToast, ...rest] = queue;
+        setQueue(rest);
+        setCurrentToast(nextToast);
+
+        const timer = setTimeout(() => {
+            removeToast();
+            isDisplayingRef.current = false;
+        }, 4000);
+
+        return () => clearTimeout(timer);
+    }
+  }, [queue, currentToast, removeToast]);
 
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="fixed top-0 inset-x-0 z-[100] flex flex-col items-center gap-2 pointer-events-none" style={{ paddingTop: 'calc(var(--topbar-height) + 20px)' }}>
-        <AnimatePresence>
-          {toasts.map((toast) => (
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] flex flex-col items-center pointer-events-none">
+        <AnimatePresence onExitComplete={() => {
+            isDisplayingRef.current = false;
+        }}>
+          {currentToast && (
             <motion.div
-              key={toast.id}
+              key={currentToast.id}
               layout
-              initial={{ opacity: 0, y: -50, scale: 0.3 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              className="pointer-events-auto"
+              className="pointer-events-auto w-full max-w-xs"
             >
               <div
-                className="flex items-center gap-3 bg-black/80 backdrop-blur-md text-white shadow-lg rounded-full py-2 px-4"
+                className="flex items-center gap-3 bg-black/80 backdrop-blur-md text-white shadow-lg rounded-xl p-4 border border-white/10"
               >
-                {ToastIcons[toast.type]}
-                <span className="text-sm font-medium">{toast.message}</span>
+                {ToastIcons[currentToast.type]}
+                <span className="text-sm font-medium text-center flex-1">{currentToast.message}</span>
               </div>
             </motion.div>
-          ))}
+          )}
         </AnimatePresence>
       </div>
     </ToastContext.Provider>
