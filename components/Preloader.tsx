@@ -50,7 +50,9 @@ const Preloader: React.FC = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* Kontener ikony: wycentrowany absolutnie, aby uniknąć wpływu innych elementów */}
           <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" // Użycie klas do absolutnego centrowania
             initial={{ scale: 1, opacity: 0.9 }}
             animate={{
               scale: [1, 1.03, 1],
@@ -65,15 +67,16 @@ const Preloader: React.FC = () => {
             <Image
               src="/icons/icon-512x512.png"
               alt="Ting Tong Logo"
-              width={192}
-              height={192}
+              width={192} // Stały rozmiar
+              height={192} // Stały rozmiar
               className="w-48 h-48"
               priority
             />
           </motion.div>
 
+          {/* Kontener wyboru języka: pojawia się po ikonie */}
           <motion.div
-            className="text-center mt-12"
+            className="text-center"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}

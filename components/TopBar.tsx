@@ -69,7 +69,7 @@ const TopBar = ({ openAccountPanel }: { openAccountPanel: () => void }) => {
       <div
         className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-black/50 backdrop-blur-md text-white border-b border-white/10"
         style={{
-          height: 'var(--topbar-height)',
+          height: 'var(--topbar-base-height)',
           paddingTop: 'var(--safe-area-top)',
         }}
       >

@@ -16,7 +16,7 @@ const translations: Record<string, Record<string, string>> = {
         subscribeAriaLabel: 'Subskrybuj',
         shareTitle: 'Udostępnij ten film!',
         shareAriaLabel: 'Udostępnij',
-        shareText: 'Udostępnij',
+        shareText: 'Szeruj',
         infoTitle: 'Informacje',
         infoAriaLabel: 'Informacje',
         infoText: 'Info',
