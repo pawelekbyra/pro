@@ -125,29 +125,21 @@ const VideoGrid: React.FC = () => {
     setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
     setIsSwiping(true);
   };
+
   const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
     if (!touchStart || isAnyModalOpen) return;
-    let deltaX = e.targetTouches[0].clientX - touchStart.x;
-    let deltaY = e.targetTouches[0].clientY - touchStart.y;
-    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
-    if (isHorizontalSwipe) {
-      deltaY = 0;
-      const targetX = activeCoordinates.x + (deltaX > 0 ? -1 : 1);
-      if (!grid[`${targetX},${activeCoordinates.y}`]) deltaX *= 0.2;
-    } else {
-      deltaX = 0;
-      const targetY = activeCoordinates.y + (deltaY > 0 ? -1 : 1);
-      if (!grid[`${activeCoordinates.x},${targetY}`]) deltaY *= 0.2;
-    }
+    const deltaX = e.targetTouches[0].clientX - touchStart.x;
+    const deltaY = e.targetTouches[0].clientY - touchStart.y;
     setSwipeTranslation({ x: deltaX, y: deltaY });
   };
+
   const handleTouchEnd = () => {
     if (!touchStart || isAnyModalOpen) return;
     const { x: deltaX, y: deltaY } = swipeTranslation;
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > SWIPE_THRESHOLD) { if (deltaX > 0) move('left'); else move('right'); }
-    } else {
-      if (Math.abs(deltaY) > SWIPE_THRESHOLD) { if (deltaY > 0) move('up'); else move('down'); }
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+      if (deltaX > 0) move('left'); else move('right');
+    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
+      if (deltaY > 0) move('up'); else move('down');
     }
     setTouchStart(null);
     setIsSwiping(false);
@@ -161,30 +153,22 @@ const VideoGrid: React.FC = () => {
     setTouchStart({ x: e.clientX, y: e.clientY });
     setIsDragging(true);
   };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !touchStart) return;
     e.preventDefault();
-    let deltaX = e.clientX - touchStart.x;
-    let deltaY = e.clientY - touchStart.y;
-    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
-    if (isHorizontalSwipe) {
-      deltaY = 0;
-      const targetX = activeCoordinates.x + (deltaX > 0 ? -1 : 1);
-      if (!grid[`${targetX},${activeCoordinates.y}`]) deltaX *= 0.2;
-    } else {
-      deltaX = 0;
-      const targetY = activeCoordinates.y + (deltaY > 0 ? -1 : 1);
-      if (!grid[`${activeCoordinates.x},${targetY}`]) deltaY *= 0.2;
-    }
+    const deltaX = e.clientX - touchStart.x;
+    const deltaY = e.clientY - touchStart.y;
     setSwipeTranslation({ x: deltaX, y: deltaY });
   };
+
   const handleMouseUp = () => {
     if (!isDragging || !touchStart) return;
     const { x: deltaX, y: deltaY } = swipeTranslation;
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (Math.abs(deltaX) > SWIPE_THRESHOLD) { if (deltaX > 0) move('left'); else move('right'); }
-    } else {
-      if (Math.abs(deltaY) > SWIPE_THRESHOLD) { if (deltaY > 0) move('up'); else move('down'); }
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+      if (deltaX > 0) move('left'); else move('right');
+    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
+      if (deltaY > 0) move('up'); else move('down');
     }
     setIsDragging(false);
     setTouchStart(null);

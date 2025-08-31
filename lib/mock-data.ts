@@ -282,3 +282,49 @@ export const mockGrid: Grid = {
     },
   },
 };
+
+export const mockComments = [
+  {
+    id: 'comment-1',
+    text: "This is the first comment, it's a bit lonely here.",
+    createdAt: '2024-05-20T10:00:00Z',
+    likedBy: ['user-2', 'user-3'],
+    user: {
+      displayName: 'Alice',
+      avatar: 'https://i.pravatar.cc/150?u=alice',
+    },
+    parentId: null,
+    replies: [
+      {
+        id: 'reply-1-1',
+        text: "Don't worry, I'm here now!",
+        createdAt: '2024-05-20T10:05:00Z',
+        likedBy: ['user-1'],
+        user: {
+          displayName: 'Bob',
+          avatar: 'https://i.pravatar.cc/150?u=bob',
+        },
+        parentId: 'comment-1',
+        replies: [],
+      },
+    ],
+  },
+  {
+    id: 'comment-2',
+    text: 'Just saw this, amazing content!',
+    createdAt: '2024-05-20T11:30:00Z',
+    likedBy: [],
+    user: {
+      displayName: 'Charlie',
+      avatar: 'https://i.pravatar.cc/150?u=charlie',
+    },
+    parentId: null,
+    replies: [],
+  },
+];
+
+export const mockNotifications = [
+    { id: 'notif-1', type: 'like', text: 'Alice liked your video.', createdAt: '2024-05-21T09:00:00Z', read: false, user: { displayName: 'Alice', avatar: 'https://i.pravatar.cc/150?u=alice' } },
+    { id: 'notif-2', type: 'comment', text: 'Bob commented: "Great stuff!"', createdAt: '2024-05-21T08:30:00Z', read: false, user: { displayName: 'Bob', avatar: 'https://i.pravatar.cc/150?u=bob' } },
+    { id: 'notif-3', type: 'follow', text: 'Charlie started following you.', createdAt: '2024-05-20T12:00:00Z', read: true, user: { displayName: 'Charlie', avatar: 'https://i.pravatar.cc/150?u=charlie' } },
+];
