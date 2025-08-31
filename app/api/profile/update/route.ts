@@ -32,8 +32,6 @@ export async function PUT(req: NextRequest) {
         }
 
         const updates: Partial<User> = {
-            firstName,
-            lastName,
             email,
             displayName: `${firstName} ${lastName}`,
         };
@@ -45,7 +43,7 @@ export async function PUT(req: NextRequest) {
         }
 
         // Re-issue the JWT with the updated user details
-        const { passwordHash, ...userPayload } = updatedUser;
+        const { password, ...userPayload } = updatedUser;
         const token = await new SignJWT({ user: userPayload })
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()

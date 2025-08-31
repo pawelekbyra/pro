@@ -73,7 +73,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, onReplySubmi
         </div>
         {isReplying && user && (
           <form onSubmit={handleLocalReplySubmit} className="flex items-center gap-2 mt-2">
-            <Image src={user.avatar} alt={t('yourAvatar')} width={24} height={24} className="w-6 h-6 rounded-full" />
+            {user.avatar && <Image src={user.avatar} alt={t('yourAvatar')} width={24} height={24} className="w-6 h-6 rounded-full" />}
             <input
               type="text"
               value={replyText}
@@ -247,7 +247,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
       text,
       createdAt: new Date().toISOString(),
       likedBy: [],
-      user: { displayName: user.displayName, avatar: user.avatar },
+      user: { displayName: user.displayName || user.username, avatar: user.avatar || '' },
       parentId,
     };
     addCommentOptimistically(newReply);
@@ -369,7 +369,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
             {user && (
               <div className="flex-shrink-0 p-2 border-t border-white/10 bg-black/50">
                 <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                  <Image src={user.avatar} alt={t('yourAvatar')} width={32} height={32} className="w-8 h-8 rounded-full" />
+                  {user.avatar && <Image src={user.avatar} alt={t('yourAvatar')} width={32} height={32} className="w-8 h-8 rounded-full" />}
                   <input
                     type="text"
                     value={newComment}

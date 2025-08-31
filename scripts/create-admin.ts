@@ -15,9 +15,9 @@ async function createAdmin() {
     if (adminUser) {
       console.log(`User '${adminUsername}' already exists.`);
       // 2a. If user exists, ensure their role is 'admin'
-      if (adminUser.role !== 'admin') {
+      if (adminUser.user_type !== 'admin') {
         console.log("Updating user to have 'admin' role.");
-        await db.updateUser(adminUser.id, { role: 'admin' });
+        await db.updateUser(adminUser.id, { user_type: 'admin' });
       } else {
         console.log("User is already an admin.");
       }

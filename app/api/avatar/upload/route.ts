@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Re-issue the JWT with the updated user details
-        const { passwordHash, ...userPayload } = updatedUser;
+        const { password, ...userPayload } = updatedUser;
         const token = await new SignJWT({ user: userPayload })
             .setProtectedHeader({ alg: 'HS256' })
             .setIssuedAt()

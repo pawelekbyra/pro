@@ -25,8 +25,12 @@ async function seed() {
     // 1. Seed Users
     console.log(`Seeding ${data.users.length} users...`);
     for (const userData of data.users) {
-      const passwordHash = await bcrypt.hash(userData.passwordHash, 10);
-      await db.createUser({ ...userData, passwordHash });
+      if (!userData.password) {
+        console.log(`- Skipping user ${userData.username} due to missing password.`);
+        continue;
+      }
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      await db.createUser({ ...userData, password: hashedPassword });
       console.log(`- Created user: ${userData.username}`);
     }
 

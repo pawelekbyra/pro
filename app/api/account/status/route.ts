@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         // This can happen if the user was deleted but the cookie remains.
         return NextResponse.json({ isLoggedIn: false, user: null });
     }
-    const { passwordHash, ...userPayload } = freshUser;
+    const { password, ...userPayload } = freshUser;
 
     return NextResponse.json({ isLoggedIn: true, user: userPayload });
 }
