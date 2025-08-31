@@ -1,3 +1,4 @@
+// components/Preloader.tsx
 "use client";
 
 import React, { useState } from 'react';
@@ -50,53 +51,56 @@ const Preloader: React.FC = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Kontener ikony: wycentrowany absolutnie, aby uniknąć wpływu innych elementów */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" // Użycie klas do absolutnego centrowania
-            initial={{ scale: 1, opacity: 0.9 }}
-            animate={{
-              scale: [1, 1.03, 1],
-              opacity: [0.9, 1, 0.9],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <Image
-              src="/icons/icon-512x512.png"
-              alt="Ting Tong Logo"
-              width={192} // Stały rozmiar
-              height={192} // Stały rozmiar
-              className="w-48 h-48"
-              priority
-            />
-          </motion.div>
+          {/* Nowy, wspólny kontener, który jest centrowany */}
+          <div className="relative flex flex-col items-center">
+            {/* Kontener ikony: pozostaje w środku */}
+            <motion.div
+              className="relative"
+              initial={{ scale: 1, opacity: 0.9 }}
+              animate={{
+                scale: [1, 1.03, 1],
+                opacity: [0.9, 1, 0.9],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            >
+              <Image
+                src="/icons/icon-512x512.png"
+                alt="Ting Tong Logo"
+                width={192}
+                height={192}
+                className="w-48 h-48"
+                priority
+              />
+            </motion.div>
 
-          {/* Kontener wyboru języka: pojawia się po ikonie */}
-          <motion.div
-            className="text-center"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
-          >
-            <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
-            <div className="flex flex-col gap-4 w-64">
-              <Button
-                onClick={() => handleLangSelect('pl')}
-                className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6"
-              >
-                {t('polish')}
-              </Button>
-              <Button
-                onClick={() => handleLangSelect('en')}
-                className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6"
-              >
-                {t('english')}
-              </Button>
-            </div>
-          </motion.div>
+            {/* Kontener wyboru języka: animowany w dół, umieszczony pod ikoną */}
+            <motion.div
+              className="text-center mt-8"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+            >
+              <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
+              <div className="flex flex-col gap-4 w-64">
+                <Button
+                  onClick={() => handleLangSelect('pl')}
+                  className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6"
+                >
+                  {t('polish')}
+                </Button>
+                <Button
+                  onClick={() => handleLangSelect('en')}
+                  className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6"
+                >
+                  {t('english')}
+                </Button>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
