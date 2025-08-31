@@ -4,6 +4,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Coffee } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
+import { useUser } from '@/context/UserContext';
+import { useToast } from '@/context/ToastContext';
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -11,14 +13,42 @@ interface InfoModalProps {
 }
 
 const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation();
+    const { t } = useTranslation();
+    const { login } = useUser(); // Dodanie hooka useUser
+    const { addToast } = useToast(); // Dodanie hooka useToast
 
-  const handleShowTipJar = () => {
-    const bmcButton = document.querySelector('#bmc-wbtn') as HTMLElement;
-    if (bmcButton) {
-      bmcButton.click();
-    }
-  };
+    const handleShowTipJar = async () => {
+        const bmcButton = document.querySelector('#bmc-wbtn') as HTMLElement;
+        if (bmcButton) {
+            bmcButton.click();
+        }
+
+        // Poniższa logika jest konceptualna i powinna być wywołana przez webhooka płatności.
+        // Dla celów demonstracyjnych, udajemy, że płatność się powiodła.
+        setTimeout(async () => {
+            const mockEmail = 'patron@example.com';
+            const mockPassword = 'password123';
+
+            try {
+                // Poniżej znajduje się koncepcyjne wywołanie API, które powinno stworzyć konto
+                const res = await fetch('/api/create-patron', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: mockEmail, password: mockPassword }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    addToast(`Twoje konto zostało utworzone! Login: ${mockEmail}`, 'success');
+                    await login({ email: mockEmail, password: mockPassword });
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Błąd tworzenia konta po wpłacie:', error);
+                addToast('Wystąpił błąd podczas tworzenia konta.', 'error');
+            }
+        }, 3000);
+    };
 
   return (
     <AnimatePresence>

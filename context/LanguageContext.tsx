@@ -76,7 +76,7 @@ const translations: Record<string, Record<string, string>> = {
         avatarUploadError: 'Błąd wysyłania awatara.',
         avatarAlt: 'Awatar użytkownika',
         changeAvatarTitle: 'Zmień awatar',
-        patronTier: 'Patron',
+        patronTier: 'Patron Miłości', // Nowy klucz
         personalData: 'Dane osobowe',
         firstName: 'Imię',
         firstNamePlaceholder: 'Twoje imię',
@@ -208,7 +208,7 @@ const translations: Record<string, Record<string, string>> = {
         avatarUploadError: 'Failed to upload avatar.',
         avatarAlt: 'User avatar',
         changeAvatarTitle: 'Change avatar',
-        patronTier: 'Patron',
+        patronTier: 'Patron of Love', // Nowy klucz
         personalData: 'Personal Data',
         firstName: 'First Name',
         firstNamePlaceholder: 'Your first name',
