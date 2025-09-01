@@ -3,31 +3,27 @@
 import React, { useState, TouchEvent, useEffect, useRef, MouseEvent, useCallback } from 'react';
 import { Slide } from '@/lib/types';
 import SlideRenderer from './SlideRenderer';
+import { useVideoGrid } from '@/context/VideoGridContext';
 
 const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe in pixels
 
 interface VerticalFeedProps {
   slides: Slide[];
   isActive: boolean; // Is this the active column?
-  onHorizontalSwipe: (direction: 'left' | 'right') => void;
-  // Pass down all necessary props for SlideRenderer and its modals
-  openAccountPanel: () => void;
-  openCommentsModal: () => void;
-  openInfoModal: () => void;
-  setIsTopBarModalOpen: (isOpen: boolean) => void;
-  isAnyModalOpen: boolean;
 }
 
 const VerticalFeed: React.FC<VerticalFeedProps> = ({
   slides,
   isActive,
-  onHorizontalSwipe,
-  openAccountPanel,
-  openCommentsModal,
-  openInfoModal,
-  setIsTopBarModalOpen,
-  isAnyModalOpen
 }) => {
+  const {
+    moveHorizontal,
+    openAccountPanel,
+    openCommentsModal,
+    openInfoModal,
+    setIsTopBarModalOpen,
+    isAnyModalOpen
+  } = useVideoGrid();
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
@@ -124,7 +120,7 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     const deltaY = y - touchStart.y;
 
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      onHorizontalSwipe(deltaX > 0 ? 'left' : 'right');
+      moveHorizontal(deltaX > 0 ? 'left' : 'right');
     }
 
     setTouchStart(null);
