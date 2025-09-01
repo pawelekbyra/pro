@@ -5,6 +5,7 @@ import { useVideoGrid } from '@/context/VideoGridContext';
 import CommentsModal from './CommentsModal';
 import InfoModal from './InfoModal';
 import AccountPanel from './AccountPanel';
+import { AnimatePresence } from 'framer-motion';
 
 export default function DesktopLayout({ children }: { children: React.ReactNode }) {
     const context = useVideoGrid();
@@ -33,10 +34,13 @@ export default function DesktopLayout({ children }: { children: React.ReactNode 
                 isOpen={state.activeModal === 'info'}
                 onClose={() => setActiveModal(null)}
             />
-            <AccountPanel
-                isOpen={state.activeModal === 'account'}
-                onClose={() => setActiveModal(null)}
-            />
+            <AnimatePresence>
+                {state.activeModal === 'account' && (
+                    <AccountPanel
+                        onClose={() => setActiveModal(null)}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }
