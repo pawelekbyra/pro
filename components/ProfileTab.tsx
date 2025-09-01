@@ -111,17 +111,20 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ onClose }) => {
   const handleLogout = async () => {
     await logout();
     addToast(t('logoutSuccess'), 'success');
-    onClose();
 
-    const firstColumnKey = Object.keys(videoGridState.columns).map(Number).sort((a,b) => a - b)[0];
+    setTimeout(() => {
+      onClose();
 
-    if (typeof firstColumnKey !== 'undefined') {
-        const firstColumn = videoGridState.columns[firstColumnKey];
-        if (firstColumn && firstColumn.length > 0) {
-            const firstSlide = firstColumn[0];
-            setActiveSlide(firstColumnKey, firstSlide.y, firstSlide.id);
-        }
-    }
+      const firstColumnKey = Object.keys(videoGridState.columns).map(Number).sort((a,b) => a - b)[0];
+
+      if (typeof firstColumnKey !== 'undefined') {
+          const firstColumn = videoGridState.columns[firstColumnKey];
+          if (firstColumn && firstColumn.length > 0) {
+              const firstSlide = firstColumn[0];
+              setActiveSlide(firstColumnKey, firstSlide.y, firstSlide.id);
+          }
+      }
+    }, 300);
   };
 
   if (!profile) {

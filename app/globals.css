@@ -118,3 +118,10 @@ body {
     display: none !important;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
