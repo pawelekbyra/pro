@@ -1,5 +1,6 @@
 import { db } from '../lib/db';
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
 async function createAdmin() {
   console.log('Starting admin user creation script...');
@@ -7,7 +8,9 @@ async function createAdmin() {
   try {
     const adminUsername = 'admin';
     const adminEmail = 'admin@example.com';
-    const adminPassword = 'admin'; // Simple password for local dev
+    const adminPassword = randomBytes(16).toString('hex'); // Generate a random password
+    console.log(`Generated admin password: ${adminPassword}`);
+
 
     // 1. Check if admin user already exists
     let adminUser = await db.findUserByEmail(adminEmail);

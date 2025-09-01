@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Wysłanie e-maila z loginem i hasłem (koncepcyjnie)
-        console.log(`Wysłano e-mail do ${email} z hasłem: ${password}`);
+        // Usunięto logowanie hasła w celu zwiększenia bezpieczeństwa
 
         return NextResponse.json({
             success: true,

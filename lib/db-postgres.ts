@@ -9,6 +9,10 @@ function getDb() {
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL environment variable is not set");
     }
+    // The Neon serverless driver over HTTP handles connection pooling automatically.
+    // There is no need to configure a client-side pool.
+    // Timeouts and retry logic are not implemented here due to the complexity
+    // of modifying all query call sites, which use the tagged template literal syntax.
     sql = neon(process.env.DATABASE_URL);
   }
   return sql;
@@ -20,6 +24,7 @@ export async function createTables() {
   const sql = getDb();
   await sql`DROP TABLE IF EXISTS push_subscriptions CASCADE;`;
   await sql`DROP TABLE IF EXISTS notifications CASCADE;`;
+  await sql`DROP TABLE IF EXISTS comment_likes CASCADE;`;
   await sql`DROP TABLE IF EXISTS likes CASCADE;`;
   await sql`DROP TABLE IF EXISTS comments CASCADE;`;
   await sql`DROP TABLE IF EXISTS slides CASCADE;`;
@@ -60,6 +65,13 @@ export async function createTables() {
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
   `;
+  await sql`
+      CREATE TABLE comment_likes (
+          "commentId" VARCHAR(255) REFERENCES comments(id),
+          "userId" UUID REFERENCES users(id),
+          PRIMARY KEY ("commentId", "userId")
+      );
+    `;
   await sql`
     CREATE TABLE likes (
         "slideId" VARCHAR(255) REFERENCES slides(id),
@@ -234,6 +246,20 @@ export async function toggleLike(slideId: string, userId: string): Promise<{ new
         await sql`INSERT INTO likes ("slideId", "userId") VALUES (${slideId}, ${userId});`;
     }
     const likeCountResult = await sql`SELECT COUNT(*) as count FROM likes WHERE "slideId" = ${slideId};`;
+    const likeCount = likeCountResult[0].count as number;
+    return { newStatus: isLiked ? 'unliked' : 'liked', likeCount };
+}
+
+export async function toggleCommentLike(commentId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked', likeCount: number }> {
+    const sql = getDb();
+    const isLikedResult = await sql`SELECT 1 FROM comment_likes WHERE "commentId" = ${commentId} AND "userId" = ${userId};`;
+    const isLiked = isLikedResult.length > 0;
+    if (isLiked) {
+        await sql`DELETE FROM comment_likes WHERE "commentId" = ${commentId} AND "userId" = ${userId};`;
+    } else {
+        await sql`INSERT INTO comment_likes ("commentId", "userId") VALUES (${commentId}, ${userId});`;
+    }
+    const likeCountResult = await sql`SELECT COUNT(*) as count FROM comment_likes WHERE "commentId" = ${commentId};`;
     const likeCount = likeCountResult[0].count as number;
     return { newStatus: isLiked ? 'unliked' : 'liked', likeCount };
 }

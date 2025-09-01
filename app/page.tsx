@@ -22,6 +22,7 @@ export default function Home() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScroll = useRef(false);
 
   // Use the gesture hook for horizontal navigation
   const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onMouseLeave } = useGesture(moveHorizontal, isAnyModalOpen);
@@ -29,7 +30,7 @@ export default function Home() {
   // Set active slide on vertical scroll
   useEffect(() => {
     const handleScroll = () => {
-      if (!scrollContainerRef.current || isAnyModalOpen) return;
+      if (!scrollContainerRef.current || isAnyModalOpen || isProgrammaticScroll.current) return;
 
       const { scrollTop, clientHeight } = scrollContainerRef.current;
       const slides = scrollContainerRef.current.children;
@@ -65,10 +66,15 @@ export default function Home() {
     // Scroll to the active slide when it changes
     const slideElement = document.getElementById(`slide-${activeColumnIndex}-${activeSlideY}`);
     if (slideElement && scrollContainerRef.current) {
+      isProgrammaticScroll.current = true;
       scrollContainerRef.current.scrollTo({
         top: slideElement.offsetTop,
         behavior: 'smooth',
       });
+      // Reset the flag after the scroll animation is likely to have finished
+      setTimeout(() => {
+        isProgrammaticScroll.current = false;
+      }, 1000);
     }
   }, [activeColumnIndex, activeSlideY]);
 
