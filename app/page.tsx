@@ -98,7 +98,7 @@ export default function Home() {
         setTimeout(() => {
             isProgrammaticScroll.current = false;
             container.style.scrollBehavior = 'smooth';
-        }, 150);
+        }, 250);
       } else if (scrollTop + clientHeight >= scrollHeight - 1) { // Scrolled to the bottom (clone of the first slide)
         isProgrammaticScroll.current = true;
         container.style.scrollBehavior = 'auto';
@@ -106,7 +106,7 @@ export default function Home() {
         setTimeout(() => {
             isProgrammaticScroll.current = false;
             container.style.scrollBehavior = 'smooth';
-        }, 150);
+        }, 250);
       }
     };
 
@@ -130,7 +130,7 @@ export default function Home() {
       // firing during the programmatic scroll.
       setTimeout(() => {
         isProgrammaticScroll.current = false;
-      }, 150);
+      }, 250);
     }
   }, [activeColumnIndex, activeSlideY]);
 
