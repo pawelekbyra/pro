@@ -304,9 +304,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const setLanguage = (newLang: Language) => {
     setLangState(newLang);
     localStorage.setItem('app_lang', newLang);
-    if (!isLangSelected) {
-      setIsLangSelected(true);
-    }
   };
 
   useEffect(() => {
@@ -317,10 +314,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const timer = setTimeout(() => {
       const savedLang = localStorage.getItem('app_lang');
       if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
-        setLanguage(savedLang);
+        // Explicitly set language and isLangSelected state
+        setLangState(savedLang as Language);
+        setIsLangSelected(true);
       } else {
-        // If no language is saved, do nothing, so the preloader stays visible
-        // until the user makes a selection.
+        // If no language is saved, do nothing, so isLangSelected remains false
+        // and the preloader shows the language selection.
       }
     }, 500); // Delay of 500ms to ensure preloader is visible
 
@@ -329,6 +328,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const selectInitialLang = (initialLang: Language) => {
     setLanguage(initialLang);
+    setIsLangSelected(true);
   };
 
   const t = (key: string, params?: { [key: string]: string }) => {
