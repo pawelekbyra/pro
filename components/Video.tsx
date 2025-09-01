@@ -9,6 +9,7 @@ import BottomBar from './BottomBar';
 import VideoInfo from './VideoInfo';
 import TopBar from './TopBar';
 import { Lock } from 'lucide-react';
+import { Slide } from '@/lib/types';
 
 // This type should align with what the API returns for a single video
 export type VideoData = {
@@ -27,17 +28,15 @@ export type VideoData = {
 
 interface VideoProps {
   video: VideoData;
+  slide: Slide;
   isActive: boolean;
-  setIsModalOpen: (isOpen: boolean) => void;
-  openAccountPanel: () => void;
-  openCommentsModal: () => void;
-  openInfoModal: () => void;
   onTimeUpdate: (videoId: string, time: number) => void;
   startTime: number;
-  onPlaybackFailure: () => void;
+  onPlaybackFailure:
+  () => void;
 }
 
-const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAccountPanel, openCommentsModal, openInfoModal, onTimeUpdate, startTime, onPlaybackFailure }) => {
+const Video: React.FC<VideoProps> = ({ video, slide, isActive, onTimeUpdate, startTime, onPlaybackFailure }) => {
   const { isLoggedIn, isLoading } = useUser();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -59,6 +58,7 @@ const Video: React.FC<VideoProps> = ({ video, isActive, setIsModalOpen, openAcco
         isActive={isActive && !showSecretOverlay}
         isSecretActive={showSecretOverlay}
         videoId={video.id}
+        slide={slide}
         onTimeUpdate={onTimeUpdate}
         startTime={startTime}
         onPlaybackFailure={onPlaybackFailure}

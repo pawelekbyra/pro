@@ -14,9 +14,6 @@ import TopBar from './TopBar';
 interface CommonSlideProps {
   isActive: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
-  openAccountPanel: () => void;
-  openCommentsModal: () => void;
-  openInfoModal: () => void;
   onTimeUpdate: (videoId: string, time: number) => void;
   startTime: number;
   onPlaybackFailure: () => void;
@@ -46,7 +43,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, ...commonProps }) 
             isLiked: slide.isLiked,
             initialComments: slide.initialComments,
         };
-        return <Video video={videoDataForComponent} {...commonProps} />;
+        return <Video video={videoDataForComponent} slide={slide} {...commonProps} />;
       case 'html':
         return <div onTouchStart={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}><HtmlContent data={slide.data} username={slide.username} onNavigate={commonProps.onNavigate} /></div>;
       case 'game':
@@ -68,18 +65,13 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, ...commonProps }) 
             {renderSlideContent()}
 
             {/* Common UI elements for all slide types */}
-            <TopBar
-                openAccountPanel={commonProps.openAccountPanel}
-            />
+            <TopBar />
             <Sidebar
                 avatarUrl={slide.avatar}
                 initialLikes={slide.initialLikes}
                 isLiked={slide.isLiked}
                 videoId={slide.id}
                 commentsCount={slide.initialComments}
-                openCommentsModal={commonProps.openCommentsModal}
-                openAccountPanel={commonProps.openAccountPanel}
-                openInfoModal={commonProps.openInfoModal}
             />
         </div>
     </div>
