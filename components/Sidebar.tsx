@@ -13,7 +13,7 @@ interface SidebarProps {
   avatarUrl:string;
   initialLikes: number;
   isLiked: boolean;
-  videoId: string;
+  slideId: string;
   commentsCount: number;
 }
 
@@ -21,10 +21,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   avatarUrl,
   initialLikes,
   isLiked: initialIsLiked,
-  videoId,
+  slideId,
   commentsCount,
 }) => {
-  const { openCommentsModal, openAccountPanel, openInfoModal } = useVideoGrid();
+  const { setActiveModal } = useVideoGrid();
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likesCount, setLikesCount] = useState(initialLikes);
   const { addToast } = useToast();
@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       const response = await fetch('/api/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoId }),
+        body: JSON.stringify({ slideId }),
       });
       if (!response.ok) throw new Error('Failed to like post');
       addToast(newIsLiked ? (t('likedToast') || 'Liked!') : (t('unlikedToast') || 'Unliked'), 'success');
@@ -80,7 +80,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       }}
     >
       <div className="relative w-12 h-12 mb-1.5">
-        <button onClick={openAccountPanel} className="w-full h-full flex items-center justify-center text-white">
+        <button onClick={() => setActiveModal('account')} className="w-full h-full flex items-center justify-center text-white">
           <Rat size={48} strokeWidth={1.4} />
         </button>
         {!isLoggedIn && (
@@ -96,7 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <button
         onClick={handleLike}
         className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold"
-        data-video-id={videoId}
+        data-slide-id={slideId}
       >
         <Heart
           size={32}
@@ -107,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <span className="icon-label">{formatCount(likesCount)}</span>
       </button>
 
-      <button data-testid="comments-button" onClick={openCommentsModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <button data-testid="comments-button" onClick={() => setActiveModal('comments')} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
         <MessageSquare size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
       </button>
@@ -117,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <span className="icon-label">{t('shareText') || 'Share'}</span>
       </button>
 
-      <button onClick={openInfoModal} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold mt-4">
+      <button onClick={() => setActiveModal('info')} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold mt-4">
         <FileQuestion size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">WTF?!</span>
       </button>

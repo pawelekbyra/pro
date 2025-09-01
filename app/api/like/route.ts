@@ -12,13 +12,13 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { videoId } = await request.json(); // The client sends videoId, which maps to slideId
+    const { slideId } = await request.json();
 
-    if (!videoId) {
-      return NextResponse.json({ success: false, message: 'videoId (slideId) is required' }, { status: 400 });
+    if (!slideId) {
+      return NextResponse.json({ success: false, message: 'slideId is required' }, { status: 400 });
     }
 
-    const result = await db.toggleLike(videoId, currentUser.id);
+    const result = await db.toggleLike(slideId, currentUser.id);
 
     return NextResponse.json({
       success: true,

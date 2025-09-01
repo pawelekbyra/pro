@@ -1,6 +1,5 @@
 import { db } from '../lib/db';
 import bcrypt from 'bcryptjs';
-import { randomBytes } from 'crypto';
 
 async function createAdmin() {
   console.log('Starting admin user creation script...');
@@ -8,9 +7,18 @@ async function createAdmin() {
   try {
     const adminUsername = 'admin';
     const adminEmail = 'admin@example.com';
-    const adminPassword = randomBytes(16).toString('hex'); // Generate a random password
-    console.log(`Generated admin password: ${adminPassword}`);
 
+    // Read password from command-line arguments
+    const adminPassword = process.argv[2];
+    if (!adminPassword) {
+      console.error('Usage: npm run create-admin -- <password>');
+      console.error('Please provide a password as a command-line argument.');
+      process.exit(1);
+    }
+    if (adminPassword.length < 8) {
+      console.error('Password must be at least 8 characters long.');
+      process.exit(1);
+    }
 
     // 1. Check if admin user already exists
     let adminUser = await db.findUserByEmail(adminEmail);
