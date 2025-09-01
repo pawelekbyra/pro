@@ -8,9 +8,10 @@ interface HtmlContentProps {
   data: HtmlSlideData;
   username: string;
   onNavigate: (coordinates: { x: number; y: number }) => void;
+  isActive: boolean;
 }
 
-const HtmlContent: React.FC<HtmlContentProps> = ({ data }) => {
+const HtmlContent: React.FC<HtmlContentProps> = ({ data, isActive }) => {
   const sanitizedHtml = useMemo(() => {
     // Check if running in a browser environment before using DOMPurify
     if (typeof window !== 'undefined' && data.htmlContent) {
