@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, TouchEvent, useEffect, useRef, MouseEvent, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Slide } from '@/lib/types';
 import SlideRenderer from './SlideRenderer';
 import { useVideoGrid } from '@/context/VideoGridContext';
-
-const SWIPE_THRESHOLD = 50; // Minimum distance for a swipe in pixels
+import { useGesture } from '@/lib/useGesture';
 
 interface VerticalFeedProps {
   slides: Slide[];
@@ -28,11 +27,10 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     columnKeys,
     setPrefetchHint,
   } = useVideoGrid();
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const gestureHandlers = useGesture(moveHorizontal, isAnyModalOpen);
 
   // --- Infinite Scroll Logic ---
   useEffect(() => {
@@ -159,45 +157,6 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     }
   }, [activeSlideY, slides]);
 
-  // --- Gesture Handling (Touch & Mouse) ---
-  const handleDragStart = (x: number, y: number) => {
-    if (isAnyModalOpen) return;
-    setTouchStart({ x, y });
-  };
-
-  const handleDragEnd = (x: number, y: number) => {
-    if (!touchStart || isAnyModalOpen) return;
-    const deltaX = x - touchStart.x;
-    const deltaY = y - touchStart.y;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      moveHorizontal(deltaX > 0 ? 'left' : 'right');
-    }
-
-    setTouchStart(null);
-    setIsDragging(false);
-  };
-
-  // Touch handlers
-  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => handleDragStart(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
-  const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => handleDragEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-
-  // Mouse handlers
-  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-    handleDragStart(e.clientX, e.clientY);
-  };
-  const handleMouseUp = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    handleDragEnd(e.clientX, e.clientY);
-  };
-  const handleMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
-    if (isDragging) {
-      handleMouseUp(e);
-    }
-  };
-
   // Render cloned slides for infinite loop effect
   const slidesWithClones = slides.length > 1 ? [slides[slides.length - 1], ...slides, slides[0]] : slides;
 
@@ -206,11 +165,7 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
       ref={feedRef}
       className="h-full w-full overflow-y-scroll snap-y snap-mandatory"
       style={{ scrollBehavior: 'smooth' }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
+      {...gestureHandlers}
     >
       {slidesWithClones.map((slide, index) => {
         const isClone = index === 0 || index === slidesWithClones.length - 1;

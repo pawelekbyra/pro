@@ -25,7 +25,7 @@ interface VideoPlayerProps {
 const DOUBLE_CLICK_DELAY_MS = 200;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, slide, videoRef, onTimeUpdate, startTime, onPlaybackFailure, isPlaying }) => {
-  const { prefetchHint } = useVideoGrid();
+  const { prefetchHint, activeSlideId } = useVideoGrid();
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -57,24 +57,39 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     const video = videoRef.current;
     if (!video) return;
 
-    if (isActive) {
-      // If we have a saved start time, apply it.
-      // The check ensures we don't seek unnecessarily if already close to the time.
+    const isThisVideoActive = videoId === activeSlideId;
+
+    // Smart Playback Logic
+    if (isActive && isThisVideoActive) {
+      // This is the active slide, play it with sound
+      video.muted = false;
       if (startTime > 0 && Math.abs(video.currentTime - startTime) > 0.5) {
         video.currentTime = startTime;
       }
       video.play().catch(error => {
-        console.error("Autoplay was prevented:", error);
-        onPlaybackFailure();
+        console.error(`Autoplay was prevented for video ${videoId}:`, error);
+        // Mute and try to play again if unmuted playback fails
+        if (error.name === 'NotAllowedError') {
+          video.muted = true;
+          video.play().catch(innerError => {
+             console.error(`Muted autoplay also failed for video ${videoId}:`, innerError);
+             onPlaybackFailure();
+          });
+        } else {
+          onPlaybackFailure();
+        }
       });
     } else {
-      // When video becomes inactive, save its current time and pause it.
-      if (!video.paused && video.currentTime > 0) {
-        onTimeUpdate(videoId, video.currentTime);
+      // This is not the active slide, or the feed is inactive. Pause and mute it.
+      if (!video.paused) {
+        if (video.currentTime > 0) {
+          onTimeUpdate(videoId, video.currentTime);
+        }
+        video.pause();
       }
-      video.pause();
+      video.muted = true;
     }
-  }, [isActive, videoRef, onTimeUpdate, startTime, videoId, onPlaybackFailure]);
+  }, [isActive, activeSlideId, videoId, videoRef, onTimeUpdate, startTime, onPlaybackFailure]);
 
   const triggerLikeAnimation = () => {
     setShowHeart(true);
