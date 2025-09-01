@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
-import { Button } from './ui/button';
 import Image from 'next/image';
 
 const Preloader: React.FC = () => {
@@ -12,12 +11,6 @@ const Preloader: React.FC = () => {
   const [isHiding, setIsHiding] = useState(false);
   const [hasShown, setHasShown] = useState(false);
 
-  useEffect(() => {
-    if (isLangSelected && !hasShown) {
-      setIsHiding(true);
-      setTimeout(() => setHasShown(true), 500); // Wait for fade-out animation to finish
-    }
-  }, [isLangSelected, hasShown]);
 
   const handleLangSelect = (lang: 'pl' | 'en') => {
     const videos = document.querySelectorAll('video');
@@ -37,6 +30,9 @@ const Preloader: React.FC = () => {
       }
     });
     selectInitialLang(lang);
+    setTimeout(() => {
+        setIsHiding(true);
+    }, 300);
   };
 
   if (hasShown) {
@@ -83,18 +79,22 @@ const Preloader: React.FC = () => {
             >
               <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
               <div className="flex flex-col gap-4 w-64">
-                <Button
+                <motion.button
                   onClick={() => handleLangSelect('pl')}
-                  className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6"
+                  className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
                 >
                   {t('polish')}
-                </Button>
-                <Button
+                </motion.button>
+                <motion.button
                   onClick={() => handleLangSelect('en')}
-                  className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6"
+                  className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
                 >
                   {t('english')}
-                </Button>
+                </motion.button>
               </div>
             </motion.div>
           </div>
