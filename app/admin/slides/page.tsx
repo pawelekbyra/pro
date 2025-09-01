@@ -18,20 +18,20 @@ export default async function SlideManagementPage() {
   const slides = await db.getAllSlides();
   const users: User[] = await db.getAllUsers();
 
-  async function createSlideAction(formData: FormData): Promise<{ success: boolean, error?: string }> {
-    'use server';
-    return { success: false, error: 'Slide creation is disabled' };
-  }
+  // async function createSlideAction(formData: FormData): Promise<{ success: boolean, error?: string }> {
+  //   'use server';
+  //   return { success: false, error: 'Slide creation is disabled' };
+  // }
 
-  async function updateSlideAction(formData: FormData): Promise<{ success: boolean, error?: string }> {
-    'use server';
-    return { success: false, error: 'Slide update is disabled' };
-  }
+  // async function updateSlideAction(formData: FormData): Promise<{ success: boolean, error?: string }> {
+  //   'use server';
+  //   return { success: false, error: 'Slide update is disabled' };
+  // }
 
-  async function deleteSlideAction(formData: FormData): Promise<{ success: boolean, error?: string }>{
-    'use server';
-    return { success: false, error: 'Slide deletion is disabled' };
-  }
+  // async function deleteSlideAction(formData: FormData): Promise<{ success: boolean, error?: string }>{
+  //   'use server';
+  //   return { success: false, error: 'Slide deletion is disabled' };
+  // }
 
   return (
     <div>
@@ -39,9 +39,9 @@ export default async function SlideManagementPage() {
       <SlideManagementClient
         slides={slides}
         users={users}
-        createSlideAction={createSlideAction}
-        updateSlideAction={updateSlideAction}
-        deleteSlideAction={deleteSlideAction}
+        // createSlideAction={createSlideAction}
+        // updateSlideAction={updateSlideAction}
+        // deleteSlideAction={deleteSlideAction}
       />
     </div>
   );

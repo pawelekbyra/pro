@@ -5,6 +5,7 @@ import DesktopLayout from '@/components/DesktopLayout';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import { useGesture } from '@/lib/useGesture';
 import SlideRenderer from '@/components/SlideRenderer';
+import { Slide } from '@/lib/types';
 
 export default function Home() {
   const {
@@ -194,7 +195,7 @@ export default function Home() {
                 </div>
 
                 {/* Real slides */}
-                {columnSlides.map(slide => (
+                {columnSlides.map((slide: Slide) => (
                   <div
                     key={slide.id}
                     id={`slide-${slide.x}-${slide.y}`}

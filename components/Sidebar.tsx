@@ -1,61 +1,42 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Heart, MessageSquare, Rat, FileQuestion, Share } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
-import Image from 'next/image';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import { formatCount } from '@/lib/utils';
 
 interface SidebarProps {
-  avatarUrl:string;
+  avatarUrl: string;
   initialLikes: number;
   isLiked: boolean;
   slideId: string;
   commentsCount: number;
+  x: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   avatarUrl,
   initialLikes,
-  isLiked: initialIsLiked,
+  isLiked,
   slideId,
   commentsCount,
+  x,
 }) => {
-  const { setActiveModal } = useVideoGrid();
-  const [isLiked, setIsLiked] = useState(initialIsLiked);
-  const [likesCount, setLikesCount] = useState(initialLikes);
+  const { setActiveModal, toggleLike } = useVideoGrid();
   const { addToast } = useToast();
   const { isLoggedIn } = useUser();
-  const { t, lang, toggleLanguage } = useTranslation();
+  const { t } = useTranslation();
 
   const handleLike = async () => {
     if (!isLoggedIn) {
       addToast(t('likeAlert') || 'Log in to like.', 'error');
       return;
     }
-    const previousIsLiked = isLiked;
-    const previousLikesCount = likesCount;
-    const newIsLiked = !isLiked;
-    const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
-    setIsLiked(newIsLiked);
-    setLikesCount(newLikesCount);
-    try {
-      const response = await fetch('/api/like', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slideId }),
-      });
-      if (!response.ok) throw new Error('Failed to like post');
-      addToast(newIsLiked ? (t('likedToast') || 'Liked!') : (t('unlikedToast') || 'Unliked'), 'success');
-    } catch (error) {
-      console.error(error);
-      setIsLiked(previousIsLiked);
-      setLikesCount(previousLikesCount);
-      addToast(t('likeError') || 'Network error, please try again', 'error');
-    }
+    await toggleLike(slideId, x);
+    addToast(isLiked ? (t('unlikedToast') || 'Unliked') : (t('likedToast') || 'Liked!'), 'success');
   };
 
   const handleShare = () => {
@@ -104,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           className={`transition-colors duration-200 ${isLiked ? 'fill-red-500 stroke-red-500' : 'fill-transparent stroke-white'}`}
           style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}
         />
-        <span className="icon-label">{formatCount(likesCount)}</span>
+        <span className="icon-label">{formatCount(initialLikes)}</span>
       </button>
 
       <button data-testid="comments-button" onClick={() => setActiveModal('comments')} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">

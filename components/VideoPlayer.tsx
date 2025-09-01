@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { VideoSlide } from '@/lib/types';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import { useHls } from '@/lib/useHls';
 import { Volume2, VolumeX } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import Sidebar from './Sidebar';
+import VideoInfo from './VideoInfo';
 
 interface VideoPlayerProps {
   slide: VideoSlide;
@@ -21,38 +22,33 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
 
   const handleHlsFatalError = useCallback(() => {
     console.warn('HLS fatal error. Falling back to MP4 source.');
-    setVideoSrc(slide.data?.mp4Url || null);
+    setVideoSrc(slide.data?.mp4Url || undefined);
   }, [slide.data?.mp4Url]);
 
-  // Use HLS hook to manage video source
   useHls({
     videoRef,
     src: videoSrc,
     onFatalError: handleHlsFatalError,
   });
 
-  // Effect to control play/pause based on active state
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     if (isActive) {
       video.play().catch(err => {
-        // Autoplay is often blocked, this is expected.
         if (err.name !== 'NotAllowedError') {
           console.error("Video play failed:", err);
         }
       });
     } else {
       video.pause();
-      video.currentTime = 0; // Reset video on slide change
+      video.currentTime = 0;
     }
   }, [isActive]);
 
-  // Effect to control mute state from global context
   useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.muted = isMuted;
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
     }
   }, [isMuted]);
 
@@ -72,19 +68,34 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
         loop
         playsInline
         poster={slide.data?.poster}
-        // Muted is controlled by useEffect to sync with global state
       >
-        {/* The useHls hook will set the src, but we can provide a fallback for non-JS or non-HLS browsers */}
         <source src={slide.data?.mp4Url} type="video/mp4" />
       </video>
+
+      <VideoInfo
+        user={slide.username}
+        description={slide.data?.description || 'No description available.'}
+      />
+
       {isActive && (
-        <button
-          onClick={toggleMute}
-          className="absolute top-16 right-4 bg-black/50 p-2 rounded-full text-white z-10"
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
-          {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-        </button>
+        <>
+          <button
+            onClick={toggleMute}
+            className="absolute top-16 right-4 bg-black/50 p-2 rounded-full text-white z-10"
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+          </button>
+
+          <Sidebar
+            avatarUrl={slide.avatar}
+            initialLikes={slide.initialLikes}
+            isLiked={slide.isLiked}
+            slideId={slide.id}
+            commentsCount={slide.initialComments}
+            x={slide.x}
+          />
+        </>
       )}
     </div>
   );

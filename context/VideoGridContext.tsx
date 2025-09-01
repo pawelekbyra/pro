@@ -7,6 +7,8 @@ export type ModalType = 'account' | 'comments' | 'info' | 'topbar' | null;
 
 // --- State and Reducer ---
 
+type Columns = { [key: number]: Slide[] };
+
 interface State {
   columns: Columns;
   activeColumnIndex: number;
@@ -29,7 +31,8 @@ type Action =
   | { type: 'FINISH_LOADING_COLUMN'; payload: number }
   | { type: 'SET_ACTIVE_MODAL'; payload: ModalType }
   | { type: 'SET_ERROR'; payload: Error | null }
-  | { type: 'MERGE_SLIDE_DATA'; payload: Slide };
+  | { type: 'MERGE_SLIDE_DATA'; payload: Slide }
+  | { type: 'OPTIMISTIC_TOGGLE_LIKE'; payload: { slideId: string, x: number } };
 
 const initialState: State = {
   columns: {},
@@ -87,10 +90,28 @@ function reducer(state: State, action: Action): State {
       if (newColumnsState[x]) {
         const slideIndex = newColumnsState[x].findIndex(slide => slide.id === id);
         if (slideIndex !== -1) {
-          newColumnsState[x][slideIndex] = { ...newColumnsState[x][slideIndex], ...action.payload };
+          newColumnsState[x][slideIndex] = action.payload;
         }
       }
       return { ...state, columns: newColumnsState };
+    case 'OPTIMISTIC_TOGGLE_LIKE':
+      const { slideId, x: slideX } = action.payload;
+      const optimisticColumns = { ...state.columns };
+      if (optimisticColumns[slideX]) {
+        const slideIndex = optimisticColumns[slideX].findIndex(s => s.id === slideId);
+        if (slideIndex > -1) {
+          const slide = optimisticColumns[slideX][slideIndex];
+          const newIsLiked = !slide.isLiked;
+          const newLikesCount = newIsLiked ? slide.initialLikes + 1 : slide.initialLikes - 1;
+
+          optimisticColumns[slideX][slideIndex] = {
+            ...slide,
+            isLiked: newIsLiked,
+            initialLikes: newLikesCount,
+          };
+        }
+      }
+      return { ...state, columns: optimisticColumns };
     default:
       return state;
   }
@@ -108,6 +129,8 @@ interface VideoGridContextType {
   setPrefetchHint: (hint: { x: number; y: number } | null) => void;
   fetchFullSlide: (id: string) => Promise<void>;
   setActiveModal: (modal: ModalType) => void;
+  openAccountPanel: () => void;
+  toggleLike: (slideId: string, x: number) => Promise<void>;
   initialCoordinates?: { x: number; y: number };
   activeSlide?: Slide;
   columnKeys: number[];
@@ -232,6 +255,34 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     dispatch({ type: 'SET_ACTIVE_MODAL', payload: modal });
   }, []);
 
+  const openAccountPanel = useCallback(() => {
+    setActiveModal('account');
+  }, [setActiveModal]);
+
+  const toggleLike = useCallback(async (slideId: string, x: number) => {
+    // Optimistic update
+    dispatch({ type: 'OPTIMISTIC_TOGGLE_LIKE', payload: { slideId, x } });
+
+    try {
+      const response = await fetch('/api/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slideId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update like status');
+      }
+      // Optionally, you could merge the final state from the server here,
+      // but for a simple like toggle, the optimistic one is usually enough.
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      // Revert the optimistic update on failure
+      dispatch({ type: 'OPTIMISTIC_TOGGLE_LIKE', payload: { slideId, x } });
+      dispatch({ type: 'SET_ERROR', payload: error as Error });
+    }
+  }, []);
+
   const activeSlide = useMemo(() => {
     const column = state.columns[state.activeColumnIndex];
     if (!column) return undefined;
@@ -248,6 +299,8 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     setPrefetchHint,
     fetchFullSlide,
     setActiveModal,
+    openAccountPanel,
+    toggleLike,
     initialCoordinates,
     activeSlide,
     columnKeys,
