@@ -40,6 +40,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         disabled={isLoading}
+        autoComplete="username"
         className="bg-white border-2 border-black text-black placeholder:text-gray-500 font-mono"
       />
       <Input
@@ -47,6 +48,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         disabled={isLoading}
+        autoComplete="current-password"
         className="bg-white border-2 border-black text-black placeholder:text-gray-500 font-mono"
       />
       <Button type="submit" variant="default" disabled={isLoading} className="font-bold uppercase tracking-wider bg-pink-600 hover:bg-pink-700">

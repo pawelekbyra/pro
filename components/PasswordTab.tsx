@@ -48,15 +48,15 @@ const PasswordTab: React.FC = () => {
         <form id="passwordForm" onSubmit={handlePasswordSubmit}>
           <div className="form-group mb-4">
             <label className="form-label text-sm font-medium mb-2 block">{t('currentPasswordLabel')}</label>
-            <Input type="password" name="currentPassword" placeholder={t('currentPasswordPlaceholder')} required />
+            <Input type="password" name="currentPassword" placeholder={t('currentPasswordPlaceholder')} required autoComplete="current-password" />
           </div>
           <div className="form-group mb-4">
             <label className="form-label text-sm font-medium mb-2 block">{t('newPasswordLabel')}</label>
-            <Input type="password" name="newPassword" placeholder={t('newPasswordPlaceholder')} required />
+            <Input type="password" name="newPassword" placeholder={t('newPasswordPlaceholder')} required autoComplete="new-password" />
           </div>
           <div className="form-group mb-4">
             <label className="form-label text-sm font-medium mb-2 block">{t('confirmPasswordLabel')}</label>
-            <Input type="password" name="confirmPassword" placeholder={t('confirmPasswordPlaceholder')} required />
+            <Input type="password" name="confirmPassword" placeholder={t('confirmPasswordPlaceholder')} required autoComplete="new-password" />
             <p className="text-xs text-white/60 mt-2">
               {t('passwordMinLength')}
             </p>

@@ -4,7 +4,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 
 const translations: Record<string, Record<string, string>> = {
     pl: {
-        loggedOutText: "Nie masz psychy się zalogować",
+        loggedOutText: "Nie masz psychy?",
         loggedInWelcome: 'Witaj, {name}',
         loading: 'Ładowanie...',
         selectLang: 'Wybierz Język',
@@ -142,7 +142,7 @@ const translations: Record<string, Record<string, string>> = {
         adminPanel: 'Panel Admina'
     },
     en: {
-        loggedOutText: "You don't have the guts to log in",
+        loggedOutText: "Don't have the guts?",
         loggedInWelcome: 'Welcome, {name}',
         loading: 'Loading...',
         selectLang: 'Select Language',
