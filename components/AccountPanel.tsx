@@ -6,9 +6,7 @@ import ProfileTab from './ProfileTab';
 import PasswordTab from './PasswordTab';
 import DeleteTab from './DeleteTab';
 import { useTranslation } from '@/context/LanguageContext';
-import { X, LogOut } from 'lucide-react';
-import { useUser } from '@/context/UserContext';
-import { useToast } from '@/context/ToastContext';
+import { X } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface AccountPanelProps {
@@ -20,18 +18,10 @@ type Tab = 'profile' | 'password' | 'delete';
 const AccountPanel: React.FC<AccountPanelProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const { t } = useTranslation();
-  const { logout } = useUser();
-  const { addToast } = useToast();
 
   const handleTabClick = (tab: Tab) => {
       setActiveTab(tab);
   }
-
-  const handleLogout = async () => {
-    await logout();
-    addToast(t('logoutSuccess'), 'success');
-    onClose();
-  };
 
   return (
     <motion.div
@@ -69,16 +59,6 @@ const AccountPanel: React.FC<AccountPanelProps> = ({ onClose }) => {
             {activeTab === 'profile' && <ProfileTab onClose={onClose} />}
             {activeTab === 'password' && <PasswordTab />}
             {activeTab === 'delete' && <DeleteTab />}
-        </div>
-
-        <div className="flex-shrink-0 p-4 bg-black/20 border-t border-white/10">
-            <Button
-                onClick={handleLogout}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2"
-            >
-                <LogOut size={18} />
-                <span>{t('logout')}</span>
-            </Button>
         </div>
       </motion.div>
     </motion.div>

@@ -3,9 +3,11 @@
 import { useEffect, useRef } from 'react';
 import DesktopLayout from '@/components/DesktopLayout';
 import { useVideoGrid } from '@/context/VideoGridContext';
-import { useGesture } from '@/lib/useGesture';
 import SlideRenderer from '@/components/SlideRenderer';
 import { Slide } from '@/lib/types';
+import { motion, PanInfo } from 'framer-motion';
+
+const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
 export default function Home() {
   const {
@@ -20,9 +22,6 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isProgrammaticScroll = useRef(false);
-
-  // Use the gesture hook for horizontal navigation
-  const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onMouseLeave } = useGesture(moveHorizontal, isAnyModalOpen);
 
   // Set active slide on vertical scroll using IntersectionObserver
   useEffect(() => {
@@ -81,15 +80,6 @@ export default function Home() {
 
       const { scrollTop, scrollHeight, clientHeight } = container;
       const slideHeight = clientHeight;
-      const numSlides = container.children.length;
-
-      // This logic creates the "infinite scroll" illusion. When the user scrolls
-      // to a cloned slide at either the beginning or the end, we programmatically
-      // jump to the corresponding real slide.
-      // A timeout is used to prevent a race condition where the user's scroll input
-      // is registered before the programmatic scroll is complete. This is a pragmatic
-      // solution to avoid complex state management for scroll events, though it may
-      // not be foolproof on very slow devices.
 
       if (scrollTop < 1) { // Scrolled to the top (clone of the last slide)
         isProgrammaticScroll.current = true;
@@ -115,7 +105,6 @@ export default function Home() {
   }, [columns, activeColumnIndex]);
 
   // This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
-  // The use of isProgrammaticScroll.current is crucial to prevent conflicts with the user's manual scrolling.
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -142,6 +131,18 @@ export default function Home() {
     }
   }, [activeColumnIndex, activeSlideY]);
 
+  const onDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, { offset, velocity }: PanInfo) => {
+    if (isAnyModalOpen) return;
+
+    const swipe = Math.abs(offset.x) * velocity.x;
+
+    if (swipe < -SWIPE_CONFIDENCE_THRESHOLD) {
+      moveHorizontal('right');
+    } else if (swipe > SWIPE_CONFIDENCE_THRESHOLD) {
+      moveHorizontal('left');
+    }
+  };
+
   if (isLoading) {
     return (
       <main className="h-full w-full flex items-center justify-center">
@@ -158,80 +159,83 @@ export default function Home() {
     );
   }
 
-  const activeColumn = columns[activeColumnIndex] || [];
-  const columnWidth = columnKeys.length > 0 ? 100 / columnKeys.length : 100;
   const activeColumnIndexInKeys = columnKeys.indexOf(activeColumnIndex);
 
   const appContent = (
-    <main
+    <motion.div
       ref={containerRef}
-      className="relative flex h-full w-full overflow-hidden"
+      className="relative h-full w-full overflow-hidden flex"
       style={{ height: 'var(--app-height)' }}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseLeave}
     >
-      {columnKeys.map((colIndex, keyIndex) => (
-        <div
-          key={colIndex}
-          ref={activeColumnIndex === colIndex ? scrollContainerRef : null}
-          className="h-full flex-shrink-0 snap-y snap-mandatory overflow-y-scroll"
-          style={{
-            width: `100vw`,
-            transform: `translateX(-${activeColumnIndexInKeys * 100}%)`,
-            transition: 'transform 0.4s ease',
-          }}
-        >
-          {(() => {
-            const columnSlides = columns[colIndex] || [];
-            if (columnSlides.length === 0) return null;
+      <motion.div
+        className="flex"
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.1}
+        onDragEnd={onDragEnd}
+        animate={{ x: `-${activeColumnIndexInKeys * 100}%` }}
+        transition={{
+            type: 'spring',
+            stiffness: 300,
+            damping: 30,
+            mass: 0.5,
+        }}
+      >
+        {columnKeys.map((colIndex) => (
+          <div
+            key={colIndex}
+            ref={activeColumnIndex === colIndex ? scrollContainerRef : null}
+            className="h-full w-screen flex-shrink-0 snap-y snap-mandatory overflow-y-scroll"
+          >
+            {(() => {
+              const columnSlides = columns[colIndex] || [];
+              if (columnSlides.length === 0) return null;
 
-            const firstSlide = columnSlides[0];
-            const lastSlide = columnSlides[columnSlides.length - 1];
+              const firstSlide = columnSlides[0];
+              const lastSlide = columnSlides[columnSlides.length - 1];
 
-            return (
-              <>
-                {/* Clone of the last slide at the beginning */}
-                <div
-                  key={`${lastSlide.id}-clone-start`}
-                  data-is-clone="true"
-                  className="w-full snap-start"
-                  style={{ height: 'var(--app-height)' }}
-                >
-                  <SlideRenderer slide={lastSlide} isActive={false} />
-                </div>
-
-                {/* Real slides */}
-                {columnSlides.map((slide: Slide) => (
+              return (
+                <>
+                  {/* Clone of the last slide at the beginning */}
                   <div
-                    key={slide.id}
-                    id={`slide-${slide.x}-${slide.y}`}
-                    data-x={slide.x}
-                    data-y={slide.y}
+                    key={`${lastSlide.id}-clone-start`}
+                    data-is-clone="true"
                     className="w-full snap-start"
                     style={{ height: 'var(--app-height)' }}
                   >
-                    <SlideRenderer slide={slide} isActive={activeSlideId === slide.id} />
+                    <SlideRenderer slide={lastSlide} isActive={false} />
                   </div>
-                ))}
 
-                {/* Clone of the first slide at the end */}
-                <div
-                  key={`${firstSlide.id}-clone-end`}
-                  data-is-clone="true"
-                  className="w-full snap-start"
-                  style={{ height: 'var(--app-height)' }}
-                >
-                  <SlideRenderer slide={firstSlide} isActive={false} />
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      ))}
-    </main>
+                  {/* Real slides */}
+                  {columnSlides.map((slide: Slide) => (
+                    <div
+                      key={slide.id}
+                      id={`slide-${slide.x}-${slide.y}`}
+                      data-x={slide.x}
+                      data-y={slide.y}
+                      className="w-full snap-start"
+                      style={{ height: 'var(--app-height)' }}
+                    >
+                      <SlideRenderer slide={slide} isActive={activeSlideId === slide.id} />
+                    </div>
+                  ))}
+
+                  {/* Clone of the first slide at the end */}
+                  <div
+                    key={`${firstSlide.id}-clone-end`}
+                    data-is-clone="true"
+                    className="w-full snap-start"
+                    style={{ height: 'var(--app-height)' }}
+                  >
+                    <SlideRenderer slide={firstSlide} isActive={false} />
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        ))}
+      </motion.div>
+    </motion.div>
   );
 
   return <DesktopLayout>{appContent}</DesktopLayout>;
