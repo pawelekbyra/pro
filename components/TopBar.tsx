@@ -144,10 +144,10 @@ const TopBar = () => {
           <motion.div
             className="absolute left-0 w-full z-30 bg-black/60 backdrop-blur-sm"
             style={{ top: 'var(--topbar-height)' }}
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             <LoginForm onLoginSuccess={() => setIsLoginPanelOpen(false)} />
           </motion.div>

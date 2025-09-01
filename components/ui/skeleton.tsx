@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 
 function Skeleton({
   className,
@@ -6,9 +7,11 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-white/10", className)}
+      className={cn("rounded-md bg-white/10 flex items-center justify-center", className)}
       {...props}
-    />
+    >
+      <Loader2 className="h-8 w-8 text-white/20 animate-spin" />
+    </div>
   )
 }
 

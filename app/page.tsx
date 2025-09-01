@@ -95,18 +95,18 @@ export default function Home() {
         isProgrammaticScroll.current = true;
         container.style.scrollBehavior = 'auto';
         container.scrollTop = scrollHeight - 2 * slideHeight; // Jump to the real last slide
-        setTimeout(() => {
-            isProgrammaticScroll.current = false;
-            container.style.scrollBehavior = 'smooth';
-        }, 250);
+        requestAnimationFrame(() => {
+          isProgrammaticScroll.current = false;
+          container.style.scrollBehavior = 'smooth';
+        });
       } else if (scrollTop + clientHeight >= scrollHeight - 1) { // Scrolled to the bottom (clone of the first slide)
         isProgrammaticScroll.current = true;
         container.style.scrollBehavior = 'auto';
         container.scrollTop = slideHeight; // Jump to the real first slide
-        setTimeout(() => {
-            isProgrammaticScroll.current = false;
-            container.style.scrollBehavior = 'smooth';
-        }, 250);
+        requestAnimationFrame(() => {
+          isProgrammaticScroll.current = false;
+          container.style.scrollBehavior = 'smooth';
+        });
       }
     };
 
@@ -117,20 +117,28 @@ export default function Home() {
   // This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
   // The use of isProgrammaticScroll.current is crucial to prevent conflicts with the user's manual scrolling.
   useEffect(() => {
-    // Scroll to the active slide when it changes
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
     const slideElement = document.getElementById(`slide-${activeColumnIndex}-${activeSlideY}`);
-    if (slideElement && scrollContainerRef.current) {
+    if (slideElement) {
       isProgrammaticScroll.current = true;
-      scrollContainerRef.current.scrollTo({
+
+      const handleScrollEnd = () => {
+        isProgrammaticScroll.current = false;
+        container.removeEventListener('scrollend', handleScrollEnd);
+      };
+
+      container.addEventListener('scrollend', handleScrollEnd);
+
+      container.scrollTo({
         top: slideElement.offsetTop,
         behavior: 'smooth',
       });
-      // A timeout is used here to reset the isProgrammaticScroll flag after the smooth scroll
-      // animation is likely to have finished. This prevents the IntersectionObserver from
-      // firing during the programmatic scroll.
-      setTimeout(() => {
-        isProgrammaticScroll.current = false;
-      }, 250);
+
+      return () => {
+        container.removeEventListener('scrollend', handleScrollEnd);
+      };
     }
   }, [activeColumnIndex, activeSlideY]);
 
