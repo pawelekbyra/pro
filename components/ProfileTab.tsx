@@ -111,6 +111,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ onClose }) => {
   const handleLogout = async () => {
     await logout();
     addToast(t('logoutSuccess'), 'success');
+    onClose();
   };
 
   if (!profile) {
@@ -215,8 +216,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ onClose }) => {
         <div className="flex justify-center mt-4">
             <Button
               onClick={handleLogout}
-              variant="outline"
-              className="w-full text-white/80 border-white/20 hover:bg-white/10"
+              className="w-full bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
             >
               {t('logoutLink')}
             </Button>
