@@ -6,9 +6,7 @@ import { Providers } from "@/components/Providers";
 import AppLayout from "@/components/AppLayout";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import Script from "next/script";
-import TopBar from "@/components/TopBar";
-
-const inter = Inter({ subsets: ["latin"] });
+import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Ting Tong",
@@ -29,7 +27,6 @@ export default function RootLayout({
       </head>
       <body className={cn("antialiased", inter.className)}>
         <Providers>
-          <TopBar />
           <AppLayout>{children}</AppLayout>
           <PWAInstallPrompt />
         </Providers>

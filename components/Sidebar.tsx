@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Heart, MessageSquare, Rat, FileQuestion, Share } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
@@ -74,10 +75,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      <button
+      <motion.button
         onClick={handleLike}
         className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold"
         data-slide-id={slideId}
+        whileTap={{ scale: 0.9 }}
       >
         <Heart
           size={32}
@@ -86,12 +88,17 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}
         />
         <span className="icon-label">{formatCount(initialLikes)}</span>
-      </button>
+      </motion.button>
 
-      <button data-testid="comments-button" onClick={() => setActiveModal('comments')} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+      <motion.button
+        data-testid="comments-button"
+        onClick={() => setActiveModal('comments')}
+        className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold"
+        whileTap={{ scale: 0.9 }}
+      >
         <MessageSquare size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
         <span className="icon-label">{formatCount(commentsCount)}</span>
-      </button>
+      </motion.button>
 
       <button onClick={handleShare} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
         <Share size={32} strokeWidth={1.4} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>

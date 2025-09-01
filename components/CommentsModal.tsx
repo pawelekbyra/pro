@@ -395,7 +395,11 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId,
                     className="flex-1 px-4 py-2 bg-white/10 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm"
                     disabled={isSubmitting}
                   />
-                  <button type="submit" className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-semibold disabled:opacity-50 flex items-center justify-center w-[80px]" disabled={!newComment.trim() || isSubmitting}>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-semibold disabled:opacity-50 flex items-center justify-center min-w-[70px] transition-colors"
+                    disabled={!newComment.trim() || isSubmitting}
+                  >
                     {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t('sendButton')}
                   </button>
                 </form>
