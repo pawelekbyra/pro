@@ -7,12 +7,13 @@ import HtmlContent from './HtmlContent';
 
 interface SlideRendererProps {
   slide: Slide;
+  isActive: boolean;
 }
 
-const SlideRenderer: React.FC<SlideRendererProps> = ({ slide }) => {
+const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
   return (
     <div className="h-full w-full">
-      <HtmlContent data={slide.data} username={slide.username} onNavigate={() => {}} />
+      <HtmlContent data={slide.data} username={slide.username} onNavigate={() => {}} isActive={isActive} />
     </div>
   );
 };
