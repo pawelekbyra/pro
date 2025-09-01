@@ -35,8 +35,23 @@ const NotificationItem: React.FC<{ notification: Notification; onToggle: (id: st
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleToggle = () => {
-    setIsExpanded(prev => !prev);
-    onToggle(notification.id);
+    const newIsExpanded = !isExpanded;
+    setIsExpanded(newIsExpanded);
+
+    // If expanding and it's unread, update state and call API
+    if (newIsExpanded && notification.unread) {
+      onToggle(notification.id); // Update parent state (removes dot)
+
+      fetch('/api/notifications/mark-as-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: notification.id }),
+      })
+      .catch(error => {
+        console.error('Error marking notification as read:', error);
+        // Here you could potentially revert the UI change
+      });
+    }
   };
 
   const getFullText = (key: string, user: string) => {
