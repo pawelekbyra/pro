@@ -3,21 +3,27 @@ import Hls from 'hls.js';
 
 interface UseHlsParams {
   videoRef: React.RefObject<HTMLVideoElement | null>;
-  src: string | null;
+  src: string | null | undefined;
   onFatalError?: () => void; // Callback to handle fatal errors (e.g., fallback to MP4)
 }
 
 const HLS_CONFIG = {
+  // --- Quality and Buffering ---
   abrEnabled: true,
   capLevelToPlayerSize: true,
-  startLevel: -1,
-  abrEwmaFastLive: 3.0, // Corrected from boolean to number
-  maxAutoLevelCapping: undefined, // Let HLS decide by default
-  // Add retry configuration for robustness
-  manifestLoadErrorMaxRetry: 5,
-  manifestLoadErrorRetryDelay: 1000,
-  levelLoadErrorMaxRetry: 5,
-  levelLoadErrorRetryDelay: 1000,
+  maxBufferLength: 60, // Increased buffer length to 60 seconds
+  maxMaxBufferLength: 120, // Increased max buffer length to 120 seconds
+
+  // --- Robustness and Retry Logic ---
+  manifestLoadErrorMaxRetry: 10,
+  manifestLoadErrorRetryDelay: 2000, // Increased delay to 2 seconds
+  levelLoadErrorMaxRetry: 10,
+  levelLoadErrorRetryDelay: 2000, // Increased delay to 2 seconds
+  fragLoadErrorMaxRetry: 15, // Added retry for fragment loading
+  fragLoadErrorRetryDelay: 2000,
+
+  // --- Diagnostics ---
+  debug: false, // Set to true for verbose logging during development
 };
 
 export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
@@ -39,14 +45,13 @@ export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
       hlsRef.current = hls;
 
       hls.on(Hls.Events.ERROR, (event, data) => {
-        // Log all errors for better diagnostics, not just fatal ones.
-        console.log('HLS.js error:', {
-          type: data.type,
-          details: data.details,
-          fatal: data.fatal,
-        });
-
         if (data.fatal) {
+          console.error('HLS.js fatal error:', {
+            type: data.type,
+            details: data.details,
+            error: data.error,
+            reason: data.reason,
+          });
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.log('Attempting to recover from HLS network error...');
@@ -62,6 +67,12 @@ export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
               hls.destroy();
               break;
           }
+        } else {
+          // Non-fatal errors can be logged for monitoring without taking drastic action.
+          console.warn('HLS.js non-fatal error:', {
+            type: data.type,
+            details: data.details,
+          });
         }
       });
 

@@ -193,7 +193,7 @@ export async function createSlide(slideData: Omit<Slide, 'id' | 'createdAt' | 'i
     const id = `slide_${crypto.randomUUID()}`;
     const { userId, username, x, y, type, data } = slideData;
     const content = JSON.stringify(data);
-    const title = 'title' in data ? (data as any).title : null;
+    const title = data && 'title' in data ? (data as any).title : null;
 
     const result = await sql`
         INSERT INTO slides ("id", "userId", "username", "x", "y", "slideType", "title", "content")
@@ -217,7 +217,7 @@ export async function updateSlide(slideId: string, updates: Partial<Omit<Slide, 
     const updatedSlide = { ...slide, ...updates };
     const { data } = updatedSlide;
     const content = JSON.stringify(data);
-    const title = 'title' in data ? (data as any).title : null;
+    const title = data && 'title' in data ? (data as any).title : null;
 
     const result = await sql`
         UPDATE slides SET title = ${title}, content = ${content} WHERE id = ${slideId} RETURNING *;

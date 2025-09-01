@@ -9,9 +9,9 @@ type ActionResponse = { success: boolean; error?: string };
 interface SlideManagementClientProps {
   slides: Slide[];
   users: User[];
-  createSlideAction: (formData: FormData) => Promise<ActionResponse>;
-  updateSlideAction: (formData: FormData) => Promise<ActionResponse>;
-  deleteSlideAction: (formData: FormData) => Promise<ActionResponse>;
+  createSlideAction?: (formData: FormData) => Promise<ActionResponse>;
+  updateSlideAction?: (formData: FormData) => Promise<ActionResponse>;
+  deleteSlideAction?: (formData: FormData) => Promise<ActionResponse>;
 }
 
 export default function SlideManagementClient({ slides, users, createSlideAction, updateSlideAction, deleteSlideAction }: SlideManagementClientProps) {
@@ -20,8 +20,8 @@ export default function SlideManagementClient({ slides, users, createSlideAction
     if (confirm('Are you sure you want to delete this slide?')) {
       const formData = new FormData();
       formData.append('slideId', slideId);
-      const result = await deleteSlideAction(formData);
-      if (!result.success) {
+      const result = await deleteSlideAction?.(formData);
+      if (result && !result.success) {
         alert(`Error deleting slide: ${result.error}`);
       }
       // The page will be revalidated by the server action on success
