@@ -16,7 +16,8 @@ export default function Home() {
     moveHorizontal,
     isAnyModalOpen,
     columnKeys,
-    isLoading
+    isLoading,
+    error,
   } = useVideoGrid();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,6 +76,14 @@ export default function Home() {
     return (
       <main className="h-full w-full flex items-center justify-center">
         <p>Loading...</p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="h-full w-full flex items-center justify-center">
+        <p className="text-red-500">Error: {error.message}</p>
       </main>
     );
   }
