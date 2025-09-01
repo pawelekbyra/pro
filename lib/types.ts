@@ -42,8 +42,20 @@ export interface VideoSlide extends BaseSlide {
     data?: VideoSlideData;
 }
 
+// Specific data for an Image slide
+export interface ImageSlideData {
+  imageUrl: string;
+  altText: string;
+}
+
+// Image slide type
+export interface ImageSlide extends BaseSlide {
+  type: 'image';
+  data?: ImageSlideData;
+}
+
 // A union type for any possible slide
-export type Slide = HtmlSlide | VideoSlide;
+export type Slide = HtmlSlide | VideoSlide | ImageSlide;
 
 // The grid will be a dictionary of slides
 export type Grid = {

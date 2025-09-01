@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/mock-db'; // Using the mock DB directly
+import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';

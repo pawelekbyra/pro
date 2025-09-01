@@ -6,11 +6,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // const session = await verifySession();
+  const session = await verifySession();
 
-  // if (!session?.user || session.user.role !== 'admin') {
-  //   redirect('/admin/login');
-  // }
+  if (!session?.user || session.user.role !== 'admin') {
+    redirect('/admin/login');
+  }
 
   return (
     <div className="admin-layout bg-gray-900 text-white min-h-screen">
