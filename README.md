@@ -1,4 +1,4 @@
-## Dziennik Pokładowy Absurdu
+# Dziennik Pokładowy Absurdu
 
 **Zasada #1: Każda nowa funkcja musi być co najmniej o 10% bardziej absurdalna od poprzedniej. Mierzymy to w jednostkach "WTF na sekundę". Celem jest osiągnięcie kwantowej superpozycji chaosu i użyteczności.**
 
@@ -7,46 +7,54 @@
 ### Wpisy:
 
 *   **Wpis #1 (Data Gwiezdna: ...jakaś):** Pacjent zero (ta apka) wykazywał objawy śmiertelnej nudy. Terapia szokowa: wstrzyknięto rozszerzoną siatkę slajdów, tworząc labirynt godny cyfrowego Minotaura. Jako wisienkę na torcie dodano mini-grę "Flappy Div", udowadniając, że nawet `<div>` potrafi marzyć o lataniu. Poziom absurdu: **podniesiony.**
+*   **Wpis #2 (Data Gwiezdna: 2025-09-01):** Agent Jules przejął stery. Zauważono, że poprzedni kapitan zostawił na pulpicie pliki `prototyp.txt` i `tingtong.txt` - starożytne mapy do nikąd. Zamiast je usuwać, oprawiono je w ramkę z ostrzeżeniem, aby przyszli odkrywcy nie podążali ścieżką, która prowadzi donikąd. Jednocześnie zoptymalizowano silniki bazy danych i naprawiono kilka krytycznych błędów, udowadniając, że nawet w absurdzie musi być porządek. Poziom absurdu: **ustabilizowany z tendencją wzrostową.**
 
 ---
 
-# pro
-ting tong professional
+# ting tong professional
 
-## Wdrożenie na Vercel
+## Wdrożenie
 
-Ten projekt Next.js jest skonfigurowany do wdrożenia na platformie [Vercel](https://vercel.com/).
+Ten projekt jest oparty na Next.js i przygotowany do wdrożenia na platformach wspierających aplikacje Node.js, takich jak Vercel.
+
+### ⚠️ Uwaga na pliki-artefakty
+
+W repozytorium znajdują się pliki `prototyp.txt` oraz `tingtong.txt`. Są to **historyczne prototypy** i **nie są częścią działającej aplikacji**. Prosimy nie traktować ich jako punktu odniesienia dla obecnej architektury ani nie wprowadzać w nich zmian z myślą o wpłynięciu na działanie projektu.
 
 ### Zmienne środowiskowe
 
-Przed wdrożeniem, musisz skonfigurować następujące zmienne środowiskowe w ustawieniach swojego projektu na Vercel:
+Przed uruchomieniem lub wdrożeniem, musisz skonfigurować następujące zmienne środowiskowe:
 
-#### Klucz JWT
+#### Baza danych (Neon PostgreSQL)
 
--   `JWT_SECRET`: Tajny klucz do podpisywania tokenów autoryzacyjnych. Możesz wygenerować bezpieczny klucz za pomocą poniższej komendy:
+Aplikacja wykorzystuje **Neon** jako dostawcę bazy danych PostgreSQL.
+
+-   `DATABASE_URL`: Pełny connection string do Twojej bazy danych na Neon. Znajdziesz go w panelu swojego projektu na Neon.
+
+#### Klucz JWT (Uwierzytelnianie)
+
+-   `JWT_SECRET`: Tajny klucz do podpisywania tokenów autoryzacyjnych (JWT). Możesz wygenerować bezpieczny klucz za pomocą poniższej komendy w terminalu:
     ```bash
     openssl rand -hex 32
     ```
 
-#### Baza danych Vercel KV
+### Uruchomienie lokalne
 
-Aplikacja używa **Vercel KV** jako bazy danych do przechowywania wszystkich danych, w tym użytkowników, filmów i interakcji. Aby połączyć się z bazą danych, musisz utworzyć nową bazę Vercel KV w panelu Vercel i dodać następujące zmienne środowiskowe do swojego projektu:
+1.  Sklonuj repozytorium.
+2.  Utwórz plik `.env.local` w głównym katalogu projektu.
+3.  Dodaj do niego zmienne `DATABASE_URL` i `JWT_SECRET`.
+4.  Zainstaluj zależności: `npm install` lub `yarn install`.
+5.  Uruchom aplikację: `npm run dev` lub `yarn dev`.
 
--   `KV_REST_API_URL`: Adres URL Twojej bazy danych KV.
--   `KV_REST_API_TOKEN`: Token dostępowy do Twojej bazy danych KV.
+### Skrypty
 
-Po ustawieniu powyższych zmiennych, aplikacja będzie w pełni funkcjonalna i gotowa do wdrożenia.
-
-### Zasilanie bazy danych (Opcjonalnie)
-
-Jeśli chcesz wypełnić swoją bazę danych początkowymi danymi, możesz użyć skryptu `db:seed`. Skrypt odczytuje dane z lokalnego pliku `data.json` i zapisuje je w Twojej bazie Vercel KV.
-
-1.  Upewnij się, że masz skonfigurowane zmienne środowiskowe w pliku `.env.local`.
-2.  Uruchom komendę:
-    ```bash
-    npm run db:seed
-    ```
+-   `npm run dev`: Uruchamia serwer deweloperski.
+-   `npm run build`: Buduje aplikację do wersji produkcyjnej.
+-   `npm run start`: Uruchamia zbudowaną aplikację.
+-   `npm run lint`: Uruchamia lintera ESLint.
+-   `npm run create-admin`: Uruchamia skrypt do tworzenia/aktualizacji użytkownika 'admin' w bazie danych.
+-   `npm run init-db`: Inicjalizuje tabele w bazie danych (uwaga: usuwa istniejące tabele).
 
 ## Panel Administratora
 
-Aplikacja zawiera panel administratora, który w przyszłości zostanie rozbudowany o funkcje zarządzania treścią, w tym wizualne zarządzanie siatką slajdów.
+Aplikacja zawiera podstawowy panel administratora dostępny pod `/admin`. Dostęp wymaga zalogowania się na konto z rolą `admin`.

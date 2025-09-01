@@ -59,8 +59,8 @@ const PWAInstallPrompt = () => {
       setShowInstructions(false);
     };
 
-    // Proszę dodać ten fragment do return()
-    if (isDesktop && !isStandalone) {
+    // Show desktop modal only in production
+    if (process.env.NODE_ENV === 'production' && isDesktop && !isStandalone) {
         return (
             <motion.div
                 className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 text-center"

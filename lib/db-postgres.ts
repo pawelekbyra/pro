@@ -61,6 +61,7 @@ export async function createTables() {
         id VARCHAR(255) PRIMARY KEY,
         "slideId" VARCHAR(255) REFERENCES slides(id),
         "userId" UUID REFERENCES users(id),
+        "parentId" VARCHAR(255) REFERENCES comments(id) DEFAULT NULL,
         text TEXT NOT NULL,
         "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
@@ -129,17 +130,31 @@ export async function createUser(userData: Omit<User, 'id' | 'sessionVersion' | 
 }
 export async function updateUser(userId: string, updates: Partial<User>): Promise<User | null> {
     const sql = getDb();
-    const user = await findUserById(userId);
-    if (!user) return null;
-    const updatedUser = { ...user, ...updates };
-    const { id, username, displayName, email, password, avatar, role, sessionVersion } = updatedUser;
-    const result = await sql`
+
+    const keys = Object.keys(updates).filter(key => (updates as any)[key] !== undefined);
+    if (keys.length === 0) {
+        // No updates provided, just return the user
+        return findUserById(userId);
+    }
+
+    // Dynamically build the SET clause
+    const setClauses = keys.map((key, index) => `"${key}" = $${index + 1}`).join(', ');
+    const values = keys.map(key => (updates as any)[key]);
+
+    // Add the userId to the values array for the WHERE clause
+    values.push(userId);
+    const whereClauseIndex = values.length;
+
+    const query = `
         UPDATE users
-        SET username = ${username}, "displayName" = ${displayName}, email = ${email}, password = ${password}, avatar = ${avatar}, "role" = ${role}, "sessionVersion" = ${sessionVersion}
-        WHERE id = ${id}
+        SET ${setClauses}
+        WHERE id = $${whereClauseIndex}
         RETURNING *;
     `;
-    return result[0] as User || null;
+
+    const result = await sql.query(query, values);
+
+    return (result.rows[0] as User) || null;
 }
 export async function deleteUser(userId: string): Promise<boolean> {
     const sql = getDb();
@@ -267,6 +282,8 @@ export async function toggleCommentLike(commentId: string, userId: string): Prom
 // --- Comment Functions ---
 export async function getComments(slideId: string): Promise<Comment[]> {
     const sql = getDb();
+    // This query needs to be recursive to fetch replies.
+    // For now, it fetches all comments and they can be nested on the client.
     const result = await sql`
         SELECT c.*, u.username, u."displayName", u.avatar FROM comments c
         JOIN users u ON c."userId" = u.id
@@ -274,10 +291,11 @@ export async function getComments(slideId: string): Promise<Comment[]> {
     `;
     return (result as unknown as any[]).map(c => ({ ...c, user: { displayName: c.displayName, avatar: c.avatar } }));
 }
-export async function addComment(slideId: string, userId: string, text: string): Promise<Comment> {
+
+export async function addComment(slideId: string, userId: string, text: string, parentId: string | null = null): Promise<Comment> {
     const sql = getDb();
     const result = await sql`
-        INSERT INTO comments ("slideId", "userId", text) VALUES (${slideId}, ${userId}, ${text}) RETURNING *;
+        INSERT INTO comments ("slideId", "userId", text, "parentId") VALUES (${slideId}, ${userId}, ${text}, ${parentId}) RETURNING *;
     `;
     const newComment = result[0] as Comment;
     const userResult = await sql`SELECT "displayName", "username", "avatar" FROM users WHERE id = ${userId}`;
