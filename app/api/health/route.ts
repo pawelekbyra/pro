@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'; // force dynamic execution
 export async function GET() {
   try {
     // Perform a simple query to keep the database connection warm
-    await db.query('SELECT 1');
+    await db.pingDb();
     return NextResponse.json({ status: 'ok' });
   } catch (error) {
     console.error('Health check failed:', error);

@@ -179,4 +179,9 @@ export const db = {
     // This is a no-op in the mock environment, as we don't persist notification state.
     return { success: true };
   },
+
+  async pingDb() {
+    // No-op for mock db
+    return Promise.resolve();
+  },
 };
