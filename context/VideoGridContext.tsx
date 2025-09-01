@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useEffect, useCallback, useMemo, ReactNode, useContext, useReducer } from 'react';
+import React, { createContext, useEffect, useCallback, useMemo, useRef, ReactNode, useContext, useReducer } from 'react';
 import { Grid, Slide } from '@/lib/types';
 import { useToast } from './ToastContext';
 export type ModalType = 'account' | 'comments' | 'info' | 'topbar' | null;
