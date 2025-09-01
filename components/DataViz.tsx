@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import VideoPlayer from './VideoPlayer';
+import { Slide } from '@/lib/types';
 
 const chartData = [
   { name: 'Jan', value: 400 },
@@ -22,6 +23,29 @@ interface DataVizProps {
 const DataViz: React.FC<DataVizProps> = ({ videoUrl, posterUrl }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Create a mock slide object to satisfy the VideoPlayer's prop requirements.
+  // This component is a special case and doesn't have a full slide object from the grid.
+  const mockSlide: Slide = {
+    id: 'dataviz-slide',
+    x: -1,
+    y: -1,
+    type: 'video',
+    userId: 'system',
+    username: 'system',
+    avatar: '',
+    access: 'public',
+    createdAt: Date.now(),
+    initialLikes: 0,
+    isLiked: false,
+    initialComments: 0,
+    data: {
+      description: 'Data visualization background video',
+      mp4Url: videoUrl,
+      hlsUrl: null,
+      poster: posterUrl,
+    }
+  };
+
   return (
     <div className="relative h-full w-full bg-black">
       <VideoPlayer
@@ -30,6 +54,7 @@ const DataViz: React.FC<DataVizProps> = ({ videoUrl, posterUrl }) => {
         isActive={true}
         isSecretActive={false}
         videoId="dataviz-video"
+        slide={mockSlide}
         videoRef={videoRef}
         onTimeUpdate={() => {}}
         startTime={0}
