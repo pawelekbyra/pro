@@ -10,6 +10,7 @@ interface VideoGridContextType {
   activeColumnIndex: number;
   activeSlideY: number;
   activeSlideId: string | null;
+  soundActiveSlideId: string | null;
   isLoading: boolean;
   isAccountPanelOpen: boolean;
   isCommentsModalOpen: boolean;
@@ -19,6 +20,7 @@ interface VideoGridContextType {
   fetchAndProcessGrid: () => Promise<void>;
   moveHorizontal: (direction: 'left' | 'right') => void;
   setActiveSlide: (x: number, y: number, id: string) => void;
+  setSoundActiveSlide: (id: string | null) => void;
   setPrefetchHint: (hint: { x: number; y: number } | null) => void;
   openAccountPanel: () => void;
   closeAccountPanel: () => void;
@@ -41,6 +43,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const [activeColumnIndex, setActiveColumnIndex] = useState(initialCoordinates.x);
   const [activeSlideY, setActiveSlideY] = useState(initialCoordinates.y);
   const [activeSlideId, setActiveSlideId] = useState<string | null>(null);
+  const [soundActiveSlideId, setSoundActiveSlide] = useState<string | null>(null);
   const [prefetchHint, setPrefetchHint] = useState<{ x: number, y: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,6 +99,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     setActiveColumnIndex(x);
     setActiveSlideY(y);
     setActiveSlideId(id);
+    setSoundActiveSlide(id); // Also set the sound active slide
     setPrefetchHint(null); // Reset prefetch hint when slide changes
   }, []);
 
@@ -139,6 +143,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     activeColumnIndex,
     activeSlideY,
     activeSlideId,
+    soundActiveSlideId,
     isLoading,
     isAccountPanelOpen,
     isCommentsModalOpen,
@@ -148,6 +153,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     fetchAndProcessGrid,
     moveHorizontal,
     setActiveSlide,
+    setSoundActiveSlide,
     setPrefetchHint,
     openAccountPanel,
     closeAccountPanel,

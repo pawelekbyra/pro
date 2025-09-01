@@ -25,7 +25,7 @@ interface VideoPlayerProps {
 const DOUBLE_CLICK_DELAY_MS = 200;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, slide, videoRef, onTimeUpdate, startTime, onPlaybackFailure, isPlaying }) => {
-  const { prefetchHint, activeSlideId, isAnyModalOpen } = useVideoGrid();
+  const { prefetchHint, activeSlideId, soundActiveSlideId, isAnyModalOpen } = useVideoGrid();
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -60,27 +60,32 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     const isThisVideoActive = videoId === activeSlideId;
 
     // Smart Playback Logic
+    const isSoundActive = soundActiveSlideId === videoId;
+
     if (isActive && !isAnyModalOpen && isThisVideoActive) {
-      // This is the active slide, play it with sound
-      video.muted = false;
+      // This is the active slide, so it should be playing.
+      video.muted = !isSoundActive; // Mute unless it's the designated sound-active slide
       if (startTime > 0 && Math.abs(video.currentTime - startTime) > 0.5) {
         video.currentTime = startTime;
       }
-      video.play().catch(error => {
-        console.error(`Autoplay was prevented for video ${videoId}:`, error);
-        // Mute and try to play again if unmuted playback fails
-        if (error.name === 'NotAllowedError') {
-          video.muted = true;
-          video.play().catch(innerError => {
-             console.error(`Muted autoplay also failed for video ${videoId}:`, innerError);
-             onPlaybackFailure();
-          });
-        } else {
-          onPlaybackFailure();
-        }
-      });
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error(`Autoplay was prevented for video ${videoId}:`, error);
+          // If unmuted playback fails, try again muted.
+          if (error.name === 'NotAllowedError') {
+            video.muted = true;
+            video.play().catch(innerError => {
+              console.error(`Muted autoplay also failed for video ${videoId}:`, innerError);
+              onPlaybackFailure();
+            });
+          } else {
+            onPlaybackFailure();
+          }
+        });
+      }
     } else {
-      // This is not the active slide, or the feed is inactive. Pause and mute it.
+      // This is not the active slide, or a modal is open. Pause and mute it.
       if (!video.paused) {
         if (video.currentTime > 0) {
           onTimeUpdate(videoId, video.currentTime);
@@ -152,7 +157,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
         loop
         playsInline
         webkit-playsinline="true"
-        preload={isActive ? 'metadata' : (prefetchHint && prefetchHint.x === slide.x && prefetchHint.y === slide.y ? 'auto' : 'none')}
+        preload={
+          isActive
+            ? 'auto'
+            : (prefetchHint && prefetchHint.x === slide.x && prefetchHint.y === slide.y
+              ? 'metadata'
+              : 'none')
+        }
         key={currentSrc}
         onError={handleVideoError}
       />
