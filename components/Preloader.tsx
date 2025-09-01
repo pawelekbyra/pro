@@ -10,9 +10,16 @@ import Image from 'next/image';
 const Preloader: React.FC = () => {
   const { t, selectInitialLang, isLangSelected } = useTranslation();
   const [isHiding, setIsHiding] = useState(false);
+  const [hasShown, setHasShown] = useState(false);
+
+  useEffect(() => {
+    if (isLangSelected && !hasShown) {
+      setIsHiding(true);
+      setTimeout(() => setHasShown(true), 500); // Wait for fade-out animation to finish
+    }
+  }, [isLangSelected, hasShown]);
 
   const handleLangSelect = (lang: 'pl' | 'en') => {
-    // 1. Unlock audio
     const videos = document.querySelectorAll('video');
     let unlocked = false;
     videos.forEach(video => {
@@ -21,8 +28,7 @@ const Preloader: React.FC = () => {
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
-            // Autoplay started!
-            video.pause(); // Immediately pause it, we just wanted the gesture
+            video.pause();
           }).catch(error => {
             console.warn("Audio unlock failed, user may need to tap video.", error);
           });
@@ -30,16 +36,11 @@ const Preloader: React.FC = () => {
         unlocked = true;
       }
     });
-
-    // 2. Set the language
     selectInitialLang(lang);
-
-    // 3. Trigger fade-out animation
-    setIsHiding(true);
   };
 
-  if (isLangSelected) {
-    return null; // Don't render if a language is already selected (e.g., from localStorage)
+  if (hasShown) {
+    return null;
   }
 
   return (
@@ -51,9 +52,7 @@ const Preloader: React.FC = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Nowy, wspólny kontener, który jest centrowany */}
           <div className="relative flex flex-col items-center">
-            {/* Kontener ikony: pozostaje w środku */}
             <motion.div
               className="relative"
               initial={{ scale: 1, opacity: 0.9 }}
@@ -76,8 +75,6 @@ const Preloader: React.FC = () => {
                 priority
               />
             </motion.div>
-
-            {/* Kontener wyboru języka: animowany w dół, umieszczony pod ikoną */}
             <motion.div
               className="text-center mt-8"
               initial={{ y: 50, opacity: 0 }}
