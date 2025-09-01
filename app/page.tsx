@@ -8,16 +8,12 @@ import SlideRenderer from '@/components/SlideRenderer';
 
 export default function Home() {
   const {
-    columns,
-    activeColumnIndex,
-    activeSlideY,
-    activeSlideId,
+    state: { columns, activeColumnIndex, activeSlideY, activeSlideId, error },
     setActiveSlide,
     moveHorizontal,
     isAnyModalOpen,
     columnKeys,
     isLoading,
-    error,
   } = useVideoGrid();
 
   const containerRef = useRef<HTMLDivElement>(null);

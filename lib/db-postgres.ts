@@ -154,7 +154,7 @@ export async function updateUser(userId: string, updates: Partial<User>): Promis
 
     const result = await sql.query(query, values);
 
-    return (result.rows[0] as User) || null;
+    return (result[0] as User) || null;
 }
 export async function deleteUser(userId: string): Promise<boolean> {
     const sql = getDb();
@@ -248,6 +248,11 @@ export async function getSlidesInView(options: { x: number, y: number, width: nu
             data: JSON.parse(content as string || '{}'),
         };
     }) as Slide[];
+}
+
+export async function pingDb() {
+  const sql = getDb();
+  await sql`SELECT 1`;
 }
 
 // --- Like Functions ---
