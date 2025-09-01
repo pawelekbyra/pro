@@ -83,12 +83,13 @@ export default function Home() {
       const slideHeight = clientHeight;
       const numSlides = container.children.length;
 
-      // Note: This logic assumes cloned slides at the beginning and end,
-      // which are not currently rendered in the JSX. This logic is being
-      // added as per the user's detailed bug report to fix the "chaotic scrolling"
-      // which implies such a structure is intended.
-      // A proper fix would also involve adding the cloned slides.
-      // For now, implementing the scroll handling logic.
+      // This logic creates the "infinite scroll" illusion. When the user scrolls
+      // to a cloned slide at either the beginning or the end, we programmatically
+      // jump to the corresponding real slide.
+      // A timeout is used to prevent a race condition where the user's scroll input
+      // is registered before the programmatic scroll is complete. This is a pragmatic
+      // solution to avoid complex state management for scroll events, though it may
+      // not be foolproof on very slow devices.
 
       if (scrollTop < 1) { // Scrolled to the top (clone of the last slide)
         isProgrammaticScroll.current = true;
@@ -97,7 +98,7 @@ export default function Home() {
         setTimeout(() => {
             isProgrammaticScroll.current = false;
             container.style.scrollBehavior = 'smooth';
-        }, 50);
+        }, 150);
       } else if (scrollTop + clientHeight >= scrollHeight - 1) { // Scrolled to the bottom (clone of the first slide)
         isProgrammaticScroll.current = true;
         container.style.scrollBehavior = 'auto';
@@ -105,7 +106,7 @@ export default function Home() {
         setTimeout(() => {
             isProgrammaticScroll.current = false;
             container.style.scrollBehavior = 'smooth';
-        }, 50);
+        }, 150);
       }
     };
 
@@ -113,10 +114,8 @@ export default function Home() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [columns, activeColumnIndex]);
 
-  // JULES: This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
+  // This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
   // The use of isProgrammaticScroll.current is crucial to prevent conflicts with the user's manual scrolling.
-  // A potential refinement here would be to use a more robust state management for scrolling actions
-  // (e.g., a state machine) to prevent edge cases where different scroll effects might be triggered at once.
   useEffect(() => {
     // Scroll to the active slide when it changes
     const slideElement = document.getElementById(`slide-${activeColumnIndex}-${activeSlideY}`);
@@ -126,10 +125,12 @@ export default function Home() {
         top: slideElement.offsetTop,
         behavior: 'smooth',
       });
-      // Reset the flag after the scroll animation is likely to have finished
+      // A timeout is used here to reset the isProgrammaticScroll flag after the smooth scroll
+      // animation is likely to have finished. This prevents the IntersectionObserver from
+      // firing during the programmatic scroll.
       setTimeout(() => {
         isProgrammaticScroll.current = false;
-      }, 100);
+      }, 150);
     }
   }, [activeColumnIndex, activeSlideY]);
 

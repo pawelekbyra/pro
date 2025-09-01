@@ -62,6 +62,7 @@ function getDb() {
 // --- Table Creation ---
 export async function createTables() {
   const sql = getDb();
+  await sql`DROP TABLE IF EXISTS password_reset_tokens CASCADE;`;
   await sql`DROP TABLE IF EXISTS push_subscriptions CASCADE;`;
   await sql`DROP TABLE IF EXISTS notifications CASCADE;`;
   await sql`DROP TABLE IF EXISTS comment_likes CASCADE;`;
@@ -76,10 +77,18 @@ export async function createTables() {
       username VARCHAR(255) UNIQUE NOT NULL,
       "displayName" VARCHAR(255),
       email VARCHAR(255) UNIQUE NOT NULL,
-      password VARCHAR(255) NOT NULL,
+      password VARCHAR(255),
       avatar VARCHAR(255),
       "role" VARCHAR(50) DEFAULT 'user',
       "sessionVersion" INTEGER DEFAULT 1
+    );
+  `;
+  await sql`
+    CREATE TABLE password_reset_tokens (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      "userId" UUID REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL,
+      "expiresAt" TIMESTAMP WITH TIME ZONE NOT NULL
     );
   `;
   await sql`
@@ -158,7 +167,7 @@ export async function getAllUsers(): Promise<User[]> {
     const result = await sql`SELECT * FROM users;`;
     return result as unknown as User[];
 }
-export async function createUser(userData: Omit<User, 'id' | 'sessionVersion' | 'password'> & {password: string}): Promise<User> {
+export async function createUser(userData: Omit<User, 'id' | 'sessionVersion' | 'password'> & {password: string | null}): Promise<User> {
     const sql = getDb();
     const { username, displayName, email, password, avatar, role } = userData;
     const result = await sql`
@@ -200,6 +209,34 @@ export async function deleteUser(userId: string): Promise<boolean> {
     const sql = getDb();
     const result = await sql`DELETE FROM users WHERE id = ${userId} RETURNING id;`;
     return result.length > 0;
+}
+
+// --- Password Reset Token Functions ---
+export async function createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    const sql = getDb();
+    await sql`
+        INSERT INTO password_reset_tokens ("userId", token, "expiresAt")
+        VALUES (${userId}, ${token}, ${expiresAt.toISOString()});
+    `;
+}
+
+export async function getPasswordResetToken(token: string): Promise<{ id: string, userId: string, expiresAt: Date } | null> {
+    const sql = getDb();
+    const result = await sql`SELECT * FROM password_reset_tokens WHERE token = ${token};`;
+    if (result.length === 0) {
+        return null;
+    }
+    const dbToken = result[0];
+    return {
+        id: dbToken.id as string,
+        userId: dbToken.userId as string,
+        expiresAt: new Date(dbToken.expiresAt as string),
+    };
+}
+
+export async function deletePasswordResetToken(id: string): Promise<void> {
+    const sql = getDb();
+    await sql`DELETE FROM password_reset_tokens WHERE id = ${id};`;
 }
 
 // --- Slide Functions ---

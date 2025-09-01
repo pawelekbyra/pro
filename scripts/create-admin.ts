@@ -1,5 +1,5 @@
 import { db } from '../lib/db';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 async function createAdmin() {
   console.log('Starting admin user creation script...');
