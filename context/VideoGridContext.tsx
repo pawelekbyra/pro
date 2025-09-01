@@ -8,6 +8,8 @@ type Columns = { [x: number]: Slide[] };
 interface VideoGridContextType {
   columns: Columns;
   activeColumnIndex: number;
+  activeSlideY: number;
+  activeSlideId: string | null;
   isLoading: boolean;
   isAccountPanelOpen: boolean;
   isCommentsModalOpen: boolean;
@@ -16,6 +18,8 @@ interface VideoGridContextType {
   isAnyModalOpen: boolean;
   fetchAndProcessGrid: () => Promise<void>;
   moveHorizontal: (direction: 'left' | 'right') => void;
+  setActiveSlide: (x: number, y: number, id: string) => void;
+  setPrefetchHint: (hint: { x: number; y: number } | null) => void;
   openAccountPanel: () => void;
   closeAccountPanel: () => void;
   openCommentsModal: () => void;
@@ -26,6 +30,7 @@ interface VideoGridContextType {
   initialCoordinates?: { x: number; y: number };
   activeSlide?: Slide;
   columnKeys: number[];
+  prefetchHint: { x: number; y: number } | null;
 }
 
 const VideoGridContext = createContext<VideoGridContextType | undefined>(undefined);
@@ -34,6 +39,9 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   // --- State Declarations ---
   const [columns, setColumns] = useState<Columns>({});
   const [activeColumnIndex, setActiveColumnIndex] = useState(initialCoordinates.x);
+  const [activeSlideY, setActiveSlideY] = useState(initialCoordinates.y);
+  const [activeSlideId, setActiveSlideId] = useState<string | null>(null);
+  const [prefetchHint, setPrefetchHint] = useState<{ x: number, y: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal States
@@ -84,6 +92,13 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const columnKeys = useMemo(() => Object.keys(columns).map(Number).sort((a, b) => a - b), [columns]);
 
   // --- Navigation ---
+  const setActiveSlide = useCallback((x: number, y: number, id: string) => {
+    setActiveColumnIndex(x);
+    setActiveSlideY(y);
+    setActiveSlideId(id);
+    setPrefetchHint(null); // Reset prefetch hint when slide changes
+  }, []);
+
   const moveHorizontal = useCallback((direction: 'left' | 'right') => {
     const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
     let nextKeyIndex;
@@ -94,9 +109,16 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     }
 
     if (nextKeyIndex !== currentKeyIndex) {
-      setActiveColumnIndex(columnKeys[nextKeyIndex]);
+      const newColumnIndex = columnKeys[nextKeyIndex];
+      setActiveColumnIndex(newColumnIndex);
+      // When moving horizontally, reset vertical position to the top of the new column
+      const firstSlideInNewColumn = columns[newColumnIndex]?.[0];
+      if (firstSlideInNewColumn) {
+        setActiveSlideY(firstSlideInNewColumn.y);
+        setActiveSlideId(firstSlideInNewColumn.id);
+      }
     }
-  }, [activeColumnIndex, columnKeys]);
+  }, [activeColumnIndex, columnKeys, columns]);
 
   // --- Modal Handlers ---
   const openAccountPanel = () => setIsAccountPanelOpen(true);
@@ -106,11 +128,17 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const openInfoModal = () => setIsInfoModalOpen(true);
   const closeInfoModal = () => setIsInfoModalOpen(false);
 
-  const activeSlide = columns[activeColumnIndex]?.[0];
+  const activeSlide = useMemo(() => {
+    const column = columns[activeColumnIndex];
+    if (!column) return undefined;
+    return column.find(slide => slide.y === activeSlideY);
+  }, [columns, activeColumnIndex, activeSlideY]);
 
   const value = {
     columns,
     activeColumnIndex,
+    activeSlideY,
+    activeSlideId,
     isLoading,
     isAccountPanelOpen,
     isCommentsModalOpen,
@@ -119,6 +147,8 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     isAnyModalOpen,
     fetchAndProcessGrid,
     moveHorizontal,
+    setActiveSlide,
+    setPrefetchHint,
     openAccountPanel,
     closeAccountPanel,
     openCommentsModal,
@@ -128,7 +158,8 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     setIsTopBarModalOpen,
     initialCoordinates,
     activeSlide,
-    columnKeys
+    columnKeys,
+    prefetchHint
   };
 
   return (

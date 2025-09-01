@@ -7,10 +7,12 @@ import { Bell, Heart, Menu } from 'lucide-react';
 import NotificationPopup from './NotificationPopup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
+import { useVideoGrid } from '@/context/VideoGridContext';
 
-const TopBar = ({ openAccountPanel }: { openAccountPanel: () => void }) => {
+const TopBar = () => {
   // --- Start of merged code ---
   const { user, logout } = useUser(); // Added logout
+  const { openAccountPanel } = useVideoGrid();
   const { t } = useTranslation(); // Added for menu text
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifPanel, setShowNotifPanel] = useState(false);

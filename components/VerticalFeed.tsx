@@ -18,16 +18,19 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
 }) => {
   const {
     moveHorizontal,
-    openAccountPanel,
-    openCommentsModal,
-    openInfoModal,
     setIsTopBarModalOpen,
-    isAnyModalOpen
+    isAnyModalOpen,
+    setActiveSlide,
+    activeSlideId,
+    activeSlideY,
+    activeColumnIndex,
+    columns,
+    columnKeys,
+    setPrefetchHint,
   } = useVideoGrid();
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0); // Index within the original `slides` array
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -75,14 +78,31 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     };
   }, [slides]);
 
+  // --- Horizontal Navigation Scroll Fix ---
+  useEffect(() => {
+    // Only scroll if this feed is the active one
+    if (isActive) {
+      const container = feedRef.current;
+      if (container) {
+        // Scroll to the first real slide.
+        // The y-position of the first real slide is equal to the container's height.
+        container.scrollTo({ top: container.clientHeight, behavior: 'auto' });
+      }
+    }
+  }, [isActive, activeColumnIndex]); // Reruns when this column becomes active
+
   // --- Active Slide Tracking via IntersectionObserver ---
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute('data-index') || '0', 10);
-            setActiveSlideIndex(index);
+            const slideId = entry.target.getAttribute('data-id');
+            const slideX = parseInt(entry.target.getAttribute('data-x') || '0', 10);
+            const slideY = parseInt(entry.target.getAttribute('data-y') || '0', 10);
+            if (slideId) {
+              setActiveSlide(slideX, slideY, slideId);
+            }
           }
         });
       },
@@ -94,11 +114,42 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     });
 
     return () => observer.disconnect();
-  }, [slides]);
+  }, [slides, setActiveSlide]);
+
+  // --- Pre-fetching Logic ---
+  useEffect(() => {
+    if (!activeSlideId) return;
+
+    const currentColumn = slides;
+    const currentSlideIndex = currentColumn.findIndex(s => s.id === activeSlideId);
+
+    if (currentSlideIndex === -1) return;
+
+    // Prefetch next slide in the same column
+    if (currentSlideIndex < currentColumn.length - 1) {
+      const nextSlide = currentColumn[currentSlideIndex + 1];
+      setPrefetchHint({ x: nextSlide.x, y: nextSlide.y });
+    } else {
+      // Or prefetch the first slide of the next column if we are at the end
+      const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
+      if (currentKeyIndex < columnKeys.length - 1) {
+        const nextColumnX = columnKeys[currentKeyIndex + 1];
+        const nextColumn = columns[nextColumnX];
+        if (nextColumn && nextColumn.length > 0) {
+          const nextSlide = nextColumn[0];
+          setPrefetchHint({ x: nextSlide.x, y: nextSlide.y });
+        }
+      } else {
+        // No more slides to prefetch
+        setPrefetchHint(null);
+      }
+    }
+  }, [activeSlideId, slides, activeColumnIndex, columnKeys, columns, setPrefetchHint]);
+
 
   const handlePlaybackFailure = useCallback(() => {
-    // Check if there is a next slide to scroll to.
-    if (activeSlideIndex < slides.length - 1) {
+    const activeIndex = slides.findIndex(s => s.y === activeSlideY);
+    if (activeIndex !== -1 && activeIndex < slides.length - 1) {
       const container = feedRef.current;
       if (container) {
         container.scrollBy({ top: container.clientHeight, behavior: 'smooth' });
@@ -106,7 +157,7 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     } else {
       console.error("Playback failed on the last slide of the column, not scrolling further.");
     }
-  }, [activeSlideIndex, slides.length]);
+  }, [activeSlideY, slides]);
 
   // --- Gesture Handling (Touch & Mouse) ---
   const handleDragStart = (x: number, y: number) => {
@@ -174,15 +225,15 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
               }
             }}
             data-index={originalIndex}
+            data-id={slide.id}
+            data-x={slide.x}
+            data-y={slide.y}
             className="h-full w-full snap-start flex-shrink-0 relative"
           >
             <SlideRenderer
               slide={slide}
-              isActive={isActive && !isAnyModalOpen && activeSlideIndex === originalIndex}
+              isActive={isActive && !isAnyModalOpen && activeSlideId === slide.id}
               setIsModalOpen={setIsTopBarModalOpen}
-              openAccountPanel={openAccountPanel}
-              openCommentsModal={openCommentsModal}
-              openInfoModal={openInfoModal}
               onTimeUpdate={() => {}} // Placeholder, can be implemented if needed
               startTime={0} // Playback position is managed by the browser on scroll
               onNavigate={() => {}} // Vertical navigation is handled by scroll, horizontal by swipe

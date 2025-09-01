@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useHls } from '@/lib/useHls';
 import { Heart, Pause, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useVideoGrid } from '@/context/VideoGridContext';
+import { Slide } from '@/lib/types';
 
 interface VideoPlayerProps {
   hlsSrc?: string | null;
@@ -12,6 +14,7 @@ interface VideoPlayerProps {
   isActive: boolean;
   isSecretActive: boolean;
   videoId: string;
+  slide: Slide;
   videoRef: React.RefObject<HTMLVideoElement>;
   onTimeUpdate: (videoId: string, time: number) => void;
   startTime: number;
@@ -21,7 +24,8 @@ interface VideoPlayerProps {
 
 const DOUBLE_CLICK_DELAY_MS = 200;
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, videoRef, onTimeUpdate, startTime, onPlaybackFailure, isPlaying }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, slide, videoRef, onTimeUpdate, startTime, onPlaybackFailure, isPlaying }) => {
+  const { prefetchHint } = useVideoGrid();
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -133,7 +137,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
         loop
         playsInline
         webkit-playsinline="true"
-        preload={isActive ? 'metadata' : 'auto'}
+        preload={isActive ? 'metadata' : (prefetchHint && prefetchHint.x === slide.x && prefetchHint.y === slide.y ? 'auto' : 'none')}
         key={currentSrc}
         onError={handleVideoError}
       />

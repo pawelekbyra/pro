@@ -6,6 +6,7 @@ import { useToast } from '@/context/ToastContext';
 import { useUser } from '@/context/UserContext';
 import { useTranslation } from '@/context/LanguageContext';
 import Image from 'next/image';
+import { useVideoGrid } from '@/context/VideoGridContext';
 
 interface SidebarProps {
   avatarUrl:string;
@@ -13,9 +14,6 @@ interface SidebarProps {
   isLiked: boolean;
   videoId: string;
   commentsCount: number;
-  openCommentsModal: () => void;
-  openAccountPanel: () => void;
-  openInfoModal: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -24,10 +22,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   isLiked: initialIsLiked,
   videoId,
   commentsCount,
-  openCommentsModal,
-  openAccountPanel,
-  openInfoModal,
 }) => {
+  const { openCommentsModal, openAccountPanel, openInfoModal } = useVideoGrid();
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [likesCount, setLikesCount] = useState(initialLikes);
   const { addToast } = useToast();
