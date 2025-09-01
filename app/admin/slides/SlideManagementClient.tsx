@@ -1,9 +1,8 @@
 'use client';
 
-import { Slide, VideoSlide } from '@/lib/types';
+import { Slide } from '@/lib/types';
 import { User } from '@/lib/db.interfaces';
-import React, { useState } from 'react';
-import SlideEditModal from '@/components/admin/SlideEditModal';
+import React from 'react';
 
 type ActionResponse = { success: boolean; error?: string };
 
@@ -16,9 +15,6 @@ interface SlideManagementClientProps {
 }
 
 export default function SlideManagementClient({ slides, users, createSlideAction, updateSlideAction, deleteSlideAction }: SlideManagementClientProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
-  const [selectedSlide, setSelectedSlide] = useState<Slide | null>(null);
 
   const handleDelete = async (slideId: string) => {
     if (confirm('Are you sure you want to delete this slide?')) {
@@ -32,28 +28,7 @@ export default function SlideManagementClient({ slides, users, createSlideAction
     }
   };
 
-  const handleOpenCreateModal = () => {
-    setModalMode('create');
-    setSelectedSlide(null);
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEditModal = (slide: Slide) => {
-    setModalMode('edit');
-    setSelectedSlide(slide);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedSlide(null);
-    setModalMode(null);
-  };
-
   const getSlideDescription = (slide: Slide) => {
-    if (slide.type === 'video') {
-      return (slide as VideoSlide).data.description;
-    }
     if (slide.type === 'html') {
       return 'HTML Content';
     }
@@ -64,8 +39,8 @@ export default function SlideManagementClient({ slides, users, createSlideAction
     <>
       <div className="flex justify-end mb-4">
         <button
-          onClick={handleOpenCreateModal}
-          className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded"
+          disabled
+          className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-500"
         >
           New Slide
         </button>
@@ -90,8 +65,8 @@ export default function SlideManagementClient({ slides, users, createSlideAction
                 <td className="p-2">{slide.username}</td>
                 <td className="p-2 flex gap-2">
                   <button
-                    onClick={() => handleOpenEditModal(slide)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-2 rounded"
+                    disabled
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-2 rounded disabled:bg-gray-500"
                   >
                     Edit
                   </button>
@@ -107,14 +82,6 @@ export default function SlideManagementClient({ slides, users, createSlideAction
           </tbody>
         </table>
       </div>
-      <SlideEditModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        slide={selectedSlide}
-        users={users}
-        createSlideAction={createSlideAction}
-        updateSlideAction={updateSlideAction}
-      />
     </>
   );
 }

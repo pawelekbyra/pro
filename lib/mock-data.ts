@@ -1,48 +1,36 @@
 // lib/mock-data.ts
-import type { Grid, Slide } from './types';
+import type { Grid } from './types';
 
-export const mockGrid: Grid = {
-  '0,0': {
-    id: 'intro_video',
-    type: 'video',
-    x: 0, y: 0,
-    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=ai_jules',
-    access: 'public', createdAt: Date.now(), initialLikes: 1000, isLiked: false, initialComments: 50,
+const colors = [
+  '#FF5733', '#33FF57', '#3357FF', '#FF33A1',
+  '#A133FF', '#33FFA1', '#FFC300', '#C70039',
+  '#900C3F', '#581845', '#FFD700', '#00FF7F',
+  '#00BFFF', '#FF69B4', '#7B68EE', '#32CD32'
+];
+
+export const mockGrid: Grid = {};
+
+for (let i = 0; i < 16; i++) {
+  const x = i % 4;
+  const y = Math.floor(i / 4);
+  mockGrid[`${x},${y}`] = {
+    id: `slide-${x}-${y}`,
+    type: 'html',
+    x,
+    y,
+    userId: `user${i}`,
+    username: `User ${i}`,
+    avatar: `https://i.pravatar.cc/150?u=user${i}`,
+    access: 'public',
+    createdAt: Date.now(),
+    initialLikes: 0,
+    isLiked: false,
+    initialComments: 0,
     data: {
-      description: 'Zjawiskowy film, jakiego świat nie widział! #tingotong #art #wow',
-      mp4Url: 'https://cdn.pixabay.com/video/2021/04/16/74542-535359404_large.mp4',
-      hlsUrl: null,
-      poster: 'https://images.pexels.com/videos/857195/free-video-857195.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+      htmlContent: `<div style="background-color: ${colors[i]}; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-size: 2rem;"><span>Caption ${i}</span><span style="font-size: 1rem;">@User ${i}</span></div>`,
     },
-  },
-  '0,1': {
-    id: 'second_video',
-    type: 'video',
-    x: 0, y: 1,
-    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=ai_jules',
-    access: 'public', createdAt: Date.now(), initialLikes: 500, isLiked: false, initialComments: 20,
-    data: {
-      description: 'Drugi, równie świetny film. #tingotong #cool',
-      mp4Url: 'https://cdn.pixabay.com/video/2024/07/04/210355-103350293_large.mp4',
-      hlsUrl: null,
-      poster: 'https://images.pexels.com/videos/2022395/free-video-2022395.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-    },
-  },
-  '0,2': {
-    id: 'secret_video',
-    type: 'video',
-    x: 0, y: 2,
-    userId: 'jules_the_ai', username: 'JulesTheAI', avatar: 'https://i.pravatar.cc/150?u=ai_jules',
-    access: 'secret', // Ważne: ustawienie dostępu na 'secret'
-    createdAt: Date.now(), initialLikes: 10, isLiked: false, initialComments: 5,
-    data: {
-      description: 'Top Secret: Film tylko dla Patronów Miłości! #tingotong #secret',
-      mp4Url: 'https://cdn.pixabay.com/video/2022/02/10/106399-684499881_large.mp4',
-      hlsUrl: null,
-      poster: 'https://i.imgflip.com/2fm6x.jpg',
-    },
-  },
-};
+  };
+}
 
 export const mockComments = []; // Pusta tablica, aby uniknąć problemów z mockami
 export const mockNotifications = []; // Pusta tablica, aby uniknąć problemów z mockami
