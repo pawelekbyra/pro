@@ -16,13 +16,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'commentId is required and must be a string' }, { status: 400 });
     }
 
-    // TODO: Implement comment liking feature in the backend.
-    // The db.toggleCommentLike function does not exist.
-    // For now, we return a mock response.
+    const result = await db.toggleCommentLike(commentId, userId);
+
     return NextResponse.json({
       success: true,
-      status: 'liked',
-      likeCount: 1,
+      status: result.newStatus,
+      likeCount: result.likeCount,
     });
 
   } catch (error) {
