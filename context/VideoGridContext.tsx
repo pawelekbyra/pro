@@ -145,6 +145,9 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     activeSlideY: initialCoordinates.y,
   });
 
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -159,7 +162,8 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const isLoading = state.loadingColumns.size > 0;
 
   const fetchColumn = useCallback(async (x: number, metadataOnly: boolean = false) => {
-    if (state.columns[x] && (!metadataOnly || state.columns[x].every(s => !s.data))) {
+    const currentState = stateRef.current;
+    if (currentState.columns[x] && (!metadataOnly || currentState.columns[x].every(s => !s.data))) {
       return;
     }
     dispatch({ type: 'START_LOADING_COLUMN', payload: x });
@@ -190,7 +194,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     } finally {
       dispatch({ type: 'FINISH_LOADING_COLUMN', payload: x });
     }
-  }, [state.columns, state.loadingColumns]);
+  }, []);
 
   const fetchFullSlide = useCallback(async (id: string) => {
       const slide = Object.values(state.columns).flat().find(s => s.id === id);

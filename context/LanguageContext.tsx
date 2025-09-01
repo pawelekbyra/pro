@@ -310,19 +310,21 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // If the flag is on, we simply do nothing. isLangSelected remains false,
-    // which is the desired behavior to force the preloader to show.
     if (FORCE_SHOW_PRELOADER) {
       return;
     }
 
-    const savedLang = localStorage.getItem('app_lang');
-    if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
-      setLanguage(savedLang);
-    } else {
-      // If no language is saved, default to Polish.
-      setLanguage('pl');
-    }
+    const timer = setTimeout(() => {
+      const savedLang = localStorage.getItem('app_lang');
+      if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
+        setLanguage(savedLang);
+      } else {
+        // If no language is saved, do nothing, so the preloader stays visible
+        // until the user makes a selection.
+      }
+    }, 500); // Delay of 500ms to ensure preloader is visible
+
+    return () => clearTimeout(timer);
   }, []);
 
   const selectInitialLang = (initialLang: Language) => {

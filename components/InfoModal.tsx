@@ -40,12 +40,14 @@ const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                 if (data.success) {
                     addToast(`Twoje konto zostało utworzone! Login: ${mockEmail}`, 'success');
                     await login({ email: mockEmail, password: mockPassword });
+                    onClose(); // Close modal on success
                 } else {
                     throw new Error(data.message);
                 }
             } catch (error) {
                 console.error('Błąd tworzenia konta po wpłacie:', error);
                 addToast('Wystąpił błąd podczas tworzenia konta.', 'error');
+                onClose(); // Close modal on error
             }
         }, 3000);
     };
