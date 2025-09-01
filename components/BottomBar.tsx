@@ -135,7 +135,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
           </button>
         </div>
         <div className="flex-1 flex justify-center">
-          <button onClick={handleTipClick} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
+          <button disabled className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold opacity-50 cursor-not-allowed">
             <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
             <span className="icon-label">{t('tipText') || 'Tip'}</span>
           </button>

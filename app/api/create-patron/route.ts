@@ -1,8 +1,10 @@
 // app/api/create-patron/route.ts
+// app/api/create-patron/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
+import { sendLoginDetailsEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
     try {
@@ -27,8 +29,8 @@ export async function POST(request: NextRequest) {
             role: 'user',
         });
 
-        // Wysłanie e-maila z loginem i hasłem (koncepcyjnie)
-        // Usunięto logowanie hasła w celu zwiększenia bezpieczeństwa
+        // Wysłanie e-maila z danymi logowania
+        await sendLoginDetailsEmail(email, password);
 
         return NextResponse.json({
             success: true,
