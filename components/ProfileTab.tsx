@@ -10,11 +10,17 @@ import { useUser } from '@/context/UserContext';
 import Image from 'next/image';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
+import { useVideoGrid } from '@/context/VideoGridContext';
 
-const ProfileTab: React.FC = () => {
+interface ProfileTabProps {
+    onClose: () => void;
+}
+
+const ProfileTab: React.FC<ProfileTabProps> = ({ onClose }) => {
   const { user: profile, checkUserStatus, logout } = useUser();
   const { t, setLanguage, lang } = useTranslation();
   const { addToast } = useToast();
+  const { setActiveSlide, state: videoGridState } = useVideoGrid();
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,6 +111,17 @@ const ProfileTab: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     addToast(t('logoutSuccess'), 'success');
+    onClose();
+
+    const firstColumnKey = Object.keys(videoGridState.columns).map(Number).sort((a,b) => a - b)[0];
+
+    if (typeof firstColumnKey !== 'undefined') {
+        const firstColumn = videoGridState.columns[firstColumnKey];
+        if (firstColumn && firstColumn.length > 0) {
+            const firstSlide = firstColumn[0];
+            setActiveSlide(firstColumnKey, firstSlide.y, firstSlide.id);
+        }
+    }
   };
 
   if (!profile) {
