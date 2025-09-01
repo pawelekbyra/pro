@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import VideoGrid from '@/components/VideoGrid';
 import DesktopLayout from '@/components/DesktopLayout';
+import { mockGrid } from '@/lib/mock-data';
+import SlideRenderer from '@/components/SlideRenderer';
 
 export default function Home() {
     const [isMobile, setIsMobile] = useState(false);
@@ -18,7 +19,13 @@ export default function Home() {
 
     const appContent = (
         <main className="h-full w-full" style={{ height: 'var(--app-height)' }}>
-            <VideoGrid initialCoordinates={{ x: 0, y: 0 }} />
+            <div className="grid grid-cols-4 grid-rows-4 h-full w-full">
+                {Object.values(mockGrid).map((slide) => (
+                    <div key={slide.id} className="h-full w-full">
+                        <SlideRenderer slide={slide} />
+                    </div>
+                ))}
+            </div>
         </main>
     );
 
