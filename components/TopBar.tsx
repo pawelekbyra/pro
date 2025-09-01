@@ -13,6 +13,7 @@ import { useToast } from '@/context/ToastContext';
 import MenuIcon from './icons/MenuIcon';
 import BellIcon from './icons/BellIcon';
 import PwaDesktopModal from './PwaDesktopModal'; // Import nowego komponentu
+import { Smartphone } from 'lucide-react';
 
 const TopBar = () => {
   const { user } = useUser();
@@ -82,11 +83,9 @@ const TopBar = () => {
   return (
     <>
       <div
-        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-2 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
+        className="relative z-40 flex items-center justify-between px-2 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
         style={{
           height: 'var(--topbar-height)',
-          paddingTop: 'var(--safe-area-top)',
-          transform: 'translateZ(0)',
         }}
       >
         {!user ? (
@@ -111,7 +110,7 @@ const TopBar = () => {
               {/* Nowy przycisk do pobierania PWA */}
               {isDesktop && (
                   <Button variant="ghost" size="icon" onClick={handleShowPwaModal} aria-label={t('installPwaAriaLabel')}>
-                      <span className="text-sm font-semibold">{t('installAppText')}</span>
+                      <Smartphone className="w-6 h-6" />
                   </Button>
               )}
               <Button variant="ghost" size="icon" onClick={handleLoggedOutNotificationClick} aria-label={t('notificationAriaLabel')}>
@@ -145,7 +144,7 @@ const TopBar = () => {
             <div className="flex justify-end">
                 {isDesktop && (
                     <Button variant="ghost" size="icon" onClick={handleShowPwaModal} aria-label={t('installPwaAriaLabel')}>
-                        <span className="text-sm font-semibold">{t('installAppText')}</span>
+                        <Smartphone className="w-6 h-6" />
                     </Button>
                 )}
                 <div className="relative">

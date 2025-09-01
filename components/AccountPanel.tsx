@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@/context/UserContext';
 import ProfileTab from './ProfileTab';
 import PasswordTab from './PasswordTab';
 import DeleteTab from './DeleteTab';
@@ -18,6 +19,14 @@ type Tab = 'profile' | 'password' | 'delete';
 const AccountPanel: React.FC<AccountPanelProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const { t } = useTranslation();
+  const { user } = useUser();
+
+  useEffect(() => {
+    // If the user logs out while this panel is open, close it automatically.
+    if (!user) {
+      onClose();
+    }
+  }, [user, onClose]);
 
   const handleTabClick = (tab: Tab) => {
       setActiveTab(tab);

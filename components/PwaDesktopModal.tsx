@@ -37,14 +37,12 @@ const PwaDesktopModal: React.FC<PwaDesktopModalProps> = ({ isOpen, onClose }) =>
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <h3 className="text-2xl font-bold mb-4">Pobierz aplikację na telefon</h3>
+            <h3 className="text-2xl font-bold mb-4">{t('pwaModalTitle')}</h3>
             <p className="mb-6">
-              Wersja na komputery stacjonarne nie obsługuje pełnego doświadczenia.
-              Proszę zeskanować kod QR lub wejść na naszą stronę na telefonie,
-              aby pobrać aplikację i odkryć świat tingotong!
+              {t('pwaModalBody')}
             </p>
-            <div className="w-32 h-32 bg-white mx-auto">
-              {/* Placeholder for QR Code */}
+            <div className="w-32 h-32 bg-white mx-auto flex items-center justify-center rounded-lg">
+              <img src="/qr-code-placeholder.png" alt="QR Code" className="w-full h-full" />
             </div>
           </motion.div>
         </motion.div>

@@ -6,6 +6,7 @@ import CommentsModal from './CommentsModal';
 import InfoModal from './InfoModal';
 import AccountPanel from './AccountPanel';
 import { AnimatePresence } from 'framer-motion';
+import TopBar from './TopBar';
 
 export default function DesktopLayout({ children }: { children: React.ReactNode }) {
     const context = useVideoGrid();
@@ -18,8 +19,14 @@ export default function DesktopLayout({ children }: { children: React.ReactNode 
     const { state, setActiveModal, activeSlide } = context;
 
     return (
-        <div className="relative h-full w-full flex justify-center">
-            <div className="relative h-full w-full max-w-sm overflow-hidden">
+        <div
+            className="relative h-full w-full flex justify-center bg-cover bg-center"
+            style={{
+                backgroundImage: "radial-gradient(ellipse at center, hsla(0, 0%, 0%, 0) 40%, hsla(0, 0%, 0%, 0.4) 70%, hsla(0, 0%, 0%, 0.8)), url('/bg-pattern.jpg')"
+            }}
+        >
+            <div className="relative h-full w-full max-w-sm overflow-hidden border-x border-white/10">
+                <TopBar />
                 {children}
             </div>
 

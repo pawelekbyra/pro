@@ -141,7 +141,9 @@ const translations: Record<string, Record<string, string>> = {
         saveAvatarButton: 'Zapisz Awatar',
         adminPanel: 'Panel Admina',
         installPwaAriaLabel: 'Pobierz aplikację',
-        installAppText: 'Pobierz'
+        installAppText: 'Pobierz',
+        pwaModalTitle: 'Doświadczenie Ting Tong czeka na telefonie!',
+        pwaModalBody: 'Zeskanuj kod QR poniżej lub odwiedź nas na telefonie, aby pobrać aplikację i cieszyć się pełnią możliwości.'
     },
     en: {
         loggedOutText: "Don't have the guts to log in",
@@ -281,7 +283,9 @@ const translations: Record<string, Record<string, string>> = {
         saveAvatarButton: 'Save Avatar',
         adminPanel: 'Admin Panel',
         installPwaAriaLabel: 'Download App',
-        installAppText: 'Download'
+        installAppText: 'Download',
+        pwaModalTitle: 'The full Ting Tong experience is on your phone!',
+        pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.'
     }
 };
 
