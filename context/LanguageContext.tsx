@@ -319,6 +319,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const savedLang = localStorage.getItem('app_lang');
     if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
       setLanguage(savedLang);
+    } else {
+      // If no language is saved, default to Polish.
+      setLanguage('pl');
     }
   }, []);
 

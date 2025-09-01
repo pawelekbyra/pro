@@ -15,9 +15,9 @@ async function createAdmin() {
     if (adminUser) {
       console.log(`User '${adminUsername}' already exists.`);
       // 2a. If user exists, ensure their role is 'admin'
-      if (adminUser.user_type !== 'admin') {
+      if (adminUser.role !== 'admin') {
         console.log("Updating user to have 'admin' role.");
-        await db.updateUser(adminUser.id, { user_type: 'admin' });
+        await db.updateUser(adminUser.id, { role: 'admin' });
       } else {
         console.log("User is already an admin.");
       }
@@ -32,10 +32,10 @@ async function createAdmin() {
         username: adminUsername,
         email: adminEmail,
         password: passwordHash,
-        user_type: 'admin',
+        role: 'admin',
         displayName: 'Administrator',
         avatar: 'https://i.pravatar.cc/150?u=admin',
-      } as any);
+      });
       console.log('Admin user created successfully.');
     }
 
@@ -45,7 +45,7 @@ async function createAdmin() {
     const verifiedUser = await db.findUserById(adminUser.id);
     console.log('Verified user object from DB:', verifiedUser);
 
-    if (verifiedUser && verifiedUser.user_type === 'admin') {
+    if (verifiedUser && verifiedUser.role === 'admin') {
       console.log('Verification successful: Admin user is configured correctly.');
     } else {
       throw new Error('Verification failed: Could not find admin user with admin role after update.');

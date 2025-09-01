@@ -1,18 +1,31 @@
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
-import { db, User } from '@/lib/db';
+import { db } from '@/lib/db';
+import { User } from './db.interfaces';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
+if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is not set");
+}
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 const COOKIE_NAME = 'session';
 
 export interface AuthPayload {
-    user: {
-        id: string;
-        sessionVersion: number;
-        [key: string]: any;
-    };
+    user: Omit<User, 'password'>;
     iat: number;
     exp: number;
+}
+
+function isUserPayloadValid(user: any): user is Omit<User, 'password'> {
+    if (!user) return false;
+    if (typeof user.id !== 'string') return false;
+    if (typeof user.email !== 'string') return false;
+    if (typeof user.username !== 'string') return false;
+    if (typeof user.sessionVersion !== 'number') return false;
+    // Optional fields can be checked for type if they exist
+    if (user.displayName && typeof user.displayName !== 'string') return false;
+    if (user.avatar && typeof user.avatar !== 'string') return false;
+    if (user.role && (user.role !== 'user' && user.role !== 'admin')) return false;
+    return true;
 }
 
 export async function verifySession(): Promise<AuthPayload | null> {
@@ -26,7 +39,7 @@ export async function verifySession(): Promise<AuthPayload | null> {
         const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
         const authPayload = payload as unknown as AuthPayload;
 
-        if (!authPayload.user?.id || typeof authPayload.user?.sessionVersion !== 'number') {
+        if (!isUserPayloadValid(authPayload.user)) {
             console.log("Token payload is malformed.");
             return null;
         }

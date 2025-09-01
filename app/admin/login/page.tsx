@@ -16,16 +16,21 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email: username, password }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        router.push('/admin');
+        if (data.user?.role === 'admin') {
+            router.push('/admin');
+        } else {
+            setError('You are not authorized to access the admin panel.');
+        }
       } else {
-        const data = await response.json();
         setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
