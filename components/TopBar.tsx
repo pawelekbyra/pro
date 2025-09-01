@@ -8,6 +8,7 @@ import NotificationPopup from './NotificationPopup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import { useVideoGrid } from '@/context/VideoGridContext';
+import LoginForm from './LoginForm';
 
 const TopBar = () => {
   // --- Start of merged code ---
@@ -17,6 +18,7 @@ const TopBar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Added for menu
+  const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -69,9 +71,9 @@ const TopBar = () => {
   return (
     <> {/* Added Fragment to hold menu */}
       <div
-        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-black text-white border-b border-white/10"
+        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
         style={{
-          height: 'var(--topbar-base-height)',
+          height: 'var(--topbar-height)',
           paddingTop: 'var(--safe-area-top)',
           transform: 'translateZ(0)',
         }}
@@ -81,6 +83,17 @@ const TopBar = () => {
           <Button variant="ghost" size="icon" className="md:hidden" onClick={handleMenuClick}>
             <Menu />
           </Button>
+        </div>
+
+        {/* Conditional Login/Status Text */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          {!user ? (
+            <Button variant="ghost" onClick={() => setIsLoginPanelOpen(!isLoginPanelOpen)} className="px-4 py-2 h-auto">
+              {t('loggedOutText')}
+            </Button>
+          ) : (
+            <span className="text-sm font-semibold">{t('loggedInText')}</span>
+          )}
         </div>
 
         <div className="flex items-center space-x-4">
@@ -114,6 +127,20 @@ const TopBar = () => {
           </Button>
         </div>
       </div>
+      {/* --- Login Panel --- */}
+      <AnimatePresence>
+        {isLoginPanelOpen && (
+          <motion.div
+            className="absolute left-0 w-full z-30 bg-black/60 backdrop-blur-sm"
+            style={{ top: 'var(--topbar-height)' }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <LoginForm onLoginSuccess={() => setIsLoginPanelOpen(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* --- Added Menu JSX --- */}
       <AnimatePresence>
         {isMenuOpen && (

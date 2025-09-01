@@ -8,13 +8,12 @@ export default function Home() {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const setAppHeight = () => {
-            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-            setIsMobile(window.innerWidth <= 768); // Ustawienie isMobile dla ekranów o szerokości do 768px
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
         };
-        setAppHeight();
-        window.addEventListener('resize', setAppHeight);
-        return () => window.removeEventListener('resize', setAppHeight);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const appContent = (
