@@ -1,87 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Grid, Slide } from '@/lib/types';
+import React, { useEffect } from 'react';
 import VerticalFeed from './VerticalFeed';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import AccountPanel from './AccountPanel';
 import CommentsModal from './CommentsModal';
 import InfoModal from './InfoModal';
 import { Skeleton } from './ui/skeleton';
-
-type Columns = { [x: number]: Slide[] };
+import { useVideoGrid } from '@/context/VideoGridContext';
 
 interface VideoGridProps {
   initialCoordinates?: { x: number; y: number };
 }
 
-const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0 } }) => {
-  // --- State Declarations ---
-  const [columns, setColumns] = useState<Columns>({});
-  const [activeColumnIndex, setActiveColumnIndex] = useState(initialCoordinates.x);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Modal States
-  const [isAccountPanelOpen, setIsAccountPanelOpen] = useState(false);
-  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
-  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  const [isTopBarModalOpen, setIsTopBarModalOpen] = useState(false);
-  const isAnyModalOpen = isAccountPanelOpen || isCommentsModalOpen || isInfoModalOpen || isTopBarModalOpen;
-
-  // --- Data Fetching and Processing ---
-  const fetchAndProcessGrid = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/slides');
-      if (!response.ok) throw new Error('Failed to fetch slides');
-      const data = await response.json();
-
-      const grid: Grid = data.grid;
-      const newColumns: Columns = {};
-
-      for (const key in grid) {
-        const slide = grid[key];
-        if (!newColumns[slide.x]) {
-          newColumns[slide.x] = [];
-        }
-        newColumns[slide.x].push(slide);
-      }
-
-      // Sort slides within each column by y-coordinate
-      for (const x in newColumns) {
-        newColumns[x].sort((a, b) => a.y - b.y);
-      }
-
-      if (Object.keys(newColumns).length > 0) {
-        setColumns(newColumns);
-      }
-    } catch (error) {
-      console.error("Failed to fetch and process slides:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchAndProcessGrid();
-  }, [fetchAndProcessGrid]);
-
-  const columnKeys = useMemo(() => Object.keys(columns).map(Number).sort((a, b) => a - b), [columns]);
-
-  // --- Navigation ---
-  const moveHorizontal = useCallback((direction: 'left' | 'right') => {
-    const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
-    let nextKeyIndex;
-    if (direction === 'left') {
-      nextKeyIndex = Math.max(0, currentKeyIndex - 1);
-    } else { // 'right'
-      nextKeyIndex = Math.min(columnKeys.length - 1, currentKeyIndex + 1);
-    }
-
-    if (nextKeyIndex !== currentKeyIndex) {
-      setActiveColumnIndex(columnKeys[nextKeyIndex]);
-    }
-  }, [activeColumnIndex, columnKeys]);
+const VideoGrid: React.FC<VideoGridProps> = () => {
+  const {
+    columns,
+    activeColumnIndex,
+    isLoading,
+    isAccountPanelOpen,
+    isCommentsModalOpen,
+    isInfoModalOpen,
+    isAnyModalOpen,
+    moveHorizontal,
+    closeAccountPanel,
+    closeCommentsModal,
+    closeInfoModal,
+    activeSlide,
+    columnKeys
+  } = useVideoGrid();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -94,14 +41,6 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAnyModalOpen, moveHorizontal]);
-
-  // --- Modal Handlers ---
-  const openAccountPanel = () => setIsAccountPanelOpen(true);
-  const closeAccountPanel = () => setIsAccountPanelOpen(false);
-  const openCommentsModal = () => setIsCommentsModalOpen(true);
-  const closeCommentsModal = () => setIsCommentsModalOpen(false);
-  const openInfoModal = () => setIsInfoModalOpen(true);
-  const closeInfoModal = () => setIsInfoModalOpen(false);
 
   // --- Render Logic ---
   if (isLoading && columnKeys.length === 0) {
@@ -118,7 +57,6 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
     return <div className="h-screen w-screen bg-black flex items-center justify-center text-white">No videos found.</div>;
   }
 
-  const activeSlide = columns[activeColumnIndex]?.[0]; // For modal data
   const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
 
   return (
@@ -135,12 +73,6 @@ const VideoGrid: React.FC<VideoGridProps> = ({ initialCoordinates = { x: 0, y: 0
             <VerticalFeed
               slides={columns[key]}
               isActive={key === activeColumnIndex}
-              onHorizontalSwipe={moveHorizontal}
-              openAccountPanel={openAccountPanel}
-              openCommentsModal={openCommentsModal}
-              openInfoModal={openInfoModal}
-              setIsTopBarModalOpen={setIsTopBarModalOpen}
-              isAnyModalOpen={isAnyModalOpen}
             />
           </div>
         ))}
