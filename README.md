@@ -1,17 +1,7 @@
-# Dziennik Pokładowy Absurdu
+# Readme aplikacji Ting Tong
 
-**Zasada #1: Każda nowa funkcja musi być co najmniej o 10% bardziej absurdalna od poprzedniej. Mierzymy to w jednostkach "WTF na sekundę". Celem jest osiągnięcie kwantowej superpozycji chaosu i użyteczności.**
 
----
 
-### Wpisy:
-
-*   **Wpis #1 (Data Gwiezdna: ...jakaś):** Pacjent zero (ta apka) wykazywał objawy śmiertelnej nudy. Terapia szokowa: wstrzyknięto rozszerzoną siatkę slajdów, tworząc labirynt godny cyfrowego Minotaura. Jako wisienkę na torcie dodano mini-grę "Flappy Div", udowadniając, że nawet `<div>` potrafi marzyć o lataniu. Poziom absurdu: **podniesiony.**
-*   **Wpis #2 (Data Gwiezdna: 2025-09-01):** Agent Jules przejął stery. Zauważono, że poprzedni kapitan zostawił na pulpicie pliki `prototyp.txt` i `tingtong.txt` - starożytne mapy do nikąd. Zamiast je usuwać, oprawiono je w ramkę z ostrzeżeniem, aby przyszli odkrywcy nie podążali ścieżką, która prowadzi donikąd. Jednocześnie zoptymalizowano silniki bazy danych i naprawiono kilka krytycznych błędów, udowadniając, że nawet w absurdzie musi być porządek. Poziom absurdu: **ustabilizowany z tendencją wzrostową.**
-
----
-
-# ting tong professional
 
 ## Wdrożenie
 
