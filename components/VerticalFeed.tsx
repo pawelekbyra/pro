@@ -28,52 +28,54 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     setPrefetchHint,
   } = useVideoGrid();
   const feedRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gestureHandlers = useGesture(moveHorizontal, isAnyModalOpen);
+  const isProgrammaticScroll = useRef(false);
 
-  // --- Infinite Scroll Logic ---
+  // Refined infinite scroll logic
   useEffect(() => {
     const container = feedRef.current;
     if (!container || slides.length <= 1) return;
 
-    // Initial positioning to the first real slide
+    // Initial positioning to the first real slide after mounting
     container.scrollTo({ top: container.clientHeight, behavior: 'auto' });
 
     const handleScroll = () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      // If the scroll is caused by our infinite loop logic, ignore it
+      if (isProgrammaticScroll.current) {
+        isProgrammaticScroll.current = false; // Reset the flag
+        return;
       }
-      scrollTimeoutRef.current = setTimeout(() => {
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const slideHeight = clientHeight;
 
-        // At the top clone, jump to the last real slide
-        if (scrollTop < 1) {
-          container.style.scrollBehavior = 'auto';
-          container.scrollTop = slideHeight * slides.length;
-          requestAnimationFrame(() => {
-            container.style.scrollBehavior = 'smooth';
-          });
-        }
-        // At the bottom clone, jump to the first real slide
-        else if (scrollTop >= scrollHeight - slideHeight) {
-          container.style.scrollBehavior = 'auto';
-          container.scrollTop = slideHeight;
-          requestAnimationFrame(() => {
-            container.style.scrollBehavior = 'smooth';
-          });
-        }
-      }, 150); // Debounce time
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const slideHeight = clientHeight;
+
+      const tolerance = 1; // A small tolerance to handle floating point inaccuracies
+
+      // At the top clone, jump to the last real slide
+      if (scrollTop < tolerance) {
+        isProgrammaticScroll.current = true;
+        container.style.scrollBehavior = 'auto';
+        container.scrollTop = slideHeight * slides.length;
+        // Restore smooth scrolling after the jump
+        setTimeout(() => {
+          container.style.scrollBehavior = 'smooth';
+        }, 50); // A short delay to ensure the scroll jump completes
+      }
+      // At the bottom clone, jump to the first real slide
+      else if (scrollTop >= scrollHeight - slideHeight - tolerance) {
+        isProgrammaticScroll.current = true;
+        container.style.scrollBehavior = 'auto';
+        container.scrollTop = slideHeight;
+        // Restore smooth scrolling after the jump
+        setTimeout(() => {
+          container.style.scrollBehavior = 'smooth';
+        }, 50);
+      }
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
+    return () => container.removeEventListener('scroll', handleScroll);
   }, [slides]);
 
   // --- Horizontal Navigation Scroll Fix ---
@@ -89,7 +91,7 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     }
   }, [isActive, activeColumnIndex]); // Reruns when this column becomes active
 
-  // --- Active Slide Tracking via IntersectionObserver ---
+  // IntersectionObserver now correctly identifies the active slide
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -98,7 +100,7 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
             const slideId = entry.target.getAttribute('data-id');
             const slideX = parseInt(entry.target.getAttribute('data-x') || '0', 10);
             const slideY = parseInt(entry.target.getAttribute('data-y') || '0', 10);
-            if (slideId) {
+            if (slideId && !isProgrammaticScroll.current) {
               setActiveSlide(slideX, slideY, slideId);
             }
           }
