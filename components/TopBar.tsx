@@ -75,22 +75,16 @@ const TopBar = () => {
         {!user ? (
           // --- LOGGED-OUT VIEW ---
           <>
-            <div className="flex-1 flex justify-start">
-              <Button variant="ghost" size="icon" onClick={handleLoggedOutMenuClick} aria-label={t('menuAriaLabel')}>
-                <MenuIcon className="w-6 h-6" />
-              </Button>
-            </div>
-
-            <div className="flex-1 flex justify-center">
+            <div className="flex justify-center flex-1">
               <button
                 onClick={() => setIsLoginPanelOpen(true)}
-                className="font-semibold text-white/80 transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500 animate-pulse"
+                className="font-semibold text-lg text-white transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500"
               >
                 {t('loggedOutText')}
               </button>
             </div>
 
-            <div className="flex-1 flex justify-end">
+            <div className="flex justify-end">
               <Button variant="ghost" size="icon" onClick={handleLoggedOutNotificationClick} aria-label={t('notificationAriaLabel')}>
                 <BellIcon className="w-6 h-6" />
               </Button>
@@ -99,7 +93,7 @@ const TopBar = () => {
         ) : (
           // --- LOGGED-IN VIEW ---
           <>
-            <div className="flex-1 flex justify-start">
+            <div className="flex justify-start">
                 <Button variant="ghost" size="icon" onClick={openAccountPanel} aria-label={t('accountMenuButton')}>
                     {user.avatar ? (
                         <Image
@@ -115,11 +109,11 @@ const TopBar = () => {
                 </Button>
             </div>
 
-            <div className="flex-1 flex justify-center">
+            <div className="flex justify-center flex-1">
                 <span className="font-semibold text-lg text-white">Ting Tong</span>
             </div>
 
-            <div className="flex-1 flex justify-end">
+            <div className="flex justify-end">
                 <div className="relative">
                     <Button variant="ghost" size="icon" onClick={handleLoggedInNotificationClick} aria-label={t('notificationAriaLabel')}>
                         <BellIcon className="w-6 h-6" />

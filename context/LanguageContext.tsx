@@ -294,36 +294,23 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// This will control whether the preloader is always shown for testing purposes.
-const FORCE_SHOW_PRELOADER = process.env.NEXT_PUBLIC_FORCE_SHOW_PRELOADER === 'true';
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [lang, setLangState] = useState<Language>('pl');
   const [isLangSelected, setIsLangSelected] = useState(false);
 
   const setLanguage = (newLang: Language) => {
     setLangState(newLang);
-    localStorage.setItem('app_lang', newLang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('app_lang', newLang);
+    }
   };
 
   useEffect(() => {
-    if (FORCE_SHOW_PRELOADER) {
-      return;
+    const savedLang = typeof window !== 'undefined' ? localStorage.getItem('app_lang') : null;
+    if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
+      setLangState(savedLang as Language);
+      setIsLangSelected(true);
     }
-
-    const timer = setTimeout(() => {
-      const savedLang = localStorage.getItem('app_lang');
-      if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
-        // Explicitly set language and isLangSelected state
-        setLangState(savedLang as Language);
-        setIsLangSelected(true);
-      } else {
-        // If no language is saved, do nothing, so isLangSelected remains false
-        // and the preloader shows the language selection.
-      }
-    }, 500); // Delay of 500ms to ensure preloader is visible
-
-    return () => clearTimeout(timer);
   }, []);
 
   const selectInitialLang = (initialLang: Language) => {

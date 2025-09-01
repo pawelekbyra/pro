@@ -9,10 +9,12 @@ import { Crown } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Image from 'next/image';
 import { useTranslation } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 
 const ProfileTab: React.FC = () => {
-  const { user: profile, checkUserStatus } = useUser();
+  const { user: profile, checkUserStatus, logout } = useUser();
   const { t, setLanguage, lang } = useTranslation();
+  const { addToast } = useToast();
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,6 +100,11 @@ const ProfileTab: React.FC = () => {
       setIsCropModalOpen(false);
       setImageToCrop(null);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    addToast(t('logoutSuccess'), 'success');
   };
 
   if (!profile) {
@@ -198,6 +205,15 @@ const ProfileTab: React.FC = () => {
               {isSubmitting ? t('saving') : t('saveSettings')}
             </Button>
           </form>
+        </div>
+        <div className="flex justify-center mt-4">
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="w-full text-white/80 border-white/20 hover:bg-white/10"
+            >
+              {t('logoutLink')}
+            </Button>
         </div>
       </div>
 
