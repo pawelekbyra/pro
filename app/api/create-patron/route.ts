@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generowanie losowego hasła
-        const password = 'temporary-password'; // Prawdziwa implementacja powinna generować bezpieczne, losowe hasło
+        const password = randomBytes(16).toString('hex');
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Tworzenie użytkownika w bazie danych
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
             password: hashedPassword,
             username: email.split('@')[0],
             displayName: `Patron ${email.split('@')[0]}`,
-            user_type: 'user',
+            role: 'user',
         });
 
         // Wysłanie e-maila z loginem i hasłem (koncepcyjnie)

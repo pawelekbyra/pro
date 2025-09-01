@@ -4,18 +4,14 @@ import React from 'react';
 import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import SlideManagementClient from './SlideManagementClient';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SlideManagementPage() {
   const session = await verifySession();
   if (!session || session.user.role !== 'admin') {
-    return (
-      <div className="p-4">
-        <h2 className="text-2xl font-semibold mb-4">Unauthorized</h2>
-        <p>You must be an admin to view this page.</p>
-      </div>
-    );
+    redirect('/admin/login');
   }
 
   // Use the new getAllSlides function

@@ -2,10 +2,17 @@ import { db } from '@/lib/db';
 import React from 'react';
 import { revalidatePath } from 'next/cache';
 import UserManagementClient from './UserManagementClient';
+import { verifySession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function UserManagementPage() {
+  const payload = await verifySession();
+  if (!payload || payload.user.role !== 'admin') {
+    redirect('/admin/login');
+  }
+
   const users = await db.getAllUsers();
 
   async function deleteUserAction(formData: FormData) {

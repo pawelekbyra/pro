@@ -4,12 +4,12 @@
 export interface User {
   id: string;
   email: string;
-  username:string;
+  username: string;
   password?: string;
-  "displayName"?: string;
+  displayName?: string;
   avatar?: string;
-  "sessionVersion"?: number;
-  "user_type"?: 'user' | 'admin';
+  sessionVersion?: number;
+  role?: 'user' | 'admin';
 }
 
 export interface Comment {

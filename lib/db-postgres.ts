@@ -33,7 +33,7 @@ export async function createTables() {
       email VARCHAR(255) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
       avatar VARCHAR(255),
-      "user_type" VARCHAR(50) DEFAULT 'user',
+      "role" VARCHAR(50) DEFAULT 'user',
       "sessionVersion" INTEGER DEFAULT 1
     );
   `;
@@ -107,10 +107,10 @@ export async function getAllUsers(): Promise<User[]> {
 }
 export async function createUser(userData: Omit<User, 'id' | 'sessionVersion' | 'password'> & {password: string}): Promise<User> {
     const sql = getDb();
-    const { username, displayName, email, password, avatar, user_type } = userData;
+    const { username, displayName, email, password, avatar, role } = userData;
     const result = await sql`
-        INSERT INTO users (username, "displayName", email, password, avatar, "user_type")
-        VALUES (${username}, ${displayName}, ${email}, ${password}, ${avatar}, ${user_type || 'user'})
+        INSERT INTO users (username, "displayName", email, password, avatar, "role")
+        VALUES (${username}, ${displayName}, ${email}, ${password}, ${avatar}, ${role || 'user'})
         RETURNING *;
     `;
     return result[0] as User;
@@ -120,10 +120,10 @@ export async function updateUser(userId: string, updates: Partial<User>): Promis
     const user = await findUserById(userId);
     if (!user) return null;
     const updatedUser = { ...user, ...updates };
-    const { id, username, displayName, email, password, avatar, user_type, sessionVersion } = updatedUser;
+    const { id, username, displayName, email, password, avatar, role, sessionVersion } = updatedUser;
     const result = await sql`
         UPDATE users
-        SET username = ${username}, "displayName" = ${displayName}, email = ${email}, password = ${password}, avatar = ${avatar}, "user_type" = ${user_type}, "sessionVersion" = ${sessionVersion}
+        SET username = ${username}, "displayName" = ${displayName}, email = ${email}, password = ${password}, avatar = ${avatar}, "role" = ${role}, "sessionVersion" = ${sessionVersion}
         WHERE id = ${id}
         RETURNING *;
     `;
@@ -298,19 +298,19 @@ export async function savePushSubscription(userId: string, subscription: object,
     `;
 }
 
-export async function getPushSubscriptions(options: { userId?: string, userType?: string, isPwaInstalled?: boolean }): Promise<any[]> {
+export async function getPushSubscriptions(options: { userId?: string, role?: string, isPwaInstalled?: boolean }): Promise<any[]> {
     const sql = getDb();
-    const { userId, userType, isPwaInstalled } = options;
+    const { userId, role, isPwaInstalled } = options;
 
     if (userId) {
         return await sql`SELECT ps.subscription FROM push_subscriptions ps WHERE ps."userId" = ${userId}`;
     }
 
-    if (userType) {
+    if (role) {
         return await sql`
             SELECT ps.subscription FROM push_subscriptions ps
             JOIN users u ON ps."userId" = u.id
-            WHERE u.user_type = ${userType}`;
+            WHERE u.role = ${role}`;
     }
 
     if (isPwaInstalled !== undefined) {

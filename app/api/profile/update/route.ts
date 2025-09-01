@@ -4,7 +4,10 @@ import { cookies } from 'next/headers';
 import { db, User } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
+if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is not set");
+}
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 const COOKIE_NAME = 'session';
 
 export const dynamic = 'force-dynamic';
