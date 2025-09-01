@@ -25,7 +25,7 @@ interface VideoPlayerProps {
 const DOUBLE_CLICK_DELAY_MS = 200;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isActive, isSecretActive, videoId, slide, videoRef, onTimeUpdate, startTime, onPlaybackFailure, isPlaying }) => {
-  const { prefetchHint, activeSlideId } = useVideoGrid();
+  const { prefetchHint, activeSlideId, isAnyModalOpen } = useVideoGrid();
   const [currentSrc, setCurrentSrc] = useState(hlsSrc || mp4Src);
   const [isHls, setIsHls] = useState(!!hlsSrc);
 
@@ -60,7 +60,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
     const isThisVideoActive = videoId === activeSlideId;
 
     // Smart Playback Logic
-    if (isActive && isThisVideoActive) {
+    if (isActive && !isAnyModalOpen && isThisVideoActive) {
       // This is the active slide, play it with sound
       video.muted = false;
       if (startTime > 0 && Math.abs(video.currentTime - startTime) > 0.5) {
@@ -89,7 +89,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsSrc, mp4Src, poster, isAct
       }
       video.muted = true;
     }
-  }, [isActive, activeSlideId, videoId, videoRef, onTimeUpdate, startTime, onPlaybackFailure]);
+  }, [isActive, isAnyModalOpen, activeSlideId, videoId, videoRef, onTimeUpdate, startTime, onPlaybackFailure]);
 
   const triggerLikeAnimation = () => {
     setShowHeart(true);

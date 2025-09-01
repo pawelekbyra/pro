@@ -114,33 +114,43 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
     return () => observer.disconnect();
   }, [slides, setActiveSlide]);
 
-  // --- Pre-fetching Logic ---
+  // --- Advanced Pre-fetching Logic ---
   useEffect(() => {
-    if (!activeSlideId) return;
+    if (!activeSlideId || !slides.length) {
+      setPrefetchHint(null);
+      return;
+    }
 
     const currentColumn = slides;
     const currentSlideIndex = currentColumn.findIndex(s => s.id === activeSlideId);
 
-    if (currentSlideIndex === -1) return;
+    if (currentSlideIndex === -1) {
+      setPrefetchHint(null);
+      return;
+    }
 
-    // Prefetch next slide in the same column
-    if (currentSlideIndex < currentColumn.length - 1) {
-      const nextSlide = currentColumn[currentSlideIndex + 1];
+    // When near the end of the column, prioritize pre-fetching the next column for a smooth horizontal swipe.
+    const isNearEnd = currentSlideIndex >= currentColumn.length - 2;
+    const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
+    const hasNextColumn = currentKeyIndex < columnKeys.length - 1;
+
+    if (isNearEnd && hasNextColumn) {
+      const nextColumnX = columnKeys[currentKeyIndex + 1];
+      const nextColumn = columns[nextColumnX];
+      if (nextColumn && nextColumn.length > 0) {
+        const nextSlide = nextColumn[0];
+        setPrefetchHint({ x: nextSlide.x, y: nextSlide.y });
+        return; // Prioritize horizontal pre-fetch
+      }
+    }
+
+    // Otherwise, pre-fetch the next slide in the current column, looping for infinite scroll.
+    const nextSlideIndex = (currentSlideIndex + 1) % currentColumn.length;
+    const nextSlide = currentColumn[nextSlideIndex];
+    if (nextSlide) {
       setPrefetchHint({ x: nextSlide.x, y: nextSlide.y });
     } else {
-      // Or prefetch the first slide of the next column if we are at the end
-      const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
-      if (currentKeyIndex < columnKeys.length - 1) {
-        const nextColumnX = columnKeys[currentKeyIndex + 1];
-        const nextColumn = columns[nextColumnX];
-        if (nextColumn && nextColumn.length > 0) {
-          const nextSlide = nextColumn[0];
-          setPrefetchHint({ x: nextSlide.x, y: nextSlide.y });
-        }
-      } else {
-        // No more slides to prefetch
-        setPrefetchHint(null);
-      }
+      setPrefetchHint(null);
     }
   }, [activeSlideId, slides, activeColumnIndex, columnKeys, columns, setPrefetchHint]);
 
@@ -187,7 +197,7 @@ const VerticalFeed: React.FC<VerticalFeedProps> = ({
           >
             <SlideRenderer
               slide={slide}
-              isActive={isActive && !isAnyModalOpen && activeSlideId === slide.id}
+              isActive={isActive && activeSlideId === slide.id}
               setIsModalOpen={setIsTopBarModalOpen}
               onTimeUpdate={() => {}} // Placeholder, can be implemented if needed
               startTime={0} // Playback position is managed by the browser on scroll
