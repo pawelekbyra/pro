@@ -107,11 +107,11 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onLike, onReplySubmi
 interface CommentsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  videoId?: string;
+  slideId?: string;
   initialCommentsCount: number;
 }
 
-const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId, initialCommentsCount }) => {
+const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, slideId, initialCommentsCount }) => {
   const { t } = useTranslation();
   const { user } = useUser();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -121,10 +121,10 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen && videoId) {
+    if (isOpen && slideId) {
       setIsLoading(true);
       setError(null);
-      fetch(`/api/comments?slideId=${videoId}`)
+      fetch(`/api/comments?slideId=${slideId}`)
         .then(res => {
           if (!res.ok) {
             throw new Error('Failed to fetch comments');
@@ -145,7 +145,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
           setIsLoading(false);
         });
     }
-  }, [isOpen, videoId]);
+  }, [isOpen, slideId]);
 
   const handleLike = async (commentId: string) => {
     if (!user) {
@@ -238,7 +238,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
   };
 
   const handleReplySubmit = async (parentId: string, text: string) => {
-    if (!text.trim() || !user || !videoId) return;
+    if (!text.trim() || !user || !slideId) return;
 
     // Optimistic update
     const tempId = `temp-${Date.now()}`;
@@ -256,7 +256,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoId, text, parentId }),
+        body: JSON.stringify({ slideId, text, parentId }),
       });
       if (!res.ok) {
         throw new Error('Failed to post reply');
@@ -275,22 +275,39 @@ const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, videoId,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedComment = newComment.trim();
-    if (!trimmedComment || !user || !videoId) return;
+    if (!trimmedComment || !user || !slideId) return;
 
     setIsSubmitting(true);
     setError(null);
+    setNewComment(''); // Clear input immediately
+
+    // Optimistic update
+    const tempId = `temp-${Date.now()}`;
+    const newCommentData: Comment = {
+      id: tempId,
+      text: trimmedComment,
+      createdAt: new Date().toISOString(),
+      likedBy: [],
+      user: { displayName: user.displayName || user.username, avatar: user.avatar || '' },
+      parentId: null,
+    };
+    addCommentOptimistically(newCommentData);
+
     try {
       const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoId, text: trimmedComment }),
+        body: JSON.stringify({ slideId, text: trimmedComment }),
       });
-      if (!res.ok) throw new Error('Failed to post comment');
+      if (!res.ok) {
+        throw new Error('Failed to post comment');
+      }
       const data = await res.json();
-      addCommentOptimistically(data.comment);
-      setNewComment('');
+      replaceTempComment(tempId, data.comment);
     } catch (err: any) {
       setError(err.message);
+      // Revert on failure
+      removeCommentOptimistically(tempId);
     } finally {
       setIsSubmitting(false);
     }

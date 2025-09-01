@@ -229,23 +229,39 @@ export async function deleteSlide(slideId: string): Promise<boolean> {
     const result = await sql`DELETE FROM slides WHERE id = ${slideId} RETURNING id;`;
     return result.length > 0;
 }
-export async function getSlidesInView(options: { x: number, y: number, width: number, height: number, currentUserId?: string }): Promise<Slide[]> {
+export async function getSlidesInView(options: { x: number, y: number, width: number, height: number, currentUserId?: string, metadataOnly?: boolean }): Promise<Slide[]> {
     const sql = getDb();
-    const { x, y, width, height, currentUserId } = options;
-    const results = await sql`
-        SELECT s.*,
-            (SELECT COUNT(*) FROM likes l WHERE l."slideId" = s.id) as "initialLikes",
-            (SELECT COUNT(*) FROM comments c WHERE c."slideId" = s.id) as "initialComments",
-            (SELECT EXISTS(SELECT 1 FROM likes l WHERE l."slideId" = s.id AND l."userId" = ${currentUserId || null})) as "isLiked"
-        FROM slides s
-        WHERE s.x >= ${x} AND s.x < ${x + width} AND s.y >= ${y} AND s.y < ${y + height};
-    `;
+    const { x, y, width, height, currentUserId, metadataOnly } = options;
+
+    let results;
+    const whereClause = sql`WHERE s.x >= ${x} AND s.x < ${x + width} AND s.y >= ${y} AND s.y < ${y + height}`;
+
+    if (metadataOnly) {
+        results = await sql`
+            SELECT s.id, s."userId", s.username, s.x, s.y, s."slideType", s.title, s."createdAt",
+                (SELECT COUNT(*) FROM likes l WHERE l."slideId" = s.id) as "initialLikes",
+                (SELECT COUNT(*) FROM comments c WHERE c."slideId" = s.id) as "initialComments",
+                (SELECT EXISTS(SELECT 1 FROM likes l WHERE l."slideId" = s.id AND l."userId" = ${currentUserId || null})) as "isLiked"
+            FROM slides s
+            ${whereClause};
+        `;
+    } else {
+        results = await sql`
+            SELECT s.*,
+                (SELECT COUNT(*) FROM likes l WHERE l."slideId" = s.id) as "initialLikes",
+                (SELECT COUNT(*) FROM comments c WHERE c."slideId" = s.id) as "initialComments",
+                (SELECT EXISTS(SELECT 1 FROM likes l WHERE l."slideId" = s.id AND l."userId" = ${currentUserId || null})) as "isLiked"
+            FROM slides s
+            ${whereClause};
+        `;
+    }
+
     return (results as unknown as any[]).map(dbSlide => {
         const { slideType, content, ...rest } = dbSlide;
         return {
             ...rest,
             type: slideType,
-            data: JSON.parse(content as string || '{}'),
+            data: metadataOnly ? undefined : JSON.parse(content as string || '{}'),
         };
     }) as Slide[];
 }

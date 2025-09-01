@@ -112,6 +112,10 @@ export default function Home() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [columns, activeColumnIndex]);
 
+  // JULES: This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
+  // The use of isProgrammaticScroll.current is crucial to prevent conflicts with the user's manual scrolling.
+  // A potential refinement here would be to use a more robust state management for scrolling actions
+  // (e.g., a state machine) to prevent edge cases where different scroll effects might be triggered at once.
   useEffect(() => {
     // Scroll to the active slide when it changes
     const slideElement = document.getElementById(`slide-${activeColumnIndex}-${activeSlideY}`);

@@ -2,8 +2,8 @@
 
 import React, { createContext, useEffect, useCallback, useMemo, ReactNode, useContext, useReducer } from 'react';
 import { Grid, Slide } from '@/lib/types';
-
-type Columns = { [x: number]: Slide[] };
+import { useToast } from './ToastContext';
+export type ModalType = 'account' | 'comments' | 'info' | 'topbar' | null;
 
 // --- State and Reducer ---
 
@@ -15,10 +15,7 @@ interface State {
   soundActiveSlideId: string | null;
   prefetchHint: { x: number, y: number } | null;
   loadingColumns: Set<number>;
-  isAccountPanelOpen: boolean;
-  isCommentsModalOpen: boolean;
-  isInfoModalOpen: boolean;
-  isTopBarModalOpen: boolean;
+  activeModal: ModalType;
   error: Error | null;
 }
 
@@ -30,8 +27,9 @@ type Action =
   | { type: 'SET_PREFETCH_HINT'; payload: { x: number; y: number } | null }
   | { type: 'START_LOADING_COLUMN'; payload: number }
   | { type: 'FINISH_LOADING_COLUMN'; payload: number }
-  | { type: 'SET_MODAL_OPEN'; payload: { modal: 'isAccountPanelOpen' | 'isCommentsModalOpen' | 'isInfoModalOpen' | 'isTopBarModalOpen'; isOpen: boolean } }
-  | { type: 'SET_ERROR'; payload: Error | null };
+  | { type: 'SET_ACTIVE_MODAL'; payload: ModalType }
+  | { type: 'SET_ERROR'; payload: Error | null }
+  | { type: 'MERGE_SLIDE_DATA'; payload: Slide };
 
 const initialState: State = {
   columns: {},
@@ -41,10 +39,7 @@ const initialState: State = {
   soundActiveSlideId: null,
   prefetchHint: null,
   loadingColumns: new Set(),
-  isAccountPanelOpen: false,
-  isCommentsModalOpen: false,
-  isInfoModalOpen: false,
-  isTopBarModalOpen: false,
+  activeModal: null,
   error: null,
 };
 
@@ -53,7 +48,16 @@ function reducer(state: State, action: Action): State {
     case 'SET_GRID_DATA':
       return { ...state, columns: action.payload };
     case 'ADD_GRID_DATA':
-      return { ...state, columns: { ...state.columns, ...action.payload } };
+      const combinedColumns = { ...state.columns };
+      for (const x in action.payload) {
+        if (combinedColumns[x]) {
+          // Simple merge, could be more sophisticated to avoid duplicates
+          combinedColumns[x] = [...combinedColumns[x], ...action.payload[x]];
+        } else {
+          combinedColumns[x] = action.payload[x];
+        }
+      }
+      return { ...state, columns: combinedColumns };
     case 'UPDATE_ACTIVE_SLIDE':
       return {
         ...state,
@@ -73,10 +77,20 @@ function reducer(state: State, action: Action): State {
       const newLoadingColumns = new Set(state.loadingColumns);
       newLoadingColumns.delete(action.payload);
       return { ...state, loadingColumns: newLoadingColumns };
-    case 'SET_MODAL_OPEN':
-      return { ...state, [action.payload.modal]: action.payload.isOpen };
+    case 'SET_ACTIVE_MODAL':
+      return { ...state, activeModal: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    case 'MERGE_SLIDE_DATA':
+      const { id, x } = action.payload;
+      const newColumnsState = { ...state.columns };
+      if (newColumnsState[x]) {
+        const slideIndex = newColumnsState[x].findIndex(slide => slide.id === id);
+        if (slideIndex !== -1) {
+          newColumnsState[x][slideIndex] = { ...newColumnsState[x][slideIndex], ...action.payload };
+        }
+      }
+      return { ...state, columns: newColumnsState };
     default:
       return state;
   }
@@ -92,13 +106,8 @@ interface VideoGridContextType {
   setActiveSlide: (x: number, y: number, id: string) => void;
   setSoundActiveSlide: (id: string | null) => void;
   setPrefetchHint: (hint: { x: number; y: number } | null) => void;
-  openAccountPanel: () => void;
-  closeAccountPanel: () => void;
-  openCommentsModal: () => void;
-  closeCommentsModal: () => void;
-  openInfoModal: () => void;
-  closeInfoModal: () => void;
-  setIsTopBarModalOpen: (isOpen: boolean) => void;
+  fetchFullSlide: (id: string) => Promise<void>;
+  setActiveModal: (modal: ModalType) => void;
   initialCoordinates?: { x: number; y: number };
   activeSlide?: Slide;
   columnKeys: number[];
@@ -113,16 +122,26 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     activeSlideY: initialCoordinates.y,
   });
 
-  const isAnyModalOpen = state.isAccountPanelOpen || state.isCommentsModalOpen || state.isInfoModalOpen || state.isTopBarModalOpen;
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    if (state.error) {
+      addToast(state.error.message, 'error');
+      // Optional: Clear the error after showing it so it doesn't reappear on re-renders
+      // dispatch({ type: 'SET_ERROR', payload: null });
+    }
+  }, [state.error, addToast]);
+
+  const isAnyModalOpen = state.activeModal !== null;
   const isLoading = state.loadingColumns.size > 0;
 
-  const fetchColumn = useCallback(async (x: number) => {
-    if (state.columns[x] || state.loadingColumns.has(x)) {
+  const fetchColumn = useCallback(async (x: number, metadataOnly: boolean = false) => {
+    if (state.columns[x] && (!metadataOnly || state.columns[x].every(s => !s.data))) {
       return;
     }
     dispatch({ type: 'START_LOADING_COLUMN', payload: x });
     try {
-      const response = await fetch(`/api/slides?x=${x}`);
+      const response = await fetch(`/api/slides?x=${x}&meta_only=${metadataOnly}`);
       if (!response.ok) throw new Error(`Failed to fetch column ${x}`);
       const data = await response.json();
       const grid: Grid = data.grid;
@@ -150,19 +169,35 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     }
   }, [state.columns, state.loadingColumns]);
 
+  const fetchFullSlide = useCallback(async (id: string) => {
+      const slide = Object.values(state.columns).flat().find(s => s.id === id);
+      if (slide && slide.data) {
+          return;
+      }
+      try {
+          const response = await fetch(`/api/slide/${id}`);
+          if (!response.ok) throw new Error('Failed to fetch full slide data');
+          const data = await response.json();
+          if (data.slide) {
+              dispatch({ type: 'MERGE_SLIDE_DATA', payload: data.slide });
+          }
+      } catch (err) {
+          console.error(`Failed to fetch full data for slide ${id}:`, err);
+          dispatch({ type: 'SET_ERROR', payload: err as Error });
+      }
+  }, [state.columns]);
+
   useEffect(() => {
     const x = state.activeColumnIndex;
-    // Fetch current column and pre-fetch adjacent ones
-    fetchColumn(x);
-    fetchColumn(x + 1);
+    fetchColumn(x, false);
+    fetchColumn(x + 1, true);
     if (x > 0) {
-      fetchColumn(x - 1);
+      fetchColumn(x - 1, true);
     }
   }, [state.activeColumnIndex, fetchColumn]);
 
   const columnKeys = useMemo(() => Object.keys(state.columns).map(Number).sort((a, b) => a - b), [state.columns]);
 
-  // --- Navigation ---
   const setActiveSlide = useCallback((x: number, y: number, id: string) => {
     dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x, y, id } });
   }, []);
@@ -180,7 +215,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     let nextKeyIndex;
     if (direction === 'left') {
       nextKeyIndex = Math.max(0, currentKeyIndex - 1);
-    } else { // 'right'
+    } else {
       nextKeyIndex = Math.min(columnKeys.length - 1, currentKeyIndex + 1);
     }
 
@@ -193,15 +228,9 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     }
   }, [state.activeColumnIndex, columnKeys, state.columns]);
 
-  // --- Modal Handlers ---
-  const openAccountPanel = () => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isAccountPanelOpen', isOpen: true } });
-  const closeAccountPanel = () => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isAccountPanelOpen', isOpen: false } });
-  const openCommentsModal = () => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isCommentsModalOpen', isOpen: true } });
-  const closeCommentsModal = () => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isCommentsModalOpen', isOpen: false } });
-  const openInfoModal = () => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isInfoModalOpen', isOpen: true } });
-  const closeInfoModal = () => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isInfoModalOpen', isOpen: false } });
-  const setIsTopBarModalOpen = (isOpen: boolean) => dispatch({ type: 'SET_MODAL_OPEN', payload: { modal: 'isTopBarModalOpen', isOpen } });
-
+  const setActiveModal = useCallback((modal: ModalType) => {
+    dispatch({ type: 'SET_ACTIVE_MODAL', payload: modal });
+  }, []);
 
   const activeSlide = useMemo(() => {
     const column = state.columns[state.activeColumnIndex];
@@ -217,13 +246,8 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     setActiveSlide,
     setSoundActiveSlide,
     setPrefetchHint,
-    openAccountPanel,
-    closeAccountPanel,
-    openCommentsModal,
-    closeCommentsModal,
-    openInfoModal,
-    closeInfoModal,
-    setIsTopBarModalOpen,
+    fetchFullSlide,
+    setActiveModal,
     initialCoordinates,
     activeSlide,
     columnKeys,
