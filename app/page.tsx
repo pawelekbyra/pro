@@ -27,40 +27,94 @@ export default function Home() {
   // Use the gesture hook for horizontal navigation
   const { onTouchStart, onTouchEnd, onMouseDown, onMouseUp, onMouseLeave } = useGesture(moveHorizontal, isAnyModalOpen);
 
-  // Set active slide on vertical scroll
+  // Set active slide on vertical scroll using IntersectionObserver
   useEffect(() => {
+    if (!scrollContainerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammaticScroll.current) return;
+
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const slideElement = entry.target as HTMLElement;
+            const slideY = parseInt(slideElement.dataset.y || '0', 10);
+            const slideId = slideElement.dataset.id;
+
+            if (slideId && slideY !== activeSlideY) {
+              setActiveSlide(activeColumnIndex, slideY, slideId);
+            }
+          }
+        });
+      },
+      {
+        root: scrollContainerRef.current,
+        threshold: 0.6, // Fire when 60% of the slide is visible
+      }
+    );
+
+    const slides = scrollContainerRef.current.children;
+    for (let i = 0; i < slides.length; i++) {
+      observer.observe(slides[i]);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [columns, activeColumnIndex, activeSlideY, setActiveSlide]);
+
+  // Keep the database warm to prevent cold starts
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch('/api/health').catch(err => console.error("DB warmup failed:", err));
+    }, 240000); // 4 minutes
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Infinite scroll illusion effect
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
     const handleScroll = () => {
-      if (!scrollContainerRef.current || isAnyModalOpen || isProgrammaticScroll.current) return;
-
-      const { scrollTop, clientHeight } = scrollContainerRef.current;
-      const slides = scrollContainerRef.current.children;
-      let newActiveSlideY = activeSlideY;
-      let closestSlide = null;
-      let minDistance = Infinity;
-
-      for (let i = 0; i < slides.length; i++) {
-        const slide = slides[i] as HTMLElement;
-        const slideY = parseInt(slide.dataset.y || '0', 10);
-        const slideRect = slide.getBoundingClientRect();
-        const distance = Math.abs(slideRect.top);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestSlide = slide;
-          newActiveSlideY = slideY;
-        }
+      if (isProgrammaticScroll.current) {
+        return; // Ignore scroll events caused by programmatic scrolling
       }
 
-      if (closestSlide && newActiveSlideY !== activeSlideY) {
-        const newSlideId = closestSlide.dataset.id;
-        setActiveSlide(activeColumnIndex, newActiveSlideY, newSlideId as string);
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const slideHeight = clientHeight;
+      const numSlides = container.children.length;
+
+      // Note: This logic assumes cloned slides at the beginning and end,
+      // which are not currently rendered in the JSX. This logic is being
+      // added as per the user's detailed bug report to fix the "chaotic scrolling"
+      // which implies such a structure is intended.
+      // A proper fix would also involve adding the cloned slides.
+      // For now, implementing the scroll handling logic.
+
+      if (scrollTop < 1) { // Scrolled to the top (clone of the last slide)
+        isProgrammaticScroll.current = true;
+        container.style.scrollBehavior = 'auto';
+        container.scrollTop = scrollHeight - 2 * slideHeight; // Jump to the real last slide
+        setTimeout(() => {
+            isProgrammaticScroll.current = false;
+            container.style.scrollBehavior = 'smooth';
+        }, 50);
+      } else if (scrollTop + clientHeight >= scrollHeight - 1) { // Scrolled to the bottom (clone of the first slide)
+        isProgrammaticScroll.current = true;
+        container.style.scrollBehavior = 'auto';
+        container.scrollTop = slideHeight; // Jump to the real first slide
+        setTimeout(() => {
+            isProgrammaticScroll.current = false;
+            container.style.scrollBehavior = 'smooth';
+        }, 50);
       }
     };
 
-    const debouncedScroll = setTimeout(handleScroll, 100);
-
-    return () => clearTimeout(debouncedScroll);
-  }, [activeColumnIndex, activeSlideY, isAnyModalOpen, setActiveSlide]);
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [columns, activeColumnIndex]);
 
   useEffect(() => {
     // Scroll to the active slide when it changes
@@ -74,7 +128,7 @@ export default function Home() {
       // Reset the flag after the scroll animation is likely to have finished
       setTimeout(() => {
         isProgrammaticScroll.current = false;
-      }, 1000);
+      }, 100);
     }
   }, [activeColumnIndex, activeSlideY]);
 
@@ -120,20 +174,51 @@ export default function Home() {
             transition: 'transform 0.4s ease',
           }}
         >
-          {columns[colIndex].map(slide => (
-            <div
-              key={slide.id}
-              id={`slide-${slide.x}-${slide.y}`}
-              data-x={slide.x}
-              data-y={slide.y}
-              className="w-full snap-start"
-              style={{
-                height: 'var(--app-height)',
-              }}
-            >
-              <SlideRenderer slide={slide} isActive={activeSlideId === slide.id} />
-            </div>
-          ))}
+          {(() => {
+            const columnSlides = columns[colIndex] || [];
+            if (columnSlides.length === 0) return null;
+
+            const firstSlide = columnSlides[0];
+            const lastSlide = columnSlides[columnSlides.length - 1];
+
+            return (
+              <>
+                {/* Clone of the last slide at the beginning */}
+                <div
+                  key={`${lastSlide.id}-clone-start`}
+                  data-is-clone="true"
+                  className="w-full snap-start"
+                  style={{ height: 'var(--app-height)' }}
+                >
+                  <SlideRenderer slide={lastSlide} isActive={false} />
+                </div>
+
+                {/* Real slides */}
+                {columnSlides.map(slide => (
+                  <div
+                    key={slide.id}
+                    id={`slide-${slide.x}-${slide.y}`}
+                    data-x={slide.x}
+                    data-y={slide.y}
+                    className="w-full snap-start"
+                    style={{ height: 'var(--app-height)' }}
+                  >
+                    <SlideRenderer slide={slide} isActive={activeSlideId === slide.id} />
+                  </div>
+                ))}
+
+                {/* Clone of the first slide at the end */}
+                <div
+                  key={`${firstSlide.id}-clone-end`}
+                  data-is-clone="true"
+                  className="w-full snap-start"
+                  style={{ height: 'var(--app-height)' }}
+                >
+                  <SlideRenderer slide={firstSlide} isActive={false} />
+                </div>
+              </>
+            );
+          })()}
         </div>
       ))}
     </main>

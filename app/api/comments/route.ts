@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   const currentUser = payload.user;
 
   try {
-    const { slideId, text } = await request.json(); // parentId is not supported by the real db function
+    const { slideId, text, parentId } = await request.json();
 
     if (!slideId || !text) {
       return NextResponse.json({ success: false, message: 'slideId and text are required' }, { status: 400 });
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Comment text cannot be empty.' }, { status: 400 });
     }
 
-    // Use the real db.addComment
-    const newComment = await db.addComment(slideId, currentUser.id, text.trim());
+    // Pass parentId to db.addComment
+    const newComment = await db.addComment(slideId, currentUser.id, text.trim(), parentId || null);
 
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
 

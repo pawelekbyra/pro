@@ -122,18 +122,26 @@ export const db = {
     return newComment;
   },
 
-  async toggleCommentLike(commentId: string, userId: string) {
+  async toggleCommentLike(commentId: string, userId: string): Promise<{ newStatus: 'liked' | 'unliked', likeCount: number }> {
     const comment = comments[commentId];
     if (!comment) {
       throw new Error('Comment not found');
     }
+
+    let newStatus: 'liked' | 'unliked';
     const index = comment.likedBy.indexOf(userId);
+
     if (index > -1) {
+      // User has already liked, so unlike
       comment.likedBy.splice(index, 1);
+      newStatus = 'unliked';
     } else {
+      // User has not liked, so like
       comment.likedBy.push(userId);
+      newStatus = 'liked';
     }
-    return { success: true };
+
+    return { newStatus, likeCount: comment.likedBy.length };
   },
 
   // --- Notification Functions ---
