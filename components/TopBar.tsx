@@ -12,6 +12,7 @@ import LoginForm from './LoginForm';
 import { useToast } from '@/context/ToastContext';
 import MenuIcon from './icons/MenuIcon';
 import BellIcon from './icons/BellIcon';
+import PwaDesktopModal from './PwaDesktopModal'; // Import nowego komponentu
 
 const TopBar = () => {
   const { user } = useUser();
@@ -21,6 +22,8 @@ const TopBar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false); // Nowy stan
+  const [showPwaModal, setShowPwaModal] = useState(false); // Nowy stan
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -37,6 +40,16 @@ const TopBar = () => {
       fetchNotifications();
     }
   }, [user]);
+
+  // Nowy useEffect do wykrywania desktopu
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        setIsDesktop(window.innerWidth > 768);
+        const handleResize = () => setIsDesktop(window.innerWidth > 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   // --- Handlers for Logged-Out State ---
   const handleLoggedOutMenuClick = () => {
@@ -62,6 +75,10 @@ const TopBar = () => {
     }
   };
 
+  const handleShowPwaModal = () => {
+    setShowPwaModal(true);
+  };
+
   return (
     <>
       <div
@@ -84,7 +101,7 @@ const TopBar = () => {
             <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-md text-white transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500"
+                className="font-semibold text-sm text-white transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500"
               >
                 <span>{t('loggedOutText')}</span>
                 <span className='ml-2'>Ting Tong</span>
@@ -92,6 +109,12 @@ const TopBar = () => {
             </div>
 
             <div className="flex justify-end w-16">
+              {/* Nowy przycisk do pobierania PWA */}
+              {isDesktop && (
+                  <Button variant="ghost" size="icon" onClick={handleShowPwaModal} aria-label={t('installPwaAriaLabel')}>
+                      <span className="text-sm font-semibold">{t('installAppText')}</span>
+                  </Button>
+              )}
               <Button variant="ghost" size="icon" onClick={handleLoggedOutNotificationClick} aria-label={t('notificationAriaLabel')}>
                 <BellIcon className="w-6 h-6" />
               </Button>
@@ -121,6 +144,11 @@ const TopBar = () => {
             </div>
 
             <div className="flex justify-end">
+                {isDesktop && (
+                    <Button variant="ghost" size="icon" onClick={handleShowPwaModal} aria-label={t('installPwaAriaLabel')}>
+                        <span className="text-sm font-semibold">{t('installAppText')}</span>
+                    </Button>
+                )}
                 <div className="relative">
                     <Button variant="ghost" size="icon" onClick={handleLoggedInNotificationClick} aria-label={t('notificationAriaLabel')}>
                         <BellIcon className="w-6 h-6" />
@@ -153,6 +181,12 @@ const TopBar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Nowy modal dla PWA na desktopie */}
+      <PwaDesktopModal
+        isOpen={showPwaModal}
+        onClose={() => setShowPwaModal(false)}
+      />
     </>
   );
 };

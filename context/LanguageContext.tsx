@@ -4,7 +4,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 
 const translations: Record<string, Record<string, string>> = {
     pl: {
-        loggedOutText: "Nie masz psychy?",
+        loggedOutText: "Nie masz psychy sie zalogowac",
         loggedInWelcome: 'Witaj, {name}',
         loading: 'Ładowanie...',
         selectLang: 'Wybierz Język',
@@ -139,10 +139,12 @@ const translations: Record<string, Record<string, string>> = {
         zoomInAriaLabel: 'Powiększ',
         saveAvatarAriaLabel: 'Zapisz nowy awatar',
         saveAvatarButton: 'Zapisz Awatar',
-        adminPanel: 'Panel Admina'
+        adminPanel: 'Panel Admina',
+        installPwaAriaLabel: 'Pobierz aplikację',
+        installAppText: 'Pobierz'
     },
     en: {
-        loggedOutText: "Don't have the guts?",
+        loggedOutText: "Don't have the guts to log in",
         loggedInWelcome: 'Welcome, {name}',
         loading: 'Loading...',
         selectLang: 'Select Language',
@@ -277,7 +279,9 @@ const translations: Record<string, Record<string, string>> = {
         zoomInAriaLabel: 'Zoom in',
         saveAvatarAriaLabel: 'Save new avatar',
         saveAvatarButton: 'Save Avatar',
-        adminPanel: 'Admin Panel'
+        adminPanel: 'Admin Panel',
+        installPwaAriaLabel: 'Download App',
+        installAppText: 'Download'
     }
 };
 

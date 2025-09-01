@@ -7,86 +7,57 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 
 const PWAInstallPrompt = () => {
-    // ... (stary kod)
-    const [isDesktop, setIsDesktop] = useState(false);
-    const [installPrompt, setInstallPrompt] = useState<any>(null);
-    const [isStandalone, setIsStandalone] = useState(false);
-    const [isIOS, setIsIOS] = useState(false);
-    const [showInstructions, setShowInstructions] = useState(false);
-    const { t } = useTranslation();
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const { t } = useTranslation();
 
-    useEffect(() => {
-        // ... (stary kod)
-        setIsDesktop(window.innerWidth > 768); // Ustawienie isDesktop dla ekranów > 768px
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-          setIsStandalone(true);
-        }
-
-        const userAgent = window.navigator.userAgent;
-        if (/iPhone|iPad|iPod/i.test(userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
-          setIsIOS(true);
-        }
-
-        const handleBeforeInstallPrompt = (e: Event) => {
-          e.preventDefault();
-          setInstallPrompt(e);
-        };
-
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-        return () => {
-          window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        };
-    }, []);
-
-    const handleInstallClick = () => {
-      if (installPrompt) {
-        installPrompt.prompt();
-        installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          } else {
-            console.log('User dismissed the install prompt');
-          }
-          setInstallPrompt(null);
-        });
-      } else if (isIOS) {
-        setShowInstructions(true);
-      }
-    };
-
-    const handleCloseInstructions = () => {
-      setShowInstructions(false);
-    };
-
-    // Show desktop modal only in production
-    if (process.env.NODE_ENV === 'production' && isDesktop && !isStandalone) {
-        return (
-            <motion.div
-                className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-            >
-                <div className="bg-zinc-800 text-white rounded-lg p-8 shadow-xl">
-                    <h3 className="text-2xl font-bold mb-4">Pobierz aplikację na telefon</h3>
-                    <p className="mb-6">
-                        Wersja na komputery stacjonarne nie obsługuje pełnego doświadczenia.
-                        Proszę zeskanować kod QR lub wejść na naszą stronę na telefonie,
-                        aby pobrać aplikację i odkryć świat tingotong!
-                    </p>
-                    {/* Można dodać tutaj obrazek z kodem QR */}
-                    <div className="w-32 h-32 bg-white mx-auto">
-                        {/* Placeholder for QR Code */}
-                    </div>
-                </div>
-            </motion.div>
-        );
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsStandalone(true);
     }
 
-    if (isStandalone || (!installPrompt && !isIOS)) {
-        return null;
+    const userAgent = window.navigator.userAgent;
+    if (/iPhone|iPad|iPod/i.test(userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+      setIsIOS(true);
     }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setInstallPrompt(null);
+      });
+    } else if (isIOS) {
+      setShowInstructions(true);
+    }
+  };
+
+  const handleCloseInstructions = () => {
+    setShowInstructions(false);
+  };
+
+  if (isStandalone || (!installPrompt && !isIOS)) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
