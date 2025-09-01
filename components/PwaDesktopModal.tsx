@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { X } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
+import Image from "next/image";
 
 interface PwaDesktopModalProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ const PwaDesktopModal: React.FC<PwaDesktopModalProps> = ({ isOpen, onClose }) =>
               {t('pwaModalBody')}
             </p>
             <div className="w-32 h-32 bg-white mx-auto flex items-center justify-center rounded-lg">
-              <img src="/qr-code-placeholder.png" alt="QR Code" className="w-full h-full" />
+              <Image src="/qr-code-placeholder.png" alt="QR Code" width={128} height={128} />
             </div>
           </motion.div>
         </motion.div>

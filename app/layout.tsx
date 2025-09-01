@@ -6,7 +6,8 @@ import { Providers } from "@/components/Providers";
 import AppLayout from "@/components/AppLayout";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import Script from "next/script";
-import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ting Tong",
