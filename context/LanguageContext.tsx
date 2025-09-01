@@ -305,14 +305,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    const savedLang = typeof window !== 'undefined' ? localStorage.getItem('app_lang') : null;
-    if (savedLang && (savedLang === 'pl' || savedLang === 'en')) {
-      setLangState(savedLang as Language);
-      setIsLangSelected(true);
-    }
-  }, []);
-
   const selectInitialLang = (initialLang: Language) => {
     setLanguage(initialLang);
     setIsLangSelected(true);

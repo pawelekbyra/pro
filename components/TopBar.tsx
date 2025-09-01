@@ -75,16 +75,23 @@ const TopBar = () => {
         {!user ? (
           // --- LOGGED-OUT VIEW ---
           <>
-            <div className="flex justify-center flex-1">
+            <div className="flex justify-start w-16">
+                <Button variant="ghost" size="icon" onClick={handleLoggedOutMenuClick} aria-label={t('menuAriaLabel')}>
+                    <MenuIcon className="w-6 h-6" />
+                </Button>
+            </div>
+
+            <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(true)}
                 className="font-semibold text-lg text-white transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500"
               >
-                {t('loggedOutText')}
+                <span>{t('loggedOutText')}</span>
+                <span className='ml-2'>Ting Tong</span>
               </button>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end w-16">
               <Button variant="ghost" size="icon" onClick={handleLoggedOutNotificationClick} aria-label={t('notificationAriaLabel')}>
                 <BellIcon className="w-6 h-6" />
               </Button>

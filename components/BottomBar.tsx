@@ -115,26 +115,26 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
         />
       </div>
 
-      <div className="flex justify-around items-center pt-2">
-        <div className="flex-1 flex justify-center">
+      <div className="flex justify-between items-center pt-2">
+        <div className="flex justify-center">
           <button onClick={() => { /* Placeholder for Gierki action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
             <Gamepad2 size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
             <span className="icon-label">Gierki</span>
           </button>
         </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex justify-center">
           <button onClick={() => { /* Placeholder for Monsta action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
             <Rat size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
             <span className="icon-label">Monsta</span>
           </button>
         </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex justify-center">
           <button onClick={() => { /* Placeholder for Robert action */ }} className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold">
             <Bot size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
             <span className="icon-label">Robert</span>
           </button>
         </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex justify-center">
           <button disabled className="flex flex-col items-center gap-0.5 text-white text-xs font-semibold opacity-50 cursor-not-allowed">
             <Coffee size={28} className="stroke-white" style={{ filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.5))' }}/>
             <span className="icon-label">{t('tipText') || 'Tip'}</span>

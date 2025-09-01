@@ -62,7 +62,7 @@ const AccountPanel: React.FC<AccountPanelProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-                {activeTab === 'profile' && <ProfileTab />}
+                {activeTab === 'profile' && <ProfileTab onClose={onClose} />}
                 {activeTab === 'password' && <PasswordTab />}
                 {activeTab === 'delete' && <DeleteTab />}
             </div>

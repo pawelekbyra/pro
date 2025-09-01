@@ -176,24 +176,32 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="absolute right-3 w-[350px] max-w-[calc(100vw-20px)] bg-[rgba(30,30,30,0.9)] border border-white/15 rounded-xl shadow-lg z-40 text-white flex flex-col"
-          style={{
-            top: 'calc(var(--topbar-base-height) + var(--safe-area-top) + 5px)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-          }}
-          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
         >
-          <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
-            <h3 className="font-semibold text-base">{t('notificationsTitle')}</h3>
-            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
-              <X size={20} />
-            </button>
-          </div>
-          {renderContent()}
+          <motion.div
+            className="w-[350px] max-w-[calc(100vw-20px)] bg-[rgba(30,30,30,0.9)] border border-white/15 rounded-xl shadow-lg text-white flex flex-col"
+            style={{
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
+              <h3 className="font-semibold text-base">{t('notificationsTitle')}</h3>
+              <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            {renderContent()}
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
