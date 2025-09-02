@@ -27,21 +27,26 @@ export default function Home() {
   useEffect(() => {
     if (!scrollContainerRef.current) return;
 
+    let debounceTimeout: NodeJS.Timeout;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (isProgrammaticScroll.current) return;
 
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const slideElement = entry.target as HTMLElement;
+        const intersectingEntry = entries.find(entry => entry.isIntersecting);
+
+        if (intersectingEntry) {
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+            const slideElement = intersectingEntry.target as HTMLElement;
             const slideY = parseInt(slideElement.dataset.y || '0', 10);
             const slideId = slideElement.dataset.id;
 
             if (slideId && slideY !== activeSlideY) {
               setActiveSlide(activeColumnIndex, slideY, slideId);
             }
-          }
-        });
+          }, 50); // A small 50ms debounce to prevent rapid firing
+        }
       },
       {
         root: scrollContainerRef.current,
@@ -56,6 +61,7 @@ export default function Home() {
 
     return () => {
       observer.disconnect();
+      clearTimeout(debounceTimeout);
     };
   }, [columns, activeColumnIndex, activeSlideY, setActiveSlide]);
 
@@ -73,6 +79,27 @@ export default function Home() {
     const container = scrollContainerRef.current;
     if (!container) return;
 
+    let scrollTimeout: NodeJS.Timeout | null = null;
+
+    const jumpTo = (newScrollTop: number) => {
+      isProgrammaticScroll.current = true;
+
+      const resetFlag = () => {
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        isProgrammaticScroll.current = false;
+        container.removeEventListener('scrollend', resetFlag);
+      };
+
+      container.addEventListener('scrollend', resetFlag, { once: true });
+      container.scrollTop = newScrollTop;
+
+      // Fallback timeout in case scrollend doesn't fire
+      scrollTimeout = setTimeout(() => {
+        console.warn('Infinite scroll "scrollend" event did not fire, resetting flag via timeout.');
+        resetFlag();
+      }, 500); // 500ms should be enough for a direct scrollTop assignment
+    };
+
     const handleScroll = () => {
       if (isProgrammaticScroll.current) {
         return; // Ignore scroll events caused by programmatic scrolling
@@ -82,16 +109,6 @@ export default function Home() {
       const slideHeight = clientHeight;
       const buffer = 1; // 1px buffer for calculations
 
-      const jumpTo = (newScrollTop: number) => {
-        isProgrammaticScroll.current = true;
-        const resetFlag = () => {
-          isProgrammaticScroll.current = false;
-          container.removeEventListener('scrollend', resetFlag);
-        };
-        container.addEventListener('scrollend', resetFlag);
-        container.scrollTop = newScrollTop;
-      };
-
       if (scrollTop < buffer) { // Scrolled to the top (clone of the last slide)
         jumpTo(scrollHeight - 2 * slideHeight);
       } else if (scrollTop + clientHeight >= scrollHeight - buffer) { // Scrolled to the bottom (clone of the first slide)
@@ -100,12 +117,13 @@ export default function Home() {
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
-    // It's tricky to clean up the scrollend listener perfectly here because it's added inside handleScroll.
-    // However, since the component unmounts and the container is destroyed, the listener will be garbage collected.
-    // A simple cleanup of the main scroll listener is sufficient.
+
     return () => {
       if (container) {
         container.removeEventListener('scroll', handleScroll);
+      }
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
       }
     };
   }, [columns, activeColumnIndex]);
@@ -119,20 +137,31 @@ export default function Home() {
     if (slideElement) {
       isProgrammaticScroll.current = true;
 
+      let scrollEndTimeout: NodeJS.Timeout;
+
       const handleScrollEnd = () => {
+        clearTimeout(scrollEndTimeout);
         isProgrammaticScroll.current = false;
         container.removeEventListener('scrollend', handleScrollEnd);
       };
 
-      container.addEventListener('scrollend', handleScrollEnd);
+      container.addEventListener('scrollend', handleScrollEnd, { once: true });
 
       container.scrollTo({
         top: slideElement.offsetTop,
         behavior: 'smooth',
       });
 
+      scrollEndTimeout = setTimeout(() => {
+          console.warn('Smooth scroll "scrollend" event did not fire, resetting flag via timeout.');
+          handleScrollEnd();
+      }, 1500); // Smooth scroll can take longer, so a longer timeout is appropriate.
+
       return () => {
-        container.removeEventListener('scrollend', handleScrollEnd);
+        clearTimeout(scrollEndTimeout);
+        if (container) {
+          container.removeEventListener('scrollend', handleScrollEnd);
+        }
       };
     }
   }, [activeColumnIndex, activeSlideY]);
