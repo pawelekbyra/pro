@@ -62,7 +62,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
       });
     } else {
       video.pause();
-      video.currentTime = 0;
     }
   }, [isActive, isMuted]);
 
