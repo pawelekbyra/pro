@@ -12,8 +12,6 @@ import LoginForm from './LoginForm';
 import { useToast } from '@/context/ToastContext';
 import MenuIcon from './icons/MenuIcon';
 import BellIcon from './icons/BellIcon';
-import PwaDesktopModal from './PwaDesktopModal'; // Import nowego komponentu
-import { Smartphone } from 'lucide-react';
 
 const TopBar = () => {
   const { user } = useUser();
@@ -23,8 +21,6 @@ const TopBar = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false); // Nowy stan
-  const [showPwaModal, setShowPwaModal] = useState(false); // Nowy stan
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -41,16 +37,6 @@ const TopBar = () => {
       fetchNotifications();
     }
   }, [user]);
-
-  // Nowy useEffect do wykrywania desktopu
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-        setIsDesktop(window.innerWidth > 768);
-        const handleResize = () => setIsDesktop(window.innerWidth > 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }
-  }, []);
 
   // --- Handlers for Logged-Out State ---
   const handleLoggedOutMenuClick = () => {
@@ -76,14 +62,10 @@ const TopBar = () => {
     }
   };
 
-  const handleShowPwaModal = () => {
-    setShowPwaModal(true);
-  };
-
   return (
     <>
       <div
-        className="relative z-40 flex items-center justify-between px-2 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
+        className="relative z-[100] flex items-center justify-between px-2 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
         style={{
           height: 'var(--topbar-height)',
         }}
@@ -100,19 +82,13 @@ const TopBar = () => {
             <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-sm text-white transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500"
+                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110"
               >
                 <span>{t('loggedOutText')}</span>
               </button>
             </div>
 
             <div className="flex justify-end">
-              {/* Nowy przycisk do pobierania PWA */}
-              {isDesktop && (
-                  <Button variant="ghost" size="icon" onClick={handleShowPwaModal} aria-label={t('installPwaAriaLabel')}>
-                      <Smartphone className="w-6 h-6" />
-                  </Button>
-              )}
               <Button variant="ghost" size="icon" onClick={handleLoggedOutNotificationClick} aria-label={t('notificationAriaLabel')}>
                 <BellIcon className="w-6 h-6" />
               </Button>
@@ -142,11 +118,6 @@ const TopBar = () => {
             </div>
 
             <div className="flex justify-end">
-                {isDesktop && (
-                    <Button variant="ghost" size="icon" onClick={handleShowPwaModal} aria-label={t('installPwaAriaLabel')}>
-                        <Smartphone className="w-6 h-6" />
-                    </Button>
-                )}
                 <div className="relative">
                     <Button variant="ghost" size="icon" onClick={handleLoggedInNotificationClick} aria-label={t('notificationAriaLabel')}>
                         <BellIcon className="w-6 h-6" />
@@ -168,7 +139,7 @@ const TopBar = () => {
       <AnimatePresence>
         {isLoginPanelOpen && (
           <motion.div
-            className="absolute left-0 w-full z-30 bg-black/60 backdrop-blur-sm"
+            className="absolute left-0 w-full z-[90] bg-black/60 backdrop-blur-sm"
             style={{ top: 'var(--topbar-height)' }}
             initial={{ opacity: 0, y: '-100%' }}
             animate={{ opacity: 1, y: '0%' }}
@@ -179,12 +150,6 @@ const TopBar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Nowy modal dla PWA na desktopie */}
-      <PwaDesktopModal
-        isOpen={showPwaModal}
-        onClose={() => setShowPwaModal(false)}
-      />
     </>
   );
 };

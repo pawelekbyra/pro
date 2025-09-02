@@ -19,7 +19,7 @@ const PwaDesktopModal: React.FC<PwaDesktopModalProps> = ({ isOpen, onClose }) =>
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 text-center"
+          className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
