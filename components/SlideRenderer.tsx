@@ -36,7 +36,22 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
         return <VideoPlayer slide={slide as VideoSlide} isActive={isActive} />;
       case 'html':
         // The non-null assertion `!` is safe due to the check above.
-        return <HtmlContent data={(slide as HtmlSlide).data!} username={slide.username} onNavigate={() => {}} isActive={isActive} />;
+        const htmlSlide = slide as HtmlSlide;
+        return (
+          <HtmlContent
+            data={htmlSlide.data!}
+            username={htmlSlide.username}
+            onNavigate={() => {}}
+            isActive={isActive}
+            avatarUrl={htmlSlide.avatar}
+            initialLikes={htmlSlide.initialLikes}
+            isLiked={htmlSlide.isLiked}
+            slideId={htmlSlide.id}
+            commentsCount={htmlSlide.initialComments}
+            x={htmlSlide.x}
+            y={htmlSlide.y}
+          />
+        );
       default:
         return (
             <div className="h-full w-full flex items-center justify-center bg-red-900 text-white">
