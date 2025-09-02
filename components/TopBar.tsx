@@ -71,10 +71,9 @@ const TopBar = () => {
             <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-sm text-white transition-all duration-300 hover:text-pink-500 hover:scale-110 focus:outline-none focus:scale-110 focus:text-pink-500"
+                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110"
               >
                 <span>{t('loggedOutText')}</span>
-                <span className='ml-2'>Ting Tong</span>
               </button>
             </div>
             <div className="flex justify-end w-16">
