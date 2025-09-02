@@ -8,8 +8,8 @@ let users: { [id: string]: User } = {
   "user_admin_01": {
     id: "user_admin_01",
     username: "admin",
-    email: "admin@example.com",
-    password: "$2b$10$scJP6AU3qVcvhTXLelewKuJo48GRwjiLIciF3xGDHEXxN9rboZXQm", // password123
+    email: "admin",
+    password: "$2b$10$cPzLYOVH./kw0c0bh93tL.2rMCzlqksiG/CILtgr3UuXsYbeSFMJq", // admin
     role: "admin",
     displayName: "Administrator",
     avatar: "https://i.pravatar.cc/150?u=admin",
