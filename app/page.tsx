@@ -45,7 +45,7 @@ export default function Home() {
       },
       {
         root: scrollContainerRef.current,
-        threshold: 0.6, // Fire when 60% of the slide is visible
+        threshold: 0.8, // Fire when 80% of the slide is visible
       }
     );
 
@@ -80,28 +80,34 @@ export default function Home() {
 
       const { scrollTop, scrollHeight, clientHeight } = container;
       const slideHeight = clientHeight;
+      const buffer = 1; // 1px buffer for calculations
 
-      if (scrollTop < 1) { // Scrolled to the top (clone of the last slide)
+      const jumpTo = (newScrollTop: number) => {
         isProgrammaticScroll.current = true;
-        container.style.scrollBehavior = 'auto';
-        container.scrollTop = scrollHeight - 2 * slideHeight; // Jump to the real last slide
-        requestAnimationFrame(() => {
+        const resetFlag = () => {
           isProgrammaticScroll.current = false;
-          container.style.scrollBehavior = 'smooth';
-        });
-      } else if (scrollTop + clientHeight >= scrollHeight - 1) { // Scrolled to the bottom (clone of the first slide)
-        isProgrammaticScroll.current = true;
-        container.style.scrollBehavior = 'auto';
-        container.scrollTop = slideHeight; // Jump to the real first slide
-        requestAnimationFrame(() => {
-          isProgrammaticScroll.current = false;
-          container.style.scrollBehavior = 'smooth';
-        });
+          container.removeEventListener('scrollend', resetFlag);
+        };
+        container.addEventListener('scrollend', resetFlag);
+        container.scrollTop = newScrollTop;
+      };
+
+      if (scrollTop < buffer) { // Scrolled to the top (clone of the last slide)
+        jumpTo(scrollHeight - 2 * slideHeight);
+      } else if (scrollTop + clientHeight >= scrollHeight - buffer) { // Scrolled to the bottom (clone of the first slide)
+        jumpTo(slideHeight);
       }
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    // It's tricky to clean up the scrollend listener perfectly here because it's added inside handleScroll.
+    // However, since the component unmounts and the container is destroyed, the listener will be garbage collected.
+    // A simple cleanup of the main scroll listener is sufficient.
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, [columns, activeColumnIndex]);
 
   // This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
@@ -131,14 +137,16 @@ export default function Home() {
     }
   }, [activeColumnIndex, activeSlideY]);
 
-  const onDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, { offset, velocity }: PanInfo) => {
+  const onDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, { offset }: PanInfo) => {
     if (isAnyModalOpen) return;
 
-    const swipe = Math.abs(offset.x) * velocity.x;
+    // Simplified swipe threshold based on drag offset only.
+    // This is more reliable than using velocity.
+    const swipeThreshold = containerRef.current ? containerRef.current.offsetWidth / 4 : 80;
 
-    if (swipe < -SWIPE_CONFIDENCE_THRESHOLD) {
+    if (offset.x < -swipeThreshold) {
       moveHorizontal('right');
-    } else if (swipe > SWIPE_CONFIDENCE_THRESHOLD) {
+    } else if (offset.x > swipeThreshold) {
       moveHorizontal('left');
     }
   };
