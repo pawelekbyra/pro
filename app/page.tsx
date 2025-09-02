@@ -27,45 +27,68 @@ export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isProgrammaticScroll = useRef(false);
 
-  // Set active slide on vertical scroll using IntersectionObserver
+  // Combined IntersectionObserver for active slide and infinite scroll
   useEffect(() => {
-    if (!scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-    let debounceTimeout: NodeJS.Timeout;
+    let scrollTimeout: NodeJS.Timeout | null = null;
+
+    const jumpTo = (newScrollTop: number) => {
+      isProgrammaticScroll.current = true;
+      container.scrollTop = newScrollTop;
+
+      // Use a timeout to reset the flag, assuming the jump is nearly instant.
+      // This avoids reliance on the 'scrollend' event which can be inconsistent.
+      setTimeout(() => {
+        isProgrammaticScroll.current = false;
+      }, 50); // A brief delay to let the scroll position settle.
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (isProgrammaticScroll.current) return;
 
         const intersectingEntry = entries.find(entry => entry.isIntersecting);
+        if (!intersectingEntry) return;
 
-        if (intersectingEntry) {
-          clearTimeout(debounceTimeout);
-          debounceTimeout = setTimeout(() => {
-            const slideElement = intersectingEntry.target as HTMLElement;
-            const slideY = parseInt(slideElement.dataset.y || '0', 10);
-            const slideId = slideElement.dataset.id;
+        const slideElement = intersectingEntry.target as HTMLElement;
+        const isClone = slideElement.dataset.isClone === 'true';
+        const slideY = parseInt(slideElement.dataset.y || '0', 10);
 
-            if (slideId && slideY !== activeSlideY) {
-              setActiveSlide(activeColumnIndex, slideY, slideId);
-            }
-          }, 50); // A small 50ms debounce to prevent rapid firing
+        if (isClone) {
+          const { scrollHeight, clientHeight } = container;
+          const slideHeight = clientHeight;
+          // Determine if it's the top or bottom clone based on its y-index from props
+          // Assuming the last slide has the highest 'y'
+          const lastSlideY = (columns[activeColumnIndex] || []).reduce((max, s) => Math.max(max, s.y), 0);
+          if (slideY === lastSlideY) { // Top clone (of the last slide)
+            jumpTo(scrollHeight - 2 * slideHeight);
+          } else { // Bottom clone (of the first slide)
+            jumpTo(slideHeight);
+          }
+        } else {
+          // It's a real slide, set it as active
+          const slideId = slideElement.dataset.id;
+          if (slideId && slideY !== activeSlideY) {
+            setActiveSlide(activeColumnIndex, slideY, slideId);
+          }
         }
       },
       {
-        root: scrollContainerRef.current,
-        threshold: 0.8, // Fire when 80% of the slide is visible
+        root: container,
+        threshold: 0.8,
       }
     );
 
-    const slides = scrollContainerRef.current.children;
+    const slides = container.children;
     for (let i = 0; i < slides.length; i++) {
       observer.observe(slides[i]);
     }
 
     return () => {
       observer.disconnect();
-      clearTimeout(debounceTimeout);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
     };
   }, [columns, activeColumnIndex, activeSlideY, setActiveSlide]);
 
@@ -77,60 +100,6 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
-
-  // Infinite scroll illusion effect
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    let scrollTimeout: NodeJS.Timeout | null = null;
-
-    const jumpTo = (newScrollTop: number) => {
-      isProgrammaticScroll.current = true;
-
-      const resetFlag = () => {
-        if (scrollTimeout) clearTimeout(scrollTimeout);
-        isProgrammaticScroll.current = false;
-        container.removeEventListener('scrollend', resetFlag);
-      };
-
-      container.addEventListener('scrollend', resetFlag, { once: true });
-      container.scrollTop = newScrollTop;
-
-      // Fallback timeout in case scrollend doesn't fire
-      scrollTimeout = setTimeout(() => {
-        console.warn('Infinite scroll "scrollend" event did not fire, resetting flag via timeout.');
-        resetFlag();
-      }, 500); // 500ms should be enough for a direct scrollTop assignment
-    };
-
-    const handleScroll = () => {
-      if (isProgrammaticScroll.current) {
-        return; // Ignore scroll events caused by programmatic scrolling
-      }
-
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const slideHeight = clientHeight;
-      const buffer = 1; // 1px buffer for calculations
-
-      if (scrollTop < buffer) { // Scrolled to the top (clone of the last slide)
-        jumpTo(scrollHeight - 2 * slideHeight);
-      } else if (scrollTop + clientHeight >= scrollHeight - buffer) { // Scrolled to the bottom (clone of the first slide)
-        jumpTo(slideHeight);
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      if (container) {
-        container.removeEventListener('scroll', handleScroll);
-      }
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-      }
-    };
-  }, [columns, activeColumnIndex]);
 
   // This useEffect handles scrolling to the active slide when the column or slide index changes programmatically.
   useEffect(() => {
@@ -241,6 +210,7 @@ export default function Home() {
                   <div
                     key={`${lastSlide.id}-clone-start`}
                     data-is-clone="true"
+                    data-y={lastSlide.y}
                     className="w-full snap-start"
                     style={{ height: 'var(--app-height)' }}
                   >
@@ -248,23 +218,31 @@ export default function Home() {
                   </div>
 
                   {/* Real slides */}
-                  {columnSlides.map((slide: Slide) => (
-                    <div
-                      key={slide.id}
-                      id={`slide-${slide.x}-${slide.y}`}
-                      data-x={slide.x}
-                      data-y={slide.y}
-                      className="w-full snap-start"
-                      style={{ height: 'var(--app-height)' }}
-                    >
-                      <SlideRenderer slide={slide} isActive={activeSlideId === slide.id} />
-                    </div>
-                  ))}
+                  {columnSlides.map((slide: Slide) => {
+                    const isPrefetchTarget = Math.abs(slide.y - activeSlideY) === 1;
+                    return (
+                      <div
+                        key={slide.id}
+                        id={`slide-${slide.x}-${slide.y}`}
+                        data-x={slide.x}
+                        data-y={slide.y}
+                        className="w-full snap-start"
+                        style={{ height: 'var(--app-height)' }}
+                      >
+                        <SlideRenderer
+                          slide={slide}
+                          isActive={activeSlideId === slide.id}
+                          isPrefetchTarget={isPrefetchTarget}
+                        />
+                      </div>
+                    );
+                  })}
 
                   {/* Clone of the first slide at the end */}
                   <div
                     key={`${firstSlide.id}-clone-end`}
                     data-is-clone="true"
+                    data-y={firstSlide.y}
                     className="w-full snap-start"
                     style={{ height: 'var(--app-height)' }}
                   >

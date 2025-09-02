@@ -11,9 +11,10 @@ import { Skeleton } from './ui/skeleton';
 interface SlideRendererProps {
   slide: Slide;
   isActive: boolean;
+  isPrefetchTarget?: boolean;
 }
 
-const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
+const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive, isPrefetchTarget = false }) => {
   const { fetchFullSlide } = useVideoGrid();
 
   useEffect(() => {
@@ -33,7 +34,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
       case 'video':
         // The `as` cast is safe here because we would have a type error
         // if the data didn't match the `VideoSlide` interface.
-        return <VideoPlayer slide={slide as VideoSlide} isActive={isActive} />;
+        return <VideoPlayer slide={slide as VideoSlide} isActive={isActive} isPrefetchTarget={isPrefetchTarget} />;
       case 'html':
         // The non-null assertion `!` is safe due to the check above.
         const htmlSlide = slide as HtmlSlide;
