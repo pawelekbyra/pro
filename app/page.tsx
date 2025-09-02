@@ -6,6 +6,8 @@ import SlideRenderer from '@/components/SlideRenderer';
 import { Slide } from '@/lib/types';
 import { motion, PanInfo, AnimatePresence } from 'framer-motion';
 import AccountPanel from '@/components/AccountPanel';
+import CommentsModal from '@/components/CommentsModal';
+import InfoModal from '@/components/InfoModal';
 
 const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
@@ -18,6 +20,7 @@ export default function Home() {
     columnKeys,
     isLoading,
     setActiveModal,
+    activeSlide,
   } = useVideoGrid();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -282,6 +285,16 @@ export default function Home() {
       <AnimatePresence>
         {activeModal === 'account' && (
           <AccountPanel onClose={() => setActiveModal(null)} />
+        )}
+        {activeModal === 'comments' && activeSlide && (
+          <CommentsModal
+            slideId={activeSlide.id}
+            initialCommentsCount={activeSlide.initialComments}
+            onClose={() => setActiveModal(null)}
+          />
+        )}
+        {activeModal === 'info' && (
+          <InfoModal onClose={() => setActiveModal(null)} />
         )}
       </AnimatePresence>
     </>
