@@ -53,7 +53,7 @@ const TopBar = () => {
   return (
     <>
       <div
-        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-1 bg-black text-white border-b border-white/10"
+        className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-1 bg-black text-white border-b border-white/10"
         style={{
           height: 'var(--topbar-height)',
           paddingTop: 'var(--safe-area-top)',
@@ -71,7 +71,7 @@ const TopBar = () => {
             <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110 whitespace-nowrap"
+                className="font-semibold text-sm text-white transition-all duration-300 focus:outline-none whitespace-nowrap"
               >
                 <span>{t('loggedOutText')}</span>
               </button>
