@@ -35,11 +35,11 @@ const TopBar = () => {
   const unreadCount = 0;
 
   const handleLoggedOutMenuClick = () => {
-    addToast(t('menuAccessAlert'));
+    addToast(t('menuAccessAlert'), 'info');
   };
 
   const handleLoggedOutNotificationClick = () => {
-    addToast(t('notificationAlert'));
+    addToast(t('notificationAlert'), 'info');
   };
 
   const handleLoggedInNotificationClick = () => {
@@ -149,7 +149,7 @@ const TopBar = () => {
       </AnimatePresence>
 
       {/* --- PWA Modal --- */}
-      {showPwaModal && <PwaDesktopModal onClose={() => setShowPwaModal(false)} />}
+      {showPwaModal && <PwaDesktopModal isOpen={showPwaModal} onClose={() => setShowPwaModal(false)} />}
     </>
   );
 };
