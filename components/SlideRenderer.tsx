@@ -7,14 +7,14 @@ import HtmlContent from './HtmlContent';
 import VideoPlayer from './VideoPlayer';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import { Skeleton } from './ui/skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SlideRendererProps {
   slide: Slide;
   isActive: boolean;
-  isPrefetchTarget?: boolean;
 }
 
-const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive, isPrefetchTarget = false }) => {
+const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
   const { fetchFullSlide } = useVideoGrid();
 
   useEffect(() => {
@@ -24,19 +24,11 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive, isPrefet
     }
   }, [slide.id, slide.data, fetchFullSlide]);
 
-  if (!slide.data) {
-    // Render a loading skeleton while the full slide data is being fetched.
-    return <Skeleton className="h-full w-full bg-zinc-900" />;
-  }
-
   const renderContent = () => {
     switch (slide.type) {
       case 'video':
-        // The `as` cast is safe here because we would have a type error
-        // if the data didn't match the `VideoSlide` interface.
-        return <VideoPlayer slide={slide as VideoSlide} isActive={isActive} isPrefetchTarget={isPrefetchTarget} />;
+        return <VideoPlayer slide={slide as VideoSlide} isActive={isActive} />;
       case 'html':
-        // The non-null assertion `!` is safe due to the check above.
         const htmlSlide = slide as HtmlSlide;
         return (
           <HtmlContent
@@ -63,8 +55,32 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive, isPrefet
   };
 
   return (
-    <div className="h-full w-full">
-      {renderContent()}
+    <div className="h-full w-full bg-black">
+      <AnimatePresence>
+        {!slide.data && (
+          <motion.div
+            key="skeleton"
+            className="absolute inset-0 z-10"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Skeleton className="h-full w-full bg-zinc-900" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {slide.data && (
+          <motion.div
+            key="content"
+            className="h-full w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            {renderContent()}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
