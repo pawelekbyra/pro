@@ -97,7 +97,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            className="absolute top-0 left-0 w-full h-full z-40 pointer-events-none"
           >
             <div className="pointer-events-auto">
               <Sidebar
