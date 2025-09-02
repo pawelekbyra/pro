@@ -4,18 +4,20 @@ import { useEffect, useRef } from 'react';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import SlideRenderer from '@/components/SlideRenderer';
 import { Slide } from '@/lib/types';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, AnimatePresence } from 'framer-motion';
+import AccountPanel from '@/components/AccountPanel';
 
 const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
 export default function Home() {
   const {
-    state: { columns, activeColumnIndex, activeSlideY, activeSlideId, error },
+    state: { columns, activeColumnIndex, activeSlideY, activeSlideId, error, activeModal },
     setActiveSlide,
     moveHorizontal,
     isAnyModalOpen,
     columnKeys,
     isLoading,
+    setActiveModal,
   } = useVideoGrid();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -274,5 +276,14 @@ export default function Home() {
     </motion.div>
   );
 
-  return appContent;
+  return (
+    <>
+      {appContent}
+      <AnimatePresence>
+        {activeModal === 'account' && (
+          <AccountPanel onClose={() => setActiveModal(null)} />
+        )}
+      </AnimatePresence>
+    </>
+  );
 }
