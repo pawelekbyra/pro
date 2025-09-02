@@ -191,7 +191,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-20"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 pb-[var(--bottombar-height,60px)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -203,9 +203,9 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
             }}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={(e) => e.stopPropagation()}
           >

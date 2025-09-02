@@ -39,6 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        placeholder={t('loginPlaceholder')}
         disabled={isLoading}
         autoComplete="username"
         className="bg-white border-2 border-black text-black placeholder:text-gray-500 font-mono"
@@ -47,6 +48,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        placeholder={t('passwordPlaceholder')}
         disabled={isLoading}
         autoComplete="current-password"
         className="bg-white border-2 border-black text-black placeholder:text-gray-500 font-mono"
