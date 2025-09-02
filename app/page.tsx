@@ -7,13 +7,16 @@ import { motion, PanInfo, AnimatePresence } from 'framer-motion';
 import AccountPanel from '@/components/AccountPanel';
 import CommentsModal from '@/components/CommentsModal';
 import InfoModal from '@/components/InfoModal';
-import { FixedSizeList, ListOnItemsRenderedProps } from 'react-window';
-import InfiniteLoader from 'react-window-infinite-loader';
+import { List, ListImperativeAPI } from 'react-window';
 import GlobalVideoPlayer from '@/components/GlobalVideoPlayer';
 
+type RowData = {
+  columnSlides: any[];
+  activeSlideId: string | null;
+};
+
 // A component to render a single slide in the virtualized list
-const Row = ({ index, style, data }: { index: number, style: React.CSSProperties, data: any }) => {
-  const { columnSlides, activeSlideId } = data;
+const Row = ({ index, style, columnSlides, activeSlideId }: { index: number, style: React.CSSProperties } & RowData) => {
   const slide = columnSlides[index];
 
   if (!slide) {
@@ -49,7 +52,7 @@ export default function Home() {
   } = useVideoGrid();
 
   const [appHeight, setAppHeight] = useState(0);
-  const listRefs = useRef<{ [key: number]: FixedSizeList | null }>({});
+  const listRefs = useRef<{ [key: number]: ListImperativeAPI | null }>({});
 
   useEffect(() => {
     const handleResize = () => {
@@ -67,7 +70,7 @@ export default function Home() {
     if (list && column) {
       const activeIndex = column.findIndex(s => s.y === activeSlideY);
       if (activeIndex !== -1) {
-        list.scrollToItem(activeIndex, 'center');
+        list.scrollToRow({ index: activeIndex, align: 'center' });
       }
     }
   }, [activeColumnIndex, activeSlideY, columns]);
@@ -100,7 +103,7 @@ export default function Home() {
 
   const debouncedOnItemsRendered = useMemo(
     () =>
-      debounce(({ visibleStartIndex, visibleStopIndex }: ListOnItemsRenderedProps) => {
+      debounce(({ startIndex, stopIndex }: { startIndex: number, stopIndex: number }) => {
         if (isNavigating) return;
 
         const column = columns[activeColumnIndex];
@@ -108,7 +111,7 @@ export default function Home() {
 
         const centeredIndex = Math.min(
           column.length - 1,
-          Math.round((visibleStartIndex + visibleStopIndex) / 2)
+          Math.round((startIndex + stopIndex) / 2)
         );
         const centeredSlide = column[centeredIndex];
 
@@ -146,8 +149,16 @@ export default function Home() {
       >
         {columnKeys.map((colIndex) => {
           const columnSlides = columns[colIndex] || [];
-          const isItemLoaded = (index: number) => !!columnSlides[index];
           const itemCount = columnSlides.length;
+
+          const handleRowsRendered = ({ startIndex, stopIndex }: { startIndex: number, stopIndex: number }) => {
+            debouncedOnItemsRendered({ startIndex, stopIndex });
+
+            const buffer = 5;
+            if (stopIndex >= itemCount - 1 - buffer) {
+              loadMoreItems(colIndex);
+            }
+          };
 
           return (
             <div
@@ -156,31 +167,18 @@ export default function Home() {
               className="h-full w-screen flex-shrink-0"
             >
               {appHeight > 0 && (
-                <InfiniteLoader
-                  isItemLoaded={isItemLoaded}
-                  itemCount={itemCount}
-                  loadMoreItems={() => loadMoreItems(colIndex)}
+                <List<RowData>
+                  listRef={(list) => {
+                    listRefs.current[colIndex] = list;
+                  }}
+                  style={{ height: appHeight, width: '100%' }}
+                  rowCount={itemCount}
+                  rowHeight={appHeight}
+                  rowProps={{ columnSlides, activeSlideId }}
+                  onRowsRendered={handleRowsRendered}
+                  rowComponent={Row}
                 >
-                  {({ onItemsRendered: onInfiniteLoaderItemsRendered, ref: infiniteLoaderRef }) => (
-                    <FixedSizeList
-                      ref={(list) => {
-                        infiniteLoaderRef(list);
-                        listRefs.current[colIndex] = list;
-                      }}
-                      height={appHeight}
-                      itemCount={itemCount}
-                      itemSize={appHeight}
-                      width="100%"
-                      itemData={{ columnSlides, activeSlideId }}
-                      onItemsRendered={(props) => {
-                        onInfiniteLoaderItemsRendered(props);
-                        debouncedOnItemsRendered(props); // Call our debounced handler
-                      }}
-                    >
-                      {Row}
-                    </FixedSizeList>
-                  )}
-                </InfiniteLoader>
+                </List>
               )}
             </div>
           );

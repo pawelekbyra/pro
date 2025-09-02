@@ -74,7 +74,7 @@ const GlobalVideoPlayer = () => {
       loop
       playsInline
       muted // Always muted initially, unmute is handled by context state
-      poster={activeVideoData?.poster}
+      poster={activeVideoData?.data?.poster}
       style={{ opacity: activeVideoData ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
     />
   );
