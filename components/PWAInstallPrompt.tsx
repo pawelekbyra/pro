@@ -108,14 +108,14 @@ const PWAInstallPrompt = () => {
           </motion.div>
         ) : (
           <div
-            className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex flex-col @[400px]:flex-row justify-center @[400px]:justify-between items-center text-center @[400px]:text-left gap-4 z-[9999]"
-            style={{ height: 'var(--bottombar-height)', paddingBottom: 'calc(1rem + var(--safe-area-bottom))' }}
+            className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-6 flex flex-row justify-between items-center text-left gap-4 z-[9999]"
+            style={{ height: 'var(--bottombar-height)', paddingBottom: 'calc(1.5rem + var(--safe-area-bottom))' }}
           >
             <div>
               <h3 className="font-bold text-lg">Zainstaluj aplikację!</h3>
-              <p className="text-sm @[400px]:text-base">Uzyskaj pełne wrażenia. Zainstaluj aplikację Ting Tong na swoim urządzeniu.</p>
+              <p className="text-sm">Uzyskaj pełne wrażenia. Zainstaluj aplikację Ting Tong na swoim urządzeniu.</p>
             </div>
-            <Button onClick={handleInstallClick} className="w-full @[400px]:w-auto flex-shrink-0">
+            <Button onClick={handleInstallClick} className="w-auto flex-shrink-0 bg-red-500 hover:bg-red-600">
               Zainstaluj
             </Button>
           </div>
