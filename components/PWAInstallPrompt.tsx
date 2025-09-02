@@ -108,7 +108,7 @@ const PWAInstallPrompt = () => {
           </motion.div>
         ) : (
           <div
-            className="w-full bg-gray-800 text-white p-4 flex flex-col @[400px]:flex-row justify-center @[400px]:justify-between items-center text-center @[400px]:text-left gap-4 z-50"
+            className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex flex-col @[400px]:flex-row justify-center @[400px]:justify-between items-center text-center @[400px]:text-left gap-4 z-50"
             style={{ paddingBottom: 'calc(1rem + var(--safe-area-bottom))' }}
           >
             <div>

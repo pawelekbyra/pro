@@ -29,6 +29,7 @@ export default function RootLayout({
       <body className={cn("antialiased", inter.className)}>
         <Providers>
           <AppLayout>{children}</AppLayout>
+          <PWAInstallPrompt />
         </Providers>
         <Script
           data-name="BMC-Widget"

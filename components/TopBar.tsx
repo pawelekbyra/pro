@@ -11,56 +11,13 @@ import { useVideoGrid } from '@/context/VideoGridContext';
 import LoginForm from './LoginForm';
 import { useToast } from '@/context/ToastContext';
 import MenuIcon from './icons/MenuIcon';
-import BellIcon from './icons/BellIcon';
 
 const TopBar = () => {
   const { user } = useUser();
   const { openAccountPanel } = useVideoGrid();
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifPanel, setShowNotifPanel] = useState(false);
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch('/api/notifications');
-        if (!response.ok) return;
-        const data = await response.json();
-        setUnreadCount(data.unreadCount);
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
-      }
-    };
-    if (user) {
-      fetchNotifications();
-    }
-  }, [user]);
-
-  // --- Handlers for Logged-Out State ---
-  const handleLoggedOutMenuClick = () => {
-    addToast(t('menuAccessAlert'), 'info');
-  };
-
-  const handleLoggedOutNotificationClick = () => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
-      } else {
-        addToast(t('notificationAlert'), 'info');
-      }
-    } else {
-        addToast(t('notificationAlert'), 'info');
-    }
-  };
-
-  // --- Handler for Logged-In State ---
-  const handleLoggedInNotificationClick = () => {
-    if (user) {
-        setShowNotifPanel(!showNotifPanel);
-    }
-  };
 
   return (
     <>
@@ -70,34 +27,12 @@ const TopBar = () => {
           height: 'var(--topbar-height)',
         }}
       >
-        {!user ? (
-          // --- LOGGED-OUT VIEW ---
-          <>
-            <div className="flex justify-start">
-                <Button variant="ghost" size="icon" onClick={handleLoggedOutMenuClick} aria-label={t('menuAriaLabel')}>
+        <div className="flex justify-start w-12">
+            {!user ? (
+                <Button variant="ghost" size="icon" onClick={() => setIsLoginPanelOpen(true)} aria-label={t('menuAriaLabel')}>
                     <MenuIcon className="w-7 h-7" />
                 </Button>
-            </div>
-
-            <div className="flex justify-center flex-1 text-center px-1">
-              <button
-                onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110"
-              >
-                <span className="mx-2">{t('loggedOutText')}</span>
-              </button>
-            </div>
-
-            <div className="flex justify-end">
-              <Button variant="ghost" size="icon" onClick={handleLoggedOutNotificationClick} aria-label={t('notificationAriaLabel')}>
-                <BellIcon className="w-7 h-7" />
-              </Button>
-            </div>
-          </>
-        ) : (
-          // --- LOGGED-IN VIEW ---
-          <>
-            <div className="flex justify-start">
+            ) : (
                 <Button variant="ghost" size="icon" onClick={openAccountPanel} aria-label={t('accountMenuButton')}>
                     {user.avatar ? (
                         <Image
@@ -111,28 +46,14 @@ const TopBar = () => {
                         <div className="w-9 h-9 rounded-full bg-gray-300 dark:bg-zinc-700" />
                     )}
                 </Button>
-            </div>
+            )}
+        </div>
 
-            <div className="flex justify-center flex-1">
-                <span className="font-semibold text-lg text-white">Ting Tong</span>
-            </div>
+        <div className="flex justify-center flex-1">
+            <span className="font-semibold text-lg text-white">Ting Tong</span>
+        </div>
 
-            <div className="flex justify-end">
-                <div className="relative">
-                    <Button variant="ghost" size="icon" onClick={handleLoggedInNotificationClick} aria-label={t('notificationAriaLabel')}>
-                        <BellIcon className="w-7 h-7" />
-                        {unreadCount > 0 && (
-                            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full ring-2 ring-black bg-pink-500" />
-                        )}
-                    </Button>
-                    <NotificationPopup
-                        isOpen={showNotifPanel}
-                        onClose={() => setShowNotifPanel(false)}
-                    />
-                </div>
-            </div>
-          </>
-        )}
+        <div className="flex justify-end w-12" />
       </div>
 
       {/* --- Login Panel --- */}
