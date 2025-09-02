@@ -13,9 +13,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface VideoPlayerProps {
   slide: VideoSlide;
   isActive: boolean;
+  isPrefetchTarget: boolean;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive, isPrefetchTarget }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { state, setSoundActiveSlide, setActiveVideoRef } = useVideoGrid();
   const { soundActiveSlideId } = state;
@@ -48,6 +49,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
     }
   }, [videoSrc, isHls]);
 
+  // Effect for smart preloading
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isActive) {
+      video.preload = 'auto';
+    } else if (isPrefetchTarget) {
+      video.preload = 'metadata';
+    } else {
+      video.preload = 'none';
+    }
+  }, [isActive, isPrefetchTarget]);
+
+  // Effect for robust playback control
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -55,15 +71,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
     video.muted = isMuted;
 
     if (isActive) {
-      video.play().catch(err => {
-        if (err.name !== 'NotAllowedError') {
-          console.error("Video play failed:", err);
-        }
-      });
+      // Use a Promise-based approach to handle play()
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          // Autoplay was prevented. This is common in browsers.
+          // We don't need to log it as an error unless it's something else.
+          if (err.name !== 'NotAllowedError') {
+            console.error("Video play failed:", err);
+          }
+        });
+      }
     } else {
       video.pause();
     }
-  }, [isActive, isMuted]);
+  }, [isActive, isMuted, videoSrc]); // videoSrc dependency ensures this runs if the source changes
 
   const toggleMute = () => {
     if (isMuted) {
