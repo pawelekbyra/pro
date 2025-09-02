@@ -7,6 +7,7 @@ import { useHls } from '@/lib/useHls';
 import { Volume2, VolumeX } from 'lucide-react';
 import Sidebar from './Sidebar';
 import VideoInfo from './VideoInfo';
+import BottomBar from './BottomBar'; // Dodano import BottomBar
 
 interface VideoPlayerProps {
   slide: VideoSlide;
@@ -24,8 +25,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
     if (isActive) {
       setActiveVideoRef(videoRef);
     }
-    // No cleanup needed here, DesktopLayout will handle nulling the ref
-    // when the active slide changes and this component unmounts.
   }, [isActive, setActiveVideoRef]);
 
   const handleHlsFatalError = useCallback(() => {
@@ -42,6 +41,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    video.muted = isMuted;
+
     if (isActive) {
       video.play().catch(err => {
         if (err.name !== 'NotAllowedError') {
@@ -52,13 +54,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
       video.pause();
       video.currentTime = 0;
     }
-  }, [isActive]);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-    }
-  }, [isMuted]);
+  }, [isActive, isMuted]);
 
   const toggleMute = () => {
     if (isMuted) {
@@ -75,6 +71,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
         className="h-full w-full object-cover"
         loop
         playsInline
+        muted
         poster={slide.data?.poster}
       >
         <source src={slide.data?.mp4Url} type="video/mp4" />
@@ -103,6 +100,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
             commentsCount={slide.initialComments}
             x={slide.x}
           />
+          <BottomBar videoRef={videoRef} isActive={isActive} />
         </>
       )}
     </div>

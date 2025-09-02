@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
   try {
     const notifications = await db.getNotifications(payload.user.id);
     const unreadCount = await db.getUnreadNotificationCount(payload.user.id);
-    return NextResponse.json({ success: true, notifications, unreadCount });
+    return NextResponse.json({ success: true, notifications, unreadCount }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      }
+    });
   } catch (error) {
     console.error('Error fetching notifications:', error);
     return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });

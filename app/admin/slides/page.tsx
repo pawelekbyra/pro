@@ -5,6 +5,7 @@ import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import SlideManagementClient from './SlideManagementClient';
 import { redirect } from 'next/navigation';
+import { sanitize } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +57,7 @@ export default async function SlideManagementPage() {
           newSlide = { ...commonData, type: 'image', data: { imageUrl: commonData.data.content, altText: commonData.data.title } };
           break;
         case 'html':
-          newSlide = { ...commonData, type: 'html', data: { htmlContent: commonData.data.content } };
+          newSlide = { ...commonData, type: 'html', data: { htmlContent: sanitize(commonData.data.content) } };
           break;
         default:
           return { success: false, error: 'Invalid slide type' };
@@ -93,7 +94,7 @@ export default async function SlideManagementPage() {
           updatedData = { imageUrl: content, altText: title };
           break;
         case 'html':
-          updatedData = { htmlContent: content };
+          updatedData = { htmlContent: sanitize(content) };
           break;
         default:
           return { success: false, error: 'Invalid slide type' };

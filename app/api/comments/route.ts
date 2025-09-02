@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifySession } from '@/lib/auth';
+import { sanitize } from '@/lib/sanitize';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -38,8 +39,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: 'Comment text cannot be empty.' }, { status: 400 });
     }
 
+    const slide = await db.getSlide(slideId);
+    if (!slide) {
+        return NextResponse.json({ success: false, message: 'Slide not found' }, { status: 404 });
+    }
+
+    const sanitizedText = sanitize(text.trim());
+    if (sanitizedText.length === 0) {
+        return NextResponse.json({ success: false, message: 'Comment text cannot be empty after sanitization.' }, { status: 400 });
+    }
+
     // Pass parentId to db.addComment
-    const newComment = await db.addComment(slideId, currentUser.id, text.trim(), parentId || null);
+    const newComment = await db.addComment(slideId, currentUser.id, sanitizedText, parentId || null);
 
     return NextResponse.json({ success: true, comment: newComment }, { status: 201 });
 
