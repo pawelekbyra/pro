@@ -1,4 +1,3 @@
-// components/Preloader.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -51,14 +50,14 @@ const Preloader: React.FC = () => {
     <AnimatePresence>
       {!isHiding && (
         <motion.div
-          className="fixed inset-0 bg-black z-[10000] overflow-hidden"
+          className="fixed inset-0 bg-black z-[10000] overflow-hidden flex flex-col items-center justify-center p-4 gap-8"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           {/* Icon Container - Centered */}
           <motion.div
-            className="absolute top-1/2 left-1/2 w-[150px] h-[150px] -translate-x-1/2 -translate-y-1/2"
+            className="w-[150px] h-[150px] flex-shrink-0"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -87,15 +86,14 @@ const Preloader: React.FC = () => {
 
           {/* Content Container - Below Icon */}
           <motion.div
-            className="absolute left-0 right-0 bottom-0 flex flex-col items-center justify-center p-4"
-            style={{ top: 'calc(50% + 75px)' }} // 75px is half of the icon's height
-            initial={{ opacity: 0, y: '100%' }}
-            animate={{ opacity: contentVisible ? 1 : 0, y: contentVisible ? 0 : '100%' }}
-            transition={{ duration: 1, ease: [0.68, -0.55, 0.27, 1.55] }}
+            className="w-full max-w-sm flex flex-col items-center justify-center"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: contentVisible ? 1 : 0, y: contentVisible ? 0 : 50 }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.5 }}
           >
             <div className="text-center w-full flex flex-col items-center">
               <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
-              <div className="flex flex-col gap-4 w-full max-w-sm">
+              <div className="flex flex-col gap-4 w-full">
                 <motion.button
                   onClick={() => handleLangSelect('pl')}
                   className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
