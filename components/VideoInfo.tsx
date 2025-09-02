@@ -77,4 +77,4 @@ const VideoInfo: React.FC<VideoInfoProps> = ({ user, description }) => {
   );
 };
 
-export default VideoInfo;
+export default React.memo(VideoInfo);

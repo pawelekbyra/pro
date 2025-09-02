@@ -147,4 +147,4 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   );
 };
 
-export default BottomBar;
+export default React.memo(BottomBar);

@@ -1,10 +1,9 @@
 "use client";
 
 import React, { createContext, useEffect, useCallback, useMemo, useRef, ReactNode, useContext, useReducer } from 'react';
-import { Grid, Slide } from '@/lib/types';
+import { Grid, Slide, VideoSlide } from '@/lib/types';
 import { useToast } from './ToastContext';
 export type ModalType = 'account' | 'comments' | 'info' | 'topbar' | null;
-export type NavigationDirection = 'up' | 'down' | 'left' | 'right';
 
 // --- State and Reducer ---
 
@@ -16,6 +15,7 @@ interface State {
   activeSlideY: number;
   activeSlideId: string | null;
   soundActiveSlideId: string | null;
+  activeVideoData: VideoSlide | null; // Data for the global video player
   isNavigating: boolean;
   loadingColumns: Set<number>;
   activeModal: ModalType;
@@ -25,7 +25,7 @@ interface State {
 type Action =
   | { type: 'SET_GRID_DATA'; payload: Columns }
   | { type: 'ADD_GRID_DATA'; payload: Columns }
-  | { type: 'UPDATE_ACTIVE_SLIDE'; payload: { x: number; y: number; id: string } }
+  | { type: 'UPDATE_ACTIVE_SLIDE'; payload: { x: number; y: number; id: string; slide?: Slide } }
   | { type: 'SET_SOUND_ACTIVE_SLIDE'; payload: string | null }
   | { type: 'START_NAVIGATION' }
   | { type: 'FINISH_NAVIGATION' }
@@ -42,6 +42,7 @@ const initialState: State = {
   activeSlideY: 0,
   activeSlideId: null,
   soundActiveSlideId: null,
+  activeVideoData: null,
   isNavigating: true, // Start as true to prevent actions until initial load is done
   loadingColumns: new Set(),
   activeModal: null,
@@ -63,16 +64,22 @@ function reducer(state: State, action: Action): State {
       }
       return { ...state, columns: combinedColumns };
     case 'UPDATE_ACTIVE_SLIDE':
-      // Only update if there's an actual change
       if (state.activeSlideId === action.payload.id) {
         return { ...state, isNavigating: false };
       }
+
+      const { x, y, id, slide } = action.payload;
+      const targetSlide = slide ?? state.columns[x]?.find(s => s.id === id);
+
+      const newActiveVideoData = (targetSlide && targetSlide.type === 'video') ? (targetSlide as VideoSlide) : null;
+
       return {
         ...state,
-        activeColumnIndex: action.payload.x,
-        activeSlideY: action.payload.y,
-        activeSlideId: action.payload.id,
-        soundActiveSlideId: action.payload.id,
+        activeColumnIndex: x,
+        activeSlideY: y,
+        activeSlideId: id,
+        soundActiveSlideId: id,
+        activeVideoData: newActiveVideoData,
         isNavigating: false,
       };
     case 'SET_SOUND_ACTIVE_SLIDE':
@@ -92,13 +99,17 @@ function reducer(state: State, action: Action): State {
     case 'SET_ERROR':
       return { ...state, error: action.payload };
     case 'MERGE_SLIDE_DATA':
-      const { id, x } = action.payload;
+      const { id: mergedId, x: mergedX } = action.payload;
       const newColumnsState = { ...state.columns };
-      if (newColumnsState[x]) {
-        const slideIndex = newColumnsState[x].findIndex(slide => slide.id === id);
+      if (newColumnsState[mergedX]) {
+        const slideIndex = newColumnsState[mergedX].findIndex(slide => slide.id === mergedId);
         if (slideIndex !== -1) {
-          newColumnsState[x][slideIndex] = action.payload;
+          newColumnsState[mergedX][slideIndex] = action.payload;
         }
+      }
+      // If the merged slide is the active slide, update the activeVideoData
+      if (state.activeSlideId === mergedId && action.payload.type === 'video') {
+        return { ...state, columns: newColumnsState, activeVideoData: action.payload as VideoSlide };
       }
       return { ...state, columns: newColumnsState };
     case 'OPTIMISTIC_TOGGLE_LIKE':
@@ -131,14 +142,15 @@ interface VideoGridContextType {
   isLoading: boolean;
   isAnyModalOpen: boolean;
   activeVideoRef: React.RefObject<HTMLVideoElement | null>;
-  handleNavigation: (direction: NavigationDirection) => Promise<void>;
+  handleNavigation: (direction: 'left' | 'right') => Promise<void>;
   setActiveSlide: (x: number, y: number, id: string) => void;
   setSoundActiveSlide: (id: string | null) => void;
   setActiveVideoRef: (ref: React.RefObject<HTMLVideoElement> | null) => void;
-  fetchFullSlide: (id: string) => Promise<void>;
+  fetchFullSlide: (id: string) => Promise<Slide | undefined>;
   setActiveModal: (modal: ModalType) => void;
   openAccountPanel: () => void;
   toggleLike: (slideId: string, x: number) => Promise<void>;
+  loadMoreItems: (x: number) => Promise<void>;
   initialCoordinates?: { x: number; y: number };
   activeSlide?: Slide;
   columnKeys: number[];
@@ -170,9 +182,9 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const isLoading = state.loadingColumns.size > 0;
 
   const fetchColumn = useCallback(async (x: number, metadataOnly: boolean = false) => {
-    // Do not fetch if column data already exists.
-    if (stateRef.current.columns[x]) {
-      return;
+    // Do not fetch if column data already exists and we are not forcing a full data fetch.
+    if (stateRef.current.columns[x] && (metadataOnly || stateRef.current.columns[x][0]?.data)) {
+        return;
     }
     dispatch({ type: 'START_LOADING_COLUMN', payload: x });
     try {
@@ -204,10 +216,24 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     }
   }, []);
 
-  const fetchFullSlide = useCallback(async (id: string) => {
+  const loadMoreItems = useCallback(async (x: number) => {
+      // This function is called by the infinite loader.
+      // In our case, it means the user has scrolled to the end of a column.
+      // We can use this to pre-warm the *next* column with full data.
+      const nextColumnIndex = x + 1;
+      // We can also pre-warm the previous one if needed
+      const prevColumnIndex = x - 1;
+
+      fetchColumn(nextColumnIndex, false);
+      if (prevColumnIndex >= 0) {
+          fetchColumn(prevColumnIndex, false);
+      }
+  }, [fetchColumn]);
+
+  const fetchFullSlide = useCallback(async (id: string): Promise<Slide | undefined> => {
     const slide = Object.values(stateRef.current.columns).flat().find(s => s.id === id);
     if ((slide && slide.data) || pendingFetches.current.has(id)) {
-        return;
+        return slide;
     }
 
     try {
@@ -217,6 +243,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
         const data = await response.json();
         if (data.slide) {
             dispatch({ type: 'MERGE_SLIDE_DATA', payload: data.slide });
+            return data.slide;
         }
     } catch (err) {
         console.error(`Failed to fetch full data for slide ${id}:`, err);
@@ -224,6 +251,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     } finally {
         pendingFetches.current.delete(id);
     }
+    return undefined;
   }, []);
 
   useEffect(() => {
@@ -242,8 +270,10 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
       const initialSlide = state.columns[state.activeColumnIndex].find(s => s.y === state.activeSlideY);
       if (initialSlide) {
         // On initial load, fetch the full data for the first slide, then set it as active.
-        fetchFullSlide(initialSlide.id).then(() => {
-          dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x: initialSlide.x, y: initialSlide.y, id: initialSlide.id } });
+        fetchFullSlide(initialSlide.id).then((fullSlide) => {
+          if (fullSlide) {
+            dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x: fullSlide.x, y: fullSlide.y, id: fullSlide.id, slide: fullSlide } });
+          }
         });
       }
     }
@@ -252,7 +282,9 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const columnKeys = useMemo(() => Object.keys(state.columns).map(Number).sort((a, b) => a - b), [state.columns]);
 
   const setActiveSlide = useCallback((x: number, y: number, id: string) => {
-    dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x, y, id } });
+    const column = stateRef.current.columns[x];
+    const slide = column?.find(s => s.id === id);
+    dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x, y, id, slide } });
   }, []);
 
   const setSoundActiveSlide = useCallback((id: string | null) => {
@@ -263,44 +295,22 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     activeVideoRef.current = ref?.current ?? null;
   }, []);
 
-  const handleNavigation = useCallback(async (direction: NavigationDirection) => {
+  const handleNavigation = useCallback(async (direction: 'left' | 'right') => {
     const currentState = stateRef.current;
     if (currentState.isNavigating) return;
 
     dispatch({ type: 'START_NAVIGATION' });
 
     let targetSlide: Slide | undefined;
-    const { activeColumnIndex, activeSlideY, columns } = currentState;
+    const { activeColumnIndex, columns } = currentState;
 
-    if (direction === 'up' || direction === 'down') {
-      const currentColumn = columns[activeColumnIndex] || [];
-      if (currentColumn.length === 0) {
-        dispatch({ type: 'FINISH_NAVIGATION' });
-        return;
-      }
-      const currentSlideIndex = currentColumn.findIndex(s => s.y === activeSlideY);
+    const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
+    const nextKeyIndex = direction === 'right' ? currentKeyIndex + 1 : currentKeyIndex - 1;
 
-      if (currentSlideIndex === -1) {
-        dispatch({ type: 'FINISH_NAVIGATION' });
-        return;
-      }
-
-      const nextSlideIndex = direction === 'down' ? currentSlideIndex + 1 : currentSlideIndex - 1;
-      const isLooping = nextSlideIndex < 0 || nextSlideIndex >= currentColumn.length;
-
-      if (isLooping) {
-        targetSlide = direction === 'down' ? currentColumn[0] : currentColumn[currentColumn.length - 1];
-      } else {
-        targetSlide = currentColumn[nextSlideIndex];
-      }
-    } else { // 'left' or 'right'
-      const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
-      const nextKeyIndex = direction === 'right' ? currentKeyIndex + 1 : currentKeyIndex - 1;
-
-      if (nextKeyIndex >= 0 && nextKeyIndex < columnKeys.length) {
-        const newColumnIndex = columnKeys[nextKeyIndex];
-        targetSlide = columns[newColumnIndex]?.[0];
-      }
+    if (nextKeyIndex >= 0 && nextKeyIndex < columnKeys.length) {
+      const newColumnIndex = columnKeys[nextKeyIndex];
+      // When moving to a new column, always target the first slide (y=0 or the first in the sorted array)
+      targetSlide = columns[newColumnIndex]?.[0];
     }
 
     if (!targetSlide) {
@@ -309,8 +319,13 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     }
 
     try {
-      await fetchFullSlide(targetSlide.id);
-      dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x: targetSlide.x, y: targetSlide.y, id: targetSlide.id } });
+      // Ensure the target slide's full data is loaded before navigating
+      const fullSlide = await fetchFullSlide(targetSlide.id);
+      if (fullSlide) {
+        dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x: fullSlide.x, y: fullSlide.y, id: fullSlide.id, slide: fullSlide } });
+      } else {
+        dispatch({ type: 'FINISH_NAVIGATION' });
+      }
     } catch (err) {
       console.error("Navigation failed:", err);
       dispatch({ type: 'SET_ERROR', payload: err as Error });
@@ -365,6 +380,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     setActiveModal,
     openAccountPanel,
     toggleLike,
+    loadMoreItems,
     initialCoordinates,
     activeSlide,
     columnKeys,
