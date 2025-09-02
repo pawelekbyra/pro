@@ -90,6 +90,7 @@ const PWAInstallPrompt = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+            style={{ paddingBottom: 'var(--safe-area-bottom)' }}
           >
             <div className="flex w-full justify-between items-center mb-4">
               <h3 className="text-lg font-bold">Jak zainstalować aplikację</h3>
@@ -106,7 +107,10 @@ const PWAInstallPrompt = () => {
             </div>
           </motion.div>
         ) : (
-          <div className="absolute bottom-0 w-full bg-gray-800 text-white p-4 flex justify-between items-center z-50">
+          <div
+            className="w-full bg-gray-800 text-white p-4 flex justify-between items-center z-50"
+            style={{ paddingBottom: 'calc(1rem + var(--safe-area-bottom))' }}
+          >
             <div>
               <p className="font-bold">Zainstaluj aplikację!</p>
               <p>Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
