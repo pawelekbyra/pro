@@ -43,35 +43,30 @@ const Preloader: React.FC = () => {
     <AnimatePresence>
       {!isHiding && (
         <motion.div
-          className="fixed inset-0 bg-black z-[10000] flex flex-col items-center justify-center p-4"
+          className="fixed inset-0 bg-black z-[10000] flex flex-col p-4"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <motion.div
-            className="relative mb-12"
-            initial={{ scale: 1, opacity: 0.9 }}
-            animate={{
-              scale: [1, 1.03, 1],
-              opacity: [0.9, 1, 0.9],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <Image
-              src="/icons/icon-512x512.png"
-              alt="Ting Tong Logo"
-              width={192}
-              height={192}
-              priority
-            />
-          </motion.div>
+          <div className="flex-grow flex items-center justify-center">
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, ease: 'easeInOut' }}
+            >
+              <Image
+                src="/icons/icon-512x512.png"
+                alt="Ting Tong Logo"
+                width={512}
+                height={512}
+                priority
+              />
+            </motion.div>
+          </div>
 
           <motion.div
-            className="text-center w-full flex flex-col items-center"
+            className="text-center w-full flex flex-col items-center pb-8"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
