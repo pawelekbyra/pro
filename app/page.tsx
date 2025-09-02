@@ -288,13 +288,14 @@ export default function Home() {
         )}
         {activeModal === 'comments' && activeSlide && (
           <CommentsModal
+            isOpen={activeModal === 'comments'}
             slideId={activeSlide.id}
             initialCommentsCount={activeSlide.initialComments}
             onClose={() => setActiveModal(null)}
           />
         )}
         {activeModal === 'info' && (
-          <InfoModal onClose={() => setActiveModal(null)} />
+          <InfoModal isOpen={activeModal === 'info'} onClose={() => setActiveModal(null)} />
         )}
       </AnimatePresence>
     </>
