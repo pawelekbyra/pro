@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom';
 const window = new JSDOM('').window;
 
 // Create a DOMPurify instance from the JSDOM window
-const purify = DOMPurify(window as unknown as Window);
+const purify = DOMPurify(window as any);
 
 /**
  * Sanitizes an HTML string to prevent XSS attacks.
