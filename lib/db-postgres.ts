@@ -310,28 +310,23 @@ export async function getSlidesInView(options: { x: number, y: number, width: nu
     const sql = getDb();
     const { x, y, width, height, currentUserId, metadataOnly } = options;
 
-    let results;
-    const whereClause = sql`WHERE s.x >= ${x} AND s.x < ${x + width} AND s.y >= ${y} AND s.y < ${y + height}`;
+    const selectedColumns = metadataOnly
+        ? `s.id, s."userId", s.username, s.x, s.y, s."slideType", s.title, s."createdAt"`
+        : "s.*";
 
-    if (metadataOnly) {
-        results = await sql`
-            SELECT s.id, s."userId", s.username, s.x, s.y, s."slideType", s.title, s."createdAt",
-                (SELECT COUNT(*) FROM likes l WHERE l."slideId" = s.id) as "initialLikes",
-                (SELECT COUNT(*) FROM comments c WHERE c."slideId" = s.id) as "initialComments",
-                (SELECT EXISTS(SELECT 1 FROM likes l WHERE l."slideId" = s.id AND l."userId" = ${currentUserId || null})) as "isLiked"
-            FROM slides s
-            ${whereClause};
-        `;
-    } else {
-        results = await sql`
-            SELECT s.*,
-                (SELECT COUNT(*) FROM likes l WHERE l."slideId" = s.id) as "initialLikes",
-                (SELECT COUNT(*) FROM comments c WHERE c."slideId" = s.id) as "initialComments",
-                (SELECT EXISTS(SELECT 1 FROM likes l WHERE l."slideId" = s.id AND l."userId" = ${currentUserId || null})) as "isLiked"
-            FROM slides s
-            ${whereClause};
-        `;
-    }
+    const query = `
+        SELECT ${selectedColumns},
+            COUNT(DISTINCT l."userId")::int AS "initialLikes",
+            COUNT(DISTINCT c.id)::int AS "initialComments",
+            COALESCE(bool_or(l."userId" = $5), false) AS "isLiked"
+        FROM slides s
+        LEFT JOIN likes l ON s.id = l."slideId"
+        LEFT JOIN comments c ON s.id = c."slideId"
+        WHERE s.x >= $1 AND s.x < $2 AND s.y >= $3 AND s.y < $4
+        GROUP BY s.id;
+    `;
+
+    const results = await sql.query(query, [x, x + width, y, y + height, currentUserId || null]);
 
     return (results as unknown as any[]).map(dbSlide => {
         const { slideType, content, ...rest } = dbSlide;
@@ -390,15 +385,27 @@ export async function getComments(slideId: string): Promise<Comment[]> {
     return (result as unknown as any[]).map(c => ({ ...c, user: { displayName: c.displayName, avatar: c.avatar } }));
 }
 
-export async function addComment(slideId: string, userId: string, text: string, parentId: string | null = null): Promise<Comment> {
+export async function addComment(slideId: string, userId:string, text: string, parentId: string | null = null): Promise<Comment> {
     const sql = getDb();
     const result = await sql`
-        INSERT INTO comments ("slideId", "userId", text, "parentId") VALUES (${slideId}, ${userId}, ${text}, ${parentId}) RETURNING *;
+        WITH new_comment AS (
+            INSERT INTO comments (id, "slideId", "userId", text, "parentId")
+            VALUES ('comment_' || gen_random_uuid()::text, ${slideId}, ${userId}, ${text}, ${parentId})
+            RETURNING *
+        )
+        SELECT c.*, u."displayName", u.username, u.avatar
+        FROM new_comment c
+        JOIN users u ON c."userId" = u.id;
     `;
-    const newComment = result[0] as Comment;
-    const userResult = await sql`SELECT "displayName", "username", "avatar" FROM users WHERE id = ${userId}`;
-    const user = userResult[0] as User;
-    return { ...newComment, user: { displayName: user.displayName || user.username, avatar: user.avatar || '' } };
+    const newCommentData = result[0];
+    const { displayName, username, avatar, ...commentData } = newCommentData;
+    return {
+        ...commentData,
+        user: {
+            displayName: displayName || username,
+            avatar: avatar || ''
+        }
+    } as Comment;
 }
 
 // --- Notification Functions ---
@@ -415,8 +422,24 @@ export async function createNotification(notificationData: Omit<Notification, 'i
 }
 export async function getNotifications(userId: string): Promise<Notification[]> {
     const sql = getDb();
-    const results = await sql`SELECT * FROM notifications WHERE "userId" = ${userId} ORDER BY "createdAt" DESC;`;
-    return results as unknown as Notification[];
+    const results = await sql`
+        SELECT n.*, u.username as "fromUsername", u.avatar as "fromUserAvatar"
+        FROM notifications n
+        LEFT JOIN users u ON n."fromUserId" = u.id
+        WHERE n."userId" = ${userId}
+        ORDER BY n."createdAt" DESC;
+    `;
+    return (results as unknown as any[]).map(n => {
+        const { fromUsername, fromUserAvatar, ...rest } = n;
+        return {
+            ...rest,
+            fromUser: n.fromUserId ? {
+                id: n.fromUserId,
+                username: fromUsername,
+                avatar: fromUserAvatar,
+            } : undefined,
+        };
+    }) as Notification[];
 }
 export async function markNotificationAsRead(notificationId: string): Promise<Notification | null> {
     const sql = getDb();

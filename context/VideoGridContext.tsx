@@ -15,7 +15,7 @@ interface State {
   activeSlideY: number;
   activeSlideId: string | null;
   soundActiveSlideId: string | null;
-  activeVideoRef: React.RefObject<HTMLVideoElement> | null;
+  activeVideoRef: React.RefObject<HTMLVideoElement> | null; // Dodano z powrotem
   prefetchHint: { x: number, y: number } | null;
   loadingColumns: Set<number>;
   activeModal: ModalType;
@@ -27,7 +27,7 @@ type Action =
   | { type: 'ADD_GRID_DATA'; payload: Columns }
   | { type: 'UPDATE_ACTIVE_SLIDE'; payload: { x: number; y: number; id: string } }
   | { type: 'SET_SOUND_ACTIVE_SLIDE'; payload: string | null }
-  | { type: 'SET_ACTIVE_VIDEO_REF'; payload: React.RefObject<HTMLVideoElement> | null }
+  | { type: 'SET_ACTIVE_VIDEO_REF'; payload: React.RefObject<HTMLVideoElement> | null } // Dodano z powrotem
   | { type: 'SET_PREFETCH_HINT'; payload: { x: number; y: number } | null }
   | { type: 'START_LOADING_COLUMN'; payload: number }
   | { type: 'FINISH_LOADING_COLUMN'; payload: number }
@@ -42,7 +42,7 @@ const initialState: State = {
   activeSlideY: 0,
   activeSlideId: null,
   soundActiveSlideId: null,
-  activeVideoRef: null,
+  activeVideoRef: null, // Dodano z powrotem
   prefetchHint: null,
   loadingColumns: new Set(),
   activeModal: null,
@@ -57,7 +57,6 @@ function reducer(state: State, action: Action): State {
       const combinedColumns = { ...state.columns };
       for (const x in action.payload) {
         if (combinedColumns[x]) {
-          // Simple merge, could be more sophisticated to avoid duplicates
           combinedColumns[x] = [...combinedColumns[x], ...action.payload[x]];
         } else {
           combinedColumns[x] = action.payload[x];
@@ -75,7 +74,7 @@ function reducer(state: State, action: Action): State {
       };
     case 'SET_SOUND_ACTIVE_SLIDE':
       return { ...state, soundActiveSlideId: action.payload };
-    case 'SET_ACTIVE_VIDEO_REF':
+    case 'SET_ACTIVE_VIDEO_REF': // Dodano z powrotem
       return { ...state, activeVideoRef: action.payload };
     case 'SET_PREFETCH_HINT':
       return { ...state, prefetchHint: action.payload };
@@ -131,7 +130,7 @@ interface VideoGridContextType {
   moveHorizontal: (direction: 'left' | 'right') => void;
   setActiveSlide: (x: number, y: number, id: string) => void;
   setSoundActiveSlide: (id: string | null) => void;
-  setActiveVideoRef: (ref: React.RefObject<HTMLVideoElement> | null) => void;
+  setActiveVideoRef: (ref: React.RefObject<HTMLVideoElement> | null) => void; // Dodano z powrotem
   setPrefetchHint: (hint: { x: number; y: number } | null) => void;
   fetchFullSlide: (id: string) => Promise<void>;
   setActiveModal: (modal: ModalType) => void;
@@ -159,8 +158,6 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   useEffect(() => {
     if (state.error) {
       addToast(state.error.message, 'error');
-      // Optional: Clear the error after showing it so it doesn't reappear on re-renders
-      // dispatch({ type: 'SET_ERROR', payload: null });
     }
   }, [state.error, addToast]);
 
@@ -229,6 +226,16 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     }
   }, [state.activeColumnIndex, fetchColumn]);
 
+  useEffect(() => {
+    // Set initial slide ID when the first column loads
+    if (!state.activeSlideId && state.columns[state.activeColumnIndex]?.length > 0) {
+      const initialSlide = state.columns[state.activeColumnIndex].find(s => s.y === state.activeSlideY);
+      if (initialSlide) {
+        dispatch({ type: 'UPDATE_ACTIVE_SLIDE', payload: { x: initialSlide.x, y: initialSlide.y, id: initialSlide.id } });
+      }
+    }
+  }, [state.columns, state.activeColumnIndex, state.activeSlideY, state.activeSlideId]);
+
   const columnKeys = useMemo(() => Object.keys(state.columns).map(Number).sort((a, b) => a - b), [state.columns]);
 
   const setActiveSlide = useCallback((x: number, y: number, id: string) => {
@@ -239,7 +246,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     dispatch({ type: 'SET_SOUND_ACTIVE_SLIDE', payload: id });
   }, []);
 
-  const setActiveVideoRef = useCallback((ref: React.RefObject<HTMLVideoElement> | null) => {
+  const setActiveVideoRef = useCallback((ref: React.RefObject<HTMLVideoElement> | null) => { // Dodano z powrotem
     dispatch({ type: 'SET_ACTIVE_VIDEO_REF', payload: ref });
   }, []);
 
@@ -274,7 +281,6 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   }, [setActiveModal]);
 
   const toggleLike = useCallback(async (slideId: string, x: number) => {
-    // Optimistic update
     dispatch({ type: 'OPTIMISTIC_TOGGLE_LIKE', payload: { slideId, x } });
 
     try {
@@ -287,11 +293,8 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
       if (!response.ok) {
         throw new Error('Failed to update like status');
       }
-      // Optionally, you could merge the final state from the server here,
-      // but for a simple like toggle, the optimistic one is usually enough.
     } catch (error) {
       console.error('Failed to toggle like:', error);
-      // Revert the optimistic update on failure
       dispatch({ type: 'OPTIMISTIC_TOGGLE_LIKE', payload: { slideId, x } });
       dispatch({ type: 'SET_ERROR', payload: error as Error });
     }
@@ -310,7 +313,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     moveHorizontal,
     setActiveSlide,
     setSoundActiveSlide,
-    setActiveVideoRef,
+    setActiveVideoRef, // Dodano z powrotem
     setPrefetchHint,
     fetchFullSlide,
     setActiveModal,

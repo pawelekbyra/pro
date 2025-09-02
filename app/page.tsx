@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import DesktopLayout from '@/components/DesktopLayout';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import SlideRenderer from '@/components/SlideRenderer';
 import { Slide } from '@/lib/types';
@@ -275,5 +274,5 @@ export default function Home() {
     </motion.div>
   );
 
-  return <DesktopLayout>{appContent}</DesktopLayout>;
+  return appContent;
 }

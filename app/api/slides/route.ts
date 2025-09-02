@@ -32,5 +32,9 @@ export async function GET(request: NextRequest) {
     grid[`${slide.x},${slide.y}`] = slide;
   });
 
-  return NextResponse.json({ grid });
+  return NextResponse.json({ grid }, {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    }
+  });
 }

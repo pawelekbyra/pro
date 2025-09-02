@@ -18,6 +18,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'slideId is required' }, { status: 400 });
     }
 
+    const slide = await db.getSlide(slideId);
+    if (!slide) {
+      return NextResponse.json({ success: false, message: 'Slide not found' }, { status: 404 });
+    }
+
     const result = await db.toggleLike(slideId, currentUser.id);
 
     return NextResponse.json({
