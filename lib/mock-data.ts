@@ -82,3 +82,25 @@ mockGrid['0,3'] = {
     description: 'A short clip of Elephants Dream.',
   },
 };
+
+mockGrid['0,4'] = {
+  id: 'video-slide-3',
+  type: 'video',
+  x: 0,
+  y: 4,
+  userId: 'admin',
+  username: 'admin',
+  avatar: 'https://i.pravatar.cc/150?u=admin',
+  access: 'public',
+  createdAt: Date.now(),
+  initialLikes: 2048,
+  isLiked: true,
+  initialComments: 12,
+  data: {
+    mp4Url: 'https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4',
+    hlsUrl: null,
+    poster: '',
+    title: 'Sintel',
+    description: 'A short clip of Sintel.',
+  },
+};
