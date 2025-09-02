@@ -90,29 +90,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
         description={slide.data?.description || 'No description available.'}
       />
 
-      <AnimatePresence>
-        {isActive && areBarsVisible && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-0 left-0 w-full h-full z-40 pointer-events-none"
-          >
-            <div className="pointer-events-auto">
-              <Sidebar
-                avatarUrl={slide.avatar}
-                initialLikes={slide.initialLikes}
-                isLiked={slide.isLiked}
-                slideId={slide.id}
-                commentsCount={slide.initialComments}
-                x={slide.x}
-              />
-              <BottomBar videoRef={videoRef} isActive={isActive} />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isActive && areBarsVisible && (
+        <div className="absolute top-0 left-0 w-full h-full z-40 pointer-events-none">
+          <div className="pointer-events-auto">
+            <Sidebar
+              avatarUrl={slide.avatar}
+              initialLikes={slide.initialLikes}
+              isLiked={slide.isLiked}
+              slideId={slide.id}
+              commentsCount={slide.initialComments}
+              x={slide.x}
+            />
+            <BottomBar videoRef={videoRef} isActive={isActive} />
+          </div>
+        </div>
+      )}
 
 
       {isActive && (
