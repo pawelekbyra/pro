@@ -191,7 +191,7 @@ const NotificationPopup: React.FC<NotificationPopupProps> = ({ isOpen, onClose }
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 pb-[var(--bottombar-height,60px)]"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 pb-[calc(var(--bottombar-height)_+_20px)] md:pb-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
