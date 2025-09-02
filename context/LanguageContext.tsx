@@ -4,7 +4,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 
 const translations: Record<string, Record<string, string>> = {
     pl: {
-        loggedOutText: "Nie masz psychy sie zalogowac",
+        loggedOutText: "Nie masz psychy się zalogować",
         loggedInWelcome: 'Witaj, {name}',
         loading: 'Ładowanie...',
         selectLang: 'Wybierz Język',
@@ -70,6 +70,12 @@ const translations: Record<string, Record<string, string>> = {
         notif3Preview: 'Specjalna oferta czeka na Ciebie!',
         notif3Time: '1 godz. temu',
         notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.',
+        mockNotif1Preview: 'Nowa wiadomość od Supportu',
+        mockNotif1Full: 'Dziękujemy za zgłoszenie! Pracujemy nad rozwiązaniem Twojego problemu.',
+        mockNotif2Preview: 'Zdobyłeś nowe osiągnięcie!',
+        mockNotif2Full: 'Gratulacje! Odblokowałeś osiągnięcie "Mistrz Absurdu" za 100 obejrzanych slajdów.',
+        mockNotif3Preview: 'Specjalna oferta dla Ciebie!',
+        mockNotif3Full: 'Otrzymaj 50% zniżki na zakup wirtualnej kawy dla dewelopera. Użyj kodu: JULES_RULEZ',
         // Nowe tłumaczenia
         notificationsFromUser: 'Nowa wiadomość od {name}',
         likeNotification: '{name} polubił Twój film.',
@@ -212,6 +218,12 @@ const translations: Record<string, Record<string, string>> = {
         notif3Preview: 'A special offer is waiting for you!',
         notif3Time: '1 hour ago',
         notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.',
+        mockNotif1Preview: 'New message from Support',
+        mockNotif1Full: 'Thanks for your report! We are working on a solution to your problem.',
+        mockNotif2Preview: 'You have a new achievement!',
+        mockNotif2Full: 'Congratulations! You have unlocked the "Master of Absurdity" achievement for watching 100 slides.',
+        mockNotif3Preview: 'Special offer for you!',
+        mockNotif3Full: 'Get a 50% discount on the purchase of a virtual coffee for the developer. Use the code: JULES_RULEZ',
         // Nowe tłumaczenia
         notificationsFromUser: 'New message from {name}',
         likeNotification: '{name} liked your video.',

@@ -4,7 +4,18 @@ import type { User, Comment } from './db.interfaces';
 
 // In-memory store for mock data
 let slides: Grid = JSON.parse(JSON.stringify(mockGrid)); // Deep copy to avoid modifying the original
-let users: { [id: string]: User } = {};
+let users: { [id: string]: User } = {
+  "user_admin_01": {
+    id: "user_admin_01",
+    username: "admin",
+    email: "admin@example.com",
+    password: "$2b$10$scJP6AU3qVcvhTXLelewKuJo48GRwjiLIciF3xGDHEXxN9rboZXQm", // password123
+    role: "admin",
+    displayName: "Administrator",
+    avatar: "https://i.pravatar.cc/150?u=admin",
+    sessionVersion: 1,
+  }
+};
 let comments: { [id: string]: Comment } = {
   "comment_1": {
     id: "comment_1",
@@ -55,6 +66,10 @@ let comments: { [id: string]: Comment } = {
 // Mock database object
 export const db = {
   // --- User Functions ---
+  async findUserByEmail(email: string): Promise<User | undefined> {
+    return Object.values(users).find(user => user.email === email);
+  },
+
   async findUserById(id: string): Promise<User | undefined> {
     return users[id];
   },
@@ -145,31 +160,43 @@ export const db = {
   },
 
   // --- Notification Functions ---
-  async getNotifications(userId: string, lang: string = 'en') {
+  async getNotifications(userId: string) {
     const notifications = [
       {
         id: 'notif_1',
         type: 'message',
-        preview: lang === 'pl' ? 'Nowa wiadomość od Supportu' : 'New message from Support',
-        time: '2 mins ago',
-        full: lang === 'pl' ? 'Dziękujemy za zgłoszenie! Pracujemy nad rozwiązaniem Twojego problemu.' : 'Thanks for your report! We are working on a solution to your problem.',
-        unread: true
+        previewKey: 'mockNotif1Preview',
+        fullKey: 'mockNotif1Full',
+        createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+        read: false,
+        fromUser: {
+          displayName: 'Support',
+          avatar: 'https://i.pravatar.cc/150?u=support',
+        },
       },
       {
         id: 'notif_2',
-        type: 'profile',
-        preview: lang === 'pl' ? 'Zdobyłeś nowe osiągnięcie!' : 'You have a new achievement!',
-        time: '1 hour ago',
-        full: lang === 'pl' ? 'Gratulacje! Odblokowałeś osiągnięcie "Mistrz Absurdu" za 100 obejrzanych slajdów.' : 'Congratulations! You have unlocked the "Master of Absurdity" achievement for watching 100 slides.',
-        unread: true
+        type: 'follow', // Changed to a valid type
+        previewKey: 'mockNotif2Preview',
+        fullKey: 'mockNotif2Full',
+        createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        read: false,
+        fromUser: {
+          displayName: 'System Osiągnięć',
+          avatar: 'https://i.pravatar.cc/150?u=achievements',
+        },
       },
       {
         id: 'notif_3',
-        type: 'offer',
-        preview: lang === 'pl' ? 'Specjalna oferta dla Ciebie!' : 'Special offer for you!',
-        time: '1 day ago',
-        full: lang === 'pl' ? 'Otrzymaj 50% zniżki na zakup wirtualnej kawy dla dewelopera. Użyj kodu: JULES_RULEZ' : 'Get a 50% discount on the purchase of a virtual coffee for the developer. Use the code: JULES_RULEZ',
-        unread: false
+        type: 'like', // Changed to a valid type
+        previewKey: 'mockNotif3Preview',
+        fullKey: 'mockNotif3Full',
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        read: true,
+        fromUser: {
+          displayName: 'Dział Marketingu',
+          avatar: 'https://i.pravatar.cc/150?u=marketing',
+        },
       },
     ];
     return notifications;
