@@ -15,6 +15,7 @@ interface State {
   activeSlideY: number;
   activeSlideId: string | null;
   soundActiveSlideId: string | null;
+  activeVideoRef: React.RefObject<HTMLVideoElement> | null;
   prefetchHint: { x: number, y: number } | null;
   loadingColumns: Set<number>;
   activeModal: ModalType;
@@ -26,6 +27,7 @@ type Action =
   | { type: 'ADD_GRID_DATA'; payload: Columns }
   | { type: 'UPDATE_ACTIVE_SLIDE'; payload: { x: number; y: number; id: string } }
   | { type: 'SET_SOUND_ACTIVE_SLIDE'; payload: string | null }
+  | { type: 'SET_ACTIVE_VIDEO_REF'; payload: React.RefObject<HTMLVideoElement> | null }
   | { type: 'SET_PREFETCH_HINT'; payload: { x: number; y: number } | null }
   | { type: 'START_LOADING_COLUMN'; payload: number }
   | { type: 'FINISH_LOADING_COLUMN'; payload: number }
@@ -40,6 +42,7 @@ const initialState: State = {
   activeSlideY: 0,
   activeSlideId: null,
   soundActiveSlideId: null,
+  activeVideoRef: null,
   prefetchHint: null,
   loadingColumns: new Set(),
   activeModal: null,
@@ -72,6 +75,8 @@ function reducer(state: State, action: Action): State {
       };
     case 'SET_SOUND_ACTIVE_SLIDE':
       return { ...state, soundActiveSlideId: action.payload };
+    case 'SET_ACTIVE_VIDEO_REF':
+      return { ...state, activeVideoRef: action.payload };
     case 'SET_PREFETCH_HINT':
       return { ...state, prefetchHint: action.payload };
     case 'START_LOADING_COLUMN':
@@ -126,6 +131,7 @@ interface VideoGridContextType {
   moveHorizontal: (direction: 'left' | 'right') => void;
   setActiveSlide: (x: number, y: number, id: string) => void;
   setSoundActiveSlide: (id: string | null) => void;
+  setActiveVideoRef: (ref: React.RefObject<HTMLVideoElement> | null) => void;
   setPrefetchHint: (hint: { x: number; y: number } | null) => void;
   fetchFullSlide: (id: string) => Promise<void>;
   setActiveModal: (modal: ModalType) => void;
@@ -233,6 +239,10 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     dispatch({ type: 'SET_SOUND_ACTIVE_SLIDE', payload: id });
   }, []);
 
+  const setActiveVideoRef = useCallback((ref: React.RefObject<HTMLVideoElement> | null) => {
+    dispatch({ type: 'SET_ACTIVE_VIDEO_REF', payload: ref });
+  }, []);
+
   const setPrefetchHint = useCallback((hint: { x: number; y: number } | null) => {
     dispatch({ type: 'SET_PREFETCH_HINT', payload: hint });
   }, []);
@@ -300,6 +310,7 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
     moveHorizontal,
     setActiveSlide,
     setSoundActiveSlide,
+    setActiveVideoRef,
     setPrefetchHint,
     fetchFullSlide,
     setActiveModal,

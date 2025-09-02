@@ -6,7 +6,7 @@ import { useToast } from '@/context/ToastContext';
 import { debounce } from '@/lib/utils';
 
 interface BottomBarProps {
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement> | null;
   isActive: boolean;
 }
 
@@ -27,6 +27,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   };
 
   useEffect(() => {
+    if (!videoRef) return;
     const video = videoRef.current;
     if (!video || !isActive) return;
 
@@ -45,6 +46,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
   }, [videoRef, isActive, isDragging]);
 
   const handleScrub = (clientX: number) => {
+    if (!videoRef) return;
     const video = videoRef.current;
     const bar = progressBarRef.current;
     if (!video || !bar || !video.duration || !isFinite(video.duration)) return;

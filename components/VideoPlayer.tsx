@@ -15,10 +15,18 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { state, setSoundActiveSlide } = useVideoGrid();
+  const { state, setSoundActiveSlide, setActiveVideoRef } = useVideoGrid();
   const { soundActiveSlideId } = state;
   const isMuted = soundActiveSlideId !== slide.id;
   const [videoSrc, setVideoSrc] = useState(slide.data?.hlsUrl || slide.data?.mp4Url);
+
+  useEffect(() => {
+    if (isActive) {
+      setActiveVideoRef(videoRef);
+    }
+    // No cleanup needed here, DesktopLayout will handle nulling the ref
+    // when the active slide changes and this component unmounts.
+  }, [isActive, setActiveVideoRef]);
 
   const handleHlsFatalError = useCallback(() => {
     console.warn('HLS fatal error. Falling back to MP4 source.');
