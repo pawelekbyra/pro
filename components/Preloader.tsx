@@ -43,14 +43,15 @@ const Preloader: React.FC = () => {
     <AnimatePresence>
       {!isHiding && (
         <motion.div
-          className="fixed inset-0 bg-black z-[10000] flex flex-col items-center justify-center"
+          className="fixed inset-0 bg-black z-[10000] flex flex-col items-center" // Usunięto justify-center
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="relative flex flex-col items-center">
+          {/* Kontener dla logo, który zajmuje elastyczną przestrzeń */}
+          <div className="flex-1 flex items-end justify-center w-full">
             <motion.div
-              className="relative"
+              className="relative flex-shrink-0" // Zapewnia, że logo się nie skurczy
               initial={{ scale: 1, opacity: 0.9 }}
               animate={{
                 scale: [1, 1.03, 1],
@@ -71,8 +72,11 @@ const Preloader: React.FC = () => {
                 priority
               />
             </motion.div>
+          </div>
+          {/* Kontener dla zawartości (wybór języka), który zajmuje resztę miejsca */}
+          <div className="flex-1 flex flex-col items-center justify-start w-full">
             <motion.div
-              className="text-center mt-8"
+              className="text-center w-full"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
