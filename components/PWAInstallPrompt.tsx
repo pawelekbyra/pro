@@ -108,14 +108,14 @@ const PWAInstallPrompt = () => {
           </motion.div>
         ) : (
           <div
-            className="w-full bg-gray-800 text-white p-4 flex justify-between items-center z-50"
+            className="w-full bg-gray-800 text-white p-4 flex flex-col @[400px]:flex-row justify-center @[400px]:justify-between items-center text-center @[400px]:text-left gap-4 z-50"
             style={{ paddingBottom: 'calc(1rem + var(--safe-area-bottom))' }}
           >
             <div>
               <p className="font-bold">Zainstaluj aplikację!</p>
-              <p>Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
+              <p className="text-sm @[400px]:text-base">Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
             </div>
-            <Button onClick={handleInstallClick}>
+            <Button onClick={handleInstallClick} className="w-full @[400px]:w-auto flex-shrink-0">
               Zainstaluj
             </Button>
           </div>

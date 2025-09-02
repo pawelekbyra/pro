@@ -25,8 +25,8 @@ export default function DesktopLayout({ children }: { children: React.ReactNode 
         <div
             className="relative h-screen w-full flex justify-center items-center bg-zinc-900"
         >
-            <div className="relative h-full w-auto max-w-full aspect-[9/16] overflow-hidden rounded-md shadow-lg border-x border-white/10 flex flex-col bg-black">
-                <TopBar />
+            <div className="@container relative w-auto h-auto max-w-full max-h-full aspect-[9/16] overflow-hidden rounded-md shadow-lg border-x border-white/10 flex flex-col bg-black">
+
                 <main className="flex-1 overflow-y-auto">
                     {children}
                 </main>
