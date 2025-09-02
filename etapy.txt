@@ -1,0 +1,50 @@
+Plan stabilizacji apki.
+
+Etap 1: Uproszczenie i stabilizacja przewijania (plik app/page.tsx)
+Zastąpienie logiki klonowania i IntersectionObserver.
+
+Usuń logikę klonowania pierwszego i ostatniego slajdu.
+
+Wyeliminuj IntersectionObserver i związaną z nim logikę jumpTo oraz flagę isProgrammaticScroll.
+
+Zaimplementuj wirtualizację listy slajdów. Możesz wykorzystać w tym celu gotowe biblioteki, takie jak react-virtualized lub react-window, które są zaprojektowane do efektywnego renderowania długich list. Dzięki temu w DOM będą renderowane tylko widoczne elementy, co znacznie odciąży przeglądarkę.
+
+Ujednolicenie mechanizmu animacji.
+
+Zamiast mieszać natywne przewijanie (scrollTop) z animacjami framer-motion, dostosuj animację motion.div tak, aby przesuwała zawartość w poziomie i reagowała na zmianę activeColumnIndex. Przewijanie pionowe powinno być teraz zarządzane bezpośrednio przez wirtualną listę, która używa transformacji CSS.
+
+Zadbaj o płynne przejścia między kolumnami za pomocą właściwości layout z framer-motion.
+
+Etap 2: Optymalizacja ładowania i cyklu życia wideo
+Stworzenie globalnego odtwarzacza wideo.
+
+Przenieś element <video> i logikę odtwarzania (useHls) do osobnego, centralnego komponentu (np. GlobalVideoPlayer.tsx). Ten komponent będzie renderowany tylko raz, na najwyższym poziomie aplikacji.
+
+W VideoGridContext dodaj stan, który będzie przechowywał URL aktywnego wideo i dane o nim.
+
+Gdy zmienia się aktywny slajd, zaktualizuj stan w kontekście. Centralny odtwarzacz wideo, nasłuchując na te zmiany, zmieni swoje źródło i rozpocznie odtwarzanie.
+
+Mądrzejsze zarządzanie HLS.js.
+
+W komponencie GlobalVideoPlayer zainicjuj jedną instancję Hls.js. Gdy zmieniasz źródło wideo, nie niszcz instancji, a jedynie wywołaj metodę loadSource i attachMedia dla nowego pliku. To znacznie zredukuje obciążenie procesora i pamięci.
+
+Zaimplementuj płynne przejście między filmami. Gdy nowe wideo jest ładowane, możesz na przykład ustawić opacity na 0 dla elementu <video>, załadować nowe źródło, a następnie przywrócić opacity do 1, kiedy film będzie gotowy do odtworzenia.
+
+Poprawa doświadczenia ładowania treści.
+
+W komponencie SlideRenderer.tsx użyj płynnego przejścia (cross-fade) między Skeleton a pełną treścią. Skeleton powinien być renderowany pod spodem, a w pełni załadowany VideoPlayer powinien pojawić się z animacją opacity. To wyeliminuje efekt "pop-in".
+
+Etap 3: Optymalizacje dodatkowe i debugowanie
+Zastosowanie technik Debouncing i Throttling.
+
+W VideoGridContext (lub w logice obsługującej przewijanie) użyj funkcji debounce lub throttle do ograniczenia częstotliwości wywoływania funkcji aktualizujących stan. Przykładowo, zdarzenie onScroll powinno wywoływać funkcję setActiveSlide z opóźnieniem, aby uniknąć wielokrotnych aktualizacji stanu podczas jednej akcji przewijania.
+
+Oddzielenie UI od logiki wideo.
+
+Upewnij się, że komponenty interfejsu (paski boczne, przyciski, paski postępu) nie wywołują ponownego renderowania całego odtwarzacza wideo. W VideoPlayer.tsx możesz użyć React.memo na komponentach, takich jak Sidebar czy BottomBar, lub przekazać dane za pomocą props, aby uniknąć niepotrzebnych ponownych renderowań.
+
+Weryfikacja i testowanie.
+
+Po każdej zmianie, dokładnie przetestuj aplikację. Sprawdź, czy przewijanie jest płynne na różnych urządzeniach i przeglądarkach. Zwróć uwagę na konsolę, aby sprawdzić, czy nie ma tam błędów związanych z ładowaniem HLS.js.
+
+Ten plan działania pozwoli ci systematycznie podejść do problemów wydajności i stworzyć stabilną i płynną aplikację, która jest odporna na błędy, które zidentyfikowałeś. Powodzenia!
