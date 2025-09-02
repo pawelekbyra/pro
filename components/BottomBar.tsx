@@ -6,7 +6,7 @@ import { useToast } from '@/context/ToastContext';
 import { debounce } from '@/lib/utils';
 
 interface BottomBarProps {
-  videoRef: React.RefObject<HTMLVideoElement> | null;
+  videoRef: React.RefObject<HTMLVideoElement | null> | null;
   isActive: boolean;
 }
 
