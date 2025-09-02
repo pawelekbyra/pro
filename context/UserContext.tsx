@@ -60,11 +60,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    const res = await fetch('/api/logout', { method: 'POST' });
-    if (res.ok) {
-        setUser(null);
-    } else {
-        console.error("Logout failed");
+    try {
+        const res = await fetch('/api/logout', { method: 'POST' });
+        if (res.ok) {
+            setUser(null);
+            // Opcjonalnie dodaj powiadomienie o sukcesie wylogowania
+        } else {
+            console.error("Logout failed", await res.text());
+        }
+    } catch (error) {
+        console.error("Logout API error:", error);
     }
   };
 
