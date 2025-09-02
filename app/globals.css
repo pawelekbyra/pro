@@ -57,6 +57,8 @@
     padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
   html, body {
     height: 100%;
@@ -75,12 +77,8 @@ body {
     background-position: center;
     background-attachment: fixed;
 }
-  body::-webkit-scrollbar, #webyx-container::-webkit-scrollbar {
-      display: none;
-  }
-  body, #webyx-container {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+  *::-webkit-scrollbar {
+    display: none;
   }
 }
 
