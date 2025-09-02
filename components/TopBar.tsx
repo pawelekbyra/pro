@@ -65,7 +65,7 @@ const TopBar = () => {
   return (
     <>
       <div
-        className="relative z-[100] flex items-center justify-between px-2 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
+        className="relative z-[100] flex items-center justify-between px-1 bg-black/60 text-white backdrop-blur-sm border-b border-white/10"
         style={{
           height: 'var(--topbar-height)',
         }}
@@ -82,7 +82,7 @@ const TopBar = () => {
             <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110"
+                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110 whitespace-nowrap"
               >
                 <span>{t('loggedOutText')}</span>
               </button>

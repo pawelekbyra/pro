@@ -72,7 +72,11 @@ const PWAInstallPrompt = () => {
     setShowInstructions(false);
   };
 
-  if (isStandalone || (!installPrompt && !isIOS)) {
+  if (isStandalone) {
+    return null;
+  }
+
+  if (!isDesktop && !installPrompt && !isIOS) {
     return null;
   }
 
