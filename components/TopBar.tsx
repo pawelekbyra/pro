@@ -53,7 +53,7 @@ const TopBar = () => {
   return (
     <>
       <div
-        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-2 bg-black text-white border-b border-white/10"
+        className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-1 bg-black text-white border-b border-white/10"
         style={{
           height: 'var(--topbar-height)',
           paddingTop: 'var(--safe-area-top)',
@@ -71,7 +71,7 @@ const TopBar = () => {
             <div className="flex justify-center flex-1 text-center">
               <button
                 onClick={() => setIsLoginPanelOpen(panel => !panel)}
-                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110"
+                className="font-semibold text-sm text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:scale-110 whitespace-nowrap"
               >
                 <span>{t('loggedOutText')}</span>
               </button>
@@ -135,7 +135,7 @@ const TopBar = () => {
       <AnimatePresence>
         {isLoginPanelOpen && (
           <motion.div
-            className="absolute left-0 w-full z-20 bg-black/60 backdrop-blur-sm"
+            className="absolute left-0 w-full z-[50] bg-black/60 backdrop-blur-sm"
             style={{ top: 'var(--topbar-height)' }}
             initial={{ opacity: 0, y: '-100%' }}
             animate={{ opacity: 1, y: '0%' }}
