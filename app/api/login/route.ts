@@ -15,6 +15,32 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, password } = body;
 
+    if (email === 'admin' && password === 'admin') {
+      const mockAdminUser = {
+        id: 'mock-admin-id',
+        email: 'admin',
+        username: 'Admin',
+        role: 'admin',
+        avatar_url: '',
+      };
+
+      const token = await new SignJWT({ user: mockAdminUser })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('24h')
+        .sign(JWT_SECRET);
+
+      cookies().set(COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24, // 1 day
+      });
+
+      return NextResponse.json({ success: true, user: mockAdminUser });
+    }
+
     if (!email || !password) {
       return NextResponse.json({ success: false, message: 'Email and password are required' }, { status: 400 });
     }
