@@ -190,7 +190,7 @@ export default function Home() {
   );
 
   return (
-    <Fragment>
+    <>
       <GlobalVideoPlayer />
       {appContent}
       <AnimatePresence>
