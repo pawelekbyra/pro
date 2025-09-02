@@ -70,7 +70,7 @@
   }
 body {
     @apply bg-zinc-900 text-foreground;
-    background-image: url('/public/bg-pattern.jpg'); /* Zakładamy, że taki plik tła istnieje */
+    background-image: radial-gradient(ellipse at center, hsl(0 0% 15%) 0%, hsl(0 0% 5%) 100%);
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

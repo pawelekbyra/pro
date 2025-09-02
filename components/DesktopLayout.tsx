@@ -7,6 +7,7 @@ import InfoModal from './InfoModal';
 import AccountPanel from './AccountPanel';
 import { AnimatePresence } from 'framer-motion';
 import TopBar from './TopBar';
+import BottomBar from './BottomBar';
 
 export default function DesktopLayout({ children }: { children: React.ReactNode }) {
     const context = useVideoGrid();
@@ -17,17 +18,18 @@ export default function DesktopLayout({ children }: { children: React.ReactNode 
     }
 
     const { state, setActiveModal, activeSlide } = context;
+    const { activeVideoRef } = state;
 
     return (
         <div
-            className="relative h-full w-full flex justify-center bg-cover bg-center"
-            style={{
-                backgroundImage: "radial-gradient(ellipse at center, hsla(0, 0%, 0%, 0) 40%, hsla(0, 0%, 0%, 0.4) 70%, hsla(0, 0%, 0%, 0.8)), url('/bg-pattern.jpg')"
-            }}
+            className="relative h-full w-full flex justify-center"
         >
-            <div className="relative h-full w-full max-w-sm overflow-hidden border-x border-white/10">
+            <div className="relative h-full w-full max-w-sm overflow-hidden border-x border-white/10 flex flex-col bg-black">
                 <TopBar />
-                {children}
+                <main className="flex-1 overflow-y-auto">
+                    {children}
+                </main>
+                {activeVideoRef && <BottomBar videoRef={activeVideoRef} isActive={true} />}
             </div>
 
             {/* Conditionally render modals based on the centralized state */}
