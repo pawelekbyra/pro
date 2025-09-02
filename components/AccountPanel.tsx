@@ -58,10 +58,25 @@ const AccountPanel: React.FC<AccountPanelProps> = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="flex-shrink-0 flex bg-black border-b border-white/10">
-          <button onClick={() => handleTabClick('profile')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'profile' ? 'bg-white/5 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>{t('profileTab')}</button>
-          <button onClick={() => handleTabClick('password')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'password' ? 'bg-white/5 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>{t('passwordTab')}</button>
-          <button onClick={() => handleTabClick('delete')} className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'delete' ? 'bg-white/5 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}>{t('deleteTab')}</button>
+        <div className="flex-shrink-0 flex bg-zinc-900 border-b border-white/10">
+          <button
+            onClick={() => handleTabClick('profile')}
+            className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'profile' ? 'bg-zinc-700 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}
+          >
+            {t('profileTab')}
+          </button>
+          <button
+            onClick={() => handleTabClick('password')}
+            className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'password' ? 'bg-zinc-700 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}
+          >
+            {t('passwordTab')}
+          </button>
+          <button
+            onClick={() => handleTabClick('delete')}
+            className={`flex-1 p-3.5 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'delete' ? 'bg-zinc-700 text-white border-pink-500' : 'text-white/60 border-transparent hover:bg-white/5'}`}
+          >
+            {t('deleteTab')}
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
