@@ -112,8 +112,7 @@ const PWAInstallPrompt = () => {
             style={{ paddingBottom: 'calc(1rem + var(--safe-area-bottom))' }}
           >
             <div>
-              <p className="font-bold">Zainstaluj aplikację!</p>
-              <p className="text-sm @[400px]:text-base">Uzyskaj pełne wrażenia. Zainstaluj naszą aplikację na swoim urządzeniu.</p>
+              <p className="text-sm @[400px]:text-base"><span className="font-bold">Zainstaluj aplikację!</span> Uzyskaj pełne wrażenia. Zainstaluj aplikację Ting Tong na swoim urządzeniu.</p>
             </div>
             <Button onClick={handleInstallClick} className="w-full @[400px]:w-auto flex-shrink-0">
               Zainstaluj
