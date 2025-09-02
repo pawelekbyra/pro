@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { HtmlSlideData } from '@/lib/types';
 import DOMPurify from 'dompurify';
 import Sidebar from './Sidebar';
+import BottomBar from './BottomBar';
 
 interface HtmlContentProps {
   data: HtmlSlideData;
@@ -39,6 +40,7 @@ const HtmlContent: React.FC<HtmlContentProps> = ({
   }, [data.htmlContent]);
 
   const shouldShowSidebar = y === 0 || y === 2;
+  const shouldShowBottomBar = x === 0 && y === 0;
 
   return (
     <div className="h-full w-full relative bg-black overflow-y-auto">
@@ -54,6 +56,12 @@ const HtmlContent: React.FC<HtmlContentProps> = ({
           slideId={slideId}
           commentsCount={commentsCount}
           x={x}
+        />
+      )}
+      {shouldShowBottomBar && (
+        <BottomBar
+          videoRef={null}
+          isActive={isActive}
         />
       )}
     </div>

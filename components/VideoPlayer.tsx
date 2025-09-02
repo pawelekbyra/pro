@@ -23,7 +23,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
   const [videoSrc, setVideoSrc] = useState(slide.data?.hlsUrl || slide.data?.mp4Url);
   const [areBarsVisible, setAreBarsVisible] = useState(true);
   const isHls = videoSrc?.endsWith('.m3u8');
-  const shouldShowBars = slide.y === 0 || slide.y === 2;
 
   useEffect(() => {
     if (isActive) {
@@ -92,7 +91,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
       />
 
       <AnimatePresence>
-        {isActive && areBarsVisible && shouldShowBars && (
+        {isActive && areBarsVisible && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
