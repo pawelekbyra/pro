@@ -11,7 +11,6 @@ import {
 } from '@/lib/types';
 import { useStore, ModalType } from '@/store/useStore';
 import { MessageCircle } from 'lucide-react';
-import { shallow } from 'zustand/shallow';
 
 // --- Prop Types for Sub-components ---
 interface HtmlContentProps {
@@ -92,8 +91,8 @@ interface SlideProps {
 
 const Slide = memo<SlideProps>(({ slide, isActive }) => {
     const isVideoPlaying = useStore((state) =>
-        state.activeSlide?.id === slide.id &&
-        state.activeSlide?.type === 'video'
+        state.activeVideo?.id === slide.id &&
+        state.activeVideo?.type === 'video'
     );
 
   const renderContent = () => {

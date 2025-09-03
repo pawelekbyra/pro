@@ -306,6 +306,56 @@ export async function deleteSlide(slideId: string): Promise<boolean> {
     const result = await sql`DELETE FROM slides WHERE id = ${slideId} RETURNING id;`;
     return result.length > 0;
 }
+export async function getSlides(options: { limit?: number, cursor?: string, currentUserId?: string }): Promise<Slide[]> {
+    const sql = getDb();
+    const { limit = 10, cursor, currentUserId } = options;
+
+    // The cursor is a timestamp. We fetch slides created before the cursor.
+    const cursorDate = cursor ? new Date(parseInt(cursor, 10)) : null;
+
+    // We need to build the query dynamically to include the WHERE clause for the cursor.
+    let query = `
+        SELECT
+            s.*,
+            COUNT(DISTINCT l."userId")::int AS "initialLikes",
+            COUNT(DISTINCT c.id)::int AS "initialComments",
+            COALESCE(bool_or(l."userId" = $2), false) AS "isLiked"
+        FROM slides s
+        LEFT JOIN likes l ON s.id = l."slideId"
+        LEFT JOIN comments c ON s.id = c."slideId"
+    `;
+    const params: any[] = [limit];
+
+    if (cursorDate) {
+        query += ` WHERE s."createdAt" < $3`;
+        params.push(cursorDate);
+    }
+
+    params.push(currentUserId || null);
+    // The user id is at a different index depending on whether the cursor is present.
+    const userIndex = params.length;
+    query = query.replace('$2', `$${userIndex}`);
+
+
+    query += `
+        GROUP BY s.id
+        ORDER BY s."createdAt" DESC
+        LIMIT $1;
+    `;
+
+    const results = await sql.query(query, params);
+
+    return (results as unknown as any[]).map(dbSlide => {
+        const { slideType, content, createdAt, ...rest } = dbSlide;
+        return {
+            ...rest,
+            type: slideType,
+            createdAt: new Date(createdAt).getTime(),
+            data: JSON.parse(content as string || '{}'),
+        };
+    }) as Slide[];
+}
+
 export async function getSlidesInView(options: { x: number, y: number, width: number, height: number, currentUserId?: string, metadataOnly?: boolean }): Promise<Slide[]> {
     const sql = getDb();
     const { x, y, width, height, currentUserId, metadataOnly } = options;

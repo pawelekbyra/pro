@@ -3,50 +3,29 @@ import { Slide } from '@/lib/types';
 
 export type ModalType = 'account' | 'comments' | 'info' | null;
 
-interface GridState {
-  columns: number[];
-  activeColumnIndex: number;
-  activeSlideIndex: number;
+interface AppState {
   activeModal: ModalType;
   isLoading: boolean;
   error: Error | null;
-
-  // New state for the global video player
-  activeSlide: Slide | null;
+  activeVideo: Slide | null; // Renamed from activeSlide
 
   // Actions
-  setColumns: (columns: number[]) => void;
-  setActiveSlide: (slide: Slide | null, colIndex: number, slideIndex: number) => void;
+  setActiveVideo: (video: Slide | null) => void;
   setActiveModal: (modal: ModalType) => void;
 
   // Computed properties (selectors)
   isAnyModalOpen: () => boolean;
 }
 
-export const useStore = create<GridState>((set, get) => ({
+export const useStore = create<AppState>((set, get) => ({
   // --- STATE ---
-  columns: [],
-  activeColumnIndex: 0,
-  activeSlideIndex: 0,
   activeModal: null,
   isLoading: true,
   error: null,
-  activeSlide: null,
+  activeVideo: null,
 
   // --- ACTIONS ---
-  setColumns: (columns) => set({ columns, isLoading: false }),
-
-  setActiveSlide: (slide, colIndex, slideIndex) =>
-    set((state) => {
-      if (colIndex < 0 || colIndex >= state.columns.length) {
-        return {};
-      }
-      return {
-        activeSlide: slide,
-        activeColumnIndex: colIndex,
-        activeSlideIndex: slideIndex,
-      };
-    }),
+  setActiveVideo: (video) => set({ activeVideo: video }),
 
   setActiveModal: (modal) => set({ activeModal: modal }),
 
