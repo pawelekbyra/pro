@@ -3,29 +3,31 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import { useHls } from '@/lib/useHls';
+import { VideoSlide } from '@/lib/types';
 
 const GlobalVideoPlayer = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { state, setActiveVideoRef } = useVideoGrid();
-  const { activeVideoData, soundActiveSlideId } = state;
-  const isMuted = soundActiveSlideId !== activeVideoData?.id;
+  const { state, setActiveVideoRef, setVideoProgress } = useVideoGrid();
+  const { activeSlideData } = state;
+
+  // For now, video is always muted. This can be expanded later.
+  const isMuted = true;
 
   // Set the active video ref in the context once the component mounts
   useEffect(() => {
     if (videoRef.current) {
       setActiveVideoRef(videoRef);
     }
-    // Cleanup on unmount
     return () => setActiveVideoRef(null);
   }, [setActiveVideoRef]);
 
   const handleHlsFatalError = useCallback(() => {
-    // In a real app, you might want to switch to the mp4Url here
     console.warn('HLS fatal error in GlobalVideoPlayer. Fallback not implemented.');
   }, []);
 
-  const videoSrc = activeVideoData?.data?.hlsUrl || activeVideoData?.data?.mp4Url;
-  const isHls = activeVideoData?.data?.hlsUrl && videoSrc === activeVideoData.data.hlsUrl;
+  const videoSlide = activeSlideData?.type === 'video' ? (activeSlideData as VideoSlide) : null;
+  const videoSrc = videoSlide?.data?.hlsUrl || videoSlide?.data?.mp4Url;
+  const isHls = videoSlide?.data?.hlsUrl && videoSrc === videoSlide.data.hlsUrl;
 
   useHls({
     videoRef,
@@ -48,7 +50,10 @@ const GlobalVideoPlayer = () => {
 
     video.muted = isMuted;
 
-    if (activeVideoData && video.src) {
+    if (videoSlide && videoSrc) {
+      if (video.src !== videoSrc) {
+        video.src = videoSrc;
+      }
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch(err => {
@@ -59,23 +64,32 @@ const GlobalVideoPlayer = () => {
       }
     } else {
       video.pause();
-      // When there's no active video, also clear the src to stop buffering
       if (video.src) {
         video.removeAttribute('src');
         video.load();
       }
     }
-  }, [activeVideoData, isMuted, videoSrc]);
+  }, [videoSlide, isMuted, videoSrc]);
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const { currentTime, duration } = videoRef.current;
+      if (!isNaN(duration)) {
+        setVideoProgress(currentTime, duration);
+      }
+    }
+  };
 
   return (
     <video
       ref={videoRef}
-      className="absolute top-0 left-0 h-full w-full object-cover -z-10" // Placed in the background
+      className="absolute top-0 left-0 h-full w-full object-cover -z-10"
       loop
       playsInline
-      muted // Always muted initially, unmute is handled by context state
-      poster={activeVideoData?.data?.poster}
-      style={{ opacity: activeVideoData ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
+      muted
+      onTimeUpdate={handleTimeUpdate}
+      poster={videoSlide?.data?.poster}
+      style={{ opacity: videoSlide ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
     />
   );
 };

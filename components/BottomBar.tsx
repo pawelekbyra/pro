@@ -1,21 +1,19 @@
 // components/BottomBar.tsx
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { Coffee, Bot, Rat, Gamepad2 } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
-import { debounce } from '@/lib/utils';
+import { useVideoGrid } from '@/context/VideoGridContext';
 
-interface BottomBarProps {
-  videoRef: React.RefObject<HTMLVideoElement | null> | null;
-  isActive: boolean;
-}
-
-const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
-  const [progress, setProgress] = useState(0);
+const BottomBar: React.FC = () => {
+  const { state, seekVideo } = useVideoGrid();
+  const { videoCurrentTime, videoDuration } = state;
   const [isDragging, setIsDragging] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
   const { addToast } = useToast();
+
+  const progress = videoDuration > 0 ? (videoCurrentTime / videoDuration) * 100 : 0;
 
   const handleTipClick = () => {
     const bmcButton = document.querySelector('[data-id="pawelperfect"]') as HTMLElement;
@@ -26,36 +24,14 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
     }
   };
 
-  useEffect(() => {
-    if (!videoRef) return;
-    const video = videoRef.current;
-    if (!video || !isActive) return;
-
-    const handleTimeUpdate = () => {
-      if (!isDragging && video.duration && isFinite(video.duration)) {
-        setProgress((video.currentTime / video.duration) * 100);
-      }
-    };
-
-    const debouncedTimeUpdate = debounce(handleTimeUpdate, 100);
-
-    video.addEventListener('timeupdate', debouncedTimeUpdate);
-    return () => {
-      video.removeEventListener('timeupdate', debouncedTimeUpdate);
-    };
-  }, [videoRef, isActive, isDragging]);
-
   const handleScrub = (clientX: number) => {
-    if (!videoRef) return;
-    const video = videoRef.current;
     const bar = progressBarRef.current;
-    if (!video || !bar || !video.duration || !isFinite(video.duration)) return;
+    if (!bar || videoDuration <= 0) return;
 
     const rect = bar.getBoundingClientRect();
     const percent = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-
-    setProgress(percent);
-    video.currentTime = (percent / 100) * video.duration;
+    const newTime = (percent / 100) * videoDuration;
+    seekVideo(newTime);
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -116,6 +92,7 @@ const BottomBar: React.FC<BottomBarProps> = ({ videoRef, isActive }) => {
           }}
         />
       </div>
+
 
       <div className="flex justify-between items-center pt-2">
         <div className="flex justify-center">

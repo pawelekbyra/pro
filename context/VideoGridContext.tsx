@@ -3,7 +3,6 @@
 import React, { createContext, useEffect, useCallback, useMemo, useRef, ReactNode, useContext, useReducer } from 'react';
 import { Grid, Slide, VideoSlide } from '@/lib/types';
 import { useToast } from './ToastContext';
-import { debounce } from '@/lib/utils';
 
 export type ModalType = 'account' | 'comments' | 'info' | null;
 
@@ -15,102 +14,93 @@ interface State {
   columns: Columns;
   columnKeys: number[];
   activeColumnIndex: number;
-  activeSlideY: number;
-  activeSlideId: string | null;
-  soundActiveSlideId: string | null;
-  activeVideoData: VideoSlide | null;
-  isNavigating: boolean;
+  activeSlideIndex: number;
+  activeSlideData: Slide | null;
   isLoading: boolean;
   activeModal: ModalType;
   error: Error | null;
-  areBarsVisible: boolean; // Added for UI visibility
+  areBarsVisible: boolean;
+  videoCurrentTime: number;
+  videoDuration: number;
 }
 
 type Action =
   | { type: 'SET_GRID_DATA'; payload: { columns: Columns; columnKeys: number[] } }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'START_NAVIGATION'; payload: { newColumnIndex: number } }
-  | { type: 'FINISH_NAVIGATION'; payload: { slide: Slide } }
-  | { type: 'SET_ACTIVE_SLIDE'; payload: { x: number; y: number; id: string } }
-  | { type: 'SET_SOUND_ACTIVE_SLIDE'; payload: string | null }
+  | { type: 'SET_ACTIVE_COLUMN'; payload: { columnIndex: number } }
+  | { type: 'SET_ACTIVE_SLIDE'; payload: { slideIndex: number } }
+  | { type: 'SET_VIDEO_PROGRESS'; payload: { currentTime: number; duration: number } }
   | { type: 'SET_ACTIVE_MODAL'; payload: ModalType }
   | { type: 'SET_ERROR'; payload: Error | null }
   | { type: 'MERGE_SLIDE_DATA'; payload: Slide }
   | { type: 'OPTIMISTIC_TOGGLE_LIKE'; payload: { slideId: string, x: number } }
-  | { type: 'TOGGLE_BARS_VISIBLE' }; // Added for UI visibility
+  | { type: 'TOGGLE_BARS_VISIBLE' };
 
 const initialState: State = {
   columns: {},
   columnKeys: [],
   activeColumnIndex: 0,
-  activeSlideY: 0,
-  activeSlideId: null,
-  soundActiveSlideId: null,
-  activeVideoData: null,
-  isNavigating: true,
+  activeSlideIndex: 0,
+  activeSlideData: null,
   isLoading: true,
   activeModal: null,
   error: null,
-  areBarsVisible: true, // Added for UI visibility
+  areBarsVisible: true,
+  videoCurrentTime: 0,
+  videoDuration: 0,
 };
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_GRID_DATA': {
       const { columns, columnKeys } = action.payload;
-      const firstSlide = columns[state.activeColumnIndex]?.[state.activeSlideY];
-      const videoData = (firstSlide && firstSlide.type === 'video') ? (firstSlide as VideoSlide) : null;
+      const initialSlide = columns[state.activeColumnIndex]?.[state.activeSlideIndex] || null;
       return {
         ...state,
         columns,
         columnKeys,
         isLoading: false,
-        isNavigating: false,
-        activeSlideId: firstSlide?.id || null,
-        soundActiveSlideId: firstSlide?.id || null,
-        activeVideoData: videoData,
+        activeSlideData: initialSlide,
+        videoCurrentTime: 0,
+        videoDuration: 0,
       };
     }
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
-    case 'START_NAVIGATION':
+    case 'SET_ACTIVE_COLUMN': {
+      const { columnIndex } = action.payload;
+      if (columnIndex === state.activeColumnIndex) return state;
+      const newSlideIndex = 0;
+      const newSlideData = state.columns[columnIndex]?.[newSlideIndex] || null;
       return {
         ...state,
-        isNavigating: true,
-        activeColumnIndex: action.payload.newColumnIndex,
-        activeSlideY: 0,
-      };
-    case 'FINISH_NAVIGATION': {
-      const newSlide = action.payload.slide;
-      const newActiveVideoData = newSlide?.type === 'video' ? (newSlide as VideoSlide) : null;
-      return {
-        ...state,
-        isNavigating: false,
-        activeSlideId: newSlide.id,
-        activeSlideY: newSlide.y,
-        soundActiveSlideId: newSlide.id,
-        activeVideoData: newActiveVideoData,
-        areBarsVisible: true, // Show bars on new slide
+        activeColumnIndex: columnIndex,
+        activeSlideIndex: newSlideIndex,
+        activeSlideData: newSlideData,
+        areBarsVisible: true,
+        videoCurrentTime: 0,
+        videoDuration: 0,
       };
     }
     case 'SET_ACTIVE_SLIDE': {
-      if (state.isNavigating || state.activeSlideId === action.payload.id) {
-        return state;
-      }
-      const newActiveSlide = state.columns[action.payload.x]?.find(s => s.id === action.payload.id);
-      const newActiveVideoData = (newActiveSlide && newActiveSlide.type === 'video') ? (newActiveSlide as VideoSlide) : null;
+      const { slideIndex } = action.payload;
+      if (slideIndex === state.activeSlideIndex) return state;
+      const newSlideData = state.columns[state.activeColumnIndex]?.[slideIndex] || null;
       return {
         ...state,
-        activeColumnIndex: action.payload.x,
-        activeSlideY: action.payload.y,
-        activeSlideId: action.payload.id,
-        soundActiveSlideId: action.payload.id,
-        activeVideoData: newActiveVideoData,
-        areBarsVisible: true, // Show bars on new slide
+        activeSlideIndex: slideIndex,
+        activeSlideData: newSlideData,
+        areBarsVisible: true,
+        videoCurrentTime: 0,
+        videoDuration: 0,
       };
     }
-    case 'SET_SOUND_ACTIVE_SLIDE':
-        return { ...state, soundActiveSlideId: action.payload };
+    case 'SET_VIDEO_PROGRESS':
+      return {
+        ...state,
+        videoCurrentTime: action.payload.currentTime,
+        videoDuration: action.payload.duration,
+      };
     case 'SET_ACTIVE_MODAL':
       return { ...state, activeModal: action.payload };
     case 'TOGGLE_BARS_VISIBLE':
@@ -118,18 +108,19 @@ function reducer(state: State, action: Action): State {
     case 'SET_ERROR':
       return { ...state, error: action.payload, isLoading: false };
     case 'MERGE_SLIDE_DATA': {
-      const { id: mergedId, x: mergedX } = action.payload;
+      const mergedSlide = action.payload;
       const newColumnsState = { ...state.columns };
-      if (newColumnsState[mergedX]) {
-        const slideIndex = newColumnsState[mergedX].findIndex(slide => slide.id === mergedId);
+      if (newColumnsState[mergedSlide.x]) {
+        const slideIndex = newColumnsState[mergedSlide.x].findIndex(slide => slide.id === mergedSlide.id);
         if (slideIndex !== -1) {
-          newColumnsState[mergedX][slideIndex] = action.payload;
+          newColumnsState[mergedSlide.x][slideIndex] = mergedSlide;
         }
       }
-      if (state.activeSlideId === mergedId && action.payload.type === 'video') {
-        return { ...state, columns: newColumnsState, activeVideoData: action.payload as VideoSlide };
-      }
-      return { ...state, columns: newColumnsState };
+      return {
+        ...state,
+        columns: newColumnsState,
+        activeSlideData: state.activeSlideData?.id === mergedSlide.id ? mergedSlide : state.activeSlideData,
+      };
     }
     case 'OPTIMISTIC_TOGGLE_LIKE': {
       const { slideId, x: slideX } = action.payload;
@@ -156,15 +147,14 @@ interface VideoGridContextType {
   state: State;
   isAnyModalOpen: boolean;
   activeVideoRef: React.RefObject<HTMLVideoElement | null>;
-  handleNavigation: (direction: 'left' | 'right') => Promise<void>;
-  setActiveSlide: (x: number, y: number, id: string) => void;
-  setSoundActiveSlide: (id: string | null) => void;
+  setActiveColumn: (columnIndex: number) => void;
+  setActiveSlide: (slideIndex: number) => void;
+  setVideoProgress: (currentTime: number, duration: number) => void;
+  seekVideo: (time: number) => void;
   setActiveVideoRef: (ref: React.RefObject<HTMLVideoElement> | null) => void;
   setActiveModal: (modal: ModalType) => void;
   toggleLike: (slideId: string, x: number) => Promise<void>;
-  loadMoreItems: (x: number) => Promise<void>;
-  toggleBarsVisible: () => void; // Added
-  activeSlide?: Slide;
+  toggleBarsVisible: () => void;
 }
 
 const VideoGridContext = createContext<VideoGridContextType | undefined>(undefined);
@@ -173,19 +163,17 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     activeColumnIndex: initialCoordinates.x,
-    activeSlideY: initialCoordinates.y,
+    activeSlideIndex: initialCoordinates.y,
   });
 
   const activeVideoRef = useRef<HTMLVideoElement | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const pendingFetches = useRef(new Set<string>());
   const { addToast } = useToast();
+  const pendingFetches = useRef(new Set<string>());
+
 
   useEffect(() => { if (state.error) { addToast(state.error.message, 'error'); } }, [state.error, addToast]);
 
   const fetchGridData = useCallback(async () => {
-    if (Object.keys(stateRef.current.columns).length > 0) return;
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await fetch('/api/slides');
@@ -209,69 +197,43 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
 
   useEffect(() => { fetchGridData(); }, [fetchGridData]);
 
-  const fetchFullSlide = useCallback(async (id: string): Promise<Slide | undefined> => {
-    const currentState = stateRef.current;
-    const slide = Object.values(currentState.columns).flat().find(s => s.id === id);
-    if ((slide && slide.data) || pendingFetches.current.has(id)) return slide;
-    pendingFetches.current.add(id);
+  const fetchFullSlide = useCallback(async (slide: Slide) => {
+    if (!slide || slide.data || pendingFetches.current.has(slide.id)) return;
+    pendingFetches.current.add(slide.id);
     try {
-      const response = await fetch(`/api/slide/${id}`);
+      const response = await fetch(`/api/slide/${slide.id}`);
       if (!response.ok) throw new Error('Failed to fetch full slide data');
       const data = await response.json();
       if (data.slide) {
         dispatch({ type: 'MERGE_SLIDE_DATA', payload: data.slide });
-        return data.slide;
       }
     } catch (err) {
       dispatch({ type: 'SET_ERROR', payload: err as Error });
     } finally {
-      pendingFetches.current.delete(id);
+      pendingFetches.current.delete(slide.id);
     }
-    return undefined;
   }, []);
 
-  const activeSlide = useMemo(() => {
-    const column = state.columns[state.activeColumnIndex];
-    if (!column) return undefined;
-    return column.find(slide => slide.y === state.activeSlideY);
-  }, [state.columns, state.activeColumnIndex, state.activeSlideY]);
+  useEffect(() => {
+    if (state.activeSlideData) {
+      fetchFullSlide(state.activeSlideData);
+    }
+  }, [state.activeSlideData, fetchFullSlide]);
 
 
-  useEffect(() => { if (activeSlide && !activeSlide.data) { fetchFullSlide(activeSlide.id); } }, [activeSlide, fetchFullSlide]);
+  const setActiveColumn = useCallback((columnIndex: number) => {
+    dispatch({ type: 'SET_ACTIVE_COLUMN', payload: { columnIndex } });
+  }, []);
 
-  const setActiveSlide = useCallback(debounce((x: number, y: number, id: string) => {
-      dispatch({ type: 'SET_ACTIVE_SLIDE', payload: { x, y, id } });
-    }, 150), []);
+  const setActiveSlide = useCallback((slideIndex: number) => {
+    dispatch({ type: 'SET_ACTIVE_SLIDE', payload: { slideIndex } });
+  }, []);
 
-  const setSoundActiveSlide = useCallback((id: string | null) => { dispatch({ type: 'SET_SOUND_ACTIVE_SLIDE', payload: id }); }, []);
+  const setVideoProgress = useCallback((currentTime: number, duration: number) => {
+    dispatch({ type: 'SET_VIDEO_PROGRESS', payload: { currentTime, duration } });
+  }, []);
+
   const toggleBarsVisible = useCallback(() => { dispatch({ type: 'TOGGLE_BARS_VISIBLE' }); }, []);
-
-  const handleNavigation = useCallback(async (direction: 'left' | 'right') => {
-    const { isNavigating, activeColumnIndex, columnKeys } = stateRef.current;
-    if (isNavigating) return;
-    const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
-    const nextKeyIndex = direction === 'right' ? currentKeyIndex + 1 : currentKeyIndex - 1;
-    if (nextKeyIndex < 0 || nextKeyIndex >= columnKeys.length) return;
-    const newColumnIndex = columnKeys[nextKeyIndex];
-    dispatch({ type: 'START_NAVIGATION', payload: { newColumnIndex } });
-    const targetSlide = stateRef.current.columns[newColumnIndex]?.[0];
-    if (!targetSlide) {
-      dispatch({ type: 'SET_ERROR', payload: new Error("New column has no slides.") });
-      return;
-    }
-    try {
-      const fullSlide = await fetchFullSlide(targetSlide.id);
-      if (fullSlide) {
-        dispatch({ type: 'FINISH_NAVIGATION', payload: { slide: fullSlide } });
-      }
-    } catch (err) {
-      dispatch({ type: 'SET_ERROR', payload: err as Error });
-    }
-  }, [fetchFullSlide]);
-
-  const loadMoreItems = useCallback(async (x: number) => {
-      await fetchGridData();
-  }, [fetchGridData]);
 
   const toggleLike = useCallback(async (slideId: string, x: number) => {
     dispatch({ type: 'OPTIMISTIC_TOGGLE_LIKE', payload: { slideId, x } });
@@ -287,19 +249,24 @@ export const VideoGridProvider = ({ children, initialCoordinates = { x: 0, y: 0 
   const setActiveModal = useCallback((modal: ModalType) => { dispatch({ type: 'SET_ACTIVE_MODAL', payload: modal }); }, []);
   const setActiveVideoRef = useCallback((ref: React.RefObject<HTMLVideoElement> | null) => { activeVideoRef.current = ref?.current ?? null; }, []);
 
+  const seekVideo = useCallback((time: number) => {
+    if (activeVideoRef.current) {
+      activeVideoRef.current.currentTime = time;
+    }
+  }, []);
+
   const value: VideoGridContextType = {
     state,
     isAnyModalOpen: state.activeModal !== null,
     activeVideoRef,
-    handleNavigation,
+    setActiveColumn,
     setActiveSlide,
-    setSoundActiveSlide,
+    setVideoProgress,
+    seekVideo,
     setActiveVideoRef,
     setActiveModal,
     toggleLike,
-    loadMoreItems,
     toggleBarsVisible,
-    activeSlide,
   };
 
   return (
