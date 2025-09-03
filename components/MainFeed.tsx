@@ -98,35 +98,6 @@ const MainFeed = () => {
     }
   }, [videoItems, activeVideo, handleItemVisible]);
 
-  useEffect(() => {
-    if (videoItems.length > 0) {
-      // WORKAROUND: This is a brittle workaround to detect when the first video is ready.
-      // The `react-vertical-feed` library does not provide a `ref` or callback to access
-      // the underlying video elements directly. Therefore, we have to query the DOM.
-      // This might break if the library changes its internal DOM structure in the future.
-      // We are assuming that each video item container has a `data-id` attribute with the item's ID.
-      const videoElement = document.querySelector(`[data-id="${videoItems[0].id}"] video`) as HTMLVideoElement | null;
-
-      const handleCanPlay = () => {
-        setIsFirstVideoReady(true);
-      };
-
-      if (videoElement) {
-        if (videoElement.readyState >= 3) { // HAVE_FUTURE_DATA or more
-          handleCanPlay();
-        } else {
-          videoElement.addEventListener('canplay', handleCanPlay);
-        }
-      }
-
-      return () => {
-        if (videoElement) {
-          videoElement.removeEventListener('canplay', handleCanPlay);
-        }
-      };
-    }
-  }, [videoItems, setIsFirstVideoReady]);
-
   const renderSlideOverlay = (item: VideoItem) => {
     const slide = item.metadata?.slide as SlideType | undefined;
     if (!slide) return null;
