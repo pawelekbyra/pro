@@ -123,7 +123,7 @@ function reducer(state: State, action: Action): State {
       if (newColumnsState[mergedX]) {
         const slideIndex = newColumnsState[mergedX].findIndex(slide => slide.id === mergedId);
         if (slideIndex !== -1) {
-          newColumnsState[mergedX][slideIndex] = { ...newColumnsState[mergedX][slideIndex], ...action.payload };
+          newColumnsState[mergedX][slideIndex] = action.payload;
         }
       }
       if (state.activeSlideId === mergedId && action.payload.type === 'video') {
