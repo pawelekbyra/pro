@@ -42,14 +42,6 @@ const MainFeed = () => {
 
   const slides = useMemo(() => data?.pages.flatMap(page => page.slides) ?? [], [data]);
 
-  // --- START OF PROPOSED FIX ---
-  useEffect(() => {
-    if (!activeVideo && slides.length > 0) {
-      setActiveVideo(slides[0]);
-    }
-  }, [slides, activeVideo, setActiveVideo]);
-  // --- END OF PROPOSED FIX ---
-
   const videoItems: VideoItem[] = useMemo(() => {
     return slides
       .filter(
@@ -66,6 +58,18 @@ const MainFeed = () => {
       controls: false,
     }));
   }, [slides]);
+
+  // --- START OF NEW FIX ---
+  // Nowa logika do obsługi pierwszego slajdu
+  useEffect(() => {
+    if (slides.length > 0 && !activeVideo) {
+      const firstVideoItem = videoItems.find(item => item.id === slides[0].id);
+      if (firstVideoItem) {
+        setActiveVideo(firstVideoItem.metadata?.slide);
+      }
+    }
+  }, [slides, activeVideo, setActiveVideo, videoItems]);
+  // --- END OF NEW FIX ---
 
   const handleEndReached = () => {
     if (hasNextPage) {
