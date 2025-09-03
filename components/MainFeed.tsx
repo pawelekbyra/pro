@@ -45,7 +45,7 @@ const MainFeed = () => {
   } = useInfiniteQuery({
     queryKey: ['slides'],
     queryFn: fetchSlides,
-    initialPageParam: preloadedSlide ? preloadedSlide.id : '',
+    initialPageParam: preloadedSlide ? preloadedSlide.createdAt.toString() : '',
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: !isPreloading,
   });
@@ -71,7 +71,7 @@ const MainFeed = () => {
         // autoPlay is unreliable, we will handle playback manually.
         muted: isMuted,
         playsInline: true,
-        controls: false,
+        controls: true,
       }));
   }, [slides, isMuted]);
 
@@ -104,11 +104,15 @@ const MainFeed = () => {
       const videoElement = document.querySelector(`[data-id="${activeVideo.id}"] video`) as HTMLVideoElement | null;
 
       if (videoElement) {
-        // We have a gesture from the user (language select), so we can try to play with sound.
-        videoElement.play().catch(error => {
-          console.error("Video play failed:", error);
-          // Optional: handle the error, e.g., by showing a play button.
-        });
+        // Delay playback slightly to allow preloader exit animation to complete.
+        const playTimeout = setTimeout(() => {
+          videoElement.play().catch(error => {
+            console.error("Video play failed:", error);
+            // Optional: handle the error, e.g., by showing a play button.
+          });
+        }, 400); // 400ms delay, should be longer than the preloader exit animation.
+
+        return () => clearTimeout(playTimeout);
       }
     }
   }, [activeVideo]);
