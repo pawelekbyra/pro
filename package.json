@@ -17,6 +17,7 @@
     "@serwist/next": "^9.2.0",
     "@serwist/precaching": "^9.2.0",
     "@serwist/sw": "^9.2.0",
+    "@tanstack/react-query": "^5.51.1",
     "@types/jsdom": "^21.1.7",
     "@upstash/redis": "^1.35.3",
     "@vercel/kv": "^3.0.0",
@@ -39,7 +40,8 @@
     "recharts": "^3.1.2",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -47,6 +49,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-window": "1.8.5",
+    "@types/react-window-infinite-loader": "^1.0.9",
     "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
