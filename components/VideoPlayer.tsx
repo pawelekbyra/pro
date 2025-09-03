@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { VideoSlide } from '@/lib/types';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import { Volume2, VolumeX, Eye, EyeOff } from 'lucide-react';
@@ -15,16 +15,9 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
-  const { state, setSoundActiveSlide, activeVideoRef } = useVideoGrid();
-  const { soundActiveSlideId } = state;
+  const { state, setSoundActiveSlide, activeVideoRef, toggleBarsVisible } = useVideoGrid();
+  const { soundActiveSlideId, areBarsVisible } = state;
   const isMuted = soundActiveSlideId !== slide.id;
-  const [areBarsVisible, setAreBarsVisible] = useState(true);
-
-  useEffect(() => {
-    if (isActive) {
-      setAreBarsVisible(true);
-    }
-  }, [isActive]);
 
   const toggleMute = () => {
     if (isMuted) {
@@ -34,16 +27,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
     }
   };
 
-  // This component now only renders the UI overlay.
-  // The actual video is handled by GlobalVideoPlayer.
-  // We render nothing if the slide is not active to avoid layering multiple UI's.
+  // This component now only renders the UI overlay if the slide is active.
+  // All state (sound, bar visibility) is controlled by the global context.
   if (!isActive) {
     return null;
   }
 
   return (
     <div className="relative h-full w-full">
-      {/* The background is now transparent as the video is playing underneath from GlobalVideoPlayer */}
+      {/* The background is transparent as the video is playing underneath from GlobalVideoPlayer */}
 
       <VideoInfo
         user={slide.username}
@@ -85,7 +77,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ slide, isActive }) => {
         </button>
 
         <motion.button
-          onClick={() => setAreBarsVisible(!areBarsVisible)}
+          onClick={toggleBarsVisible}
           className="absolute bottom-24 left-4 bg-transparent text-white z-20 p-2 rounded-full bg-black/50"
           aria-label="Toggle UI visibility"
           whileHover={{ scale: 1.1 }}
