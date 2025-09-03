@@ -14,6 +14,7 @@ export type Db = typeof postgresDb & {
         columnIndex: number,
         options: { offset?: number; limit?: number; currentUserId?: string }
     ) => Promise<Slide[]>;
+    getSlides?: (options: { limit?: number, cursor?: string, currentUserId?: string }) => Promise<Slide[]>;
 };
 
 let db: Db;

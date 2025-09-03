@@ -3,37 +3,34 @@ import type { User, Comment } from './db.interfaces';
 
 // In-memory store for mock data
 const slides: Grid = {};
-const NUM_COLUMNS = 5;
-const SLIDES_PER_COLUMN = 50;
+const NUM_SLIDES = 10;
 
 // Data generation
 (() => {
   if (Object.keys(slides).length > 0) return; // Generate only once
-  for (let colIndex = 0; colIndex < NUM_COLUMNS; colIndex++) {
-    for (let slideIndex = 0; slideIndex < SLIDES_PER_COLUMN; slideIndex++) {
-      const slideId = `${colIndex}-${slideIndex}`;
-      slides[slideId] = {
-        id: slideId,
-        x: colIndex,
-        y: slideIndex,
-        type: 'video',
-        initialLikes: Math.floor(Math.random() * 1000),
-        initialComments: Math.floor(Math.random() * 200),
-        isLiked: Math.random() > 0.5,
-        avatar: `https://i.pravatar.cc/150?u=user_${colIndex}`,
-        userId: `user_${colIndex}`,
-        username: `User ${colIndex}`,
-        access: 'public',
-        createdAt: Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30, // within the last 30 days
-        data: {
-          hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-          mp4Url: '',
-          poster: `https://picsum.photos/seed/${colIndex}-${slideIndex}/400/800`,
-          title: `Slide ${slideIndex} in Column ${colIndex}`,
-          description: `This is a mock slide at coordinates (${colIndex}, ${slideIndex}).`,
-        },
-      };
-    }
+  for (let i = 0; i < NUM_SLIDES; i++) {
+    const slideId = `mock_slide_${i}`;
+    slides[slideId] = {
+      id: slideId,
+      x: 0, // No longer used, but schema might require it for now
+      y: i, // No longer used
+      type: 'video',
+      initialLikes: Math.floor(Math.random() * 1000),
+      initialComments: Math.floor(Math.random() * 200),
+      isLiked: Math.random() > 0.5,
+      avatar: `https://i.pravatar.cc/150?u=user_${i}`,
+      userId: `user_${i}`,
+      username: `User ${i}`,
+      access: 'public',
+      createdAt: Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7, // within the last 7 days
+      data: {
+        hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+        mp4Url: '',
+        poster: `https://picsum.photos/seed/${i}/400/800`,
+        title: `Mock Video Slide ${i}`,
+        description: `This is a mock video slide, generated for testing.`,
+      },
+    };
   }
 })();
 
@@ -142,6 +139,38 @@ export const db = {
 
   async getAllSlides(): Promise<Slide[]> {
     return Object.values(slides);
+  },
+
+  async getSlides(options: { limit?: number, cursor?: string, currentUserId?: string }): Promise<Slide[]> {
+    const { limit = 5, cursor } = options;
+    const allSlides = Object.values(slides).sort((a, b) => b.createdAt - a.createdAt);
+
+    if (!cursor) {
+      return allSlides.slice(0, limit);
+    }
+
+    const cursorDate = new Date(parseInt(cursor, 10));
+    const cursorIndex = allSlides.findIndex(slide => new Date(slide.createdAt) < cursorDate);
+
+    if (cursorIndex === -1) {
+      return [];
+    }
+
+    return allSlides.slice(cursorIndex, cursorIndex + limit);
+  },
+
+  async createSlide(slideData: Omit<Slide, 'id' | 'createdAt' | 'initialLikes' | 'isLiked' | 'initialComments'>): Promise<Slide> {
+    const id = `slide_${crypto.randomUUID()}`;
+    const newSlide = {
+      ...slideData,
+      id,
+      createdAt: Date.now(),
+      initialLikes: 0,
+      initialComments: 0,
+      isLiked: false,
+    } as Slide;
+    slides[id] = newSlide;
+    return newSlide;
   },
 
   // --- Like Functions ---
