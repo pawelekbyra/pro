@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { VerticalFeed, VideoItem } from 'react-vertical-feed';
 import { useStore } from '@/store/useStore';
@@ -41,6 +41,14 @@ const MainFeed = () => {
   });
 
   const slides = useMemo(() => data?.pages.flatMap(page => page.slides) ?? [], [data]);
+
+  // --- START OF PROPOSED FIX ---
+  useEffect(() => {
+    if (!activeVideo && slides.length > 0) {
+      setActiveVideo(slides[0]);
+    }
+  }, [slides, activeVideo, setActiveVideo]);
+  // --- END OF PROPOSED FIX ---
 
   const videoItems: VideoItem[] = useMemo(() => {
     return slides
