@@ -12,7 +12,6 @@ import { useStore } from '@/store/useStore';
 import type { Slide as SlideType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import Slide from '@/components/Slide';
-import { GlobalVideoPlayer } from '@/components/GlobalVideoPlayer';
 import { shallow } from 'zustand/shallow';
 
 // --- React Query Client ---
@@ -200,7 +199,6 @@ function GridView() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black">
-      <GlobalVideoPlayer />
       <motion.div
         ref={scope}
         className="flex h-full"
