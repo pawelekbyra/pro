@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from 'react';
+import React, { useEffect, useRef, memo, useState } from 'react';
 import Image from 'next/image';
 import DOMPurify from 'dompurify';
+import Hls from 'hls.js';
 import {
   Slide as SlideUnionType,
   VideoSlide,
@@ -10,7 +11,7 @@ import {
   ImageSlide,
 } from '@/lib/types';
 import { useStore, ModalType } from '@/store/useStore';
-import { HeartIcon, MessageCircle } from 'lucide-react';
+import { HeartIcon, MessageCircle, PlayCircle } from 'lucide-react';
 
 // --- Prop Types for Sub-components ---
 interface HtmlContentProps {
@@ -26,18 +27,70 @@ interface SlideUIProps {
 // --- Sub-components ---
 
 const VideoSlideContent = ({ slide }: { slide: VideoSlide }) => {
-    if (!slide.data?.poster) {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const hlsRef = useRef<Hls | null>(null);
+
+    useEffect(() => {
+        if (isPlaying && videoRef.current) {
+            const video = videoRef.current;
+            const hlsUrl = slide.data?.hlsUrl;
+
+            if (Hls.isSupported() && hlsUrl) {
+                if (hlsRef.current) {
+                    hlsRef.current.destroy();
+                }
+                const hls = new Hls();
+                hlsRef.current = hls;
+                hls.loadSource(hlsUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.muted = false; // Unmute by default in this setup
+                    video.play().catch(err => console.error("Play failed", err));
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = hlsUrl!;
+                video.play().catch(err => console.error("Play failed", err));
+            }
+        }
+
+        return () => {
+            hlsRef.current?.destroy();
+            hlsRef.current = null;
+        }
+    }, [isPlaying, slide.data?.hlsUrl]);
+
+
+    if (!slide.data?.poster && !isPlaying) {
         return <div className="w-full h-full bg-black" />; // Fallback
     }
+
     return (
         <div className="relative w-full h-full bg-black">
-            <Image
-                src={slide.data.poster}
-                alt={slide.data.title || 'Video poster'}
-                layout="fill"
-                objectFit="cover"
-                unoptimized
-            />
+            {!isPlaying ? (
+                <>
+                    <Image
+                        src={slide.data.poster!}
+                        alt={slide.data.title || 'Video poster'}
+                        layout="fill"
+                        objectFit="cover"
+                        unoptimized
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <button onClick={() => setIsPlaying(true)} className="text-white/80 hover:text-white transition-colors">
+                            <PlayCircle size={80} />
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    loop
+                />
+            )}
         </div>
     );
 };
