@@ -10,7 +10,7 @@ import {
   ImageSlide,
 } from '@/lib/types';
 import { useStore, ModalType } from '@/store/useStore';
-import { MessageCircle, PlayCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { shallow } from 'zustand/shallow';
 
 // --- Prop Types for Sub-components ---
@@ -25,44 +25,6 @@ interface SlideUIProps {
 }
 
 // --- Sub-components ---
-
-const VideoPoster = ({ slide }: { slide: VideoSlide }) => {
-    const { setActiveSlide, activeColumnIndex, activeSlideIndex } = useStore(
-        (state) => ({
-            setActiveSlide: state.setActiveSlide,
-            activeColumnIndex: state.activeColumnIndex,
-            activeSlideIndex: state.activeSlideIndex,
-        }),
-        shallow
-    );
-
-    const handlePlay = () => {
-        // We need to provide all identifiers to correctly set the active slide
-        setActiveSlide(slide, activeColumnIndex, activeSlideIndex);
-    };
-
-    if (!slide.data?.poster) {
-        return <div className="w-full h-full bg-black" />; // Fallback if no poster
-    }
-
-    return (
-        <div className="relative w-full h-full bg-black">
-            <Image
-                src={slide.data.poster}
-                alt={slide.data.title || 'Video poster'}
-                layout="fill"
-                objectFit="cover"
-                unoptimized
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <button onClick={handlePlay} className="text-white/80 hover:text-white transition-colors">
-                    <PlayCircle size={80} />
-                </button>
-            </div>
-        </div>
-    );
-};
-
 
 const HtmlContent = ({ slide }: HtmlContentProps) => {
   if (!slide.data?.htmlContent) return null;
@@ -137,9 +99,9 @@ const Slide = memo<SlideProps>(({ slide, isActive }) => {
   const renderContent = () => {
     switch (slide.type) {
       case 'video':
-        // If the video is active and playing, the GlobalVideoPlayer is visible.
-        // We render the poster component only if it's not the active video.
-        return isVideoPlaying ? null : <VideoPoster slide={slide as VideoSlide} />;
+        // The GlobalVideoPlayer is now responsible for all video playback.
+        // This component just needs to be transparent to let it show through.
+        return null;
       case 'html':
         return <HtmlContent slide={slide as HtmlSlide} />;
       case 'image':
@@ -150,7 +112,7 @@ const Slide = memo<SlideProps>(({ slide, isActive }) => {
   };
 
   return (
-    <div className="relative w-full h-full bg-black">
+    <div className={`relative w-full h-full transition-colors ${isVideoPlaying ? 'bg-transparent' : 'bg-black'}`}>
       {renderContent()}
       <SlideUI slide={slide} />
       {isActive && <div className="absolute top-2 right-2 bg-green-500/80 text-white text-xs px-2 py-1 rounded-full z-20">ACTIVE</div>}
