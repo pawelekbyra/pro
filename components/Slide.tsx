@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, memo } from 'react';
 import Image from 'next/image';
-import Hls from 'hls.js';
 import DOMPurify from 'dompurify';
 import {
   Slide as SlideUnionType,
@@ -10,7 +9,7 @@ import {
   HtmlSlide,
   ImageSlide,
 } from '@/lib/types';
-import { useStore } from '@/store/useStore';
+import { useStore, ModalType } from '@/store/useStore';
 import { HeartIcon, MessageCircle } from 'lucide-react';
 
 // --- Prop Types for Sub-components ---
@@ -32,41 +31,26 @@ interface SlideUIProps {
 
 const VideoPlayer = ({ slide, isActive }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
+  const setVideoElement = useStore((state) => state.setVideoElement);
 
+  // Register or unregister the video element in the global store
+  // when the slide becomes active or inactive.
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // This function will be called to clean up the previous effect
-    const cleanup = () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
-    };
-
-    if (isActive && slide.data) {
-      if (slide.data.hlsUrl && Hls.isSupported()) {
-        const hls = new Hls();
-        hlsRef.current = hls;
-        hls.loadSource(slide.data.hlsUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(() => console.error('Video play was prevented.'));
-        });
-      } else if (slide.data.mp4Url) {
-        video.src = slide.data.mp4Url;
-        video.play().catch(() => console.error('Video play was prevented.'));
-      }
+    if (isActive) {
+      setVideoElement(videoRef.current);
+    } else {
+      // When this slide is no longer active, we don't nullify the videoElement
+      // immediately, because another slide might become active in the same render cycle.
+      // The GlobalVideoPlayer will handle detaching from the old element.
+      // We only nullify on unmount.
     }
-
-    // Return the cleanup function
-    return cleanup;
-  }, [isActive, slide.data]);
+    return () => {
+        // On unmount, if this video element is still the active one, clear it.
+        if (useStore.getState().videoElement === videoRef.current) {
+            setVideoElement(null);
+        }
+    }
+  }, [isActive, setVideoElement]);
 
   if (!slide.data) return null;
 
@@ -77,7 +61,7 @@ const VideoPlayer = ({ slide, isActive }: VideoPlayerProps) => {
       className="w-full h-full object-cover"
       playsInline
       loop
-      muted
+      muted // The global player will handle audio
     />
   );
 };
@@ -109,17 +93,18 @@ const ImageContent = ({ slide }: ImageContentProps) => {
 };
 
 const SlideUI = ({ slide }: SlideUIProps) => {
-    const toggleLike = useStore((state) => state.toggleLike);
     const setActiveModal = useStore((state) => state.setActiveModal);
 
-    const handleLike = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      toggleLike(slide.x, slide.y);
-    };
+    // const handleLike = (e: React.MouseEvent) => {
+    //   e.stopPropagation();
+    //   // TODO: Re-implement with React Query mutation
+    //   // toggleLike(slide.x, slide.y);
+    // };
 
     const handleComment = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setActiveModal('comments');
+        const modal: ModalType = 'comments';
+        setActiveModal(modal);
     }
 
     return (
@@ -133,10 +118,11 @@ const SlideUI = ({ slide }: SlideUIProps) => {
         {slide.data && 'description' in slide.data && <p className="text-sm opacity-90">{slide.data.description}</p>}
 
         <div className="absolute right-4 bottom-20 flex flex-col items-center gap-4">
-            <button onClick={handleLike} className="flex flex-col items-center gap-1 text-white">
+            {/* TODO: Re-implement like button with React Query */}
+            {/* <button onClick={handleLike} className="flex flex-col items-center gap-1 text-white">
                 <HeartIcon size={32} fill={slide.isLiked ? 'red' : 'transparent'} className={slide.isLiked ? 'text-red-500' : 'text-white'}/>
                 <span className="text-sm font-bold">{slide.initialLikes}</span>
-            </button>
+            </button> */}
             <button onClick={handleComment} className="flex flex-col items-center gap-1 text-white">
                 <MessageCircle size={32} />
                 <span className="text-sm font-bold">{slide.initialComments}</span>

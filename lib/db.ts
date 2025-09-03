@@ -1,5 +1,6 @@
 import { db as mockDb } from './mock-db';
 import * as postgres from './db-postgres';
+import { Slide } from './types';
 
 const postgresDb = {
     ...postgres,
@@ -7,7 +8,13 @@ const postgresDb = {
     getPushSubscriptions: postgres.getPushSubscriptions,
 };
 
-export type Db = typeof postgresDb;
+export type Db = typeof postgresDb & {
+    getAllColumnCoords?: () => Promise<{ x: number }[]>;
+    getSlidesInColumn?: (
+        columnIndex: number,
+        options: { offset?: number; limit?: number; currentUserId?: string }
+    ) => Promise<Slide[]>;
+};
 
 let db: Db;
 

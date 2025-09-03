@@ -1,6 +1,6 @@
 # Readme aplikacji Ting Tong
 
-
+> **UWAGA:** Aplikacja jest obecnie skonfigurowana do pracy w **trybie MOCK**. Oznacza to, że wszystkie dane pochodzą z lokalnego, symulowanego źródła, a nie z prawdziwej bazy danych. Aby przełączyć się na produkcyjną bazę danych, upewnij się, że zmienna środowiskowa `MOCK_API` nie jest ustawiona na `true`.
 
 
 ## Wdrożenie

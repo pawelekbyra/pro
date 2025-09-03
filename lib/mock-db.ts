@@ -2,7 +2,42 @@ import type { Grid, Slide } from './types';
 import type { User, Comment } from './db.interfaces';
 
 // In-memory store for mock data
-let slides: Grid = {};
+const slides: Grid = {};
+const NUM_COLUMNS = 5;
+const SLIDES_PER_COLUMN = 50;
+
+// Data generation
+(() => {
+  if (Object.keys(slides).length > 0) return; // Generate only once
+  for (let colIndex = 0; colIndex < NUM_COLUMNS; colIndex++) {
+    for (let slideIndex = 0; slideIndex < SLIDES_PER_COLUMN; slideIndex++) {
+      const slideId = `${colIndex}-${slideIndex}`;
+      slides[slideId] = {
+        id: slideId,
+        x: colIndex,
+        y: slideIndex,
+        type: 'video',
+        initialLikes: Math.floor(Math.random() * 1000),
+        initialComments: Math.floor(Math.random() * 200),
+        isLiked: Math.random() > 0.5,
+        avatar: `https://i.pravatar.cc/150?u=user_${colIndex}`,
+        userId: `user_${colIndex}`,
+        username: `User ${colIndex}`,
+        access: 'public',
+        createdAt: Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30, // within the last 30 days
+        data: {
+          hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+          mp4Url: '',
+          poster: `https://picsum.photos/seed/${colIndex}-${slideIndex}/400/800`,
+          title: `Slide ${slideIndex} in Column ${colIndex}`,
+          description: `This is a mock slide at coordinates (${colIndex}, ${slideIndex}).`,
+        },
+      };
+    }
+  }
+})();
+
+
 let users: { [id: string]: User } = {
   "user_admin_01": {
     id: "user_admin_01",
@@ -81,6 +116,24 @@ export const db = {
   },
 
   // --- Slide Functions ---
+  async getAllColumnCoords(): Promise<{ x: number }[]> {
+    const allSlides = Object.values(slides);
+    const columnCoords = [...new Set(allSlides.map(s => s.x))];
+    return columnCoords.sort((a, b) => a - b).map(x => ({ x }));
+  },
+
+  async getSlidesInColumn(
+    columnIndex: number,
+    options: { offset?: number; limit?: number; currentUserId?: string }
+  ): Promise<Slide[]> {
+    const { offset = 0, limit = 10 } = options;
+    const columnSlides = Object.values(slides)
+      .filter(s => s.x === columnIndex)
+      .sort((a, b) => a.y - b.y); // Ensure slides are ordered by their vertical index
+
+    return columnSlides.slice(offset, offset + limit);
+  },
+
   async getSlidesInView(options: { x: number, y: number, width: number, height: number, currentUserId?: string }) {
     // This is a simplified version for the mock.
     // The real implementation fetches a view, but here we just return the whole grid.
