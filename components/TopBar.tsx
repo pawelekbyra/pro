@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import NotificationPopup from './NotificationPopup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
-import { useVideoGrid } from '@/context/VideoGridContext';
+import { useStore } from '@/store/useStore';
 import LoginForm from './LoginForm';
 import { useToast } from '@/context/ToastContext';
 import MenuIcon from './icons/MenuIcon';
@@ -16,7 +16,7 @@ import PwaDesktopModal from './PwaDesktopModal';
 
 const TopBar = () => {
   const { user } = useUser();
-  const { setActiveModal } = useVideoGrid();
+  const setActiveModal = useStore((state) => state.setActiveModal);
   const { t } = useTranslation();
   const { addToast } = useToast();
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);

@@ -10,7 +10,6 @@ import { useUser } from '@/context/UserContext';
 import Image from 'next/image';
 import { useTranslation } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
-import { useVideoGrid } from '@/context/VideoGridContext';
 
 interface ProfileTabProps {
     onClose: () => void;
@@ -20,7 +19,6 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ onClose }) => {
   const { user: profile, checkUserStatus, logout } = useUser();
   const { t, setLanguage, lang } = useTranslation();
   const { addToast } = useToast();
-  const { state: videoGridState } = useVideoGrid();
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
