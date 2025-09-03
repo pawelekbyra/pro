@@ -29,16 +29,10 @@ const HLS_CONFIG = {
 export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
   const hlsRef = useRef<Hls | null>(null);
 
+  // Effect to initialize and destroy HLS instance
   useEffect(() => {
-    if (!src) return;
-
     const videoElement = videoRef.current;
     if (!videoElement) return;
-
-    // Destroy previous instance if it exists
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-    }
 
     if (Hls.isSupported()) {
       const hls = new Hls(HLS_CONFIG);
@@ -68,7 +62,6 @@ export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
               break;
           }
         } else {
-          // Non-fatal errors can be logged for monitoring without taking drastic action.
           console.warn('HLS.js non-fatal error:', {
             type: data.type,
             details: data.details,
@@ -76,19 +69,35 @@ export const useHls = ({ videoRef, src, onFatalError }: UseHlsParams) => {
         }
       });
 
-      hls.loadSource(src);
       hls.attachMedia(videoElement);
-    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native HLS support (e.g., Safari)
-      videoElement.src = src;
-    }
 
-    // Cleanup on unmount
-    return () => {
+      return () => {
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
+      };
+    }
+  }, [videoRef, onFatalError]); // Runs only once on mount
+
+  // Effect to handle source changes
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    if (src) {
       if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
+        // Use existing HLS instance
+        hlsRef.current.loadSource(src);
+      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS support for Safari
+        videoElement.src = src;
       }
-    };
-  }, [src, videoRef, onFatalError]);
+    } else {
+      // If src is null, detach source
+      if (hlsRef.current) {
+        hlsRef.current.stopLoad();
+      }
+    }
+  }, [src]); // Runs when src changes
 };
