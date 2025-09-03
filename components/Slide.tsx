@@ -67,10 +67,10 @@ const VideoSlideContent = ({ slide }: { slide: VideoSlide }) => {
 
     return (
         <div className="relative w-full h-full bg-black">
-            {!isPlaying ? (
+            {!isPlaying && slide.data ? (
                 <>
                     <Image
-                        src={slide.data.poster!}
+                        src={slide.data.poster}
                         alt={slide.data.title || 'Video poster'}
                         layout="fill"
                         objectFit="cover"
