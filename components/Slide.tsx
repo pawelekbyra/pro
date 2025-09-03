@@ -13,10 +13,6 @@ import { useStore, ModalType } from '@/store/useStore';
 import { HeartIcon, MessageCircle } from 'lucide-react';
 
 // --- Prop Types for Sub-components ---
-interface VideoPlayerProps {
-  slide: VideoSlide;
-  isActive: boolean;
-}
 interface HtmlContentProps {
   slide: HtmlSlide;
 }
@@ -29,41 +25,21 @@ interface SlideUIProps {
 
 // --- Sub-components ---
 
-const VideoPlayer = ({ slide, isActive }: VideoPlayerProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const setVideoElement = useStore((state) => state.setVideoElement);
-
-  // Register or unregister the video element in the global store
-  // when the slide becomes active or inactive.
-  useEffect(() => {
-    if (isActive) {
-      setVideoElement(videoRef.current);
-    } else {
-      // When this slide is no longer active, we don't nullify the videoElement
-      // immediately, because another slide might become active in the same render cycle.
-      // The GlobalVideoPlayer will handle detaching from the old element.
-      // We only nullify on unmount.
+const VideoSlideContent = ({ slide }: { slide: VideoSlide }) => {
+    if (!slide.data?.poster) {
+        return <div className="w-full h-full bg-black" />; // Fallback
     }
-    return () => {
-        // On unmount, if this video element is still the active one, clear it.
-        if (useStore.getState().videoElement === videoRef.current) {
-            setVideoElement(null);
-        }
-    }
-  }, [isActive, setVideoElement]);
-
-  if (!slide.data) return null;
-
-  return (
-    <video
-      ref={videoRef}
-      poster={slide.data.poster}
-      className="w-full h-full object-cover"
-      playsInline
-      loop
-      muted // The global player will handle audio
-    />
-  );
+    return (
+        <div className="relative w-full h-full bg-black">
+            <Image
+                src={slide.data.poster}
+                alt={slide.data.title || 'Video poster'}
+                layout="fill"
+                objectFit="cover"
+                unoptimized
+            />
+        </div>
+    );
 };
 
 const HtmlContent = ({ slide }: HtmlContentProps) => {
@@ -143,7 +119,7 @@ const Slide = memo<SlideProps>(({ slide, isActive }) => {
   const renderContent = () => {
     switch (slide.type) {
       case 'video':
-        return <VideoPlayer slide={slide} isActive={isActive} />;
+        return <VideoSlideContent slide={slide} />;
       case 'html':
         return <HtmlContent slide={slide} />;
       case 'image':
