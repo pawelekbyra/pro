@@ -28,16 +28,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
         return (
           <HtmlContent
             data={htmlSlide.data!}
-            username={htmlSlide.username}
-            onNavigate={() => {}} // This is likely obsolete with the new navigation model
             isActive={isActive}
-            avatarUrl={htmlSlide.avatar}
-            initialLikes={htmlSlide.initialLikes}
-            isLiked={htmlSlide.isLiked}
-            slideId={htmlSlide.id}
-            commentsCount={htmlSlide.initialComments}
-            x={htmlSlide.x}
-            y={htmlSlide.y}
           />
         );
       default:

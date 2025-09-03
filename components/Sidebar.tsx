@@ -10,7 +10,7 @@ import { useVideoGrid } from '@/context/VideoGridContext';
 import { formatCount } from '@/lib/utils';
 
 interface SidebarProps {
-  avatarUrl: string;
+  avatar: string;
   initialLikes: number;
   isLiked: boolean;
   slideId: string;
@@ -19,7 +19,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  avatarUrl,
+  avatar,
   initialLikes,
   isLiked,
   slideId,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import SlideRenderer from '@/components/SlideRenderer';
 import { motion, PanInfo, AnimatePresence } from 'framer-motion';
@@ -9,51 +9,45 @@ import GlobalVideoPlayer from '@/components/GlobalVideoPlayer';
 import AccountPanel from '@/components/AccountPanel';
 import CommentsModal from '@/components/CommentsModal';
 import InfoModal from '@/components/InfoModal';
+import Sidebar from '@/components/Sidebar';
+import { debounce } from '@/lib/utils';
+import { Slide } from '@/lib/types';
 
 interface RowData {
-  columnSlides: any[];
-  activeSlideId: string | null;
-  setActiveSlide: (x: number, y: number, id: string) => void;
+  columnSlides: Slide[];
+  activeSlideIndex: number;
 }
 
 const Row = ({ index, style, data }: ListChildComponentProps<RowData>) => {
-  const { columnSlides, activeSlideId } = data;
-  const slide = columnSlides[index];
-
+  const slide = data.columnSlides[index];
   if (!slide) {
-    return (
-      <div style={style} className="w-full h-full bg-black flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
+    return <div style={style} className="w-full h-full bg-black flex items-center justify-center text-white">Loading...</div>;
   }
-
   return (
     <div style={style} className="w-full h-full">
-      <SlideRenderer
-        slide={slide}
-        isActive={activeSlideId === slide.id}
-      />
+      <SlideRenderer slide={slide} isActive={index === data.activeSlideIndex} />
     </div>
   );
 };
 
 export default function Home() {
   const {
-    state: { columns, activeColumnIndex, activeSlideId, error, activeModal, isNavigating },
+    state: { columns, columnKeys, activeColumnIndex, activeSlideIndex, activeSlideData, activeModal, error },
     isAnyModalOpen,
     setActiveModal,
-    activeSlide,
-    handleNavigation,
+    setActiveColumn,
     setActiveSlide,
-    loadMoreItems,
   } = useVideoGrid();
 
   const [appHeight, setAppHeight] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(0);
   const listRef = useRef<List | null>(null);
 
   useEffect(() => {
-    const handleResize = () => setAppHeight(window.innerHeight);
+    const handleResize = () => {
+      setAppHeight(window.innerHeight);
+      setWindowWidth(window.innerWidth);
+    };
     window.addEventListener('resize', handleResize);
     handleResize();
     return () => window.removeEventListener('resize', handleResize);
@@ -61,90 +55,86 @@ export default function Home() {
 
   useEffect(() => {
     if (listRef.current) {
-      listRef.current.scrollToItem(activeSlide?.y || 0, 'center');
+      listRef.current.scrollToItem(activeSlideIndex, 'start');
     }
-  }, [activeSlide?.y]);
+  }, [activeColumnIndex, activeSlideIndex]);
 
   const onDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, { offset }: PanInfo) => {
-    if (isAnyModalOpen || isNavigating) return;
+    if (isAnyModalOpen) return;
     const swipeThreshold = 80;
-    if (offset.x < -swipeThreshold) {
-      handleNavigation('right');
-    } else if (offset.x > swipeThreshold) {
-      handleNavigation('left');
+    const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
+
+    if (offset.x < -swipeThreshold && currentKeyIndex < columnKeys.length - 1) {
+      setActiveColumn(columnKeys[currentKeyIndex + 1]);
+    } else if (offset.x > swipeThreshold && currentKeyIndex > 0) {
+      setActiveColumn(columnKeys[currentKeyIndex - 1]);
     }
   };
 
-  const onVerticalScroll = ({ visibleStartIndex, visibleStopIndex }: { visibleStartIndex: number; visibleStopIndex: number }) => {
-    if (isNavigating) return;
-    const column = columns[activeColumnIndex];
-    if (!column || column.length === 0) return;
+  const debouncedSetActiveSlide = useCallback(debounce(setActiveSlide, 50), [setActiveSlide]);
 
-    const centeredIndex = Math.round((visibleStartIndex + visibleStopIndex) / 2);
-    const centeredSlide = column[centeredIndex];
-
-    if (centeredSlide && centeredSlide.id !== activeSlideId) {
-      setActiveSlide(centeredSlide.x, centeredSlide.y, centeredSlide.id);
-    }
-
-    // Obsługa ładowania kolejnych slajdów
-    const buffer = 5;
-    if (visibleStopIndex >= column.length - 1 - buffer) {
-      loadMoreItems(activeColumnIndex);
+  const onItemsRendered = ({ visibleStartIndex }: { visibleStartIndex: number }) => {
+    if (visibleStartIndex !== activeSlideIndex) {
+      debouncedSetActiveSlide(visibleStartIndex);
     }
   };
 
   const activeColumnSlides = columns[activeColumnIndex] || [];
-  const itemCount = activeColumnSlides.length;
 
   return (
     <>
       <GlobalVideoPlayer />
       <motion.div
-        className="relative h-full w-full overflow-hidden"
-        style={{ height: appHeight || '100vh' }}
+        className="relative h-full w-full overflow-hidden flex"
+        style={{ height: appHeight || '100vh', width: windowWidth * columnKeys.length, x: `-${activeColumnIndex * windowWidth}px` }}
         drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
+        dragConstraints={{ left: -((columnKeys.length - 1) * windowWidth), right: 0 }}
         dragElastic={0.1}
         onDragEnd={onDragEnd}
+        animate={{ x: `-${activeColumnIndex * windowWidth}px` }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeColumnIndex}
-            className="w-full h-full flex-shrink-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {itemCount > 0 && appHeight > 0 && (
+        {columnKeys.map(key => (
+          <div key={key} className="flex-shrink-0" style={{ width: windowWidth, height: appHeight }}>
+            {appHeight > 0 && windowWidth > 0 && (
               <List
                 ref={listRef}
                 height={appHeight}
-                width="100%"
-                itemCount={itemCount}
+                width={windowWidth}
+                itemCount={columns[key]?.length || 0}
                 itemSize={appHeight}
-                onItemsRendered={onVerticalScroll}
-                itemData={{ columnSlides: activeColumnSlides, activeSlideId, setActiveSlide }}
+                onItemsRendered={onItemsRendered}
+                itemData={{ columnSlides: columns[key], activeSlideIndex }}
+                initialScrollOffset={key === activeColumnIndex ? activeSlideIndex * appHeight : 0}
               >
                 {Row}
               </List>
             )}
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        ))}
       </motion.div>
       <AnimatePresence>
         {activeModal === 'account' && <AccountPanel onClose={() => setActiveModal(null)} />}
-        {activeModal === 'comments' && activeSlide && (
+        {activeModal === 'comments' && activeSlideData && (
           <CommentsModal
             isOpen={activeModal === 'comments'}
-            slideId={activeSlide.id}
-            initialCommentsCount={activeSlide.initialComments}
+            slideId={activeSlideData.id}
+            initialCommentsCount={activeSlideData.initialComments}
             onClose={() => setActiveModal(null)}
           />
         )}
         {activeModal === 'info' && <InfoModal isOpen={activeModal === 'info'} onClose={() => setActiveModal(null)} />}
       </AnimatePresence>
+      {activeSlideData && (
+        <Sidebar
+          avatar={activeSlideData.avatar}
+          initialLikes={activeSlideData.initialLikes}
+          isLiked={activeSlideData.isLiked}
+          slideId={activeSlideData.id}
+          commentsCount={activeSlideData.initialComments}
+          x={activeSlideData.x}
+        />
+      )}
     </>
   );
 }
