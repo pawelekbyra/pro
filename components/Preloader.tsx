@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import Image from 'next/image';
 import { useStore } from '@/store/useStore';
-import { shallow } from 'zustand/shallow';
 import { useQuery } from '@tanstack/react-query';
 import { VideoItem } from 'react-vertical-feed';
 import { Slide as SlideType } from '@/lib/types';
@@ -21,31 +20,66 @@ const fetchSlides = async () => {
 
 const Preloader: React.FC = () => {
   const { t, selectInitialLang, isLangSelected } = useTranslation();
-  const { setPreloadedSlide, isFirstVideoReady, setIsMuted } = useStore(state => ({
-    setPreloadedSlide: state.setPreloadedSlide,
-    isFirstVideoReady: state.isFirstVideoReady,
-    setIsMuted: state.setIsMuted,
-  }), shallow);
+  const { setPreloadedSlide } = useStore();
   const [isHiding, setIsHiding] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+  const [showLoadingBar, setShowLoadingBar] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
-  // Rozpoczęcie ładowania danych od razu, zanim użytkownik wybierze język
+  // Zmienione: useQuery jest teraz uruchamiany domyślnie, aby rozpocząć ładowanie w tle.
   const { data, isLoading: isQueryLoading, isFetched } = useQuery({
       queryKey: ['slides', 'preload'],
       queryFn: fetchSlides,
-      enabled: !isLangSelected, // Uruchamiamy tylko raz
+      // Usunięto: enabled: !isLangSelected
   });
 
   const handleLangSelect = (lang: 'pl' | 'en') => {
     selectInitialLang(lang);
-    setIsMuted(false); // Unmute the video
-    setIsHiding(true); // Hide the preloader
+    // Pokaż pasek ładowania tylko jeśli dane nie są jeszcze załadowane
+    if (!isFetched) {
+        setShowLoadingBar(true);
+    } else {
+        setIsHiding(true);
+    }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => setContentVisible(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (isFetched && data?.slides.length > 0) {
       setPreloadedSlide(data.slides[0]);
     }
   }, [data, isFetched, setPreloadedSlide]);
+
+  useEffect(() => {
+    if (showLoadingBar) {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (isFetched && prev >= 100) {
+            clearInterval(interval);
+            setIsHiding(true);
+            return 100;
+          }
+          if (isFetched) {
+            return 100; // Po załadowaniu danych, natychmiast ustawiamy 100%
+          }
+          return prev + 10;
+        });
+      }, 50);
+      return () => clearInterval(interval);
+    }
+  }, [showLoadingBar, isFetched]);
+
+  // Zmienione: ten useEffect teraz ukrywa preloader, gdy język jest wybrany,
+  // a dane są już gotowe.
+  useEffect(() => {
+      if (isLangSelected && isFetched) {
+          setIsHiding(true);
+      }
+  }, [isLangSelected, isFetched]);
 
   return (
     <AnimatePresence>
@@ -84,39 +118,51 @@ const Preloader: React.FC = () => {
               />
             </motion.div>
           </motion.div>
-          <AnimatePresence>
-            {isFirstVideoReady && (
-              <motion.div
-                className="w-full max-w-sm flex flex-col items-center justify-center"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-              >
-                <div className="text-center w-full flex flex-col items-center">
-                  <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
-                  <div className="flex flex-col gap-4 w-full">
-                    <motion.button
-                      onClick={() => handleLangSelect('pl')}
-                      className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {t('polish')}
-                    </motion.button>
-                    <motion.button
-                      onClick={() => handleLangSelect('en')}
-                      className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
-                      whileTap={{ scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {t('english')}
-                    </motion.button>
-                  </div>
+          {showLoadingBar ? (
+            <motion.div
+              className="w-full max-w-sm flex flex-col items-center justify-center gap-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <p className="text-white">Ładowanie...</p>
+              <div className="w-full h-2 bg-white/20 rounded-full">
+                <motion.div
+                  className="h-full bg-pink-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="w-full max-w-sm flex flex-col items-center justify-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: contentVisible ? 1 : 0, y: contentVisible ? 0 : 50 }}
+              transition={{ duration: 0.5, ease: 'easeOut', delay: 0.5 }}
+            >
+              <div className="text-center w-full flex flex-col items-center">
+                <h2 className="text-xl font-semibold text-white mb-6">{t('selectLang')}</h2>
+                <div className="flex flex-col gap-4 w-full">
+                  <motion.button
+                    onClick={() => handleLangSelect('pl')}
+                    className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {t('polish')}
+                  </motion.button>
+                  <motion.button
+                    onClick={() => handleLangSelect('en')}
+                    className="bg-white/5 border border-white/20 hover:bg-white/10 text-base py-6 rounded-md"
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {t('english')}
+                  </motion.button>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
