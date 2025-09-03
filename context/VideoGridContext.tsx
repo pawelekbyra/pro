@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useEffect, useCallback, useRef, ReactNode, useContext, useReducer } from 'react';
+import React, { createContext, useCallback, ReactNode, useContext, useReducer } from 'react';
 import { Slide } from '@/lib/types';
 import { useToast } from './ToastContext';
 
@@ -22,9 +22,10 @@ type Action =
   | { type: 'SET_ERROR'; payload: Error | null }
   | { type: 'TOGGLE_LIKE' };
 
+// Uproszczony stan początkowy
 const initialState: State = {
   activeSlideData: null,
-  isLoading: true,
+  isLoading: false, // Nie ładujemy danych przy starcie
   activeModal: null,
   error: null,
 };
@@ -67,6 +68,7 @@ interface VideoGridContextType {
   state: State;
   isAnyModalOpen: boolean;
   setActiveModal: (modal: ModalType) => void;
+  setSlideData: (slide: Slide) => void; // Nowa funkcja do ustawiania slajdu
   toggleLike: () => Promise<void>;
 }
 
@@ -76,37 +78,11 @@ export const VideoGridProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { addToast } = useToast();
 
-  useEffect(() => { if (state.error) { addToast(state.error.message, 'error'); } }, [state.error, addToast]);
+  // Usunięto logikę pobierania danych (fetchSlideData i useEffect)
 
-  const fetchSlideData = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      // Fetch slide 0,0 directly
-      const response = await fetch('/api/slides?x=0&y=0');
-      if (!response.ok) throw new Error('Failed to fetch slide data');
-      const data = await response.json();
-      // Assuming the API returns the single slide object
-      if (data.slide) {
-        dispatch({ type: 'SET_SLIDE_DATA', payload: data.slide });
-      } else {
-        // Handle case where specific slide is not found in the response
-        // For simplicity, let's try to find it in the grid if the structure is still array-like
-        const grid = data.grid;
-        const slide = grid ? Object.values(grid).find((s: any) => s.x === 0 && s.y === 0) : null;
-        if(slide) {
-          dispatch({ type: 'SET_SLIDE_DATA', payload: slide as Slide });
-        } else {
-          throw new Error('Slide 0,0 not found');
-        }
-      }
-    } catch (err) {
-      dispatch({ type: 'SET_ERROR', payload: err as Error });
-    }
+  const setSlideData = useCallback((slide: Slide) => {
+    dispatch({ type: 'SET_SLIDE_DATA', payload: slide });
   }, []);
-
-  useEffect(() => {
-    fetchSlideData();
-  }, [fetchSlideData]);
 
   const toggleLike = useCallback(async () => {
     if (!state.activeSlideData) return;
@@ -116,9 +92,9 @@ export const VideoGridProvider = ({ children }: { children: ReactNode }) => {
       if (!response.ok) throw new Error('Failed to update like status');
     } catch (error) {
       dispatch({ type: 'TOGGLE_LIKE' }); // Revert optimistic update
-      dispatch({ type: 'SET_ERROR', payload: error as Error });
+      addToast((error as Error).message, 'error');
     }
-  }, [state.activeSlideData]);
+  }, [state.activeSlideData, addToast]);
 
   const setActiveModal = useCallback((modal: ModalType) => { dispatch({ type: 'SET_ACTIVE_MODAL', payload: modal }); }, []);
 
@@ -126,6 +102,7 @@ export const VideoGridProvider = ({ children }: { children: ReactNode }) => {
     state,
     isAnyModalOpen: state.activeModal !== null,
     setActiveModal,
+    setSlideData,
     toggleLike,
   };
 

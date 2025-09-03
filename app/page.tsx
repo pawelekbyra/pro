@@ -1,56 +1,40 @@
 // app/page.tsx
 "use client";
 
-import { useVideoGrid } from '@/context/VideoGridContext';
 import SlideRenderer from '@/components/SlideRenderer';
-import { AnimatePresence } from 'framer-motion';
 import GlobalVideoPlayer from '@/components/GlobalVideoPlayer';
-import AccountPanel from '@/components/AccountPanel';
-import CommentsModal from '@/components/CommentsModal';
-import InfoModal from '@/components/InfoModal';
-import Sidebar from '@/components/Sidebar';
+import { VideoSlide } from '@/lib/types';
+
+// Statyczny obiekt slajdu, używany do renderowania, gdy dane nie są jeszcze dostępne
+const staticSlide: VideoSlide = {
+  id: '1',
+  x: 0,
+  y: 0,
+  userId: 'static-user',
+  username: 'Static User',
+  avatar: '/avatars/default.png',
+  access: 'public',
+  createdAt: Date.now(),
+  initialLikes: 0,
+  isLiked: false,
+  initialComments: 0,
+  type: 'video',
+  data: {
+    mp4Url: '', // URL zostanie ustawiony przez GlobalVideoPlayer
+    hlsUrl: null,
+    poster: '/qr-code-placeholder.png', // Domyślny poster
+    title: 'Welcome',
+    description: 'This is a statically rendered slide.',
+  },
+};
 
 export default function Home() {
-  const {
-    state: { activeSlideData, activeModal, isLoading },
-    setActiveModal,
-  } = useVideoGrid();
-
   return (
     <>
       <GlobalVideoPlayer />
       <div className="relative h-screen w-screen overflow-hidden bg-black">
-        {isLoading && (
-          <div className="w-full h-full flex items-center justify-center text-white">
-            Loading...
-          </div>
-        )}
-        {activeSlideData && !isLoading && (
-          <SlideRenderer slide={activeSlideData} isActive={true} />
-        )}
+        <SlideRenderer slide={staticSlide} isActive={true} />
       </div>
-      <AnimatePresence>
-        {activeModal === 'account' && <AccountPanel onClose={() => setActiveModal(null)} />}
-        {activeModal === 'comments' && activeSlideData && (
-          <CommentsModal
-            isOpen={activeModal === 'comments'}
-            slideId={activeSlideData.id}
-            initialCommentsCount={activeSlideData.initialComments}
-            onClose={() => setActiveModal(null)}
-          />
-        )}
-        {activeModal === 'info' && <InfoModal isOpen={activeModal === 'info'} onClose={() => setActiveModal(null)} />}
-      </AnimatePresence>
-      {activeSlideData && (
-        <Sidebar
-          avatar={activeSlideData.avatar}
-          initialLikes={activeSlideData.initialLikes}
-          isLiked={activeSlideData.isLiked}
-          slideId={activeSlideData.id}
-          commentsCount={activeSlideData.initialComments}
-          x={activeSlideData.x}
-        />
-      )}
     </>
   );
 }
