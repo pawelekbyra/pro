@@ -19,19 +19,10 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const {
-    activeVideo,
-    setActiveVideo,
-    isPreloading,
-    preloadedSlide,
-    isMuted,
-  } = useStore(
+  const { activeVideo, setActiveVideo } = useStore(
     (state) => ({
       activeVideo: state.activeVideo,
       setActiveVideo: state.setActiveVideo,
-      isPreloading: state.isPreloading,
-      preloadedSlide: state.preloadedSlide,
-      isMuted: state.isMuted,
     }),
     shallow
   );
@@ -45,35 +36,27 @@ const MainFeed = () => {
   } = useInfiniteQuery({
     queryKey: ['slides'],
     queryFn: fetchSlides,
-    initialPageParam: preloadedSlide ? preloadedSlide.createdAt.toString() : '',
+    initialPageParam: '',
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    enabled: !isPreloading,
   });
 
   const slides = useMemo(() => {
-      const allSlides = data?.pages.flatMap(page => page.slides) ?? [];
-      if (preloadedSlide && !allSlides.some(s => s.id === preloadedSlide.id)) {
-          return [preloadedSlide, ...allSlides];
-      }
-      return allSlides;
-  }, [data, preloadedSlide]);
+    return data?.pages.flatMap(page => page.slides) ?? [];
+  }, [data]);
 
-  const videoItems: VideoItem[] = useMemo(() => {
-    return slides
-      .filter(
-        (slide): slide is SlideType & { type: 'video'; data: { hlsUrl: string } } =>
-          slide.type === 'video' && typeof slide.data?.hlsUrl === 'string'
-      )
-      .map((slide) => ({
-        id: slide.id,
-        src: slide.data.hlsUrl,
-        metadata: { slide },
-        // autoPlay is unreliable, we will handle playback manually.
-        muted: isMuted,
-        playsInline: true,
-        controls: true,
-      }));
-  }, [slides, isMuted]);
+  // We must provide VideoItems to the library, but they will be dummies.
+  // The real video is played by GlobalVideoPlayer.
+  // These items are just for scrolling and layout.
+  const feedItems: VideoItem[] = useMemo(() => {
+    return slides.map((slide) => ({
+      id: slide.id,
+      src: slide.data?.hlsUrl || slide.id, // Provide a src, even a dummy one.
+      metadata: { slide },
+      muted: true, // The dummy videos in the feed are always muted.
+      playsInline: true,
+      autoPlay: false, // We control playback globally.
+    }));
+  }, [slides]);
 
   const handleEndReached = () => {
     if (hasNextPage) {
@@ -88,41 +71,12 @@ const MainFeed = () => {
     }
   }, [activeVideo, setActiveVideo]);
 
-  // Effect to set the first item as active as soon as it's available.
   useEffect(() => {
-    if (!activeVideo && videoItems.length > 0) {
-      handleItemVisible(videoItems[0]);
+    if (!activeVideo && slides.length > 0) {
+      setActiveVideo(slides[0]);
     }
-  }, [videoItems, activeVideo, handleItemVisible]);
+  }, [slides, activeVideo, setActiveVideo]);
 
-  // Effect to MANUALLY play the video when it becomes active.
-  // This is the core fix for the Android playback issue.
-  useEffect(() => {
-    if (activeVideo) {
-      // Find the video element in the DOM.
-      // This relies on react-vertical-feed rendering a `data-id` attribute.
-      const videoElement = document.querySelector(`[data-id="${activeVideo.id}"] video`) as HTMLVideoElement | null;
-
-      if (videoElement) {
-        // Delay playback slightly to allow preloader exit animation to complete.
-        const playTimeout = setTimeout(() => {
-          videoElement.play().catch(error => {
-            console.error("Video play failed:", error);
-            // Optional: handle the error, e.g., by showing a play button.
-          });
-        }, 400); // 400ms delay, should be longer than the preloader exit animation.
-
-        return () => clearTimeout(playTimeout);
-      }
-    }
-  }, [activeVideo]);
-
-  const renderSlideOverlay = (item: VideoItem) => {
-    const slide = item.metadata?.slide as SlideType | undefined;
-    if (!slide) return null;
-    const isActive = slide.id === activeVideo?.id;
-    return <Slide slide={slide} isActive={isActive} />;
-  };
 
   if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -133,13 +87,20 @@ const MainFeed = () => {
   }
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-screen relative">
       <VerticalFeed
-        items={videoItems}
+        items={feedItems}
         onEndReached={handleEndReached}
         onItemVisible={handleItemVisible}
         className="h-full"
-        renderItemOverlay={renderSlideOverlay}
+        // We only render the UI overlay. The video itself is global.
+        // The library's video component will be in the background, muted and invisible.
+        renderItemOverlay={(item) => {
+          const slide = item.metadata?.slide as SlideType | undefined;
+          if (!slide) return null;
+          const isActive = slide.id === activeVideo?.id;
+          return <Slide slide={slide} isActive={isActive} />;
+        }}
         loadingComponent={<Skeleton className="w-full h-full" />}
       />
     </div>

@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import Preloader from './Preloader';
 import { useTranslation } from '@/context/LanguageContext';
 import TopBar from './TopBar';
+import GlobalVideoPlayer from './GlobalVideoPlayer';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -18,8 +19,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-full flex-col relative">
+      <GlobalVideoPlayer />
       <TopBar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto z-10">
         {children}
       </div>
     </div>
