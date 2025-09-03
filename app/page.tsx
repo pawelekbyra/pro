@@ -59,11 +59,12 @@ const Column = memo(({ columnIndex, width, height }: { columnIndex: number, widt
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const setActiveSlide = useStore((state) => state.setActiveSlide);
-  const { activeColumnIndex, activeSlideIndex } = useStore(
+  const { setActiveSlide, activeSlide, activeColumnIndex, activeSlideIndex } = useStore(
     (state) => ({
-      activeColumnIndex: state.activeColumnIndex,
-      activeSlideIndex: state.activeSlideIndex,
+        setActiveSlide: state.setActiveSlide,
+        activeSlide: state.activeSlide,
+        activeColumnIndex: state.activeColumnIndex,
+        activeSlideIndex: state.activeSlideIndex,
     }),
     shallow
   );
@@ -73,12 +74,13 @@ const Column = memo(({ columnIndex, width, height }: { columnIndex: number, widt
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop } = event.currentTarget;
     const newSlideIndex = Math.round(scrollTop / height);
-    const currentSlide = slides[newSlideIndex];
+    const newSlide = slides[newSlideIndex];
 
-    if (currentSlide && newSlideIndex !== activeSlideIndex) {
-      setActiveSlide(currentSlide, columnIndex, newSlideIndex);
+    // Only update if the slide is different from the currently active one.
+    if (newSlide && newSlide.id !== activeSlide?.id) {
+      setActiveSlide(newSlide, columnIndex, newSlideIndex);
     }
-  }, [height, slides, activeSlideIndex, columnIndex, setActiveSlide]);
+  }, [height, slides, columnIndex, setActiveSlide, activeSlide]);
 
   const loadMoreItems = useCallback(() => {
     if (hasNextPage) {
