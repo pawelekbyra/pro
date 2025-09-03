@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { motion, useAnimate } from 'framer-motion';
 import { FixedSizeList } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -19,6 +19,22 @@ import { shallow } from 'zustand/shallow';
 
 // --- React Query Client ---
 const queryClient = new QueryClient();
+
+// --- Utility Functions ---
+function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  const debounced = (...args: Parameters<F>) => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+
+  return debounced as (...args: Parameters<F>) => void;
+}
+
 
 // --- Custom Hooks ---
 const useWindowSize = () => {
@@ -71,17 +87,32 @@ const Column = memo(({ columnIndex, width, height }: { columnIndex: number, widt
     shallow
   );
 
-  const slides = data?.pages.flatMap((page) => page.slides) ?? [];
+  const slides = useMemo(() => data?.pages.flatMap((page) => page.slides) ?? [], [data]);
   const itemCount = hasNextPage ? slides.length + 1 : slides.length;
   const isItemLoaded = (index: number) => !hasNextPage || index < slides.length;
+
+  const debouncedSetIndex = useMemo(
+    () =>
+      debounce((newSlideIndex: number, currentSlide: SlideType) => {
+        if (currentSlide && columnIndex === useStore.getState().activeColumnIndex) {
+          setActiveSlide(currentSlide, columnIndex, newSlideIndex);
+        }
+      }, 100), // 100ms debounce delay
+    [columnIndex, setActiveSlide]
+  );
 
   const handleScroll = useCallback(({ scrollOffset }: { scrollOffset: number }) => {
     const newSlideIndex = Math.round(scrollOffset / height);
     const currentSlide = slides[newSlideIndex];
-    if (currentSlide && newSlideIndex !== activeSlideIndex && columnIndex === activeColumnIndex) {
-      setActiveSlide(currentSlide, columnIndex, newSlideIndex);
+    debouncedSetIndex(newSlideIndex, currentSlide);
+  }, [height, slides, debouncedSetIndex]);
+
+  // No overload matches this call fix
+  const loadMoreItems = useCallback(() => {
+    if (hasNextPage) {
+      fetchNextPage();
     }
-  }, [height, slides, activeSlideIndex, columnIndex, activeColumnIndex, setActiveSlide]);
+  }, [fetchNextPage, hasNextPage]);
 
   if (isLoading) {
     return <div style={{ width, height, flexShrink: 0 }} className="flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -95,7 +126,7 @@ const Column = memo(({ columnIndex, width, height }: { columnIndex: number, widt
       <InfiniteLoader
         isItemLoaded={isItemLoaded}
         itemCount={itemCount}
-        loadMoreItems={fetchNextPage}
+        loadMoreItems={loadMoreItems}
       >
         {({ onItemsRendered, ref }) => (
           <FixedSizeList
@@ -139,41 +170,42 @@ function GridView() {
     shallow
   );
 
-  const { isLoading: isLoadingColumns, isError: isErrorColumns } = useQuery({
+  const { data: columnsData, isLoading: isLoadingColumns, isError: isErrorColumns } = useQuery({
     queryKey: ['columns'],
     queryFn: fetchColumns,
-    onSuccess: (data) => {
-      setColumns(data);
-      // Set initial active slide
-      if (data.length > 0) {
-        // We can't set active slide data here as we haven't fetched it yet.
-        // We'll set a default active index, and the Column component will fetch the data.
+  });
+
+  // Handle side-effects from the query in useEffect, per react-query v5 best practices
+  useEffect(() => {
+    if (columnsData) {
+      setColumns(columnsData);
+      if (columnsData.length > 0) {
         setActiveSlide(null, 0, 0);
       }
-    },
-  });
+    }
+  }, [columnsData, setColumns, setActiveSlide]);
 
   const onDragEnd = async (event: any, info: any) => {
     const velocity = info.velocity.x;
+    const offset = info.offset.x;
     let newColumnIndex = activeColumnIndex;
 
-    if (Math.abs(velocity) > 300) {
-      newColumnIndex = velocity < 0 ? Math.min(activeColumnIndex + 1, columns.length - 1) : Math.max(activeColumnIndex - 1, 0);
-    } else {
-      const offset = info.offset.x;
-      if (Math.abs(offset) > width / 2) {
-        newColumnIndex = offset < 0 ? Math.min(activeColumnIndex + 1, columns.length - 1) : Math.max(activeColumnIndex - 1, 0);
-      }
+    // Softer animation trigger logic
+    if (Math.abs(velocity) > 200 || Math.abs(offset) > width * 0.4) {
+        newColumnIndex = velocity < 0
+            ? Math.min(activeColumnIndex + 1, columns.length - 1)
+            : Math.max(activeColumnIndex - 1, 0);
     }
 
     if (newColumnIndex !== activeColumnIndex) {
-        await animate(scope.current, { x: -newColumnIndex * width }, { type: 'spring', stiffness: 300, damping: 30 });
-        setActiveSlide(null, newColumnIndex, 0); // Reset slide index on column change, slide data will be fetched by Column
+        // Set the new active column *before* animating for a more responsive feel
+        setActiveSlide(null, newColumnIndex, 0);
+        await animate(scope.current, { x: -newColumnIndex * width }, { type: 'spring', stiffness: 250, damping: 25 });
     } else {
         // Snap back to the current column if not dragged far enough
-        await animate(scope.current, { x: -activeColumnIndex * width }, { type: 'spring', stiffness: 300, damping: 30 });
+        await animate(scope.current, { x: -activeColumnIndex * width }, { type: 'spring', stiffness: 400, damping: 35 });
     }
-  };
+};
 
   if (isLoadingColumns || !width || !height) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;

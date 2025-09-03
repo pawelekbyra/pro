@@ -13,13 +13,11 @@ interface GridState {
 
   // New state for the global video player
   activeSlide: Slide | null;
-  videoElement: HTMLVideoElement | null;
 
   // Actions
   setColumns: (columns: number[]) => void;
   setActiveSlide: (slide: Slide | null, colIndex: number, slideIndex: number) => void;
   setActiveModal: (modal: ModalType) => void;
-  setVideoElement: (element: HTMLVideoElement | null) => void;
 
   // Computed properties (selectors)
   isAnyModalOpen: () => boolean;
@@ -34,7 +32,6 @@ export const useStore = create<GridState>((set, get) => ({
   isLoading: true,
   error: null,
   activeSlide: null,
-  videoElement: null,
 
   // --- ACTIONS ---
   setColumns: (columns) => set({ columns, isLoading: false }),
@@ -52,8 +49,6 @@ export const useStore = create<GridState>((set, get) => ({
     }),
 
   setActiveModal: (modal) => set({ activeModal: modal }),
-
-  setVideoElement: (element) => set({ videoElement: element }),
 
 
   // --- COMPUTED / SELECTORS ---
