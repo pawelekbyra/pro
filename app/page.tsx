@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import SlideRenderer from '@/components/SlideRenderer';
 import { motion, PanInfo, AnimatePresence } from 'framer-motion';
@@ -17,10 +17,11 @@ import { Slide } from '@/lib/types';
 interface RowData {
   columnSlides: Slide[];
   activeSlideIndex: number;
+  isActiveColumn: boolean;
 }
 
 const Row = ({ index, style, data }: ListChildComponentProps<RowData>) => {
-  const { columnSlides, activeSlideIndex } = data;
+  const { columnSlides, activeSlideIndex, isActiveColumn } = data;
   const slide = columnSlides[index];
 
   if (!slide) {
@@ -31,7 +32,8 @@ const Row = ({ index, style, data }: ListChildComponentProps<RowData>) => {
     );
   }
 
-  const isActive = index === activeSlideIndex;
+  // An item is active if it's in the active column and is the active slide index
+  const isActive = isActiveColumn && index === activeSlideIndex;
 
   return (
     <div style={style} className={`w-full h-full scroll-snap-align-start`}>
@@ -51,7 +53,9 @@ export default function Home() {
 
   const [appHeight, setAppHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
-  const listRef = useRef<List | null>(null);
+
+  // Create a ref for each list instance
+  const listRefs = useRef<{ [key: number]: List | null }>({});
 
   useEffect(() => {
     const handleResize = () => {
@@ -63,9 +67,11 @@ export default function Home() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // When active column or slide changes, scroll the correct list to the active slide
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollToItem(activeSlideIndex, 'start');
+    const activeList = listRefs.current[activeColumnIndex];
+    if (activeList) {
+      activeList.scrollToItem(activeSlideIndex, 'start');
     }
   }, [activeColumnIndex, activeSlideIndex]);
 
@@ -89,32 +95,36 @@ export default function Home() {
     }
   };
 
-  const activeColumnSlides = columns[activeColumnIndex] || [];
+  const currentKeyIndex = columnKeys.indexOf(activeColumnIndex);
 
   return (
     <>
       <GlobalVideoPlayer />
       <motion.div
         className="relative h-full w-full overflow-hidden flex"
-        style={{ height: appHeight || '100vh', width: windowWidth * columnKeys.length, x: `-${activeColumnIndex * windowWidth}px` }}
+        style={{ height: appHeight || '100vh', width: windowWidth * columnKeys.length, x: `-${currentKeyIndex * windowWidth}px` }}
         drag="x"
         dragConstraints={{ left: -((columnKeys.length - 1) * windowWidth), right: 0 }}
         dragElastic={0.1}
         onDragEnd={onDragEnd}
-        animate={{ x: `-${activeColumnIndex * windowWidth}px` }}
+        animate={{ x: `-${currentKeyIndex * windowWidth}px` }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         {columnKeys.map(key => (
           <div key={key} className="flex-shrink-0" style={{ width: windowWidth, height: appHeight }}>
-            {appHeight > 0 && windowWidth > 0 && (
+            {appHeight > 0 && windowWidth > 0 && columns[key] && (
               <List
-                ref={listRef}
+                ref={el => (listRefs.current[key] = el)}
                 height={appHeight}
                 width={windowWidth}
-                itemCount={activeColumnSlides.length}
+                itemCount={columns[key].length}
                 itemSize={appHeight}
-                onItemsRendered={onItemsRendered}
-                itemData={{ columnSlides: activeColumnSlides, activeSlideIndex }}
+                onItemsRendered={key === activeColumnIndex ? onItemsRendered : undefined}
+                itemData={{
+                  columnSlides: columns[key],
+                  activeSlideIndex,
+                  isActiveColumn: key === activeColumnIndex,
+                }}
                 initialScrollOffset={key === activeColumnIndex ? activeSlideIndex * appHeight : 0}
                 className="scroll-snap-y-mandatory"
               >
