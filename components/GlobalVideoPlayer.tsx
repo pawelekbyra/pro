@@ -4,80 +4,76 @@ import React, { useEffect, useRef } from 'react';
 import Hls from 'hls.js';
 import { useStore } from '@/store/useStore';
 import { VideoSlide } from '@/lib/types';
-import { shallow } from 'zustand/shallow';
 
 const GlobalVideoPlayer = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
-  const { activeSlide, isActive } = useStore(
-    (state) => {
-        const slide = state.activeSlide;
-        const isActive = slide?.id === state.activeSlide?.id &&
-                         state.activeColumnIndex === state.activeColumnIndex &&
-                         state.activeSlideIndex === state.activeSlideIndex;
-        return { activeSlide: state.activeSlide, isActive };
-    },
-    shallow
-  );
+  const activeSlide = useStore((state) => state.activeSlide);
 
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    // Initialize HLS.js
-    if (!hlsRef.current) {
-      if (Hls.isSupported()) {
-        hlsRef.current = new Hls();
-        hlsRef.current.attachMedia(videoElement);
-      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support
-      }
+    // Initialize HLS.js if not already done
+    if (!hlsRef.current && Hls.isSupported()) {
+      hlsRef.current = new Hls();
+      hlsRef.current.attachMedia(videoElement);
     }
 
     const hls = hlsRef.current;
     const isVideoSlide = activeSlide && activeSlide.type === 'video';
 
-    if (isVideoSlide && isActive) {
+    const playVideo = () => {
+      // Mute the video to allow autoplay in most browsers
+      videoElement.muted = true;
+      const playPromise = videoElement.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error("Autoplay was prevented:", error);
+        });
+      }
+    };
+
+    if (isVideoSlide) {
       const slideData = activeSlide.data as VideoSlide['data'];
       const hlsUrl = slideData?.hlsUrl;
 
       if (hlsUrl) {
-        console.log(`GlobalPlayer: Loading HLS stream: ${hlsUrl}`);
-        videoElement.style.display = 'block';
+        videoElement.style.display = 'block'; // Make player visible
+
         if (hls) {
           hls.loadSource(hlsUrl);
-          hls.once(Hls.Events.MANIFEST_PARSED, () => {
-            videoElement.muted = false;
-            videoElement.play().catch(err => console.error("Global player play failed", err));
-          });
-        } else {
+          hls.once(Hls.Events.MANIFEST_PARSED, playVideo);
+        } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
           // For native HLS on Safari
           videoElement.src = hlsUrl;
-          videoElement.addEventListener('loadedmetadata', () => {
-            videoElement.muted = false;
-            videoElement.play().catch(err => console.error("Global player play failed (native)", err));
-          });
+          videoElement.addEventListener('loadeddata', playVideo);
         }
+      } else {
+        // It's a video slide but has no URL, so hide the player
+        videoElement.style.display = 'none';
+        videoElement.pause();
+        videoElement.src = '';
       }
     } else {
-      // Not a video slide or not active, so stop playback and hide
-      console.log("GlobalPlayer: No active video slide. Pausing and hiding.");
+      // Not a video slide, so stop playback and hide
+      videoElement.style.display = 'none';
       videoElement.pause();
       videoElement.src = '';
-      videoElement.style.display = 'none';
       if (hls) {
         hls.stopLoad();
       }
     }
 
     return () => {
-      // Don't destroy HLS instance, just stop loading
-      // if (hls) {
-      //   hls.stopLoad();
-      // }
+      // Cleanup listeners to prevent memory leaks
+      if (hls) {
+        hls.off(Hls.Events.MANIFEST_PARSED, playVideo);
+      }
+      videoElement.removeEventListener('loadeddata', playVideo);
     };
-  }, [activeSlide, isActive]);
+  }, [activeSlide]);
 
   return (
     <video
