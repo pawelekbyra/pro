@@ -109,6 +109,14 @@ body {
   .no-transition {
     transition: none !important;
   }
+  .scroll-snap-y-mandatory {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+  }
+  .scroll-snap-align-start {
+    scroll-snap-align: start;
+  }
 }
 
 @layer utilities {

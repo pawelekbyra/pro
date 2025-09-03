@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useVideoGrid } from '@/context/VideoGridContext';
 import SlideRenderer from '@/components/SlideRenderer';
 import { motion, PanInfo, AnimatePresence } from 'framer-motion';
@@ -16,16 +16,29 @@ import { Slide } from '@/lib/types';
 interface RowData {
   columnSlides: Slide[];
   activeSlideIndex: number;
+  initialScrollOffset: number;
+  listRef: React.RefObject<List>;
 }
 
 const Row = ({ index, style, data }: ListChildComponentProps<RowData>) => {
-  const slide = data.columnSlides[index];
+  const { columnSlides, activeSlideIndex } = data;
+  const slide = columnSlides[index];
+
   if (!slide) {
-    return <div style={style} className="w-full h-full bg-black flex items-center justify-center text-white">Loading...</div>;
+    return (
+      <div style={style} className="w-full h-full bg-black flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
   }
+
+  const isClone = index === 0 || index === columnSlides.length + 1;
+  const isActive = index === activeSlideIndex;
+
   return (
-    <div style={style} className="w-full h-full">
-      <SlideRenderer slide={slide} isActive={index === data.activeSlideIndex} />
+    <div style={style} className={`w-full h-full scroll-snap-align-start`}>
+      {/* Nie renderuj treści dla klonów, aby uniknąć problemów z odtwarzaniem wideo */}
+      {!isClone && <SlideRenderer slide={slide} isActive={isActive} />}
     </div>
   );
 };
@@ -42,6 +55,7 @@ export default function Home() {
   const [appHeight, setAppHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
   const listRef = useRef<List | null>(null);
+  const isScrollingProgrammatically = useRef(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,7 +69,9 @@ export default function Home() {
 
   useEffect(() => {
     if (listRef.current) {
-      listRef.current.scrollToItem(activeSlideIndex, 'start');
+      const targetIndex = activeSlideIndex + 1;
+      isScrollingProgrammatically.current = true;
+      listRef.current.scrollToItem(targetIndex, 'start');
     }
   }, [activeColumnIndex, activeSlideIndex]);
 
@@ -71,15 +87,54 @@ export default function Home() {
     }
   };
 
-  const debouncedSetActiveSlide = useCallback(debounce(setActiveSlide, 50), [setActiveSlide]);
+  const debouncedSetActiveSlide = useMemo(() => debounce(setActiveSlide, 50), [setActiveSlide]);
 
-  const onItemsRendered = ({ visibleStartIndex }: { visibleStartIndex: number }) => {
-    if (visibleStartIndex !== activeSlideIndex) {
-      debouncedSetActiveSlide(visibleStartIndex);
+  const onItemsRendered = ({ visibleStartIndex, overscanStartIndex, overscanStopIndex, visibleStopIndex }: {
+    overscanStartIndex: number;
+    overscanStopIndex: number;
+    visibleStartIndex: number;
+    visibleStopIndex: number;
+  }) => {
+    // Zapobiegaj aktualizacji stanu podczas programowego przewijania, aby uniknąć błędów
+    if (isScrollingProgrammatically.current) {
+      isScrollingProgrammatically.current = false;
+      return;
+    }
+
+    if (visibleStartIndex !== activeSlideIndex + 1) {
+      const realIndex = visibleStartIndex - 1; // Odejmij 1, aby uwzględnić klon na początku
+      debouncedSetActiveSlide(realIndex);
     }
   };
 
   const activeColumnSlides = columns[activeColumnIndex] || [];
+  const loopedSlides = [
+    activeColumnSlides[activeColumnSlides.length - 1], // Klap z ostatniego slajdu
+    ...activeColumnSlides,
+    activeColumnSlides[0], // Klon pierwszego slajdu
+  ].filter(Boolean);
+
+  const handleScroll = (scrollOffset: number) => {
+    const totalSlides = activeColumnSlides.length;
+    const scrollHeight = appHeight * (totalSlides + 2); // Wysokość całej listy z klonami
+    const slideHeight = appHeight;
+
+    if (listRef.current && scrollHeight > 0) {
+      // Użytkownik przewinął na dół do klonu pierwszego slajdu
+      if (scrollOffset >= slideHeight * (totalSlides + 1)) {
+        isScrollingProgrammatically.current = true;
+        listRef.current.scrollTo(slideHeight);
+        return;
+      }
+
+      // Użytkownik przewinął na górę do klonu ostatniego slajdu
+      if (scrollOffset <= 0) {
+        isScrollingProgrammatically.current = true;
+        listRef.current.scrollTo(slideHeight * totalSlides);
+        return;
+      }
+    }
+  };
 
   return (
     <>
@@ -101,11 +156,13 @@ export default function Home() {
                 ref={listRef}
                 height={appHeight}
                 width={windowWidth}
-                itemCount={columns[key]?.length || 0}
+                itemCount={loopedSlides.length}
                 itemSize={appHeight}
                 onItemsRendered={onItemsRendered}
-                itemData={{ columnSlides: columns[key], activeSlideIndex }}
-                initialScrollOffset={key === activeColumnIndex ? activeSlideIndex * appHeight : 0}
+                itemData={{ columnSlides: loopedSlides, activeSlideIndex: activeSlideIndex + 1, initialScrollOffset: appHeight, listRef }}
+                initialScrollOffset={key === activeColumnIndex ? appHeight : 0}
+                className="scroll-snap-y-mandatory"
+                onScroll={({ scrollOffset }) => handleScroll(scrollOffset)}
               >
                 {Row}
               </List>
