@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { motion, useAnimate } from 'framer-motion';
-import { FixedSizeList } from 'react-window';
-import InfiniteLoader from 'react-window-infinite-loader';
 import {
   QueryClient,
   QueryClientProvider,
@@ -19,22 +17,6 @@ import { shallow } from 'zustand/shallow';
 
 // --- React Query Client ---
 const queryClient = new QueryClient();
-
-// --- Utility Functions ---
-function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-
-  const debounced = (...args: Parameters<F>) => {
-    if (timeout !== null) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
-    timeout = setTimeout(() => func(...args), waitFor);
-  };
-
-  return debounced as (...args: Parameters<F>) => void;
-}
-
 
 // --- Custom Hooks ---
 const useWindowSize = () => {
@@ -88,31 +70,37 @@ const Column = memo(({ columnIndex, width, height }: { columnIndex: number, widt
   );
 
   const slides = useMemo(() => data?.pages.flatMap((page) => page.slides) ?? [], [data]);
-  const itemCount = hasNextPage ? slides.length + 1 : slides.length;
-  const isItemLoaded = (index: number) => !hasNextPage || index < slides.length;
 
-  const debouncedSetIndex = useMemo(
-    () =>
-      debounce((newSlideIndex: number, currentSlide: SlideType) => {
-        if (currentSlide && columnIndex === useStore.getState().activeColumnIndex) {
-          setActiveSlide(currentSlide, columnIndex, newSlideIndex);
-        }
-      }, 100), // 100ms debounce delay
-    [columnIndex, setActiveSlide]
-  );
-
-  const handleScroll = useCallback(({ scrollOffset }: { scrollOffset: number }) => {
-    const newSlideIndex = Math.round(scrollOffset / height);
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop } = event.currentTarget;
+    const newSlideIndex = Math.round(scrollTop / height);
     const currentSlide = slides[newSlideIndex];
-    debouncedSetIndex(newSlideIndex, currentSlide);
-  }, [height, slides, debouncedSetIndex]);
 
-  // No overload matches this call fix
+    if (currentSlide && newSlideIndex !== activeSlideIndex) {
+      setActiveSlide(currentSlide, columnIndex, newSlideIndex);
+    }
+  }, [height, slides, activeSlideIndex, columnIndex, setActiveSlide]);
+
   const loadMoreItems = useCallback(() => {
     if (hasNextPage) {
       fetchNextPage();
     }
   }, [fetchNextPage, hasNextPage]);
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastSlideRef = useCallback((node: HTMLDivElement) => {
+    if (isLoading) return;
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        loadMoreItems();
+      }
+    });
+
+    if (node) observerRef.current.observe(node);
+  }, [isLoading, hasNextPage, loadMoreItems]);
+
 
   if (isLoading) {
     return <div style={{ width, height, flexShrink: 0 }} className="flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -122,34 +110,30 @@ const Column = memo(({ columnIndex, width, height }: { columnIndex: number, widt
   }
 
   return (
-    <div style={{ width, height, flexShrink: 0 }}>
-      <InfiniteLoader
-        isItemLoaded={isItemLoaded}
-        itemCount={itemCount}
-        loadMoreItems={loadMoreItems}
-      >
-        {({ onItemsRendered, ref }) => (
-          <FixedSizeList
-            height={height}
-            width={width}
-            itemCount={itemCount}
-            itemSize={height}
-            onItemsRendered={onItemsRendered}
-            ref={ref}
-            onScroll={handleScroll}
+    <div
+      style={{ width, height, flexShrink: 0 }}
+      className="scroll-snap-y-mandatory overflow-y-auto"
+      onScroll={handleScroll}
+    >
+      {slides.map((slide, index) => {
+        const isActive = index === activeSlideIndex && columnIndex === activeColumnIndex;
+        const isLastSlide = index === slides.length - 1;
+        return (
+          <div
+            key={slide.id}
+            ref={isLastSlide ? lastSlideRef : null}
+            style={{ height, width }}
+            className="scroll-snap-align-start"
           >
-            {({ index, style }) => {
-              const slide = slides[index];
-              const isActive = index === activeSlideIndex && columnIndex === activeColumnIndex;
-              return (
-                <div style={style} key={slide ? slide.id : `loader-${index}`}>
-                  {slide ? <Slide slide={slide} isActive={isActive} /> : <Skeleton className="w-full h-full" />}
-                </div>
-              );
-            }}
-          </FixedSizeList>
-        )}
-      </InfiniteLoader>
+            <Slide slide={slide} isActive={isActive} />
+          </div>
+        );
+      })}
+      {hasNextPage && (
+        <div style={{ height, width }} className="flex items-center justify-center">
+          <Skeleton className="w-full h-full" />
+        </div>
+      )}
     </div>
   );
 });
