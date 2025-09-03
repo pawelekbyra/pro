@@ -8,14 +8,18 @@ interface AppState {
   activeModal: ModalType;
   isLoading: boolean;
   error: Error | null;
-  activeVideo: Slide | null; // Renamed from activeSlide
-  isPreloading: boolean; // Nowe: śledzi, czy preloader jest aktywny
-  preloadedSlide: Slide | null; // Nowe: przechowuje wstępnie załadowany slajd
+  activeVideo: Slide | null;
+  isPreloading: boolean;
+  preloadedSlide: Slide | null;
+  isFirstVideoReady: boolean;
+  isMuted: boolean;
 
   // Actions
   setActiveVideo: (video: Slide | null) => void;
   setActiveModal: (modal: ModalType) => void;
-  setPreloadedSlide: (slide: Slide | null) => void; // Nowe: akcja do ustawiania preładowanego slajdu
+  setPreloadedSlide: (slide: Slide | null) => void;
+  setIsFirstVideoReady: (isReady: boolean) => void;
+  setIsMuted: (isMuted: boolean) => void;
 
   // Computed properties (selectors)
   isAnyModalOpen: () => boolean;
@@ -27,8 +31,10 @@ export const useStore = create<AppState>((set, get) => ({
   isLoading: true,
   error: null,
   activeVideo: null,
-  isPreloading: true, // Zaczynamy w trybie preloadingu
+  isPreloading: true,
   preloadedSlide: null,
+  isFirstVideoReady: false,
+  isMuted: true,
 
   // --- ACTIONS ---
   setActiveVideo: (video) => set({ activeVideo: video }),
@@ -36,6 +42,10 @@ export const useStore = create<AppState>((set, get) => ({
   setActiveModal: (modal) => set({ activeModal: modal }),
 
   setPreloadedSlide: (slide) => set({ preloadedSlide: slide, isPreloading: false }),
+
+  setIsFirstVideoReady: (isReady) => set({ isFirstVideoReady: isReady }),
+
+  setIsMuted: (isMuted) => set({ isMuted: isMuted }),
 
 
   // --- COMPUTED / SELECTORS ---
