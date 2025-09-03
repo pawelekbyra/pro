@@ -5,45 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import Image from 'next/image';
 import { useStore } from '@/store/useStore';
-import { shallow } from 'zustand/shallow';
-import { useQuery } from '@tanstack/react-query';
-
-const fetchSlides = async () => {
-    const res = await fetch(`/api/slides?cursor=&limit=1`);
-    if (!res.ok) {
-        throw new Error('Failed to fetch slides');
-    }
-    const data = await res.json();
-    return data;
-};
 
 const Preloader: React.FC = () => {
   const { t, selectInitialLang } = useTranslation();
-  const { setPreloadedSlide, setIsMuted } = useStore(
-    (state) => ({
-      setPreloadedSlide: state.setPreloadedSlide,
-      setIsMuted: state.setIsMuted,
-    }),
-    shallow
-  );
+  // We only need setIsMuted from the store now.
+  const setIsMuted = useStore((state) => state.setIsMuted);
 
   const [isHiding, setIsHiding] = useState(false);
   const [showLangButtons, setShowLangButtons] = useState(false);
-
-  // Fetch the first slide's data in the background.
-  // This query will only run once and the data will be cached.
-  const { data, isFetched } = useQuery({
-      queryKey: ['slides', 'preload'],
-      queryFn: fetchSlides,
-      staleTime: Infinity,
-  });
-
-  // Once the data is fetched, set it in our global store.
-  useEffect(() => {
-    if (isFetched && data?.slides.length > 0) {
-      setPreloadedSlide(data.slides[0]);
-    }
-  }, [data, isFetched, setPreloadedSlide]);
 
   // Show language buttons after a brief moment.
   useEffect(() => {
