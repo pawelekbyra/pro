@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/context/LanguageContext';
 import Image from 'next/image';
 import { useStore } from '@/store/useStore';
+import { shallow } from 'zustand/shallow';
 import { useQuery } from '@tanstack/react-query';
 import { VideoItem } from 'react-vertical-feed';
 import { Slide as SlideType } from '@/lib/types';
