@@ -11,46 +11,69 @@ const GlobalVideoPlayer: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
-  const { activeVideo, isPlaying, isMuted, togglePlay, setActiveVideo } = useStore(
+  const {
+    activeVideo,
+    isPlaying,
+    isMuted,
+    togglePlay,
+    setVideoElement,
+    preloadedVideoUrl
+  } = useStore(
     (state) => ({
       activeVideo: state.activeVideo,
       isPlaying: state.isPlaying,
       isMuted: state.isMuted,
       togglePlay: state.togglePlay,
-      setActiveVideo: state.setActiveVideo,
+      setVideoElement: state.setVideoElement,
+      preloadedVideoUrl: state.preloadedVideoUrl,
     }),
     shallow
   );
 
-  // Initialize HLS.js
+  // Initialize HLS.js and set the video element in the store
   useEffect(() => {
-    if (typeof window !== 'undefined' && videoRef.current) {
-      const video = videoRef.current;
+    if (videoRef.current) {
+      setVideoElement(videoRef);
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.attachMedia(video);
+        hls.attachMedia(videoRef.current);
         hlsRef.current = hls;
       }
     }
-    return () => hlsRef.current?.destroy();
-  }, []);
+    return () => {
+      hlsRef.current?.destroy();
+    }
+  }, [setVideoElement]);
 
-  // Effect to handle changing the video source
+  // Effect for preloading the initial video
+  useEffect(() => {
+    const hls = hlsRef.current;
+    if (hls && preloadedVideoUrl) {
+      hls.loadSource(preloadedVideoUrl);
+    } else if (videoRef.current && preloadedVideoUrl) {
+      videoRef.current.src = preloadedVideoUrl;
+    }
+  }, [preloadedVideoUrl]);
+
+  // Effect to handle changing the active video source (after preloading)
   useEffect(() => {
     const hls = hlsRef.current;
 
-    // Only proceed if the active slide is a video and has data
     if (activeVideo && activeVideo.type === 'video' && activeVideo.data) {
       const videoUrl = activeVideo.data.hlsUrl;
+
+      // Don't interrupt the preloaded video if it's the same as the active one
+      if (videoUrl && videoUrl === preloadedVideoUrl && videoRef.current?.src === videoUrl) {
+        return;
+      }
 
       if (hls && videoUrl) {
         hls.loadSource(videoUrl);
       } else if (videoRef.current && videoUrl) {
-        // For native HLS support (Safari)
         videoRef.current.src = videoUrl;
       }
     }
-  }, [activeVideo]);
+  }, [activeVideo, preloadedVideoUrl]);
 
   // Effect to handle play/pause
   useEffect(() => {
@@ -72,21 +95,35 @@ const GlobalVideoPlayer: React.FC = () => {
     }
   }, [isMuted]);
 
-  // Effect to handle video ending
+  // Effect to handle video ending, time updates, and duration changes
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const handleEnded = () => {
-      // For now, just pause. In the future, could advance to next video.
-      if (isPlaying) {
-        togglePlay();
+      if (useStore.getState().isPlaying) {
+        useStore.getState().togglePlay();
       }
     };
 
+    const handleTimeUpdate = () => {
+      useStore.getState().setCurrentTime(video.currentTime);
+    };
+
+    const handleDurationChange = () => {
+      useStore.getState().setDuration(video.duration);
+    };
+
     video.addEventListener('ended', handleEnded);
-    return () => video.removeEventListener('ended', handleEnded);
-  }, [isPlaying, togglePlay]);
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('durationchange', handleDurationChange);
+
+    return () => {
+      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('durationchange', handleDurationChange);
+    };
+  }, []); // Empty dependency array to run only once
 
   return (
     <div className="absolute inset-0 z-0">
@@ -94,9 +131,8 @@ const GlobalVideoPlayer: React.FC = () => {
         ref={videoRef}
         className="w-full h-full object-cover"
         playsInline
-        loop // Loop the video for now
+        loop
       />
-      {/* Clickable overlay for play/pause */}
       <div
         className="absolute inset-0 flex items-center justify-center"
         onClick={togglePlay}

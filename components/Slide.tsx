@@ -11,6 +11,7 @@ import {
 } from '@/lib/types';
 import { useStore, ModalType } from '@/store/useStore';
 import { MessageCircle } from 'lucide-react';
+import VideoControls from './VideoControls';
 
 // --- Prop Types for Sub-components ---
 interface HtmlContentProps {
@@ -114,6 +115,7 @@ const Slide = memo<SlideProps>(({ slide, isActive }) => {
     <div className={`relative w-full h-full transition-colors ${isVideoPlaying ? 'bg-transparent' : 'bg-black'}`}>
       {renderContent()}
       <SlideUI slide={slide} />
+      {isActive && slide.type === 'video' && <VideoControls />}
       {isActive && <div className="absolute top-2 right-2 bg-green-500/80 text-white text-xs px-2 py-1 rounded-full z-20">ACTIVE</div>}
     </div>
   );
