@@ -19,13 +19,21 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const { activeVideo, setActiveVideo, isPreloading, preloadedSlide, setPreloadedSlide } = useStore(
+  const {
+    activeVideo,
+    setActiveVideo,
+    isPreloading,
+    preloadedSlide,
+    isMuted,
+    setIsFirstVideoReady
+  } = useStore(
     (state) => ({
       activeVideo: state.activeVideo,
       setActiveVideo: state.setActiveVideo,
       isPreloading: state.isPreloading,
       preloadedSlide: state.preloadedSlide,
-      setPreloadedSlide: state.setPreloadedSlide,
+      isMuted: state.isMuted,
+      setIsFirstVideoReady: state.setIsFirstVideoReady,
     }),
     shallow
   );
@@ -53,13 +61,6 @@ const MainFeed = () => {
       return allSlides;
   }, [data, preloadedSlide]);
 
-  useEffect(() => {
-    // Logika do ustawiania pierwszego slajdu jako aktywnego
-    if (slides.length > 0 && !activeVideo) {
-      setActiveVideo(slides[0]);
-    }
-  }, [slides, activeVideo, setActiveVideo]);
-
   const videoItems: VideoItem[] = useMemo(() => {
     return slides
       .filter(
@@ -71,11 +72,11 @@ const MainFeed = () => {
         src: slide.data.hlsUrl,
         metadata: { slide },
         autoPlay: true,
-      muted: true,
+      muted: isMuted,
       playsInline: true,
       controls: false,
     }));
-  }, [slides]);
+  }, [slides, isMuted]);
 
   const handleEndReached = () => {
     if (hasNextPage) {
@@ -89,6 +90,42 @@ const MainFeed = () => {
       setActiveVideo(slide);
     }
   };
+
+  // NOWA POPRAWKA: Automatycznie wywołaj handleItemVisible dla pierwszego elementu
+  useEffect(() => {
+    if (!activeVideo && videoItems.length > 0) {
+      handleItemVisible(videoItems[0]);
+    }
+  }, [videoItems, activeVideo, handleItemVisible]);
+
+  useEffect(() => {
+    if (videoItems.length > 0) {
+      // WORKAROUND: This is a brittle workaround to detect when the first video is ready.
+      // The `react-vertical-feed` library does not provide a `ref` or callback to access
+      // the underlying video elements directly. Therefore, we have to query the DOM.
+      // This might break if the library changes its internal DOM structure in the future.
+      // We are assuming that each video item container has a `data-id` attribute with the item's ID.
+      const videoElement = document.querySelector(`[data-id="${videoItems[0].id}"] video`) as HTMLVideoElement | null;
+
+      const handleCanPlay = () => {
+        setIsFirstVideoReady(true);
+      };
+
+      if (videoElement) {
+        if (videoElement.readyState >= 3) { // HAVE_FUTURE_DATA or more
+          handleCanPlay();
+        } else {
+          videoElement.addEventListener('canplay', handleCanPlay);
+        }
+      }
+
+      return () => {
+        if (videoElement) {
+          videoElement.removeEventListener('canplay', handleCanPlay);
+        }
+      };
+    }
+  }, [videoItems, setIsFirstVideoReady]);
 
   const renderSlideOverlay = (item: VideoItem) => {
     const slide = item.metadata?.slide as SlideType | undefined;
