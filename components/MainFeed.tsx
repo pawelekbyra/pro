@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { VerticalFeed, VideoItem } from 'react-vertical-feed';
 import { useStore } from '@/store/useStore';
@@ -25,7 +25,6 @@ const MainFeed = () => {
     isPreloading,
     preloadedSlide,
     isMuted,
-    setIsFirstVideoReady
   } = useStore(
     (state) => ({
       activeVideo: state.activeVideo,
@@ -33,7 +32,6 @@ const MainFeed = () => {
       isPreloading: state.isPreloading,
       preloadedSlide: state.preloadedSlide,
       isMuted: state.isMuted,
-      setIsFirstVideoReady: state.setIsFirstVideoReady,
     }),
     shallow
   );
@@ -47,12 +45,11 @@ const MainFeed = () => {
   } = useInfiniteQuery({
     queryKey: ['slides'],
     queryFn: fetchSlides,
-    initialPageParam: preloadedSlide ? preloadedSlide.createdAt.toString() : '', // Użyj kursora z preładowanego slajdu
+    initialPageParam: preloadedSlide ? preloadedSlide.id : '',
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    enabled: !isPreloading, // Włącz query dopiero po zakończeniu preloadingu
+    enabled: !isPreloading,
   });
 
-  // Dodaj preładowany slajd na początek listy
   const slides = useMemo(() => {
       const allSlides = data?.pages.flatMap(page => page.slides) ?? [];
       if (preloadedSlide && !allSlides.some(s => s.id === preloadedSlide.id)) {
@@ -71,11 +68,11 @@ const MainFeed = () => {
         id: slide.id,
         src: slide.data.hlsUrl,
         metadata: { slide },
-        autoPlay: true,
-      muted: isMuted,
-      playsInline: true,
-      controls: false,
-    }));
+        // autoPlay is unreliable, we will handle playback manually.
+        muted: isMuted,
+        playsInline: true,
+        controls: false,
+      }));
   }, [slides, isMuted]);
 
   const handleEndReached = () => {
@@ -84,29 +81,46 @@ const MainFeed = () => {
     }
   };
 
-  const handleItemVisible = (item: VideoItem) => {
+  const handleItemVisible = useCallback((item: VideoItem) => {
     const slide = item.metadata?.slide as SlideType | undefined;
     if (slide && slide.id !== activeVideo?.id) {
       setActiveVideo(slide);
     }
-  };
+  }, [activeVideo, setActiveVideo]);
 
-  // NOWA POPRAWKA: Automatycznie wywołaj handleItemVisible dla pierwszego elementu
+  // Effect to set the first item as active as soon as it's available.
   useEffect(() => {
     if (!activeVideo && videoItems.length > 0) {
       handleItemVisible(videoItems[0]);
     }
   }, [videoItems, activeVideo, handleItemVisible]);
 
+  // Effect to MANUALLY play the video when it becomes active.
+  // This is the core fix for the Android playback issue.
+  useEffect(() => {
+    if (activeVideo) {
+      // Find the video element in the DOM.
+      // This relies on react-vertical-feed rendering a `data-id` attribute.
+      const videoElement = document.querySelector(`[data-id="${activeVideo.id}"] video`) as HTMLVideoElement | null;
+
+      if (videoElement) {
+        // We have a gesture from the user (language select), so we can try to play with sound.
+        videoElement.play().catch(error => {
+          console.error("Video play failed:", error);
+          // Optional: handle the error, e.g., by showing a play button.
+        });
+      }
+    }
+  }, [activeVideo]);
+
   const renderSlideOverlay = (item: VideoItem) => {
     const slide = item.metadata?.slide as SlideType | undefined;
     if (!slide) return null;
-
     const isActive = slide.id === activeVideo?.id;
     return <Slide slide={slide} isActive={isActive} />;
   };
 
-  if (isPreloading || isLoading) {
+  if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
   }
 
