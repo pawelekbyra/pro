@@ -1,41 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, useAnimate } from 'framer-motion';
 import { FixedSizeList } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import { useStore } from '@/store/useStore';
 import type { Slide as SlideType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import Slide from '@/components/Slide';
+import { GlobalVideoPlayer } from '@/components/GlobalVideoPlayer';
+import { shallow } from 'zustand/shallow';
 
-// --- Mock Data Generation ---
-// In a real app, this would be replaced by API calls.
-const generateMockSlides = (columnIndex: number, start: number, count: number): SlideType[] => {
-  return Array.from({ length: count }, (_, i) => {
-    const slideIndex = start + i;
-    return {
-      id: `${columnIndex}-${slideIndex}`,
-      x: columnIndex,
-      y: slideIndex,
-      type: 'video',
-      initialLikes: Math.floor(Math.random() * 1000),
-      initialComments: Math.floor(Math.random() * 200),
-      isLiked: Math.random() > 0.5,
-      avatar: `/avatars/placeholder.png`,
-      userId: `user_${columnIndex}`,
-      username: `User ${columnIndex}`,
-      access: 'public',
-      createdAt: Date.now(),
-      data: {
-        hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-        mp4Url: '',
-        poster: `https://picsum.photos/seed/${columnIndex}-${slideIndex}/400/800`,
-        title: `Slide ${slideIndex}`,
-        description: `This is a mock slide at column ${columnIndex}, index ${slideIndex}.`,
-      },
-    };
-  });
-};
+// --- React Query Client ---
+const queryClient = new QueryClient();
 
 // --- Custom Hooks ---
 const useWindowSize = () => {
@@ -49,122 +32,159 @@ const useWindowSize = () => {
   return size;
 };
 
-import Slide from '@/components/Slide';
+// --- API Fetching Functions ---
+const fetchColumns = async (): Promise<number[]> => {
+  const res = await fetch('/api/slides/grid/columns');
+  if (!res.ok) throw new Error('Failed to fetch columns');
+  return res.json();
+};
 
+const fetchSlidesForColumn = async ({ pageParam = 0, queryKey }: any) => {
+  const [, columnIndex] = queryKey;
+  const res = await fetch(`/api/slides/grid/${columnIndex}?cursor=${pageParam}`);
+  if (!res.ok) throw new Error(`Failed to fetch slides for column ${columnIndex}`);
+  const data = await res.json();
+  return data; // Expected to be { slides: SlideType[], nextCursor: number | null }
+};
 
-// --- Main Component ---
-export default function Home() {
+// --- Column Component ---
+const Column = memo(({ columnIndex, width, height }: { columnIndex: number, width: number, height: number }) => {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: ['slides', columnIndex],
+    queryFn: fetchSlidesForColumn,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+
+  const setActiveSlide = useStore((state) => state.setActiveSlide);
+  const { activeColumnIndex, activeSlideIndex } = useStore(
+    (state) => ({
+      activeColumnIndex: state.activeColumnIndex,
+      activeSlideIndex: state.activeSlideIndex,
+    }),
+    shallow
+  );
+
+  const slides = data?.pages.flatMap((page) => page.slides) ?? [];
+  const itemCount = hasNextPage ? slides.length + 1 : slides.length;
+  const isItemLoaded = (index: number) => !hasNextPage || index < slides.length;
+
+  const handleScroll = useCallback(({ scrollOffset }: { scrollOffset: number }) => {
+    const newSlideIndex = Math.round(scrollOffset / height);
+    const currentSlide = slides[newSlideIndex];
+    if (currentSlide && newSlideIndex !== activeSlideIndex && columnIndex === activeColumnIndex) {
+      setActiveSlide(currentSlide, columnIndex, newSlideIndex);
+    }
+  }, [height, slides, activeSlideIndex, columnIndex, activeColumnIndex, setActiveSlide]);
+
+  if (isLoading) {
+    return <div style={{ width, height, flexShrink: 0 }} className="flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
+  }
+  if (isError) {
+    return <div style={{ width, height, flexShrink: 0 }} className="flex items-center justify-center text-white">Error loading slides.</div>;
+  }
+
+  return (
+    <div style={{ width, height, flexShrink: 0 }}>
+      <InfiniteLoader
+        isItemLoaded={isItemLoaded}
+        itemCount={itemCount}
+        loadMoreItems={fetchNextPage}
+      >
+        {({ onItemsRendered, ref }) => (
+          <FixedSizeList
+            height={height}
+            width={width}
+            itemCount={itemCount}
+            itemSize={height}
+            onItemsRendered={onItemsRendered}
+            ref={ref}
+            onScroll={handleScroll}
+          >
+            {({ index, style }) => {
+              const slide = slides[index];
+              const isActive = index === activeSlideIndex && columnIndex === activeColumnIndex;
+              return (
+                <div style={style} key={slide ? slide.id : `loader-${index}`}>
+                  {slide ? <Slide slide={slide} isActive={isActive} /> : <Skeleton className="w-full h-full" />}
+                </div>
+              );
+            }}
+          </FixedSizeList>
+        )}
+      </InfiniteLoader>
+    </div>
+  );
+});
+Column.displayName = 'Column';
+
+// --- Main Grid Component ---
+function GridView() {
   const { width, height } = useWindowSize();
   const [scope, animate] = useAnimate();
-  const {
-    columns,
-    activeColumnIndex,
-    activeSlideIndex,
-    setColumns,
-    appendSlides,
-    setActiveIndices,
-  } = useStore();
 
-  const infiniteLoaderRefs = useRef<(InfiniteLoader | null)[]>([]);
+  const { columns, activeColumnIndex, setColumns, setActiveSlide } = useStore(
+    (state) => ({
+      columns: state.columns,
+      activeColumnIndex: state.activeColumnIndex,
+      setColumns: state.setColumns,
+      setActiveSlide: state.setActiveSlide,
+    }),
+    shallow
+  );
 
-  // 1. Initial data load (mock)
-  useEffect(() => {
-    const initialColumns = Array.from({ length: 5 }, (_, i) => generateMockSlides(i, 0, 10));
-    setColumns(initialColumns);
-  }, [setColumns]);
+  const { isLoading: isLoadingColumns, isError: isErrorColumns } = useQuery({
+    queryKey: ['columns'],
+    queryFn: fetchColumns,
+    onSuccess: (data) => {
+      setColumns(data);
+      // Set initial active slide
+      if (data.length > 0) {
+        // We can't set active slide data here as we haven't fetched it yet.
+        // We'll set a default active index, and the Column component will fetch the data.
+        setActiveSlide(null, 0, 0);
+      }
+    },
+  });
 
-  // 2. Horizontal navigation (Framer Motion)
   const onDragEnd = async (event: any, info: any) => {
     const velocity = info.velocity.x;
     let newColumnIndex = activeColumnIndex;
 
-    if (Math.abs(velocity) > 300) { // Threshold for a swipe
-      if (velocity < 0 && activeColumnIndex < columns.length - 1) {
-        newColumnIndex++;
-      } else if (velocity > 0 && activeColumnIndex > 0) {
-        newColumnIndex--;
-      }
-    } else { // Snap based on position
+    if (Math.abs(velocity) > 300) {
+      newColumnIndex = velocity < 0 ? Math.min(activeColumnIndex + 1, columns.length - 1) : Math.max(activeColumnIndex - 1, 0);
+    } else {
       const offset = info.offset.x;
       if (Math.abs(offset) > width / 2) {
         newColumnIndex = offset < 0 ? Math.min(activeColumnIndex + 1, columns.length - 1) : Math.max(activeColumnIndex - 1, 0);
       }
     }
 
-    await animate(scope.current, { x: -newColumnIndex * width }, { type: 'spring', stiffness: 300, damping: 30 });
-    setActiveIndices(newColumnIndex, activeSlideIndex);
+    if (newColumnIndex !== activeColumnIndex) {
+        await animate(scope.current, { x: -newColumnIndex * width }, { type: 'spring', stiffness: 300, damping: 30 });
+        setActiveSlide(null, newColumnIndex, 0); // Reset slide index on column change, slide data will be fetched by Column
+    } else {
+        // Snap back to the current column if not dragged far enough
+        await animate(scope.current, { x: -activeColumnIndex * width }, { type: 'spring', stiffness: 300, damping: 30 });
+    }
   };
 
-  // 3. Vertical navigation (React Window)
-  const Column = React.memo(({ columnIndex }: { columnIndex: number }) => {
-    const slideColumn = columns[columnIndex];
-
-    // Hooks must be called unconditionally at the top level.
-    const loadMoreItems = useCallback(() => {
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          const { columns, appendSlides } = useStore.getState();
-          const currentColumnLength = columns[columnIndex]?.length || 0;
-          const newSlides = generateMockSlides(columnIndex, currentColumnLength, 10);
-          appendSlides(columnIndex, newSlides);
-          resolve();
-        }, 500); // Simulate network latency
-      });
-    }, [columnIndex]);
-
-    if (!slideColumn) return null; // Early return is now after the hook call.
-
-    const isItemLoaded = (index: number) => !!slideColumn[index];
-    const itemCount = slideColumn.length + 1; // +1 for loader
-
-    return (
-      <div style={{ width, height, flexShrink: 0 }}>
-        <InfiniteLoader
-          ref={(ref) => {
-            infiniteLoaderRefs.current[columnIndex] = ref;
-          }}
-          isItemLoaded={isItemLoaded}
-          itemCount={itemCount}
-          loadMoreItems={loadMoreItems}
-        >
-          {({ onItemsRendered, ref }) => (
-            <FixedSizeList
-              height={height}
-              width={width}
-              itemCount={itemCount}
-              itemSize={height}
-              onItemsRendered={onItemsRendered}
-              ref={ref}
-              onScroll={({ scrollOffset }) => {
-                const newSlideIndex = Math.round(scrollOffset / height);
-                if (newSlideIndex !== activeSlideIndex && columnIndex === activeColumnIndex) {
-                  setActiveIndices(columnIndex, newSlideIndex);
-                }
-              }}
-            >
-              {({ index, style }) => {
-                const slide = slideColumn[index];
-                const isActive = index === activeSlideIndex && columnIndex === activeColumnIndex;
-                return (
-                  <div style={style}>
-                    {slide ? <Slide slide={slide} isActive={isActive} /> : <Skeleton className="w-full h-full" />}
-                  </div>
-                );
-              }}
-            </FixedSizeList>
-          )}
-        </InfiniteLoader>
-      </div>
-    );
-  });
-  Column.displayName = 'Column';
-
-  if (!width || !height || columns.length === 0) {
+  if (isLoadingColumns || !width || !height) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
+  }
+  if (isErrorColumns) {
+    return <div className="w-screen h-screen bg-black flex items-center justify-center text-white">Error loading configuration.</div>;
   }
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black">
+      <GlobalVideoPlayer />
       <motion.div
         ref={scope}
         className="flex h-full"
@@ -173,10 +193,19 @@ export default function Home() {
         onDragEnd={onDragEnd}
         style={{ x: -activeColumnIndex * width }}
       >
-        {columns.map((_, index) => (
-          <Column key={index} columnIndex={index} />
+        {columns.map((colIndex) => (
+          <Column key={colIndex} columnIndex={colIndex} width={width} height={height} />
         ))}
       </motion.div>
     </div>
+  );
+}
+
+// --- Main Page Export ---
+export default function Home() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GridView />
+    </QueryClientProvider>
   );
 }
