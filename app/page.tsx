@@ -42,8 +42,6 @@ export default function Home() {
   const {
     state: { columns, activeColumnIndex, activeSlideId, error, activeModal, isNavigating },
     isAnyModalOpen,
-    columnKeys,
-    isLoading,
     setActiveModal,
     activeSlide,
     handleNavigation,
@@ -123,6 +121,7 @@ export default function Home() {
               <List
                 ref={listRef}
                 height={appHeight}
+                width="100%"
                 itemCount={itemCount}
                 itemSize={appHeight}
                 onItemsRendered={onVerticalScroll}

@@ -16,7 +16,7 @@ import PwaDesktopModal from './PwaDesktopModal';
 
 const TopBar = () => {
   const { user } = useUser();
-  const { openAccountPanel } = useVideoGrid();
+  const { setActiveModal } = useVideoGrid();
   const { t } = useTranslation();
   const { addToast } = useToast();
   const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
@@ -91,7 +91,7 @@ const TopBar = () => {
           // --- WIDOK DLA ZALOGOWANYCH UŻYTKOWNIKÓW ---
           <>
             <div className="flex justify-start">
-              <Button variant="ghost" size="icon" onClick={openAccountPanel} aria-label={t('accountMenuButton')}>
+              <Button variant="ghost" size="icon" onClick={() => setActiveModal('account')} aria-label={t('accountMenuButton')}>
                 {user.avatar ? (
                   <Image
                     src={user.avatar}
