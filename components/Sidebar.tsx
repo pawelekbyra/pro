@@ -13,9 +13,9 @@ interface SidebarProps {
   avatar: string;
   initialLikes: number;
   isLiked: boolean;
-  slideId: string;
+  slideId: string; // Keep for comments modal
   commentsCount: number;
-  x: number;
+  x: number; // Keep for now, might be used for other things
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       addToast(t('likeAlert') || 'Log in to like.', 'error');
       return;
     }
-    await toggleLike(slideId, x);
+    await toggleLike();
     addToast(isLiked ? (t('unlikedToast') || 'Unliked') : (t('likedToast') || 'Liked!'), 'success');
   };
 

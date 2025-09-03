@@ -2,9 +2,8 @@
 "use client";
 
 import React from 'react';
-import { Slide, VideoSlide, HtmlSlide } from '@/lib/types';
+import { Slide, HtmlSlide } from '@/lib/types';
 import HtmlContent from './HtmlContent';
-import VideoPlayer from './VideoPlayer';
 import { Skeleton } from './ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,9 +19,9 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ slide, isActive }) => {
     // This function will only be called when slide.data is available.
     switch (slide.type) {
       case 'video':
-        // VideoPlayer is now a UI-only component. The actual video playback
-        // is managed by the GlobalVideoPlayer, driven by the context.
-        return <VideoPlayer slide={slide as VideoSlide} isActive={isActive} />;
+        // The GlobalVideoPlayer handles video playback.
+        // This component only needs to render other slide types.
+        return null;
       case 'html':
         const htmlSlide = slide as HtmlSlide;
         return (

@@ -1,9 +1,8 @@
-import { mockGrid } from './mock-data';
 import type { Grid, Slide } from './types';
 import type { User, Comment } from './db.interfaces';
 
 // In-memory store for mock data
-let slides: Grid = JSON.parse(JSON.stringify(mockGrid)); // Deep copy to avoid modifying the original
+let slides: Grid = {};
 let users: { [id: string]: User } = {
   "user_admin_01": {
     id: "user_admin_01",
