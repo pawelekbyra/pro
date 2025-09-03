@@ -19,10 +19,13 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const { activeVideo, setActiveVideo } = useStore(
+  const { activeVideo, setActiveVideo, isPreloading, preloadedSlide, setPreloadedSlide } = useStore(
     (state) => ({
       activeVideo: state.activeVideo,
       setActiveVideo: state.setActiveVideo,
+      isPreloading: state.isPreloading,
+      preloadedSlide: state.preloadedSlide,
+      setPreloadedSlide: state.setPreloadedSlide,
     }),
     shallow
   );
@@ -36,11 +39,26 @@ const MainFeed = () => {
   } = useInfiniteQuery({
     queryKey: ['slides'],
     queryFn: fetchSlides,
-    initialPageParam: '',
+    initialPageParam: preloadedSlide ? preloadedSlide.createdAt.toString() : '', // Użyj kursora z preładowanego slajdu
     getNextPageParam: (lastPage) => lastPage.nextCursor,
+    enabled: !isPreloading, // Włącz query dopiero po zakończeniu preloadingu
   });
 
-  const slides = useMemo(() => data?.pages.flatMap(page => page.slides) ?? [], [data]);
+  // Dodaj preładowany slajd na początek listy
+  const slides = useMemo(() => {
+      const allSlides = data?.pages.flatMap(page => page.slides) ?? [];
+      if (preloadedSlide && !allSlides.some(s => s.id === preloadedSlide.id)) {
+          return [preloadedSlide, ...allSlides];
+      }
+      return allSlides;
+  }, [data, preloadedSlide]);
+
+  useEffect(() => {
+    // Logika do ustawiania pierwszego slajdu jako aktywnego
+    if (slides.length > 0 && !activeVideo) {
+      setActiveVideo(slides[0]);
+    }
+  }, [slides, activeVideo, setActiveVideo]);
 
   const videoItems: VideoItem[] = useMemo(() => {
     return slides
@@ -58,18 +76,6 @@ const MainFeed = () => {
       controls: false,
     }));
   }, [slides]);
-
-  // --- START OF NEW FIX ---
-  // Nowa logika do obsługi pierwszego slajdu
-  useEffect(() => {
-    if (slides.length > 0 && !activeVideo) {
-      const firstVideoItem = videoItems.find(item => item.id === slides[0].id);
-      if (firstVideoItem) {
-        setActiveVideo(firstVideoItem.metadata?.slide);
-      }
-    }
-  }, [slides, activeVideo, setActiveVideo, videoItems]);
-  // --- END OF NEW FIX ---
 
   const handleEndReached = () => {
     if (hasNextPage) {
@@ -92,7 +98,7 @@ const MainFeed = () => {
     return <Slide slide={slide} isActive={isActive} />;
   };
 
-  if (isLoading) {
+  if (isPreloading || isLoading) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
   }
 
