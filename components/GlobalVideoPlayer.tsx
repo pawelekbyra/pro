@@ -7,19 +7,11 @@ import { VideoSlide } from '@/lib/types';
 
 const GlobalVideoPlayer = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { state, setActiveVideoRef, setVideoProgress } = useVideoGrid();
+  const { state } = useVideoGrid();
   const { activeSlideData } = state;
 
   // For now, video is always muted. This can be expanded later.
   const isMuted = true;
-
-  // Set the active video ref in the context once the component mounts
-  useEffect(() => {
-    if (videoRef.current) {
-      setActiveVideoRef(videoRef);
-    }
-    return () => setActiveVideoRef(null);
-  }, [setActiveVideoRef]);
 
   const handleHlsFatalError = useCallback(() => {
     console.warn('HLS fatal error in GlobalVideoPlayer. Fallback not implemented.');
@@ -71,15 +63,6 @@ const GlobalVideoPlayer = () => {
     }
   }, [videoSlide, isMuted, videoSrc]);
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const { currentTime, duration } = videoRef.current;
-      if (!isNaN(duration)) {
-        setVideoProgress(currentTime, duration);
-      }
-    }
-  };
-
   return (
     <video
       ref={videoRef}
@@ -87,7 +70,6 @@ const GlobalVideoPlayer = () => {
       loop
       playsInline
       muted
-      onTimeUpdate={handleTimeUpdate}
       poster={videoSlide?.data?.poster}
       style={{ opacity: videoSlide ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
     />

@@ -20,7 +20,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({ onClose }) => {
   const { user: profile, checkUserStatus, logout } = useUser();
   const { t, setLanguage, lang } = useTranslation();
   const { addToast } = useToast();
-  const { setActiveSlide, state: videoGridState } = useVideoGrid();
+  const { state: videoGridState } = useVideoGrid();
   const [emailConsent, setEmailConsent] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
