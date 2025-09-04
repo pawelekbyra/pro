@@ -171,7 +171,7 @@
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=pawel',
                         'access': 'public',
-                        'initialLikes': 1500,
+                        'initialLikes': 567,
                         'isLiked': false,
                         'initialComments': 567
                     },
@@ -185,9 +185,37 @@
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=webdev',
                         'access': 'public',
-                        'initialLikes': 2200,
+                        'initialLikes': 1245,
                         'isLiked': false,
                         'initialComments': 1245
+                    },
+                    {
+                        'id': 'slide-003',
+                        'likeId': '3',
+                        'user': 'Tajemniczy Tester',
+                        'description': 'Ten slajd jest tajny! 🤫',
+                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/4678261-hd_1080_1920_25fps.mp4',
+                        'hlsUrl': null,
+                        'poster': '',
+                        'avatar': 'https://i.pravatar.cc/100?u=tester',
+                        'access': 'secret',
+                        'initialLikes': 2,
+                        'isLiked': false,
+                        'initialComments': 2
+                    },
+                    {
+                        'id': 'slide-004',
+                        'likeId': '4',
+                        'user': 'Artysta AI',
+                        'description': 'Generowane przez AI, renderowane przez przeglądarkę. #future',
+                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/AdobeStock_631182722-online-video-cutter.com_.mp4',
+                        'hlsUrl': null,
+                        'poster': '',
+                        'avatar': 'https://i.pravatar.cc/100?u=ai-artist',
+                        'access': 'public',
+                        'initialLikes': 890,
+                        'isLiked': false,
+                        'initialComments': 890
                     }
                 ]
             };
@@ -1164,14 +1192,24 @@
             // Modal visibility functions
             function openAccountModal() {
                 const modal = document.getElementById('accountModal');
-                modal.classList.add('visible');
+                if (!modal) return;
+                modal.classList.remove('hidden');
+                // We need a short delay to allow the display property to change before starting the transition
+                setTimeout(() => {
+                    modal.classList.add('visible');
+                }, 10);
                 document.body.style.overflow = 'hidden';
                 loadInitialProfileData(); // Fetch live data when opening
             }
 
             function closeAccountModal() {
                 const modal = document.getElementById('accountModal');
+                if (!modal) return;
                 modal.classList.remove('visible');
+                // Wait for the transition to finish before hiding the element completely
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 400); // Should match the transition duration in CSS
                 document.body.style.overflow = '';
             }
 
