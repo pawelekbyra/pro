@@ -5,40 +5,42 @@ import React from 'react';
 export type ModalType = 'account' | 'comments' | 'info' | null;
 
 interface AppState {
-  // Video player state
-  isMuted: boolean;
-  setIsMuted: (isMuted: boolean) => void;
-  preloadedVideoUrl: string | null;
-  setPreloadedVideoUrl: (url: string | null) => void;
-  videoElement: React.RefObject<HTMLVideoElement> | null;
-  setVideoElement: (ref: React.RefObject<HTMLVideoElement>) => void;
-  activeVideo: Slide | null;
-  setActiveVideo: (video: Slide | null) => void;
-  isPlaying: boolean;
-  togglePlay: () => void;
-
-  // Modal state
   activeModal: ModalType;
   setActiveModal: (modal: ModalType) => void;
   isAnyModalOpen: () => boolean;
+
+  // Video player state
+  isMuted: boolean;
+  isPlaying: boolean;
+  preloadedVideoUrl: string | null;
+  videoElement: React.RefObject<HTMLVideoElement> | null;
+  activeVideo: Slide | null;
+
+  // Video player actions
+  setIsMuted: (isMuted: boolean) => void;
+  togglePlay: () => void;
+  setPreloadedVideoUrl: (url: string | null) => void;
+  setVideoElement: (ref: React.RefObject<HTMLVideoElement>) => void;
+  setActiveVideo: (video: Slide | null) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
   // --- STATE ---
+  activeModal: null,
   isMuted: true,
+  isPlaying: false,
   preloadedVideoUrl: null,
   videoElement: null,
   activeVideo: null,
-  isPlaying: false,
-  activeModal: null,
+
 
   // --- ACTIONS ---
+  setActiveModal: (modal) => set({ activeModal: modal }),
   setIsMuted: (isMuted) => set({ isMuted }),
+  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
   setPreloadedVideoUrl: (url) => set({ preloadedVideoUrl: url }),
   setVideoElement: (ref) => set({ videoElement: ref }),
   setActiveVideo: (video) => set({ activeVideo: video }),
-  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
-  setActiveModal: (modal) => set({ activeModal: modal }),
 
   // --- COMPUTED / SELECTORS ---
   isAnyModalOpen: () => get().activeModal !== null,
