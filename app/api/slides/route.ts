@@ -20,17 +20,13 @@ export async function GET(request: NextRequest) {
     const slides = await db.getSlides({ limit, cursor, currentUserId });
 
     let nextCursor: string | null = null;
-    let slidesToSend = slides;
-
-    if (slides.length > limit) {
-      // If we got more slides than the limit, there's a next page.
-      const lastSlide = slides[limit - 1]; // The last slide of the *current* page
+    if (slides.length === limit) {
+      const lastSlide = slides[slides.length - 1];
       nextCursor = lastSlide.createdAt.toString();
-      slidesToSend = slides.slice(0, limit); // Send only the requested number of slides
     }
 
     return NextResponse.json({
-      slides: slidesToSend,
+      slides,
       nextCursor,
     });
   } catch (error) {

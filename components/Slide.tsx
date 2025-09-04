@@ -24,8 +24,6 @@ interface ImageContentProps {
 }
 interface SlideUIProps {
     slide: SlideUnionType;
-    isLastSlide?: boolean;
-    onScrollToTop?: () => void;
 }
 
 // --- Sub-components ---
@@ -56,7 +54,7 @@ const ImageContent = ({ slide }: ImageContentProps) => {
   );
 };
 
-const SlideUI = ({ slide, isLastSlide, onScrollToTop }: SlideUIProps) => {
+const SlideUI = ({ slide }: SlideUIProps) => {
     const {
         activeModal,
         setActiveModal,
@@ -90,9 +88,7 @@ const SlideUI = ({ slide, isLastSlide, onScrollToTop }: SlideUIProps) => {
         // We only toggle play if the click is on the container itself,
         // not on the UI elements within it.
         if (e.target === e.currentTarget) {
-            // This is handled by the VideoPlayer's own onClick now.
-            // We could call togglePlay() here but it might conflict.
-            // For now, let's leave this to the VideoPlayer.
+            togglePlay();
         }
     }
 
@@ -108,17 +104,6 @@ const SlideUI = ({ slide, isLastSlide, onScrollToTop }: SlideUIProps) => {
         {/* Bottom gradient */}
         <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
 
-        {isLastSlide && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
-                <p className="text-lg mb-4">To już wszystko!</p>
-                <button
-                    onClick={onScrollToTop}
-                    className="bg-white text-black font-bold py-2 px-4 rounded-full shadow-lg hover:bg-gray-200 transition-colors"
-                >
-                    Wróć na początek
-                </button>
-            </div>
-        )}
 
         {/* UI Controls Container */}
         <div className="relative z-20">
@@ -159,17 +144,15 @@ const SlideUI = ({ slide, isLastSlide, onScrollToTop }: SlideUIProps) => {
 
 interface SlideProps {
     slide: SlideUnionType;
-    isLastSlide?: boolean;
-    onScrollToTop?: () => void;
 }
 
-const Slide = memo<SlideProps>(({ slide, isLastSlide, onScrollToTop }) => {
+const Slide = memo<SlideProps>(({ slide}) => {
     const renderContent = () => {
         switch (slide.type) {
             case 'video':
                 const videoSlide = slide as VideoSlide;
                 if (!videoSlide.data?.hlsUrl) return <div className="w-full h-full bg-black" />;
-                return <VideoPlayer hlsUrl={videoSlide.data.hlsUrl} />;
+                return <VideoPlayer hlsUrl={videoSlide.data.hlsUrl} posterUrl={videoSlide.data.poster} />;
             case 'html':
                 return <HtmlContent slide={slide as HtmlSlide} />;
             case 'image':
@@ -182,7 +165,7 @@ const Slide = memo<SlideProps>(({ slide, isLastSlide, onScrollToTop }) => {
     return (
         <div className="relative w-full h-full bg-black">
             {renderContent()}
-            <SlideUI slide={slide} isLastSlide={isLastSlide} onScrollToTop={onScrollToTop} />
+            <SlideUI slide={slide} />
         </div>
     );
 });

@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import Slide from '@/components/Slide';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,8 +13,11 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const bottomSentinelRef = useRef<HTMLDivElement>(null);
+  const [isLooping, setIsLooping] = useState(false);
+  const isJumping = useRef(false);
 
   const {
     data,
@@ -35,34 +36,59 @@ const MainFeed = () => {
     return data?.pages.flatMap(page => page.slides) ?? [];
   }, [data]);
 
+  const loopedSlides = useMemo(() => {
+      if (!isLooping || slides.length === 0) return slides;
+      return [...slides, ...slides, ...slides];
+  }, [slides, isLooping]);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    const currentLoadMoreRef = loadMoreRef.current;
-    if (currentLoadMoreRef) {
-      observer.observe(currentLoadMoreRef);
+    if (hasNextPage) {
+      fetchNextPage();
+    } else if (slides.length > 0) {
+        setIsLooping(true);
     }
+  }, [hasNextPage, fetchNextPage, slides.length]);
 
-    return () => {
-      if (currentLoadMoreRef) {
-        observer.unobserve(currentLoadMoreRef);
-      }
-    };
-  }, [hasNextPage, fetchNextPage]);
+  useEffect(() => {
+    if (isLooping && scrollContainerRef.current) {
+        const slideHeight = scrollContainerRef.current.clientHeight;
+        const initialScrollTop = slides.length * slideHeight;
+        scrollContainerRef.current.scrollTop = initialScrollTop;
+    }
+  }, [isLooping, slides.length]);
 
-  const scrollToTop = () => {
-    scrollContainerRef.current?.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
+  useEffect(() => {
+      if (!isLooping) return;
+
+      const observer = new IntersectionObserver(
+          (entries) => {
+              if (isJumping.current) return;
+              entries.forEach(entry => {
+                  if (entry.isIntersecting) {
+                      const slideHeight = scrollContainerRef.current!.clientHeight;
+                      isJumping.current = true;
+                      if (entry.target === topSentinelRef.current) {
+                          const newScrollTop = scrollContainerRef.current!.scrollTop + (slides.length * slideHeight);
+                          scrollContainerRef.current!.scrollTop = newScrollTop;
+                      } else if (entry.target === bottomSentinelRef.current) {
+                          const newScrollTop = scrollContainerRef.current!.scrollTop - (slides.length * slideHeight);
+                          scrollContainerRef.current!.scrollTop = newScrollTop;
+                      }
+                      setTimeout(() => { isJumping.current = false; }, 100);
+                  }
+              });
+          },
+          { root: scrollContainerRef.current, threshold: 0.1 }
+      );
+
+      if (topSentinelRef.current) observer.observe(topSentinelRef.current);
+      if (bottomSentinelRef.current) observer.observe(bottomSentinelRef.current);
+
+      return () => {
+          observer.disconnect();
+      };
+  }, [isLooping, slides]);
+
 
   if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -74,20 +100,13 @@ const MainFeed = () => {
 
   return (
     <div ref={scrollContainerRef} className="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
-      {slides.map((slide, index) => (
-        <div key={slide.id} className="h-full w-full snap-start">
-          <Slide
-            slide={slide}
-            isLastSlide={!hasNextPage && index === slides.length - 1}
-            onScrollToTop={scrollToTop}
-          />
+      {isLooping && <div ref={topSentinelRef} />}
+      {loopedSlides.map((slide, index) => (
+        <div key={`${slide.id}-${index}`} className="h-full w-full snap-start">
+          <Slide slide={slide} />
         </div>
       ))}
-       {hasNextPage && (
-        <div ref={loadMoreRef} className="h-full w-full snap-start flex items-center justify-center bg-black">
-          <Skeleton className="w-full h-full" />
-        </div>
-      )}
+      {isLooping && <div ref={bottomSentinelRef} />}
     </div>
   );
 };
