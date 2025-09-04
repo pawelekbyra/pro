@@ -7,15 +7,18 @@ import { shallow } from 'zustand/shallow';
 
 interface VideoPlayerProps {
   hlsUrl: string;
+  posterUrl: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
 
   const {
     isMuted,
+    userPlaybackIntent,
+    togglePlay,
     playVideo,
     pauseVideo,
     setCurrentTime,
@@ -23,6 +26,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
   } = useStore(
     (state) => ({
       isMuted: state.isMuted,
+      userPlaybackIntent: state.userPlaybackIntent,
+      togglePlay: state.togglePlay,
       playVideo: state.playVideo,
       pauseVideo: state.pauseVideo,
       setCurrentTime: state.setCurrentTime,
@@ -62,35 +67,44 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
     };
   }, [hlsUrl, setCurrentTime, setDuration]);
 
+  // This effect synchronizes the video element's state with our desired state
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (isIntersecting) {
+    const shouldPlay = isIntersecting && userPlaybackIntent !== 'pause';
+
+    if (shouldPlay) {
       video.play().catch(e => console.error("Video play prevented:", e));
-      playVideo();
+      // We also update the global state if it's not already correct
+      if (!useStore.getState().isPlaying) {
+        playVideo();
+      }
     } else {
       video.pause();
-      video.currentTime = 0;
-      pauseVideo();
+       // We also update the global state if it's not already correct
+       if (useStore.getState().isPlaying) {
+        pauseVideo();
+      }
     }
-  }, [isIntersecting, playVideo, pauseVideo]);
+  }, [isIntersecting, userPlaybackIntent, playVideo, pauseVideo]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = isMuted;
-  }, [isMuted]);
 
+  // This effect handles the observer that detects if the video is on screen
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsIntersecting(entry.isIntersecting);
+        // When video goes out of view, reset its time and pause it
+        if (!entry.isIntersecting && videoRef.current) {
+          videoRef.current.currentTime = 0;
+          pauseVideo();
+        }
       },
       {
         root: null,
         rootMargin: '100% 0px', // Preload one viewport height away
-        threshold: 0.6, // 60% of the video must be visible to play
+        threshold: 0.6,
       }
     );
 
@@ -104,29 +118,24 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
         observer.unobserve(currentVideoRef);
       }
     };
-  }, []);
+  }, [pauseVideo]);
 
-  const handleVideoClick = () => {
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    if (video.paused) {
-      video.play();
-      playVideo();
-    } else {
-      video.pause();
-      pauseVideo();
-    }
-  };
+    video.muted = isMuted;
+  }, [isMuted]);
 
   return (
     <video
       ref={videoRef}
-      onClick={handleVideoClick}
+      onClick={togglePlay}
       className="absolute top-0 left-0 w-full h-full object-cover z-0"
       playsInline
       loop
       preload="auto"
+      poster={posterUrl}
     />
   );
 };

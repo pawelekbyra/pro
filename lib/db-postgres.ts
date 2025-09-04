@@ -314,7 +314,6 @@ export async function getSlides(options: { limit?: number, cursor?: string, curr
     const cursorDate = cursor ? new Date(parseInt(cursor, 10)) : null;
 
     // We need to build the query dynamically to include the WHERE clause for the cursor.
-    // We fetch limit + 1 to determine if there's a next page.
     let query = `
         SELECT
             s.*,
@@ -325,7 +324,7 @@ export async function getSlides(options: { limit?: number, cursor?: string, curr
         LEFT JOIN likes l ON s.id = l."slideId"
         LEFT JOIN comments c ON s.id = c."slideId"
     `;
-    const params: any[] = [limit + 1];
+    const params: any[] = [limit];
 
     if (cursorDate) {
         query += ` WHERE s."createdAt" < $3`;

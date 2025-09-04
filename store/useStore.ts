@@ -16,6 +16,7 @@ interface AppState {
   // Global video player state
   isMuted: boolean;
   isPlaying: boolean;
+  userPlaybackIntent: 'play' | 'pause' | null;
   currentTime: number;
   duration: number;
 
@@ -37,6 +38,7 @@ export const useStore = create<AppState>((set, get) => ({
   // Video Player
   isMuted: true,
   isPlaying: false,
+  userPlaybackIntent: null,
   currentTime: 0,
   duration: 0,
 
@@ -47,9 +49,15 @@ export const useStore = create<AppState>((set, get) => ({
 
   // Video Player
   setIsMuted: (isMuted) => set({ isMuted }),
-  togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  togglePlay: () => set((state) => {
+    const newIsPlaying = !state.isPlaying;
+    return {
+      isPlaying: newIsPlaying,
+      userPlaybackIntent: newIsPlaying ? 'play' : 'pause',
+    };
+  }),
   playVideo: () => set({ isPlaying: true }),
-  pauseVideo: () => set({ isPlaying: false }),
+  pauseVideo: () => set({ isPlaying: false, userPlaybackIntent: null }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setDuration: (duration) => set({ duration: duration }),
   seek: (time) => set({ currentTime: time }), // This is a simplified seek
