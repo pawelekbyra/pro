@@ -1,10 +1,18 @@
-import React, { useMemo, useRef, useEffect, useState } from 'react';
+"use client";
+
+import React, { useMemo, useState, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import Slide from '@/components/Slide';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// --- Swiper Imports ---
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/pagination';
+
 const fetchSlides = async ({ pageParam = '' }) => {
-  const res = await fetch(`/api/slides?cursor=${pageParam}&limit=5`);
+  // We fetch a larger number of slides to make the feed feel substantial.
+  const res = await fetch(`/api/slides?cursor=${pageParam}&limit=10`);
   if (!res.ok) {
     throw new Error('Failed to fetch slides');
   }
@@ -13,11 +21,7 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const topSentinelRef = useRef<HTMLDivElement>(null);
-  const bottomSentinelRef = useRef<HTMLDivElement>(null);
-  const [isLooping, setIsLooping] = useState(false);
-  const isJumping = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const {
     data,
@@ -36,58 +40,12 @@ const MainFeed = () => {
     return data?.pages.flatMap(page => page.slides) ?? [];
   }, [data]);
 
-  const loopedSlides = useMemo(() => {
-      if (!isLooping || slides.length === 0) return slides;
-      return [...slides, ...slides, ...slides];
-  }, [slides, isLooping]);
-
+  // Effect to fetch more slides when user gets close to the end
   useEffect(() => {
-    if (hasNextPage) {
+    if (hasNextPage && activeIndex >= slides.length - 3) {
       fetchNextPage();
-    } else if (slides.length > 0) {
-        setIsLooping(true);
     }
-  }, [hasNextPage, fetchNextPage, slides.length]);
-
-  useEffect(() => {
-    if (isLooping && scrollContainerRef.current) {
-        const slideHeight = scrollContainerRef.current.clientHeight;
-        const initialScrollTop = slides.length * slideHeight;
-        scrollContainerRef.current.scrollTop = initialScrollTop;
-    }
-  }, [isLooping, slides.length]);
-
-  useEffect(() => {
-      if (!isLooping) return;
-
-      const observer = new IntersectionObserver(
-          (entries) => {
-              if (isJumping.current) return;
-              entries.forEach(entry => {
-                  if (entry.isIntersecting) {
-                      const slideHeight = scrollContainerRef.current!.clientHeight;
-                      isJumping.current = true;
-                      if (entry.target === topSentinelRef.current) {
-                          const newScrollTop = scrollContainerRef.current!.scrollTop + (slides.length * slideHeight);
-                          scrollContainerRef.current!.scrollTop = newScrollTop;
-                      } else if (entry.target === bottomSentinelRef.current) {
-                          const newScrollTop = scrollContainerRef.current!.scrollTop - (slides.length * slideHeight);
-                          scrollContainerRef.current!.scrollTop = newScrollTop;
-                      }
-                      setTimeout(() => { isJumping.current = false; }, 100);
-                  }
-              });
-          },
-          { root: scrollContainerRef.current, threshold: 0.1 }
-      );
-
-      if (topSentinelRef.current) observer.observe(topSentinelRef.current);
-      if (bottomSentinelRef.current) observer.observe(bottomSentinelRef.current);
-
-      return () => {
-          observer.disconnect();
-      };
-  }, [isLooping, slides]);
+  }, [activeIndex, slides.length, hasNextPage, fetchNextPage]);
 
 
   if (isLoading && slides.length === 0) {
@@ -99,15 +57,24 @@ const MainFeed = () => {
   }
 
   return (
-    <div ref={scrollContainerRef} className="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
-      {isLooping && <div ref={topSentinelRef} />}
-      {loopedSlides.map((slide, index) => (
-        <div key={`${slide.id}-${index}`} className="h-full w-full snap-start">
-          <Slide slide={slide} />
-        </div>
+    <Swiper
+      direction={'vertical'}
+      className="w-full h-screen"
+      slidesPerView={1}
+      spaceBetween={0}
+      onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+      mousewheel
+      speed={600}
+    >
+      {slides.map((slide, index) => (
+        <SwiperSlide key={`${slide.id}-${index}`}>
+          <Slide
+            slide={slide}
+            isActive={index === activeIndex}
+          />
+        </SwiperSlide>
       ))}
-      {isLooping && <div ref={bottomSentinelRef} />}
-    </div>
+    </Swiper>
   );
 };
 
