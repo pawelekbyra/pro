@@ -9,38 +9,59 @@ interface AppState {
   setActiveModal: (modal: ModalType) => void;
   isAnyModalOpen: () => boolean;
 
-  // Video player state
+  // Slide state
+  activeSlide: Slide | null;
+  setActiveSlide: (slide: Slide | null) => void;
+
+  // Global video player state
   isMuted: boolean;
   isPlaying: boolean;
-  preloadedVideoUrl: string | null;
-  videoElement: React.RefObject<HTMLVideoElement> | null;
-  activeVideo: Slide | null;
+  currentHlsUrl: string | null;
+  nextHlsUrl: string | null;
+  isVideoLoaded: boolean;
+  currentTime: number;
+  duration: number;
 
   // Video player actions
   setIsMuted: (isMuted: boolean) => void;
   togglePlay: () => void;
-  setPreloadedVideoUrl: (url: string | null) => void;
-  setVideoElement: (ref: React.RefObject<HTMLVideoElement>) => void;
-  setActiveVideo: (video: Slide | null) => void;
+  setCurrentHlsUrl: (url: string | null) => void;
+  setNextHlsUrl: (url: string | null) => void;
+  setIsVideoLoaded: (isLoaded: boolean) => void;
+  setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
+  seek: (time: number) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
   // --- STATE ---
   activeModal: null,
+  activeSlide: null,
+
+  // Video Player
   isMuted: true,
   isPlaying: false,
-  preloadedVideoUrl: null,
-  videoElement: null,
-  activeVideo: null,
+  currentHlsUrl: null,
+  nextHlsUrl: null,
+  isVideoLoaded: false,
+  currentTime: 0,
+  duration: 0,
 
 
   // --- ACTIONS ---
   setActiveModal: (modal) => set({ activeModal: modal }),
+  setActiveSlide: (slide) => set({ activeSlide: slide }),
+
+  // Video Player
   setIsMuted: (isMuted) => set({ isMuted }),
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
-  setPreloadedVideoUrl: (url) => set({ preloadedVideoUrl: url }),
-  setVideoElement: (ref) => set({ videoElement: ref }),
-  setActiveVideo: (video) => set({ activeVideo: video }),
+  setCurrentHlsUrl: (url) => set({ currentHlsUrl: url, currentTime: 0, duration: 0 }), // Reset times on new video
+  setNextHlsUrl: (url) => set({ nextHlsUrl: url }),
+  setIsVideoLoaded: (isLoaded) => set({ isVideoLoaded: isLoaded }),
+  setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (duration) => set({ duration: duration }),
+  seek: (time) => set({ currentTime: time }), // This is a simplified seek
+
 
   // --- COMPUTED / SELECTORS ---
   isAnyModalOpen: () => get().activeModal !== null,

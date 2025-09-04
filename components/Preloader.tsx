@@ -21,16 +21,10 @@ const Preloader: React.FC = () => {
   const { t, selectInitialLang } = useTranslation();
   const {
     setIsMuted,
-    setPreloadedVideoUrl,
-    videoElement,
-    setActiveVideo,
     togglePlay,
   } = useStore(
     (state) => ({
       setIsMuted: state.setIsMuted,
-      setPreloadedVideoUrl: state.setPreloadedVideoUrl,
-      videoElement: state.videoElement,
-      setActiveVideo: state.setActiveVideo,
       togglePlay: state.togglePlay,
     }),
     shallow
@@ -39,19 +33,12 @@ const Preloader: React.FC = () => {
   const [isHiding, setIsHiding] = useState(false);
   const [showLangButtons, setShowLangButtons] = useState(false);
 
-  const { data, isFetched } = useQuery({
+  // We still fetch the first slide to warm up the cache, but don't interact with video state here.
+  useQuery({
       queryKey: ['slides', 'preload'],
       queryFn: fetchSlides,
       staleTime: Infinity,
   });
-
-  useEffect(() => {
-    if (isFetched && data?.slides.length > 0 && data.slides[0].type === 'video' && data.slides[0].data) {
-      setPreloadedVideoUrl(data.slides[0].data.hlsUrl);
-      // Also set this as the active video so the feed starts with it
-      setActiveVideo(data.slides[0]);
-    }
-  }, [data, isFetched, setPreloadedVideoUrl, setActiveVideo]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowLangButtons(true), 500);
@@ -62,15 +49,9 @@ const Preloader: React.FC = () => {
     selectInitialLang(lang);
     setIsMuted(false);
 
-    // Direct Play Command
-    if (videoElement?.current) {
-      videoElement.current.play().catch(error => {
-        console.error("Preloader: Play command failed", error);
-      });
-      // Ensure the global state knows we are playing
-      if (!useStore.getState().isPlaying) {
-        togglePlay();
-      }
+    // The GlobalVideoPlayer will react to the isPlaying state.
+    if (!useStore.getState().isPlaying) {
+      togglePlay();
     }
 
     setIsHiding(true);
