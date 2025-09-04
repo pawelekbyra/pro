@@ -20,7 +20,6 @@ interface ImageContentProps {
 }
 interface SlideUIProps {
     slide: SlideUnionType;
-    onTogglePlay: () => void;
 }
 
 // --- Sub-components ---
@@ -51,8 +50,9 @@ const ImageContent = ({ slide }: ImageContentProps) => {
   );
 };
 
-const SlideUI = ({ slide, onTogglePlay }: SlideUIProps) => {
+const SlideUI = ({ slide }: SlideUIProps) => {
     const setActiveModal = useStore((state) => state.setActiveModal);
+    const togglePlay = useStore((state) => state.togglePlay);
 
     const handleComment = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -64,7 +64,7 @@ const SlideUI = ({ slide, onTogglePlay }: SlideUIProps) => {
         // We only toggle play if the click is on the container itself,
         // not on the UI elements within it.
         if (e.target === e.currentTarget) {
-            onTogglePlay();
+            togglePlay();
         }
     }
 
@@ -106,18 +106,15 @@ const SlideUI = ({ slide, onTogglePlay }: SlideUIProps) => {
 
 interface SlideProps {
     slide: SlideUnionType;
-    isActive: boolean;
 }
 
 const Slide = memo<SlideProps>(({ slide }) => {
-    const { togglePlay } = useStore();
-
     const renderContent = () => {
         switch (slide.type) {
             case 'video':
                 // The global video player will handle the actual video rendering.
                 // This component only needs to provide the UI overlay.
-                return <div className="w-full h-full bg-black" />;
+                return <div className="w-full h-full bg-transparent" />;
             case 'html':
                 return <HtmlContent slide={slide as HtmlSlide} />;
             case 'image':
@@ -130,7 +127,7 @@ const Slide = memo<SlideProps>(({ slide }) => {
     return (
         <div className="relative w-full h-full bg-black">
             {renderContent()}
-            <SlideUI slide={slide} onTogglePlay={togglePlay} />
+            <SlideUI slide={slide} />
             {/* VideoControls are now removed as playback is global */}
         </div>
     );

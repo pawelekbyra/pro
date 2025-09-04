@@ -20,8 +20,14 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const { setActiveSlide, setCurrentHlsUrl, setNextHlsUrl, setIsVideoLoaded } = useStore();
+  const {
+    setActiveSlide,
+    setCurrentHlsUrl,
+    setNextHlsUrl,
+    setIsVideoLoaded,
+    playVideo,
+    pauseVideo,
+  } = useStore();
 
   const {
     data,
@@ -48,12 +54,15 @@ const MainFeed = () => {
 
       if (initialSlide.type === 'video') {
         setCurrentHlsUrl((initialSlide as VideoSlide).data?.hlsUrl ?? null);
+        playVideo();
+      } else {
+        pauseVideo();
       }
       if (nextSlide && nextSlide.type === 'video') {
         setNextHlsUrl((nextSlide as VideoSlide).data?.hlsUrl ?? null);
       }
     }
-  }, [slides, setActiveSlide, setCurrentHlsUrl, setNextHlsUrl]);
+  }, [slides, setActiveSlide, setCurrentHlsUrl, setNextHlsUrl, playVideo, pauseVideo]);
 
   if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -70,7 +79,6 @@ const MainFeed = () => {
       modules={[Mousewheel]}
       mousewheel={true}
       onSlideChange={(swiper) => {
-        setActiveIndex(swiper.activeIndex);
         const newSlide = slides[swiper.activeIndex];
         const nextSlide = slides[swiper.activeIndex + 1];
         if (newSlide) {
@@ -79,8 +87,10 @@ const MainFeed = () => {
 
           if (newSlide.type === 'video') {
             setCurrentHlsUrl((newSlide as VideoSlide).data?.hlsUrl ?? null);
+            playVideo();
           } else {
             setCurrentHlsUrl(null);
+            pauseVideo();
           }
 
           if (nextSlide && nextSlide.type === 'video') {
@@ -96,9 +106,9 @@ const MainFeed = () => {
         }
       }}
     >
-      {slides.map((slide, index) => (
+      {slides.map((slide) => (
         <SwiperSlide key={slide.id}>
-          <Slide slide={slide} isActive={index === activeIndex} />
+          <Slide slide={slide} />
         </SwiperSlide>
       ))}
        {hasNextPage && (

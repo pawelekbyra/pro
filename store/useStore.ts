@@ -25,6 +25,8 @@ interface AppState {
   // Video player actions
   setIsMuted: (isMuted: boolean) => void;
   togglePlay: () => void;
+  playVideo: () => void;
+  pauseVideo: () => void;
   setCurrentHlsUrl: (url: string | null) => void;
   setNextHlsUrl: (url: string | null) => void;
   setIsVideoLoaded: (isLoaded: boolean) => void;
@@ -55,6 +57,8 @@ export const useStore = create<AppState>((set, get) => ({
   // Video Player
   setIsMuted: (isMuted) => set({ isMuted }),
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+  playVideo: () => set({ isPlaying: true }),
+  pauseVideo: () => set({ isPlaying: false }),
   setCurrentHlsUrl: (url) => set({ currentHlsUrl: url, currentTime: 0, duration: 0 }), // Reset times on new video
   setNextHlsUrl: (url) => set({ nextHlsUrl: url }),
   setIsVideoLoaded: (isLoaded) => set({ isVideoLoaded: isLoaded }),
