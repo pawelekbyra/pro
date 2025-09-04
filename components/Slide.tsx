@@ -1,8 +1,9 @@
 "use client";
 
-import React, { memo } from 'react';
+import React, { memo, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import DOMPurify from 'dompurify';
+import Hls from 'hls.js';
 import {
   Slide as SlideUnionType,
   VideoSlide,
@@ -14,6 +15,13 @@ import { MessageCircle } from 'lucide-react';
 import VideoControls from './VideoControls';
 
 // --- Prop Types for Sub-components ---
+interface VideoContentProps {
+    slide: VideoSlide;
+    videoRef: React.RefObject<HTMLVideoElement>;
+    setIsPlaying: (isPlaying: boolean) => void;
+    setCurrentTime: (time: number) => void;
+    setDuration: (duration: number) => void;
+}
 interface HtmlContentProps {
   slide: HtmlSlide;
 }
@@ -22,9 +30,59 @@ interface ImageContentProps {
 }
 interface SlideUIProps {
     slide: SlideUnionType;
+    onTogglePlay: () => void;
 }
 
 // --- Sub-components ---
+
+const VideoContent = ({ slide, videoRef, setIsPlaying, setCurrentTime, setDuration }: VideoContentProps) => {
+    const hlsRef = useRef<Hls | null>(null);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const setupHls = () => {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hlsRef.current = hls;
+                hls.loadSource(slide.data.hlsUrl);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = slide.data.hlsUrl;
+            }
+        };
+
+        const onPlay = () => setIsPlaying(true);
+        const onPause = () => setIsPlaying(false);
+        const onTimeUpdate = () => setCurrentTime(video.currentTime);
+        const onDurationChange = () => setDuration(video.duration);
+
+        setupHls();
+        video.addEventListener('play', onPlay);
+        video.addEventListener('pause', onPause);
+        video.addEventListener('timeupdate', onTimeUpdate);
+        video.addEventListener('durationchange', onDurationChange);
+
+        return () => {
+            hlsRef.current?.destroy();
+            video.removeEventListener('play', onPlay);
+            video.removeEventListener('pause', onPause);
+            video.removeEventListener('timeupdate', onTimeUpdate);
+            video.removeEventListener('durationchange', onDurationChange);
+        };
+    }, [slide.data.hlsUrl, videoRef, setIsPlaying, setCurrentTime, setDuration]);
+
+    return (
+        <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            playsInline
+            controls={false} // We use custom controls
+            muted // Autoplay on mobile requires muted
+        />
+    );
+};
 
 const HtmlContent = ({ slide }: HtmlContentProps) => {
   if (!slide.data?.htmlContent) return null;
@@ -52,9 +110,8 @@ const ImageContent = ({ slide }: ImageContentProps) => {
   );
 };
 
-const SlideUI = ({ slide }: SlideUIProps) => {
+const SlideUI = ({ slide, onTogglePlay }: SlideUIProps) => {
     const setActiveModal = useStore((state) => state.setActiveModal);
-    const togglePlay = useStore((state) => state.togglePlay);
 
     const handleComment = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -63,9 +120,8 @@ const SlideUI = ({ slide }: SlideUIProps) => {
     }
 
     const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        // Only toggle play if the click is on the container itself, not on its children.
         if (e.target === e.currentTarget) {
-            togglePlay();
+            onTogglePlay();
         }
     }
 
@@ -111,34 +167,84 @@ interface SlideProps {
 }
 
 const Slide = memo<SlideProps>(({ slide, isActive }) => {
-    const isVideoPlaying = useStore((state) =>
-        state.activeVideo?.id === slide.id &&
-        state.activeVideo?.type === 'video'
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+
+    // Effect to handle play/pause when the active slide changes
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (isActive) {
+            video.muted = isMuted; // Use state to control mute
+            video.play().catch(e => console.error("Play was prevented", e));
+        } else {
+            video.pause();
+            video.currentTime = 0;
+        }
+    }, [isActive, isMuted]); // Depend on isMuted as well
+
+    const handleTogglePlay = () => {
+        const video = videoRef.current;
+        if (!video) return;
+        if (video.paused) video.play();
+        else video.pause();
+    };
+
+    const handleToggleMute = () => {
+        const video = videoRef.current;
+        if (!video) return;
+        video.muted = !video.muted;
+        setIsMuted(video.muted);
+    };
+
+    const handleSeek = (time: number) => {
+        const video = videoRef.current;
+        if (!video) return;
+        video.currentTime = time;
+    };
+
+    const renderContent = () => {
+        switch (slide.type) {
+            case 'video':
+                return (
+                    <VideoContent
+                        slide={slide as VideoSlide}
+                        videoRef={videoRef}
+                        setIsPlaying={setIsPlaying}
+                        setCurrentTime={setCurrentTime}
+                        setDuration={setDuration}
+                    />
+                );
+            case 'html':
+                return <HtmlContent slide={slide as HtmlSlide} />;
+            case 'image':
+                return <ImageContent slide={slide as ImageSlide} />;
+            default:
+                return <div className="w-full h-full bg-gray-800 flex items-center justify-center"><p>Unsupported slide type</p></div>;
+        }
+    };
+
+    return (
+        <div className="relative w-full h-full bg-black">
+            {renderContent()}
+            <SlideUI slide={slide} onTogglePlay={handleTogglePlay} />
+            {isActive && slide.type === 'video' && (
+                <VideoControls
+                    currentTime={currentTime}
+                    duration={duration}
+                    isPlaying={isPlaying}
+                    isMuted={isMuted}
+                    onTogglePlay={handleTogglePlay}
+                    onToggleMute={handleToggleMute}
+                    onSeek={handleSeek}
+                />
+            )}
+        </div>
     );
-
-  const renderContent = () => {
-    switch (slide.type) {
-      case 'video':
-        // The GlobalVideoPlayer is now responsible for all video playback.
-        // This component just needs to be transparent to let it show through.
-        return null;
-      case 'html':
-        return <HtmlContent slide={slide as HtmlSlide} />;
-      case 'image':
-        return <ImageContent slide={slide as ImageSlide} />;
-      default:
-        return <div className="w-full h-full bg-gray-800 flex items-center justify-center"><p>Unsupported slide type</p></div>;
-    }
-  };
-
-  return (
-    <div className={`relative w-full h-full transition-colors ${isVideoPlaying ? 'bg-transparent' : 'bg-black'}`}>
-      {renderContent()}
-      <SlideUI slide={slide} />
-      {isActive && slide.type === 'video' && <VideoControls />}
-      {isActive && <div className="absolute top-2 right-2 bg-green-500/80 text-white text-xs px-2 py-1 rounded-full z-20">ACTIVE</div>}
-    </div>
-  );
 });
 
 Slide.displayName = 'Slide';

@@ -1,32 +1,27 @@
 "use client";
 
 import React from 'react';
-import { useStore } from '@/store/useStore';
-import { shallow } from 'zustand/shallow';
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
-const VideoControls: React.FC = () => {
-  const {
+interface VideoControlsProps {
+    currentTime: number;
+    duration: number;
+    isPlaying: boolean;
+    isMuted: boolean;
+    onTogglePlay: () => void;
+    onToggleMute: () => void;
+    onSeek: (time: number) => void;
+}
+
+const VideoControls: React.FC<VideoControlsProps> = ({
     currentTime,
     duration,
-    seek,
     isPlaying,
-    togglePlay,
     isMuted,
-    toggleMute,
-  } = useStore(
-    (state) => ({
-      currentTime: state.currentTime,
-      duration: state.duration,
-      seek: state.seek,
-      isPlaying: state.isPlaying,
-      togglePlay: state.togglePlay,
-      isMuted: state.isMuted,
-      toggleMute: state.toggleMute,
-    }),
-    shallow
-  );
-
+    onTogglePlay,
+    onToggleMute,
+    onSeek,
+}) => {
   const formatTime = (time: number) => {
     if (isNaN(time)) return '0:00';
     const minutes = Math.floor(time / 60);
@@ -35,7 +30,7 @@ const VideoControls: React.FC = () => {
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    seek(Number(e.target.value));
+    onSeek(Number(e.target.value));
   };
 
   // Don't render controls if duration is 0 or NaN
@@ -45,7 +40,7 @@ const VideoControls: React.FC = () => {
 
   return (
     <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 text-white z-20 bg-black/30 p-2 rounded-lg">
-      <button onClick={togglePlay} className="p-1">
+      <button onClick={onTogglePlay} className="p-1">
         {isPlaying ? <Pause size={20} /> : <Play size={20} />}
       </button>
       <span className="text-xs font-mono w-12 text-center">{formatTime(currentTime)}</span>
@@ -59,7 +54,7 @@ const VideoControls: React.FC = () => {
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
       />
       <span className="text-xs font-mono w-12 text-center">{formatTime(duration)}</span>
-      <button onClick={toggleMute} className="p-1">
+      <button onClick={onToggleMute} className="p-1">
         {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
       </button>
     </div>
