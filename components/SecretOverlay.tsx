@@ -34,4 +34,6 @@ const SecretOverlay: React.FC = memo(() => {
   );
 });
 
+SecretOverlay.displayName = 'SecretOverlay';
+
 export default SecretOverlay;
