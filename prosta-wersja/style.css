@@ -105,7 +105,7 @@
             background: var(--modern-interactive-bg);
             border: 1px solid var(--modern-border-color);
             color: var(--modern-text-secondary);
-            padding: 14px 24px;
+            padding: 14px 48px 14px 24px;
             margin: 0;
             font-size: 1rem;
             font-weight: 600;
@@ -115,6 +115,8 @@
             max-width: 400px;
             transition: all 0.2s ease-in-out;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
         }
         .language-selection button:hover:not(:disabled) {
             transform: translateY(-2px);
@@ -132,6 +134,21 @@
             color: var(--modern-text-primary);
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
             transform: scale(1.02);
+        }
+
+        .language-selection button::after {
+            content: '✔';
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            font-size: 1.1rem;
+            color: #fff;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .language-selection button.is-selected::after {
+            transform: translateY(-50%) scale(1);
         }
         .language-selection button:disabled {
             opacity: 0.5;
@@ -1089,17 +1106,25 @@
         .notif-full-details {
             max-height: 0;
             overflow: hidden;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--modern-text-secondary);
-            opacity: 0;
-            /* Removed the problematic text animation by simplifying the transition */
-            transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.2s ease-out;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
         }
         .notification-item.expanded .notif-full-details {
             max-height: 200px;
             padding: 0 12px 12px 48px;
+        }
+
+        .notif-full-details-inner {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--modern-text-secondary);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease-out 0.1s, transform 0.2s ease-out 0.1s;
+        }
+
+        .notification-item.expanded .notif-full-details-inner {
             opacity: 1;
+            transform: translateY(0);
         }
 
         .notification-empty-state {
@@ -1435,7 +1460,7 @@
 
         .language-option {
             flex: 1;
-            padding: 12px 16px;
+            padding: 12px 40px 12px 16px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 8px;
@@ -1445,6 +1470,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .language-option:hover {
@@ -1458,6 +1485,21 @@
             border-color: #ff0055;
             color: #fff;
             transform: scale(1.02);
+        }
+
+        .language-option::after {
+            content: '✔';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            font-size: 1rem;
+            color: #fff;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .language-option.active::after {
+            transform: translateY(-50%) scale(1);
         }
 
         .form-group {
@@ -1844,17 +1886,25 @@
 
         #mock-login-toggle {
             position: fixed;
-            top: 10px;
+    top: 50%;
             left: 10px;
+    transform: translateY(-50%);
             z-index: 9999;
-            background: rgba(255, 255, 255, 0.8);
-            color: #000;
-            border: 1px solid #000;
-            padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 4px 8px;
             cursor: pointer;
             border-radius: 5px;
             font-family: sans-serif;
-            font-size: 12px;
+    font-size: 11px;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+#mock-login-toggle:hover {
+    opacity: 1;
+    border-color: white;
         }
 
         /* ==========================================================================

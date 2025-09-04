@@ -1067,7 +1067,9 @@
                                 </div>
                             </div>
                             <div class="notif-full-details">
-                                ${Utils.getTranslation(notif.fullKey)}
+                                <div class="notif-full-details-inner">
+                                    ${Utils.getTranslation(notif.fullKey)}
+                                </div>
                             </div>
                         `;
                         fragment.appendChild(item);
