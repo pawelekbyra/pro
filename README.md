@@ -1,4 +1,4 @@
-# Prosta Wersja Projektu (Vanilla JS).
+# Prosta Wersja Projektu (Vanilla JS)..
 
 Ten projekt jest uproszczoną wersją oryginalnej aplikacji, przepisanej na czysty JavaScript (Vanilla JS) i CSS..
 
