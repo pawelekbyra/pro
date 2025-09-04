@@ -144,10 +144,9 @@ const SlideUI = ({ slide }: SlideUIProps) => {
 
 interface SlideProps {
     slide: SlideUnionType;
-    isActive: boolean;
 }
 
-const Slide = memo<SlideProps>(({ slide }) => {
+const Slide = memo<SlideProps>(({ slide}) => {
     const renderContent = () => {
         switch (slide.type) {
             case 'video':
