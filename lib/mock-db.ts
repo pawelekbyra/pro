@@ -21,7 +21,7 @@ const NUM_SLIDES = 10;
       avatar: `https://i.pravatar.cc/150?u=user_${i}`,
       userId: `user_${i}`,
       username: `User ${i}`,
-      access: 'public',
+      access: i === 1 ? 'secret' : 'public',
       createdAt: Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7, // within the last 7 days
       data: {
         hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
