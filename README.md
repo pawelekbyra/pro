@@ -1,53 +1,18 @@
-# Readme aplikacji Ting Tong
+# Prosta Wersja Projektu (Vanilla JS)
 
-> **UWAGA:** Aplikacja jest obecnie skonfigurowana do pracy w **trybie MOCK**. Oznacza to, że wszystkie dane pochodzą z lokalnego, symulowanego źródła, a nie z prawdziwej bazy danych. Dane te są generowane w `lib/mock-db.ts` i symulują pionowy feed wideo. Aby przełączyć się na produkcyjną bazę danych, upewnij się, że zmienna środowiskowa `MOCK_API` nie jest ustawiona na `true`.
+Ten projekt jest uproszczoną wersją oryginalnej aplikacji, przepisanej na czysty JavaScript (Vanilla JS) i CSS.
 
-## Architektura Feed'u
+## Cel
 
-Główny feed aplikacji został zbudowany w oparciu o bibliotekę `react-vertical-feed`, która zapewnia wydajne i płynne przewijanie wideo, podobne do popularnych aplikacji społecznościowych. Dane do feedu są ładowane w sposób nieskończony (infinite loading) z endpointu `/api/slides`.
+Głównym celem tej wersji jest integracja z platformą WordPress. Cała funkcjonalność front-end jest zawarta w plikach `index.html`, `prosta-wersja/style.css` oraz `prosta-wersja/script.js`.
 
-## Wdrożenie
+## Struktura
 
-Ten projekt jest oparty na Next.js i przygotowany do wdrożenia na platformach wspierających aplikacje Node.js, takich jak Vercel.
+*   `archiwum/`: Ten katalog zawiera kompletną, historyczną wersję projektu opartą na React/Next.js. Służy ona jako referencja wizualna i funkcjonalna.
+*   `prosta-wersja/`: Zawiera pliki CSS i JS dla uproszczonej aplikacji.
+*   `index.html`: Główny plik HTML, który ładuje aplikację. Działa w trybie "mockowym" (korzysta z przykładowych danych wbitych na stałe w kodzie), co pozwala na rozwój i testowanie front-endu bez potrzeby uruchamiania pełnego środowiska WordPress.
+*   `functions.php`: Ten plik zawiera kod PHP, który docelowo ma zostać umieszczony w pliku `functions.php` motywu WordPress. Odpowiada on za wczytanie skryptów, stylów oraz przekazanie danych z WordPressa do JavaScriptu. W tym środowisku plik ten nie jest aktywny.
 
-### ⚠️ Uwaga na pliki-artefakty
+## Tryb Mockowy
 
-W repozytorium znajdują się pliki `prototyp.txt` oraz `tingtong.txt`. Są to **historyczne prototypy** i **nie są częścią działającej aplikacji**. Prosimy nie traktować ich jako punktu odniesienia dla obecnej architektury ani nie wprowadzać w nich zmian z myślą o wpłynięciu na działanie projektu.
-
-### Zmienne środowiskowe
-
-Przed uruchomieniem lub wdrożeniem, musisz skonfigurować następujące zmienne środowiskowe:
-
-#### Baza danych (Neon PostgreSQL)
-
-Aplikacja wykorzystuje **Neon** jako dostawcę bazy danych PostgreSQL.
-
--   `DATABASE_URL`: Pełny connection string do Twojej bazy danych na Neon. Znajdziesz go w panelu swojego projektu na Neon.
-
-#### Klucz JWT (Uwierzytelnianie)
-
--   `JWT_SECRET`: Tajny klucz do podpisywania tokenów autoryzacyjnych (JWT). Możesz wygenerować bezpieczny klucz za pomocą poniższej komendy w terminalu:
-    ```bash
-    openssl rand -hex 32
-    ```
-
-### Uruchomienie lokalne
-
-1.  Sklonuj repozytorium.
-2.  Utwórz plik `.env.local` w głównym katalogu projektu.
-3.  Dodaj do niego zmienne `DATABASE_URL` i `JWT_SECRET`.
-4.  Zainstaluj zależności: `npm install` lub `yarn install`.
-5.  Uruchom aplikację: `npm run dev` lub `yarn dev`.
-
-### Skrypty
-
--   `npm run dev`: Uruchamia serwer deweloperski.
--   `npm run build`: Buduje aplikację do wersji produkcyjnej.
--   `npm run start`: Uruchamia zbudowaną aplikację.
--   `npm run lint`: Uruchamia lintera ESLint.
--   `npm run create-admin`: Uruchamia skrypt do tworzenia/aktualizacji użytkownika 'admin' w bazie danych.
--   `npm run init-db`: Inicjalizuje tabele w bazie danych (uwaga: usuwa istniejące tabele).
-
-## Panel Administratora
-
-Aplikacja zawiera podstawowy panel administratora dostępny pod `/admin`. Dostęp wymaga zalogowania się na konto z rolą `admin`.
+Aplikacja działa w trybie demonstracyjnym (mock mode). Oznacza to, że dane, które normalnie byłyby pobierane z bazy danych WordPressa (np. lista slajdów, status logowania), są symulowane bezpośrednio w pliku `prosta-wersja/script.js`. Pozwala to na swobodny rozwój warstwy wizualnej.
