@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Mousewheel } from 'swiper/modules';
-import 'swiper/css';
 import Slide from '@/components/Slide';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useStore } from '@/store/useStore';
-import { VideoSlide } from '@/lib/types';
 
 const fetchSlides = async ({ pageParam = '' }) => {
   const res = await fetch(`/api/slides?cursor=${pageParam}&limit=5`);
@@ -20,12 +15,7 @@ const fetchSlides = async ({ pageParam = '' }) => {
 };
 
 const MainFeed = () => {
-  const {
-    setActiveSlide,
-    playVideo,
-    pauseVideo,
-  } = useStore();
-
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const {
     data,
     fetchNextPage,
@@ -44,16 +34,27 @@ const MainFeed = () => {
   }, [data]);
 
   useEffect(() => {
-    if (slides.length > 0) {
-      const initialSlide = slides[0];
-      setActiveSlide(initialSlide);
-      if (initialSlide.type === 'video') {
-        playVideo();
-      } else {
-        pauseVideo();
-      }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    const currentLoadMoreRef = loadMoreRef.current;
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
     }
-  }, [slides, setActiveSlide, playVideo, pauseVideo]);
+
+    return () => {
+      if (currentLoadMoreRef) {
+        observer.unobserve(currentLoadMoreRef);
+      }
+    };
+  }, [hasNextPage, fetchNextPage]);
+
 
   if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -64,41 +65,18 @@ const MainFeed = () => {
   }
 
   return (
-    <Swiper
-      direction="vertical"
-      className="w-full h-screen"
-      modules={[Mousewheel]}
-      mousewheel={true}
-      onSlideChange={(swiper) => {
-        const newSlide = slides[swiper.activeIndex];
-        if (newSlide) {
-          setActiveSlide(newSlide);
-          if (newSlide.type === 'video') {
-            playVideo();
-          } else {
-            pauseVideo();
-          }
-        }
-      }}
-      onReachEnd={() => {
-        if (hasNextPage) {
-          fetchNextPage();
-        }
-      }}
-    >
+    <div className="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
       {slides.map((slide, index) => (
-        <SwiperSlide key={slide.id}>
-          <Slide slide={slide} isActive={false} />
-        </SwiperSlide>
+        <div key={slide.id} className="h-full w-full snap-start">
+          <Slide slide={slide} />
+        </div>
       ))}
        {hasNextPage && (
-        <SwiperSlide>
-            <div className="w-full h-full flex items-center justify-center bg-black">
-                <Skeleton className="w-full h-full" />
-            </div>
-        </SwiperSlide>
+        <div ref={loadMoreRef} className="h-full w-full snap-start flex items-center justify-center bg-black">
+          <Skeleton className="w-full h-full" />
+        </div>
       )}
-    </Swiper>
+    </div>
   );
 };
 
