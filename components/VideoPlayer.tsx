@@ -4,16 +4,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import { useStore } from '@/store/useStore';
 import { shallow } from 'zustand/shallow';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Skeleton } from './ui/skeleton';
 
 interface VideoPlayerProps {
   hlsUrl: string;
-  posterUrl: string;
+  // posterUrl is no longer needed, we use the first frame.
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const {
     isMuted,
@@ -40,16 +43,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (Hls.isSupported()) {
-      if (!hlsRef.current) {
-        const hls = new Hls();
-        hls.attachMedia(video);
-        hlsRef.current = hls;
-      }
-      hlsRef.current.loadSource(hlsUrl);
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = hlsUrl;
-    }
+    const hls = new Hls();
+    hls.loadSource(hlsUrl);
+    hls.attachMedia(video);
+    hlsRef.current = hls;
+
+    const onFragLoaded = () => {
+      setIsVideoReady(true);
+      hls.off(Hls.Events.FRAG_LOADED, onFragLoaded); // Detach listener after first fire
+    };
+    hls.on(Hls.Events.FRAG_LOADED, onFragLoaded);
 
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
     const handleDurationChange = () => setDuration(video.duration);
@@ -60,34 +63,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('durationchange', handleDurationChange);
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
+      hls.destroy();
     };
   }, [hlsUrl, setCurrentTime, setDuration]);
 
   // This effect synchronizes the video element's state with our desired state
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !isVideoReady) return;
 
     const shouldPlay = isIntersecting && userPlaybackIntent !== 'pause';
 
     if (shouldPlay) {
       video.play().catch(e => console.error("Video play prevented:", e));
-      // We also update the global state if it's not already correct
       if (!useStore.getState().isPlaying) {
         playVideo();
       }
     } else {
       video.pause();
-       // We also update the global state if it's not already correct
        if (useStore.getState().isPlaying) {
         pauseVideo();
       }
     }
-  }, [isIntersecting, userPlaybackIntent, playVideo, pauseVideo]);
+  }, [isIntersecting, userPlaybackIntent, isVideoReady, playVideo, pauseVideo]);
 
 
   // This effect handles the observer that detects if the video is on screen
@@ -95,15 +93,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsIntersecting(entry.isIntersecting);
-        // When video goes out of view, reset its time and pause it
-        if (!entry.isIntersecting && videoRef.current) {
-          videoRef.current.currentTime = 0;
-          pauseVideo();
-        }
       },
       {
         root: null,
-        rootMargin: '100% 0px', // Preload one viewport height away
+        rootMargin: '100% 0px',
         threshold: 0.6,
       }
     );
@@ -118,7 +111,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
         observer.unobserve(currentVideoRef);
       }
     };
-  }, [pauseVideo]);
+  }, []);
 
 
   useEffect(() => {
@@ -128,15 +121,24 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl, posterUrl }) => {
   }, [isMuted]);
 
   return (
-    <video
-      ref={videoRef}
-      onClick={togglePlay}
-      className="absolute top-0 left-0 w-full h-full object-cover z-0"
-      playsInline
-      loop
-      preload="auto"
-      poster={posterUrl}
-    />
+    <>
+      <AnimatePresence>
+        {!isVideoReady && (
+            <Skeleton className="absolute inset-0 w-full h-full" />
+        )}
+      </AnimatePresence>
+      <motion.video
+        ref={videoRef}
+        onClick={togglePlay}
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        playsInline
+        loop
+        preload="auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isVideoReady ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      />
+    </>
   );
 };
 
