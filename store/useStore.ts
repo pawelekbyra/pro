@@ -16,9 +16,6 @@ interface AppState {
   // Global video player state
   isMuted: boolean;
   isPlaying: boolean;
-  currentHlsUrl: string | null;
-  nextHlsUrl: string | null;
-  isVideoLoaded: boolean;
   currentTime: number;
   duration: number;
 
@@ -27,9 +24,6 @@ interface AppState {
   togglePlay: () => void;
   playVideo: () => void;
   pauseVideo: () => void;
-  setCurrentHlsUrl: (url: string | null) => void;
-  setNextHlsUrl: (url: string | null) => void;
-  setIsVideoLoaded: (isLoaded: boolean) => void;
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
   seek: (time: number) => void;
@@ -43,9 +37,6 @@ export const useStore = create<AppState>((set, get) => ({
   // Video Player
   isMuted: true,
   isPlaying: false,
-  currentHlsUrl: null,
-  nextHlsUrl: null,
-  isVideoLoaded: false,
   currentTime: 0,
   duration: 0,
 
@@ -59,9 +50,6 @@ export const useStore = create<AppState>((set, get) => ({
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
   playVideo: () => set({ isPlaying: true }),
   pauseVideo: () => set({ isPlaying: false }),
-  setCurrentHlsUrl: (url) => set({ currentHlsUrl: url, currentTime: 0, duration: 0 }), // Reset times on new video
-  setNextHlsUrl: (url) => set({ nextHlsUrl: url }),
-  setIsVideoLoaded: (isLoaded) => set({ isVideoLoaded: isLoaded }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setDuration: (duration) => set({ duration: duration }),
   seek: (time) => set({ currentTime: time }), // This is a simplified seek

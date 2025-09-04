@@ -22,9 +22,6 @@ const fetchSlides = async ({ pageParam = '' }) => {
 const MainFeed = () => {
   const {
     setActiveSlide,
-    setCurrentHlsUrl,
-    setNextHlsUrl,
-    setIsVideoLoaded,
     playVideo,
     pauseVideo,
   } = useStore();
@@ -49,20 +46,14 @@ const MainFeed = () => {
   useEffect(() => {
     if (slides.length > 0) {
       const initialSlide = slides[0];
-      const nextSlide = slides[1];
       setActiveSlide(initialSlide);
-
       if (initialSlide.type === 'video') {
-        setCurrentHlsUrl((initialSlide as VideoSlide).data?.hlsUrl ?? null);
         playVideo();
       } else {
         pauseVideo();
       }
-      if (nextSlide && nextSlide.type === 'video') {
-        setNextHlsUrl((nextSlide as VideoSlide).data?.hlsUrl ?? null);
-      }
     }
-  }, [slides, setActiveSlide, setCurrentHlsUrl, setNextHlsUrl, playVideo, pauseVideo]);
+  }, [slides, setActiveSlide, playVideo, pauseVideo]);
 
   if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -80,23 +71,12 @@ const MainFeed = () => {
       mousewheel={true}
       onSlideChange={(swiper) => {
         const newSlide = slides[swiper.activeIndex];
-        const nextSlide = slides[swiper.activeIndex + 1];
         if (newSlide) {
           setActiveSlide(newSlide);
-          setIsVideoLoaded(false); // Reset loaded state for new slide
-
           if (newSlide.type === 'video') {
-            setCurrentHlsUrl((newSlide as VideoSlide).data?.hlsUrl ?? null);
             playVideo();
           } else {
-            setCurrentHlsUrl(null);
             pauseVideo();
-          }
-
-          if (nextSlide && nextSlide.type === 'video') {
-            setNextHlsUrl((nextSlide as VideoSlide).data?.hlsUrl ?? null);
-          } else {
-            setNextHlsUrl(null);
           }
         }
       }}
@@ -106,9 +86,9 @@ const MainFeed = () => {
         }
       }}
     >
-      {slides.map((slide) => (
+      {slides.map((slide, index) => (
         <SwiperSlide key={slide.id}>
-          <Slide slide={slide} />
+          <Slide slide={slide} isActive={false} />
         </SwiperSlide>
       ))}
        {hasNextPage && (

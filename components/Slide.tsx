@@ -7,9 +7,13 @@ import {
   Slide as SlideUnionType,
   HtmlSlide,
   ImageSlide,
+  VideoSlide,
 } from '@/lib/types';
 import { useStore, ModalType } from '@/store/useStore';
 import { MessageCircle } from 'lucide-react';
+import VideoPlayer from './VideoPlayer';
+import VideoControls from './VideoControls';
+import { shallow } from 'zustand/shallow';
 
 // --- Prop Types for Sub-components ---
 interface HtmlContentProps {
@@ -51,8 +55,28 @@ const ImageContent = ({ slide }: ImageContentProps) => {
 };
 
 const SlideUI = ({ slide }: SlideUIProps) => {
-    const setActiveModal = useStore((state) => state.setActiveModal);
-    const togglePlay = useStore((state) => state.togglePlay);
+    const {
+        activeModal,
+        setActiveModal,
+        togglePlay,
+        currentTime,
+        duration,
+        isPlaying,
+        isMuted,
+        seek,
+        setIsMuted
+    } = useStore(state => ({
+        activeModal: state.activeModal,
+        setActiveModal: state.setActiveModal,
+        togglePlay: state.togglePlay,
+        currentTime: state.currentTime,
+        duration: state.duration,
+        isPlaying: state.isPlaying,
+        isMuted: state.isMuted,
+        seek: state.seek,
+        setIsMuted: state.setIsMuted,
+    }), shallow);
+
 
     const handleComment = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -67,6 +91,8 @@ const SlideUI = ({ slide }: SlideUIProps) => {
             togglePlay();
         }
     }
+
+    const isVideoSlide = slide.type === 'video';
 
     return (
       <div
@@ -98,6 +124,18 @@ const SlideUI = ({ slide }: SlideUIProps) => {
                 <span className="text-sm font-bold">{slide.initialComments}</span>
             </button>
         </div>
+
+        {isVideoSlide && (
+            <VideoControls
+              currentTime={currentTime}
+              duration={duration}
+              isPlaying={isPlaying}
+              isMuted={isMuted}
+              onTogglePlay={togglePlay}
+              onToggleMute={() => setIsMuted(!isMuted)}
+              onSeek={seek}
+            />
+        )}
       </div>
     );
   };
@@ -106,15 +144,16 @@ const SlideUI = ({ slide }: SlideUIProps) => {
 
 interface SlideProps {
     slide: SlideUnionType;
+    isActive: boolean;
 }
 
 const Slide = memo<SlideProps>(({ slide }) => {
     const renderContent = () => {
         switch (slide.type) {
             case 'video':
-                // The global video player will handle the actual video rendering.
-                // This component only needs to provide the UI overlay.
-                return <div className="w-full h-full bg-transparent" />;
+                const videoSlide = slide as VideoSlide;
+                if (!videoSlide.data?.hlsUrl) return <div className="w-full h-full bg-black" />;
+                return <VideoPlayer hlsUrl={videoSlide.data.hlsUrl} />;
             case 'html':
                 return <HtmlContent slide={slide as HtmlSlide} />;
             case 'image':
@@ -128,7 +167,6 @@ const Slide = memo<SlideProps>(({ slide }) => {
         <div className="relative w-full h-full bg-black">
             {renderContent()}
             <SlideUI slide={slide} />
-            {/* VideoControls are now removed as playback is global */}
         </div>
     );
 });
