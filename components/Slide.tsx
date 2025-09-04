@@ -40,16 +40,18 @@ const VideoContent = ({ slide, videoRef, setIsPlaying, setCurrentTime, setDurati
 
     useEffect(() => {
         const video = videoRef.current;
-        if (!video) return;
+        const slideData = slide.data;
+
+        if (!video || !slideData || !slideData.hlsUrl) return;
 
         const setupHls = () => {
             if (Hls.isSupported()) {
                 const hls = new Hls();
                 hlsRef.current = hls;
-                hls.loadSource(slide.data.hlsUrl);
+                hls.loadSource(slideData.hlsUrl as string);
                 hls.attachMedia(video);
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = slide.data.hlsUrl;
+                video.src = slideData.hlsUrl as string;
             }
         };
 
@@ -71,7 +73,7 @@ const VideoContent = ({ slide, videoRef, setIsPlaying, setCurrentTime, setDurati
             video.removeEventListener('timeupdate', onTimeUpdate);
             video.removeEventListener('durationchange', onDurationChange);
         };
-    }, [slide.data.hlsUrl, videoRef, setIsPlaying, setCurrentTime, setDuration]);
+    }, [slide.data, videoRef, setIsPlaying, setCurrentTime, setDuration]);
 
     return (
         <video
