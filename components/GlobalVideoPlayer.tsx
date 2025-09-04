@@ -17,7 +17,7 @@ const GlobalVideoPlayer: React.FC = () => {
     isMuted,
     togglePlay,
     setVideoElement,
-    preloadedVideoUrl
+    setIsPlaying,
   } = useStore(
     (state) => ({
       activeVideo: state.activeVideo,
@@ -25,7 +25,7 @@ const GlobalVideoPlayer: React.FC = () => {
       isMuted: state.isMuted,
       togglePlay: state.togglePlay,
       setVideoElement: state.setVideoElement,
-      preloadedVideoUrl: state.preloadedVideoUrl,
+      setIsPlaying: state.setIsPlaying,
     }),
     shallow
   );
@@ -35,7 +35,11 @@ const GlobalVideoPlayer: React.FC = () => {
     if (videoRef.current) {
       setVideoElement(videoRef);
       if (Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({
+          capLevelToPlayerSize: true,
+          maxBufferSize: 30,
+          maxBufferLength: 10,
+        });
         hls.attachMedia(videoRef.current);
         hlsRef.current = hls;
       }
@@ -45,43 +49,61 @@ const GlobalVideoPlayer: React.FC = () => {
     }
   }, [setVideoElement]);
 
-  // Effect for preloading the initial video
+  // Master effect to handle changing the active video source
   useEffect(() => {
+    const video = videoRef.current;
     const hls = hlsRef.current;
-    if (hls && preloadedVideoUrl) {
-      hls.loadSource(preloadedVideoUrl);
-    } else if (videoRef.current && preloadedVideoUrl) {
-      videoRef.current.src = preloadedVideoUrl;
-    }
-  }, [preloadedVideoUrl]);
+    if (!video) return;
 
-  // Effect to handle changing the active video source (after preloading)
-  useEffect(() => {
-    const hls = hlsRef.current;
-
-    if (activeVideo && activeVideo.type === 'video' && activeVideo.data) {
-      const videoUrl = activeVideo.data.hlsUrl;
-
-      // Don't interrupt the preloaded video if it's the same as the active one
-      if (videoUrl && videoUrl === preloadedVideoUrl && videoRef.current?.src === videoUrl) {
-        return;
+    if (!activeVideo || activeVideo.type !== 'video' || !activeVideo.data?.hlsUrl) {
+      video.pause();
+      setIsPlaying(false);
+      if (hls) {
+        hls.stopLoad();
       }
-
-      if (hls && videoUrl) {
-        hls.loadSource(videoUrl);
-      } else if (videoRef.current && videoUrl) {
-        videoRef.current.src = videoUrl;
-      }
+      video.removeAttribute('src');
+      return;
     }
-  }, [activeVideo, preloadedVideoUrl]);
 
-  // Effect to handle play/pause
+    const videoUrl = activeVideo.data.hlsUrl;
+
+    video.pause();
+    setIsPlaying(false);
+
+    const startPlayback = () => {
+      video.play().then(() => {
+        setIsPlaying(true);
+      }).catch(e => {
+        console.error("Autoplay was prevented.", e);
+        setIsPlaying(false);
+      });
+    };
+
+    if (hls && videoUrl) {
+      hls.off(Hls.Events.MANIFEST_PARSED);
+      hls.once(Hls.Events.MANIFEST_PARSED, () => {
+        startPlayback();
+      });
+      hls.loadSource(videoUrl);
+    } else if (videoUrl) {
+      video.src = videoUrl;
+      const onCanPlay = () => {
+        startPlayback();
+        video.removeEventListener('canplay', onCanPlay);
+      };
+      video.addEventListener('canplay', onCanPlay);
+    }
+  }, [activeVideo, setIsPlaying]);
+
+  // Effect to handle manual play/pause toggle by the user
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     if (isPlaying) {
-      video.play().catch(e => console.error("Play failed", e));
+      if (video.currentSrc || video.src) {
+        video.play().catch(e => console.error("Play failed", e));
+      }
     } else {
       video.pause();
     }
@@ -95,35 +117,41 @@ const GlobalVideoPlayer: React.FC = () => {
     }
   }, [isMuted]);
 
-  // Effect to handle video ending, time updates, and duration changes
+  // Effect to handle video events like ending, time updates, etc.
   useEffect(() => {
     const video = videoRef.current;
+    const hls = hlsRef.current;
     if (!video) return;
 
     const handleEnded = () => {
-      if (useStore.getState().isPlaying) {
-        useStore.getState().togglePlay();
-      }
+      useStore.getState().setIsPlaying(false);
     };
 
     const handleTimeUpdate = () => {
       useStore.getState().setCurrentTime(video.currentTime);
     };
 
-    const handleDurationChange = () => {
-      useStore.getState().setDuration(video.duration);
+    // Use HLS events for more reliable metadata
+    const handleManifestLoaded = () => {
+        if (video.duration && isFinite(video.duration)) {
+            useStore.getState().setDuration(video.duration);
+        }
     };
 
     video.addEventListener('ended', handleEnded);
     video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('durationchange', handleDurationChange);
+    hls?.on(Hls.Events.MANIFEST_LOADED, handleManifestLoaded);
+    // Fallback for non-HLS
+    video.addEventListener('durationchange', handleManifestLoaded);
+
 
     return () => {
       video.removeEventListener('ended', handleEnded);
       video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('durationchange', handleDurationChange);
+      hls?.off(Hls.Events.MANIFEST_LOADED, handleManifestLoaded);
+      video.removeEventListener('durationchange', handleManifestLoaded);
     };
-  }, []); // Empty dependency array to run only once
+  }, []); // This effect should only run once to attach listeners.
 
   return (
     <div className="absolute inset-0 z-0">
@@ -131,14 +159,12 @@ const GlobalVideoPlayer: React.FC = () => {
         ref={videoRef}
         className="w-full h-full object-cover"
         playsInline
-        loop
+        controls
       />
-      <div
-        className="absolute inset-0 flex items-center justify-center"
-        onClick={togglePlay}
-      >
-        <AnimatePresence>
-          {!isPlaying && (
+      {/* The click-to-play logic is now handled by the SlideUI component overlay */}
+      <AnimatePresence>
+        {!isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 1.5 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -147,9 +173,9 @@ const GlobalVideoPlayer: React.FC = () => {
             >
               <Play className="w-16 h-16 text-white/70" fill="white" />
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
