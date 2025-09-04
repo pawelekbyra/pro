@@ -16,6 +16,8 @@ const fetchSlides = async ({ pageParam = '' }) => {
 
 const MainFeed = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const {
     data,
     fetchNextPage,
@@ -55,6 +57,12 @@ const MainFeed = () => {
     };
   }, [hasNextPage, fetchNextPage]);
 
+  const scrollToTop = () => {
+    scrollContainerRef.current?.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   if (isLoading && slides.length === 0) {
     return <div className="w-screen h-screen bg-black flex items-center justify-center"><Skeleton className="w-full h-full" /></div>;
@@ -65,10 +73,14 @@ const MainFeed = () => {
   }
 
   return (
-    <div className="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
+    <div ref={scrollContainerRef} className="w-full h-screen overflow-y-scroll snap-y snap-mandatory">
       {slides.map((slide, index) => (
         <div key={slide.id} className="h-full w-full snap-start">
-          <Slide slide={slide} />
+          <Slide
+            slide={slide}
+            isLastSlide={!hasNextPage && index === slides.length - 1}
+            onScrollToTop={scrollToTop}
+          />
         </div>
       ))}
        {hasNextPage && (
