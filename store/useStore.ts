@@ -19,6 +19,8 @@ interface AppState {
   setActiveModal: (modal: ModalType) => void;
   setIsMuted: (isMuted: boolean) => void;
   togglePlay: () => void;
+  setIsPlaying: (isPlaying: boolean) => void;
+  toggleMute: () => void;
   setVideoElement: (element: React.RefObject<HTMLVideoElement>) => void;
   setPreloadedVideoUrl: (url: string) => void;
   setCurrentTime: (time: number) => void;
@@ -33,7 +35,7 @@ export const useStore = create<AppState>((set, get) => ({
   // --- STATE ---
   activeModal: null,
   activeVideo: null,
-  isMuted: true,
+  isMuted: false, // Start with sound on, per user request
   isPlaying: false,
   videoElement: null,
   preloadedVideoUrl: null,
@@ -41,13 +43,18 @@ export const useStore = create<AppState>((set, get) => ({
   duration: 0,
 
   // --- ACTIONS ---
-  setActiveVideo: (video) => set({ activeVideo: video, isPlaying: true, currentTime: 0, duration: 0 }),
+  // This should NOT automatically play. The player component will handle that.
+  setActiveVideo: (video) => set({ activeVideo: video, currentTime: 0, duration: 0 }),
 
   setActiveModal: (modal) => set({ activeModal: modal }),
 
   setIsMuted: (isMuted) => set({ isMuted: isMuted }),
 
   togglePlay: () => set((state) => ({ isPlaying: !state.isPlaying })),
+
+  setIsPlaying: (isPlaying) => set({ isPlaying }),
+
+  toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
 
   setVideoElement: (element) => set({ videoElement: element }),
 
