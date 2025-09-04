@@ -89,7 +89,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
       },
       {
         root: null,
-        rootMargin: '0px',
+        rootMargin: '100% 0px', // Preload one viewport height away
         threshold: 0.6, // 60% of the video must be visible to play
       }
     );
@@ -106,9 +106,23 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ hlsUrl }) => {
     };
   }, []);
 
+  const handleVideoClick = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play();
+      playVideo();
+    } else {
+      video.pause();
+      pauseVideo();
+    }
+  };
+
   return (
     <video
       ref={videoRef}
+      onClick={handleVideoClick}
       className="absolute top-0 left-0 w-full h-full object-cover z-0"
       playsInline
       loop
