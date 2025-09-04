@@ -49,6 +49,7 @@
     <link rel="stylesheet" href="prosta-wersja/style.css">
 </head>
 <body>
+    <button id="mock-login-toggle" style="position: fixed; top: 10px; left: 10px; z-index: 9999;">Toggle Login</button>
     <div id="preloader">
         <div class="preloader-icon-container">
             <img src="https://pawelperfect.pl/wp-content/uploads/2025/07/output-onlinepngtools-1-1.png" alt="Ting Tong Logo" class="splash-icon">
@@ -107,10 +108,6 @@
                     </button>
                     <button class="icon-button shareButton" data-action="share" data-translate-title="shareTitle" data-translate-aria-label="shareAriaLabel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l6 6-6 6M21 11H9a6 6 0 0 0-6 6" /></svg><div class="icon-label" data-translate-key="shareText">Szeruj</div></button>
                     <button class="icon-button infoButton" data-action="open-info-modal" data-translate-title="infoTitle" data-translate-aria-label="infoAriaLabel" aria-controls="infoModal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" /><line x1="8" y1="8" x2="16" y2="8" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="8" y1="16" x2="12" y2="16" /></svg><div class="icon-label" data-translate-key="infoText">Info</div></button>
-                    <button class="icon-button languageButton" data-action="toggle-language" data-translate-aria-label="languageAriaLabel">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="1.5" fill="none"/><line x1="2" y1="12" x2="22" y2="12" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="10" stroke-width="1.5" fill="none"/></svg>
-                        <div class="icon-label language-label" data-translate-key="languageText">PL</div>
-                    </button>
                     <button class="icon-button tipButton" data-action="show-tip-jar" data-translate-title="tipTitle" data-translate-aria-label="tipAriaLabel">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
                         <div class="icon-label" data-translate-key="tipText">Napiwek</div>
@@ -177,11 +174,11 @@
     </div>
 
     <!-- New Account Modal -->
-    <div class="account-modal-overlay" id="accountModal">
+    <div class="account-modal-overlay hidden" id="accountModal">
         <div class="account-modal-content">
             <!-- Header -->
             <div class="account-header">
-                <h2>Profil</h2>
+                <h2 id="account-header-title">Profil</h2>
                 <button class="close-btn" data-action="close-account-modal">&times;</button>
             </div>
 
@@ -196,166 +193,89 @@
             <div class="account-content">
                 <!-- Profile Tab -->
                 <div class="tab-pane active" id="profile-tab">
-                    <!-- Avatar Wizytówka -->
+                    <!-- Avatar section from old design - can be reused -->
                     <div class="avatar-section">
                         <div class="avatar-wrapper">
                             <div class="avatar-container">
                                 <img src="" alt="Avatar" class="avatar-img" id="userAvatar">
                             </div>
-                            <button class="avatar-edit-btn" id="avatarEditBtn" title="Zmień avatar">
-                                +
-                            </button>
+                            <button class="avatar-edit-btn" id="avatarEditBtn" title="Zmień avatar">+</button>
                         </div>
                         <div class="avatar-info">
                             <div class="avatar-name" id="displayName"></div>
                             <div class="avatar-email" id="userEmail"></div>
                             <div class="user-badge">
-                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
-                                </svg>
+                                <svg class="badge-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/></svg>
                                 Patron
                             </div>
                         </div>
                     </div>
-
-                    <!-- Formularz danych - Osobna ramka -->
+                    <!-- Form section from old design - can be reused -->
                     <div class="form-section">
                         <h3 class="section-title">Dane osobowe</h3>
-
                         <form id="profileForm">
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Imię</label>
-                                    <input type="text" class="form-input" placeholder="Twoje imię" id="firstName" value="">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Nazwisko</label>
-                                    <input type="text" class="form-input" placeholder="Twoje nazwisko" id="lastName" value="">
-                                </div>
+                                <div class="form-group"><label class="form-label">Imię</label><input type="text" class="form-input" placeholder="Twoje imię" id="firstName" value=""></div>
+                                <div class="form-group"><label class="form-label">Nazwisko</label><input type="text" class="form-input" placeholder="Twoje nazwisko" id="lastName" value=""></div>
                             </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-input" placeholder="email@domena.pl" id="email" value="">
-                            </div>
-
-                            <button type="submit" class="btn-primary" id="saveProfileBtn">
-                                Zapisz zmiany
-                            </button>
-                            <div class="status-message status-success" id="profileSuccess">
-                                Profil został zaktualizowany!
-                            </div>
-                            <div class="status-message status-error" id="profileError">
-                                Wystąpił błąd podczas aktualizacji profilu.
-                            </div>
+                            <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" placeholder="email@domena.pl" id="email" value=""></div>
+                            <button type="submit" class="btn-primary" id="saveProfileBtn">Zapisz zmiany</button>
+                            <div class="status-message status-success" id="profileSuccess"></div>
+                            <div class="status-message status-error" id="profileError"></div>
                         </form>
                     </div>
-
-                    <!-- Ustawienia - Trzecia ramka -->
+                    <!-- Settings section from old design - can be reused -->
                     <div class="settings-section">
                         <h3 class="section-title">Ustawienia</h3>
-
-                        <!-- Zgoda na maile -->
-                        <div class="toggle-container">
-                            <label class="toggle-label">Zgoda na maile</label>
-                            <div class="toggle-switch" id="emailConsent">
-                                <div class="toggle-slider"></div>
-                            </div>
-                        </div>
-
-                        <!-- Język maili -->
+                        <div class="toggle-container"><label class="toggle-label">Zgoda na maile</label><div class="toggle-switch" id="emailConsent"><div class="toggle-slider"></div></div></div>
                         <div class="form-group">
                             <label class="form-label">Język maili</label>
                             <div class="language-selector">
-                                <div class="language-option active" data-lang="pl">
-                                    Polski
-                                </div>
-                                <div class="language-option" data-lang="en">
-                                    English
-                                </div>
+                                <div class="language-option active" data-lang="pl">Polski</div>
+                                <div class="language-option" data-lang="en">English</div>
                             </div>
                         </div>
-
-                        <button type="button" class="btn-primary" id="saveSettingsBtn">
-                            Zapisz ustawienia
-                        </button>
-
-                        <div class="status-message status-success" id="settingsSuccess">
-                            Ustawienia zostały zapisane!
-                        </div>
-                        <div class="status-message status-error" id="settingsError">
-                            Wystąpił błąd podczas zapisywania ustawień.
-                        </div>
+                        <button type="button" class="btn-primary" id="saveSettingsBtn">Zapisz ustawienia</button>
+                        <div class="status-message status-success" id="settingsSuccess"></div>
+                        <div class="status-message status-error" id="settingsError"></div>
                     </div>
                 </div>
 
                 <!-- Password Tab -->
                 <div class="tab-pane" id="password-tab">
-                    <div class="profile-section">
+                    <div class="form-section">
                         <h3 class="section-title">Zmiana hasła</h3>
-
                         <form id="passwordForm">
+                            <div class="form-group"><label class="form-label">Obecne hasło</label><input type="password" class="form-input" placeholder="Wprowadź obecne hasło" id="currentPassword"></div>
+                            <div class="form-group"><label class="form-label">Nowe hasło</label><input type="password" class="form-input" placeholder="Minimum 8 znaków" id="newPassword"></div>
                             <div class="form-group">
-                                <label class="form-label">Obecne hasło</label>
-                                <input type="password" class="form-input" placeholder="Wprowadź obecne hasło" id="currentPassword">
+                                <label class="form-label">Powtórz nowe hasło</label><input type="password" class="form-input" placeholder="Powtórz nowe hasło" id="confirmPassword">
+                                <div class="helper-text">Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.</div>
                             </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Nowe hasło</label>
-                                <input type="password" class="form-input" placeholder="Minimum 8 znaków" id="newPassword">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Powtórz nowe hasło</label>
-                                <input type="password" class="form-input" placeholder="Powtórz nowe hasło" id="confirmPassword">
-                                <div class="helper-text">
-                                    Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn-primary" id="changePasswordBtn">
-                                Zmień hasło
-                            </button>
-                             <div class="status-message status-success" id="passwordSuccess">
-                                Hasło zostało zmienione!
-                            </div>
-                            <div class="status-message status-error" id="passwordError">
-                                Wystąpił błąd podczas zmiany hasła.
-                            </div>
+                            <button type="submit" class="btn-primary" id="changePasswordBtn">Zmień hasło</button>
+                            <div class="status-message status-success" id="passwordSuccess"></div>
+                            <div class="status-message status-error" id="passwordError"></div>
                         </form>
                     </div>
                 </div>
 
                 <!-- Delete Tab -->
                 <div class="tab-pane" id="delete-tab">
-                    <div class="profile-section">
+                    <div class="form-section">
                         <h3 class="section-title">Usuń konto</h3>
-
-                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                            <h4 style="color: #ef4444; margin-bottom: 12px; font-size: 16px;">⚠️ Uwaga!</h4>
-                            <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; line-height: 1.5;">
-                                Ta operacja jest nieodwracalna. Wszystkie Twoje dane, filmy i ustawienia zostaną trwale usunięte.
-                            </p>
+                        <div class="warning-box">
+                            <h4>⚠️ Uwaga!</h4>
+                            <p>Ta operacja jest nieodwracalna. Wszystkie Twoje dane, filmy i ustawienia zostaną trwale usunięte.</p>
                         </div>
-
                         <form id="deleteForm">
                             <div class="form-group">
                                 <label class="form-label">Aby potwierdzić, wpisz: <strong>USUWAM KONTO</strong></label>
                                 <input type="text" class="form-input" placeholder="USUWAM KONTO" id="deleteConfirmation">
-                                <div class="helper-text">
-                                    Po usunięciu konta zostaniesz automatycznie wylogowany.
-                                </div>
+                                <div class="helper-text">Po usunięciu konta zostaniesz automatycznie wylogowany.</div>
                             </div>
-
-                            <button type="submit" class="btn-danger" id="deleteAccountBtn" disabled>
-                                Trwale usuń konto
-                            </button>
-                            <div class="status-message status-success" id="deleteSuccess">
-                                Konto zostało usunięte. Trwa wylogowywanie...
-                            </div>
-                            <div class="status-message status-error" id="deleteError">
-                                Wystąpił błąd podczas usuwania konta.
-                            </div>
+                            <button type="submit" class="btn-danger" id="deleteAccountBtn" disabled>Trwale usuń konto</button>
+                            <div class="status-message status-success" id="deleteSuccess"></div>
+                            <div class="status-message status-error" id="deleteError"></div>
                         </form>
                     </div>
                 </div>
@@ -395,6 +315,28 @@
     <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
     <!-- Hidden containers for WordPress to render shortcodes -->
     <div id="um-login-render-container" style="display: none;">[tt_login_form]</div>
+
+    <!-- PWA Install Prompt Bar (Android/Desktop) -->
+    <div id="pwa-install-bar" class="pwa-prompt hidden">
+        <div class="pwa-prompt-content">
+            <h3 class="pwa-prompt-title">Zainstaluj aplikację!</h3>
+            <p class="pwa-prompt-description">Dodaj Ting Tong do ekranu głównego, aby mieć szybki dostęp.</p>
+        </div>
+        <button id="pwa-install-button" class="pwa-prompt-button">Zainstaluj</button>
+    </div>
+
+    <!-- PWA Instructions Overlay (iOS) -->
+    <div id="pwa-ios-instructions" class="pwa-prompt-ios hidden">
+        <div class="pwa-ios-header">
+            <h3>Jak zainstalować aplikację</h3>
+            <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
+        </div>
+        <div class="pwa-ios-body">
+            <p>1. Stuknij ikonę **udostępniania** w przeglądarce.</p>
+            <p>2. Wybierz **"Dodaj do ekranu początkowego"**.</p>
+            <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
+        </div>
+    </div>
 
     <script src="prosta-wersja/script.js" defer></script>
 </body>
