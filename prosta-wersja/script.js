@@ -921,14 +921,6 @@
                 }
             }
 
-            function handleLanguageToggle() {
-                const newLang = State.get('currentLang') === 'pl' ? 'en' : 'pl';
-                State.set('currentLang', newLang);
-                localStorage.setItem('tt_lang', newLang);
-                UI.updateTranslations();
-                Notifications.render();
-            }
-
             return {
                 handleNotificationClick,
                 mainClickHandler: (e) => {
@@ -945,7 +937,6 @@
                     switch (action) {
                         case 'toggle-like': handleLikeToggle(actionTarget); break;
                         case 'share': handleShare(actionTarget); break;
-                        case 'toggle-language': handleLanguageToggle(); break;
                         case 'open-comments-modal': UI.openModal(UI.DOM.commentsModal); break;
                         case 'open-info-modal': UI.openModal(UI.DOM.infoModal); break;
                         case 'open-account-modal':
@@ -1584,4 +1575,89 @@
         })();
 
         App.init();
+
+        /**
+         * ==========================================================================
+         * 10. PWA INSTALL PROMPT LOGIC
+         * ==========================================================================
+         */
+        const PWA = (function() {
+            let installPromptEvent = null;
+            const installBar = document.getElementById('pwa-install-bar');
+            const installButton = document.getElementById('pwa-install-button');
+            const iosInstructions = document.getElementById('pwa-ios-instructions');
+            const iosCloseButton = document.getElementById('pwa-ios-close-button');
+
+            function init() {
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    return; // Already installed
+                }
+
+                const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    installPromptEvent = e;
+                    if (installBar) {
+                        installBar.classList.remove('hidden');
+                    }
+                });
+
+                if (installButton) {
+                    installButton.addEventListener('click', () => {
+                        if (installPromptEvent) {
+                            installPromptEvent.prompt();
+                            installPromptEvent.userChoice.then(() => {
+                                installPromptEvent = null;
+                                if (installBar) {
+                                    installBar.classList.add('hidden');
+                                }
+                            });
+                        } else if (isIOS && iosInstructions) {
+                            iosInstructions.classList.remove('hidden');
+                        }
+                    });
+                }
+
+                // Show the bar for iOS immediately if not installed
+                if(isIOS && installBar) {
+                     installBar.classList.remove('hidden');
+                }
+
+                if (iosCloseButton) {
+                    iosCloseButton.addEventListener('click', () => {
+                        if (iosInstructions) {
+                            iosInstructions.classList.add('hidden');
+                        }
+                    });
+                }
+            }
+
+            return { init };
+        })();
+
+        PWA.init();
+
+        const mockLoginToggle = document.getElementById('mock-login-toggle');
+        if (mockLoginToggle) {
+            mockLoginToggle.addEventListener('click', () => {
+                const newLoginState = !State.get('isUserLoggedIn');
+                State.set('isUserLoggedIn', newLoginState);
+                TingTongData.isLoggedIn = newLoginState; // Update mock global object
+
+                // Simulate data refresh that would happen on real login/logout
+                if (newLoginState) {
+                    UI.showAlert('Zalogowano (mock).');
+                    // In a real app, you might fetch user-specific data here
+                } else {
+                    UI.showAlert('Wylogowano (mock).');
+                    // Reset any user-specific data
+                    slidesData.forEach(slide => slide.isLiked = false);
+                }
+
+                UI.updateUIForLoginState();
+
+                mockLoginToggle.textContent = newLoginState ? 'Mock Logout' : 'Mock Login';
+            });
+        }
     });
