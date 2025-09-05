@@ -551,7 +551,16 @@
             function renderSlides() {
                 DOM.container.innerHTML = '';
                 if (slidesData.length === 0) return;
+
+                const addClone = (slideData, index, isFirst) => {
+                    const clone = createSlideElement(slideData, index);
+                    clone.dataset.isClone = 'true';
+                    DOM.container.appendChild(clone);
+                };
+
+                addClone(slidesData[slidesData.length - 1], slidesData.length - 1, false);
                 slidesData.forEach((data, index) => DOM.container.appendChild(createSlideElement(data, index)));
+                addClone(slidesData[0], 0, true);
             }
 
             return {
@@ -1522,151 +1531,129 @@
          * 9. APP INITIALIZATION
          * ==========================================================================
          */
-        const App = (function() {
-            function _initializeGlobalListeners() {
-                Utils.setAppHeightVar();
-                window.addEventListener('resize', Utils.setAppHeightVar);
-                window.addEventListener('orientationchange', Utils.setAppHeightVar);
+const App = (function() {
+    function _initializeGlobalListeners() {
+        Utils.setAppHeightVar();
+        window.addEventListener('resize', Utils.setAppHeightVar);
+        window.addEventListener('orientationchange', Utils.setAppHeightVar);
 
-                ['touchstart', 'pointerdown', 'click', 'keydown'].forEach(evt => {
-                    document.addEventListener(evt, Utils.recordUserGesture, { passive: true });
-                });
+        ['touchstart', 'pointerdown', 'click', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, Utils.recordUserGesture, { passive: true });
+        });
 
-                document.body.addEventListener('click', Handlers.mainClickHandler);
-                UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
+        document.body.addEventListener('click', Handlers.mainClickHandler);
+        document.querySelector('body').addEventListener('submit', Handlers.formSubmitHandler); // Use body for event delegation
 
-                document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
-                    modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
-                    modal.querySelector('.modal-close-btn, .topbar-close-btn')?.addEventListener('click', () => UI.closeModal(modal));
-                });
+        document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
+            modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
+            modal.querySelector('.modal-close-btn, .topbar-close-btn')?.addEventListener('click', () => UI.closeModal(modal));
+        });
 
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        const visibleModal = document.querySelector('.modal-overlay.visible:not(#accountModal):not(#cropModal)');
-                        if(visibleModal) UI.closeModal(visibleModal);
-                        if(UI.DOM.notificationPopup.classList.contains('visible')) UI.DOM.notificationPopup.classList.remove('visible');
-                    }
-                });
-
-                document.addEventListener('click', (event) => {
-                    const popup = UI.DOM.notificationPopup;
-                    if (popup && popup.classList.contains('visible') &&
-                        !popup.contains(event.target) &&
-                        !event.target.closest('[data-action="toggle-notifications"]')) {
-                        popup.classList.remove('visible');
-                    }
-                });
-
-                UI.DOM.notificationPopup.querySelector('.notification-list').addEventListener('click', Handlers.handleNotificationClick);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const visibleModal = document.querySelector('.modal-overlay.visible:not(#accountModal):not(#cropModal)');
+                if(visibleModal) UI.closeModal(visibleModal);
+                if(UI.DOM.notificationPopup.classList.contains('visible')) UI.DOM.notificationPopup.classList.remove('visible');
             }
+        });
 
-            async function _fetchAndUpdateSlideData() {
-                const json = await API.fetchSlidesData();
-                if (json.success && Array.isArray(json.data)) {
-                    const newDataMap = new Map(json.data.map(item => [String(item.likeId), item]));
-                    slidesData.forEach(existingSlide => {
-                        const updatedInfo = newDataMap.get(String(existingSlide.likeId));
-                        if (updatedInfo) {
-                            existingSlide.isLiked = updatedInfo.isLiked;
-                            existingSlide.initialLikes = updatedInfo.initialLikes;
-                            UI.applyLikeStateToDom(existingSlide.likeId, existingSlide.isLiked, existingSlide.initialLikes);
-                        }
-                    });
+        document.addEventListener('click', (event) => {
+            const popup = UI.DOM.notificationPopup;
+            if (popup && popup.classList.contains('visible') &&
+                !popup.contains(event.target) &&
+                !event.target.closest('[data-action="toggle-notifications"]')) {
+                popup.classList.remove('visible');
+            }
+        });
+
+        UI.DOM.notificationPopup.querySelector('.notification-list').addEventListener('click', Handlers.handleNotificationClick);
+    }
+
+    async function _fetchAndUpdateSlideData() {
+        const json = await API.fetchSlidesData();
+        if (json.success && Array.isArray(json.data)) {
+            const newDataMap = new Map(json.data.map(item => [String(item.likeId), item]));
+            slidesData.forEach(existingSlide => {
+                const updatedInfo = newDataMap.get(String(existingSlide.likeId));
+                if (updatedInfo) {
+                    existingSlide.isLiked = updatedInfo.isLiked;
+                    existingSlide.initialLikes = updatedInfo.initialLikes;
+                    UI.applyLikeStateToDom(existingSlide.likeId, existingSlide.isLiked, existingSlide.initialLikes);
                 }
-            }
+            });
+        }
+    }
 
-            function _startApp(selectedLang) {
-                State.set('currentLang', selectedLang);
-                localStorage.setItem('tt_lang', selectedLang);
+function _startApp(selectedLang) {
+    State.set('currentLang', selectedLang);
+    localStorage.setItem('tt_lang', selectedLang);
 
-                UI.renderSlides();
-                UI.updateTranslations();
-                VideoManager.init();
+    UI.renderSlides();
+    UI.updateTranslations();
+    VideoManager.init();
 
-                setTimeout(() => {
-                    UI.DOM.preloader.classList.add('preloader-hiding');
-                    UI.DOM.container.classList.add('ready');
-                    UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
-                }, 1000);
+    setTimeout(() => {
+        UI.DOM.preloader.classList.add('preloader-hiding');
+        UI.DOM.container.classList.add('ready');
+        UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
+    }, 1000);
 
-                if (slidesData.length > 0) {
-                    // Set scroll to top, no clones, no special handling needed.
-                    UI.DOM.container.scrollTo({ top: 0, behavior: 'auto' });
-                }
-
-                let programmaticScrollTimeout = null;
-                const myScrollTo = (options) => {
-                    clearTimeout(programmaticScrollTimeout);
-                    UI.DOM.container.scrollTo(options);
-                    programmaticScrollTimeout = setTimeout(() => {
-                        programmaticScrollTimeout = null;
-                    }, 150); // Ważne: czas musi być dłuższy niż throttle
-                };
-
-                let lastScrollPosition = 0;
-                const handleScroll = Utils.throttle(() => {
-                    if (programmaticScrollTimeout) return;
-
-                    const viewHeight = window.innerHeight;
-                    const scrollPosition = UI.DOM.container.scrollTop;
-
-                    // --- Logika wykrywania zmiany slajdu ---
-                    const newIndex = Math.round(scrollPosition / viewHeight);
-                    if (newIndex !== State.get('currentSlideIndex') && newIndex >= 0 && newIndex < slidesData.length) {
-                        const oldIndex = State.get('currentSlideIndex');
-                        State.set('currentSlideIndex', newIndex);
-                        VideoManager.onActiveSlideChanged(newIndex, oldIndex);
-                        UI.updateUIForLoginState();
+    if (slidesData.length > 0) {
+        const viewHeight = window.innerHeight;
+        UI.DOM.container.classList.add('no-transition');
+        UI.DOM.container.scrollTo({ top: viewHeight, behavior: 'auto' });
+        requestAnimationFrame(() => {
+            UI.DOM.container.classList.remove('no-transition');
+            UI.DOM.container.addEventListener('scroll', () => {
+                clearTimeout(window.scrollEndTimeout);
+                window.scrollEndTimeout = setTimeout(() => {
+                    const physicalIndex = Math.round(UI.DOM.container.scrollTop / viewHeight);
+                    if (physicalIndex === 0) {
+                        UI.DOM.container.classList.add('no-transition');
+                        UI.DOM.container.scrollTop = slidesData.length * viewHeight;
+                        requestAnimationFrame(() => UI.DOM.container.classList.remove('no-transition'));
+                    } else if (physicalIndex === slidesData.length + 1) {
+                        UI.DOM.container.classList.add('no-transition');
+                        UI.DOM.container.scrollTop = viewHeight;
+                        requestAnimationFrame(() => UI.DOM.container.classList.remove('no-transition'));
                     }
+                }, 50);
+            }, { passive: true });
+        });
+    }
+}
 
-                    // --- Logika nieskończonej pętli ---
-                    const isScrollingDown = scrollPosition > lastScrollPosition;
+    function _initializePreloader() {
+        setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
+        UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
+            button.addEventListener('click', () => {
+                UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
+                button.classList.add('is-selected');
+                setTimeout(() => _startApp(button.dataset.lang), 300);
+            }, { once: true });
+        });
+    }
 
-                    if (isScrollingDown && scrollPosition >= (slidesData.length - 1) * viewHeight) {
-                        // Jeśli przewijamy w dół z ostatniego slajdu, skocz na pierwszy
-                        myScrollTo({ top: 0, behavior: 'auto' });
-                    } else if (!isScrollingDown && scrollPosition <= 0) {
-                        // Jeśli przewijamy w górę z pierwszego slajdu, skocz na ostatni
-                        myScrollTo({ top: (slidesData.length - 1) * viewHeight, behavior: 'auto' });
-                    }
+    function _setInitialConfig() {
+        try {
+            const c = navigator.connection || navigator.webkitConnection;
+            if (c?.saveData) Config.LOW_DATA_MODE = true;
+            if (c?.effectiveType?.includes('2g')) Config.LOW_DATA_MODE = true;
+            if (c?.effectiveType?.includes('3g')) Config.HLS.maxAutoLevelCapping = 480;
+        } catch(_) {}
+    }
 
-                    lastScrollPosition = scrollPosition;
-                }, 50); // Ustaw throttle na 50ms (około 20 klatek na sekundę), co jest wystarczająco płynne.
-
-                UI.DOM.container.addEventListener('scroll', handleScroll, { passive: true });
-            }
-
-            function _initializePreloader() {
-                setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
-                UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
-                        button.classList.add('is-selected');
-                        setTimeout(() => _startApp(button.dataset.lang), 300);
-                    }, { once: true });
-                });
-            }
-
-            function _setInitialConfig() {
-                try {
-                    const c = navigator.connection || navigator.webkitConnection;
-                    if (c?.saveData) Config.LOW_DATA_MODE = true;
-                    if (c?.effectiveType?.includes('2g')) Config.LOW_DATA_MODE = true;
-                    if (c?.effectiveType?.includes('3g')) Config.HLS.maxAutoLevelCapping = 480;
-                } catch(_) {}
-            }
-
-            return {
-                init: () => {
-                    _setInitialConfig();
-                    _initializeGlobalListeners();
-                    AccountPanel.init();
-                    _initializePreloader();
-                    document.body.classList.add('loaded');
-                },
-                fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
-            };
-        })();
+    return {
+        init: () => {
+            _setInitialConfig();
+            _initializeGlobalListeners();
+            AccountPanel.init();
+            _initializePreloader();
+            document.body.classList.add('loaded');
+        },
+        fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
+    };
+})();
 
         App.init();
 
