@@ -1600,35 +1600,40 @@
                     UI.DOM.container.scrollTo(options);
                     programmaticScrollTimeout = setTimeout(() => {
                         programmaticScrollTimeout = null;
-                    }, 200); // Must be longer than throttle time
+                    }, 150); // Ważne: czas musi być dłuższy niż throttle
                 };
 
+                let lastScrollPosition = 0;
                 const handleScroll = Utils.throttle(() => {
                     if (programmaticScrollTimeout) return;
 
                     const viewHeight = window.innerHeight;
                     const scrollPosition = UI.DOM.container.scrollTop;
 
-                    // --- Slide change logic ---
+                    // --- Logika wykrywania zmiany slajdu ---
                     const newIndex = Math.round(scrollPosition / viewHeight);
-                    if (newIndex !== State.get('currentSlideIndex') && newIndex < slidesData.length) {
+                    if (newIndex !== State.get('currentSlideIndex') && newIndex >= 0 && newIndex < slidesData.length) {
                         const oldIndex = State.get('currentSlideIndex');
                         State.set('currentSlideIndex', newIndex);
                         VideoManager.onActiveSlideChanged(newIndex, oldIndex);
                         UI.updateUIForLoginState();
                     }
 
-                    // --- Infinite loop logic ---
-                    if (scrollPosition >= (slidesData.length - 1) * viewHeight + viewHeight * 0.5) {
-                        // At the end, scroll to top
-                        myScrollTo({ top: 1, behavior: 'auto' }); // Scroll to 1 instead of 0 to allow scrolling up
-                    } else if (scrollPosition < 1) { // If user scrolls up from the first slide
-                        // At the top, scroll to end
+                    // --- Logika nieskończonej pętli ---
+                    const isScrollingDown = scrollPosition > lastScrollPosition;
+
+                    if (isScrollingDown && scrollPosition >= (slidesData.length - 1) * viewHeight) {
+                        // Jeśli przewijamy w dół z ostatniego slajdu, skocz na pierwszy
+                        myScrollTo({ top: 0, behavior: 'auto' });
+                    } else if (!isScrollingDown && scrollPosition <= 0) {
+                        // Jeśli przewijamy w górę z pierwszego slajdu, skocz na ostatni
                         myScrollTo({ top: (slidesData.length - 1) * viewHeight, behavior: 'auto' });
                     }
-                }, 100);
 
-                UI.DOM.container.addEventListener('scroll', handleScroll);
+                    lastScrollPosition = scrollPosition;
+                }, 50); // Ustaw throttle na 50ms (około 20 klatek na sekundę), co jest wystarczająco płynne.
+
+                UI.DOM.container.addEventListener('scroll', handleScroll, { passive: true });
             }
 
             function _initializePreloader() {
