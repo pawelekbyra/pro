@@ -313,6 +313,25 @@
                 },
                 setAppHeightVar: () => {
                   document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+                },
+                debounce: function(func, delay) {
+                    let timeout;
+                    return function(...args) {
+                        const context = this;
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(context, args), delay);
+                    };
+                },
+                throttle: function(func, limit) {
+                    let inThrottle;
+                    return function(...args) {
+                        const context = this;
+                        if (!inThrottle) {
+                            func.apply(context, args);
+                            inThrottle = true;
+                            setTimeout(() => inThrottle = false, limit);
+                        }
+                    };
                 }
             };
         })();
@@ -532,16 +551,7 @@
             function renderSlides() {
                 DOM.container.innerHTML = '';
                 if (slidesData.length === 0) return;
-
-                const addClone = (slideData, index, isFirst) => {
-                    const clone = createSlideElement(slideData, index);
-                    clone.dataset.isClone = 'true';
-                    DOM.container.appendChild(clone);
-                };
-
-                addClone(slidesData[slidesData.length - 1], slidesData.length - 1, false);
                 slidesData.forEach((data, index) => DOM.container.appendChild(createSlideElement(data, index)));
-                addClone(slidesData[0], 0, true);
             }
 
             return {
@@ -564,24 +574,83 @@
          */
         const VideoManager = (function() {
             let hlsPromise = null;
-            const hlsInstances = new Map();
+            let hls = null; // Single, global HLS.js instance
             const attachedSet = new WeakSet();
-            const retryCounts = new WeakMap();
-            const hlsRecoverCounts = new Map();
             let playObserver, lazyObserver;
 
             window.TTStats = window.TTStats || { videoErrors: 0, videoRetries: 0, hlsErrors: 0, hlsRecovered: 0, ttfpSamples: 0, ttfpTotalMs: 0 };
 
-            function _loadHlsLibrary() {
-                if (window.Hls) return Promise.resolve();
-                if (!hlsPromise) {
-                    hlsPromise = import('https://cdn.jsdelivr.net/npm/hls.js@1.5.14/dist/hls.min.js')
-                        .catch(err => {
-                            console.error("Failed to load HLS.js", err);
-                            hlsPromise = null;
-                            throw err;
-                        });
+            function _setMp4Source(video, mp4Url) {
+                if (!video || !mp4Url) return;
+                // If HLS is attached, detach it first
+                if (hls && hls.media === video) {
+                    hls.detachMedia();
                 }
+                const finalUrl = Utils.toRelativeIfSameOrigin(Utils.fixProtocol(mp4Url));
+                const sourceEl = video.querySelector('source');
+                if (sourceEl) {
+                    sourceEl.src = finalUrl;
+                    sourceEl.type = 'video/mp4';
+                } else {
+                    const newSourceEl = document.createElement('source');
+                    newSourceEl.src = finalUrl;
+                    newSourceEl.type = 'video/mp4';
+                    video.prepend(newSourceEl);
+                }
+                video.load();
+            }
+
+            function _onHlsError(event, data) {
+                if (data.fatal) {
+                    const videoEl = hls.media;
+                    if (videoEl) {
+                        const sectionEl = videoEl.closest('.webyx-section');
+                        if (sectionEl) {
+                            const slideId = sectionEl.dataset.slideId;
+                            const slideData = slidesData.find(s => s.id === slideId);
+                            if (slideData && slideData.mp4Url) {
+                                console.error(`Fatal HLS error on slide ${slideId}, falling back to MP4.`, data);
+                                _setMp4Source(videoEl, slideData.mp4Url);
+                                return;
+                            }
+                        }
+                    }
+
+                    console.error('Fatal HLS error, attempting generic recovery...', data);
+                    switch (data.type) {
+                        case window.Hls.ErrorTypes.NETWORK_ERROR:
+                            hls.startLoad();
+                            break;
+                        case window.Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            hls.destroy();
+                            hls = null;
+                            break;
+                    }
+                }
+            }
+
+            function _initHls() {
+                if (hls) return Promise.resolve(hls);
+                if (hlsPromise) return hlsPromise; // Return existing promise if import is in progress
+
+                hlsPromise = import('https://cdn.jsdelivr.net/npm/hls.js@1.5.14/dist/hls.min.js')
+                    .then(() => {
+                        if (window.Hls?.isSupported()) {
+                            hls = new window.Hls(Config.HLS);
+                            hls.on(window.Hls.Events.ERROR, _onHlsError);
+                            return hls;
+                        } else {
+                            throw new Error("HLS.js is not supported");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Failed to load or initialize HLS.js", err);
+                        hlsPromise = null; // Allow retry on next call
+                        throw err;
+                    });
                 return hlsPromise;
             }
 
@@ -608,14 +677,6 @@
                 const canAttach = slideData && !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
                 if (!canAttach) return;
 
-                const setMp4Source = (mp4Url) => {
-                    if (!mp4Url) return;
-                    const finalUrl = Utils.toRelativeIfSameOrigin(Utils.fixProtocol(mp4Url));
-                    const sourceEl = video.querySelector('source');
-                    if (sourceEl) { sourceEl.src = finalUrl; sourceEl.type = 'video/mp4'; }
-                    video.load();
-                };
-
                 if (Config.USE_HLS && slideData.hlsUrl) {
                     const finalHlsUrl = Utils.toRelativeIfSameOrigin(Utils.fixProtocol(slideData.hlsUrl));
                     if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -623,25 +684,17 @@
                         if(sourceEl) { sourceEl.src = finalHlsUrl; sourceEl.type = 'application/vnd.apple.mpegurl'; }
                         video.load();
                     } else {
-                        _loadHlsLibrary().then(() => {
-                            if (window.Hls?.isSupported()) {
-                                if (hlsInstances.has(slideId)) hlsInstances.get(slideId).destroy();
-                                const hls = new window.Hls(Config.HLS);
-                                hls.loadSource(finalHlsUrl);
-                                hls.attachMedia(video);
-                                hls.on(window.Hls.Events.ERROR, (event, data) => {
-                                    if (data.fatal) {
-                                       hls.destroy(); hlsInstances.delete(slideId); setMp4Source(slideData.mp4Url);
-                                    }
-                                });
-                                hlsInstances.set(slideId, hls);
+                        _initHls().then(hlsInstance => {
+                            if (hlsInstance) {
+                                hlsInstance.loadSource(finalHlsUrl);
+                                hlsInstance.attachMedia(video);
                             } else {
-                                setMp4Source(slideData.mp4Url);
+                                _setMp4Source(video, slideData.mp4Url);
                             }
-                        }).catch(() => setMp4Source(slideData.mp4Url));
+                        }).catch(() => _setMp4Source(video, slideData.mp4Url));
                     }
                 } else {
-                    setMp4Source(slideData.mp4Url);
+                    _setMp4Source(video, slideData.mp4Url);
                 }
 
                 attachedSet.add(video);
@@ -651,10 +704,10 @@
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video) return;
                 try { video.pause(); } catch(e) {}
-                const slideId = sectionEl.dataset.slideId;
-                if (slideId && hlsInstances.has(slideId)) {
-                  try { hlsInstances.get(slideId).destroy(); } catch(e){}
-                  hlsInstances.delete(slideId);
+
+                if (hls && hls.media === video) {
+                  hls.stopLoad();
+                  hls.detachMedia();
                 }
                 const sourceEl = video.querySelector('source');
                 if (sourceEl) { sourceEl.removeAttribute('src'); }
@@ -781,9 +834,10 @@
                         seek(e);
                     });
 
+                    const throttledSeek = Utils.throttle(seek, 16); // Około 60 klatek na sekundę
                     progressEl.addEventListener('pointermove', (e) => {
                         if (e.pointerId !== pointerId) return;
-                        seek(e);
+                        throttledSeek(e);
                     });
 
                     const endDrag = (e) => {
@@ -1550,27 +1604,8 @@
                 }, 1000);
 
                 if (slidesData.length > 0) {
-                    const viewHeight = window.innerHeight;
-                    UI.DOM.container.classList.add('no-transition');
-                    UI.DOM.container.scrollTo({ top: viewHeight, behavior: 'auto' });
-                    requestAnimationFrame(() => {
-                        UI.DOM.container.classList.remove('no-transition');
-                        UI.DOM.container.addEventListener('scroll', () => {
-                            clearTimeout(window.scrollEndTimeout);
-                            window.scrollEndTimeout = setTimeout(() => {
-                                const physicalIndex = Math.round(UI.DOM.container.scrollTop / viewHeight);
-                                if (physicalIndex === 0) {
-                                    UI.DOM.container.classList.add('no-transition');
-                                    UI.DOM.container.scrollTop = slidesData.length * viewHeight;
-                                    requestAnimationFrame(() => UI.DOM.container.classList.remove('no-transition'));
-                                } else if (physicalIndex === slidesData.length + 1) {
-                                    UI.DOM.container.classList.add('no-transition');
-                                    UI.DOM.container.scrollTop = viewHeight;
-                                    requestAnimationFrame(() => UI.DOM.container.classList.remove('no-transition'));
-                                }
-                            }, 50);
-                        }, { passive: true });
-                    });
+                    // Set scroll to top, no clones, no special handling needed.
+                    UI.DOM.container.scrollTo({ top: 0, behavior: 'auto' });
                 }
             }
 
