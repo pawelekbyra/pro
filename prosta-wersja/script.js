@@ -1628,27 +1628,42 @@ function _startApp(selectedLang) {
     }, 1000);
 
     if (slidesData.length > 0) {
-        const viewHeight = window.innerHeight;
-        UI.DOM.container.classList.add('no-transition');
-        UI.DOM.container.scrollTo({ top: viewHeight, behavior: 'auto' });
-        requestAnimationFrame(() => {
-            UI.DOM.container.classList.remove('no-transition');
-            UI.DOM.container.addEventListener('scroll', () => {
-                clearTimeout(window.scrollEndTimeout);
-                window.scrollEndTimeout = setTimeout(() => {
-                    const physicalIndex = Math.round(UI.DOM.container.scrollTop / viewHeight);
-                    if (physicalIndex === 0) {
-                        UI.DOM.container.classList.add('no-transition');
-                        UI.DOM.container.scrollTop = slidesData.length * viewHeight;
-                        requestAnimationFrame(() => UI.DOM.container.classList.remove('no-transition'));
-                    } else if (physicalIndex === slidesData.length + 1) {
-                        UI.DOM.container.classList.add('no-transition');
-                        UI.DOM.container.scrollTop = viewHeight;
-                        requestAnimationFrame(() => UI.DOM.container.classList.remove('no-transition'));
+        const container = UI.DOM.container;
+        const viewHeight = container.clientHeight || window.innerHeight;
+
+        // Start at the first real slide without animation
+        container.scrollTo({ top: viewHeight, behavior: 'instant' });
+
+        const handleLooping = () => {
+            const clones = container.querySelectorAll('[data-is-clone="true"]');
+            if (clones.length < 2) return;
+
+            const firstClone = clones[1]; // Clone of the first slide, at the end
+            const lastClone = clones[0];  // Clone of the last slide, at the beginning
+
+            const observer = new IntersectionObserver((entries) => {
+                for (const entry of entries) {
+                    if (!entry.isIntersecting) continue;
+
+                    // Scrolled past the last slide to the first clone
+                    if (entry.target === firstClone) {
+                        container.scrollTo({ top: viewHeight, behavior: 'instant' });
                     }
-                }, 50);
-            }, { passive: true });
-        });
+                    // Scrolled before the first slide to the last clone
+                    else if (entry.target === lastClone) {
+                        const lastSlideY = slidesData.length * viewHeight;
+                        container.scrollTo({ top: lastSlideY, behavior: 'instant' });
+                    }
+                }
+            }, { threshold: 0.5 }); // 50% of the clone must be visible
+
+            observer.observe(firstClone);
+            observer.observe(lastClone);
+        };
+
+        // The content is ready, set up the looping mechanism.
+        // A small delay can help ensure the initial layout is fully stable.
+        setTimeout(handleLooping, 100);
     }
 }
 
