@@ -215,7 +215,6 @@
             height: calc(100% - var(--topbar-height));
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
-            scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
             opacity: 0; /* Hidden initially */
             transition: opacity 0.5s linear;
@@ -223,9 +222,6 @@
         }
         #webyx-container.ready {
             opacity: 1;
-        }
-        #webyx-container.no-transition {
-            scroll-behavior: auto;
         }
         .webyx-section {
             width: 100vw;
