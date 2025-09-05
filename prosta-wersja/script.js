@@ -576,7 +576,7 @@
             let hlsPromise = null;
             let hls = null; // Single, global HLS.js instance
             const attachedSet = new WeakSet();
-            let playObserver, lazyObserver;
+            let lazyObserver;
 
             window.TTStats = window.TTStats || { videoErrors: 0, videoRetries: 0, hlsErrors: 0, hlsRecovered: 0, ttfpSamples: 0, ttfpTotalMs: 0 };
 
@@ -794,22 +794,8 @@
             return {
                 init: () => {
                     _initLazyObserver();
-                    playObserver = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                const newIndex = parseInt(entry.target.dataset.index, 10);
-                                if (newIndex !== State.get('currentSlideIndex')) {
-                                    const oldIndex = State.get('currentSlideIndex');
-                                    State.set('currentSlideIndex', newIndex);
-                                    _onActiveSlideChanged(newIndex, oldIndex);
-                                    UI.updateUIForLoginState();
-                                }
-                            }
-                        });
-                    }, { root: UI.DOM.container, threshold: 0.75 });
-
-                    UI.DOM.container.querySelectorAll('.webyx-section:not([data-is-clone="true"])').forEach(section => playObserver.observe(section));
                 },
+                onActiveSlideChanged: _onActiveSlideChanged,
                 initProgressBar: (progressEl, videoEl) => {
                     if (!progressEl || !videoEl) return;
                     progressEl.classList.add('skeleton');
@@ -1607,6 +1593,42 @@
                     // Set scroll to top, no clones, no special handling needed.
                     UI.DOM.container.scrollTo({ top: 0, behavior: 'auto' });
                 }
+
+                let programmaticScrollTimeout = null;
+                const myScrollTo = (options) => {
+                    clearTimeout(programmaticScrollTimeout);
+                    UI.DOM.container.scrollTo(options);
+                    programmaticScrollTimeout = setTimeout(() => {
+                        programmaticScrollTimeout = null;
+                    }, 200); // Must be longer than throttle time
+                };
+
+                const handleScroll = Utils.throttle(() => {
+                    if (programmaticScrollTimeout) return;
+
+                    const viewHeight = window.innerHeight;
+                    const scrollPosition = UI.DOM.container.scrollTop;
+
+                    // --- Slide change logic ---
+                    const newIndex = Math.round(scrollPosition / viewHeight);
+                    if (newIndex !== State.get('currentSlideIndex') && newIndex < slidesData.length) {
+                        const oldIndex = State.get('currentSlideIndex');
+                        State.set('currentSlideIndex', newIndex);
+                        VideoManager.onActiveSlideChanged(newIndex, oldIndex);
+                        UI.updateUIForLoginState();
+                    }
+
+                    // --- Infinite loop logic ---
+                    if (scrollPosition >= (slidesData.length - 1) * viewHeight + viewHeight * 0.5) {
+                        // At the end, scroll to top
+                        myScrollTo({ top: 1, behavior: 'auto' }); // Scroll to 1 instead of 0 to allow scrolling up
+                    } else if (scrollPosition < 1) { // If user scrolls up from the first slide
+                        // At the top, scroll to end
+                        myScrollTo({ top: (slidesData.length - 1) * viewHeight, behavior: 'auto' });
+                    }
+                }, 100);
+
+                UI.DOM.container.addEventListener('scroll', handleScroll);
             }
 
             function _initializePreloader() {
