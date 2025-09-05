@@ -565,18 +565,33 @@
             }
 
             function renderSlides() {
+                const { DOM } = UI;
+                const currentIndex = State.get('currentSlideIndex');
+                const totalSlides = slidesData.length;
+
                 DOM.container.innerHTML = '';
-                if (slidesData.length === 0) return;
+                if (totalSlides === 0) return;
 
-                const addClone = (slideData, index, isFirst) => {
-                    const clone = createSlideElement(slideData, index);
-                    clone.dataset.isClone = 'true';
-                    DOM.container.appendChild(clone);
-                };
+                if (totalSlides === 1) {
+                    DOM.container.appendChild(createSlideElement(slidesData[0], 0));
+                    return;
+                }
 
-                addClone(slidesData[slidesData.length - 1], slidesData.length - 1, false);
-                slidesData.forEach((data, index) => DOM.container.appendChild(createSlideElement(data, index)));
-                addClone(slidesData[0], 0, true);
+                const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                const nextIndex = (currentIndex + 1) % totalSlides;
+
+                const prevSlide = createSlideElement(slidesData[prevIndex], prevIndex);
+                const currentSlide = createSlideElement(slidesData[currentIndex], currentIndex);
+                const nextSlide = createSlideElement(slidesData[nextIndex], nextIndex);
+
+                DOM.container.appendChild(prevSlide);
+                DOM.container.appendChild(currentSlide);
+                DOM.container.appendChild(nextSlide);
+
+                // Attach video sources for the initial viewport
+                VideoManager.attachSrc(prevSlide);
+                VideoManager.attachSrc(currentSlide);
+                VideoManager.attachSrc(nextSlide);
             }
 
             return {
@@ -587,7 +602,8 @@
                 updateUIForLoginState,
                 updateTranslations,
                 applyLikeStateToDom,
-                renderSlides
+                renderSlides,
+                createSlideElement
             };
         })();
 
@@ -601,13 +617,11 @@
             let hlsPromise = null;
             let hls = null; // Single, global HLS.js instance
             const attachedSet = new WeakSet();
-            let lazyObserver;
 
             window.TTStats = window.TTStats || { videoErrors: 0, videoRetries: 0, hlsErrors: 0, hlsRecovered: 0, ttfpSamples: 0, ttfpTotalMs: 0 };
 
             function _setMp4Source(video, mp4Url) {
                 if (!video || !mp4Url) return;
-                // If HLS is attached, detach it first
                 if (hls && hls.media === video) {
                     hls.detachMedia();
                 }
@@ -659,7 +673,7 @@
 
             function _initHls() {
                 if (hls) return Promise.resolve(hls);
-                if (hlsPromise) return hlsPromise; // Return existing promise if import is in progress
+                if (hlsPromise) return hlsPromise;
 
                 hlsPromise = import('https://cdn.jsdelivr.net/npm/hls.js@1.5.14/dist/hls.min.js')
                     .then(() => {
@@ -673,7 +687,7 @@
                     })
                     .catch(err => {
                         console.error("Failed to load or initialize HLS.js", err);
-                        hlsPromise = null; // Allow retry on next call
+                        hlsPromise = null;
                         throw err;
                     });
                 return hlsPromise;
@@ -694,12 +708,15 @@
             }
 
             function _attachSrc(sectionEl) {
+                if (!sectionEl) return;
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video || attachedSet.has(video)) return;
-                const slideId = sectionEl.dataset.slideId;
-                const slideData = slidesData.find(s => s.id === slideId);
 
-                const canAttach = slideData && !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
+                const slideIndex = parseInt(sectionEl.dataset.index, 10);
+                const slideData = slidesData[slideIndex];
+                if (!slideData) return;
+
+                const canAttach = !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
                 if (!canAttach) return;
 
                 if (Config.USE_HLS && slideData.hlsUrl) {
@@ -726,6 +743,7 @@
             }
 
             function _detachSrc(sectionEl) {
+                if (!sectionEl) return;
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video) return;
                 try { video.pause(); } catch(e) {}
@@ -768,28 +786,24 @@
                 section.querySelector('.video-progress').setAttribute('aria-valuenow', String(Math.round(percent)));
             };
 
-            function _onActiveSlideChanged(newIndex, oldIndex = -1) {
+            function _onActiveSlideChanged(newCurrentSection, oldCurrentSection = null) {
                 State.set('activeVideoSession', State.get('activeVideoSession') + 1);
 
-                const allSections = UI.DOM.container.querySelectorAll('.webyx-section:not([data-is-clone="true"])');
-
-                if (oldIndex > -1 && oldIndex < allSections.length) {
-                    const oldSection = allSections[oldIndex];
-                    const oldVideo = oldSection.querySelector('.videoPlayer');
+                if (oldCurrentSection) {
+                    const oldVideo = oldCurrentSection.querySelector('.videoPlayer');
                     if (oldVideo) { oldVideo.pause(); _stopProgressUpdates(oldVideo); }
-                    oldSection.querySelector('.pause-icon')?.classList.remove('visible');
-                    const progressLine = oldSection.querySelector('.progress-line');
-                    const progressDot = oldSection.querySelector('.progress-dot');
+                    oldCurrentSection.querySelector('.pause-icon')?.classList.remove('visible');
+                    const progressLine = oldCurrentSection.querySelector('.progress-line');
+                    const progressDot = oldCurrentSection.querySelector('.progress-dot');
                     if(progressLine && progressDot) {
                         progressLine.style.width = '0%';
                         progressDot.style.left = '0%';
                     }
                 }
 
-                if (newIndex < allSections.length) {
-                    const newSection = allSections[newIndex];
-                    const newVideo = newSection.querySelector('.videoPlayer');
-                    const isSecret = newSection.querySelector('.tiktok-symulacja').dataset.access === 'secret';
+                if (newCurrentSection) {
+                    const newVideo = newCurrentSection.querySelector('.videoPlayer');
+                    const isSecret = newCurrentSection.querySelector('.tiktok-symulacja').dataset.access === 'secret';
 
                     if (!(isSecret && !State.get('isUserLoggedIn')) && !State.get('isAutoplayBlocked')) {
                         _guardedPlay(newVideo);
@@ -798,28 +812,10 @@
                 }
             }
 
-            function _initLazyObserver() {
-                if (lazyObserver) return;
-                lazyObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        const section = entry.target.closest('.webyx-section');
-                        if (!section) return;
-                        if (entry.isIntersecting) {
-                            _attachSrc(section);
-                        } else if (Config.UNLOAD_FAR_SLIDES) {
-                            const index = parseInt(section.dataset.index, 10);
-                            const distance = Math.abs(index - State.get('currentSlideIndex'));
-                            if (distance > Config.FAR_DISTANCE) _detachSrc(section);
-                        }
-                    });
-                }, { root: UI.DOM.container, rootMargin: Config.PREFETCH_MARGIN, threshold: 0.01 });
-                UI.DOM.container.querySelectorAll('.webyx-section:not([data-is-clone="true"])').forEach(sec => lazyObserver.observe(sec));
-            }
-
             return {
-                init: () => {
-                    _initLazyObserver();
-                },
+                init: () => {},
+                attachSrc: _attachSrc,
+                detachSrc: _detachSrc,
                 onActiveSlideChanged: _onActiveSlideChanged,
                 initProgressBar: (progressEl, videoEl) => {
                     if (!progressEl || !videoEl) return;
@@ -845,7 +841,7 @@
                         seek(e);
                     });
 
-                    const throttledSeek = Utils.throttle(seek, 16); // Około 60 klatek na sekundę
+                    const throttledSeek = Utils.throttle(seek, 16);
                     progressEl.addEventListener('pointermove', (e) => {
                         if (e.pointerId !== pointerId) return;
                         throttledSeek(e);
@@ -1266,22 +1262,20 @@
                 const modal = document.getElementById('accountModal');
                 if (!modal) return;
                 modal.classList.remove('hidden');
-                // We need a short delay to allow the display property to change before starting the transition
                 setTimeout(() => {
                     modal.classList.add('visible');
                 }, 10);
                 document.body.style.overflow = 'hidden';
-                loadInitialProfileData(); // Fetch live data when opening
+                loadInitialProfileData();
             }
 
             function closeAccountModal() {
                 const modal = document.getElementById('accountModal');
                 if (!modal) return;
                 modal.classList.remove('visible');
-                // Wait for the transition to finish before hiding the element completely
                 setTimeout(() => {
                     modal.classList.add('hidden');
-                }, 400); // Should match the transition duration in CSS
+                }, 400);
                 document.body.style.overflow = '';
             }
 
@@ -1561,6 +1555,10 @@
          * ==========================================================================
          */
 const App = (function() {
+    let _observer = null;
+    let _isUpdating = false;
+    let _lastInteractionTime = 0;
+
     function _initializeGlobalListeners() {
         Utils.setAppHeightVar();
         window.addEventListener('resize', Utils.setAppHeightVar);
@@ -1571,7 +1569,7 @@ const App = (function() {
         });
 
         document.body.addEventListener('click', Handlers.mainClickHandler);
-        document.querySelector('body').addEventListener('submit', Handlers.formSubmitHandler); // Use body for event delegation
+        document.querySelector('body').addEventListener('submit', Handlers.formSubmitHandler);
 
         document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
             modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
@@ -1613,59 +1611,112 @@ const App = (function() {
         }
     }
 
-function _startApp(selectedLang) {
-    State.set('currentLang', selectedLang);
-    localStorage.setItem('tt_lang', selectedLang);
+    function _updateViewport(direction) {
+        if (_isUpdating) return;
+        _isUpdating = true;
 
-    UI.renderSlides();
-    UI.updateTranslations();
-    VideoManager.init();
-
-    setTimeout(() => {
-        UI.DOM.preloader.classList.add('preloader-hiding');
-        UI.DOM.container.classList.add('ready');
-        UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
-    }, 1000);
-
-    if (slidesData.length > 0) {
         const container = UI.DOM.container;
-        const viewHeight = container.clientHeight || window.innerHeight;
+        const totalSlides = slidesData.length;
+        let currentIndex = State.get('currentSlideIndex');
 
-        // Start at the first real slide without animation
-        container.scrollTo({ top: viewHeight, behavior: 'instant' });
+        const oldCurrentElement = container.children[1];
 
-        const handleLooping = () => {
-            const clones = container.querySelectorAll('[data-is-clone="true"]');
-            if (clones.length < 2) return;
+        if (direction === 'down') {
+            currentIndex = (currentIndex + 1) % totalSlides;
+        } else if (direction === 'up') {
+            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        } else {
+            _isUpdating = false;
+            return;
+        }
 
-            const firstClone = clones[1]; // Clone of the first slide, at the end
-            const lastClone = clones[0];  // Clone of the last slide, at the beginning
+        State.set('currentSlideIndex', currentIndex);
 
-            const observer = new IntersectionObserver((entries) => {
-                for (const entry of entries) {
-                    if (!entry.isIntersecting) continue;
+        if (direction === 'down') {
+            const oldPrevElement = container.firstElementChild;
+            VideoManager.detachSrc(oldPrevElement);
+            container.removeChild(oldPrevElement);
 
-                    // Scrolled past the last slide to the first clone
-                    if (entry.target === firstClone) {
-                        container.scrollTo({ top: viewHeight, behavior: 'instant' });
-                    }
-                    // Scrolled before the first slide to the last clone
-                    else if (entry.target === lastClone) {
-                        const lastSlideY = slidesData.length * viewHeight;
-                        container.scrollTo({ top: lastSlideY, behavior: 'instant' });
-                    }
-                }
-            }, { threshold: 0.5 }); // 50% of the clone must be visible
+            const nextIndex = (currentIndex + 1) % totalSlides;
+            const newNextSlide = UI.createSlideElement(slidesData[nextIndex], nextIndex);
+            VideoManager.attachSrc(newNextSlide);
+            container.appendChild(newNextSlide);
+        } else { // direction === 'up'
+            const oldNextElement = container.lastElementChild;
+            VideoManager.detachSrc(oldNextElement);
+            container.removeChild(oldNextElement);
 
-            observer.observe(firstClone);
-            observer.observe(lastClone);
-        };
+            const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+            const newPrevSlide = UI.createSlideElement(slidesData[prevIndex], prevIndex);
+            VideoManager.attachSrc(newPrevSlide);
+            container.insertBefore(newPrevSlide, container.firstElementChild);
+        }
 
-        // The content is ready, set up the looping mechanism.
-        // A small delay can help ensure the initial layout is fully stable.
-        setTimeout(handleLooping, 100);
+        const newCurrentElement = container.children[1];
+        VideoManager.onActiveSlideChanged(newCurrentElement, oldCurrentElement);
+
+        const slideHeight = container.clientHeight;
+        container.scrollTo({ top: slideHeight, behavior: 'instant' });
+
+        setTimeout(() => {
+            _isUpdating = false;
+        }, 50);
     }
-}
+
+    function _startApp(selectedLang) {
+        State.set('currentLang', selectedLang);
+        localStorage.setItem('tt_lang', selectedLang);
+
+        UI.renderSlides();
+        UI.updateTranslations();
+        VideoManager.init();
+
+        setTimeout(() => {
+            UI.DOM.preloader.classList.add('preloader-hiding');
+            UI.DOM.container.classList.add('ready');
+            UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
+
+            // Play the first video after preloader is gone
+            const firstSlide = UI.DOM.container.children[1];
+            if(firstSlide) VideoManager.onActiveSlideChanged(firstSlide);
+
+        }, 1000);
+
+        if (slidesData.length > 1) {
+            const container = UI.DOM.container;
+            const slideHeight = container.clientHeight || window.innerHeight;
+
+            container.scrollTo({ top: slideHeight, behavior: 'instant' });
+
+            _observer = new IntersectionObserver((entries) => {
+                if (_isUpdating) return;
+
+                const now = Date.now();
+                if (now - _lastInteractionTime < 200) return;
+
+                const intersectingEntry = entries.find(e => e.isIntersecting);
+                if (!intersectingEntry) return;
+
+                const activeSlide = intersectingEntry.target;
+                const rect = activeSlide.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                // Check if the slide is centered
+                const isCentered = Math.abs(rect.top - containerRect.top) < 10;
+                if (!isCentered) return;
+
+                const currentSlideInDom = container.children[1];
+                if (activeSlide === currentSlideInDom) return;
+
+                const direction = Array.from(container.children).indexOf(activeSlide) === 2 ? 'down' : 'up';
+                _updateViewport(direction);
+                _lastInteractionTime = now;
+
+            }, { root: container, threshold: 0.85 });
+
+            Array.from(container.children).forEach(child => _observer.observe(child));
+        }
+    }
 
     function _initializePreloader() {
         setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
@@ -1721,7 +1772,6 @@ function _startApp(selectedLang) {
                 }
 
                 const preloader = document.getElementById('preloader');
-                // Check if preloader is visible and not already in the process of hiding
                 if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
                     const observer = new MutationObserver((mutationsList, observer) => {
                         for(const mutation of mutationsList) {
@@ -1736,7 +1786,6 @@ function _startApp(selectedLang) {
                     });
                     observer.observe(preloader, { attributes: true });
                 } else if (!preloader || preloader.style.display === 'none') {
-                    // If preloader is already gone, show the bar
                     installBar.classList.remove('hidden');
                 }
             }
@@ -1753,7 +1802,7 @@ function _startApp(selectedLang) {
                 }
 
                 if (window.matchMedia('(display-mode: standalone)').matches) {
-                    return; // Already installed
+                    return;
                 }
 
                 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
@@ -1794,8 +1843,6 @@ function _startApp(selectedLang) {
                     });
                 }
 
-
-                // Show the bar for iOS if not installed, but respect preloader
                 if (isIOS) {
                      showInstallBar();
                 }
@@ -1819,15 +1866,12 @@ function _startApp(selectedLang) {
             mockLoginToggle.addEventListener('click', () => {
                 const newLoginState = !State.get('isUserLoggedIn');
                 State.set('isUserLoggedIn', newLoginState);
-                TingTongData.isLoggedIn = newLoginState; // Update mock global object
+                TingTongData.isLoggedIn = newLoginState;
 
-                // Simulate data refresh that would happen on real login/logout
                 if (newLoginState) {
                     UI.showAlert('Zalogowano (mock).');
-                    // In a real app, you might fetch user-specific data here
                 } else {
                     UI.showAlert('Wylogowano (mock).');
-                    // Reset any user-specific data
                     slidesData.forEach(slide => slide.isLiked = false);
                 }
 
