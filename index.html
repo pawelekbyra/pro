@@ -47,6 +47,7 @@
     <link rel="dns-prefetch" href="//i.pravatar.cc">
 
     <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="pawelperfect" data-description="Support me on Buy me a coffee!" data-message="" data-color="#FF5F5F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="prosta-wersja/style.css">
 </head>
 <body>
@@ -79,7 +80,7 @@
     </div>
     <!-- Szablon dla pojedynczego slajdu -->
     <template id="slide-template">
-        <div class="webyx-section">
+        <div class="swiper-slide webyx-section">
             <div class="tiktok-symulacja">
                 <video class="videoPlayer" muted loop playsinline webkit-playsinline autoplay preload="metadata" poster="placeholder.jpg" oncontextmenu="return false;" crossorigin="anonymous">
                     <source src="" type="video/mp4" />
@@ -128,7 +129,11 @@
         </div>
     </template>
     <!-- Główny kontener na slajdy -->
-    <div id="webyx-container"></div>
+    <div id="webyx-container" class="swiper">
+        <div class="swiper-wrapper">
+            <!-- Slajdy będą wstawiane tutaj przez JS -->
+        </div>
+    </div>
     <!-- Współdzielone Modale i Alerty -->
     <div id="alertBox" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
@@ -346,6 +351,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="prosta-wersja/script.js" defer></script>
 </body>
 </html>

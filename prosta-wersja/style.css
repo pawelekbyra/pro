@@ -213,28 +213,18 @@
             left: 0;
             width: 100%;
             height: calc(100% - var(--topbar-height));
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+            /* overflow, scroll-snap, and scroll-behavior are now controlled by Swiper.js */
             opacity: 0; /* Hidden initially */
             transition: opacity 0.5s linear;
-            scroll-padding: 0; /* PATCH: brak paddingu wpływającego na snap */
         }
         #webyx-container.ready {
             opacity: 1;
         }
-        #webyx-container.no-transition {
-            scroll-behavior: auto;
-        }
         .webyx-section {
-            width: 100vw;
-            height: 100vh;
-            height: calc(var(--app-height) + 1px); /* PATCH: 1px na subpiksele */ /* Użycie zmiennej dla spójności */
+            width: 100%; /* Let Swiper control width */
+            height: 100%; /* Let Swiper control height */
             overflow: hidden;
             position: relative;
-            scroll-snap-align: start;
-            scroll-snap-stop: always; /* Zatrzymaj scroll-snap zawsze (nie pomijaj slajdów) */
             -webkit-transform: translate3d(0, 0, 0); /* Wymuś nową warstwę (zapobiega migotaniu) */
             transform: translate3d(0, 0, 0); /* Wymuś nową warstwę (zapobiega migotaniu) */
         }
