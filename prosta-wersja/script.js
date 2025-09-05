@@ -166,7 +166,7 @@
                         'likeId': '1',
                         'user': 'Paweł Polutek',
                         'description': 'To jest dynamicznie załadowany opis dla pierwszego slajdu. Działa!',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
+                        'mp4Url': 'https://cdn.pixabay.com/video/2024/08/16/226795_large.mp4',
                         'hlsUrl': null,
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=pawel',
@@ -180,7 +180,7 @@
                         'likeId': '2',
                         'user': 'Web Dev',
                         'description': 'Kolejny slajd, kolejne wideo. #efficiency',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/4434150-hd_1080_1920_30fps-1.mp4',
+                        'mp4Url': 'https://cdn.pixabay.com/video/2023/02/16/150957-799711743_large.mp4',
                         'hlsUrl': null,
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=webdev',
@@ -194,7 +194,7 @@
                         'likeId': '3',
                         'user': 'Tajemniczy Tester',
                         'description': 'Ten slajd jest tajny! 🤫',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/4678261-hd_1080_1920_25fps.mp4',
+                        'mp4Url': 'https://cdn.pixabay.com/video/2022/07/24/125314-733046618_tiny.mp4',
                         'hlsUrl': null,
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=tester',
@@ -202,20 +202,6 @@
                         'initialLikes': 2,
                         'isLiked': false,
                         'initialComments': 2
-                    },
-                    {
-                        'id': 'slide-004',
-                        'likeId': '4',
-                        'user': 'Artysta AI',
-                        'description': 'Generowane przez AI, renderowane przez przeglądarkę. #future',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/AdobeStock_631182722-online-video-cutter.com_.mp4',
-                        'hlsUrl': null,
-                        'poster': '',
-                        'avatar': 'https://i.pravatar.cc/100?u=ai-artist',
-                        'access': 'public',
-                        'initialLikes': 890,
-                        'isLiked': false,
-                        'initialComments': 890
                     }
                 ]
             };
@@ -1628,6 +1614,32 @@
             const iosInstructions = document.getElementById('pwa-ios-instructions');
             const iosCloseButton = document.getElementById('pwa-ios-close-button');
 
+            function showInstallBar() {
+                if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
+                    return;
+                }
+
+                const preloader = document.getElementById('preloader');
+                // Check if preloader is visible and not already in the process of hiding
+                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for(const mutation of mutationsList) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                if (preloader.style.display === 'none') {
+                                    installBar.classList.remove('hidden');
+                                    observer.disconnect();
+                                    return;
+                                }
+                            }
+                        }
+                    });
+                    observer.observe(preloader, { attributes: true });
+                } else if (!preloader || preloader.style.display === 'none') {
+                    // If preloader is already gone, show the bar
+                    installBar.classList.remove('hidden');
+                }
+            }
+
             function init() {
                 if (window.matchMedia('(display-mode: standalone)').matches) {
                     return; // Already installed
@@ -1638,9 +1650,7 @@
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     installPromptEvent = e;
-                    if (installBar) {
-                        installBar.classList.remove('hidden');
-                    }
+                    showInstallBar();
                 });
 
                 if (installButton) {
@@ -1659,9 +1669,9 @@
                     });
                 }
 
-                // Show the bar for iOS immediately if not installed
-                if(isIOS && installBar) {
-                     installBar.classList.remove('hidden');
+                // Show the bar for iOS if not installed, but respect preloader
+                if (isIOS) {
+                     showInstallBar();
                 }
 
                 if (iosCloseButton) {
