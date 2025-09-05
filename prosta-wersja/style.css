@@ -251,6 +251,7 @@
             color: white;
             z-index: 1;
             font-family: 'Manrope', sans-serif;
+            padding-top: var(--topbar-height);
         }
         .tiktok-symulacja * {
             box-sizing: border-box;
@@ -344,7 +345,8 @@
             backdrop-filter: blur(8px);
         }
         .tiktok-symulacja .topbar {
-            position: sticky; /* Zmieniono z relative na fixed, a teraz na sticky */
+            position: fixed;
+            visibility: hidden;
             display: flex;
             justify-content: center; /* Center the middle element */
             align-items: center;
@@ -360,6 +362,10 @@
             color: inherit;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Subtle separator */
             transition: border-color 0.3s ease-out;
+        }
+
+        .active-slide .tiktok-symulacja .topbar {
+            visibility: visible;
         }
         .tiktok-symulacja .topbar.login-panel-active {
             border-bottom-color: transparent;
@@ -630,7 +636,7 @@
         }
         .tiktok-symulacja .notification-bell svg {
     stroke: white !important;
-            fill: white;
+            fill: white !important;
         }
         .tiktok-symulacja .notification-dot {
             position: absolute;
@@ -638,9 +644,9 @@
             right: 11px;
             width: 8px;
             height: 8px;
-            background-color: var(--accent-color);
+            background-color: white;
             border-radius: 50%;
-            border: 2px solid #6F6F6F;
+            border: 2px solid white;
         }
 
         /* ==========================================================================
@@ -972,7 +978,7 @@
            ========================================================================== */
         .notification-popup {
             position: fixed;
-            top: calc(var(--topbar-height) + 5px); /* Adjusted spacing */
+            top: 30px; /* Adjusted spacing */
             right: 5px;
             width: 350px;
             max-width: calc(100vw - 10px);
