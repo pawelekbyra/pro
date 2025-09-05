@@ -449,6 +449,17 @@
                 const isLoggedIn = State.get('isUserLoggedIn');
                 const currentSlideIndex = State.get('currentSlideIndex');
 
+                // Update global elements
+                const topbar = document.querySelector('.topbar');
+                if (topbar) {
+                    topbar.querySelector('.central-text-wrapper').classList.toggle('with-arrow', !isLoggedIn);
+                    topbar.classList.remove('login-panel-active');
+                    topbar.querySelector('.topbar-text').textContent = isLoggedIn ? Utils.getTranslation('loggedInText') : Utils.getTranslation('loggedOutText');
+                }
+                document.querySelector('.login-panel')?.classList.remove('active');
+                document.querySelector('.logged-in-menu')?.classList.remove('active');
+
+
                 DOM.container.querySelectorAll('.webyx-section').forEach((section) => {
                     const sim = section.querySelector('.tiktok-symulacja');
                     sim.classList.toggle('is-logged-in', isLoggedIn);
@@ -457,11 +468,6 @@
 
                     section.querySelector('.secret-overlay').classList.toggle('visible', showSecretOverlay);
                     section.querySelector('.videoPlayer').classList.toggle('secret-active', showSecretOverlay);
-                    section.querySelector('.topbar .central-text-wrapper').classList.toggle('with-arrow', !isLoggedIn);
-                    section.querySelector('.login-panel').classList.remove('active');
-                    section.querySelector('.topbar').classList.remove('login-panel-active');
-                    section.querySelector('.logged-in-menu').classList.remove('active');
-                    section.querySelector('.topbar .topbar-text').textContent = isLoggedIn ? Utils.getTranslation('loggedInText') : Utils.getTranslation('loggedOutText');
 
                     const likeBtn = section.querySelector('.like-button');
                     if (likeBtn) {
@@ -954,7 +960,7 @@
                         case 'open-comments-modal': UI.openModal(UI.DOM.commentsModal); break;
                         case 'open-info-modal': UI.openModal(UI.DOM.infoModal); break;
                         case 'open-account-modal':
-                            if(section) section.querySelector('.logged-in-menu').classList.remove('active');
+                            document.querySelector('.logged-in-menu').classList.remove('active');
                             AccountPanel.openAccountModal();
                             break;
                         case 'close-account-modal':
@@ -963,7 +969,7 @@
                         case 'logout': e.preventDefault(); handleLogout(actionTarget); break;
                         case 'toggle-main-menu':
                             if (State.get('isUserLoggedIn')) {
-                                section.querySelector('.logged-in-menu').classList.toggle('active');
+                                document.querySelector('.logged-in-menu').classList.toggle('active');
                             } else {
                                 Utils.vibrateTry();
                                 UI.showAlert(Utils.getTranslation('menuAccessAlert'));
@@ -971,8 +977,8 @@
                             break;
                         case 'toggle-login-panel':
                             if (!State.get('isUserLoggedIn')) {
-                                section.querySelector('.login-panel').classList.toggle('active');
-                                section.querySelector('.topbar').classList.toggle('login-panel-active');
+                                document.querySelector('.login-panel').classList.toggle('active');
+                                document.querySelector('.topbar').classList.toggle('login-panel-active');
                             }
                             break;
                         case 'subscribe':
