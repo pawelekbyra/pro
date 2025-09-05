@@ -629,7 +629,7 @@
             fill: none;
         }
         .tiktok-symulacja .notification-bell svg {
-            stroke: white;
+    stroke: white !important;
             fill: none;
         }
         .tiktok-symulacja .notification-dot {
@@ -2002,3 +2002,11 @@
         .pwa-ios-body p {
             margin-bottom: 0.75rem;
         }
+
+.ios-instruction-icon {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: -0.2em;
+    margin: 0 0.1em;
+}
