@@ -630,7 +630,7 @@
         }
         .notification-bell svg {
     stroke: white;
-            fill: white;
+    fill: none;
         }
         .notification-dot {
             position: absolute;
@@ -1120,14 +1120,6 @@
             font-size: 14px;
             line-height: 1.5;
             color: var(--modern-text-secondary);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: opacity 0.2s ease-out 0.1s, transform 0.2s ease-out 0.1s;
-        }
-
-        .notification-item.expanded .notif-full-details-inner {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .notification-empty-state {
