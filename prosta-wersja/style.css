@@ -629,8 +629,8 @@
             fill: none;
         }
         .notification-bell svg {
-    stroke: white !important;
-            fill: white !important;
+    stroke: white;
+            fill: white;
         }
         .notification-dot {
             position: absolute;
@@ -1232,17 +1232,17 @@
             font-weight: 600;
             border: none;
             border-bottom: 2px solid transparent;
-            background-color: transparent;
+            background-color: #27272a; /* bg-zinc-800 */
             color: var(--modern-text-secondary);
             cursor: pointer;
             transition: color 0.2s, background-color 0.2s, border-color 0.2s;
         }
         .tab-btn:hover {
-            background-color: var(--modern-interactive-bg-hover);
+            background-color: #3f3f46; /* Lighter zinc for hover */
             color: var(--modern-text-primary);
         }
         .tab-btn.active {
-            background-color: #27272a; /* bg-zinc-800 */
+            background-color: transparent;
             color: var(--modern-text-primary);
             border-bottom-color: var(--accent-color);
         }
@@ -2013,3 +2013,35 @@
     vertical-align: -0.2em;
     margin: 0 0.1em;
 }
+
+        /* ==========================================================================
+           --- DESKTOP INSTALL MODAL ---
+           ========================================================================== */
+        #desktop-install-modal .modal-content {
+            background: white;
+            color: #111;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 400px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #desktop-install-modal h2 {
+            margin-top: 0;
+            padding-right: 40px;
+        }
+
+        #desktop-install-modal .modal-close-btn {
+            color: #111;
+        }
+
+        #desktop-install-modal .qr-code {
+            margin-top: 20px;
+            border: 5px solid white;
+            border-radius: 10px;
+        }
+
+        #infoModal .modal-body {
+            text-align: center;
+        }
