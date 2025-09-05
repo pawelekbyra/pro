@@ -344,7 +344,7 @@
             backdrop-filter: blur(8px);
         }
         .tiktok-symulacja .topbar {
-            position: fixed; /* Zmieniono z relative na fixed */
+            position: sticky; /* Zmieniono z relative na fixed, a teraz na sticky */
             display: flex;
             justify-content: center; /* Center the middle element */
             align-items: center;
@@ -630,7 +630,7 @@
         }
         .tiktok-symulacja .notification-bell svg {
     stroke: white !important;
-            fill: none;
+            fill: white;
         }
         .tiktok-symulacja .notification-dot {
             position: absolute;
