@@ -3762,13 +3762,28 @@
 
             function _initializePreloader() {
                 setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
-                UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
-                        button.classList.add('is-selected');
-                        setTimeout(() => _startApp(button.dataset.lang), 300);
-                    }, { once: true });
-                });
+                const langButtonsContainer = UI.DOM.preloader.querySelector('.language-selection .lang-buttons-container');
+                if (!langButtonsContainer) return;
+
+                const langSelectHandler = (event) => {
+                    const button = event.target.closest('button[data-lang]');
+                    if (!button || button.disabled) {
+                        return;
+                    }
+
+                    // Remove listener to emulate { once: true } behavior and prevent multiple triggers
+                    langButtonsContainer.removeEventListener('click', langSelectHandler);
+
+                    // Disable all buttons
+                    langButtonsContainer.querySelectorAll('button').forEach(btn => {
+                        btn.disabled = true;
+                    });
+
+                    button.classList.add('is-selected');
+                    setTimeout(() => _startApp(button.dataset.lang), 300);
+                };
+
+                langButtonsContainer.addEventListener('click', langSelectHandler);
             }
 
             function _setInitialConfig() {
