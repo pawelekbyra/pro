@@ -1,90 +1,60 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const unmuteButton = document.getElementById('unmute-button');
-    let swiper; // Declare swiper variable to be accessible in the whole scope
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize Video.js on all video elements
+    const players = [];
+    const videoElements = document.querySelectorAll('.video-js');
+    videoElements.forEach((videoEl, index) => {
+        const player = videojs(videoEl, {
+            controls: true,
+            autoplay: false, // We will control autoplay manually
+            preload: 'auto'
+        });
+        players.push(player);
+    });
 
-    const handlePlayPause = (player) => {
-        if (player.paused()) {
-            player.play().catch(e => console.error('Play was prevented.', e));
-        } else {
-            player.pause();
-        }
-    };
-
-    swiper = new Swiper('.swiper', {
+    // Initialize Swiper
+    const swiper = new Swiper('.swiper', {
         direction: 'vertical',
         loop: true,
-        grabCursor: true,
-        keyboard: true,
         on: {
-            init: function () {
-                const swiperInstance = this;
-                swiperInstance.players = {};
-
-                swiperInstance.slides.forEach((slide, index) => {
-                    const videoEl = slide.querySelector('.video-js');
-                    if (videoEl) {
-                        const videoId = `video-${index}`;
-                        videoEl.id = videoId;
-
-                        const player = videojs(videoEl, {
-                            controls: false,
-                            preload: 'auto',
-                            loop: true,
-                            muted: true, // Ensure videos start muted
-                        });
-
-                        // Add tap-to-play/pause functionality
-                        player.on('click', () => handlePlayPause(player));
-
-                        swiperInstance.players[videoId] = player;
-                    }
-                });
-
-                // Play the first video
-                const activeSlide = swiperInstance.slides[swiperInstance.activeIndex];
-                const activeVideo = activeSlide.querySelector('video');
-                if (activeVideo && swiperInstance.players[activeVideo.id]) {
-                    swiperInstance.players[activeVideo.id].play().catch(e => console.error('Autoplay was prevented.', e));
-                }
-            },
-            transitionEnd: function () {
-                const swiperInstance = this;
+            // This event fires when the transition to a new slide ends
+            slideChangeTransitionEnd: function () {
                 // Pause all videos
-                Object.values(swiperInstance.players).forEach(player => {
-                    player.pause();
-                });
-
-                // Play the video in the active slide
-                const activeSlide = swiperInstance.slides[swiperInstance.activeIndex];
-                const activeVideo = activeSlide.querySelector('video');
-                if (activeVideo && swiperInstance.players[activeVideo.id]) {
-                    const activePlayer = swiperInstance.players[activeVideo.id];
-                    activePlayer.currentTime(0);
-                    activePlayer.play().catch(e => console.error('Playback was prevented.', e));
+                players.forEach(player => player.pause());
+                // Get the current slide's video player
+                const activeIndex = this.realIndex; // Use realIndex for loop mode
+                const activePlayer = players[activeIndex];
+                // Play the active video
+                if (activePlayer) {
+                    activePlayer.play().catch(error => {
+                        console.error("Video play failed:", error);
+                    });
                 }
-            },
-            beforeDestroy: function () {
-                const swiperInstance = this;
-                Object.values(swiperInstance.players).forEach(player => {
-                    if (player) {
-                        player.dispose();
-                    }
-                });
-                swiperInstance.players = {};
             },
         },
     });
 
-    // Unmute button functionality
-    if (unmuteButton && swiper) {
-        unmuteButton.addEventListener('click', () => {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            const activeVideo = activeSlide.querySelector('video');
-            if (activeVideo && swiper.players[activeVideo.id]) {
-                const activePlayer = swiper.players[activeVideo.id];
-                activePlayer.muted(!activePlayer.muted());
-                unmuteButton.textContent = activePlayer.muted() ? 'Unmute' : 'Mute';
+    // Add click-to-toggle-play functionality
+    document.querySelectorAll('.swiper-slide').forEach((slide, index) => {
+        slide.addEventListener('click', function() {
+            const player = players[index];
+            if (player) {
+                if (player.paused()) {
+                    player.play().catch(error => console.error("Video play failed:", error));
+                } else {
+                    player.pause();
+                }
             }
         });
+    });
+
+    // Initial play for the first slide
+    if (players.length > 0) {
+        // Find the player for the initial active slide (index 0)
+        const initialPlayer = players[swiper.realIndex];
+        if (initialPlayer) {
+            initialPlayer.play().catch(error => {
+                console.log("Initial autoplay was prevented. User interaction is required.");
+            });
+        }
     }
 });
