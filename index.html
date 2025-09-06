@@ -2813,7 +2813,7 @@
             function _guardedPlay(videoEl) {
                 if (!videoEl) return;
                 // Use video.js player instance
-                const player = videojs(videoEl.id);
+                const player = videojs(videoEl);
                 const playPromise = player.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
@@ -2834,7 +2834,7 @@
                 const canAttach = slideData && !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
                 if (!canAttach) return;
 
-                const player = videojs(video.id);
+                const player = videojs(video);
                 const source = {
                     src: Config.USE_HLS && slideData.hlsUrl ? slideData.hlsUrl : slideData.mp4Url,
                     type: Config.USE_HLS && slideData.hlsUrl ? 'application/x-mpegURL' : 'video/mp4'
@@ -2847,14 +2847,14 @@
             function _detachSrc(sectionEl) {
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video) return;
-                const player = videojs(video.id);
+                const player = videojs(video);
                 player.pause();
                 player.reset(); // Resets the player to its initial state
                 attachedSet.delete(video);
             }
 
             function _startProgressUpdates(video) {
-                const player = videojs(video.id);
+                const player = videojs(video);
                 _stopProgressUpdates(video);
                 const session = State.get('activeVideoSession');
 
@@ -2871,14 +2871,14 @@
 
             function _stopProgressUpdates(video) {
                  if (video.rAF_id) cancelAnimationFrame(video.rAF_id);
-                 const player = videojs(video.id);
+                 const player = videojs(video);
                  player.off('timeupdate');
                  player.off('play');
             }
 
             function _updateProgressUI(video) {
                 if (State.get('isDraggingProgress') || !video) return;
-                const player = videojs(video.id);
+                const player = videojs(video);
                 if(!player.duration()) return;
 
                 const section = video.closest('.swiper-slide');
@@ -2898,7 +2898,7 @@
                     const oldSlide = allSlides[oldIndex];
                     const oldVideo = oldSlide.querySelector('.videoPlayer');
                     if (oldVideo) {
-                        videojs(oldVideo.id).pause();
+                        videojs(oldVideo).pause();
                         _stopProgressUpdates(oldVideo);
                     }
                     oldSlide.querySelector('.pause-icon')?.classList.remove('visible');
@@ -3744,46 +3744,36 @@
             }
 
             function _startApp(selectedLang) {
-                State.set('currentLang', selectedLang);
-                localStorage.setItem('tt_lang', selectedLang);
+                try {
+                    State.set('currentLang', selectedLang);
+                    localStorage.setItem('tt_lang', selectedLang);
 
-                UI.renderSlides();
-                UI.updateTranslations();
-                VideoManager.init(); // This now initializes Swiper
+                    UI.renderSlides();
+                    UI.updateTranslations();
+                    VideoManager.init(); // This now initializes Swiper
 
-                setTimeout(() => {
-                    UI.DOM.preloader.classList.add('preloader-hiding');
-                    UI.DOM.container.classList.add('ready');
-                    UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
-                }, 1000);
+                    setTimeout(() => {
+                        UI.DOM.preloader.classList.add('preloader-hiding');
+                        UI.DOM.container.classList.add('ready');
+                        UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
+                    }, 1000);
 
-                // The old scroll logic is removed. Swiper handles everything.
+                    // The old scroll logic is removed. Swiper handles everything.
+                } catch (error) {
+                    alert('Application failed to start. Error: ' + error.message + '\\n\\nStack: ' + error.stack);
+                    console.error("TingTong App Start Error:", error);
+                }
             }
 
             function _initializePreloader() {
                 setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
-                const langButtonsContainer = UI.DOM.preloader.querySelector('.language-selection .lang-buttons-container');
-                if (!langButtonsContainer) return;
-
-                const langSelectHandler = (event) => {
-                    const button = event.target.closest('button[data-lang]');
-                    if (!button || button.disabled) {
-                        return;
-                    }
-
-                    // Remove listener to emulate { once: true } behavior and prevent multiple triggers
-                    langButtonsContainer.removeEventListener('click', langSelectHandler);
-
-                    // Disable all buttons
-                    langButtonsContainer.querySelectorAll('button').forEach(btn => {
-                        btn.disabled = true;
-                    });
-
-                    button.classList.add('is-selected');
-                    setTimeout(() => _startApp(button.dataset.lang), 300);
-                };
-
-                langButtonsContainer.addEventListener('click', langSelectHandler);
+                UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
+                        button.classList.add('is-selected');
+                        setTimeout(() => _startApp(button.dataset.lang), 300);
+                    }, { once: true });
+                });
             }
 
             function _setInitialConfig() {
