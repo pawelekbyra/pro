@@ -3,41 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wideo Scroller - Swiper.js</title>
+    <title>Wideo Scroller - Video.js</title>
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
+    <div id="splash-screen">
+        <button id="start-button">Rozpocznij ogladanie</button>
+    </div>
 
     <!-- Swiper -->
-    <div class="swiper">
+    <div class="swiper" style="display: none;">
         <div class="swiper-wrapper">
             <!-- Slides -->
             <div class="swiper-slide">
                 <div class="video-slide">
-                    <video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" playsinline muted></video>
+                    <video class="video-js" playsinline>
+                        <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                    </video>
                 </div>
             </div>
             <div class="swiper-slide">
                 <div class="video-slide">
-                    <video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" playsinline muted></video>
+                    <video class="video-js" playsinline>
+                        <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+                    </video>
                 </div>
             </div>
             <div class="swiper-slide">
                  <div class="video-slide">
-                    <!-- HLS stream example -->
-                    <video data-hls-source="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" playsinline muted></video>
+                    <video class="video-js" playsinline>
+                        <source src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" type="application/x-mpegURL">
+                    </video>
                 </div>
             </div>
             <div class="swiper-slide">
                  <div class="video-slide">
-                    <video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" playsinline muted></video>
+                    <video class="video-js" playsinline>
+                        <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+                    </video>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
