@@ -16,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const videoElements = document.querySelectorAll('.video-js');
         videoElements.forEach((videoEl, index) => {
             const player = videojs(videoEl, {
-                controls: true,
-                autoplay: false, // We will control autoplay manually via Swiper
-                muted: false,
+                controls: false, // Controls are hidden via CSS, but this is cleaner
+                autoplay: true, // Start muted and autoplay
+                muted: true, // Muted by default to allow autoplay
                 fluid: true, // Makes the player responsive
                 playsinline: true,
-                 loop: true,
+                loop: true,
             });
             players.push(player);
         });
@@ -34,14 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
             on: {
                 // When transition ends, play the active video
                 slideChangeTransitionEnd: function () {
-                    players.forEach((player, index) => {
-                        // The loop index might not match the player index directly
-                        // if swiper.realIndex is not what we think. Let's use the slide index.
+                    players.forEach((player) => {
                         const slide = player.el().closest('.swiper-slide');
                         if (slide && slide.classList.contains('swiper-slide-active')) {
-                            player.play().catch(error => {
-                                console.error("Could not play video with sound, even after interaction.", error);
-                            });
+                            // Play the video and unmute it
+                            player.play().catch(error => console.error("Could not play video:", error));
+                            player.muted(false);
                         } else {
                             player.pause();
                         }
@@ -51,18 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // --- Initial Play ---
-        // Play the first video after initialization
+        // The first video should autoplay because of the `autoplay: true` option.
+        // We just need to ensure it's unmuted after the initial interaction.
         if (players.length > 0) {
-            // Find the player in the initially active slide
-            const activeSlide = document.querySelector('.swiper-slide-active');
-            if(activeSlide) {
-                const activePlayerEl = activeSlide.querySelector('.video-js');
-                const activePlayer = players.find(p => p.el() === activePlayerEl);
-                if (activePlayer) {
-                    activePlayer.play().catch(error => {
-                       console.error("Initial play failed", error);
-                    });
-                }
+            const activePlayer = players[swiper.realIndex];
+            if (activePlayer) {
+                activePlayer.muted(false); // Unmute the first video
             }
         }
     }

@@ -35,17 +35,6 @@ body, html {
     object-fit: cover;
 }
 
-/* Hide default controls - keeping this as it's still relevant */
-video::-webkit-media-controls {
-    display: none !important;
-}
-video::-webkit-media-controls-enclosure {
-    display: none !important;
-}
-video::-webkit-media-controls-panel {
-    display: none !important;
-}
-
 /* --- Splash Screen Styles --- */
 #splash-screen {
     position: fixed;
@@ -73,4 +62,16 @@ video::-webkit-media-controls-panel {
 /* Hide the big play button for a cleaner UI */
 .video-js .vjs-big-play-button {
     display: none;
+}
+
+/* --- Responsive Styles for Desktop --- */
+@media (min-width: 600px) {
+    .swiper {
+        height: 100vh;
+        width: calc(100vh * 9 / 16);
+        max-width: 100%;
+        margin: 0 auto;
+        border-left: 1px solid #333;
+        border-right: 1px solid #333;
+    }
 }
