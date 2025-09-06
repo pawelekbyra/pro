@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         videoEl.id = videoId;
 
                         const player = videojs(videoEl, {
-                            controls: true,
-                            autoplay: false,
+                            controls: false,
+                            autoplay: true,
+                            muted: false,
                             preload: 'auto',
                         });
 
