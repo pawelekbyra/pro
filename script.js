@@ -1,5 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const swiper = new Swiper('.swiper', {
+    const unmuteButton = document.getElementById('unmute-button');
+    let swiper; // Declare swiper variable to be accessible in the whole scope
+
+    const handlePlayPause = (player) => {
+        if (player.paused()) {
+            player.play().catch(e => console.error('Play was prevented.', e));
+        } else {
+            player.pause();
+        }
+    };
+
+    swiper = new Swiper('.swiper', {
         direction: 'vertical',
         loop: true,
         grabCursor: true,
@@ -17,15 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const player = videojs(videoEl, {
                             controls: false,
-                            autoplay: true,
-                            muted: false,
                             preload: 'auto',
+                            loop: true,
+                            muted: true, // Ensure videos start muted
                         });
+
+                        // Add tap-to-play/pause functionality
+                        player.on('click', () => handlePlayPause(player));
 
                         swiperInstance.players[videoId] = player;
                     }
                 });
 
+                // Play the first video
                 const activeSlide = swiperInstance.slides[swiperInstance.activeIndex];
                 const activeVideo = activeSlide.querySelector('video');
                 if (activeVideo && swiperInstance.players[activeVideo.id]) {
@@ -34,15 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             transitionEnd: function () {
                 const swiperInstance = this;
+                // Pause all videos
                 Object.values(swiperInstance.players).forEach(player => {
                     player.pause();
                 });
 
+                // Play the video in the active slide
                 const activeSlide = swiperInstance.slides[swiperInstance.activeIndex];
                 const activeVideo = activeSlide.querySelector('video');
                 if (activeVideo && swiperInstance.players[activeVideo.id]) {
-                    swiperInstance.players[activeVideo.id].currentTime(0);
-                    swiperInstance.players[activeVideo.id].play().catch(e => console.error('Playback was prevented.', e));
+                    const activePlayer = swiperInstance.players[activeVideo.id];
+                    activePlayer.currentTime(0);
+                    activePlayer.play().catch(e => console.error('Playback was prevented.', e));
                 }
             },
             beforeDestroy: function () {
@@ -56,4 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
             },
         },
     });
+
+    // Unmute button functionality
+    if (unmuteButton && swiper) {
+        unmuteButton.addEventListener('click', () => {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            const activeVideo = activeSlide.querySelector('video');
+            if (activeVideo && swiper.players[activeVideo.id]) {
+                const activePlayer = swiper.players[activeVideo.id];
+                activePlayer.muted(!activePlayer.muted());
+                unmuteButton.textContent = activePlayer.muted() ? 'Unmute' : 'Mute';
+            }
+        });
+    }
 });
