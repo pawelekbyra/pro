@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 controls: false, // Controls are hidden via CSS, but this is cleaner
                 autoplay: true, // Start muted and autoplay
                 muted: true, // Muted by default to allow autoplay
-                fluid: true, // Makes the player responsive
+                fluid: false, // We disable fluid mode to allow object-fit: cover
                 playsinline: true,
                 loop: true,
             });
@@ -50,10 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Initial Play ---
         // The first video should autoplay because of the `autoplay: true` option.
-        // We just need to ensure it's unmuted after the initial interaction.
+        // We will also explicitly play it and unmute it to ensure it starts.
         if (players.length > 0) {
             const activePlayer = players[swiper.realIndex];
             if (activePlayer) {
+                activePlayer.play().catch(error => console.error("Could not play video:", error));
                 activePlayer.muted(false); // Unmute the first video
             }
         }
