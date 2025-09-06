@@ -1,63 +1,113 @@
-/* General body styling to remove margin and hide overflow */
-body {
+body, html {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-color: #000;
 }
 
-/* Swiper container takes up the full viewport */
+/* --- Swiper Styles --- */
 .swiper {
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
 }
 
-/* Each slide also takes up the full viewport */
 .swiper-slide {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #000;
 }
 
-/* Video element styling */
-.video-js {
-    width: 100% !important;
-    height: 100% !important;
+/* This is the container I added inside the swiper-slide */
+.video-slide {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Ensure the video content fits within the container, covering the area */
-.vjs-tech {
+video {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-/* Customizing Video.js controls to be a bit more modern */
-.video-js .vjs-control-bar {
-    background-color: rgba(0, 0, 0, 0.5);
-    height: 5em;
-    padding: 0 1em;
+/* Hide default controls - keeping this as it's still relevant */
+video::-webkit-media-controls {
+    display: none !important;
+}
+video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+video::-webkit-media-controls-panel {
+    display: none !important;
+}
+/* ... keeping all the -webkit-media-controls rules ... */
+
+
+/* Custom controls wrapper - no changes needed here */
+.controls-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 10;
 }
 
-.video-js .vjs-play-control,
-.video-js .vjs-volume-panel,
-.video-js .vjs-progress-control,
-.video-js .vjs-fullscreen-control {
-    position: static;
+.video-slide:hover .controls-container {
+    opacity: 1;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0;
+    background-color: #ff0000;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.left-controls, .right-controls {
     display: flex;
     align-items: center;
 }
 
-.video-js .vjs-big-play-button {
-    font-size: 4em;
-    line-height: 2em;
-    height: 2em;
-    width: 2em;
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    margin-top: -1em;
-    margin-left: -1em;
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 0.06666em solid #fff;
+.control-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.volume-container {
+    display: flex;
+    align-items: center;
+}
+
+.volume-slider {
+    width: 80px;
+    cursor: pointer;
 }

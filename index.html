@@ -2,41 +2,43 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TikTok Style Video Scroll</title>
-    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
-    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wideo Scroller - Swiper.js</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
+    <!-- Swiper -->
     <div class="swiper">
         <div class="swiper-wrapper">
+            <!-- Slides -->
             <div class="swiper-slide">
-                <video class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" muted loop playsinline>
-                    <source src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" type="application/x-mpegURL">
-                </video>
+                <div class="video-slide">
+                    <video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" playsinline muted></video>
+                </div>
             </div>
             <div class="swiper-slide">
-                <video class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" muted loop playsinline>
-                    <source src="https://test-streams.mux.dev/add_subtitles/add_subtitles.m3u8" type="application/x-mpegURL">
-                </video>
+                <div class="video-slide">
+                    <video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" playsinline muted></video>
+                </div>
             </div>
             <div class="swiper-slide">
-                <video class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" muted loop playsinline>
-                     <source src="https://test-streams.mux.dev/alternative_audio/alternative_audio.m3u8" type="application/x-mpegURL">
-                </video>
+                 <div class="video-slide">
+                    <!-- HLS stream example -->
+                    <video data-hls-source="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" playsinline muted></video>
+                </div>
             </div>
-             <div class="swiper-slide">
-                <video class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" muted loop playsinline>
-                    <source src="https://test-streams.mux.dev/elephants_dream/elephants_dream.m3u8" type="application/x-mpegURL">
-                </video>
+            <div class="swiper-slide">
+                 <div class="video-slide">
+                    <video src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" playsinline muted></video>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
-    <script src="https://unpkg.com/swiper@7/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
