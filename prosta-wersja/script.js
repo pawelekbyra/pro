@@ -102,11 +102,11 @@
       }, { root: null, rootMargin: '150% 0px 150% 0px', threshold: 0.01 });
 
       const bootPrefetch = () => slideSelector().forEach(s => io.observe(s));
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootPrefetch, { once: true });
-      } else {
-        bootPrefetch();
-      }
+      // if (document.readyState === 'loading') {
+      //   document.addEventListener('DOMContentLoaded', bootPrefetch, { once: true });
+      // } else {
+      //   bootPrefetch();
+      // }
 
       /* ======================================================
        * 3) iOS: unmute na WYBORZE JĘZYKA (tak jak Android)
