@@ -858,28 +858,21 @@
             }
 
             function _initializePreloader() {
-                // Zawsze wyświetlaj zawartość preloadera z wyborem języka
-                UI.DOM.preloader.classList.add('content-visible');
+                // To ensure the CSS transition is applied correctly after the initial render,
+                // we add the class inside a short timeout.
+                setTimeout(() => {
+                    UI.DOM.preloader.classList.add('content-visible');
+                }, 50); // A small delay to ensure the browser has painted the initial state.
 
-                // Dodaj detektory zdarzeń dla przycisków wyboru języka
+                // Add event listeners for the language buttons
                 const langSelection = UI.DOM.preloader.querySelector('.language-selection');
                 const languageButtons = langSelection.querySelectorAll('button');
                 languageButtons.forEach(button => {
                     button.addEventListener('click', (event) => {
                         const selectedLang = event.target.dataset.lang;
-                        // Dalsza logika uruchomienia aplikacji
                         _startApp(selectedLang);
                     }, { once: true });
                 });
-
-                // Opcjonalnie: Ustaw domyślny język, jeśli jest zapisany w pamięci
-                const initialLang = localStorage.getItem('tt_lang');
-                if (initialLang) {
-                    const button = langSelection.querySelector(`[data-lang="${initialLang}"]`);
-                    if (button) {
-                        button.classList.add('is-selected');
-                    }
-                }
             }
 
             function _setInitialConfig() {
