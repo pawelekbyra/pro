@@ -1502,76 +1502,68 @@
          * PWA MODULE
          * ==========================================================================
          */
+const PWA = (function() {
+    let installPromptEvent = null;
+    const installBar = document.getElementById('pwa-install-bar');
+    const installButton = document.getElementById('pwa-install-button');
+    const iosInstructions = document.getElementById('pwa-ios-instructions');
+    const iosCloseButton = document.getElementById('pwa-ios-close-button');
+
+    function showInstallBar() {
+        if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
+            return;
+        }
+        installBar.classList.remove('hidden');
+    }
+
+    function init() {
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            return; // Already installed
+        }
+
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            installPromptEvent = e;
+            showInstallBar();
+        });
+
+        if (installButton) {
+            installButton.addEventListener('click', () => {
+                if (installPromptEvent) {
+                    installPromptEvent.prompt();
+                    installPromptEvent.userChoice.then(() => {
+                        installPromptEvent = null;
+                        if (installBar) {
+                            installBar.classList.add('hidden');
+                        }
+                    });
+                } else if (isIOS && iosInstructions) {
+                    iosInstructions.classList.remove('hidden');
+                    if (installBar) {
+                        installBar.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        if (isIOS) {
+             showInstallBar();
+        }
+
+        if (iosCloseButton) {
+            iosCloseButton.addEventListener('click', () => {
+                if (iosInstructions) {
+                    iosInstructions.classList.add('hidden');
+                }
+            });
+        }
+    }
+
+    return { init };
+})();
 
 
         App.init();
-
-        /**
-         * ==========================================================================
-         * 10. PWA INSTALL PROMPT LOGIC
-         * ==========================================================================
-         */
-        const PWA = (function() {
-            let installPromptEvent = null;
-            const installBar = document.getElementById('pwa-install-bar');
-            const installButton = document.getElementById('pwa-install-button');
-            const iosInstructions = document.getElementById('pwa-ios-instructions');
-            const iosCloseButton = document.getElementById('pwa-ios-close-button');
-
-            function showInstallBar() {
-                if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
-                    return;
-                }
-                installBar.classList.remove('hidden');
-            }
-
-            function init() {
-                if (window.matchMedia('(display-mode: standalone)').matches) {
-                    return; // Already installed
-                }
-
-                const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
-
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    installPromptEvent = e;
-                    showInstallBar();
-                });
-
-                if (installButton) {
-                    installButton.addEventListener('click', () => {
-                        if (installPromptEvent) {
-                            installPromptEvent.prompt();
-                            installPromptEvent.userChoice.then(() => {
-                                installPromptEvent = null;
-                                if (installBar) {
-                                    installBar.classList.add('hidden');
-                                }
-                            });
-                        } else if (isIOS && iosInstructions) {
-                            iosInstructions.classList.remove('hidden');
-                            if (installBar) {
-                                installBar.classList.add('hidden');
-                            }
-                        }
-                    });
-                }
-
-                if (isIOS) {
-                     showInstallBar();
-                }
-
-                if (iosCloseButton) {
-                    iosCloseButton.addEventListener('click', () => {
-                        if (iosInstructions) {
-                            iosInstructions.classList.add('hidden');
-                        }
-                    });
-                }
-            }
-
-            return { init };
-        })();
-
-        PWA.init();
     });
