@@ -1546,7 +1546,8 @@ const PWA = (function() {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             installPromptEvent = e;
-            if (!isIOS() && !isDesktop()) {
+            // Show the prompt banner if the event was fired.
+            if (DOM.pwaInstallPrompt) {
                 DOM.pwaInstallPrompt.classList.add('visible');
             }
         });
