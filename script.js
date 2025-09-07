@@ -1121,15 +1121,33 @@
                     });
                 }
 
-                document.getElementById('zoomSlider').addEventListener('input', function() {
-                    scale = parseFloat(this.value);
-                    drawCropCanvas();
-                });
+                const zoomSlider = document.getElementById('zoomSlider');
+                if (zoomSlider) {
+                    zoomSlider.addEventListener('input', function() {
+                        scale = parseFloat(this.value);
+                        drawCropCanvas();
+                    });
+                }
 
-                document.getElementById('cropCloseBtn').addEventListener('click', closeCropModal);
-                document.getElementById('zoomInBtn').addEventListener('click', () => adjustZoom(0.1));
-                document.getElementById('zoomOutBtn').addEventListener('click', () => adjustZoom(-0.1));
-                document.getElementById('cropSaveBtn').addEventListener('click', cropAndSave);
+                const cropCloseBtn = document.getElementById('cropCloseBtn');
+                if (cropCloseBtn) {
+                    cropCloseBtn.addEventListener('click', closeCropModal);
+                }
+
+                const zoomInBtn = document.getElementById('zoomInBtn');
+                if (zoomInBtn) {
+                    zoomInBtn.addEventListener('click', () => adjustZoom(0.1));
+                }
+
+                const zoomOutBtn = document.getElementById('zoomOutBtn');
+                if (zoomOutBtn) {
+                    zoomOutBtn.addEventListener('click', () => adjustZoom(-0.1));
+                }
+
+                const cropSaveBtn = document.getElementById('cropSaveBtn');
+                if (cropSaveBtn) {
+                    cropSaveBtn.addEventListener('click', cropAndSave);
+                }
 
                 document.addEventListener('keydown', function(event) {
                     if (event.key === 'Escape') {
