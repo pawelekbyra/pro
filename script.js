@@ -1513,7 +1513,26 @@ const PWA = (function() {
         if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
             return;
         }
-        installBar.classList.remove('hidden');
+
+                const preloader = document.getElementById('preloader');
+                // Check if preloader is visible and not already in the process of hiding
+                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
+                    const observer = new MutationObserver((mutationsList, observer) => {
+                        for(const mutation of mutationsList) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                if (preloader.style.display === 'none') {
+                                    installBar.classList.remove('hidden');
+                                    observer.disconnect();
+                                    return;
+                                }
+                            }
+                        }
+                    });
+                    observer.observe(preloader, { attributes: true });
+                } else if (!preloader || preloader.style.display === 'none') {
+                    // If preloader is already gone, show the bar
+                    installBar.classList.remove('hidden');
+                }
     }
 
     function init() {
