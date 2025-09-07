@@ -289,23 +289,6 @@
         .tiktok-symulacja .videoPlayer.ready {
             opacity: 1;
         }
-        .video-overlay-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 80px;
-            height: 80px;
-            transform: translate(-50%, -50%);
-            z-index: 12;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-out;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-        }
-        .video-overlay-icon.visible {
-            opacity: 1;
-            transition: opacity 0.1s ease-in;
-        }
         .secret-overlay {
             position: absolute;
             top: var(--topbar-height); /* Start below top bar */
@@ -764,79 +747,6 @@
             outline: none;
         }
 
-        /* ==========================================================================
-           --- KOMPONENTY UI: PASEK POSTĘPU ---
-           ========================================================================== */
-        .tiktok-symulacja .video-progress {
-            position: absolute;
-            top: -22px;
-            left: 0;
-            width: 100%;
-            height: 40px;
-            background: transparent;
-            z-index: 999;
-            cursor: pointer;
-            contain: layout paint;
-            will-change: transform;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            touch-action: pan-x;
-        }
-        .video-progress.skeleton .progress-line,
-        .video-progress.skeleton .progress-dot { visibility: hidden; }
-        .tiktok-symulacja .video-progress::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 2px;
-        }
-        .tiktok-symulacja .progress-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            height: 4px;
-            background: #FFF01F;
-            width: 0%;
-            border-radius: 2px;
-            transition: width 0.1s linear, left 0.1s linear;
-        }
-        .tiktok-symulacja .progress-dot {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 14px;
-            height: 14px;
-            background: var(--accent-color);
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
-            left: 0%;
-            z-index: 1000;
-            pointer-events: auto;
-            transition: left 0.1s linear, transform .15s ease, box-shadow .15s ease;
-        }
-        .tiktok-symulacja .video-progress.dragging .progress-dot,
-        .tiktok-symulacja .video-progress:focus-within .progress-dot {
-          transform: translate(-50%, -50%) scale(1.55);
-          box-shadow: 0 0 0 6px rgba(255,255,255,.15), 0 0 12px rgba(255,255,255,.7);
-        }
-        .tiktok-symulacja .video-progress.dragging::before {
-          background: linear-gradient(90deg, rgba(255,255,255,.28), rgba(255,255,255,.18));
-        }
-        @media (hover: none) {
-          .tiktok-symulacja .video-progress.dragging .progress-line { height: 6px; }
-        }
-        .video-progress .progress-line.no-anim,
-        .video-progress .progress-dot.no-anim {
-             transition: none !important;
-        }
 
         /* ==========================================================================
            --- KOMPONENTY UI: MODALE I ALERTY ---
@@ -1880,6 +1790,7 @@
             outline: 2px solid white;
             outline-offset: 2px;
         }
+        .vjs-has-started .vjs-poster { display: none; }
     </style>
 </head>
 <body>
@@ -1916,13 +1827,10 @@
     <template id="slide-template">
         <div class="webyx-section swiper-slide">
             <div class="tiktok-symulacja">
-                <video class="videoPlayer" muted loop playsinline webkit-playsinline autoplay preload="metadata" poster="placeholder.jpg" oncontextmenu="return false;" crossorigin="anonymous">
+                <video class="videoPlayer video-js" controls muted loop playsinline webkit-playsinline autoplay preload="metadata" poster="placeholder.jpg" oncontextmenu="return false;" crossorigin="anonymous">
                     <source src="" type="video/mp4" />
                     Twoja przeglądarka nie obsługuje wideo.
                 </video>
-                <div class="video-overlay-icon pause-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
-                </div>
                 <div class="secret-overlay" aria-hidden="true">
                     <svg class="secret-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                     <h2 class="secret-title" data-translate-key="secretTitle">Top Secret</h2>
@@ -1954,10 +1862,6 @@
                     </button>
                 </div>
                 <div class="bottombar">
-                    <div class="video-progress" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Postęp wideo">
-                        <div class="progress-line"></div>
-                        <div class="progress-dot"></div>
-                    </div>
                     <div class="text-info">
                         <div class="text-user"></div>
                         <div class="text-description"></div>
@@ -2484,7 +2388,6 @@
                 currentLang: 'pl',
                 currentSlideIndex: 0,
                 isAutoplayBlocked: false,
-                isDraggingProgress: false,
                 lastFocusedElement: null,
                 lastUserGestureTimestamp: 0,
                 activeVideoSession: 0,
@@ -2746,9 +2649,6 @@
                 likeBtn.dataset.likeId = slideData.likeId;
                 updateLikeButtonState(likeBtn, slideData.isLiked, slideData.initialLikes);
 
-                const progressSlider = section.querySelector('.video-progress');
-                VideoManager.initProgressBar(progressSlider, section.querySelector('.videoPlayer'));
-
                 return section;
             }
 
@@ -2872,41 +2772,6 @@
                 attachedSet.delete(video);
             }
 
-            function _startProgressUpdates(video) {
-                const player = videojs(video);
-                _stopProgressUpdates(video);
-                const session = State.get('activeVideoSession');
-
-                const updateFn = () => {
-                    if (session !== State.get('activeVideoSession') || !player.duration()) return;
-                    _updateProgressUI(video);
-                    if (!player.paused()) {
-                        video.rAF_id = requestAnimationFrame(updateFn);
-                    }
-                };
-                player.on('timeupdate', () => _updateProgressUI(video));
-                player.on('play', updateFn);
-            }
-
-            function _stopProgressUpdates(video) {
-                 if (video.rAF_id) cancelAnimationFrame(video.rAF_id);
-                 const player = videojs(video);
-                 player.off('timeupdate');
-                 player.off('play');
-            }
-
-            function _updateProgressUI(video) {
-                if (State.get('isDraggingProgress') || !video) return;
-                const player = videojs(video);
-                if(!player.duration()) return;
-
-                const section = video.closest('.swiper-slide');
-                if (!section) return;
-                const percent = (player.currentTime() / player.duration()) * 100;
-                section.querySelector('.progress-line').style.width = `${percent}%`;
-                section.querySelector('.progress-dot').style.left = `${percent}%`;
-                section.querySelector('.video-progress').setAttribute('aria-valuenow', String(Math.round(percent)));
-            };
 
             function _onActiveSlideChanged(newIndex, oldIndex = -1) {
                 State.set('activeVideoSession', State.get('activeVideoSession') + 1);
@@ -2918,14 +2783,6 @@
                     const oldVideo = oldSlide.querySelector('.videoPlayer');
                     if (oldVideo) {
                         videojs(oldVideo).pause();
-                        _stopProgressUpdates(oldVideo);
-                    }
-                    oldSlide.querySelector('.pause-icon')?.classList.remove('visible');
-                    const progressLine = oldSlide.querySelector('.progress-line');
-                    const progressDot = oldSlide.querySelector('.progress-dot');
-                    if(progressLine && progressDot) {
-                        progressLine.style.width = '0%';
-                        progressDot.style.left = '0%';
                     }
                 }
 
@@ -2936,7 +2793,6 @@
 
                     if (newVideo && !(isSecret && !State.get('isUserLoggedIn')) && !State.get('isAutoplayBlocked')) {
                         _guardedPlay(newVideo);
-                        _startProgressUpdates(newVideo);
                     }
                 }
             }
@@ -2987,56 +2843,6 @@
                         },
                     });
                 },
-                initProgressBar: (progressEl, videoEl) => {
-                    if (!progressEl || !videoEl) return;
-                    progressEl.classList.add('skeleton');
-                    videoEl.addEventListener('loadedmetadata', () => progressEl.classList.remove('skeleton'), { once: true });
-
-                    let pointerId = null;
-                    const seek = (e) => {
-                        const rect = progressEl.getBoundingClientRect();
-                        const x = ('clientX' in e ? e.clientX : (e.touches?.[0]?.clientX || 0));
-                        const percent = ((x - rect.left) / rect.width) * 100;
-                        const clamped = Math.max(0, Math.min(100, percent));
-                        if (videoEl.duration) videoEl.currentTime = (clamped / 100) * videoEl.duration;
-                        _updateProgressUI(videoEl);
-                    };
-
-                    progressEl.addEventListener('pointerdown', (e) => {
-                        if (pointerId !== null) return;
-                        pointerId = e.pointerId;
-                        State.set('isDraggingProgress', true);
-                        progressEl.classList.add('dragging');
-                        progressEl.setPointerCapture(pointerId);
-                        seek(e);
-                    });
-
-                    progressEl.addEventListener('pointermove', (e) => {
-                        if (e.pointerId !== pointerId) return;
-                        seek(e);
-                    });
-
-                    const endDrag = (e) => {
-                        if (e.pointerId !== pointerId) return;
-                        pointerId = null;
-                        State.set('isDraggingProgress', false);
-                        progressEl.classList.remove('dragging');
-                        _startProgressUpdates(videoEl);
-                    };
-                    progressEl.addEventListener('pointerup', endDrag);
-                    progressEl.addEventListener('pointercancel', endDrag);
-
-                    progressEl.addEventListener('keydown', (e) => {
-                        if (!videoEl.duration) return;
-                        const step = videoEl.duration * 0.05;
-                        switch (e.key) {
-                            case 'ArrowLeft': videoEl.currentTime -= step; break;
-                            case 'ArrowRight': videoEl.currentTime += step; break;
-                            default: return;
-                        }
-                        e.preventDefault();
-                    });
-                },
                 updatePlaybackForLoginChange: (section, isSecret) => {
                     const video = section.querySelector('.videoPlayer');
                     const hasSrc = video.querySelector('source')?.getAttribute('src');
@@ -3045,22 +2851,9 @@
 
                     if (isSecret) {
                         video.pause();
-                        _stopProgressUpdates(video);
                         video.currentTime = 0;
-                        _updateProgressUI(video);
-                    } else if (video.paused && document.body.classList.contains('loaded') && !State.get('isDraggingProgress') && !State.get('isAutoplayBlocked')) {
+                    } else if (video.paused && document.body.classList.contains('loaded') && !State.get('isAutoplayBlocked')) {
                        _guardedPlay(video);
-                    }
-                },
-                handleVideoClick: (video) => {
-                    if (State.get('isDraggingProgress')) return;
-                    const pauseIcon = video.closest('.webyx-section')?.querySelector('.pause-icon');
-                    if (video.paused) {
-                        _guardedPlay(video);
-                        pauseIcon?.classList.remove('visible');
-                    } else {
-                        video.pause();
-                        pauseIcon?.classList.add('visible');
                     }
                 },
             };
@@ -3185,7 +2978,6 @@
                     const target = e.target;
                     const actionTarget = target.closest('[data-action]');
                     if (!actionTarget) {
-                        if (target.closest('.videoPlayer')) VideoManager.handleVideoClick(target.closest('.videoPlayer'));
                         return;
                     }
 
