@@ -1115,9 +1115,11 @@
 
                 const deleteInput = document.getElementById('deleteConfirmation');
                 const deleteBtn = document.getElementById('deleteAccountBtn');
-                deleteInput.addEventListener('input', function() {
-                    deleteBtn.disabled = this.value.trim() !== 'USUWAM KONTO';
-                });
+                if (deleteInput && deleteBtn) {
+                    deleteInput.addEventListener('input', function() {
+                        deleteBtn.disabled = this.value.trim() !== 'USUWAM KONTO';
+                    });
+                }
 
                 document.getElementById('zoomSlider').addEventListener('input', function() {
                     scale = parseFloat(this.value);
@@ -1163,6 +1165,7 @@
 
             function initializeCropper() {
                 cropCanvas = document.getElementById('cropCanvas');
+                if (!cropCanvas) return;
                 cropCtx = cropCanvas.getContext('2d');
                 cropCanvas.addEventListener('mousedown', startDrag);
                 cropCanvas.addEventListener('mousemove', drag);
@@ -1435,7 +1438,7 @@
             }
 
             function _initializePreloader() {
-                UI.DOM.preloader.classList.add('content-visible');
+                setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
                 UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
                     button.addEventListener('click', () => {
                         UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
