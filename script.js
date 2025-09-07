@@ -1435,7 +1435,7 @@
             }
 
             function _initializePreloader() {
-                setTimeout(() => UI.DOM.preloader.classList.add('content-visible'), 500);
+                UI.DOM.preloader.classList.add('content-visible');
                 UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
                     button.addEventListener('click', () => {
                         UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
