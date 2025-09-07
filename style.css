@@ -1762,3 +1762,88 @@
         height: 100%;
     }
 }
+
+/* --- Style dla promptu na mobilnym (PWAInstallPrompt.tsx) --- */
+.pwa-install-prompt-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #2d2d2d;
+    color: white;
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    gap: 16px;
+    z-index: 9999;
+    height: var(--bottombar-height);
+    padding-bottom: calc(1.5rem + var(--safe-area-bottom));
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+}
+
+.pwa-install-prompt-banner.visible {
+    transform: translateY(0);
+}
+
+.pwa-install-prompt-banner h3 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.pwa-install-prompt-banner p {
+    font-size: 14px;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.pwa-install-prompt-banner .btn-primary {
+    background: #ef4444; /* Użyj koloru destrukcyjnego dla akcentu */
+    border: none;
+    padding: 12px 20px;
+    border-radius: 9999px; /* rounded-full */
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* --- Style dla modalnych okien (PwaDesktopModal.tsx) --- */
+#pwaDesktopModal .modal-content,
+#pwaIosInstructions .modal-content {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: white;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    padding: 32px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+#pwaDesktopModal h3,
+#pwaIosInstructions h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+#pwaDesktopModal .qr-code-container {
+    width: 128px;
+    height: 128px;
+    background: white;
+    margin: 0 auto;
+    border-radius: 8px;
+}
+
+#pwaIosInstructions img {
+    max-width: 100px;
+    margin: 10px auto;
+    display: block;
+    background: #444;
+    padding: 10px;
+    border-radius: 8px;
+}
