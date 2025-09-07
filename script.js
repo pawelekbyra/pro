@@ -1502,91 +1502,76 @@
          * PWA MODULE
          * ==========================================================================
          */
-const PWA = (function() {
-    let installPromptEvent = null;
-
-    const DOM = {
-        pwaDesktopModal: document.getElementById('pwaDesktopModal'),
-        pwaInstallPrompt: document.getElementById('pwaInstallPrompt'),
-        pwaIosInstructions: document.getElementById('pwaIosInstructions'),
-        pwaDesktopInstallButton: document.querySelector('.topbar-icon-btn.desktop-only'),
-    };
-
-    function isStandalone() {
-        return window.matchMedia('(display-mode: standalone)').matches;
-    }
-
-    function isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-
-    function isDesktop() {
-        return window.innerWidth > 768; // Używamy szerokości ekranu zamiast User-Agent
-    }
-
-    function showInstallPrompt() {
-        if (!installPromptEvent) return;
-        installPromptEvent.prompt();
-        installPromptEvent.userChoice.then(choiceResult => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the A2HS prompt');
-            } else {
-                console.log('User dismissed the A2HS prompt');
-            }
-            installPromptEvent = null;
-        });
-    }
-
-    function init() {
-        if (isStandalone()) {
-            console.log('App is in standalone mode.');
-            return;
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            installPromptEvent = e;
-            // Show the prompt banner if the event was fired.
-            if (DOM.pwaInstallPrompt) {
-                DOM.pwaInstallPrompt.classList.add('visible');
-            }
-        });
-
-        if (isDesktop() || isIOS()) {
-            if (DOM.pwaDesktopInstallButton) {
-                 DOM.pwaDesktopInstallButton.style.display = 'flex'; // Zmieniono na flex, aby poprawnie wyświetlać
-                 DOM.pwaDesktopInstallButton.dataset.action = isIOS() ? 'open-ios-pwa-modal' : 'open-desktop-pwa-modal';
-                 if (isIOS()) {
-                    const icon = document.createElement('svg');
-                    icon.innerHTML = '<path d="M15 5l6 6-6 6M21 11H9a6 6 0 0 0-6 6"></path>';
-                    DOM.pwaDesktopInstallButton.prepend(icon); // Dodaj ikonę udostępniania
-                 }
-            }
-        }
-    }
-
-    function openDesktopModal() {
-        UI.openModal(DOM.pwaDesktopModal);
-    }
-
-    function openIosModal() {
-        UI.openModal(DOM.pwaIosInstructions);
-    }
-
-    function closePwaModals() {
-        UI.closeModal(DOM.pwaDesktopModal);
-        UI.closeModal(DOM.pwaIosInstructions);
-    }
-
-    return {
-        init,
-        showInstallPrompt,
-        openDesktopModal,
-        openIosModal,
-        closePwaModals
-    };
-})();
 
 
         App.init();
+
+        /**
+         * ==========================================================================
+         * 10. PWA INSTALL PROMPT LOGIC
+         * ==========================================================================
+         */
+        const PWA = (function() {
+            let installPromptEvent = null;
+            const installBar = document.getElementById('pwa-install-bar');
+            const installButton = document.getElementById('pwa-install-button');
+            const iosInstructions = document.getElementById('pwa-ios-instructions');
+            const iosCloseButton = document.getElementById('pwa-ios-close-button');
+
+            function showInstallBar() {
+                if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
+                    return;
+                }
+                installBar.classList.remove('hidden');
+            }
+
+            function init() {
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    return; // Already installed
+                }
+
+                const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    installPromptEvent = e;
+                    showInstallBar();
+                });
+
+                if (installButton) {
+                    installButton.addEventListener('click', () => {
+                        if (installPromptEvent) {
+                            installPromptEvent.prompt();
+                            installPromptEvent.userChoice.then(() => {
+                                installPromptEvent = null;
+                                if (installBar) {
+                                    installBar.classList.add('hidden');
+                                }
+                            });
+                        } else if (isIOS && iosInstructions) {
+                            iosInstructions.classList.remove('hidden');
+                            if (installBar) {
+                                installBar.classList.add('hidden');
+                            }
+                        }
+                    });
+                }
+
+                if (isIOS) {
+                     showInstallBar();
+                }
+
+                if (iosCloseButton) {
+                    iosCloseButton.addEventListener('click', () => {
+                        if (iosInstructions) {
+                            iosInstructions.classList.add('hidden');
+                        }
+                    });
+                }
+            }
+
+            return { init };
+        })();
+
+        PWA.init();
     });

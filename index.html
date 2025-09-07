@@ -139,13 +139,6 @@
             <div class="swiper-wrapper">
                 </div>
         </div>
-        <div id="pwaInstallPrompt" class="pwa-install-prompt-banner" aria-hidden="true">
-            <div>
-                <h3 data-translate-key="installPwaTitle">Zainstaluj aplikację!</h3>
-                <p data-translate-key="installPwaDescription">Uzyskaj pełne wrażenia. Zainstaluj aplikację Ting Tong na swoim urządzeniu.</p>
-            </div>
-            <button class="btn-primary" data-action="install-pwa" data-translate-key="installAppText">Zainstaluj</button>
-        </div>
     </div>
     <div id="alertBox" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
@@ -367,26 +360,23 @@
     <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
     <div id="um-login-render-container" style="display: none;">[tt_login_form]</div>
 
-    <div id="pwaDesktopModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
-        <div class="modal-content" tabindex="-1">
-            <button class="modal-close-btn" data-action="close-modal" aria-label="Zamknij">&times;</button>
-            <h3 data-translate-key="pwaModalTitle"></h3>
-            <p data-translate-key="pwaModalBody"></p>
-            <div class="qr-code-container">
-                <img src="/qr-code-placeholder.png" alt="QR Code" width="128" height="128">
-            </div>
+    <div id="pwa-install-bar" class="pwa-prompt hidden">
+        <div class="pwa-prompt-content">
+            <h3 class="pwa-prompt-title">Zainstaluj aplikację!</h3>
+            <p class="pwa-prompt-description">Dodaj Ting Tong do ekranu głównego, aby mieć szybki dostęp.</p>
         </div>
+        <button id="pwa-install-button" class="pwa-prompt-button">Zainstaluj</button>
     </div>
 
-    <div id="pwaIosInstructions" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
-        <div class="modal-content" tabindex="-1">
-            <button class="modal-close-btn" data-action="close-modal" aria-label="Zamknij">&times;</button>
-            <h3 data-translate-key="installPwaTitle"></h3>
-            <p data-translate-key="pwaIosInstruction1"></p>
-            <img src="/icons/share-ios.svg" alt="Ikona Udostępniania">
-            <p data-translate-key="pwaIosInstruction2"></p>
-            <img src="/icons/add-to-home.svg" alt="Ikona Dodawania">
-            <p data-translate-key="pwaIosInstruction3"></p>
+    <div id="pwa-ios-instructions" class="pwa-prompt-ios hidden">
+        <div class="pwa-ios-header">
+            <h3>Jak zainstalować aplikację</h3>
+            <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
+        </div>
+        <div class="pwa-ios-body">
+            <p>1. Stuknij ikonę <strong>udostępniania</strong> w przeglądarce.</p>
+            <p>2. Wybierz <strong>"Dodaj do ekranu początkowego"</strong>.</p>
+            <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
         </div>
     </div>
     <script>
