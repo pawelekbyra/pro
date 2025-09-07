@@ -343,9 +343,10 @@
             backdrop-filter: blur(8px);
         }
         .topbar {
-            position: fixed;
+            /* Zmodyfikowane style, aby pasek pozycjonował się względem #app-frame */
+            position: absolute; /* Zmienione z 'fixed' na 'absolute' */
             display: flex;
-            justify-content: center; /* Center the middle element */
+            justify-content: center;
             align-items: center;
             text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
             top: 0;
@@ -357,7 +358,7 @@
             padding: 0;
             font: inherit;
             color: inherit;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Subtle separator */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             transition: border-color 0.3s ease-out;
         }
         .topbar.login-panel-active {
@@ -1815,9 +1816,6 @@
                 width: 100%;
                 height: 100%;
             }
-            .topbar {
-                position: absolute;
-            }
         }
     </style>
 </head>
@@ -2614,9 +2612,9 @@
                 const currentSlideIndex = State.get('currentSlideIndex');
 
                 // Update global UI elements
-                const topbar = document.querySelector('body > .topbar');
-                const loginPanel = document.querySelector('body > .login-panel');
-                const loggedInMenu = document.querySelector('body > .logged-in-menu');
+                const topbar = document.querySelector('#app-frame > .topbar');
+                const loginPanel = document.querySelector('#app-frame > .login-panel');
+                const loggedInMenu = document.querySelector('#app-frame > .logged-in-menu');
 
                 if (topbar) {
                     topbar.querySelector('.central-text-wrapper').classList.toggle('with-arrow', !isLoggedIn);
@@ -2695,7 +2693,7 @@
             }
 
             function initGlobalPanels() {
-                const loginPanel = document.querySelector('body > .login-panel');
+                const loginPanel = document.querySelector('#app-frame > .login-panel');
                 const renderedForm = document.getElementById('um-login-render-container');
                 if (loginPanel && renderedForm) {
                     loginPanel.innerHTML = renderedForm.innerHTML;
@@ -3014,9 +3012,9 @@
 
                     const action = actionTarget.dataset.action;
 
-                    const topbar = document.querySelector('body > .topbar');
-                    const loginPanel = document.querySelector('body > .login-panel');
-                    const loggedInMenu = document.querySelector('body > .logged-in-menu');
+                    const topbar = document.querySelector('#app-frame > .topbar');
+                    const loginPanel = document.querySelector('#app-frame > .login-panel');
+                    const loggedInMenu = document.querySelector('#app-frame > .logged-in-menu');
 
                     switch (action) {
                         case 'toggle-like': handleLikeToggle(actionTarget); break;
