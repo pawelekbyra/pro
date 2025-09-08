@@ -605,7 +605,13 @@
                 const canAttach = slideData && !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
                 if (!canAttach) return;
 
-                const player = videojs(video);
+                const player = videojs(video, {
+                  html5: {
+                    hls: {
+                      ...Config.HLS
+                    }
+                  }
+                });
                 const sourceUrl = Config.USE_HLS && slideData.hlsUrl ? slideData.hlsUrl : slideData.mp4Url;
                 const sourceType = Config.USE_HLS && slideData.hlsUrl ? 'application/x-mpegURL' : 'video/mp4';
 
