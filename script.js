@@ -609,10 +609,10 @@
                   html5: {
                     hls: {
                       ...Config.HLS,
-                      overrideNative: false // Let's be explicit as per best practices
+                      overrideNative: false // Explicitly use native HLS where available (e.g., Safari)
                     },
                     vhs: {
-                      overrideNative: false
+                      overrideNative: false // VHS is video.js's HLS engine
                     }
                   }
                 });
@@ -621,11 +621,17 @@
                 const useHls = Config.USE_HLS && slideData.hlsUrl;
 
                 if (useHls) {
+                    // Recommended setup: HLS first, with an MP4 fallback.
+                    // Video.js will try HLS and, if it fails (e.g., CORS, unsupported), it will try the next source.
                     sources.push({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
-                }
-                if (slideData.mp4Url) {
+                    if (slideData.mp4Url) {
+                        sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
+                    }
+                } else if (slideData.mp4Url) {
+                    // If HLS is disabled or not present, just use the MP4 source.
                     sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
                 }
+
 
                 if (sources.length > 0) {
                     player.src(sources);
