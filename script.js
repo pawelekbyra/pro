@@ -608,15 +608,27 @@
                 const player = videojs(video, {
                   html5: {
                     hls: {
-                      ...Config.HLS
+                      ...Config.HLS,
+                      overrideNative: false // Let's be explicit as per best practices
+                    },
+                    vhs: {
+                      overrideNative: false
                     }
                   }
                 });
-                const sourceUrl = Config.USE_HLS && slideData.hlsUrl ? slideData.hlsUrl : slideData.mp4Url;
-                const sourceType = Config.USE_HLS && slideData.hlsUrl ? 'application/x-mpegURL' : 'video/mp4';
 
-                if (sourceUrl) {
-                    player.src({ src: sourceUrl, type: sourceType });
+                const sources = [];
+                const useHls = Config.USE_HLS && slideData.hlsUrl;
+
+                if (useHls) {
+                    sources.push({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
+                }
+                if (slideData.mp4Url) {
+                    sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
+                }
+
+                if (sources.length > 0) {
+                    player.src(sources);
                     attachedSet.add(video);
                 }
             }
