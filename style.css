@@ -1845,3 +1845,9 @@
     line-height: 1.5;
 }
 .pwa-ios-body p { margin-bottom: 0.75rem; }
+
+/* Custom Video.js styles to position control bar above the bottom bar */
+.tiktok-symulacja .vjs-control-bar {
+    bottom: var(--bottombar-height, 110px);
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
