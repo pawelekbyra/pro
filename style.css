@@ -1777,7 +1777,7 @@
     width: 100%;
     background: #333;
     color: white;
-    z-index: 10000;
+    z-index: 10002;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1816,7 +1816,7 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: white;
-    z-index: 10001;
+    z-index: 10003;
     padding: 1rem;
     padding-bottom: calc(1rem + var(--safe-area-bottom));
     border-top: 1px solid rgba(255, 255, 255, 0.1);
