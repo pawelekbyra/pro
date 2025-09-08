@@ -580,10 +580,16 @@
                 const player = videojs(videoEl);
                 const playPromise = player.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(error => {
+                    playPromise.then(() => {
+                        if (State.get('isAutoplayBlocked')) {
+                           State.set('isAutoplayBlocked', false);
+                        }
+                    }).catch(error => {
                         if (error.name === 'NotAllowedError') {
                             console.warn("Autoplay was blocked by the browser.", error);
                             State.set('isAutoplayBlocked', true);
+                        } else {
+                            console.error("TingTong Playback Error:", error);
                         }
                     });
                 }
@@ -640,6 +646,13 @@
                     const newSlide = allSlides[newIndex];
                     const newVideo = newSlide.querySelector('.videoPlayer');
                     const isSecret = newSlide.querySelector('.tiktok-symulacja').dataset.access === 'secret';
+
+                    // If autoplay was blocked but the user has interacted with the page since,
+                    // we can probably try playing again.
+                    const timeSinceLastGesture = Date.now() - State.get('lastUserGestureTimestamp');
+                    if (State.get('isAutoplayBlocked') && timeSinceLastGesture < Config.GESTURE_GRACE_PERIOD_MS) {
+                        State.set('isAutoplayBlocked', false);
+                    }
 
                     if (newVideo && !(isSecret && !State.get('isUserLoggedIn')) && !State.get('isAutoplayBlocked')) {
                         _guardedPlay(newVideo);
