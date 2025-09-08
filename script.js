@@ -1503,78 +1503,88 @@
          * ==========================================================================
          */
 const PWA = (function() {
-    let installPromptEvent = null;
+    // DOM Elements
     const installBar = document.getElementById('pwa-install-bar');
     const installButton = document.getElementById('pwa-install-button');
     const iosInstructions = document.getElementById('pwa-ios-instructions');
     const iosCloseButton = document.getElementById('pwa-ios-close-button');
 
-    const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+    // State
+    let installPromptEvent = null;
 
-    function showInstallBar() {
-        if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
-            return; // Don't show if installed or element doesn't exist
+    // Predicates
+    const isIOS = () => {
+        if (typeof window === 'undefined' || !window.navigator) return false;
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    };
+    const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches;
+
+    // Actions
+    function showIosInstructions() {
+        if (installBar) installBar.classList.add('hidden');
+        if (iosInstructions) iosInstructions.classList.remove('hidden');
+    }
+
+    function hideIosInstructions() {
+        if (iosInstructions) iosInstructions.classList.add('hidden');
+    }
+
+    function showInstallPrompt() {
+        if (isStandalone()) {
+            return; // Already installed, do nothing.
         }
 
-        const preloader = document.getElementById('preloader');
-        // Wait for preloader to finish before showing the bar
-        if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
-            const observer = new MutationObserver((mutationsList, observer) => {
-                for(const mutation of mutationsList) {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        // We show the prompt if the event is available OR if the user is on iOS.
+        if (installPromptEvent || isIOS()) {
+             if (installBar) {
+                // The preloader check from the original code is good UX.
+                const preloader = document.getElementById('preloader');
+                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
+                    const observer = new MutationObserver((mutations, obs) => {
                         if (preloader.style.display === 'none') {
                             installBar.classList.remove('hidden');
-                            observer.disconnect();
-                            return;
+                            obs.disconnect();
                         }
-                    }
+                    });
+                    observer.observe(preloader, { attributes: true, attributeFilter: ['style'] });
+                } else {
+                    // If preloader is already gone, show the bar
+                    installBar.classList.remove('hidden');
                 }
-            });
-            observer.observe(preloader, { attributes: true });
-        } else {
-            // If preloader is already gone, show the bar
-            installBar.classList.remove('hidden');
+             }
         }
     }
 
+    function handleInstallClick() {
+        if (installPromptEvent) {
+            installPromptEvent.prompt();
+        } else if (isIOS()) {
+            showIosInstructions();
+        }
+    }
+
+    // Initialization
     function init() {
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            return; // Already installed
+        if (isStandalone()) {
+            return; // Don't set up listeners if already installed.
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             installPromptEvent = e;
-            showInstallBar(); // Show the bar when the install prompt is available
+            showInstallPrompt();
         });
 
-        if (installButton) {
-            installButton.addEventListener('click', () => {
-                if (installPromptEvent) {
-                    // Standard PWA installation prompt (Desktop, Android)
-                    installPromptEvent.prompt();
-                    // Do not hide the bar. It should remain until the app is installed.
-                } else if (isIOS() && iosInstructions) {
-                    // iOS fallback: show instructions and hide the bar for a cleaner UI
-                    iosInstructions.classList.remove('hidden');
-                    if (installBar) {
-                        installBar.classList.add('hidden');
-                    }
-                }
-            });
-        }
+        // For iOS, which doesn't get `beforeinstallprompt`, we check and show the prompt right away.
+        showInstallPrompt();
 
-        // For iOS, which doesn't support `beforeinstallprompt`, we show the bar directly.
-        if (isIOS()) {
-             showInstallBar();
+        if (installButton) {
+            installButton.addEventListener('click', handleInstallClick);
         }
 
         if (iosCloseButton) {
-            iosCloseButton.addEventListener('click', () => {
-                if (iosInstructions) {
-                    iosInstructions.classList.add('hidden');
-                }
-            });
+            iosCloseButton.addEventListener('click', hideIosInstructions);
         }
     }
 
