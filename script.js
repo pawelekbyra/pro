@@ -1509,30 +1509,32 @@ const PWA = (function() {
     const iosInstructions = document.getElementById('pwa-ios-instructions');
     const iosCloseButton = document.getElementById('pwa-ios-close-button');
 
+    const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+
     function showInstallBar() {
         if (!installBar || window.matchMedia('(display-mode: standalone)').matches) {
-            return;
+            return; // Don't show if installed or element doesn't exist
         }
 
-                const preloader = document.getElementById('preloader');
-                // Check if preloader is visible and not already in the process of hiding
-                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
-                    const observer = new MutationObserver((mutationsList, observer) => {
-                        for(const mutation of mutationsList) {
-                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                                if (preloader.style.display === 'none') {
-                                    installBar.classList.remove('hidden');
-                                    observer.disconnect();
-                                    return;
-                                }
-                            }
+        const preloader = document.getElementById('preloader');
+        // Wait for preloader to finish before showing the bar
+        if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for(const mutation of mutationsList) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        if (preloader.style.display === 'none') {
+                            installBar.classList.remove('hidden');
+                            observer.disconnect();
+                            return;
                         }
-                    });
-                    observer.observe(preloader, { attributes: true });
-                } else if (!preloader || preloader.style.display === 'none') {
-                    // If preloader is already gone, show the bar
-                    installBar.classList.remove('hidden');
+                    }
                 }
+            });
+            observer.observe(preloader, { attributes: true });
+        } else {
+            // If preloader is already gone, show the bar
+            installBar.classList.remove('hidden');
+        }
     }
 
     function init() {
@@ -1540,25 +1542,20 @@ const PWA = (function() {
             return; // Already installed
         }
 
-        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             installPromptEvent = e;
-            showInstallBar();
+            showInstallBar(); // Show the bar when the install prompt is available
         });
 
         if (installButton) {
             installButton.addEventListener('click', () => {
                 if (installPromptEvent) {
+                    // Standard PWA installation prompt (Desktop, Android)
                     installPromptEvent.prompt();
-                    installPromptEvent.userChoice.then(() => {
-                        installPromptEvent = null;
-                        if (installBar) {
-                            installBar.classList.add('hidden');
-                        }
-                    });
-                } else if (isIOS && iosInstructions) {
+                    // Do not hide the bar. It should remain until the app is installed.
+                } else if (isIOS() && iosInstructions) {
+                    // iOS fallback: show instructions and hide the bar for a cleaner UI
                     iosInstructions.classList.remove('hidden');
                     if (installBar) {
                         installBar.classList.add('hidden');
@@ -1567,7 +1564,8 @@ const PWA = (function() {
             });
         }
 
-        if (isIOS) {
+        // For iOS, which doesn't support `beforeinstallprompt`, we show the bar directly.
+        if (isIOS()) {
              showInstallBar();
         }
 
