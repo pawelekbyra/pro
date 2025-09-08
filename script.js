@@ -164,12 +164,12 @@
                     {
                         'id': 'slide-001',
                         'likeId': '1',
-                        'user': 'Paweł Polutek',
-                        'description': 'To jest dynamicznie załadowany opis dla pierwszego slajdu. Działa!',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/4434150-hd_1080_1920_30fps-1.mp4',
-                        'hlsUrl': null,
+                        'user': 'Unified Streaming',
+                        'description': 'Tears of Steel - HLS (ISM)',
+                        'mp4Url': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4',
+                        'hlsUrl': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
                         'poster': '',
-                        'avatar': 'https://i.pravatar.cc/100?u=pawel',
+                        'avatar': 'https://i.pravatar.cc/100?u=unified',
                         'access': 'public',
                         'initialLikes': 1500,
                         'isLiked': false,
@@ -178,16 +178,30 @@
                     {
                         'id': 'slide-002',
                         'likeId': '2',
-                        'user': 'Web Dev',
-                        'description': 'Kolejny slajd, kolejne wideo. #efficiency',
+                        'user': 'Apple',
+                        'description': 'BipBop - HLS (fMP4)',
                         'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': null,
+                        'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                         'poster': '',
-                        'avatar': 'https://i.pravatar.cc/100?u=webdev',
+                        'avatar': 'https://i.pravatar.cc/100?u=apple',
                         'access': 'public',
                         'initialLikes': 2200,
                         'isLiked': false,
                         'initialComments': 1245
+                    },
+                    {
+                        'id': 'slide-003',
+                        'likeId': '3',
+                        'user': 'Unified Streaming',
+                        'description': 'Tears of Steel - HLS (MP4)',
+                        'mp4Url': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4',
+                        'hlsUrl': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4/.m3u8',
+                        'poster': '',
+                        'avatar': 'https://i.pravatar.cc/100?u=unified2',
+                        'access': 'public',
+                        'initialLikes': 1800,
+                        'isLiked': false,
+                        'initialComments': 888
                     }
                 ]
             };
