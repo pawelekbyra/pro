@@ -570,37 +570,13 @@
          * ==========================================================================
          */
         const VideoManager = (function() {
-            let hlsPromise = null;
-            const hlsInstances = new Map();
             const attachedSet = new WeakSet();
-            const retryCounts = new WeakMap();
-            const hlsRecoverCounts = new Map();
-            let lazyObserver; // playObserver is removed
+            let lazyObserver;
 
             window.TTStats = window.TTStats || { videoErrors: 0, videoRetries: 0, hlsErrors: 0, hlsRecovered: 0, ttfpSamples: 0, ttfpTotalMs: 0 };
 
-            function _loadHlsLibrary() {
-                if (window.Hls) return Promise.resolve();
-                // Use video.js's dynamic import for HLS
-                if (!hlsPromise) {
-                    hlsPromise = new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.14/dist/hls.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    }).catch(err => {
-                        console.error("Failed to load HLS.js", err);
-                        hlsPromise = null;
-                        throw err;
-                    });
-                }
-                return hlsPromise;
-            }
-
             function _guardedPlay(videoEl) {
                 if (!videoEl) return;
-                // Use video.js player instance
                 const player = videojs(videoEl);
                 const playPromise = player.play();
                 if (playPromise !== undefined) {
@@ -616,6 +592,7 @@
             function _attachSrc(sectionEl) {
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video || attachedSet.has(video)) return;
+
                 const slideId = sectionEl.dataset.slideId;
                 const slideData = slidesData.find(s => s.id === slideId);
 
@@ -623,21 +600,25 @@
                 if (!canAttach) return;
 
                 const player = videojs(video);
-                const source = {
-                    src: Config.USE_HLS && slideData.hlsUrl ? slideData.hlsUrl : slideData.mp4Url,
-                    type: Config.USE_HLS && slideData.hlsUrl ? 'application/x-mpegURL' : 'video/mp4'
-                };
+                const sourceUrl = Config.USE_HLS && slideData.hlsUrl ? slideData.hlsUrl : slideData.mp4Url;
+                const sourceType = Config.USE_HLS && slideData.hlsUrl ? 'application/x-mpegURL' : 'video/mp4';
 
-                player.src(source);
-                attachedSet.add(video);
+                if (sourceUrl) {
+                    player.src({ src: sourceUrl, type: sourceType });
+                    attachedSet.add(video);
+                }
             }
 
             function _detachSrc(sectionEl) {
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video) return;
-                const player = videojs(video);
-                player.pause();
-                player.reset(); // Resets the player to its initial state
+
+                // Check if a player instance exists
+                const player = videojs.getPlayer(video);
+                if (player && !player.isDisposed()) {
+                    player.pause();
+                    player.reset(); // Resets the player to its initial state
+                }
                 attachedSet.delete(video);
             }
 
