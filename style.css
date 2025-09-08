@@ -1748,9 +1748,10 @@
     #app-frame {
         position: relative;
         height: 100vh;
+        /* Use a 9:16 aspect ratio, but don't let it get too wide */
         width: calc(100vh * 9 / 16);
+        max-width: 450px;
         max-height: 100%;
-        max-width: 100%;
         margin: 0 auto;
         border-left: 1px solid #333;
         border-right: 1px solid #333;

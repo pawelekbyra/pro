@@ -1554,7 +1554,6 @@ const PWA = (function() {
 
     // Actions
     function showIosInstructions() {
-        if (installBar) installBar.classList.add('hidden');
         if (iosInstructions) iosInstructions.classList.remove('hidden');
     }
 
@@ -1562,59 +1561,84 @@ const PWA = (function() {
         if (iosInstructions) iosInstructions.classList.add('hidden');
     }
 
-    function showInstallPrompt() {
-        if (isStandalone()) {
-            return; // Already installed, do nothing.
+    function showInstallBar() {
+        if (isStandalone() || !installBar) {
+            return;
         }
 
-        // We show the prompt if the event is available OR if the user is on iOS.
-        if (installPromptEvent || isIOS()) {
-             if (installBar) {
-                // The preloader check from the original code is good UX.
-                const preloader = document.getElementById('preloader');
-                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
-                    const observer = new MutationObserver((mutations, obs) => {
-                        if (preloader.style.display === 'none') {
-                            installBar.classList.remove('hidden');
-                            obs.disconnect();
-                        }
-                    });
-                    observer.observe(preloader, { attributes: true, attributeFilter: ['style'] });
-                } else {
-                    // If preloader is already gone, show the bar
-                    installBar.classList.remove('hidden');
+        const preloader = document.getElementById('preloader');
+        const showBar = () => {
+            installBar.classList.remove('hidden');
+            // If we don't have a real prompt, the button should act as a download link.
+            if (!installPromptEvent) {
+                installButton.textContent = Utils.getTranslation('downloadApp');
+            }
+        };
+
+        if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
+            const observer = new MutationObserver((mutations, obs) => {
+                if (preloader.style.display === 'none') {
+                    showBar();
+                    obs.disconnect();
                 }
-             }
+            });
+            observer.observe(preloader, { attributes: true, attributeFilter: ['style'] });
+        } else {
+            showBar();
         }
     }
 
     function handleInstallClick() {
+        // If we have a stored prompt, use it. This is the preferred PWA installation method.
         if (installPromptEvent) {
             installPromptEvent.prompt();
-        } else if (isIOS()) {
+            installPromptEvent.userChoice.then(() => {
+                installPromptEvent = null;
+                installBar.classList.add('hidden');
+            });
+        }
+        // On iOS, we don't have a prompt, so we show instructions.
+        else if (isIOS()) {
             showIosInstructions();
+        }
+        // Fallback for other systems (e.g., Android with failed PWA criteria): link to the store.
+        else {
+            window.open('https://play.google.com/store/apps/details?id=com.tingtong.app', '_blank');
         }
     }
 
     // Initialization
     function init() {
         if (isStandalone()) {
-            return; // Don't set up listeners if already installed.
+            return; // Don't set up any prompts if the app is already installed.
         }
 
+        // Listen for the native install prompt event
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             installPromptEvent = e;
-            showInstallPrompt();
+            // Now that we have the prompt, ensure the button text is "Install"
+            if (installButton) {
+                installButton.textContent = Utils.getTranslation('installAppText');
+            }
+            // Show the bar because we know it's installable
+            showInstallBar();
         });
 
-        // For iOS, which doesn't get `beforeinstallprompt`, we check and show the prompt right away.
-        showInstallPrompt();
+        // Proactively show a prompt for all users (if not installed)
+        if (isIOS()) {
+            // On iOS, the only option is manual instructions.
+            showIosInstructions();
+        } else {
+            // On Android/Desktop, show our custom bar.
+            // It will either trigger the real prompt or a fallback link.
+            showInstallBar();
+        }
 
+        // Attach event listeners
         if (installButton) {
             installButton.addEventListener('click', handleInstallClick);
         }
-
         if (iosCloseButton) {
             iosCloseButton.addEventListener('click', hideIosInstructions);
         }
