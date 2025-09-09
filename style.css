@@ -400,25 +400,6 @@
             text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
         }
 
-        .video-progress-container {
-            position: absolute;
-            bottom: var(--bottombar-height, 110px);
-            left: 0;
-            width: 100%;
-            height: 8px; /* Increased thickness */
-            background-color: rgba(255, 255, 255, 0.25);
-            z-index: 10004;
-        }
-
-        .video-progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #00AEEF, #0089D1); /* New blue gradient color */
-            box-shadow: 0 0 8px rgba(0, 174, 239, 0.5);
-            transition: width 0.1s linear;
-            border-radius: 4px;
-        }
-
         /* ==========================================================================
            --- KOMPONENTY UI: PRZYCISKI I IKONY ---
            ========================================================================== */
@@ -2035,9 +2016,35 @@
 }
 
 /* Unify UI by hiding redundant/unused Video.js controls */
-.tiktok-symulacja .vjs-progress-control,
 .tiktok-symulacja .vjs-volume-panel,
 .tiktok-symulacja .vjs-picture-in-picture-control,
-.tiktok-symulacja .vjs-fullscreen-control {
+.tiktok-symulacja .vjs-fullscreen-control,
+.tiktok-symulacja .vjs-duration,
+.tiktok-symulacja .vjs-current-time,
+.tiktok-symulacja .vjs-time-divider {
     display: none !important;
+}
+
+/* Nadaj stylizację do paska Video.js */
+.tiktok-symulacja .vjs-progress-control {
+    order: -1; /* Umieszcza pasek na górze w flexbox, aby był nad innymi kontrolkami */
+    position: absolute; /* Ustawia na warstwie nad odtwarzaczem */
+    bottom: var(--bottombar-height); /* Daje mu pozycję nad dolnym paskiem */
+    left: 0;
+    width: 100%;
+    height: 8px; /* Grubość Twojego starego paska */
+}
+
+/* Stylizacja wypełnienia paska, czyli progresu odtwarzania */
+.tiktok-symulacja .vjs-play-progress {
+    background: linear-gradient(90deg, #00AEEF, #0089D1); /* Twój gradient */
+    box-shadow: 0 0 8px rgba(0, 174, 239, 0.5); /* Twój cień */
+    border-radius: 4px; /* Zaokrąglone krawędzie */
+}
+
+/* Stylizacja tła paska */
+.tiktok-symulacja .vjs-progress-holder {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.25); /* Tło Twojego starego paska */
+    border-radius: 4px;
 }
