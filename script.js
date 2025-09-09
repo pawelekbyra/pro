@@ -1449,6 +1449,29 @@
                 document.body.addEventListener('click', Handlers.mainClickHandler);
                 UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
 
+                UI.DOM.container.addEventListener('click', (e) => {
+                    const slide = e.target.closest('.swiper-slide');
+                    if (!slide) return;
+
+                    if (e.target.closest('.sidebar, .bottombar, .vjs-control-bar')) {
+                        return;
+                    }
+
+                    const video = slide.querySelector('.videoPlayer');
+                    const pauseOverlay = slide.querySelector('.pause-overlay');
+
+                    if (video) {
+                        const player = videojs(video);
+                        if (player.paused()) {
+                            player.play();
+                            if (pauseOverlay) pauseOverlay.classList.remove('visible');
+                        } else {
+                            player.pause();
+                            if (pauseOverlay) pauseOverlay.classList.add('visible');
+                        }
+                    }
+                });
+
                 document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
                     modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
                     modal.querySelector('.modal-close-btn, .topbar-close-btn')?.addEventListener('click', () => UI.closeModal(modal));
@@ -1618,9 +1641,14 @@ const PWA = (function() {
         else if (isIOS()) {
             showIosInstructions();
         }
-        // Fallback for other systems (e.g., Android with failed PWA criteria): link to the store.
+        // Fallback for other systems (e.g., Android with failed PWA criteria): trigger a file download.
         else {
-            window.open('https://play.google.com/store/apps/details?id=com.tingtong.app', '_blank');
+            const a = document.createElement('a');
+            a.href = 'tingtong.pwa';
+            a.download = 'tingtong.pwa';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     }
 
