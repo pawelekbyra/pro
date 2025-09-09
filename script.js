@@ -166,8 +166,8 @@
                         'likeId': '1',
                         'user': 'Unified Streaming',
                         'description': 'Tears of Steel - HLS (ISM)',
-                        'mp4Url': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4',
-                        'hlsUrl': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
+                        'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified',
                         'access': 'public',
@@ -194,8 +194,8 @@
                         'likeId': '3',
                         'user': 'Unified Streaming',
                         'description': 'Tears of Steel - HLS (MP4)',
-                        'mp4Url': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4',
-                        'hlsUrl': 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.mp4/.m3u8',
+                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
+                        'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified2',
                         'access': 'public',
@@ -637,6 +637,21 @@
                 if (sources.length > 0) {
                     player.src(sources);
                     attachedSet.add(video);
+
+                    const progressBar = sectionEl.querySelector('.video-progress-bar');
+                    if (progressBar) {
+                        player.on('timeupdate', function() {
+                            const duration = player.duration();
+                            if (isFinite(duration) && duration > 0) {
+                                const progress = (player.currentTime() / duration) * 100;
+                                progressBar.style.width = progress + '%';
+                            }
+                        });
+
+                        player.on('ended', function() {
+                            progressBar.style.width = '0%';
+                        });
+                    }
                 }
             }
 
@@ -664,6 +679,10 @@
                     const oldVideo = oldSlide.querySelector('.videoPlayer');
                     if (oldVideo) {
                         videojs(oldVideo).pause();
+                    }
+                    const oldProgressBar = oldSlide.querySelector('.video-progress-bar');
+                    if (oldProgressBar) {
+                        oldProgressBar.style.width = '0%';
                     }
                 }
 
