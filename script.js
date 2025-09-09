@@ -637,6 +637,21 @@
                 if (sources.length > 0) {
                     player.src(sources);
                     attachedSet.add(video);
+
+                    const progressBar = sectionEl.querySelector('.video-progress-bar');
+                    if (progressBar) {
+                        player.on('timeupdate', function() {
+                            const duration = player.duration();
+                            if (isFinite(duration) && duration > 0) {
+                                const progress = (player.currentTime() / duration) * 100;
+                                progressBar.style.width = progress + '%';
+                            }
+                        });
+
+                        player.on('ended', function() {
+                            progressBar.style.width = '0%';
+                        });
+                    }
                 }
             }
 
@@ -664,6 +679,10 @@
                     const oldVideo = oldSlide.querySelector('.videoPlayer');
                     if (oldVideo) {
                         videojs(oldVideo).pause();
+                    }
+                    const oldProgressBar = oldSlide.querySelector('.video-progress-bar');
+                    if (oldProgressBar) {
+                        oldProgressBar.style.width = '0%';
                     }
                 }
 
