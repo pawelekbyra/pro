@@ -2033,3 +2033,11 @@
 .error-overlay .error-retry-button:active {
     transform: scale(0.95);
 }
+
+/* Unify UI by hiding redundant/unused Video.js controls */
+.tiktok-symulacja .vjs-progress-control,
+.tiktok-symulacja .vjs-volume-panel,
+.tiktok-symulacja .vjs-picture-in-picture-control,
+.tiktok-symulacja .vjs-fullscreen-control {
+    display: none !important;
+}

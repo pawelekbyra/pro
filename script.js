@@ -642,14 +642,39 @@
                         const error = this.error();
                         console.error('Video.js Error:', error);
                         const section = this.el().closest('.tiktok-symulacja');
-                        if (section) {
+                        if (!section) return;
+
+                        // Reset retry count on manual retry
+                        const retryButton = section.querySelector('.error-retry-button');
+                        if (retryButton) {
+                            retryButton.addEventListener('click', () => {
+                                section.dataset.retryCount = 0;
+                            }, { once: true });
+                        }
+
+                        let retryCount = parseInt(section.dataset.retryCount || '0', 10);
+
+                        if (retryCount < Config.RETRY_MAX_ATTEMPTS) {
+                            retryCount++;
+                            section.dataset.retryCount = retryCount;
+                            window.TTStats.videoRetries = (window.TTStats.videoRetries || 0) + 1;
+
+                            setTimeout(() => {
+                                console.log(`Retrying video load, attempt ${retryCount}...`);
+                                section.classList.remove('video-error-state');
+                                this.load();
+                                _guardedPlay(this.el());
+                            }, Config.RETRY_BACKOFF_MS * Math.pow(2, retryCount - 1)); // Exponential backoff
+                        } else {
+                            console.error(`Max retries reached for video. Showing error overlay.`);
+                            window.TTStats.videoErrors = (window.TTStats.videoErrors || 0) + 1;
                             section.classList.add('video-error-state');
                         }
                     });
 
                     const progressBar = sectionEl.querySelector('.video-progress-bar');
                     if (progressBar) {
-                        player.on('timeupdate', function() {
+                        const updateProgress = () => {
                             requestAnimationFrame(() => {
                                 const duration = player.duration();
                                 if (isFinite(duration) && duration > 0) {
@@ -657,7 +682,10 @@
                                     progressBar.style.width = progress + '%';
                                 }
                             });
-                        });
+                        };
+
+                        player.on('timeupdate', updateProgress);
+                        player.on('seeked', updateProgress);
 
                         player.on('ended', function() {
                             progressBar.style.width = '0%';
@@ -670,11 +698,10 @@
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video) return;
 
-                // Check if a player instance exists
+                // Check if a player instance exists and dispose of it
                 const player = videojs.getPlayer(video);
                 if (player && !player.isDisposed()) {
-                    player.pause();
-                    player.reset(); // Resets the player to its initial state
+                    player.dispose();
                 }
                 attachedSet.delete(video);
             }
@@ -776,7 +803,7 @@
                     const video = sectionEl.querySelector('.videoPlayer');
                     if (video) {
                         sectionEl.classList.remove('video-error-state');
-                        const player = videojs.getPlayer(video.id);
+                        const player = videojs.getPlayer(video);
                         if (player && !player.isDisposed()) {
                             player.load();
                             _guardedPlay(video);
@@ -796,7 +823,7 @@
                 const slide = event.target.closest('.swiper-slide');
                 if (!slide) return;
 
-                if (event.target.closest('.sidebar, .bottombar, .vjs-control-bar, a, button, .error-overlay')) {
+                if (event.target.closest('.sidebar, .bottombar, .vjs-control-bar, a, button, .error-overlay, .secret-overlay')) {
                     return;
                 }
 
