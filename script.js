@@ -1702,6 +1702,32 @@ const PWA = (function() {
         }
     }
 
+    // --- PATCH: Dynamically adjust progress bar for PWA prompt ---
+    const pwaBar = document.getElementById('pwa-install-bar');
+    const root = document.documentElement;
+
+    if (pwaBar) {
+        const pwaObserver = new MutationObserver(() => {
+            requestAnimationFrame(() => {
+                if (pwaBar.classList.contains('visible')) {
+                    // When PWA bar is visible, position the progress bar above it.
+                    root.style.setProperty('--progress-bar-bottom-offset', `${pwaBar.offsetHeight}px`);
+                } else {
+                    // When PWA bar is hidden, revert to the default position above the main bottom bar.
+                    root.style.removeProperty('--progress-bar-bottom-offset');
+                }
+            });
+        });
+
+        pwaObserver.observe(pwaBar, { attributes: true, attributeFilter: ['class'] });
+
+        // Initial check in case the bar is already visible on load
+        if (pwaBar.classList.contains('visible')) {
+             root.style.setProperty('--progress-bar-bottom-offset', `${pwaBar.offsetHeight}px`);
+        }
+    }
+    // --- END PATCH ---
+
     return { init };
 })();
 
