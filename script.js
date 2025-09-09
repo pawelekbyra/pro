@@ -216,7 +216,7 @@
           USE_HLS: true,
           PREFETCH_NEIGHBORS: true,
           PREFETCH_MARGIN: '150%',
-          UNLOAD_FAR_SLIDES: false,
+          UNLOAD_FAR_SLIDES: true,
           FAR_DISTANCE: 2,
           LOW_DATA_MODE: false,
           RETRY_MAX_ATTEMPTS: 2,
@@ -233,8 +233,8 @@
             maxAutoLevelCapping: null
           },
           TRANSLATIONS: {
-            pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Jesteś zalogowany', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitle: 'Zaloguj się, aby odblokować', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaTitle: 'Zainstaluj aplikację!', installPwaDescription: 'Uzyskaj pełne wrażenia. Zainstaluj aplikację Ting Tong na swoim urządzeniu.', installAppText: 'Zainstaluj', downloadApp: 'Pobierz' },
-            en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitle: 'Log in to unlock', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaTitle: 'Install the app!', installPwaDescription: 'Get the full experience. Install the Ting Tong app on your device.', installAppText: 'Install', downloadApp: 'Download App' }
+            pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Jesteś zalogowany', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitle: 'Zaloguj się, aby odblokować', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaTitle: 'Zainstaluj aplikację!', installPwaDescription: 'Uzyskaj pełne wrażenia. Zainstaluj aplikację Ting Tong na swoim urządzeniu.', installAppText: 'Zainstaluj', downloadApp: 'Pobierz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie' },
+            en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitle: 'Log in to unlock', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaTitle: 'Install the app!', installPwaDescription: 'Get the full experience. Install the Ting Tong app on your device.', installAppText: 'Install', downloadApp: 'Download App', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again' }
           }
         };
 
@@ -638,14 +638,25 @@
                     player.src(sources);
                     attachedSet.add(video);
 
+                    player.on('error', function() {
+                        const error = this.error();
+                        console.error('Video.js Error:', error);
+                        const section = this.el().closest('.tiktok-symulacja');
+                        if (section) {
+                            section.classList.add('video-error-state');
+                        }
+                    });
+
                     const progressBar = sectionEl.querySelector('.video-progress-bar');
                     if (progressBar) {
                         player.on('timeupdate', function() {
-                            const duration = player.duration();
-                            if (isFinite(duration) && duration > 0) {
-                                const progress = (player.currentTime() / duration) * 100;
-                                progressBar.style.width = progress + '%';
-                            }
+                            requestAnimationFrame(() => {
+                                const duration = player.duration();
+                                if (isFinite(duration) && duration > 0) {
+                                    const progress = (player.currentTime() / duration) * 100;
+                                    progressBar.style.width = progress + '%';
+                                }
+                            });
                         });
 
                         player.on('ended', function() {
@@ -760,6 +771,18 @@
                        _guardedPlay(video);
                     }
                 },
+                retryPlayback: function(sectionEl) {
+                    if (!sectionEl) return;
+                    const video = sectionEl.querySelector('.videoPlayer');
+                    if (video) {
+                        sectionEl.classList.remove('video-error-state');
+                        const player = videojs.getPlayer(video.id);
+                        if (player && !player.isDisposed()) {
+                            player.load();
+                            _guardedPlay(video);
+                        }
+                    }
+                }
             };
         })();
 
@@ -773,7 +796,7 @@
                 const slide = event.target.closest('.swiper-slide');
                 if (!slide) return;
 
-                if (event.target.closest('.sidebar, .bottombar, .vjs-control-bar, a, button')) {
+                if (event.target.closest('.sidebar, .bottombar, .vjs-control-bar, a, button, .error-overlay')) {
                     return;
                 }
 
@@ -918,6 +941,10 @@
                         case 'toggle-like': handleLikeToggle(actionTarget); break;
                         case 'share': handleShare(actionTarget); break;
                         case 'toggle-language': handleLanguageToggle(); break;
+                        case 'retry-video':
+                            const section = actionTarget.closest('.tiktok-symulacja');
+                            VideoManager.retryPlayback(section);
+                            break;
                         case 'open-comments-modal': UI.openModal(UI.DOM.commentsModal); break;
                         case 'open-info-modal': UI.openModal(UI.DOM.infoModal); break;
                         case 'open-desktop-pwa-modal': PWA.openDesktopModal(); break;
@@ -1196,7 +1223,7 @@
                 const deleteBtn = document.getElementById('deleteAccountBtn');
                 if (deleteInput && deleteBtn) {
                     deleteInput.addEventListener('input', function() {
-                        deleteBtn.disabled = this.value.trim() !== 'USUWAM KONTO';
+                        deleteBtn.disabled = this.value.trim().toUpperCase() !== 'USUWAM KONTO';
                     });
                 }
 
@@ -1673,8 +1700,8 @@ const PWA = (function() {
 
         // Proactively show a prompt for all users (if not installed)
         if (isIOS()) {
-            // On iOS, the only option is manual instructions.
-            showIosInstructions();
+            // On iOS, the only option is manual instructions, triggered by the install bar.
+            showInstallBar();
         } else {
             // On Android/Desktop, show our custom bar.
             // It will either trigger the real prompt or a fallback link.
