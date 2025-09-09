@@ -769,6 +769,28 @@
          * ==========================================================================
          */
         const Handlers = (function() {
+            function handleVideoTap(event) {
+                const slide = event.target.closest('.swiper-slide');
+                if (!slide) return;
+
+                if (event.target.closest('.sidebar, .bottombar, .vjs-control-bar, a, button')) {
+                    return;
+                }
+
+                const video = slide.querySelector('.videoPlayer');
+                const pauseOverlay = slide.querySelector('.pause-overlay');
+
+                if (video) {
+                    const player = videojs(video);
+                    if (player.paused()) {
+                        player.play();
+                        if (pauseOverlay) pauseOverlay.classList.remove('visible');
+                    } else {
+                        player.pause();
+                        if (pauseOverlay) pauseOverlay.classList.add('visible');
+                    }
+                }
+            }
             function handleNotificationClick(event) {
                 const item = event.target.closest('.notification-item');
                 if (!item) return;
@@ -878,6 +900,7 @@
 
             return {
                 handleNotificationClick,
+                videoTapHandler: handleVideoTap,
                 mainClickHandler: (e) => {
                     const target = e.target;
                     const actionTarget = target.closest('[data-action]');
@@ -1448,29 +1471,7 @@
 
                 document.body.addEventListener('click', Handlers.mainClickHandler);
                 UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
-
-                UI.DOM.container.addEventListener('click', (e) => {
-                    const slide = e.target.closest('.swiper-slide');
-                    if (!slide) return;
-
-                    if (e.target.closest('.sidebar, .bottombar, .vjs-control-bar')) {
-                        return;
-                    }
-
-                    const video = slide.querySelector('.videoPlayer');
-                    const pauseOverlay = slide.querySelector('.pause-overlay');
-
-                    if (video) {
-                        const player = videojs(video);
-                        if (player.paused()) {
-                            player.play();
-                            if (pauseOverlay) pauseOverlay.classList.remove('visible');
-                        } else {
-                            player.pause();
-                            if (pauseOverlay) pauseOverlay.classList.add('visible');
-                        }
-                    }
-                });
+                UI.DOM.container.addEventListener('click', Handlers.videoTapHandler);
 
                 document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
                     modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
