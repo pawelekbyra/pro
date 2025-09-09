@@ -1867,17 +1867,15 @@
 .tiktok-symulacja .vjs-control-bar {
     bottom: var(--bottombar-height, 110px);
     background-color: rgba(0, 0, 0, 0.5) !important;
-    /* PATCH: Make progress bar float on top of the control bar, not inside it */
+    /* PATCH: Use flex-direction to safely reorder controls */
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 /* --- PATCH: Custom Video.js progress bar styles --- */
 .tiktok-symulacja .vjs-progress-control {
-    position: absolute;
-    top: -12px; /* Position it above the control bar icons */
-    left: 0;
-    right: 0;
+    order: -1; /* Position progress bar on top */
     width: 100%;
     height: 4px; /* A subtle, thin line */
     transition: height 0.2s ease-out;
