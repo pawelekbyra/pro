@@ -606,6 +606,7 @@
                 if (!canAttach) return;
 
                 const player = videojs(video, {
+                  controls: true, // Włącz domyślne kontrolki
                   html5: {
                     hls: {
                       ...Config.HLS,
