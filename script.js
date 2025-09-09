@@ -1662,7 +1662,7 @@ const PWA = (function() {
             installPromptEvent.prompt();
             installPromptEvent.userChoice.then(() => {
                 installPromptEvent = null;
-                installBar.classList.add('hidden');
+                installBar.classList.remove('visible');
             });
         } else if (isIOS()) {
             showIosInstructions();
@@ -1675,10 +1675,17 @@ const PWA = (function() {
             return; // Don't set up any prompts if the app is already installed.
         }
 
+        if (installButton) {
+            installButton.disabled = true;
+        }
+
         // Listen for the native install prompt event
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             installPromptEvent = e;
+            if (installButton) {
+                installButton.disabled = false;
+            }
             // Show the bar because we know it's installable
             showInstallBar();
         });
