@@ -1766,7 +1766,6 @@
 
 
 /* PWA Prompt Styles from Reference */
-.hidden { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.001ms !important;
@@ -1788,6 +1787,15 @@
     padding: 1rem;
     padding-bottom: calc(1rem + var(--safe-area-bottom));
     box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+
+    /* PATCH: Animate from bottom */
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    visibility: hidden;
+}
+.pwa-prompt.visible {
+    transform: translateY(0);
+    visibility: visible;
 }
 .pwa-prompt-title {
     font-weight: bold;
@@ -1823,6 +1831,15 @@
     padding: 1rem;
     padding-bottom: calc(1rem + var(--safe-area-bottom));
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    /* PATCH: Animate from bottom */
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.5s;
+    visibility: hidden;
+}
+.pwa-prompt-ios.visible {
+    transform: translateY(0);
+    visibility: visible;
 }
 .pwa-ios-header {
     display: flex;
@@ -1850,4 +1867,57 @@
 .tiktok-symulacja .vjs-control-bar {
     bottom: var(--bottombar-height, 110px);
     background-color: rgba(0, 0, 0, 0.5) !important;
+    /* PATCH: Make progress bar float on top of the control bar, not inside it */
+    display: flex;
+    align-items: flex-end;
+}
+
+/* --- PATCH: Custom Video.js progress bar styles --- */
+.tiktok-symulacja .vjs-progress-control {
+    position: absolute;
+    top: -12px; /* Position it above the control bar icons */
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 4px; /* A subtle, thin line */
+    transition: height 0.2s ease-out;
+}
+/* Make it slightly thicker on hover for better usability */
+.tiktok-symulacja .vjs-progress-control:hover {
+    height: 6px;
+}
+.tiktok-symulacja .vjs-progress-holder {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    margin: 0;
+}
+.tiktok-symulacja .vjs-play-progress,
+.tiktok-symulacja .vjs-load-progress {
+    height: 100%;
+    border-radius: 2px;
+}
+.tiktok-symulacja .vjs-play-progress {
+    background-color: var(--accent-color);
+}
+.tiktok-symulacja .vjs-load-progress {
+    background: rgba(255, 255, 255, 0.5);
+}
+/* Style the scrubber handle */
+.tiktok-symulacja .vjs-play-progress::before {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+}
+.tiktok-symulacja .vjs-progress-control:hover .vjs-play-progress::before {
+    opacity: 1;
 }

@@ -1554,11 +1554,11 @@ const PWA = (function() {
 
     // Actions
     function showIosInstructions() {
-        if (iosInstructions) iosInstructions.classList.remove('hidden');
+        if (iosInstructions) iosInstructions.classList.add('visible');
     }
 
     function hideIosInstructions() {
-        if (iosInstructions) iosInstructions.classList.add('hidden');
+        if (iosInstructions) iosInstructions.classList.remove('visible');
     }
 
     function showInstallBar() {
@@ -1568,7 +1568,8 @@ const PWA = (function() {
 
         const preloader = document.getElementById('preloader');
         const showBar = () => {
-            installBar.classList.remove('hidden');
+            // PATCH: Add .visible class to trigger animation
+            installBar.classList.add('visible');
             // If we don't have a real prompt, the button should act as a download link.
             if (!installPromptEvent) {
                 installButton.textContent = Utils.getTranslation('downloadApp');
