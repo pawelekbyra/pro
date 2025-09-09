@@ -376,6 +376,24 @@
             text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
         }
 
+        .video-progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px; /* Increased thickness */
+            background-color: rgba(255, 255, 255, 0.25);
+            z-index: 106;
+        }
+
+        .video-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00AEEF, #0089D1); /* New blue gradient color */
+            box-shadow: 0 0 8px rgba(0, 174, 239, 0.5);
+            transition: width 0.1s linear;
+            border-radius: 4px;
+        }
 
         /* ==========================================================================
            --- KOMPONENTY UI: PRZYCISKI I IKONY ---
@@ -1878,27 +1896,26 @@
 .tiktok-symulacja .vjs-progress-control {
     order: -1; /* Position progress bar on top */
     width: 100%;
-    height: 8px; /* A subtle, thin line */
+    height: 4px; /* A subtle, thin line */
     transition: height 0.2s ease-out;
 }
 /* Make it slightly thicker on hover for better usability */
 .tiktok-symulacja .vjs-progress-control:hover {
-    height: 12px;
+    height: 6px;
 }
 .tiktok-symulacja .vjs-progress-holder {
     height: 100%;
     background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
+    border-radius: 2px;
     margin: 0;
 }
 .tiktok-symulacja .vjs-play-progress,
 .tiktok-symulacja .vjs-load-progress {
     height: 100%;
-    border-radius: 4px;
+    border-radius: 2px;
 }
 .tiktok-symulacja .vjs-play-progress {
-    background: linear-gradient(90deg, #00AEEF, #0089D1);
-    box-shadow: 0 0 8px rgba(0, 174, 239, 0.5);
+    background-color: var(--accent-color);
 }
 .tiktok-symulacja .vjs-load-progress {
     background: rgba(255, 255, 255, 0.5);
@@ -1907,15 +1924,14 @@
 .tiktok-symulacja .vjs-play-progress::before {
     content: '';
     position: absolute;
-    right: -8px;
+    right: -5px;
     top: 50%;
     transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     background: white;
     border-radius: 50%;
-    border: 2px solid #00AEEF;
-    box-shadow: 0 0 8px rgba(0,0,0,0.7);
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
     opacity: 0;
     transition: opacity 0.2s ease-out;
 }
