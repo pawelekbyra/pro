@@ -796,6 +796,140 @@
 
         /**
          * ==========================================================================
+         * PWA MODULE
+         * ==========================================================================
+         */
+        const PWA = (function() {
+            // DOM Elements
+            const installBar = document.getElementById('pwa-install-bar');
+            const installButton = document.getElementById('pwa-install-button');
+            const iosInstructions = document.getElementById('pwa-ios-instructions');
+            const iosCloseButton = document.getElementById('pwa-ios-close-button');
+
+            // State
+            let installPromptEvent = null;
+
+            // Predicates
+            const isIOS = () => {
+                if (typeof window === 'undefined' || !window.navigator) return false;
+                return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            };
+            const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches;
+
+            // Actions
+            function showIosInstructions() {
+                if (iosInstructions) iosInstructions.classList.add('visible');
+            }
+
+            function hideIosInstructions() {
+                if (iosInstructions) iosInstructions.classList.remove('visible');
+            }
+
+            function showInstallBar() {
+                if (isStandalone() || !installBar) {
+                    return;
+                }
+                const preloader = document.getElementById('preloader');
+                const showBar = () => {
+                    installBar.classList.add('visible');
+                };
+                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
+                    const observer = new MutationObserver((mutations, obs) => {
+                        if (preloader.style.display === 'none') {
+                            showBar();
+                            obs.disconnect();
+                        }
+                    });
+                    observer.observe(preloader, { attributes: true, attributeFilter: ['style'] });
+                } else {
+                    showBar();
+                }
+            }
+
+            function handleInstallClick() {
+                if (installPromptEvent) {
+                    installPromptEvent.prompt();
+                    installPromptEvent.userChoice.then(() => {
+                        installPromptEvent = null;
+                        installBar.classList.remove('visible');
+                    });
+                } else if (isIOS()) {
+                    showIosInstructions();
+                }
+            }
+
+            // Initialization
+            function init() {
+                if (isStandalone()) {
+                    return; // Don't set up any prompts if the app is already installed.
+                }
+
+                if (installButton) {
+                    installButton.disabled = true;
+                }
+
+                // Listen for the native install prompt event
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    installPromptEvent = e;
+                    if (installButton) {
+                        installButton.disabled = false;
+                    }
+                    // Show the bar because we know it's installable
+                    showInstallBar();
+                });
+
+                // Proactively show a prompt for all users (if not installed)
+                if (isIOS()) {
+                    // On iOS, the only option is manual instructions, triggered by the install bar.
+                    showInstallBar();
+                } else {
+                    // On Android/Desktop, show our custom bar.
+                    // It will either trigger the real prompt or a fallback link.
+                    showInstallBar();
+                }
+
+                // Attach event listeners
+                if (installButton) {
+                    installButton.addEventListener('click', handleInstallClick);
+                }
+                if (iosCloseButton) {
+                    iosCloseButton.addEventListener('click', hideIosInstructions);
+                }
+            }
+
+            // --- PATCH: Dynamically adjust progress bar for PWA prompt ---
+            const pwaBar = document.getElementById('pwa-install-bar');
+            const root = document.documentElement;
+
+            if (pwaBar) {
+                const pwaObserver = new MutationObserver(() => {
+                    requestAnimationFrame(() => {
+                        if (pwaBar.classList.contains('visible')) {
+                            // When PWA bar is visible, position the progress bar above it.
+                            root.style.setProperty('--progress-bar-bottom-offset', `${pwaBar.offsetHeight}px`);
+                        } else {
+                            // When PWA bar is hidden, revert to the default position above the main bottom bar.
+                            root.style.removeProperty('--progress-bar-bottom-offset');
+                        }
+                    });
+                });
+
+                pwaObserver.observe(pwaBar, { attributes: true, attributeFilter: ['class'] });
+
+                // Initial check in case the bar is already visible on load
+                if (pwaBar.classList.contains('visible')) {
+                     root.style.setProperty('--progress-bar-bottom-offset', `${pwaBar.offsetHeight}px`);
+                }
+            }
+            // --- END PATCH ---
+
+            return { init, handleInstallClick };
+        })();
+
+        /**
+         * ==========================================================================
          * 7. EVENT HANDLERS & NOTIFICATIONS
          * ==========================================================================
          */
@@ -957,7 +1091,7 @@
                         case 'open-info-modal': UI.openModal(UI.DOM.infoModal); break;
                         case 'open-desktop-pwa-modal': PWA.openDesktopModal(); break;
                         case 'open-ios-pwa-modal': PWA.openIosModal(); break;
-                        case 'install-pwa': PWA.showInstallPrompt(); break;
+                        case 'install-pwa': PWA.handleInstallClick(); break;
                         case 'close-modal': PWA.closePwaModals(); break;
                         case 'open-account-modal':
                             if (loggedInMenu) loggedInMenu.classList.remove('active');
@@ -1604,139 +1738,6 @@
             };
         })();
 
-        /**
-         * ==========================================================================
-         * PWA MODULE
-         * ==========================================================================
-         */
-const PWA = (function() {
-    // DOM Elements
-    const installBar = document.getElementById('pwa-install-bar');
-    const installButton = document.getElementById('pwa-install-button');
-    const iosInstructions = document.getElementById('pwa-ios-instructions');
-    const iosCloseButton = document.getElementById('pwa-ios-close-button');
-
-    // State
-    let installPromptEvent = null;
-
-    // Predicates
-    const isIOS = () => {
-        if (typeof window === 'undefined' || !window.navigator) return false;
-        return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    };
-    const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches;
-
-    // Actions
-    function showIosInstructions() {
-        if (iosInstructions) iosInstructions.classList.add('visible');
-    }
-
-    function hideIosInstructions() {
-        if (iosInstructions) iosInstructions.classList.remove('visible');
-    }
-
-    function showInstallBar() {
-        if (isStandalone() || !installBar) {
-            return;
-        }
-        const preloader = document.getElementById('preloader');
-        const showBar = () => {
-            installBar.classList.add('visible');
-        };
-        if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
-            const observer = new MutationObserver((mutations, obs) => {
-                if (preloader.style.display === 'none') {
-                    showBar();
-                    obs.disconnect();
-                }
-            });
-            observer.observe(preloader, { attributes: true, attributeFilter: ['style'] });
-        } else {
-            showBar();
-        }
-    }
-
-    function handleInstallClick() {
-        if (installPromptEvent) {
-            installPromptEvent.prompt();
-            installPromptEvent.userChoice.then(() => {
-                installPromptEvent = null;
-                installBar.classList.remove('visible');
-            });
-        } else if (isIOS()) {
-            showIosInstructions();
-        }
-    }
-
-    // Initialization
-    function init() {
-        if (isStandalone()) {
-            return; // Don't set up any prompts if the app is already installed.
-        }
-
-        if (installButton) {
-            installButton.disabled = true;
-        }
-
-        // Listen for the native install prompt event
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            installPromptEvent = e;
-            if (installButton) {
-                installButton.disabled = false;
-            }
-            // Show the bar because we know it's installable
-            showInstallBar();
-        });
-
-        // Proactively show a prompt for all users (if not installed)
-        if (isIOS()) {
-            // On iOS, the only option is manual instructions, triggered by the install bar.
-            showInstallBar();
-        } else {
-            // On Android/Desktop, show our custom bar.
-            // It will either trigger the real prompt or a fallback link.
-            showInstallBar();
-        }
-
-        // Attach event listeners
-        if (installButton) {
-            installButton.addEventListener('click', handleInstallClick);
-        }
-        if (iosCloseButton) {
-            iosCloseButton.addEventListener('click', hideIosInstructions);
-        }
-    }
-
-    // --- PATCH: Dynamically adjust progress bar for PWA prompt ---
-    const pwaBar = document.getElementById('pwa-install-bar');
-    const root = document.documentElement;
-
-    if (pwaBar) {
-        const pwaObserver = new MutationObserver(() => {
-            requestAnimationFrame(() => {
-                if (pwaBar.classList.contains('visible')) {
-                    // When PWA bar is visible, position the progress bar above it.
-                    root.style.setProperty('--progress-bar-bottom-offset', `${pwaBar.offsetHeight}px`);
-                } else {
-                    // When PWA bar is hidden, revert to the default position above the main bottom bar.
-                    root.style.removeProperty('--progress-bar-bottom-offset');
-                }
-            });
-        });
-
-        pwaObserver.observe(pwaBar, { attributes: true, attributeFilter: ['class'] });
-
-        // Initial check in case the bar is already visible on load
-        if (pwaBar.classList.contains('visible')) {
-             root.style.setProperty('--progress-bar-bottom-offset', `${pwaBar.offsetHeight}px`);
-        }
-    }
-    // --- END PATCH ---
-
-    return { init };
-})();
 
 
         App.init();
