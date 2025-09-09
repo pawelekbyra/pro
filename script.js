@@ -216,7 +216,7 @@
           USE_HLS: true,
           PREFETCH_NEIGHBORS: true,
           PREFETCH_MARGIN: '150%',
-          UNLOAD_FAR_SLIDES: true,
+          UNLOAD_FAR_SLIDES: false,
           FAR_DISTANCE: 2,
           LOW_DATA_MODE: false,
           RETRY_MAX_ATTEMPTS: 2,
@@ -679,10 +679,6 @@
                     const oldVideo = oldSlide.querySelector('.videoPlayer');
                     if (oldVideo) {
                         videojs(oldVideo).pause();
-                    }
-                    const oldProgressBar = oldSlide.querySelector('.video-progress-bar');
-                    if (oldProgressBar) {
-                        oldProgressBar.style.width = '0%';
                     }
                 }
 
