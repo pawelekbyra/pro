@@ -2027,10 +2027,14 @@
 
 /* Nadaj stylizację do paska Video.js */
 .tiktok-symulacja .vjs-progress-control {
-    order: -1; /* Umieszcza pasek na górze w flexbox, aby był nad innymi kontrolkami */
-    position: absolute; /* Ustawia na warstwie nad odtwarzaczem */
-    bottom: var(--bottombar-height); /* Daje mu pozycję nad dolnym paskiem */
-    left: 0;
+    /* Utrzymaj order, by był nad innymi kontrolkami */
+    order: -1;
+
+    /* Usuń błędne pozycjonowanie, by pasek postępu był w domyślnym miejscu wewnątrz .vjs-control-bar */
+    position: relative; /* Ustawia normalne pozycjonowanie względem rodzica */
+    bottom: unset; /* Usuwa błędne pozycjonowanie od dołu */
+
+    /* Pozostałe style są poprawne */
     width: 100%;
     height: 8px; /* Grubość Twojego starego paska */
 }
