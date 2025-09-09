@@ -854,7 +854,7 @@
                         installPromptEvent = null;
                         installBar.classList.remove('visible');
                     });
-                } else if (isIOS()) {
+                } else {
                     showIosInstructions();
                 }
             }
@@ -865,9 +865,6 @@
                     return; // Don't set up any prompts if the app is already installed.
                 }
 
-                if (installButton) {
-                    installButton.disabled = true;
-                }
 
                 // Listen for the native install prompt event
                 window.addEventListener('beforeinstallprompt', (e) => {
