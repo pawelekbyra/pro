@@ -370,9 +370,9 @@
                 commentsModal: document.getElementById('commentsModal'),
                 accountModal: document.getElementById('accountModal'),
                 notificationPopup: document.getElementById('notificationPopup'),
-                pwaDesktopModal: document.getElementById('pwaDesktopModal'),
+                pwaDesktopModal: document.getElementById('pwa-desktop-modal'),
                 pwaInstallPrompt: document.getElementById('pwaInstallPrompt'),
-                pwaIosInstructions: document.getElementById('pwaIosInstructions'),
+                pwaIosInstructions: document.getElementById('pwa-ios-instructions'),
                 pwaDesktopInstallButton: document.querySelector('.topbar-icon-btn.desktop-only'),
             };
             let alertTimeout;
@@ -805,6 +805,7 @@
             const installButton = document.getElementById('pwa-install-button');
             const iosInstructions = document.getElementById('pwa-ios-instructions');
             const iosCloseButton = document.getElementById('pwa-ios-close-button');
+            const desktopModal = document.getElementById('pwa-desktop-modal');
 
             // State
             let installPromptEvent = null;
@@ -816,6 +817,8 @@
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             };
             const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches;
+            const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
+
 
             // Actions
             function showIosInstructions() {
@@ -825,6 +828,16 @@
             function hideIosInstructions() {
                 if (iosInstructions) iosInstructions.classList.remove('visible');
             }
+
+            function showDesktopModal() {
+                if (desktopModal) UI.openModal(desktopModal);
+            }
+
+            function closePwaModals() {
+                if (desktopModal && desktopModal.classList.contains('visible')) UI.closeModal(desktopModal);
+                if (iosInstructions && iosInstructions.classList.contains('visible')) hideIosInstructions();
+            }
+
 
             function showInstallBar() {
                 if (!installBar) {
@@ -848,13 +861,18 @@
             }
 
             function handleInstallClick() {
+                if (isDesktop()) {
+                    showDesktopModal();
+                    return;
+                }
+
                 if (installPromptEvent) {
                     installPromptEvent.prompt();
                     installPromptEvent.userChoice.then(() => {
                         installPromptEvent = null;
                         if (installBar) installBar.classList.remove('visible');
                     });
-                } else {
+                } else if (isIOS()) {
                     // Fallback for iOS
                     showIosInstructions();
                 }
@@ -864,6 +882,12 @@
             function init() {
                 // Do not show any install prompts if the app is already running in standalone mode.
                 if (isStandalone()) {
+                    return;
+                }
+
+                if (isDesktop()) {
+                    // On desktop, we don't show the persistent install bar.
+                    // The install button will trigger the modal instead.
                     return;
                 }
 
@@ -920,7 +944,7 @@
             }
             // --- END PATCH ---
 
-            return { init, handleInstallClick };
+            return { init, handleInstallClick, closePwaModals };
         })();
 
         /**
@@ -1087,10 +1111,17 @@
                         case 'open-desktop-pwa-modal': PWA.openDesktopModal(); break;
                         case 'open-ios-pwa-modal': PWA.openIosModal(); break;
                         case 'install-pwa': PWA.handleInstallClick(); break;
-                        case 'close-modal': PWA.closePwaModals(); break;
                         case 'open-account-modal':
                             if (loggedInMenu) loggedInMenu.classList.remove('active');
                             AccountPanel.openAccountModal();
+                            break;
+                        case 'close-modal':
+                            const modal = actionTarget.closest('.modal-overlay');
+                            if (modal) {
+                                UI.closeModal(modal);
+                            } else {
+                                PWA.closePwaModals();
+                            }
                             break;
                         case 'close-account-modal':
                             AccountPanel.closeAccountModal();
