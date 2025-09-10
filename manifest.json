@@ -8,12 +8,12 @@
   "description": "Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.",
   "icons": [
     {
-      "src": "assets/icons/icon-192.png",
+      "src": "https://picsum.photos/192",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "assets/icons/icon-512.png",
+      "src": "https://picsum.photos/512",
       "sizes": "512x512",
       "type": "image/png"
     }
