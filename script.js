@@ -808,7 +808,6 @@
 
             // State
             let installPromptEvent = null;
-            let isNativeAppInstalled = false;
 
             // Predicates
             const isIOS = () => {
@@ -819,12 +818,6 @@
             const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches;
 
             // Actions
-            function updateUIForNativeApp() {
-                if (!installBar) return;
-                installButton.textContent = Utils.getTranslation('openPwaAction');
-                installButton.removeAttribute('data-translate-key');
-            }
-
             function showIosInstructions() {
                 if (iosInstructions) iosInstructions.classList.add('visible');
             }
@@ -855,62 +848,41 @@
             }
 
             function handleInstallClick() {
-                if (isNativeAppInstalled) {
-                    // Attempt to open the native app via custom URL scheme.
-                    // The developer needs to replace 'tingtong://app' with the actual URL scheme.
-                    window.location.href = 'tingtong://app';
-                    return;
-                }
-
                 if (installPromptEvent) {
                     installPromptEvent.prompt();
                     installPromptEvent.userChoice.then(() => {
                         installPromptEvent = null;
-                        installBar.classList.remove('visible');
+                        if (installBar) installBar.classList.remove('visible');
                     });
                 } else {
+                    // Fallback for iOS
                     showIosInstructions();
                 }
             }
 
             // Initialization
-            async function init() {
-                // If running as an installed PWA, do nothing.
+            function init() {
+                // Do not show any install prompts if the app is already running in standalone mode.
                 if (isStandalone()) {
                     return;
                 }
 
-                // Check for installed native app
-                if (navigator.getInstalledRelatedApps) {
-                    try {
-                        const relatedApps = await navigator.getInstalledRelatedApps();
-                        if (relatedApps.length > 0) {
-                            isNativeAppInstalled = true;
-                        }
-                    } catch (e) {
-                        console.error('Error checking for related apps:', e);
+                // The primary mechanism for showing the install prompt.
+                // 'beforeinstallprompt' only fires if the PWA is not already installed.
+                // This correctly hides the banner for users who have installed the PWA.
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    installPromptEvent = e;
+                    if (installButton) {
+                        installButton.disabled = false;
                     }
-                }
-
-                if (isNativeAppInstalled) {
-                    updateUIForNativeApp();
                     showInstallBar();
-                } else {
-                    // Logic for non-installed app (original logic)
-                    window.addEventListener('beforeinstallprompt', (e) => {
-                        e.preventDefault();
-                        installPromptEvent = e;
-                        if (installButton) {
-                            installButton.disabled = false;
-                        }
-                        showInstallBar();
-                    });
+                });
 
-                    if (isIOS()) {
-                        showInstallBar();
-                    } else {
-                        showInstallBar();
-                    }
+                // Fallback for iOS, which does not support 'beforeinstallprompt'.
+                // We always show the instructions bar, as there's no way to detect installation status.
+                if (isIOS()) {
+                    showInstallBar();
                 }
 
                 // Attach event listeners
