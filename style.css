@@ -1916,6 +1916,10 @@
     height: 6px;
 }
 
+/* Make the progress bar fill the width of the control bar */
+.tiktok-symulacja .vjs-progress-control {
+    flex-grow: 1;
+}
 
 /* Style the progress bar itself */
 .tiktok-symulacja .vjs-play-progress {
