@@ -885,12 +885,6 @@
                     return;
                 }
 
-                if (isDesktop()) {
-                    // On desktop, we don't show the persistent install bar.
-                    // The install button will trigger the modal instead.
-                    return;
-                }
-
                 // The primary mechanism for showing the install prompt.
                 // 'beforeinstallprompt' only fires if the PWA is not already installed.
                 // This correctly hides the banner for users who have installed the PWA.
@@ -903,11 +897,10 @@
                     showInstallBar();
                 });
 
-                // Fallback for iOS, which does not support 'beforeinstallprompt'.
-                // We always show the instructions bar, as there's no way to detect installation status.
-                if (isIOS()) {
-                    showInstallBar();
-                }
+                // Fallback for all other browsers (including desktop browsers that don't fire beforeinstallprompt and iOS)
+                // We show the bar so the user can click the button. The button's click handler
+                // will then decide what to do (show modal, show instructions, etc.).
+                showInstallBar();
 
                 // Attach event listeners
                 if (installButton) {
