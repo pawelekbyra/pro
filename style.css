@@ -1864,6 +1864,9 @@
 .pwa-ios-body p { margin-bottom: 0.75rem; }
 
 /* --- Desktop PWA Modal --- */
+#pwa-desktop-modal {
+    z-index: 10004;
+}
 #pwa-desktop-modal .modal-content {
     background: white;
     color: #111;
