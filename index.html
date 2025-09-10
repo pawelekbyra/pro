@@ -383,6 +383,17 @@
             <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
         </div>
     </div>
+
+    <div id="pwa-desktop-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
+        <div class="modal-content" tabindex="-1">
+            <button class="modal-close-btn" data-action="close-modal">&times;</button>
+            <h2 id="pwa-desktop-title" data-translate-key="pwaModalTitle">Pełne doświadczenie Ting Tong na Twoim telefonie!</h2>
+            <div class="modal-body" style="text-align: center;">
+                <p data-translate-key="pwaModalBody">Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://example.com" alt="QR Code" style="margin-top: 16px; border-radius: 8px;">
+            </div>
+        </div>
+    </div>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {

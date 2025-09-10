@@ -1863,6 +1863,35 @@
 }
 .pwa-ios-body p { margin-bottom: 0.75rem; }
 
+/* --- Desktop PWA Modal --- */
+#pwa-desktop-modal .modal-content {
+    background: white;
+    color: #111;
+    border-radius: 12px;
+    max-width: 90%;
+    width: 450px;
+    padding: 20px;
+    text-align: center;
+}
+
+#pwa-desktop-modal h2 {
+    margin-top: 0;
+    padding-right: 40px; /* Space for the close button */
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+#pwa-desktop-modal .modal-body p {
+    line-height: 1.5;
+    font-size: 1rem;
+    color: #333;
+}
+
+#pwa-desktop-modal .modal-close-btn {
+    color: #111;
+}
+
+
 /* --- PATCH: Relocated Video.js progress bar to the bottom --- */
 
 /* Position the control bar at the bottom, using a variable for dynamic shifting. */
