@@ -815,7 +815,7 @@
                 return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             };
-            const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches;
+            const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
 
@@ -884,22 +884,22 @@
                     return;
                 }
 
-                // The primary mechanism for showing the install prompt.
-                // 'beforeinstallprompt' only fires if the PWA is not already installed.
-                // This correctly hides the banner for users who have installed the PWA.
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    installPromptEvent = e;
-                    if (installButton) {
-                        installButton.disabled = false;
-                    }
+                // For browsers that support `beforeinstallprompt`
+                if ('onbeforeinstallprompt' in window) {
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        installPromptEvent = e;
+                        if (installButton) {
+                            installButton.disabled = false;
+                        }
+                        showInstallBar();
+                    });
+                }
+                // Fallback for browsers that don't support it (e.g. iOS, Firefox, Safari desktop)
+                else {
                     showInstallBar();
-                });
+                }
 
-                // Fallback for all other browsers (including desktop browsers that don't fire beforeinstallprompt and iOS)
-                // We show the bar so the user can click the button. The button's click handler
-                // will then decide what to do (show modal, show instructions, etc.).
-                showInstallBar();
 
                 // Attach event listeners
                 if (installButton) {
