@@ -838,11 +838,19 @@
             }
 
             function updateBarToInstalledState() {
-                if (!installBar) return;
-                // Ensure the bar is visible, but do not change its content.
+                if (!installBar || !installButton) return;
+
+                const title = installBar.querySelector('.pwa-prompt-title');
+                const description = installBar.querySelector('.pwa-prompt-description');
+
+                if (title) title.style.display = 'none';
+                if (description) description.style.display = 'none';
+
+                installButton.textContent = Utils.getTranslation('openPwaAction');
+
+                // Ensure the bar is visible to show the "Open" button.
                 showInstallBar();
             }
-
 
             function showInstallBar() {
                 if (!installBar) {
@@ -872,9 +880,11 @@
                     installButton.addEventListener('click', handleInstallClick);
                 }
 
-                 // If running as a PWA, show the bar in its "installed" state.
+                // If running in standalone PWA mode, hide the install bar completely.
                 if (isStandalone()) {
-                    updateBarToInstalledState();
+                    if (installBar) {
+                        installBar.style.display = 'none';
+                    }
                     // Do not set up other install listeners if already installed.
                     return;
                 }
@@ -919,16 +929,18 @@
                     installPromptEvent.prompt();
                     installPromptEvent.userChoice.then((choiceResult) => {
                         console.log(`PWA prompt user choice: ${choiceResult.outcome}`);
-                        // We no longer hide the bar here. The 'appinstalled' event will handle UI changes.
-                        // If the user accepts, the 'appinstalled' event will fire.
-                        // If the user dismisses, the bar remains, allowing them to try again later.
-                        if (choiceResult.outcome !== 'accepted') {
-                           // User dismissed, do nothing, maybe they'll change their mind.
+                        if (choiceResult.outcome === 'accepted') {
+                            // The 'appinstalled' event will handle the UI change.
+                        } else {
+                            // User dismissed the prompt, do nothing.
                         }
                     });
                 } else if (isIOS()) {
-                    // Fallback for iOS
+                    // On iOS, we show instructions.
                     showIosInstructions();
+                } else {
+                    // If not on iOS and there's no prompt, the app is likely installed.
+                    UI.showAlert(Utils.getTranslation('alreadyInstalledText'));
                 }
             }
 
