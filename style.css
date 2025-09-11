@@ -1901,9 +1901,9 @@
 .tiktok-symulacja .vjs-control-bar {
     position: absolute;
     bottom: var(--progress-bar-bottom-offset, var(--bottombar-height, 110px));
-    left: 0;
-    right: 0;
-    width: auto;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
     height: 3px;
     background-color: transparent !important;
     z-index: 116;
