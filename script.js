@@ -184,7 +184,7 @@
                         'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=apple',
-                        'access': 'public',
+                        'access': 'secret',
                         'initialLikes': 2200,
                         'isLiked': false,
                         'initialComments': 1245
