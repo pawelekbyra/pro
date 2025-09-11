@@ -2056,3 +2056,12 @@
 .tiktok-symulacja .vjs-remaining-time-display {
     display: none !important;
 }
+
+/* Custom fix for the progress bar on secret slides */
+.tiktok-symulacja .videoPlayer.secret-active .vjs-progress-control {
+    pointer-events: none !important;
+}
+
+.tiktok-symulacja .videoPlayer.secret-active .vjs-progress-holder {
+    background-color: rgba(255, 255, 255, 0.4);
+}
