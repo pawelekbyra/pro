@@ -597,82 +597,75 @@
 
             function _attachSrc(sectionEl) {
                 const video = sectionEl.querySelector('.videoPlayer');
-                if (!video || attachedSet.has(video)) return;
+                if (!video) return;
 
-                const slideId = sectionEl.dataset.slideId;
-                const slideData = slidesData.find(s => s.id === slideId);
-
-                const canAttach = slideData && !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
-                if (!canAttach) return;
-
+                // --- PATCH START ---
+                // Initialize player even if already attached, to handle potential disposal.
+                // Video.js handles this gracefully.
                 const player = videojs(video, {
-                  controls: true, // Włącz domyślne kontrolki
+                  controls: true,
                   html5: {
-                    hls: {
-                      ...Config.HLS,
-                      overrideNative: false // Explicitly use native HLS where available (e.g., Safari)
-                    },
-                    vhs: {
-                      overrideNative: false // VHS is video.js's HLS engine
-                    }
+                    hls: { ...Config.HLS, overrideNative: false },
+                    vhs: { overrideNative: false }
                   }
                 });
 
-                const sources = [];
-                const useHls = Config.USE_HLS && slideData.hlsUrl;
-
-                if (useHls) {
-                    // Recommended setup: HLS first, with an MP4 fallback.
-                    // Video.js will try HLS and, if it fails (e.g., CORS, unsupported), it will try the next source.
-                    sources.push({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
-                    if (slideData.mp4Url) {
-                        sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
-                    }
-                } else if (slideData.mp4Url) {
-                    // If HLS is disabled or not present, just use the MP4 source.
-                    sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
-                }
-
-
-                if (sources.length > 0) {
-                    player.src(sources);
-                    attachedSet.add(video);
-
+                if (!attachedSet.has(video)) {
                     player.on('error', function() {
                         const error = this.error();
                         console.error('Video.js Error:', error);
                         const section = this.el().closest('.tiktok-symulacja');
                         if (!section) return;
-
-                        // Reset retry count on manual retry
-                        const retryButton = section.querySelector('.error-retry-button');
-                        if (retryButton) {
-                            retryButton.addEventListener('click', () => {
-                                section.dataset.retryCount = 0;
-                            }, { once: true });
-                        }
-
                         let retryCount = parseInt(section.dataset.retryCount || '0', 10);
-
                         if (retryCount < Config.RETRY_MAX_ATTEMPTS) {
                             retryCount++;
                             section.dataset.retryCount = retryCount;
                             window.TTStats.videoRetries = (window.TTStats.videoRetries || 0) + 1;
-
                             setTimeout(() => {
                                 console.log(`Retrying video load, attempt ${retryCount}...`);
                                 section.classList.remove('video-error-state');
                                 this.load();
                                 _guardedPlay(this.el());
-                            }, Config.RETRY_BACKOFF_MS * Math.pow(2, retryCount - 1)); // Exponential backoff
+                            }, Config.RETRY_BACKOFF_MS * Math.pow(2, retryCount - 1));
                         } else {
-                            console.error(`Max retries reached for video. Showing error overlay.`);
+                            console.error(`Max retries reached. Showing error overlay.`);
                             window.TTStats.videoErrors = (window.TTStats.videoErrors || 0) + 1;
                             section.classList.add('video-error-state');
                         }
                     });
-
+                    attachedSet.add(video);
                 }
+
+                const slideId = sectionEl.dataset.slideId;
+                const slideData = slidesData.find(s => s.id === slideId);
+                if (!slideData) return;
+
+                const canAttachSrc = !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
+
+                if (canAttachSrc) {
+                    const sources = [];
+                    const useHls = Config.USE_HLS && slideData.hlsUrl;
+
+                    if (useHls) {
+                        sources.push({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
+                        if (slideData.mp4Url) sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
+                    } else if (slideData.mp4Url) {
+                        sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
+                    }
+
+                    // Only set src if it's different to avoid re-loading
+                    const currentSrc = player.currentSrc();
+                    const newSrc = sources[0]?.src;
+                    if (newSrc && currentSrc !== newSrc) {
+                        player.src(sources);
+                    }
+                } else {
+                    // If user can't access, ensure no source is loaded
+                    if (player.currentSrc()) {
+                        player.reset();
+                    }
+                }
+                // --- PATCH END ---
             }
 
             function _detachSrc(sectionEl) {
