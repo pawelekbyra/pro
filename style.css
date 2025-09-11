@@ -1921,15 +1921,25 @@
 
 /* Ensure all parts of the progress bar are visible, interactive, and styled correctly. */
 .tiktok-symulacja .vjs-progress-control {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     z-index: 117;
-    flex-grow: 1;
 }
 
 .tiktok-symulacja .vjs-progress-holder {
+    position: absolute;
+    left: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 0;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -1948,13 +1958,6 @@
     border-radius: 0;
 }
 
-.tiktok-symulacja .vjs-progress-holder {
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.25);
-    border-radius: 0;
-    margin: 0;
-}
-
 /* Style the scrubber handle */
 .tiktok-symulacja .vjs-play-progress::before {
     content: '';
@@ -1967,9 +1970,10 @@
     background: white;
     border-radius: 50%;
     box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    opacity: 0;
+    opacity: 1; /* Make handle always visible */
     transition: opacity 0.2s ease-out;
 }
+
 .tiktok-symulacja .vjs-progress-control:hover .vjs-play-progress::before {
     opacity: 1;
 }
