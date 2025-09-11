@@ -544,20 +544,7 @@
             }
 
             function initGlobalPanels() {
-                const loginPanel = document.querySelector('#app-frame > .login-panel');
-                const renderedForm = document.getElementById('um-login-render-container');
-                if (loginPanel && renderedForm) {
-                    loginPanel.innerHTML = renderedForm.innerHTML;
-                    const form = loginPanel.querySelector('.login-form');
-                    if (form) {
-                        form.querySelector('label[for="user_login"]')?.remove();
-                        form.querySelector('#user_login')?.setAttribute('placeholder', 'Login');
-                        form.querySelector('label[for="user_pass"]')?.remove();
-                        form.querySelector('#user_pass')?.setAttribute('placeholder', 'Hasło');
-                        const submitButton = form.querySelector('#wp-submit');
-                        if (submitButton) submitButton.value = 'ENTER';
-                    }
-                }
+                // This function is now empty as the form is hardcoded in index.html
             }
 
             return {
@@ -979,6 +966,22 @@
          * ==========================================================================
          */
         const Handlers = (function() {
+            function mockToggleLogin() {
+                const isLoggedIn = State.get('isUserLoggedIn');
+                State.set('isUserLoggedIn', !isLoggedIn);
+                UI.updateUIForLoginState();
+                const message = !isLoggedIn ? Utils.getTranslation('loginSuccess') : Utils.getTranslation('logoutSuccess');
+                UI.showAlert(message);
+
+                // If we are logging in, close the panel
+                if (!isLoggedIn) {
+                    const loginPanel = document.querySelector('#app-frame > .login-panel');
+                    if (loginPanel) loginPanel.classList.remove('active');
+                    const topbar = document.querySelector('#app-frame > .topbar');
+                    if (topbar) topbar.classList.remove('login-panel-active');
+                }
+            }
+
             function handleVideoTap(event) {
                 const slide = event.target.closest('.swiper-slide');
                 if (!slide) return;
@@ -1010,26 +1013,6 @@
 
                 if (item.classList.contains('unread')) {
                     item.classList.remove('unread');
-                }
-            }
-
-            async function handleLogin(form) {
-                const submitButton = form.querySelector('input[type="submit"]');
-                submitButton.disabled = true;
-                try {
-                    const data = Object.fromEntries(new FormData(form).entries());
-                    const json = await API.login(data);
-                    if (json.success) {
-                        State.set('isUserLoggedIn', true);
-                        UI.showAlert(Utils.getTranslation('loginSuccess'));
-                        await API.refreshNonce();
-                        App.fetchAndUpdateSlideData();
-                        UI.updateUIForLoginState();
-                    } else {
-                        UI.showAlert(json.data?.message || Utils.getTranslation('loginFailed'), true);
-                    }
-                } finally {
-                    submitButton.disabled = false;
                 }
             }
 
@@ -1133,7 +1116,7 @@
                             VideoManager.retryPlayback(section);
                             break;
                         case 'open-comments-modal': UI.openModal(UI.DOM.commentsModal); break;
-                        case 'open-info-modal': UI.openModal(UI.DOM.infoModal); break;
+                        case 'open-info-modal': mockToggleLogin(); break;
                         case 'open-desktop-pwa-modal': PWA.openDesktopModal(); break;
                         case 'open-ios-pwa-modal': PWA.openIosModal(); break;
                         case 'install-pwa': PWA.handleInstallClick(); break;
@@ -1194,8 +1177,11 @@
                     }
                 },
                 formSubmitHandler: (e) => {
-                    const form = e.target.closest('form.login-form');
-                    if (form) { e.preventDefault(); handleLogin(form); }
+                    const form = e.target.closest('form#tt-login-form');
+                    if (form) {
+                        e.preventDefault();
+                        mockToggleLogin();
+                    }
                 }
             };
         })();

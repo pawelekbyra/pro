@@ -630,37 +630,35 @@
         .login-panel.active {
             max-height: 500px;
         }
-        .login-panel > div {
-            padding: 20px 25px;
+        .login-panel > div, .login-panel > form {
+            padding: 20px 15px;
             background: transparent !important;
         }
-        .login-panel form {
-            margin-bottom: 0 !important;
-            padding-bottom: 0 !important;
+        .login-panel .login-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-        }
-        .login-panel form p {
-            margin: 0;
+            gap: 15px;
+            width: 95%;
+            margin: 0 auto;
         }
 
-        /* === LOGIN PANEL RETRO HACKER STYLE === */
-        .login-panel form input[type="text"],
-        .login-panel form input[type="password"],
-        .login-panel form input[type="email"] {
+        /* === LOGIN PANEL NEW STYLE === */
+        .login-panel .login-form input[type="text"],
+        .login-panel .login-form input[type="password"] {
             background: white;
             border: 2px solid black;
-            font-family: "Courier New", monospace;
             font-weight: bold;
             color: black;
-            padding: 10px;
+            padding: 12px 10px;
             border-radius: 4px;
             width: 100%;
-            margin-bottom: 0; /* Use flex gap for spacing */
+            font-size: 16px;
         }
 
-        .login-panel form input[type="submit"] {
+        .login-panel .login-form button[type="submit"] {
             background: black;
             border: none;
             width: 100%;
@@ -673,9 +671,10 @@
             -webkit-appearance: none;
             appearance: none;
             border-radius: 4px;
+            font-size: 16px;
         }
 
-        .login-panel form input[type="submit"]:active {
+        .login-panel .login-form button[type="submit"]:active {
             background: #222;
         }
 
