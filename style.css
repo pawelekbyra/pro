@@ -631,7 +631,7 @@
             max-height: 500px;
         }
         .login-panel > div, .login-panel > form {
-            padding: 20px 15px;
+            padding: 10px 15px;
             background: transparent !important;
         }
         .login-panel .login-form {
@@ -640,8 +640,9 @@
             border-radius: 8px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            width: 95%;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
             margin: 0 auto;
         }
 
@@ -659,7 +660,7 @@
         }
 
         .login-panel .login-form button[type="submit"] {
-            background: black;
+            background: var(--accent-color);
             border: none;
             width: 100%;
             padding: 14px;
