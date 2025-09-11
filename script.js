@@ -837,6 +837,22 @@
                 if (iosInstructions && iosInstructions.classList.contains('visible')) hideIosInstructions();
             }
 
+            function updateBarToInstalledState() {
+                if (!installBar) return;
+                const titleEl = installBar.querySelector('.pwa-prompt-title');
+                const descriptionEl = installBar.querySelector('.pwa-prompt-description');
+
+                if (titleEl) titleEl.textContent = Utils.getTranslation('alreadyInstalledText');
+                if (descriptionEl) descriptionEl.style.display = 'none';
+
+                if (installButton) {
+                    installButton.textContent = Utils.getTranslation('openPwaAction');
+                    installButton.disabled = true; // Disable the button as the app is open
+                }
+                // Ensure the bar is visible
+                showInstallBar();
+            }
+
 
             function showInstallBar() {
                 if (!installBar) {
@@ -861,6 +877,13 @@
 
             // Initialization
             function init() {
+                 // If running as a PWA, show the bar in its "installed" state.
+                if (isStandalone()) {
+                    updateBarToInstalledState();
+                    // Do not set up install listeners if already installed.
+                    return;
+                }
+
                 // For browsers that support `beforeinstallprompt`
                 if ('onbeforeinstallprompt' in window) {
                     window.addEventListener('beforeinstallprompt', (e) => {
@@ -871,10 +894,19 @@
                         }
                         showInstallBar();
                     });
+
+                    window.addEventListener('appinstalled', () => {
+                        console.log('PWA was installed');
+                        // Hide prompt, nullify event, and update UI to installed state
+                        installPromptEvent = null;
+                        updateBarToInstalledState();
+                    });
                 }
-                // Fallback for browsers that don't support it (e.g. iOS, Firefox, Safari desktop)
+                // Fallback for browsers that don't support it (e.g. iOS)
                 else {
-                    showInstallBar();
+                    if(isIOS()) {
+                        showInstallBar();
+                    }
                 }
 
 
@@ -888,22 +920,22 @@
             }
 
             function handleInstallClick() {
-                // NOWA ZMIANA: Sprawdź, czy aplikacja jest już w trybie standalone
+                // This check is redundant if init() returns early, but good for safety.
                 if (isStandalone()) {
                     UI.showAlert(Utils.getTranslation('alreadyInstalledText'));
                     return;
                 }
 
-                if (isDesktop()) {
-                    showDesktopModal();
-                    return;
-                }
-
                 if (installPromptEvent) {
                     installPromptEvent.prompt();
-                    installPromptEvent.userChoice.then(() => {
-                        installPromptEvent = null;
-                        if (installBar) installBar.classList.remove('visible');
+                    installPromptEvent.userChoice.then((choiceResult) => {
+                        console.log(`PWA prompt user choice: ${choiceResult.outcome}`);
+                        // We no longer hide the bar here. The 'appinstalled' event will handle UI changes.
+                        // If the user accepts, the 'appinstalled' event will fire.
+                        // If the user dismisses, the bar remains, allowing them to try again later.
+                        if (choiceResult.outcome !== 'accepted') {
+                           // User dismissed, do nothing, maybe they'll change their mind.
+                        }
                     });
                 } else if (isIOS()) {
                     // Fallback for iOS
