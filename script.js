@@ -839,17 +839,7 @@
 
             function updateBarToInstalledState() {
                 if (!installBar) return;
-                const titleEl = installBar.querySelector('.pwa-prompt-title');
-                const descriptionEl = installBar.querySelector('.pwa-prompt-description');
-
-                if (titleEl) titleEl.textContent = Utils.getTranslation('alreadyInstalledText');
-                if (descriptionEl) descriptionEl.style.display = 'none';
-
-                if (installButton) {
-                    installButton.textContent = Utils.getTranslation('openPwaAction');
-                    installButton.disabled = true; // Disable the button as the app is open
-                }
-                // Ensure the bar is visible
+                // Ensure the bar is visible, but do not change its content.
                 showInstallBar();
             }
 
@@ -877,10 +867,15 @@
 
             // Initialization
             function init() {
+                // Always attach event listener to the install button.
+                if (installButton) {
+                    installButton.addEventListener('click', handleInstallClick);
+                }
+
                  // If running as a PWA, show the bar in its "installed" state.
                 if (isStandalone()) {
                     updateBarToInstalledState();
-                    // Do not set up install listeners if already installed.
+                    // Do not set up other install listeners if already installed.
                     return;
                 }
 
@@ -910,10 +905,7 @@
                 }
 
 
-                // Attach event listeners
-                if (installButton) {
-                    installButton.addEventListener('click', handleInstallClick);
-                }
+                // Attach other event listeners
                 if (iosCloseButton) {
                     iosCloseButton.addEventListener('click', hideIosInstructions);
                 }
