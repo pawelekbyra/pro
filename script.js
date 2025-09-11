@@ -170,7 +170,7 @@
                         'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified',
-                        'access': 'pwa',
+                        'access': 'public',
                         'initialLikes': 1500,
                         'isLiked': false,
                         'initialComments': 567
@@ -198,7 +198,7 @@
                         'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified2',
-                        'access': 'public',
+                        'access': 'pwa',
                         'initialLikes': 1800,
                         'isLiked': false,
                         'initialComments': 888
