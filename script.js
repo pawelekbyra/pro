@@ -879,7 +879,12 @@
                     return;
                 }
 
-                // For browsers that support `beforeinstallprompt`
+                // For mobile browsers, always show the installation bar.
+                if (!isDesktop()) {
+                    showInstallBar();
+                }
+
+                // For browsers that support `beforeinstallprompt` (like Chrome on Android)
                 if ('onbeforeinstallprompt' in window) {
                     window.addEventListener('beforeinstallprompt', (e) => {
                         e.preventDefault();
@@ -887,21 +892,13 @@
                         if (installButton) {
                             installButton.disabled = false;
                         }
-                        showInstallBar();
                     });
 
                     window.addEventListener('appinstalled', () => {
                         console.log('PWA was installed');
-                        // Hide prompt, nullify event, and update UI to installed state
                         installPromptEvent = null;
                         updateBarToInstalledState();
                     });
-                }
-                // Fallback for browsers that don't support it (e.g. iOS)
-                else {
-                    if(isIOS()) {
-                        showInstallBar();
-                    }
                 }
 
 
