@@ -1919,24 +1919,30 @@
     height: 6px;
 }
 
-/* Upewnij się, że inne części paska postępu również są widoczne i interaktywne. */
-.tiktok-symulacja .vjs-progress-control,
-.tiktok-symulacja .vjs-progress-holder,
+/* Ensure all parts of the progress bar are visible, interactive, and styled correctly. */
+.tiktok-symulacja .vjs-progress-control {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 117;
+    flex-grow: 1;
+}
+
+.tiktok-symulacja .vjs-progress-holder {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 117;
+}
+
 .tiktok-symulacja .vjs-play-progress {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    z-index: 117; /* Ustaw wyższy z-index, aby być nad nakładką secret-overlay */
-}
-
-/* Make the progress bar fill the width of the control bar */
-.tiktok-symulacja .vjs-progress-control {
-    flex-grow: 1;
-}
-
-/* Style the progress bar itself */
-.tiktok-symulacja .vjs-play-progress {
+    z-index: 117;
     background: linear-gradient(90deg, #00AEEF, #0089D1);
     box-shadow: 0 0 8px rgba(0, 174, 239, 0.5);
     border-radius: 0;

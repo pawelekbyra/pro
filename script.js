@@ -599,9 +599,6 @@
                 const video = sectionEl.querySelector('.videoPlayer');
                 if (!video) return;
 
-                // --- PATCH START ---
-                // Initialize player even if already attached, to handle potential disposal.
-                // Video.js handles this gracefully.
                 const player = videojs(video, {
                   controls: true,
                   html5: {
@@ -645,27 +642,25 @@
                 if (canAttachSrc) {
                     const sources = [];
                     const useHls = Config.USE_HLS && slideData.hlsUrl;
-
                     if (useHls) {
                         sources.push({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
                         if (slideData.mp4Url) sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
                     } else if (slideData.mp4Url) {
                         sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
                     }
-
-                    // Only set src if it's different to avoid re-loading
                     const currentSrc = player.currentSrc();
                     const newSrc = sources[0]?.src;
                     if (newSrc && currentSrc !== newSrc) {
                         player.src(sources);
                     }
                 } else {
-                    // If user can't access, ensure no source is loaded
                     if (player.currentSrc()) {
                         player.reset();
                     }
+                    // --- NEW FIX ---
+                    // Trick Video.js into thinking playback has started to show controls.
+                    player.addClass('vjs-has-started');
                 }
-                // --- PATCH END ---
             }
 
             function _detachSrc(sectionEl) {
