@@ -1911,10 +1911,23 @@
     visibility: visible !important;
     opacity: 1 !important;
     transition: all 0.3s ease-out !important;
+    /* NOWA ZMIANA: Zapewnia, że pasek postępu jest zawsze widoczny na warstwie wyżej. */
+    pointer-events: auto !important;
 }
 
 .tiktok-symulacja .vjs-control-bar:hover {
     height: 6px;
+}
+
+/* Upewnij się, że inne części paska postępu również są widoczne i interaktywne. */
+.tiktok-symulacja .vjs-progress-control,
+.tiktok-symulacja .vjs-progress-holder,
+.tiktok-symulacja .vjs-play-progress {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 117; /* Ustaw wyższy z-index, aby być nad nakładką secret-overlay */
 }
 
 /* Make the progress bar fill the width of the control bar */
