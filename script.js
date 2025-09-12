@@ -460,7 +460,7 @@
 
                 if (topbar) {
                     topbar.querySelector('.central-text-wrapper').classList.toggle('with-arrow', !isLoggedIn);
-                    topbar.querySelector('.topbar-text').textContent = isLoggedIn ? Utils.getTranslation('loggedInText') : Utils.getTranslation('loggedOutText');
+                    topbar.querySelector('.topbar-text').innerHTML = isLoggedIn ? '<img src="logsiks.png" class="topbar-logo-img" alt="Ting Tong Logo">' : Utils.getTranslation('loggedOutText');
                     topbar.classList.remove('login-panel-active');
                 }
                 if (loginPanel) {
