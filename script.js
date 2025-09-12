@@ -865,9 +865,7 @@
                 }
 
                 // For mobile browsers, always show the installation bar.
-                if (!isDesktop()) {
-                    showInstallBar();
-                }
+                showInstallBar();
 
                 // For browsers that support `beforeinstallprompt` (like Chrome on Android)
                 if ('onbeforeinstallprompt' in window) {
@@ -914,6 +912,8 @@
                 } else if (isIOS()) {
                     // On iOS, we show instructions.
                     showIosInstructions();
+                } else if (isDesktop()) {
+                    showDesktopModal();
                 } else {
                     // If not on iOS and there's no prompt, the app is likely installed.
                     UI.showAlert(Utils.getTranslation('alreadyInstalledText'));
