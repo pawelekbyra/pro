@@ -1366,7 +1366,30 @@
 
             function closeAccountModal() {
                 const modal = document.getElementById('accountModal');
-                modal.classList.remove('visible');
+                const modalContent = modal.querySelector('.account-modal-content');
+
+                // Do nothing if the modal is not visible or is already closing.
+                if (!modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+                    return;
+                }
+
+                const onTransitionEnd = (event) => {
+                    // Ensure we're reacting to the end of the transform on the correct element.
+                    if (event.target === modalContent && event.propertyName === 'transform') {
+                        modal.classList.remove('visible');
+                        modal.classList.remove('is-hiding');
+                        // Clean up the event listener.
+                        modalContent.removeEventListener('transitionend', onTransitionEnd);
+                    }
+                };
+
+                modalContent.addEventListener('transitionend', onTransitionEnd);
+
+                // Add the is-hiding class to trigger the closing animation.
+                // The .visible class remains for now, so the overlay is still visible during the animation.
+                modal.classList.add('is-hiding');
+
+                // Restore body scrolling immediately.
                 document.body.style.overflow = '';
             }
 
