@@ -4,29 +4,33 @@ import os
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch()
         page = await browser.new_page()
 
-        await page.goto('http://localhost:8000/index.html')
+        # Get the absolute path to the index.html file
+        file_path = os.path.abspath('index.html')
 
-        # Click the language button to start the app
+        # Go to the local HTML file
+        await page.goto(f'file://{file_path}')
+
+        # Click the Polish language button to start the app
         await page.locator('button[data-lang="pl"]').click()
 
         # Wait for the preloader to disappear
         await expect(page.locator('#preloader')).not_to_be_visible(timeout=10000)
 
-        # The 'info' button click now toggles the login state
-        info_button = page.locator('.swiper-slide-active button[data-action="open-info-modal"]')
-        await info_button.click()
+        # Simulate logging in to see the logo
+        await page.locator('[data-action="toggle-login-panel"]').click()
+        await page.locator('#tt-username').fill('test')
+        await page.locator('#tt-password').fill('test')
+        await page.locator('#tt-login-submit').click()
 
+        # Wait for the logo to be visible by checking for the img tag in the topbar
+        logo = page.locator('.topbar-text .topbar-logo-img')
+        await expect(logo).to_be_visible(timeout=5000)
 
-        # Wait for the logo to be visible
-        logo_locator = page.locator('.topbar-logo')
-        await expect(logo_locator).to_be_visible(timeout=5000)
-
-        # Take a screenshot of the top bar area
-        top_bar_locator = page.locator('.topbar')
-        await top_bar_locator.screenshot(path="jules-scratch/verification/verification.png")
+        # Take a screenshot of the top bar
+        await page.locator('.topbar').screenshot(path='jules-scratch/verification/verification.png')
 
         await browser.close()
 

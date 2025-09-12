@@ -2366,7 +2366,6 @@
 .topbar-logo-img {
   width: 150px;
   height: 32px;
-  filter: brightness(0) invert(1);
   /* The image is inside a flex container (.topbar-central-trigger) that centers it, so no extra vertical alignment is needed. */
   display: block; /* a good practice for images inside containers */
 }
