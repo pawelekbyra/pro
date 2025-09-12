@@ -116,7 +116,7 @@
                     </div>
                     <div class="sidebar">
                         <div class="profile">
-                            <button class="profileButton" data-action="subscribe" data-translate-alert="subscribeAlert" data-translate-aria-label="subscribeAriaLabel" aria-label="Subskrybuj"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                            <button class="profileButton" data-action="open-public-profile" data-translate-aria-label="subscribeAriaLabel" aria-label="Subskrybuj"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                             <div class="plus" aria-hidden="true">+</div>
                         </div>
                         <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -366,6 +366,55 @@
             </div>
         </div>
     </div>
+    <div id="tiktok-profile-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tiktok-profile-username" aria-hidden="true">
+        <div class="tiktok-profile-content">
+            <header class="tiktok-profile-header">
+                <button class="profile-action-btn" data-action="go-back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <h2 id="tiktok-profile-username" class="username"></h2>
+                <button class="profile-action-btn" data-action="share-profile"><svg viewBox="0 0 24 24"><path d="M18 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm-4 5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zM6 12c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm8-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" /></svg></button>
+                 <button class="modal-close-btn" data-action="close-modal">&times;</button>
+            </header>
+            <main class="profile-main">
+                <div class="profile-summary">
+                    <div class="profile-avatar-wrapper">
+                         <img src="" alt="Avatar użytkownika" class="profile-avatar" id="tiktok-profile-avatar">
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="tiktok-following-count">0</span>
+                            <span class="stat-label">Obserwuje</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="tiktok-followers-count">0</span>
+                            <span class="stat-label">Obserwujący</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="tiktok-likes-count">0</span>
+                            <span class="stat-label">Polubienia</span>
+                        </div>
+                    </div>
+                </div>
+                <h1 class="profile-nickname" id="tiktok-profile-nickname"></h1>
+                <p class="profile-bio" id="tiktok-profile-bio"></p>
+                <div class="profile-actions">
+                    <button class="follow-button">Obserwuj</button>
+                    <button class="icon-button"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></button>
+                </div>
+
+                <div class="profile-tabs">
+                    <div class="tab active" data-tab-content="videos-grid"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/></svg></div>
+                    <div class="tab" data-tab-content="liked-grid"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+                </div>
+                <div class="video-gallery active" id="videos-grid">
+                    <!-- Video thumbnails will be dynamically inserted here -->
+                </div>
+                 <div class="video-gallery" id="liked-grid">
+                    <!-- Liked video thumbnails will be dynamically inserted here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
     <div class="crop-modal" id="cropModal">
         </div>
     <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
