@@ -793,10 +793,6 @@
             const iosCloseButton = document.getElementById('pwa-ios-close-button');
             const desktopModal = document.getElementById('pwa-desktop-modal');
 
-            // State
-            let installPromptEvent = null;
-            let isAppInstalled = isStandalone(); // Initialize state
-
             // Predicates
             const isIOS = () => {
                 if (typeof window === 'undefined' || !window.navigator) return false;
@@ -805,6 +801,10 @@
             };
             const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
+
+            // State
+            let installPromptEvent = null;
+            let isAppInstalled = isStandalone(); // Initialize state
 
 
             // Actions
