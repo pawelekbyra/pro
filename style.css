@@ -1166,7 +1166,7 @@
             background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             margin: 0;
-            padding: 0 10px;
+    padding: 0;
             flex-shrink: 0;
         }
 
@@ -1175,6 +1175,7 @@
             padding: 14px 8px;
             background: rgba(255, 255, 255, 0.08);
             border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
             border-bottom: 2px solid transparent;
             color: #fff;
             font-size: 14px;
@@ -1195,6 +1196,10 @@
             background: none;
             border-bottom-color: var(--accent-color);
         }
+
+.tab-btn:last-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
 
         .account-content {
             flex: 1;
@@ -1500,7 +1505,7 @@
 
         .btn-danger {
             background: linear-gradient(135deg, #dc2626, #ef4444);
-            border: none;
+    border: 1px solid rgba(255, 255, 255, 0.8);
             padding: 14px 24px;
             border-radius: 12px;
             color: #fff;
