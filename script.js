@@ -460,7 +460,7 @@
 
                 if (topbar) {
                     topbar.querySelector('.central-text-wrapper').classList.toggle('with-arrow', !isLoggedIn);
-                    topbar.querySelector('.topbar-text').innerHTML = isLoggedIn ? '<img src="logsiks.png" class="topbar-logo-img" alt="Ting Tong Logo">' : Utils.getTranslation('loggedOutText');
+                    topbar.querySelector('.topbar-text').textContent = isLoggedIn ? 'Ting Tong' : Utils.getTranslation('loggedOutText');
                     topbar.classList.remove('login-panel-active');
                 }
                 if (loginPanel) {
@@ -1149,6 +1149,12 @@
                     const loggedInMenu = document.querySelector('#app-frame > .logged-in-menu');
 
                     switch (action) {
+                        case 'go-back':
+                            const modalToClose = actionTarget.closest('.modal-overlay');
+                            if (modalToClose) {
+                                UI.closeModal(modalToClose);
+                            }
+                            break;
                         case 'open-public-profile':
                              if (!State.get('isUserLoggedIn')) {
                                 Utils.vibrateTry();
