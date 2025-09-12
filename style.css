@@ -305,7 +305,9 @@
             color: rgba(255, 255, 255, 0.8);
             filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
         }
-        .topbar,
+        .topbar {
+            background: #000;
+        }
         .tiktok-symulacja .bottombar,
         .login-panel {
             background: rgba(0, 0, 0, 0.6);
@@ -1051,7 +1053,7 @@
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .account-modal-overlay.visible {
@@ -1077,15 +1079,13 @@
         .account-header {
             position: relative;
             height: var(--topbar-height);
-            background: rgba(255, 255, 255, 0.05);
+            background: #000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0 20px; /* Simplified padding */
             padding-top: var(--safe-area-top);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             flex-shrink: 0;
         }
 
@@ -1098,15 +1098,15 @@
 
         .close-btn {
             position: absolute;
-            right: 0;
+            right: 10px;
             top: var(--safe-area-top);
             height: var(--topbar-base-height); /* FIX: Set height to match visible header area */
-            width: 50px;
+            width: 40px;
             background: none;
             border: none;
             color: #fff;
-            font-size: 28px;
-            font-weight: 300;
+            font-size: 24px;
+            font-weight: 400;
             line-height: 1;
             cursor: pointer;
             display: flex;
