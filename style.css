@@ -2081,17 +2081,3 @@
 }
 
 /* Styles for installed PWA bar */
-#pwa-install-bar.installed .pwa-prompt-button {
-    cursor: not-allowed;
-    background-color: #555;
-    pointer-events: none;
-}
-
-#pwa-install-bar.installed .pwa-prompt-description {
-    font-size: 0;
-}
-
-#pwa-install-bar.installed .pwa-prompt-description::before {
-    content: "Aplikacja jest już zainstalowana.";
-    font-size: 0.9rem;
-}
