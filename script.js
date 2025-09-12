@@ -234,7 +234,7 @@
           },
           TRANSLATIONS: {
                 pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Ting Tong', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitle: 'Zaloguj się, aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitle: 'Ściągnij apkę, aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheading: 'Zainstaluj aplikację Ting Tong na swoim telefonie.', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś' },
-                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitle: 'Log in to unlock', pwaTitle: 'Top Secret', pwaSubtitle: 'Download the app to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheading: 'Install the Ting Tong app on your phone.', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!" }
+                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitle: 'Log in to unlock', pwaTitle: 'Top Secret', pwaSubtitle: 'Download the app to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheading: 'Install the Ting Tong app on your phone.', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!" }
           }
         };
 
@@ -369,6 +369,7 @@
                 infoModal: document.getElementById('infoModal'),
                 commentsModal: document.getElementById('commentsModal'),
                 accountModal: document.getElementById('accountModal'),
+                tiktokProfileModal: document.getElementById('tiktok-profile-modal'),
                 notificationPopup: document.getElementById('notificationPopup'),
                 pwaDesktopModal: document.getElementById('pwa-desktop-modal'),
                 pwaInstallPrompt: document.getElementById('pwaInstallPrompt'),
@@ -547,6 +548,37 @@
                 // This function is now empty as the form is hardcoded in index.html
             }
 
+            function populateProfileModal(slideData) {
+                if (!slideData || !DOM.tiktokProfileModal) return;
+
+                // Basic info
+                DOM.tiktokProfileModal.querySelector('#tiktok-profile-avatar').src = slideData.avatar;
+                DOM.tiktokProfileModal.querySelector('#tiktok-profile-username').textContent = `@${slideData.user.toLowerCase().replace(/\s/g, '_')}`;
+                DOM.tiktokProfileModal.querySelector('#tiktok-profile-nickname').textContent = slideData.user;
+                DOM.tiktokProfileModal.querySelector('#tiktok-profile-bio').textContent = `To jest bio użytkownika ${slideData.user}.\nOdkryj więcej! ✨`;
+
+                // Stats
+                DOM.tiktokProfileModal.querySelector('#tiktok-following-count').textContent = Math.floor(Math.random() * 500);
+                DOM.tiktokProfileModal.querySelector('#tiktok-followers-count').textContent = Utils.formatCount(Math.floor(Math.random() * 5000000));
+                DOM.tiktokProfileModal.querySelector('#tiktok-likes-count').textContent = Utils.formatCount(slideData.initialLikes * 3.5); // Mock total likes
+
+                // Video Grid (mock data)
+                const videoGrid = DOM.tiktokProfileModal.querySelector('#videos-grid');
+                videoGrid.innerHTML = ''; // Clear previous
+                for (let i = 1; i <= 9; i++) {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'video-thumbnail';
+                    thumb.innerHTML = `
+                        <img src="https://picsum.photos/200/280?random=${slideData.id}-${i}" alt="Miniatura filmu">
+                        <div class="video-views">
+                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                            ${Utils.formatCount(Math.floor(Math.random() * 3000000))}
+                        </div>
+                    `;
+                    videoGrid.appendChild(thumb);
+                }
+            }
+
             return {
                 DOM,
                 showAlert,
@@ -556,7 +588,8 @@
                 updateTranslations,
                 applyLikeStateToDom,
                 renderSlides,
-                initGlobalPanels
+                initGlobalPanels,
+                populateProfileModal
             };
         })();
 
@@ -1083,6 +1116,25 @@
             return {
                 handleNotificationClick,
                 videoTapHandler: handleVideoTap,
+                profileModalTabHandler: (e) => {
+                    const tab = e.target.closest('.tab');
+                    if (!tab) return;
+
+                    const modal = tab.closest('#tiktok-profile-modal');
+                    if (!modal) return;
+
+                    // Deactivate all tabs and galleries
+                    modal.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    modal.querySelectorAll('.video-gallery').forEach(g => g.classList.remove('active'));
+
+                    // Activate clicked tab and corresponding gallery
+                    tab.classList.add('active');
+                    const contentId = tab.dataset.tabContent;
+                    const gallery = modal.querySelector(`#${contentId}`);
+                    if (gallery) {
+                        gallery.classList.add('active');
+                    }
+                },
                 mainClickHandler: (e) => {
                     const target = e.target;
                     const actionTarget = target.closest('[data-action]');
@@ -1097,6 +1149,21 @@
                     const loggedInMenu = document.querySelector('#app-frame > .logged-in-menu');
 
                     switch (action) {
+                        case 'open-public-profile':
+                             if (!State.get('isUserLoggedIn')) {
+                                Utils.vibrateTry();
+                                UI.showAlert(Utils.getTranslation('profileViewAlert'));
+                                return;
+                            }
+                            const profileSection = actionTarget.closest('.webyx-section');
+                            if (profileSection) {
+                                const slideData = slidesData.find(s => s.id === profileSection.dataset.slideId);
+                                if (slideData) {
+                                    UI.populateProfileModal(slideData);
+                                    UI.openModal(UI.DOM.tiktokProfileModal);
+                                }
+                            }
+                            break;
                         case 'toggle-like': handleLikeToggle(actionTarget); break;
                         case 'share': handleShare(actionTarget); break;
                         case 'toggle-language': handleLanguageToggle(); break;
@@ -1717,6 +1784,7 @@
                 });
 
                 UI.DOM.notificationPopup.querySelector('.notification-list').addEventListener('click', Handlers.handleNotificationClick);
+                UI.DOM.tiktokProfileModal?.addEventListener('click', Handlers.profileModalTabHandler);
             }
 
             async function _fetchAndUpdateSlideData() {
