@@ -1006,15 +1006,20 @@
         .notif-full-details {
             max-height: 0;
             overflow: hidden;
+            transition: max-height 0.35s ease-out;
+        }
+        .notification-item.expanded .notif-full-details {
+            max-height: 200px;
+        }
+        .notif-full-details-content {
+            padding: 0 12px 12px 48px;
             font-size: 14px;
             line-height: 1.5;
             color: rgba(255, 255, 255, 0.8);
             opacity: 0;
-            transition: max-height 0.3s ease-out, opacity 0.2s ease-in, padding 0.3s ease-out;
+            transition: opacity 0.2s ease-in 0.15s;
         }
-        .notification-item.expanded .notif-full-details {
-            max-height: 200px;
-            padding: 0 12px 12px 48px;
+        .notification-item.expanded .notif-full-details-content {
             opacity: 1;
         }
 
