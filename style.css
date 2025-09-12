@@ -1116,7 +1116,7 @@
         .account-header {
             position: relative;
             height: var(--topbar-height);
-            background: #000;
+            background: #1F1F1F;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
@@ -1173,10 +1173,10 @@
         .tab-btn {
             flex: 1;
             padding: 14px 8px;
-            background: none;
+            background: rgba(255, 255, 255, 0.08);
             border: none;
             border-bottom: 2px solid transparent;
-            color: rgba(255, 255, 255, 0.6);
+            color: #fff;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -1191,8 +1191,8 @@
         }
 
         .tab-btn.active {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.6);
+            background: none;
             border-bottom-color: var(--accent-color);
         }
 
