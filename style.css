@@ -240,7 +240,7 @@
             top: var(--topbar-height); /* Start below top bar */
             left: 0;
             width: 100%;
-            height: calc(100% - var(--topbar-height)); /* Fill remaining space */
+            height: calc(100% - var(--topbar-height) - var(--bottombar-height)); /* Fill space between bars */
             background: rgba(0,0,0,0.4);
             -webkit-backdrop-filter: blur(12px) saturate(120%);
             backdrop-filter: blur(12px) saturate(120%);
@@ -648,7 +648,7 @@
             gap: 12px;
             width: 100%;
             max-width: 400px;
-            margin: 0 auto;
+            margin: -10px auto 0;
         }
 
         /* === LOGIN PANEL NEW STYLE === */
@@ -658,7 +658,7 @@
             border: 2px solid black;
             font-weight: bold;
             color: black;
-            padding: 12px 10px;
+            padding: 8px 10px;
             border-radius: 4px;
             width: 100%;
             font-size: 16px;
@@ -668,11 +668,11 @@
             background: var(--accent-color);
             border: none;
             width: 100%;
-            padding: 14px;
+            padding: 10px;
             font-weight: bold;
             color: white;
             text-transform: uppercase;
-            font-family: "Courier New", monospace;
+            font-family: inherit;
             cursor: pointer;
             -webkit-appearance: none;
             appearance: none;
