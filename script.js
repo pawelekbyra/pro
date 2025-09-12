@@ -815,6 +815,13 @@
                 if (iosInstructions) iosInstructions.classList.remove('visible');
             }
 
+            function updatePwaUiForInstalledState() {
+                if (!installBar || !installButton) return;
+                installButton.disabled = true;
+                installButton.textContent = Utils.getTranslation('installPwaAction');
+                installBar.classList.add('installed');
+            }
+
             function showDesktopModal() {
                 if (desktopModal) UI.openModal(desktopModal);
             }
@@ -822,21 +829,6 @@
             function closePwaModals() {
                 if (desktopModal && desktopModal.classList.contains('visible')) UI.closeModal(desktopModal);
                 if (iosInstructions && iosInstructions.classList.contains('visible')) hideIosInstructions();
-            }
-
-            function updateBarToInstalledState() {
-                if (!installBar || !installButton) return;
-
-                const title = installBar.querySelector('.pwa-prompt-title');
-                const description = installBar.querySelector('.pwa-prompt-description');
-
-                if (title) title.style.display = 'none';
-                if (description) description.style.display = 'none';
-
-                installButton.textContent = Utils.getTranslation('openPwaAction');
-
-                // Ensure the bar is visible to show the "Open" button.
-                showInstallBar();
             }
 
             function showInstallBar() {
@@ -867,11 +859,9 @@
                     installButton.addEventListener('click', handleInstallClick);
                 }
 
-                // If running in standalone PWA mode, hide the install bar completely.
+                // If running in standalone PWA mode, update the UI to show the installed state.
                 if (isStandalone()) {
-                    if (installBar) {
-                        installBar.style.display = 'none';
-                    }
+                    updatePwaUiForInstalledState();
                     // Do not set up other install listeners if already installed.
                     return;
                 }
@@ -894,7 +884,7 @@
                     window.addEventListener('appinstalled', () => {
                         console.log('PWA was installed');
                         installPromptEvent = null;
-                        updateBarToInstalledState();
+                        updatePwaUiForInstalledState();
                     });
                 }
 
@@ -906,7 +896,7 @@
             }
 
             function handleInstallClick() {
-                // This check is redundant if init() returns early, but good for safety.
+                // Check if the app is already installed and show an alert.
                 if (isStandalone()) {
                     UI.showAlert(Utils.getTranslation('alreadyInstalledText'));
                     return;
