@@ -1796,10 +1796,15 @@
     transform: translateY(100%);
     transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     visibility: hidden;
+    height: var(--bottombar-height);
 }
 .pwa-prompt.visible {
     transform: translateY(0);
     visibility: visible;
+}
+.pwa-prompt-content {
+    display: flex;
+    flex-direction: column;
 }
 .pwa-prompt-title {
     font-weight: bold;
