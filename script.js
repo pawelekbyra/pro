@@ -669,29 +669,52 @@
 
                 const canAttachSrc = !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
 
-                if (canAttachSrc) {
-                    const sources = [];
-                    const useHls = Config.USE_HLS && slideData.hlsUrl;
-                    if (useHls) {
-                        // PATCH: Użyj lokalnego proxy CORS, aby ominąć ograniczenia przeglądarki.
-                        // URL jest kodowany, aby zapewnić poprawne przekazanie jako parametr zapytania.
-                        const proxiedHlsUrl = `/api/proxy?url=${encodeURIComponent(slideData.hlsUrl)}`;
-                        sources.push({ src: proxiedHlsUrl, type: 'application/x-mpegURL' });
-                        if (slideData.mp4Url) sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
-                    } else if (slideData.mp4Url) {
-                        sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
+                // --- PATCH: HLS.js Integration ---
+                // Destroy previous HLS instance if it exists to prevent memory leaks
+                if (video.hls) {
+                    video.hls.destroy();
+                }
+
+                if (canAttachSrc && Config.USE_HLS && slideData.hlsUrl && typeof Hls !== 'undefined') {
+                    if (Hls.isSupported()) {
+                        // Use hls.js if supported
+                        const hls = new Hls({
+                            // Using the same ABR config as before
+                            ...Config.HLS
+                        });
+                        hls.loadSource(slideData.hlsUrl);
+                        hls.attachMedia(video);
+                        video.hls = hls; // Store instance for later destruction
+
+                        hls.on(Hls.Events.ERROR, function (event, data) {
+                           if (data.fatal) {
+                                console.error('HLS.js Fatal Error:', data);
+                                // If HLS.js fails, we could try to fallback to the MP4 source
+                                if (slideData.mp4Url) {
+                                    console.log('HLS.js failed, falling back to MP4.');
+                                    const player = videojs(video);
+                                    player.src({ src: slideData.mp4Url, type: 'video/mp4' });
+                                }
+                           }
+                        });
+
+                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Native HLS support (e.g., Safari)
+                        player.src({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
+                    } else {
+                        // Fallback to MP4 if HLS is not supported at all
+                        if (slideData.mp4Url) {
+                            player.src({ src: slideData.mp4Url, type: 'video/mp4' });
+                        }
                     }
-                    const currentSrc = player.currentSrc();
-                    const newSrc = sources[0]?.src;
-                    if (newSrc && currentSrc !== newSrc) {
-                        player.src(sources);
-                    }
+                } else if (canAttachSrc && slideData.mp4Url) {
+                    // If not using HLS, or HLS url not available, use MP4
+                    player.src({ src: slideData.mp4Url, type: 'video/mp4' });
                 } else {
+                    // No source can be attached (e.g., secret video and logged out)
                     if (player.currentSrc()) {
                         player.reset();
                     }
-                    // --- NEW FIX ---
-                    // Trick Video.js into thinking playback has started to show controls.
                     player.addClass('vjs-has-started');
                 }
             }
