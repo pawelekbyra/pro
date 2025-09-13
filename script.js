@@ -669,17 +669,49 @@
 
                 const canAttachSrc = !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
 
-                // --- DIAGNOSTIC: Force MP4 playback ---
+                // --- PATCH: HLS.js Integration ---
+                // Destroy previous HLS instance if it exists to prevent memory leaks
                 if (video.hls) {
                     video.hls.destroy();
-                    video.hls = null;
                 }
 
-                if (canAttachSrc && slideData.mp4Url) {
-                    console.log('DIAGNOSTIC: Forcing MP4 source:', slideData.mp4Url);
+                if (canAttachSrc && Config.USE_HLS && slideData.hlsUrl && typeof Hls !== 'undefined') {
+                    if (Hls.isSupported()) {
+                        // Use hls.js if supported
+                        const hls = new Hls({
+                            // Using the same ABR config as before
+                            ...Config.HLS
+                        });
+                        hls.loadSource(slideData.hlsUrl);
+                        hls.attachMedia(video);
+                        video.hls = hls; // Store instance for later destruction
+
+                        hls.on(Hls.Events.ERROR, function (event, data) {
+                           if (data.fatal) {
+                                console.error('HLS.js Fatal Error:', data);
+                                // If HLS.js fails, we could try to fallback to the MP4 source
+                                if (slideData.mp4Url) {
+                                    console.log('HLS.js failed, falling back to MP4.');
+                                    const player = videojs(video);
+                                    player.src({ src: slideData.mp4Url, type: 'video/mp4' });
+                                }
+                           }
+                        });
+
+                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Native HLS support (e.g., Safari)
+                        player.src({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
+                    } else {
+                        // Fallback to MP4 if HLS is not supported at all
+                        if (slideData.mp4Url) {
+                            player.src({ src: slideData.mp4Url, type: 'video/mp4' });
+                        }
+                    }
+                } else if (canAttachSrc && slideData.mp4Url) {
+                    // If not using HLS, or HLS url not available, use MP4
                     player.src({ src: slideData.mp4Url, type: 'video/mp4' });
                 } else {
-                    // No source can be attached
+                    // No source can be attached (e.g., secret video and logged out)
                     if (player.currentSrc()) {
                         player.reset();
                     }
