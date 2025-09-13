@@ -40,8 +40,11 @@ module.exports = async (request, response) => {
     });
 
     // Leite den Body als Stream weiter
+    // PATCH: Konvertiere den Web-Stream (von fetch) in einen Node.js-Stream, um ihn korrekt an die Antwort zu pipen.
+    // Die direkte Verwendung von .pipe() ist bei Web-Streams nicht mit Node-Server-Antworten kompatibel.
+    const { Readable } = require('stream');
     const bodyStream = fetchResponse.body;
-    bodyStream.pipe(response);
+    Readable.fromWeb(bodyStream).pipe(response);
 
   } catch (error) {
     console.error('Proxy-Fehler:', error);
