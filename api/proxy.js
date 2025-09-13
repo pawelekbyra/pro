@@ -1,3 +1,5 @@
+const { Readable } = require('stream');
+
 module.exports = async (request, response) => {
   const targetUrl = request.query.url;
 
@@ -24,34 +26,47 @@ module.exports = async (request, response) => {
       return response.status(fetchResponse.status).send(`Error from target server: ${errorText}`);
     }
 
-    const manifestText = await fetchResponse.text();
-    const manifestBaseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
-
-    const rewrittenManifest = manifestText.split('\n').map(line => {
-      line = line.trim();
-      if (line && !line.startsWith('#')) {
-        // This line is a URL. It could be for a segment (.ts) or another manifest (.m3u8).
-        let absoluteUrl;
-        if (line.startsWith('http')) {
-          // It's already an absolute URL.
-          absoluteUrl = line;
-        } else {
-          // It's a relative URL, resolve it against the manifest's base URL.
-          absoluteUrl = new URL(line, manifestBaseUrl).href;
-        }
-        // Rewrite the URL to point back to our proxy.
-        return `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`;
-      }
-      // If it's a comment or empty line, return it as is.
-      return line;
-    }).join('\n');
-
-    // Set CORS and Content-Type headers.
+    // Set CORS headers for all successful responses.
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Content-Type', fetchResponse.headers.get('content-type') || 'application/vnd.apple.mpegurl');
 
-    // Send the rewritten manifest text as the response.
-    return response.status(200).send(rewrittenManifest);
+    const contentType = fetchResponse.headers.get('content-type') || '';
+
+    // Check if the content is an HLS manifest.
+    if (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl')) {
+      // It's a manifest file, so we need to read it as text and rewrite URLs.
+      const manifestText = await fetchResponse.text();
+      const manifestBaseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
+
+      const rewrittenManifest = manifestText.split('\n').map(line => {
+        line = line.trim();
+        if (line && !line.startsWith('#')) {
+          let absoluteUrl;
+          if (line.startsWith('http')) {
+            absoluteUrl = line;
+          } else {
+            absoluteUrl = new URL(line, manifestBaseUrl).href;
+          }
+          return `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`;
+        }
+        return line;
+      }).join('\n');
+
+      response.setHeader('Content-Type', contentType);
+      return response.status(200).send(rewrittenManifest);
+
+    } else {
+      // It's a video segment (.ts) or another binary file. Stream it directly.
+      // Forward all headers from the target response.
+      fetchResponse.headers.forEach((value, name) => {
+        if (name.toLowerCase() !== 'access-control-allow-origin') {
+          response.setHeader(name, value);
+        }
+      });
+
+      // Convert the Web Stream to a Node.js Stream and pipe it.
+      const bodyStream = fetchResponse.body;
+      Readable.fromWeb(bodyStream).pipe(response);
+    }
 
   } catch (error) {
     console.error('Proxy Error:', error);
