@@ -161,15 +161,13 @@
             window.TingTongData = {
                 isLoggedIn: false, // Start as logged out
                 slides: [
-                    // PATCH: Dodano proxy CORS, aby umożliwić odtwarzanie strumieni HLS z zewnętrznych serwerów.
-                    // Przeglądarki (poza Safari) blokują takie żądania bez odpowiednich nagłówków CORS.
                     {
                         'id': 'slide-001',
                         'likeId': '1',
                         'user': 'Unified Streaming',
                         'description': 'Tears of Steel - HLS (ISM)',
                         'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://proxy.cors.sh/https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.m3u8',
+                        'hlsUrl': 'https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified',
                         'access': 'public',
@@ -183,7 +181,7 @@
                         'user': 'Apple',
                         'description': 'BipBop - HLS (fMP4)',
                         'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://proxy.cors.sh/https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8',
+                        'hlsUrl': 'https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=apple',
                         'access': 'secret',
@@ -197,7 +195,7 @@
                         'user': 'Unified Streaming',
                         'description': 'Tears of Steel - HLS (MP4)',
                         'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://proxy.cors.sh/https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+                        'hlsUrl': 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified2',
                         'access': 'pwa',
@@ -675,7 +673,10 @@
                     const sources = [];
                     const useHls = Config.USE_HLS && slideData.hlsUrl;
                     if (useHls) {
-                        sources.push({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
+                        // PATCH: Użyj lokalnego proxy CORS, aby ominąć ograniczenia przeglądarki.
+                        // URL jest kodowany, aby zapewnić poprawne przekazanie jako parametr zapytania.
+                        const proxiedHlsUrl = `/api/proxy?url=${encodeURIComponent(slideData.hlsUrl)}`;
+                        sources.push({ src: proxiedHlsUrl, type: 'application/x-mpegURL' });
                         if (slideData.mp4Url) sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
                     } else if (slideData.mp4Url) {
                         sources.push({ src: slideData.mp4Url, type: 'video/mp4' });
