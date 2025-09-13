@@ -528,6 +528,7 @@
                 updateUIForLoginState,
                 updateTranslations,
                 applyLikeStateToDom,
+                createSlideElement,
                 renderSlides,
                 initGlobalPanels,
                 populateProfileModal
