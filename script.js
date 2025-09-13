@@ -70,79 +70,6 @@
         } catch(e){}
       }
 
-      /* ===========================================
-       * 2) Prefetch następnego slajdu (JIT, lekki)
-       * =========================================== */
-      function slideSelector() {
-        return document.querySelectorAll('.slide, .webyx-section');
-      }
-      function getNextSlide(el) {
-        let p = el.nextElementSibling;
-        while (p && !(p.classList?.contains('slide') || p.classList?.contains('webyx-section'))) {
-          p = p.nextElementSibling;
-        }
-        return p || null;
-      }
-      function prefetchSlide(slide) {
-        if (!slide || slide.__tt_prefetched) return;
-        const v = slide.querySelector?.('video');
-        if (v) {
-          v.setAttribute('preload', 'metadata');
-        }
-        slide.__tt_prefetched = true;
-      }
-
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            const next = getNextSlide(e.target);
-            if (next) prefetchSlide(next);
-          }
-        });
-      }, { root: null, rootMargin: '150% 0px 150% 0px', threshold: 0.01 });
-
-      const bootPrefetch = () => slideSelector().forEach(s => io.observe(s));
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootPrefetch, { once: true });
-      } else {
-        bootPrefetch();
-      }
-
-      /* ======================================================
-       * 3) iOS: unmute na WYBORZE JĘZYKA (tak jak Android)
-       * ====================================================== */
-      const isIOS = () => /iP(hone|ad|od)/i.test(navigator.userAgent) ||
-                           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-      function unlockAudioFromLangChoiceOnce() {
-        if (!isIOS()) return;
-        let unlocked = false;
-        const handler = (ev) => {
-          const t = ev.target.closest?.('[data-lang], .lang-option, .language-option, .lang-flag, [data-translate-lang]');
-          if (!t) return;
-          if (unlocked) return;
-          unlocked = true;
-
-          const vids = document.querySelectorAll('video');
-          vids.forEach(v => {
-            try {
-              v.muted = false;
-              const p = v.play();
-              if (p && typeof p.catch === 'function') p.catch(() => {});
-            } catch(e){}
-          });
-
-          document.removeEventListener('click', handler, true);
-        };
-        document.addEventListener('click', handler, true);
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', unlockAudioFromLangChoiceOnce, { once: true });
-      } else {
-        unlockAudioFromLangChoiceOnce();
-      }
-
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -164,44 +91,72 @@
                     {
                         'id': 'slide-001',
                         'likeId': '1',
-                        'user': 'Unified Streaming',
-                        'description': 'Tears of Steel - HLS (ISM)',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.m3u8',
-                        'poster': '',
-                        'avatar': 'https://i.pravatar.cc/100?u=unified',
+                        'user': 'Plyr',
+                        'description': 'Big Buck Bunny - MP4',
+                        'mp4Url': 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4',
+                        'hlsUrl': '',
+                        'poster': 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+                        'avatar': 'https://i.pravatar.cc/100?u=plyr',
                         'access': 'public',
-                        'initialLikes': 1500,
+                        'initialLikes': 101,
                         'isLiked': false,
-                        'initialComments': 567
+                        'initialComments': 11
                     },
                     {
                         'id': 'slide-002',
                         'likeId': '2',
-                        'user': 'Apple',
-                        'description': 'BipBop - HLS (fMP4)',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8',
-                        'poster': '',
-                        'avatar': 'https://i.pravatar.cc/100?u=apple',
-                        'access': 'secret',
-                        'initialLikes': 2200,
+                        'user': 'HLS.js',
+                        'description': 'Apple Advanced HLS Stream',
+                        'mp4Url': '',
+                        'hlsUrl': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+                        'poster': 'https://i.ytimg.com/vi/x36xhzz/maxresdefault.jpg',
+                        'avatar': 'https://i.pravatar.cc/100?u=hlsjs',
+                        'access': 'public',
+                        'initialLikes': 202,
                         'isLiked': false,
-                        'initialComments': 1245
+                        'initialComments': 22
                     },
                     {
                         'id': 'slide-003',
                         'likeId': '3',
-                        'user': 'Unified Streaming',
-                        'description': 'Tears of Steel - HLS (MP4)',
-                        'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
-                        'poster': '',
-                        'avatar': 'https://i.pravatar.cc/100?u=unified2',
-                        'access': 'pwa',
-                        'initialLikes': 1800,
+                        'user': 'Bitmovin',
+                        'description': 'Art of Motion - HLS',
+                        'mp4Url': '',
+                        'hlsUrl': 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
+                        'poster': 'https://bitmovin.com/wp-content/uploads/2020/09/art-of-motion-poster.jpg',
+                        'avatar': 'https://i.pravatar.cc/100?u=bitmovin',
+                        'access': 'secret',
+                        'initialLikes': 303,
                         'isLiked': false,
-                        'initialComments': 888
+                        'initialComments': 33
+                    },
+                    {
+                        'id': 'slide-004',
+                        'likeId': '4',
+                        'user': 'Unified Streaming',
+                        'description': 'Tears of Steel - HLS (fMP4)',
+                        'mp4Url': '',
+                        'hlsUrl': 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+                        'poster': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Tears_of_Steel_poster.jpg/1200px-Tears_of_Steel_poster.jpg',
+                        'avatar': 'https://i.pravatar.cc/100?u=unified',
+                        'access': 'pwa',
+                        'initialLikes': 404,
+                        'isLiked': false,
+                        'initialComments': 44
+                    },
+                    {
+                        'id': 'slide-005',
+                        'likeId': '5',
+                        'user': 'Apple',
+                        'description': 'BipBop - HLS',
+                        'mp4Url': '',
+                        'hlsUrl': 'https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8',
+                        'poster': 'https://i.ytimg.com/vi/moctobpltc/maxresdefault.jpg',
+                        'avatar': 'https://i.pravatar.cc/100?u=apple',
+                        'access': 'public',
+                        'initialLikes': 505,
+                        'isLiked': false,
+                        'initialComments': 55
                     }
                 ]
             };
@@ -213,25 +168,14 @@
          * ==========================================================================
          */
         const Config = {
-          USE_HLS: true,
           PREFETCH_NEIGHBORS: true,
           PREFETCH_MARGIN: '150%',
           UNLOAD_FAR_SLIDES: true,
           FAR_DISTANCE: 2,
           LOW_DATA_MODE: false,
-          RETRY_MAX_ATTEMPTS: 2,
-          RETRY_BACKOFF_MS: 800,
           METRICS_ENDPOINT: '/api/tt-metrics',
           DEBUG_PANEL: true,
           GESTURE_GRACE_PERIOD_MS: 2000,
-          LQIP_POSTER: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGIctGhgoMSA+PIxCSkdHTFROU2A3NkVJQkpbY2P/2wBDAQYGBgoJEQoSDxAHExQXHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx//wAARCAAoABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIDAQT/xAAfEAEAAgICAwEBAAAAAAAAAAABAhEDBCESMUFRYnH/xAAaAQADAQEBAQAAAAAAAAAAAAAAAQIDBAUG/8QAHREAAgICAwEBAAAAAAAAAAAAAAECEQMhEjFBYf/a.AABEIAKAAYQMBIgACEQEDEQA/AOgY2XQk9RLbl+nEdI9Tae4grQYdQl5+Lq+wMv04jo9W45pTDl30y9U2nuJpDDy7aZeobT3EFaDBzH6cvVtp7iaQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC2Bg4z9Ofq209xAWgwcZ+nP1ba+4gLgYOM/Tn6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gLpL2DCPxZeqbT3EFaDBxH6cvVtp7iCtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVcDBzH6cvVtp7iAtgYOY/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMHGfpz9W2nuICtBg4j9OXq209xBWgwcR+nL1ba+4grQYOY/Tl6ttPcQVsDBzH6cvVtp7iAtgYOM/Tl6ttPcQFoMHGfpz9W2nuIC0GDjP05+re09xAWgwcZ+nL1ba+4gukvYMI/Fl6ptPcQVoMGHkP05eqbT3EFaDBh5D9OXqm09xBWgweQ/Tl6ptPcQVcDB5D9OXq209xBWwMHkP05erbT3EBaDB5D9OXq209xAWgweR+nP1bae4gLpP//Z',
-          HLS: {
-            abrEnabled: true,
-            capLevelToPlayerSize: true,
-            startLevel: -1,
-            abrEwmaFastLive: true,
-            maxAutoLevelCapping: null
-          },
           TRANSLATIONS: {
                 pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Ting Tong', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitle: 'Zaloguj się, aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitle: 'Ściągnij apkę, aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheading: 'Zainstaluj aplikację Ting Tong na swoim telefonie.', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś' },
                 en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitle: 'Log in to unlock', pwaTitle: 'Top Secret', pwaSubtitle: 'Download the app to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheading: 'Install the Ting Tong app on your phone.', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!" }
@@ -480,8 +424,10 @@
 
                     const showSecretOverlay = (isSecret && !isLoggedIn) || (isPwaOnly && !isStandalone());
 
-                    section.querySelector('.secret-overlay').classList.toggle('visible', showSecretOverlay);
-                    section.querySelector('.videoPlayer').classList.toggle('secret-active', showSecretOverlay);
+                    const secretOverlay = section.querySelector('.secret-overlay');
+                    if (secretOverlay) {
+                        secretOverlay.classList.toggle('visible', showSecretOverlay);
+                    }
 
                     if (showSecretOverlay) {
                         const titleKey = isPwaOnly ? 'pwaTitle' : 'secretTitle';
@@ -496,10 +442,6 @@
                         if (slide) {
                             updateLikeButtonState(likeBtn, !!(slide.isLiked && isLoggedIn), Number(slide.initialLikes || 0));
                         }
-                    }
-
-                    if (parseInt(section.dataset.index, 10) === currentSlideIndex) {
-                        VideoManager.updatePlaybackForLoginChange(section, showSecretOverlay);
                     }
                 });
             }
@@ -520,7 +462,6 @@
                 section.dataset.slideId = slideData.id;
 
                 section.querySelector('.tiktok-symulacja').dataset.access = slideData.access;
-                section.querySelector('.videoPlayer').poster = slideData.poster || Config.LQIP_POSTER;
                 section.querySelector('.profileButton img').src = slideData.avatar;
                 section.querySelector('.text-user').textContent = slideData.user;
                 section.querySelector('.text-description').textContent = slideData.description;
@@ -594,250 +535,77 @@
         })();
 
 
-        /**
-         * ==========================================================================
-         * 6. VIDEO MANAGER
-         * ==========================================================================
-         */
         const VideoManager = (function() {
-            const attachedSet = new WeakSet();
-            let lazyObserver;
+            let swiper;
+            const players = {};
 
-            window.TTStats = window.TTStats || { videoErrors: 0, videoRetries: 0, hlsErrors: 0, hlsRecovered: 0, ttfpSamples: 0, ttfpTotalMs: 0 };
-
-            function _guardedPlay(videoEl) {
-                if (!videoEl) return;
-                const player = videojs(videoEl);
-                const playPromise = player.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        if (State.get('isAutoplayBlocked')) {
-                           State.set('isAutoplayBlocked', false);
-                        }
-                    }).catch(error => {
-                        if (error.name === 'NotAllowedError') {
-                            console.warn("Autoplay was blocked by the browser.", error);
-                            State.set('isAutoplayBlocked', true);
-                        } else {
-                            console.error("TingTong Playback Error:", error);
-                        }
-                    });
-                }
-            }
-
-            function _attachSrc(sectionEl) {
-                const video = sectionEl.querySelector('.videoPlayer');
+            function initPlayer(sectionEl) {
+                const video = sectionEl.querySelector('.player');
                 if (!video) return;
-
-                const player = videojs(video, {
-                  controls: true,
-                  html5: {
-                    hls: { ...Config.HLS, overrideNative: false },
-                    vhs: { overrideNative: false }
-                  }
-                });
-
-                if (!attachedSet.has(video)) {
-                    player.on('error', function() {
-                        const error = this.error();
-                        console.error('Video.js Error:', error);
-                        const section = this.el().closest('.tiktok-symulacja');
-                        if (!section) return;
-                        let retryCount = parseInt(section.dataset.retryCount || '0', 10);
-                        if (retryCount < Config.RETRY_MAX_ATTEMPTS) {
-                            retryCount++;
-                            section.dataset.retryCount = retryCount;
-                            window.TTStats.videoRetries = (window.TTStats.videoRetries || 0) + 1;
-                            setTimeout(() => {
-                                console.log(`Retrying video load, attempt ${retryCount}...`);
-                                section.classList.remove('video-error-state');
-                                this.load();
-                                _guardedPlay(this.el());
-                            }, Config.RETRY_BACKOFF_MS * Math.pow(2, retryCount - 1));
-                        } else {
-                            console.error(`Max retries reached. Showing error overlay.`);
-                            window.TTStats.videoErrors = (window.TTStats.videoErrors || 0) + 1;
-                            section.classList.add('video-error-state');
-                        }
-                    });
-                    attachedSet.add(video);
-                }
 
                 const slideId = sectionEl.dataset.slideId;
                 const slideData = slidesData.find(s => s.id === slideId);
                 if (!slideData) return;
 
-                const canAttachSrc = !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
+                const player = new Plyr(video, {
+                    // Options
+                });
+                players[slideId] = player;
 
-                // --- PATCH: HLS.js Integration ---
-                // Destroy previous HLS instance if it exists to prevent memory leaks
-                if (video.hls) {
-                    video.hls.destroy();
-                }
+                const source = slideData.hlsUrl || slideData.mp4Url;
+                const isHls = slideData.hlsUrl && Hls.isSupported();
 
-                if (canAttachSrc && Config.USE_HLS && slideData.hlsUrl && typeof Hls !== 'undefined') {
-                    if (Hls.isSupported()) {
-                        // Use hls.js if supported
-                        const hls = new Hls({
-                            // Using the same ABR config as before
-                            ...Config.HLS
-                        });
-                        hls.loadSource(slideData.hlsUrl);
-                        hls.attachMedia(video);
-                        video.hls = hls; // Store instance for later destruction
-
-                        hls.on(Hls.Events.ERROR, function (event, data) {
-                           if (data.fatal) {
-                                console.error('HLS.js Fatal Error:', data);
-                                // If HLS.js fails, we could try to fallback to the MP4 source
-                                if (slideData.mp4Url) {
-                                    console.log('HLS.js failed, falling back to MP4.');
-                                    const player = videojs(video);
-                                    player.src({ src: slideData.mp4Url, type: 'video/mp4' });
-                                }
-                           }
-                        });
-
-                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        // Native HLS support (e.g., Safari)
-                        player.src({ src: slideData.hlsUrl, type: 'application/x-mpegURL' });
-                    } else {
-                        // Fallback to MP4 if HLS is not supported at all
-                        if (slideData.mp4Url) {
-                            player.src({ src: slideData.mp4Url, type: 'video/mp4' });
-                        }
-                    }
-                } else if (canAttachSrc && slideData.mp4Url) {
-                    // If not using HLS, or HLS url not available, use MP4
-                    player.src({ src: slideData.mp4Url, type: 'video/mp4' });
+                if (isHls) {
+                    const hls = new Hls();
+                    hls.loadSource(source);
+                    hls.attachMedia(video);
                 } else {
-                    // No source can be attached (e.g., secret video and logged out)
-                    if (player.currentSrc()) {
-                        player.reset();
-                    }
-                    player.addClass('vjs-has-started');
+                    player.source = {
+                        type: 'video',
+                        sources: [{
+                            src: source,
+                            type: 'video/mp4',
+                        }],
+                        poster: slideData.poster
+                    };
                 }
             }
 
-            function _detachSrc(sectionEl) {
-                const video = sectionEl.querySelector('.videoPlayer');
-                if (!video) return;
-
-                // Check if a player instance exists and dispose of it
-                const player = videojs.getPlayer(video);
-                if (player && !player.isDisposed()) {
-                    player.dispose();
-                }
-                attachedSet.delete(video);
-            }
-
-
-            function _onActiveSlideChanged(newIndex, oldIndex = -1) {
-                State.set('activeVideoSession', State.get('activeVideoSession') + 1);
-
-                const allSlides = UI.DOM.container.querySelectorAll('.swiper-slide:not(.swiper-slide-duplicate)');
-
-                if (oldIndex > -1 && oldIndex < allSlides.length) {
-                    const oldSlide = allSlides[oldIndex];
-                    const oldVideo = oldSlide.querySelector('.videoPlayer');
-                    if (oldVideo) {
-                        videojs(oldVideo).pause();
+            function onActiveSlideChanged(newIndex) {
+                Object.values(players).forEach(p => p.pause());
+                const activeSlide = swiper.slides[newIndex];
+                if (activeSlide) {
+                    const slideId = activeSlide.dataset.slideId;
+                    const player = players[slideId];
+                    if (player) {
+                        player.play();
                     }
                 }
-
-                if (newIndex < allSlides.length) {
-                    const newSlide = allSlides[newIndex];
-                    const newVideo = newSlide.querySelector('.videoPlayer');
-                    const isSecret = newSlide.querySelector('.tiktok-symulacja').dataset.access === 'secret';
-
-                    // If autoplay was blocked but the user has interacted with the page since,
-                    // we can probably try playing again.
-                    const timeSinceLastGesture = Date.now() - State.get('lastUserGestureTimestamp');
-                    if (State.get('isAutoplayBlocked') && timeSinceLastGesture < Config.GESTURE_GRACE_PERIOD_MS) {
-                        State.set('isAutoplayBlocked', false);
-                    }
-
-                    if (newVideo && !(isSecret && !State.get('isUserLoggedIn')) && !State.get('isAutoplayBlocked')) {
-                        _guardedPlay(newVideo);
-                    }
-                }
-            }
-
-            function _initLazyObserver() {
-                if (lazyObserver) return;
-                // This observer will attach video sources to slides that are about to become visible
-                lazyObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        const section = entry.target;
-                        if (entry.isIntersecting) {
-                            _attachSrc(section);
-                        } else if (Config.UNLOAD_FAR_SLIDES) {
-                            // Detach from slides that are far away
-                             const index = parseInt(section.dataset.index, 10);
-                             const distance = Math.abs(index - State.get('currentSlideIndex'));
-                             if (distance > Config.FAR_DISTANCE) _detachSrc(section);
-                        }
-                    });
-                }, { root: UI.DOM.container, rootMargin: Config.PREFETCH_MARGIN, threshold: 0.01 });
-
-                UI.DOM.container.querySelectorAll('.swiper-slide:not(.swiper-slide-duplicate)').forEach(sec => lazyObserver.observe(sec));
             }
 
             return {
                 init: () => {
-                    _initLazyObserver();
-                    const swiper = new Swiper('.swiper', {
+                    slidesData.forEach((data, index) => {
+                        const slideElement = UI.createSlideElement(data, index);
+                        UI.DOM.container.querySelector('.swiper-wrapper').appendChild(slideElement);
+                        initPlayer(slideElement);
+                    });
+
+                    swiper = new Swiper('.swiper', {
                         direction: 'vertical',
                         mousewheel: true,
                         loop: true,
                         keyboard: true,
                         on: {
-                            init: function() {
-                                const newIndex = this.realIndex;
-                                State.set('currentSlideIndex', newIndex);
-                                _onActiveSlideChanged(newIndex, -1);
-                                UI.updateUIForLoginState();
-                            },
                             slideChange: function () {
-                                const oldIndex = State.get('currentSlideIndex');
-                                const newIndex = this.realIndex;
-                                if (newIndex !== oldIndex) {
-                                    State.set('currentSlideIndex', newIndex);
-                                    _onActiveSlideChanged(newIndex, oldIndex);
-                                    UI.updateUIForLoginState();
-                                }
+                                onActiveSlideChanged(this.realIndex);
                             },
                         },
                     });
-                },
-                updatePlaybackForLoginChange: (section, isSecret) => {
-                    const video = section.querySelector('.videoPlayer');
-                    const player = videojs(video);
-                    const hasSrc = video.querySelector('source')?.getAttribute('src');
-
-                    if (!isSecret && !hasSrc) _attachSrc(section);
-
-                    if (isSecret) {
-                        player.pause();
-                        player.currentTime(0);
-                    } else if (player.paused() && document.body.classList.contains('loaded') && !State.get('isAutoplayBlocked')) {
-                       _guardedPlay(video);
-                    }
-                },
-                retryPlayback: function(sectionEl) {
-                    if (!sectionEl) return;
-                    const video = sectionEl.querySelector('.videoPlayer');
-                    if (video) {
-                        sectionEl.classList.remove('video-error-state');
-                        const player = videojs.getPlayer(video);
-                        if (player && !player.isDisposed()) {
-                            player.load();
-                            _guardedPlay(video);
-                        }
-                    }
                 }
             };
         })();
+
 
         /**
          * ==========================================================================
@@ -1030,28 +798,6 @@
                 }
             }
 
-            function handleVideoTap(event) {
-                const slide = event.target.closest('.swiper-slide');
-                if (!slide) return;
-
-                if (event.target.closest('.sidebar, .bottombar, .vjs-control-bar, a, button, .error-overlay, .secret-overlay')) {
-                    return;
-                }
-
-                const video = slide.querySelector('.videoPlayer');
-                const pauseOverlay = slide.querySelector('.pause-overlay');
-
-                if (video) {
-                    const player = videojs(video);
-                    if (player.paused()) {
-                        player.play();
-                        if (pauseOverlay) pauseOverlay.classList.remove('visible');
-                    } else {
-                        player.pause();
-                        if (pauseOverlay) pauseOverlay.classList.add('visible');
-                    }
-                }
-            }
             function handleNotificationClick(event) {
                 const item = event.target.closest('.notification-item');
                 if (!item) return;
@@ -1141,7 +887,6 @@
 
             return {
                 handleNotificationClick,
-                videoTapHandler: handleVideoTap,
                 profileModalTabHandler: (e) => {
                     const tab = e.target.closest('.tab');
                     if (!tab) return;
@@ -1199,10 +944,6 @@
                         case 'toggle-like': handleLikeToggle(actionTarget); break;
                         case 'share': handleShare(actionTarget); break;
                         case 'toggle-language': handleLanguageToggle(); break;
-                        case 'retry-video':
-                            const section = actionTarget.closest('.tiktok-symulacja');
-                            VideoManager.retryPlayback(section);
-                            break;
                         case 'open-comments-modal': UI.openModal(UI.DOM.commentsModal); break;
                         case 'open-info-modal': mockToggleLogin(); break;
                         case 'open-desktop-pwa-modal': PWA.openDesktopModal(); break;
@@ -1791,7 +1532,6 @@
 
                 document.body.addEventListener('click', Handlers.mainClickHandler);
                 UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
-                UI.DOM.container.addEventListener('click', Handlers.videoTapHandler);
 
                 document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
                     modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
@@ -1841,7 +1581,7 @@
 
                     UI.renderSlides();
                     UI.updateTranslations();
-                    VideoManager.init(); // This now initializes Swiper
+                    VideoManager.init();
 
                     setTimeout(() => {
                         UI.DOM.preloader.classList.add('preloader-hiding');

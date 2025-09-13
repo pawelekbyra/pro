@@ -22,10 +22,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Ting Tong</title>
 
-    <!-- Swiper.js & Video.js CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link href="https://vjs.zencdn.net/8.23.3/video-js.css" rel="stylesheet" />
-
     <!-- PATCH: iOS PWA cosmetics -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -51,10 +48,11 @@
     <link rel="dns-prefetch" href="//i.pravatar.cc">
 
     <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="pawelperfect" data-description="Support me on Buy me a coffee!" data-message="" data-color="#FF5F5F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
-    <script src="https://vjs.zencdn.net/8.23.3/video.min.js" defer></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
     <script src="script.js" defer></script>
 </head>
@@ -95,10 +93,7 @@
         <template id="slide-template">
             <div class="webyx-section swiper-slide">
                 <div class="tiktok-symulacja">
-                    <video class="videoPlayer video-js" muted loop playsinline webkit-playsinline autoplay preload="metadata" poster="placeholder.jpg" oncontextmenu="return false;">
-                        <source src="" type="video/mp4" />
-                        Twoja przeglądarka nie obsługuje wideo.
-                    </video>
+                    <video controls crossorigin playsinline autoplay muted class="player"></video>
                     <div class="pause-overlay" aria-hidden="true">
                         <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M8 5v14l11-7z" />
@@ -147,7 +142,7 @@
         </template>
         <div id="webyx-container" class="swiper">
             <div class="swiper-wrapper">
-                </div>
+            </div>
         </div>
     </div>
     <div id="alertBox" role="status" aria-live="polite">
