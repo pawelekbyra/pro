@@ -167,7 +167,7 @@
                         'user': 'Unified Streaming',
                         'description': 'Tears of Steel - HLS (ISM)',
                         'mp4Url': 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
-                        'hlsUrl': 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+                        'hlsUrl': 'https://live-hls-abr-cdn.livepush.io/live/bigbuckbunnyclip/index.m3u8',
                         'poster': '',
                         'avatar': 'https://i.pravatar.cc/100?u=unified',
                         'access': 'public',
