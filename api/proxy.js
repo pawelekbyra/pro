@@ -5,7 +5,7 @@ module.exports = async (request, response) => {
     return response.status(400).send('Error: "url" query parameter is required.');
   }
 
-  // Preflight-Anfrage für CORS abhandeln
+  // Handle OPTIONS preflight request for CORS
   if (request.method === 'OPTIONS') {
     response.setHeader('Access-Control-Allow-Origin', '*');
     response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -15,39 +15,46 @@ module.exports = async (request, response) => {
 
   try {
     const fetchResponse = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'TingTongVercelProxy/1.0',
-      },
-      redirect: 'follow' // HLS-Manifeste können Weiterleitungen enthalten
+      headers: { 'User-Agent': 'TingTongVercelProxy/1.0' },
+      redirect: 'follow'
     });
 
     if (!fetchResponse.ok) {
-      // Den Fehlertext vom Zielserver an den Client weiterleiten
       const errorText = await fetchResponse.text();
       return response.status(fetchResponse.status).send(`Error from target server: ${errorText}`);
     }
 
-    // Setze die CORS-Header für die eigentliche Antwort
-    response.setHeader('Access-Control-Allow-Origin', '*');
+    const manifestText = await fetchResponse.text();
+    const manifestBaseUrl = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
 
-    // Leite die Header vom Zielserver an den Client weiter
-    // Wichtig für Content-Type, Content-Length etc.
-    fetchResponse.headers.forEach((value, name) => {
-      // Überschreibe den CORS-Header nicht, falls er vom Zielserver kommt
-      if (name.toLowerCase() !== 'access-control-allow-origin') {
-        response.setHeader(name, value);
+    const rewrittenManifest = manifestText.split('\n').map(line => {
+      line = line.trim();
+      if (line && !line.startsWith('#')) {
+        // This line is a URL. It could be for a segment (.ts) or another manifest (.m3u8).
+        let absoluteUrl;
+        if (line.startsWith('http')) {
+          // It's already an absolute URL.
+          absoluteUrl = line;
+        } else {
+          // It's a relative URL, resolve it against the manifest's base URL.
+          absoluteUrl = new URL(line, manifestBaseUrl).href;
+        }
+        // Rewrite the URL to point back to our proxy.
+        return `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`;
       }
-    });
+      // If it's a comment or empty line, return it as is.
+      return line;
+    }).join('\n');
 
-    // Leite den Body als Stream weiter
-    // PATCH: Konvertiere den Web-Stream (von fetch) in einen Node.js-Stream, um ihn korrekt an die Antwort zu pipen.
-    // Die direkte Verwendung von .pipe() ist bei Web-Streams nicht mit Node-Server-Antworten kompatibel.
-    const { Readable } = require('stream');
-    const bodyStream = fetchResponse.body;
-    Readable.fromWeb(bodyStream).pipe(response);
+    // Set CORS and Content-Type headers.
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Content-Type', fetchResponse.headers.get('content-type') || 'application/vnd.apple.mpegurl');
+
+    // Send the rewritten manifest text as the response.
+    return response.status(200).send(rewrittenManifest);
 
   } catch (error) {
-    console.error('Proxy-Fehler:', error);
-    response.status(500).send(`Proxy Error: ${error.message}`);
+    console.error('Proxy Error:', error);
+    return response.status(500).send(`Proxy Error: ${error.message}`);
   }
 };
