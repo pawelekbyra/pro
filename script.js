@@ -669,44 +669,17 @@
 
                 const canAttachSrc = !(slideData.access === 'secret' && !State.get('isUserLoggedIn'));
 
-                // --- PATCH: HLS.js Integration (Corrected) ---
-                // Video.js v8+ automatically uses hls.js if it's on the page.
-                // We just need to provide the sources in the correct order.
-
-                // Destroy previous HLS instance if it exists to prevent memory leaks
+                // --- DIAGNOSTIC: Force MP4 playback ---
                 if (video.hls) {
                     video.hls.destroy();
                     video.hls = null;
                 }
 
-                if (canAttachSrc) {
-                    const sources = [];
-                    // Prefer HLS if enabled and available
-                    if (Config.USE_HLS && slideData.hlsUrl) {
-                        sources.push({
-                            src: slideData.hlsUrl,
-                            type: 'application/x-mpegURL'
-                        });
-                    }
-                    // Fallback to MP4
-                    if (slideData.mp4Url) {
-                        sources.push({
-                            src: slideData.mp4Url,
-                            type: 'video/mp4'
-                        });
-                    }
-
-                    if (sources.length > 0) {
-                        player.src(sources);
-                    } else {
-                        // No source can be attached, so reset player
-                        if (player.currentSrc()) {
-                            player.reset();
-                        }
-                        player.addClass('vjs-has-started');
-                    }
+                if (canAttachSrc && slideData.mp4Url) {
+                    console.log('DIAGNOSTIC: Forcing MP4 source:', slideData.mp4Url);
+                    player.src({ src: slideData.mp4Url, type: 'video/mp4' });
                 } else {
-                    // No source can be attached (e.g., secret video and logged out)
+                    // No source can be attached
                     if (player.currentSrc()) {
                         player.reset();
                     }
