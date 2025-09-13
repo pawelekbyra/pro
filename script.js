@@ -572,14 +572,14 @@
                 }
             }
 
-            function onActiveSlideChanged(newIndex) {
+            function onActiveSlideChanged(swiper) {
                 Object.values(players).forEach(p => p.pause());
-                const activeSlide = swiper.slides[newIndex];
+                // Use activeIndex for loop mode
+                const activeSlide = swiper.slides[swiper.activeIndex];
                 if (activeSlide) {
                     const slideId = activeSlide.dataset.slideId;
-                    const player = players[slideId];
-                    if (player) {
-                        player.play();
+                    if (slideId && players[slideId]) {
+                        players[slideId].play();
                     }
                 }
             }
@@ -598,9 +598,8 @@
                         loop: true,
                         keyboard: true,
                         on: {
-                            slideChange: function () {
-                                onActiveSlideChanged(this.realIndex);
-                            },
+                            init: onActiveSlideChanged,
+                            slideChange: onActiveSlideChanged,
                         },
                     });
                 }
