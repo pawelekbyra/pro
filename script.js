@@ -541,35 +541,49 @@
             const players = {};
 
             function initPlayer(sectionEl) {
-                const video = sectionEl.querySelector('.player');
-                if (!video) return;
+              const video = sectionEl.querySelector('.player');
+              if (!video) return;
 
-                const slideId = sectionEl.dataset.slideId;
-                const slideData = slidesData.find(s => s.id === slideId);
-                if (!slideData) return;
+              const slideId = sectionEl.dataset.slideId;
+              const slideData = slidesData.find(s => s.id === slideId);
+              if (!slideData) return;
 
-                const player = new Plyr(video, {
-                    // Options
-                });
-                players[slideId] = player;
+              const player = new Plyr(video, {
+                // Options
+              });
+              players[slideId] = player;
 
-                const source = slideData.hlsUrl || slideData.mp4Url;
-                const isHls = slideData.hlsUrl && Hls.isSupported();
+              const source = slideData.hlsUrl || slideData.mp4Url;
 
-                if (isHls) {
-                    const hls = new Hls();
-                    hls.loadSource(source);
-                    hls.attachMedia(video);
-                } else {
-                    player.source = {
-                        type: 'video',
-                        sources: [{
-                            src: source,
-                            type: 'video/mp4',
-                        }],
-                        poster: slideData.poster
-                    };
-                }
+              // Sprawdzenie, czy źródło jest HLS
+              const isHls = slideData.hlsUrl;
+
+              if (isHls && Hls.isSupported()) {
+                // Użyj Hls.js dla wspieranych przeglądarek
+                const hls = new Hls();
+                hls.loadSource(source);
+                hls.attachMedia(video);
+              } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Użyj natywnego odtwarzania HLS na iOS
+                player.source = {
+                  type: 'video',
+                  sources: [{
+                    src: source,
+                    type: 'application/vnd.apple.mpegurl'
+                  }],
+                  poster: slideData.poster
+                };
+              } else {
+                // Domyślne ustawienie dla MP4 lub gdy HLS nie jest wspierany
+                player.source = {
+                  type: 'video',
+                  sources: [{
+                    src: source,
+                    type: 'video/mp4',
+                  }],
+                  poster: slideData.poster
+                };
+              }
             }
 
             function onActiveSlideChanged(swiper) {
