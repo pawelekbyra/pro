@@ -285,9 +285,12 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease-in-out;
+            visibility: hidden;
         }
         .pause-overlay.visible {
             opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
         }
         .pause-icon {
             width: 80px;
