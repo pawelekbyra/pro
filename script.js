@@ -1295,6 +1295,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Main initialization function
         function init() {
+            const accountModal = document.getElementById('accountModal');
+            if (!accountModal) {
+                // Silently return if the account panel is not part of the DOM.
+                // This allows the rest of the app to function without the account features.
+                return;
+            }
             initializeModal();
             initializeCropper();
             setupEventListeners();
