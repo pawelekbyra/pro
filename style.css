@@ -2269,3 +2269,84 @@
   /* The image is inside a flex container (.topbar-central-trigger) that centers it, so no extra vertical alignment is needed. */
   display: block; /* a good practice for images inside containers */
 }
+
+/* Dodaj to do swojego pliku CSS */
+
+.video-error-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-content {
+    max-width: 280px;
+}
+
+.error-content svg {
+    color: var(--accent-color, #ff6b6b);
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.error-content h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.error-content p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.retry-btn {
+    background: var(--accent-color, #ff6b6b);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.retry-btn:hover {
+    background: var(--accent-color-hover, #ff5252);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.retry-btn:active {
+    transform: translateY(0);
+}
+
+/* Animacja pojawiania się overlay */
+.video-error-overlay {
+    animation: errorFadeIn 0.5s ease-out;
+}
+
+@keyframes errorFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
