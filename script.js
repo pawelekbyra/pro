@@ -539,59 +539,132 @@
         const VideoManager = (function() {
             let swiper;
             const players = {};
+            const hlsInstances = {};
 
-            function initPlayer(sectionEl) {
-                const video = sectionEl.querySelector('.player');
-                if (!video) return;
+            function destroyPlayer(slideId) {
+                if (players[slideId]) {
+                    try {
+                        players[slideId].destroy();
+                    } catch (e) {
+                        console.warn(`Error destroying Plyr player for slide ${slideId}:`, e);
+                    }
+                    delete players[slideId];
+                }
+                if (hlsInstances[slideId]) {
+                    try {
+                        hlsInstances[slideId].destroy();
+                    } catch (e) {
+                        console.warn(`Error destroying HLS instance for slide ${slideId}:`, e);
+                    }
+                    delete hlsInstances[slideId];
+                }
+            }
 
-                const slideId = sectionEl.dataset.slideId;
+            function loadPlayerForSlide(index) {
+                const slideEl = swiper.slides[index];
+                if (!slideEl) return;
+
+                const slideId = slideEl.dataset.slideId;
+                if (!slideId || players[slideId]) {
+                    // If player already exists, and it's the active slide, play it.
+                    if (players[slideId] && swiper.activeIndex === index) {
+                        const player = players[slideId];
+                        if (player.paused) {
+                           const playPromise = player.play();
+                           if (playPromise !== undefined) {
+                               playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
+                           }
+                        }
+                    }
+                    return;
+                }
+
                 const slideData = slidesData.find(s => s.id === slideId);
                 if (!slideData) return;
 
+                const video = slideEl.querySelector('.player');
+                if (!video) return;
+
                 const player = new Plyr(video, {
-                    // Options
+                    muted: true,
+                    autoplay: false,
+                    controls: [],
+                    clickToPlay: false,
+                    tooltips: { controls: false, seek: false }
                 });
                 players[slideId] = player;
 
                 const source = slideData.hlsUrl || slideData.mp4Url;
                 const isHls = slideData.hlsUrl && Hls.isSupported();
 
+                player.on('ready', () => {
+                    if (swiper.activeIndex === index) {
+                        const playPromise = player.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                if (error.name !== 'AbortError') {
+                                    console.error("Playback error:", error);
+                                }
+                            });
+                        }
+                    }
+                });
+
                 if (isHls) {
                     const hls = new Hls();
+                    hlsInstances[slideId] = hls;
                     hls.loadSource(source);
                     hls.attachMedia(video);
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        if (data.fatal) {
+                            console.error("HLS fatal error:", data);
+                            // we could try to recover here
+                        }
+                    });
                 } else {
                     player.source = {
                         type: 'video',
-                        sources: [{
-                            src: source,
-                            type: 'video/mp4',
-                        }],
-                        poster: slideData.poster
+                        sources: [{ src: source, type: 'video/mp4' }],
+                        poster: slideData.poster,
                     };
                 }
             }
 
             function onActiveSlideChanged(swiper) {
+                // Pause all players
                 Object.values(players).forEach(p => p.pause());
-                // Use activeIndex for loop mode
-                const activeSlide = swiper.slides[swiper.activeIndex];
-                if (activeSlide) {
-                    const slideId = activeSlide.dataset.slideId;
-                    if (slideId && players[slideId]) {
-                        players[slideId].play();
-                    }
+
+                const activeIndex = swiper.activeIndex;
+
+                // Load and play the active slide
+                loadPlayerForSlide(activeIndex);
+
+                // Preload neighbors
+                const nextSlideIndex = activeIndex + 1;
+                if (nextSlideIndex < swiper.slides.length) {
+                   loadPlayerForSlide(nextSlideIndex);
                 }
+                const prevSlideIndex = activeIndex - 1;
+                if (prevSlideIndex >= 0) {
+                    loadPlayerForSlide(prevSlideIndex);
+                }
+
+                // Destroy far away players
+                const visibleIndexes = [activeIndex, activeIndex - 1, activeIndex + 1];
+                const visibleSlideIds = visibleIndexes
+                    .map(index => swiper.slides[index]?.dataset.slideId)
+                    .filter(Boolean);
+
+                Object.keys(players).forEach(slideId => {
+                    if (!visibleSlideIds.includes(slideId)) {
+                        destroyPlayer(slideId);
+                    }
+                });
             }
 
             return {
                 init: () => {
-                    slidesData.forEach((data, index) => {
-                        const slideElement = UI.createSlideElement(data, index);
-                        UI.DOM.container.querySelector('.swiper-wrapper').appendChild(slideElement);
-                        initPlayer(slideElement);
-                    });
-
+                    // Slides are already rendered by UI.renderSlides()
                     swiper = new Swiper('.swiper', {
                         direction: 'vertical',
                         mousewheel: true,
