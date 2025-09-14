@@ -86,80 +86,80 @@
         if (typeof window.TingTongData === 'undefined') {
             console.warn('`TingTongData` is not defined. Using mock data for standalone development.');
             window.TingTongData = {
-                isLoggedIn: false, // Start as logged out
-                slides: [
-                    {
-                        'id': 'slide-001',
-                        'likeId': '1',
-                        'user': 'Plyr',
-                        'description': 'Big Buck Bunny - MP4',
-                        'mp4Url': 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4',
-                        'hlsUrl': '',
-                        'poster': 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
-                        'avatar': 'https://i.pravatar.cc/100?u=plyr',
-                        'access': 'public',
-                        'initialLikes': 101,
-                        'isLiked': false,
-                        'initialComments': 11
-                    },
-                    {
-                        'id': 'slide-002',
-                        'likeId': '2',
-                        'user': 'HLS.js',
-                        'description': 'Apple Advanced HLS Stream',
-                        'mp4Url': '',
-                        'hlsUrl': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
-                        'poster': 'https://i.ytimg.com/vi/x36xhzz/maxresdefault.jpg',
-                        'avatar': 'https://i.pravatar.cc/100?u=hlsjs',
-                        'access': 'public',
-                        'initialLikes': 202,
-                        'isLiked': false,
-                        'initialComments': 22
-                    },
-                    {
-                        'id': 'slide-003',
-                        'likeId': '3',
-                        'user': 'Bitmovin',
-                        'description': 'Art of Motion - HLS',
-                        'mp4Url': '',
-                        'hlsUrl': 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8',
-                        'poster': 'https://bitmovin.com/wp-content/uploads/2020/09/art-of-motion-poster.jpg',
-                        'avatar': 'https://i.pravatar.cc/100?u=bitmovin',
-                        'access': 'secret',
-                        'initialLikes': 303,
-                        'isLiked': false,
-                        'initialComments': 33
-                    },
-                    {
-                        'id': 'slide-004',
-                        'likeId': '4',
-                        'user': 'Unified Streaming',
-                        'description': 'Tears of Steel - HLS (fMP4)',
-                        'mp4Url': '',
-                        'hlsUrl': 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
-                        'poster': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Tears_of_Steel_poster.jpg/1200px-Tears_of_Steel_poster.jpg',
-                        'avatar': 'https://i.pravatar.cc/100?u=unified',
-                        'access': 'pwa',
-                        'initialLikes': 404,
-                        'isLiked': false,
-                        'initialComments': 44
-                    },
-                    {
-                        'id': 'slide-005',
-                        'likeId': '5',
-                        'user': 'Apple',
-                        'description': 'BipBop - HLS',
-                        'mp4Url': '',
-                        'hlsUrl': 'https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8',
-                        'poster': 'https://i.ytimg.com/vi/moctobpltc/maxresdefault.jpg',
-                        'avatar': 'https://i.pravatar.cc/100?u=apple',
-                        'access': 'public',
-                        'initialLikes': 505,
-                        'isLiked': false,
-                        'initialComments': 55
-                    }
-                ]
-            };
+    isLoggedIn: false,
+    slides: [
+        {
+            'id': 'slide-001',
+            'likeId': '1',
+            'user': 'Plyr',
+            'description': 'Big Buck Bunny - MP4',
+            'mp4Url': 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4',
+            'hlsUrl': '',
+            'poster': 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+            'avatar': 'https://i.pravatar.cc/100?u=plyr',
+            'access': 'public',
+            'initialLikes': 101,
+            'isLiked': false,
+            'initialComments': 11
+        },
+        {
+            'id': 'slide-002',
+            'likeId': '2',
+            'user': 'Mux',
+            'description': 'Test HLS Stream',
+            'mp4Url': '',
+            'hlsUrl': 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+            'poster': 'https://picsum.photos/720/1280?random=2',
+            'avatar': 'https://i.pravatar.cc/100?u=mux',
+            'access': 'public',
+            'initialLikes': 202,
+            'isLiked': false,
+            'initialComments': 22
+        },
+        {
+            'id': 'slide-003',
+            'likeId': '3',
+            'user': 'Apple Demo',
+            'description': 'Apple HLS Demo Stream',
+            'mp4Url': '',
+            'hlsUrl': 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+            'poster': 'https://picsum.photos/720/1280?random=3',
+            'avatar': 'https://i.pravatar.cc/100?u=apple',
+            'access': 'public',
+            'initialLikes': 303,
+            'isLiked': false,
+            'initialComments': 33
+        },
+        {
+            'id': 'slide-004',
+            'likeId': '4',
+            'user': 'Akamai',
+            'description': 'Akamai Test Stream',
+            'mp4Url': '',
+            'hlsUrl': 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+            'poster': 'https://picsum.photos/720/1280?random=4',
+            'avatar': 'https://i.pravatar.cc/100?u=akamai',
+            'access': 'secret',
+            'initialLikes': 404,
+            'isLiked': false,
+            'initialComments': 44
+        },
+        {
+            'id': 'slide-005',
+            'likeId': '5',
+            'user': 'Local Video',
+            'description': 'Fallback MP4 Video',
+            'mp4Url': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            'hlsUrl': '',
+            'poster': 'https://picsum.photos/720/1280?random=5',
+            'avatar': 'https://i.pravatar.cc/100?u=local',
+            'access': 'public',
+            'initialLikes': 505,
+            'isLiked': false,
+            'initialComments': 55
+        }
+    ]
+};
         }
 
         /**
@@ -537,112 +537,275 @@
 
 
         const VideoManager = (function() {
-            let swiper;
-            const players = {};
+    let swiper;
+    const players = {};
+    const retryAttempts = new Map(); // Śledzenie prób ponownego ładowania
 
-            function initPlayer(sectionEl) {
-                const video = sectionEl.querySelector('.player');
-                if (!video) return;
+    function createErrorOverlay(sectionEl, message) {
+        const existingError = sectionEl.querySelector('.video-error-overlay');
+        if (existingError) existingError.remove();
 
-                const slideId = sectionEl.dataset.slideId;
-                const slideData = slidesData.find(s => s.id === slideId);
-                if (!slideData) return;
+        const errorOverlay = document.createElement('div');
+        errorOverlay.className = 'video-error-overlay';
+        errorOverlay.innerHTML = `
+            <div class="error-content">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <h3>${Utils.getTranslation('videoErrorTitle')}</h3>
+                <p>${message || Utils.getTranslation('videoErrorSubtitle')}</p>
+                <button class="retry-btn" onclick="VideoManager.retryVideo('${sectionEl.dataset.slideId}')">
+                    ${Utils.getTranslation('videoErrorRetry')}
+                </button>
+            </div>
+        `;
 
-                const source = slideData.hlsUrl || slideData.mp4Url;
-                const isHls = !!slideData.hlsUrl;
+        const playerContainer = sectionEl.querySelector('.player-container');
+        if (playerContainer) {
+            playerContainer.appendChild(errorOverlay);
+        }
+    }
 
-                video.setAttribute('poster', slideData.poster);
+    function initPlayer(sectionEl) {
+        const video = sectionEl.querySelector('.player');
+        if (!video) return;
 
-                if (isHls && Hls.isSupported()) {
-                    const hls = new Hls({
-                        debug: true
-                    });
-                    hls.loadSource(source);
-                    hls.attachMedia(video);
-                    hls.on(Hls.Events.ERROR, function (event, data) {
-                        if (data.fatal) {
-                            switch (data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    console.error('fatal network error encountered, try to recover', data);
+        const slideId = sectionEl.dataset.slideId;
+        const slideData = slidesData.find(s => s.id === slideId);
+        if (!slideData) return;
+
+        const source = slideData.hlsUrl || slideData.mp4Url;
+        const isHls = !!slideData.hlsUrl;
+
+        video.setAttribute('poster', slideData.poster);
+
+        if (isHls && Hls.isSupported()) {
+            // Konfiguracja HLS.js z lepszym error handlingiem
+            const hls = new Hls({
+                debug: false, // Wyłączamy debug w produkcji
+                enableWorker: false, // Wyłączamy Web Workers jeśli są problemy z CSP
+                lowLatencyMode: false,
+                backBufferLength: 90,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 600,
+                maxBufferSize: 60 * 1000 * 1000,
+                maxBufferHole: 0.5,
+                highBufferWatchdogPeriod: 2,
+                nudgeOffset: 0.1,
+                nudgeMaxRetry: 3,
+                maxFragLookUpTolerance: 0.25,
+                liveSyncDurationCount: 3,
+                liveMaxLatencyDurationCount: Infinity,
+                liveDurationInfinity: false,
+                liveBackBufferLength: Infinity,
+                maxLiveSyncPlaybackRate: 1,
+                liveSyncDuration: undefined,
+                liveMaxLatencyDuration: undefined,
+                maxStarvationDelay: 4,
+                maxLoadingDelay: 4,
+                minAutoBitrate: 0,
+                emeEnabled: false,
+                widevineLicenseUrl: undefined,
+                drmSystemOptions: {},
+                requestMediaKeySystemAccessFunc: null
+            });
+
+            hls.loadSource(source);
+            hls.attachMedia(video);
+
+            // Lepszy error handling
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                console.error('HLS Error:', data);
+                const attempts = retryAttempts.get(slideId) || 0;
+
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.error('Fatal network error encountered for', slideId);
+                            if (attempts < 3) {
+                                console.log(`Retrying... Attempt ${attempts + 1}/3`);
+                                retryAttempts.set(slideId, attempts + 1);
+                                setTimeout(() => {
                                     hls.startLoad();
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    console.error('fatal media error encountered, try to recover', data);
-                                    hls.recoverMediaError();
-                                    break;
-                                default:
-                                    console.error('fatal error encountered, cannot recover', data);
-                                    hls.destroy();
-                                    break;
+                                }, 1000 * (attempts + 1)); // Exponential backoff
+                            } else {
+                                createErrorOverlay(sectionEl, 'Błąd sieci. Sprawdź połączenie internetowe.');
+                                hls.destroy();
                             }
-                        }
-                    });
-                    const player = new Plyr(video, {});
-                    players[slideId] = player;
-
-                } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
-                    const player = new Plyr(video, {});
-                     players[slideId] = player;
-                    player.source = {
-                        type: 'video',
-                        sources: [{
-                            src: source,
-                            type: 'application/vnd.apple.mpegurl'
-                        }],
-                        poster: slideData.poster
-                    };
-                } else {
-                    const player = new Plyr(video, {});
-                     players[slideId] = player;
-                    player.source = {
-                        type: 'video',
-                        sources: [{
-                            src: source,
-                            type: 'video/mp4',
-                        }],
-                        poster: slideData.poster
-                    };
-                }
-            }
-
-            function onActiveSlideChanged(swiper) {
-                Object.values(players).forEach(p => p.pause());
-                const activeSlide = swiper.slides[swiper.activeIndex];
-                if (activeSlide) {
-                    const slideId = activeSlide.dataset.slideId;
-                    if (slideId && players[slideId]) {
-                        const player = players[slideId];
-                        player.play().catch(error => {
-                            const overlay = activeSlide.querySelector('.pause-overlay');
-                            if (overlay) {
-                                overlay.classList.add('visible');
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.error('Fatal media error encountered for', slideId);
+                            if (attempts < 2) {
+                                console.log('Trying to recover media error...');
+                                retryAttempts.set(slideId, attempts + 1);
+                                hls.recoverMediaError();
+                            } else {
+                                createErrorOverlay(sectionEl, 'Błąd odtwarzania multimediów.');
+                                hls.destroy();
                             }
-                        });
+                            break;
+                        default:
+                            console.error('Fatal error encountered, cannot recover for', slideId, data);
+                            createErrorOverlay(sectionEl, `Błąd odtwarzacza: ${data.details || 'Nieznany błąd'}`);
+                            hls.destroy();
+                            break;
                     }
                 }
+            });
+
+            // Callback po załadowaniu manifest
+            hls.on(Hls.Events.MANIFEST_LOADED, function(event, data) {
+                console.log('HLS Manifest loaded for', slideId, data);
+                retryAttempts.delete(slideId); // Reset retry counter on success
+            });
+
+            // Inicjalizuj Plyr po pomyślnym załadowaniu HLS
+            hls.on(Hls.Events.MEDIA_ATTACHED, function() {
+                const player = new Plyr(video, {
+                    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+                    hideControls: true,
+                    resetOnEnd: true,
+                    keyboard: { focused: false, global: false }
+                });
+
+                players[slideId] = player;
+
+                // Error handling dla Plyr
+                player.on('error', event => {
+                    console.error('Plyr error for', slideId, event);
+                    createErrorOverlay(sectionEl, 'Błąd odtwarzacza wideo.');
+                });
+            });
+
+        } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari native HLS
+            const player = new Plyr(video, {
+                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+                hideControls: true,
+                resetOnEnd: true,
+                keyboard: { focused: false, global: false }
+            });
+
+            players[slideId] = player;
+
+            player.source = {
+                type: 'video',
+                sources: [{
+                    src: source,
+                    type: 'application/vnd.apple.mpegurl'
+                }],
+                poster: slideData.poster
+            };
+
+            // Error handling
+            player.on('error', event => {
+                console.error('Safari HLS error for', slideId, event);
+                createErrorOverlay(sectionEl, 'Błąd ładowania strumienia wideo.');
+            });
+
+        } else {
+            // Fallback do MP4
+            const player = new Plyr(video, {
+                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+                hideControls: true,
+                resetOnEnd: true,
+                keyboard: { focused: false, global: false }
+            });
+
+            players[slideId] = player;
+
+            player.source = {
+                type: 'video',
+                sources: [{
+                    src: source,
+                    type: 'video/mp4',
+                }],
+                poster: slideData.poster
+            };
+
+            // Error handling
+            player.on('error', event => {
+                console.error('MP4 error for', slideId, event);
+                createErrorOverlay(sectionEl, 'Nie można załadować pliku wideo.');
+            });
+        }
+    }
+
+    function onActiveSlideChanged(swiper) {
+        // Zatrzymaj wszystkie odtwarzacze
+        Object.values(players).forEach(p => {
+            if (p && p.pause) p.pause();
+        });
+
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        if (activeSlide) {
+            const slideId = activeSlide.dataset.slideId;
+            if (slideId && players[slideId]) {
+                const player = players[slideId];
+                // Próbuj odtworzyć z opóźnieniem
+                setTimeout(() => {
+                    player.play().catch(error => {
+                        console.log('Autoplay blocked for', slideId, error);
+                        const overlay = activeSlide.querySelector('.pause-overlay');
+                        if (overlay) {
+                            overlay.classList.add('visible');
+                        }
+                    });
+                }, 100);
+            }
+        }
+    }
+
+    // Funkcja retry dostępna globalnie
+    window.VideoManager = window.VideoManager || {};
+    window.VideoManager.retryVideo = function(slideId) {
+        const section = document.querySelector(`[data-slide-id="${slideId}"]`);
+        if (section) {
+            const errorOverlay = section.querySelector('.video-error-overlay');
+            if (errorOverlay) errorOverlay.remove();
+
+            // Reset retry counter
+            retryAttempts.delete(slideId);
+
+            // Zniszcz istniejący player
+            if (players[slideId]) {
+                if (players[slideId].destroy) players[slideId].destroy();
+                delete players[slideId];
             }
 
-            return {
-                init: () => {
-                    slidesData.forEach((data, index) => {
-                        const slideElement = UI.createSlideElement(data, index);
-                        UI.DOM.container.querySelector('.swiper-wrapper').appendChild(slideElement);
-                        initPlayer(slideElement);
-                    });
+            // Reinicjalizuj player
+            initPlayer(section);
+        }
+    };
 
-                    swiper = new Swiper('.swiper', {
-                        direction: 'vertical',
-                        mousewheel: true,
-                        loop: true,
-                        keyboard: true,
-                        on: {
-                            init: onActiveSlideChanged,
-                            slideChange: onActiveSlideChanged,
-                        },
-                    });
-                }
-            };
-        })();
+    return {
+        init: () => {
+            slidesData.forEach((data, index) => {
+                const slideElement = UI.createSlideElement(data, index);
+                UI.DOM.container.querySelector('.swiper-wrapper').appendChild(slideElement);
+                initPlayer(slideElement);
+            });
+
+            swiper = new Swiper('.swiper', {
+                direction: 'vertical',
+                mousewheel: {
+                    releaseOnEdges: true,
+                },
+                loop: true,
+                keyboard: {
+                    enabled: true,
+                    onlyInViewport: false,
+                },
+                speed: 300,
+                on: {
+                    init: onActiveSlideChanged,
+                    slideChange: onActiveSlideChanged,
+                },
+            });
+        },
+        retryVideo: window.VideoManager?.retryVideo
+    };
+})();
 
 
         /**
