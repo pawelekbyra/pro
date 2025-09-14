@@ -536,10 +536,11 @@
         })();
 
 
-        const VideoManager = (function() {
+const VideoManager = (function() {
     let swiper;
     const players = {};
-    const retryAttempts = new Map(); // Śledzenie prób ponownego ładowania
+    const hlsInstances = {};
+    const retryAttempts = new Map();
 
     function createErrorOverlay(sectionEl, message) {
         const existingError = sectionEl.querySelector('.video-error-overlay');
@@ -549,26 +550,21 @@
         errorOverlay.className = 'video-error-overlay';
         errorOverlay.innerHTML = `
             <div class="error-content">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                 <h3>${Utils.getTranslation('videoErrorTitle')}</h3>
                 <p>${message || Utils.getTranslation('videoErrorSubtitle')}</p>
-                <button class="retry-btn" onclick="VideoManager.retryVideo('${sectionEl.dataset.slideId}')">
-                    ${Utils.getTranslation('videoErrorRetry')}
-                </button>
-            </div>
-        `;
+                <button class="retry-btn" onclick="VideoManager.retryVideo('${sectionEl.dataset.slideId}')">${Utils.getTranslation('videoErrorRetry')}</button>
+            </div>`;
 
-        const playerContainer = sectionEl.querySelector('.player-container');
-        if (playerContainer) {
-            playerContainer.appendChild(errorOverlay);
-        }
+        sectionEl.querySelector('.tiktok-symulacja').appendChild(errorOverlay);
     }
 
     function initPlayer(sectionEl) {
         const video = sectionEl.querySelector('.player');
         if (!video) return;
+
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
 
         const slideId = sectionEl.dataset.slideId;
         const slideData = slidesData.find(s => s.id === slideId);
@@ -579,160 +575,68 @@
 
         video.setAttribute('poster', slideData.poster);
 
-        if (isHls && Hls.isSupported()) {
-            // Konfiguracja HLS.js z lepszym error handlingiem
-            const hls = new Hls({
-                debug: false, // Wyłączamy debug w produkcji
-                enableWorker: false, // Wyłączamy Web Workers jeśli są problemy z CSP
-                lowLatencyMode: false,
-                backBufferLength: 90,
-                maxBufferLength: 30,
-                maxMaxBufferLength: 600,
-                maxBufferSize: 60 * 1000 * 1000,
-                maxBufferHole: 0.5,
-                highBufferWatchdogPeriod: 2,
-                nudgeOffset: 0.1,
-                nudgeMaxRetry: 3,
-                maxFragLookUpTolerance: 0.25,
-                liveSyncDurationCount: 3,
-                liveMaxLatencyDurationCount: Infinity,
-                liveDurationInfinity: false,
-                liveBackBufferLength: Infinity,
-                maxLiveSyncPlaybackRate: 1,
-                liveSyncDuration: undefined,
-                liveMaxLatencyDuration: undefined,
-                maxStarvationDelay: 4,
-                maxLoadingDelay: 4,
-                minAutoBitrate: 0,
-                emeEnabled: false,
-                widevineLicenseUrl: undefined,
-                drmSystemOptions: {},
-                requestMediaKeySystemAccessFunc: null
-            });
+        const plyrOptions = {
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+            hideControls: true,
+            resetOnEnd: true,
+            keyboard: { focused: false, global: false },
+            muted: true,
+        };
 
-            hls.loadSource(source);
-            hls.attachMedia(video);
+        if (isHls) {
+            if (Hls.isSupported()) {
+                const hls = new Hls({ debug: true, enableWorker: false });
+                hlsInstances[slideId] = hls;
 
-            // Lepszy error handling
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                console.error('HLS Error:', data);
-                const attempts = retryAttempts.get(slideId) || 0;
-
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            console.error('Fatal network error encountered for', slideId);
-                            if (attempts < 3) {
-                                console.log(`Retrying... Attempt ${attempts + 1}/3`);
-                                retryAttempts.set(slideId, attempts + 1);
-                                setTimeout(() => {
-                                    hls.startLoad();
-                                }, 1000 * (attempts + 1)); // Exponential backoff
-                            } else {
-                                createErrorOverlay(sectionEl, 'Błąd sieci. Sprawdź połączenie internetowe.');
-                                hls.destroy();
-                            }
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.error('Fatal media error encountered for', slideId);
-                            if (attempts < 2) {
-                                console.log('Trying to recover media error...');
-                                retryAttempts.set(slideId, attempts + 1);
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    console.error('HLS Error:', data);
+                    if (data.fatal) {
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error('fatal network error encountered, try to recover');
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.error('fatal media error encountered, try to recover');
                                 hls.recoverMediaError();
-                            } else {
-                                createErrorOverlay(sectionEl, 'Błąd odtwarzania multimediów.');
+                                break;
+                            default:
+                                createErrorOverlay(sectionEl, `Playback Error: ${data.details}`);
                                 hls.destroy();
-                            }
-                            break;
-                        default:
-                            console.error('Fatal error encountered, cannot recover for', slideId, data);
-                            createErrorOverlay(sectionEl, `Błąd odtwarzacza: ${data.details || 'Nieznany błąd'}`);
-                            hls.destroy();
-                            break;
+                                delete hlsInstances[slideId];
+                                break;
+                        }
                     }
-                }
-            });
-
-            // Callback po załadowaniu manifest
-            hls.on(Hls.Events.MANIFEST_LOADED, function(event, data) {
-                console.log('HLS Manifest loaded for', slideId, data);
-                retryAttempts.delete(slideId); // Reset retry counter on success
-            });
-
-            // Inicjalizuj Plyr po pomyślnym załadowaniu HLS
-            hls.on(Hls.Events.MEDIA_ATTACHED, function() {
-                const player = new Plyr(video, {
-                    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                    hideControls: true,
-                    resetOnEnd: true,
-                    keyboard: { focused: false, global: false }
                 });
 
-                players[slideId] = player;
+                hls.loadSource(source);
+                hls.attachMedia(video);
+                players[slideId] = new Plyr(video, plyrOptions);
 
-                // Error handling dla Plyr
-                player.on('error', event => {
-                    console.error('Plyr error for', slideId, event);
-                    createErrorOverlay(sectionEl, 'Błąd odtwarzacza wideo.');
-                });
-            });
-
-        } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Safari native HLS
-            const player = new Plyr(video, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                hideControls: true,
-                resetOnEnd: true,
-                keyboard: { focused: false, global: false }
-            });
-
-            players[slideId] = player;
-
-            player.source = {
-                type: 'video',
-                sources: [{
-                    src: source,
-                    type: 'application/vnd.apple.mpegurl'
-                }],
-                poster: slideData.poster
-            };
-
-            // Error handling
-            player.on('error', event => {
-                console.error('Safari HLS error for', slideId, event);
-                createErrorOverlay(sectionEl, 'Błąd ładowania strumienia wideo.');
-            });
-
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Native HLS on iOS
+                video.src = source;
+                players[slideId] = new Plyr(video, plyrOptions);
+            }
         } else {
-            // Fallback do MP4
-            const player = new Plyr(video, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                hideControls: true,
-                resetOnEnd: true,
-                keyboard: { focused: false, global: false }
-            });
-
-            players[slideId] = player;
-
-            player.source = {
+            // Standard MP4
+            players[slideId] = new Plyr(video, plyrOptions);
+            players[slideId].source = {
                 type: 'video',
-                sources: [{
-                    src: source,
-                    type: 'video/mp4',
-                }],
+                sources: [{ src: source, type: 'video/mp4' }],
                 poster: slideData.poster
             };
+        }
 
-            // Error handling
-            player.on('error', event => {
-                console.error('MP4 error for', slideId, event);
-                createErrorOverlay(sectionEl, 'Nie można załadować pliku wideo.');
+        if (players[slideId]) {
+             players[slideId].on('error', event => {
+                console.error('Plyr/Video Error for', slideId, event);
+                createErrorOverlay(sectionEl, 'Could not load video.');
             });
         }
     }
 
     function onActiveSlideChanged(swiper) {
-        // Zatrzymaj wszystkie odtwarzacze
         Object.values(players).forEach(p => {
             if (p && p.pause) p.pause();
         });
@@ -742,21 +646,22 @@
             const slideId = activeSlide.dataset.slideId;
             if (slideId && players[slideId]) {
                 const player = players[slideId];
-                // Próbuj odtworzyć z opóźnieniem
                 setTimeout(() => {
-                    player.play().catch(error => {
-                        console.log('Autoplay blocked for', slideId, error);
-                        const overlay = activeSlide.querySelector('.pause-overlay');
-                        if (overlay) {
-                            overlay.classList.add('visible');
-                        }
-                    });
-                }, 100);
+                    const playPromise = player.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.log('Autoplay blocked for', slideId, error);
+                            const overlay = activeSlide.querySelector('.pause-overlay');
+                            if (overlay) overlay.classList.add('visible');
+                            player.muted = true;
+                            player.play();
+                        });
+                    }
+                }, 150);
             }
         }
     }
 
-    // Funkcja retry dostępna globalnie
     window.VideoManager = window.VideoManager || {};
     window.VideoManager.retryVideo = function(slideId) {
         const section = document.querySelector(`[data-slide-id="${slideId}"]`);
@@ -764,16 +669,15 @@
             const errorOverlay = section.querySelector('.video-error-overlay');
             if (errorOverlay) errorOverlay.remove();
 
-            // Reset retry counter
-            retryAttempts.delete(slideId);
-
-            // Zniszcz istniejący player
             if (players[slideId]) {
-                if (players[slideId].destroy) players[slideId].destroy();
+                players[slideId].destroy();
                 delete players[slideId];
             }
+            if (hlsInstances[slideId]) {
+                hlsInstances[slideId].destroy();
+                delete hlsInstances[slideId];
+            }
 
-            // Reinicjalizuj player
             initPlayer(section);
         }
     };
@@ -788,14 +692,9 @@
 
             swiper = new Swiper('.swiper', {
                 direction: 'vertical',
-                mousewheel: {
-                    releaseOnEdges: true,
-                },
+                mousewheel: { releaseOnEdges: true },
                 loop: true,
-                keyboard: {
-                    enabled: true,
-                    onlyInViewport: false,
-                },
+                keyboard: { enabled: true, onlyInViewport: false },
                 speed: 300,
                 on: {
                     init: onActiveSlideChanged,
@@ -803,7 +702,7 @@
                 },
             });
         },
-        retryVideo: window.VideoManager?.retryVideo
+        retryVideo: window.VideoManager.retryVideo
     };
 })();
 
