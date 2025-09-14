@@ -1834,7 +1834,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.body.addEventListener('click', Handlers.mainClickHandler);
-            UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
+
+            if (UI.DOM.container) {
+                UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
+                UI.DOM.container.addEventListener('click', (e) => {
+                    const slide = e.target.closest('.swiper-slide-active');
+                    if (!slide) return;
+
+                    // Ignore clicks on buttons in the sidebar or other interactive elements
+                    if (e.target.closest('.sidebar, .bottombar, .profile, a, button')) {
+                        return;
+                    }
+
+                    const slideId = slide.dataset.slideId;
+                    const player = VideoManager.players[slideId];
+                    if (player) {
+                        player.muted = !player.muted;
+                        State.set('isUnmutedByUser', true);
+                    }
+                });
+            }
 
             document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
                 modal.addEventListener('click', (e) => {
@@ -1847,7 +1866,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.key === 'Escape') {
                     const visibleModal = document.querySelector('.modal-overlay.visible:not(#accountModal):not(#cropModal)');
                     if (visibleModal) UI.closeModal(visibleModal);
-                    if (UI.DOM.notificationPopup.classList.contains('visible')) UI.DOM.notificationPopup.classList.remove('visible');
+                    if (UI.DOM.notificationPopup && UI.DOM.notificationPopup.classList.contains('visible')) {
+                        UI.DOM.notificationPopup.classList.remove('visible');
+                    }
                 }
             });
 
@@ -1860,25 +1881,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            UI.DOM.notificationPopup.querySelector('.notification-list').addEventListener('click', Handlers.handleNotificationClick);
-            UI.DOM.tiktokProfileModal ? .addEventListener('click', Handlers.profileModalTabHandler);
-
-            UI.DOM.container.addEventListener('click', (e) => {
-                const slide = e.target.closest('.swiper-slide-active');
-                if (!slide) return;
-
-                // Ignore clicks on buttons in the sidebar or other interactive elements
-                if (e.target.closest('.sidebar, .bottombar, .profile, a, button')) {
-                    return;
+            if (UI.DOM.notificationPopup) {
+                const notifList = UI.DOM.notificationPopup.querySelector('.notification-list');
+                if (notifList) {
+                    notifList.addEventListener('click', Handlers.handleNotificationClick);
                 }
+            }
 
-                const slideId = slide.dataset.slideId;
-                const player = VideoManager.players[slideId];
-                if (player) {
-                    player.muted = !player.muted;
-                    State.set('isUnmutedByUser', true);
-                }
-            });
+            UI.DOM.tiktokProfileModal?.addEventListener('click', Handlers.profileModalTabHandler);
         }
 
         async function _fetchAndUpdateSlideData() {
