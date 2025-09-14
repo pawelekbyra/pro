@@ -554,7 +554,11 @@
                 video.setAttribute('poster', slideData.poster);
 
                 if (isHls && Hls.isSupported()) {
-                    const hls = new Hls();
+                    const hls = new Hls({
+                        videoPreference: {
+                            videoCodec: 'avc1'
+                        }
+                    });
                     hls.loadSource(source);
 
                     hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
