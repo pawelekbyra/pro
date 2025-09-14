@@ -1818,12 +1818,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return { init, openAccountModal, closeAccountModal };
     })();
 
+    /**
+     * ==========================================================================
+     * 9. APP INITIALIZATION
+     * ==========================================================================
+     */
     const runAppInit = () => {
-        /**
-         * ==========================================================================
-         * 9. APP INITIALIZATION
-         * ==========================================================================
-         */
         const App = (function() {
             function _initializeGlobalListeners() {
                 Utils.setAppHeightVar();
@@ -1926,6 +1926,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             function _initializePreloader() {
                 // Spraw, aby kontener wyboru języka był widoczny
+            UI.DOM.preloader.style.visibility = 'visible';
                 UI.DOM.preloader.classList.add('content-visible');
 
                 UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
