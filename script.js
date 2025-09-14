@@ -541,59 +541,66 @@
             const players = {};
 
             function initPlayer(sectionEl) {
-              const video = sectionEl.querySelector('.player');
-              if (!video) return;
+                const video = sectionEl.querySelector('.player');
+                if (!video) return;
 
-              const slideId = sectionEl.dataset.slideId;
-              const slideData = slidesData.find(s => s.id === slideId);
-              if (!slideData) return;
+                const slideId = sectionEl.dataset.slideId;
+                const slideData = slidesData.find(s => s.id === slideId);
+                if (!slideData) return;
 
-              const player = new Plyr(video, {
-                // Options
-              });
-              players[slideId] = player;
+                const player = new Plyr(video, {
+                    // Options
+                });
+                players[slideId] = player;
 
-              const source = slideData.hlsUrl || slideData.mp4Url;
+                const source = slideData.hlsUrl || slideData.mp4Url;
+                const isHls = !!slideData.hlsUrl;
 
-              // Sprawdzenie, czy źródło jest HLS
-              const isHls = slideData.hlsUrl;
+                // Ustaw poster dynamicznie dla każdego slajdu
+                video.setAttribute('poster', slideData.poster);
 
-              if (isHls && Hls.isSupported()) {
-                // Użyj Hls.js dla wspieranych przeglądarek
-                const hls = new Hls();
-                hls.loadSource(source);
-                hls.attachMedia(video);
-              } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Użyj natywnego odtwarzania HLS na iOS
-                player.source = {
-                  type: 'video',
-                  sources: [{
-                    src: source,
-                    type: 'application/vnd.apple.mpegurl'
-                  }],
-                  poster: slideData.poster
-                };
-              } else {
-                // Domyślne ustawienie dla MP4 lub gdy HLS nie jest wspierany
-                player.source = {
-                  type: 'video',
-                  sources: [{
-                    src: source,
-                    type: 'video/mp4',
-                  }],
-                  poster: slideData.poster
-                };
-              }
+                if (isHls && Hls.isSupported()) {
+                    // Użycie Hls.js dla przeglądarek wspierających Media Source Extensions
+                    const hls = new Hls();
+                    hls.loadSource(source);
+                    hls.attachMedia(video);
+                } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Użycie natywnego odtwarzania HLS na iOS
+                    player.source = {
+                        type: 'video',
+                        sources: [{
+                            src: source,
+                            type: 'application/vnd.apple.mpegurl'
+                        }],
+                        poster: slideData.poster
+                    };
+                } else {
+                    // Domyślne ustawienie dla MP4 lub gdy HLS nie jest wspierany
+                    player.source = {
+                        type: 'video',
+                        sources: [{
+                            src: source,
+                            type: 'video/mp4',
+                        }],
+                        poster: slideData.poster
+                    };
+                }
             }
 
             function onActiveSlideChanged(swiper) {
                 Object.values(players).forEach(p => p.pause());
-                // Use activeIndex for loop mode
                 const activeSlide = swiper.slides[swiper.activeIndex];
                 if (activeSlide) {
                     const slideId = activeSlide.dataset.slideId;
                     if (slideId && players[slideId]) {
-                        players[slideId].play();
+                        const player = players[slideId];
+                        player.play().catch(error => {
+                            console.log('Autoplay was prevented. Showing play overlay.', error);
+                            const overlay = activeSlide.querySelector('.pause-overlay');
+                            if (overlay) {
+                                 overlay.classList.add('visible');
+                            }
+                        });
                     }
                 }
             }
@@ -1017,6 +1024,16 @@
                             }
                             break;
                         case 'show-tip-jar': document.querySelector('#bmc-wbtn')?.click(); break;
+                        case 'play-video':
+                            const currentSlide = document.querySelector('.swiper-slide-active');
+                            if (currentSlide) {
+                                const player = players[currentSlide.dataset.slideId];
+                                if (player) {
+                                    player.play();
+                                    currentSlide.querySelector('.pause-overlay').classList.remove('visible');
+                                }
+                            }
+                            break;
                     }
                 },
                 formSubmitHandler: (e) => {
