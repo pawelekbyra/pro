@@ -2034,13 +2034,14 @@
 }
 
 .tiktok-profile-header {
+    height: var(--topbar-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 16px;
-    padding-top: calc(10px + var(--safe-area-top));
-    background-color: #121212;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 16px;
+    padding-top: var(--safe-area-top);
+    background-color: #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
     position: relative;
 }
@@ -2053,12 +2054,24 @@
     transform: translateX(-50%);
 }
 
-.tiktok-profile-header .profile-action-btn {
+.tiktok-profile-header .profile-action-btn,
+#tiktok-profile-modal .modal-close-btn {
     background: none;
     border: none;
     color: #fff;
     cursor: pointer;
     padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease-in-out, opacity 0.2s;
+}
+
+.tiktok-profile-header .profile-action-btn:active,
+#tiktok-profile-modal .modal-close-btn:active {
+    transform: scale(0.9);
 }
 
 .tiktok-profile-header .profile-action-btn svg {
