@@ -671,19 +671,20 @@
             return {
                 init: () => {
                     // Slides are already rendered by UI.renderSlides()
-                    swiper = new Swiper('.swiper', {
+                    new Swiper('.swiper', {
                         direction: 'vertical',
                         mousewheel: true,
                         loop: true,
                         keyboard: true,
                         on: {
-                            init: (swiper) => {
+                            init: function () {
+                                 swiper = this; // Assign the swiper instance to the closure variable
                                  // Odtwórz tylko początkowy slajd po inicjalizacji
-                                 const initialSlideEl = swiper.slides[swiper.realIndex];
+                                 const initialSlideEl = this.slides[this.realIndex];
                                  if (initialSlideEl) {
                                      const slideId = initialSlideEl.dataset.slideId;
                                      if (!players[slideId]) {
-                                         loadPlayerForSlide(swiper.realIndex);
+                                         loadPlayerForSlide(this.realIndex);
                                      } else {
                                          players[slideId].play();
                                      }
