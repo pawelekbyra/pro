@@ -1823,149 +1823,145 @@ document.addEventListener('DOMContentLoaded', () => {
      * 9. APP INITIALIZATION
      * ==========================================================================
      */
-    const runAppInit = () => {
-        const App = (function() {
-            function _initializeGlobalListeners() {
-                Utils.setAppHeightVar();
-                window.addEventListener('resize', Utils.setAppHeightVar);
-                window.addEventListener('orientationchange', Utils.setAppHeightVar);
+    const App = (function() {
+        function _initializeGlobalListeners() {
+            Utils.setAppHeightVar();
+            window.addEventListener('resize', Utils.setAppHeightVar);
+            window.addEventListener('orientationchange', Utils.setAppHeightVar);
 
-                ['touchstart', 'pointerdown', 'click', 'keydown'].forEach(evt => {
-                    document.addEventListener(evt, Utils.recordUserGesture, { passive: true });
-                });
+            ['touchstart', 'pointerdown', 'click', 'keydown'].forEach(evt => {
+                document.addEventListener(evt, Utils.recordUserGesture, { passive: true });
+            });
 
-                document.body.addEventListener('click', Handlers.mainClickHandler);
+            document.body.addEventListener('click', Handlers.mainClickHandler);
 
-                if (UI.DOM.container) {
-                    UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
-                    UI.DOM.container.addEventListener('click', (e) => {
-                        const slide = e.target.closest('.swiper-slide-active');
-                        if (!slide) return;
+            if (UI.DOM.container) {
+                UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
+                UI.DOM.container.addEventListener('click', (e) => {
+                    const slide = e.target.closest('.swiper-slide-active');
+                    if (!slide) return;
 
-                        // Ignore clicks on buttons in the sidebar or other interactive elements
-                        if (e.target.closest('.sidebar, .bottombar, .profile, a, button')) {
-                            return;
-                        }
+                    // Ignore clicks on buttons in the sidebar or other interactive elements
+                    if (e.target.closest('.sidebar, .bottombar, .profile, a, button')) {
+                        return;
+                    }
 
-                        const slideId = slide.dataset.slideId;
-                        const player = VideoManager.players[slideId];
-                        if (player) {
-                            player.muted = !player.muted;
-                            State.set('isUnmutedByUser', true);
-                        }
-                    });
-                }
-
-                document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) UI.closeModal(modal);
-                    });
-                    modal.querySelector('.modal-close-btn, .topbar-close-btn') ? .addEventListener('click', () => UI.closeModal(modal));
-                });
-
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        const visibleModal = document.querySelector('.modal-overlay.visible:not(#accountModal):not(#cropModal)');
-                        if (visibleModal) UI.closeModal(visibleModal);
-                        if (UI.DOM.notificationPopup && UI.DOM.notificationPopup.classList.contains('visible')) {
-                            UI.DOM.notificationPopup.classList.remove('visible');
-                        }
+                    const slideId = slide.dataset.slideId;
+                    const player = VideoManager.players[slideId];
+                    if (player) {
+                        player.muted = !player.muted;
+                        State.set('isUnmutedByUser', true);
                     }
                 });
+            }
 
-                document.addEventListener('click', (event) => {
-                    const popup = UI.DOM.notificationPopup;
-                    if (popup && popup.classList.contains('visible') &&
-                        !popup.contains(event.target) &&
-                        !event.target.closest('[data-action="toggle-notifications"]')) {
-                        popup.classList.remove('visible');
+            document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) UI.closeModal(modal);
+                });
+                modal.querySelector('.modal-close-btn, .topbar-close-btn') ? .addEventListener('click', () => UI.closeModal(modal));
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const visibleModal = document.querySelector('.modal-overlay.visible:not(#accountModal):not(#cropModal)');
+                    if (visibleModal) UI.closeModal(visibleModal);
+                    if (UI.DOM.notificationPopup && UI.DOM.notificationPopup.classList.contains('visible')) {
+                        UI.DOM.notificationPopup.classList.remove('visible');
+                    }
+                }
+            });
+
+            document.addEventListener('click', (event) => {
+                const popup = UI.DOM.notificationPopup;
+                if (popup && popup.classList.contains('visible') &&
+                    !popup.contains(event.target) &&
+                    !event.target.closest('[data-action="toggle-notifications"]')) {
+                    popup.classList.remove('visible');
+                }
+            });
+
+            if (UI.DOM.notificationPopup) {
+                const notifList = UI.DOM.notificationPopup.querySelector('.notification-list');
+                if (notifList) {
+                    notifList.addEventListener('click', Handlers.handleNotificationClick);
+                }
+            }
+
+            UI.DOM.tiktokProfileModal?.addEventListener('click', Handlers.profileModalTabHandler);
+        }
+
+        async function _fetchAndUpdateSlideData() {
+            const json = await API.fetchSlidesData();
+            if (json.success && Array.isArray(json.data)) {
+                const newDataMap = new Map(json.data.map(item => [String(item.likeId), item]));
+                slidesData.forEach(existingSlide => {
+                    const updatedInfo = newDataMap.get(String(existingSlide.likeId));
+                    if (updatedInfo) {
+                        existingSlide.isLiked = updatedInfo.isLiked;
+                        existingSlide.initialLikes = updatedInfo.initialLikes;
+                        UI.applyLikeStateToDom(existingSlide.likeId, existingSlide.isLiked, existingSlide.initialLikes);
                     }
                 });
-
-                if (UI.DOM.notificationPopup) {
-                    const notifList = UI.DOM.notificationPopup.querySelector('.notification-list');
-                    if (notifList) {
-                        notifList.addEventListener('click', Handlers.handleNotificationClick);
-                    }
-                }
-
-                UI.DOM.tiktokProfileModal?.addEventListener('click', Handlers.profileModalTabHandler);
             }
+        }
 
-            async function _fetchAndUpdateSlideData() {
-                const json = await API.fetchSlidesData();
-                if (json.success && Array.isArray(json.data)) {
-                    const newDataMap = new Map(json.data.map(item => [String(item.likeId), item]));
-                    slidesData.forEach(existingSlide => {
-                        const updatedInfo = newDataMap.get(String(existingSlide.likeId));
-                        if (updatedInfo) {
-                            existingSlide.isLiked = updatedInfo.isLiked;
-                            existingSlide.initialLikes = updatedInfo.initialLikes;
-                            UI.applyLikeStateToDom(existingSlide.likeId, existingSlide.isLiked, existingSlide.initialLikes);
-                        }
-                    });
-                }
+        function _startApp(selectedLang) {
+            try {
+                State.set('currentLang', selectedLang);
+                localStorage.setItem('tt_lang', selectedLang);
+                UI.renderSlides(); // Slajdy sa teraz renderowane natychmiast
+                UI.updateTranslations();
+                VideoManager.init(); // Swiper jest inicjalizowany natychmiast, gdy slajdy sa juz w DOM
+
+                UI.DOM.preloader.classList.add('preloader-hiding');
+                UI.DOM.container.classList.add('ready');
+                UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
+            } catch (error) {
+                alert('Application failed to start. Error: ' + error.message + '\\n\\nStack: ' + error.stack);
+                console.error("TingTong App Start Error:", error);
             }
+        }
 
-            function _startApp(selectedLang) {
-                try {
-                    State.set('currentLang', selectedLang);
-                    localStorage.setItem('tt_lang', selectedLang);
-                    UI.renderSlides(); // Slajdy sa teraz renderowane natychmiast
-                    UI.updateTranslations();
-                    VideoManager.init(); // Swiper jest inicjalizowany natychmiast, gdy slajdy sa juz w DOM
+        function _initializePreloader() {
+            // Spraw, aby kontener wyboru języka był widoczny
+            UI.DOM.preloader.classList.add('content-visible');
 
-                    UI.DOM.preloader.classList.add('preloader-hiding');
-                    UI.DOM.container.classList.add('ready');
-                    UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
-                } catch (error) {
-                    alert('Application failed to start. Error: ' + error.message + '\\n\\nStack: ' + error.stack);
-                    console.error("TingTong App Start Error:", error);
-                }
-            }
+            UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
+                button.addEventListener('click', () => {
+                    UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
+                    button.classList.add('is-selected');
+                    // Natychmiastowe uruchomienie aplikacji po wybraniu jezyka
+                    _startApp(button.dataset.lang);
+                }, { once: true });
+            });
+        }
 
-            function _initializePreloader() {
-                // Spraw, aby kontener wyboru języka był widoczny
-            UI.DOM.preloader.style.visibility = 'visible';
-                UI.DOM.preloader.classList.add('content-visible');
+        function _setInitialConfig() {
+            try {
+                const c = navigator.connection || navigator.webkitConnection;
+                if (c ? .saveData) Config.LOW_DATA_MODE = true;
+                if (c ? .effectiveType ? .includes('2g')) Config.LOW_DATA_MODE = true;
+                if (c ? .effectiveType ? .includes('3g')) Config.HLS.maxAutoLevelCapping = 480;
+            } catch (_) {}
+        }
 
-                UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
-                        button.classList.add('is-selected');
-                        // Natychmiastowe uruchomienie aplikacji po wybraniu jezyka
-                        _startApp(button.dataset.lang);
-                    }, { once: true });
-                });
-            }
+        return {
+            init: () => {
+                _initializePreloader();
+                _setInitialConfig();
+                _initializeGlobalListeners();
+                AccountPanel.init();
+                UI.initGlobalPanels();
+                PWA.init();
+                document.body.classList.add('loaded');
+            },
+            fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
+        };
+    })();
 
-            function _setInitialConfig() {
-                try {
-                    const c = navigator.connection || navigator.webkitConnection;
-                    if (c ? .saveData) Config.LOW_DATA_MODE = true;
-                    if (c ? .effectiveType ? .includes('2g')) Config.LOW_DATA_MODE = true;
-                    if (c ? .effectiveType ? .includes('3g')) Config.HLS.maxAutoLevelCapping = 480;
-                } catch (_) {}
-            }
+    // Expose VideoManager to the global scope for event handlers to access
+    window.VideoManager = VideoManager;
 
-            return {
-                init: () => {
-                    _setInitialConfig();
-                    _initializeGlobalListeners();
-                    AccountPanel.init();
-                    UI.initGlobalPanels();
-                    PWA.init();
-                    _initializePreloader();
-                    document.body.classList.add('loaded');
-                },
-                fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
-            };
-        })();
-
-        // Expose VideoManager to the global scope for event handlers to access
-        window.VideoManager = VideoManager;
-
-        App.init();
-    };
-    runAppInit();
+    App.init();
 });
