@@ -643,35 +643,29 @@
             }
 
             function onActiveSlideChanged(swiper) {
-                // Pause all players
-                Object.values(players).forEach(p => p.pause());
-
-                const activeIndex = swiper.activeIndex;
-
-                // Load and play the active slide
-                loadPlayerForSlide(activeIndex);
-
-                // Preload neighbors
-                const nextSlideIndex = activeIndex + 1;
-                if (nextSlideIndex < swiper.slides.length) {
-                   loadPlayerForSlide(nextSlideIndex);
-                }
-                const prevSlideIndex = activeIndex - 1;
-                if (prevSlideIndex >= 0) {
-                    loadPlayerForSlide(prevSlideIndex);
-                }
-
-                // Destroy far away players
-                const visibleIndexes = [activeIndex, activeIndex - 1, activeIndex + 1];
-                const visibleSlideIds = visibleIndexes
-                    .map(index => swiper.slides[index]?.dataset.slideId)
-                    .filter(Boolean);
-
+                const activeIndex = swiper.realIndex; // Użyj realIndex dla pętli
+                // Pauzuj wszystkie odtwarzacze, które nie są aktywne
                 Object.keys(players).forEach(slideId => {
-                    if (!visibleSlideIds.includes(slideId)) {
-                        destroyPlayer(slideId);
+                    const index = swiper.slides.findIndex(s => s.dataset.slideId === slideId);
+                    if (index !== activeIndex) {
+                        players[slideId].pause();
                     }
                 });
+
+                // Załaduj i odtwórz aktywny slajd, jeśli jeszcze nie jest odtwarzany
+                const activeSlideEl = swiper.slides[activeIndex];
+                if (activeSlideEl) {
+                    const slideId = activeSlideEl.dataset.slideId;
+                    if (!players[slideId]) {
+                        loadPlayerForSlide(activeIndex);
+                    } else {
+                        const player = players[slideId];
+                        const playPromise = player.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
+                        }
+                    }
+                }
             }
 
             return {
@@ -683,7 +677,18 @@
                         loop: true,
                         keyboard: true,
                         on: {
-                            init: onActiveSlideChanged,
+                            init: (swiper) => {
+                                 // Odtwórz tylko początkowy slajd po inicjalizacji
+                                 const initialSlideEl = swiper.slides[swiper.realIndex];
+                                 if (initialSlideEl) {
+                                     const slideId = initialSlideEl.dataset.slideId;
+                                     if (!players[slideId]) {
+                                         loadPlayerForSlide(swiper.realIndex);
+                                     } else {
+                                         players[slideId].play();
+                                     }
+                                 }
+                            },
                             slideChange: onActiveSlideChanged,
                         },
                     });
@@ -1663,14 +1668,13 @@
                 try {
                     State.set('currentLang', selectedLang);
                     localStorage.setItem('tt_lang', selectedLang);
+                    UI.renderSlides(); // Slajdy są teraz renderowane natychmiast
                     UI.updateTranslations();
-                    VideoManager.init();
+                    VideoManager.init(); // Swiper jest inicjalizowany natychmiast, gdy slajdy są już w DOM
 
-                    setTimeout(() => {
-                        UI.DOM.preloader.classList.add('preloader-hiding');
-                        UI.DOM.container.classList.add('ready');
-                        UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
-                    }, 1000);
+                    UI.DOM.preloader.classList.add('preloader-hiding');
+                    UI.DOM.container.classList.add('ready');
+                    UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
                 } catch (error) {
                     alert('Application failed to start. Error: ' + error.message + '\\n\\nStack: ' + error.stack);
                     console.error("TingTong App Start Error:", error);
@@ -1683,9 +1687,8 @@
                     button.addEventListener('click', () => {
                         UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
                         button.classList.add('is-selected');
-                        // RENDERUJ SLAJDY PRZED INICJALIZACJĄ SWIPERA
-                        UI.renderSlides();
-                        setTimeout(() => _startApp(button.dataset.lang), 300);
+                        // Natychmiastowe uruchomienie aplikacji po wybraniu języka
+                        _startApp(button.dataset.lang);
                     }, { once: true });
                 });
             }
