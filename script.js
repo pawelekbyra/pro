@@ -200,6 +200,7 @@
                 lastFocusedElement: null,
                 lastUserGestureTimestamp: 0,
                 activeVideoSession: 0,
+                isUnmutedByUser: false,
             };
 
             return {
@@ -546,7 +547,6 @@
 
                 const slideId = slideEl.dataset.slideId;
                 if (!slideId || players[slideId]) {
-                    // This case is handled by onActiveSlideChanged, so we just return.
                     return;
                 }
 
@@ -557,7 +557,7 @@
                 if (!video) return;
 
                 const player = new Plyr(video, {
-                    muted: true,
+                    muted: !State.get('isUnmutedByUser'), // All videos start muted, unless unmuted by user
                     autoplay: false,
                     controls: [],
                     clickToPlay: false,
@@ -566,11 +566,10 @@
                 players[slideId] = player;
 
                 const source = slideData.hlsUrl || slideData.mp4Url;
-                const isHls = slideData.hlsUrl && Hls.isSupported();
+                const isHls = !!slideData.hlsUrl;
+                const nativeHlsSupport = video.canPlayType('application/vnd.apple.mpegurl');
 
                 player.on('ready', () => {
-                    // The onActiveSlideChanged handler will call play().
-                    // We just ensure it's ready.
                     if (swiperInstance.realIndex === index) {
                         const playPromise = player.play();
                         if (playPromise) {
@@ -579,7 +578,11 @@
                     }
                 });
 
-                if (isHls) {
+                if (isHls && nativeHlsSupport) {
+                    // Native HLS support (Safari, iOS)
+                    video.src = source;
+                } else if (isHls && Hls.isSupported()) {
+                    // HLS support via Hls.js (Chrome, Android)
                     const hls = new Hls();
                     hlsInstances[slideId] = hls;
                     hls.loadSource(source);
@@ -588,18 +591,14 @@
                         if (data.fatal) {
                             console.error("HLS fatal error:", data);
                             switch(data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    hls.startLoad();
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    hls.recoverMediaError();
-                                    break;
-                                default:
-                                    break;
+                                case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+                                case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+                                default: break;
                             }
                         }
                     });
                 } else {
+                    // MP4
                     player.source = {
                         type: 'video',
                         sources: [{ src: source, type: 'video/mp4' }],
@@ -1609,6 +1608,23 @@
 
                 UI.DOM.notificationPopup.querySelector('.notification-list').addEventListener('click', Handlers.handleNotificationClick);
                 UI.DOM.tiktokProfileModal?.addEventListener('click', Handlers.profileModalTabHandler);
+
+                UI.DOM.container.addEventListener('click', (e) => {
+                    const slide = e.target.closest('.swiper-slide-active');
+                    if (!slide) return;
+
+                    // Ignore clicks on buttons in the sidebar or other interactive elements
+                    if (e.target.closest('.sidebar, .bottombar, .profile, a, button')) {
+                        return;
+                    }
+
+                    const slideId = slide.dataset.slideId;
+                    const player = players[slideId];
+                    if (player) {
+                        player.muted = !player.muted;
+                        State.set('isUnmutedByUser', true);
+                    }
+                });
             }
 
             async function _fetchAndUpdateSlideData() {
