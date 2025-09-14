@@ -548,24 +548,41 @@
                 const slideData = slidesData.find(s => s.id === slideId);
                 if (!slideData) return;
 
-                const player = new Plyr(video, {
-                    // Options
-                });
-                players[slideId] = player;
-
                 const source = slideData.hlsUrl || slideData.mp4Url;
                 const isHls = !!slideData.hlsUrl;
 
-                // Ustaw poster dynamicznie dla każdego slajdu
                 video.setAttribute('poster', slideData.poster);
 
                 if (isHls && Hls.isSupported()) {
-                    // Użycie Hls.js dla przeglądarek wspierających Media Source Extensions
                     const hls = new Hls();
                     hls.loadSource(source);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                        const availableQualities = hls.levels.map((l) => l.height);
+                        availableQualities.unshift(0); // Add 'Auto' quality
+
+                        const player = new Plyr(video, {
+                            quality: {
+                                default: 0,
+                                options: availableQualities,
+                                forced: true,
+                                onChange: (e) => updateQuality(e),
+                            },
+                             i18n: {
+                                qualityLabel: {
+                                    0: 'Auto',
+                                },
+                            }
+                        });
+                        players[slideId] = player;
+                        window.hls = hls;
+                    });
+
                     hls.attachMedia(video);
+
                 } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Użycie natywnego odtwarzania HLS na iOS
+                    const player = new Plyr(video, {});
+                     players[slideId] = player;
                     player.source = {
                         type: 'video',
                         sources: [{
@@ -575,7 +592,8 @@
                         poster: slideData.poster
                     };
                 } else {
-                    // Domyślne ustawienie dla MP4 lub gdy HLS nie jest wspierany
+                    const player = new Plyr(video, {});
+                     players[slideId] = player;
                     player.source = {
                         type: 'video',
                         sources: [{
@@ -584,6 +602,20 @@
                         }],
                         poster: slideData.poster
                     };
+                }
+            }
+
+            function updateQuality(newQuality) {
+                if (window.hls) {
+                    if (newQuality === 0) {
+                        window.hls.currentLevel = -1;
+                    } else {
+                        window.hls.levels.forEach((level, levelIndex) => {
+                            if (level.height === newQuality) {
+                                window.hls.currentLevel = levelIndex;
+                            }
+                        });
+                    }
                 }
             }
 
