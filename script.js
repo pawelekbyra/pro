@@ -595,10 +595,9 @@
                     if (slideId && players[slideId]) {
                         const player = players[slideId];
                         player.play().catch(error => {
-                            console.log('Autoplay was prevented. Showing play overlay.', error);
                             const overlay = activeSlide.querySelector('.pause-overlay');
                             if (overlay) {
-                                 overlay.classList.add('visible');
+                                overlay.classList.add('visible');
                             }
                         });
                     }
