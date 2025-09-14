@@ -1924,6 +1924,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function _initializePreloader() {
+            // Spraw, aby kontener wyboru języka był widoczny
+            UI.DOM.preloader.classList.add('content-visible');
+
             UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(button => {
                 button.addEventListener('click', () => {
                     UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
