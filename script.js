@@ -555,34 +555,30 @@
 
                 if (isHls && Hls.isSupported()) {
                     const hls = new Hls({
-                        videoPreference: {
-                            videoCodec: 'avc1'
-                        }
+                        debug: true
                     });
                     hls.loadSource(source);
-
-                    hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                        const availableQualities = hls.levels.map((l) => l.height);
-                        availableQualities.unshift(0); // Add 'Auto' quality
-
-                        const player = new Plyr(video, {
-                            quality: {
-                                default: 0,
-                                options: availableQualities,
-                                forced: true,
-                                onChange: (e) => updateQuality(e),
-                            },
-                             i18n: {
-                                qualityLabel: {
-                                    0: 'Auto',
-                                },
-                            }
-                        });
-                        players[slideId] = player;
-                        window.hls = hls;
-                    });
-
                     hls.attachMedia(video);
+                    hls.on(Hls.Events.ERROR, function (event, data) {
+                        if (data.fatal) {
+                            switch (data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    console.error('fatal network error encountered, try to recover', data);
+                                    hls.startLoad();
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.error('fatal media error encountered, try to recover', data);
+                                    hls.recoverMediaError();
+                                    break;
+                                default:
+                                    console.error('fatal error encountered, cannot recover', data);
+                                    hls.destroy();
+                                    break;
+                            }
+                        }
+                    });
+                    const player = new Plyr(video, {});
+                    players[slideId] = player;
 
                 } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
                     const player = new Plyr(video, {});
@@ -606,20 +602,6 @@
                         }],
                         poster: slideData.poster
                     };
-                }
-            }
-
-            function updateQuality(newQuality) {
-                if (window.hls) {
-                    if (newQuality === 0) {
-                        window.hls.currentLevel = -1;
-                    } else {
-                        window.hls.levels.forEach((level, levelIndex) => {
-                            if (level.height === newQuality) {
-                                window.hls.currentLevel = levelIndex;
-                            }
-                        });
-                    }
                 }
             }
 
