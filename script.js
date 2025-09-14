@@ -1945,13 +1945,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             init: () => {
-                // _setInitialConfig();
-                // _initializeGlobalListeners();
-                // AccountPanel.init();
-                // UI.initGlobalPanels();
-                // PWA.init();
+                _setInitialConfig();
+                _initializeGlobalListeners();
+                AccountPanel.init();
+                UI.initGlobalPanels();
+                PWA.init();
                 _initializePreloader();
-                // document.body.classList.add('loaded');
+                document.body.classList.add('loaded');
             },
             fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
         };
