@@ -537,44 +537,16 @@
 
 
         const VideoManager = (function() {
-            let swiper;
             const players = {};
             const hlsInstances = {};
 
-            function destroyPlayer(slideId) {
-                if (players[slideId]) {
-                    try {
-                        players[slideId].destroy();
-                    } catch (e) {
-                        console.warn(`Error destroying Plyr player for slide ${slideId}:`, e);
-                    }
-                    delete players[slideId];
-                }
-                if (hlsInstances[slideId]) {
-                    try {
-                        hlsInstances[slideId].destroy();
-                    } catch (e) {
-                        console.warn(`Error destroying HLS instance for slide ${slideId}:`, e);
-                    }
-                    delete hlsInstances[slideId];
-                }
-            }
-
-            function loadPlayerForSlide(index) {
-                const slideEl = swiper.slides[index];
+            function loadPlayerForSlide(swiperInstance, index) {
+                const slideEl = swiperInstance.slides[index];
                 if (!slideEl) return;
 
                 const slideId = slideEl.dataset.slideId;
                 if (!slideId || players[slideId]) {
-                    if (players[slideId] && swiper.activeIndex === index) {
-                        const player = players[slideId];
-                        if (player.paused) {
-                        const playPromise = player.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
-                        }
-                        }
-                    }
+                    // This case is handled by onActiveSlideChanged, so we just return.
                     return;
                 }
 
@@ -586,7 +558,7 @@
 
                 const player = new Plyr(video, {
                     muted: true,
-                    autoplay: false, // Upewnij się, że jest false
+                    autoplay: false,
                     controls: [],
                     clickToPlay: false,
                     tooltips: { controls: false, seek: false }
@@ -596,16 +568,13 @@
                 const source = slideData.hlsUrl || slideData.mp4Url;
                 const isHls = slideData.hlsUrl && Hls.isSupported();
 
-                // Używaj zdarzenia 'ready' do odtwarzania wideo
                 player.on('ready', () => {
-                    if (swiper.activeIndex === index) {
+                    // The onActiveSlideChanged handler will call play().
+                    // We just ensure it's ready.
+                    if (swiperInstance.realIndex === index) {
                         const playPromise = player.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(error => {
-                                if (error.name !== 'AbortError') {
-                                    console.error("Playback error:", error);
-                                }
-                            });
+                        if (playPromise) {
+                            playPromise.catch(e => {if (e.name !== 'AbortError') console.error('Autoplay error on ready', e)});
                         }
                     }
                 });
@@ -618,7 +587,6 @@
                     hls.on(Hls.Events.ERROR, function(event, data) {
                         if (data.fatal) {
                             console.error("HLS fatal error:", data);
-                            // Dodaj logikę odzyskiwania błędu
                             switch(data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
                                     hls.startLoad();
@@ -627,8 +595,6 @@
                                     hls.recoverMediaError();
                                     break;
                                 default:
-                                    destroyPlayer(slideId);
-                                    loadPlayerForSlide(index);
                                     break;
                             }
                         }
@@ -642,27 +608,32 @@
                 }
             }
 
-            function onActiveSlideChanged(swiper) {
-                const activeIndex = swiper.realIndex; // Użyj realIndex dla pętli
-                // Pauzuj wszystkie odtwarzacze, które nie są aktywne
+            function onActiveSlideChanged(swiperInstance) {
+                const activeIndex = swiperInstance.realIndex;
+
+                // Pause all non-active players
                 Object.keys(players).forEach(slideId => {
-                    const index = swiper.slides.findIndex(s => s.dataset.slideId === slideId);
-                    if (index !== activeIndex) {
-                        players[slideId].pause();
+                    const player = players[slideId];
+                    // Find the slide element associated with this player
+                    const slideForPlayer = player.elements.container.closest('.swiper-slide');
+                    if (slideForPlayer && !slideForPlayer.classList.contains('swiper-slide-active')) {
+                        player.pause();
                     }
                 });
 
-                // Załaduj i odtwórz aktywny slajd, jeśli jeszcze nie jest odtwarzany
-                const activeSlideEl = swiper.slides[activeIndex];
+                // Load and/or play the active slide
+                const activeSlideEl = swiperInstance.slides[swiperInstance.activeIndex];
                 if (activeSlideEl) {
                     const slideId = activeSlideEl.dataset.slideId;
                     if (!players[slideId]) {
-                        loadPlayerForSlide(activeIndex);
+                        loadPlayerForSlide(swiperInstance, swiperInstance.activeIndex);
                     } else {
                         const player = players[slideId];
-                        const playPromise = player.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
+                        if (player.paused) {
+                            const playPromise = player.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
+                            }
                         }
                     }
                 }
@@ -670,7 +641,6 @@
 
             return {
                 init: () => {
-                    // Slides are already rendered by UI.renderSlides()
                     new Swiper('.swiper', {
                         direction: 'vertical',
                         mousewheel: true,
@@ -678,17 +648,8 @@
                         keyboard: true,
                         on: {
                             init: function () {
-                                 swiper = this; // Assign the swiper instance to the closure variable
-                                 // Odtwórz tylko początkowy slajd po inicjalizacji
-                                 const initialSlideEl = this.slides[this.realIndex];
-                                 if (initialSlideEl) {
-                                     const slideId = initialSlideEl.dataset.slideId;
-                                     if (!players[slideId]) {
-                                         loadPlayerForSlide(this.realIndex);
-                                     } else {
-                                         players[slideId].play();
-                                     }
-                                 }
+                                const swiperInstance = this;
+                                onActiveSlideChanged(swiperInstance);
                             },
                             slideChange: onActiveSlideChanged,
                         },
