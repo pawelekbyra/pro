@@ -566,14 +566,13 @@
 
                 const slideId = slideEl.dataset.slideId;
                 if (!slideId || players[slideId]) {
-                    // If player already exists, and it's the active slide, play it.
                     if (players[slideId] && swiper.activeIndex === index) {
                         const player = players[slideId];
                         if (player.paused) {
-                           const playPromise = player.play();
-                           if (playPromise !== undefined) {
-                               playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
-                           }
+                        const playPromise = player.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(e => { if (e.name !== 'AbortError') console.error('Play interrupted on existing player', e) });
+                        }
                         }
                     }
                     return;
@@ -587,7 +586,7 @@
 
                 const player = new Plyr(video, {
                     muted: true,
-                    autoplay: false,
+                    autoplay: false, // Upewnij się, że jest false
                     controls: [],
                     clickToPlay: false,
                     tooltips: { controls: false, seek: false }
@@ -597,6 +596,7 @@
                 const source = slideData.hlsUrl || slideData.mp4Url;
                 const isHls = slideData.hlsUrl && Hls.isSupported();
 
+                // Używaj zdarzenia 'ready' do odtwarzania wideo
                 player.on('ready', () => {
                     if (swiper.activeIndex === index) {
                         const playPromise = player.play();
@@ -618,7 +618,19 @@
                     hls.on(Hls.Events.ERROR, function(event, data) {
                         if (data.fatal) {
                             console.error("HLS fatal error:", data);
-                            // we could try to recover here
+                            // Dodaj logikę odzyskiwania błędu
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    hls.startLoad();
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    hls.recoverMediaError();
+                                    break;
+                                default:
+                                    destroyPlayer(slideId);
+                                    loadPlayerForSlide(index);
+                                    break;
+                            }
                         }
                     });
                 } else {
@@ -1651,8 +1663,6 @@
                 try {
                     State.set('currentLang', selectedLang);
                     localStorage.setItem('tt_lang', selectedLang);
-
-                    UI.renderSlides();
                     UI.updateTranslations();
                     VideoManager.init();
 
@@ -1661,8 +1671,6 @@
                         UI.DOM.container.classList.add('ready');
                         UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
                     }, 1000);
-
-                    // The old scroll logic is removed. Swiper handles everything.
                 } catch (error) {
                     alert('Application failed to start. Error: ' + error.message + '\\n\\nStack: ' + error.stack);
                     console.error("TingTong App Start Error:", error);
@@ -1675,6 +1683,8 @@
                     button.addEventListener('click', () => {
                         UI.DOM.preloader.querySelectorAll('.language-selection button').forEach(btn => btn.disabled = true);
                         button.classList.add('is-selected');
+                        // RENDERUJ SLAJDY PRZED INICJALIZACJĄ SWIPERA
+                        UI.renderSlides();
                         setTimeout(() => _startApp(button.dataset.lang), 300);
                     }, { once: true });
                 });
