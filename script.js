@@ -89,13 +89,7 @@
     isLoggedIn: false,
     slides: [
         {
-            'id': 'slide-livepush-1',
-            'likeId': 'livepush-1',
-            'user': 'Livepush',
-            'description': 'Livepush.io embedded video',
-            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
-            'poster': 'logsiks.png',
-            'avatar': 'https://i.pravatar.cc/100?u=livepush',
+
             'access': 'public',
             'initialLikes': 0,
             'isLiked': false,
@@ -103,18 +97,7 @@
             'isIframe': true
         },
         {
-            'id': 'slide-livepush-2',
-            'likeId': 'livepush-2',
-            'user': 'Livepush',
-            'description': 'Livepush.io embedded video',
-            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
-            'poster': 'logsiks.png',
-            'avatar': 'https://i.pravatar.cc/100?u=livepush',
-            'access': 'public',
-            'initialLikes': 0,
-            'isLiked': false,
-            'initialComments': 0,
-            'isIframe': true
+
         }
     ]
 };
