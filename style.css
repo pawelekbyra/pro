@@ -2035,23 +2035,21 @@
 
 .tiktok-profile-header {
     height: var(--topbar-height);
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     padding: 0 16px;
     padding-top: var(--safe-area-top);
     background-color: #000;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
-    position: relative;
 }
 
 .tiktok-profile-header .username {
     font-size: 16px;
     font-weight: 700;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    text-align: center;
+    grid-column: 2;
 }
 
 .tiktok-profile-header .profile-action-btn,
@@ -2100,8 +2098,9 @@
 
 .profile-summary {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     margin-bottom: 16px;
 }
 
@@ -2121,6 +2120,7 @@
     display: flex;
     justify-content: space-around;
     flex-grow: 1;
+    gap: 20px;
 }
 
 .stat-item {
