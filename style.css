@@ -2043,6 +2043,10 @@
     transform: translateX(0);
 }
 
+#tiktok-profile-modal.is-hiding .tiktok-profile-content {
+    transform: translateX(100%);
+}
+
 .tiktok-profile-header {
     height: var(--topbar-height);
     display: grid;
@@ -2152,6 +2156,12 @@
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 4px;
+}
+
+#tiktok-profile-at-username {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: -8px;
 }
 
 .profile-bio {

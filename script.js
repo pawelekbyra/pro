@@ -109,7 +109,7 @@
             'initialComments': 8,
             'isIframe': true,
             'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
-            'user': 'Paweł polutek',
+            'user': 'Paweł Polutek',
             'description': 'Podpis do filmiku 2',
             'avatar': 'https://i.pravatar.cc/100?u=2',
             'likeId': '102'
@@ -324,11 +324,30 @@
             }
 
             function closeModal(modal) {
-                modal.classList.remove('visible');
-                modal.setAttribute('aria-hidden', 'true');
-                if (modal._focusTrapDispose) { modal._focusTrapDispose(); delete modal._focusTrapDispose; }
-                DOM.container.removeAttribute('aria-hidden');
-                State.get('lastFocusedElement')?.focus();
+                const modalContent = modal.querySelector('.modal-content, .tiktok-profile-content');
+                if (modal.id === 'tiktok-profile-modal' && modalContent) {
+                    const onTransitionEnd = (event) => {
+                        if (event.target === modalContent && event.propertyName === 'transform') {
+                            modal.classList.remove('visible');
+                            modal.classList.remove('is-hiding');
+                            modalContent.removeEventListener('transitionend', onTransitionEnd);
+                            if (modal._focusTrapDispose) { modal._focusTrapDispose(); delete modal._focusTrapDispose; }
+                            DOM.container.removeAttribute('aria-hidden');
+                            State.get('lastFocusedElement')?.focus();
+                        }
+                    };
+                    modalContent.addEventListener('transitionend', onTransitionEnd);
+                    modal.classList.add('is-hiding');
+                    // The CSS will now trigger the transform animation.
+                    // After the animation, the 'transitionend' event will clean up.
+                } else {
+                    // Fallback for other modals
+                    modal.classList.remove('visible');
+                    modal.setAttribute('aria-hidden', 'true');
+                    if (modal._focusTrapDispose) { modal._focusTrapDispose(); delete modal._focusTrapDispose; }
+                    DOM.container.removeAttribute('aria-hidden');
+                    State.get('lastFocusedElement')?.focus();
+                }
             }
 
             function updateLikeButtonState(likeButton, liked, count) {
@@ -470,9 +489,11 @@
                 if (!slideData || !DOM.tiktokProfileModal) return;
 
                 // Basic info
+                const atUsername = `@${slideData.user.toLowerCase().replace(/\s/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`;
                 DOM.tiktokProfileModal.querySelector('#tiktok-profile-avatar').src = slideData.avatar;
-                DOM.tiktokProfileModal.querySelector('#tiktok-profile-username').textContent = `@${slideData.user.toLowerCase().replace(/\s/g, '_')}`;
+                DOM.tiktokProfileModal.querySelector('#tiktok-profile-username').textContent = atUsername;
                 DOM.tiktokProfileModal.querySelector('#tiktok-profile-nickname').textContent = slideData.user;
+                DOM.tiktokProfileModal.querySelector('#tiktok-profile-at-username').textContent = atUsername;
                 DOM.tiktokProfileModal.querySelector('#tiktok-profile-bio').textContent = `To jest bio użytkownika ${slideData.user}.\nOdkryj więcej! ✨`;
 
                 // Stats
