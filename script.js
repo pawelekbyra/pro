@@ -89,15 +89,30 @@
     isLoggedIn: false,
     slides: [
         {
-
+            'id': 'slide1',
             'access': 'public',
-            'initialLikes': 0,
+            'initialLikes': 10,
             'isLiked': false,
-            'initialComments': 0,
-            'isIframe': true
+            'initialComments': 5,
+            'isIframe': true,
+            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
+            'user': 'Filmik 1',
+            'description': 'Podpis do filmiku 1',
+            'avatar': 'https://i.pravatar.cc/100?u=1',
+            'likeId': '101'
         },
         {
-
+            'id': 'slide2',
+            'access': 'public',
+            'initialLikes': 20,
+            'isLiked': false,
+            'initialComments': 8,
+            'isIframe': true,
+            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
+            'user': 'Filmik 2',
+            'description': 'Podpis do filmiku 2',
+            'avatar': 'https://i.pravatar.cc/100?u=2',
+            'likeId': '102'
         }
     ]
 };
