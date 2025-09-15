@@ -157,6 +157,20 @@
             'initialLikes': 505,
             'isLiked': false,
             'initialComments': 55
+        },
+        {
+            'id': 'slide-livepush',
+            'likeId': 'livepush-1',
+            'user': 'Livepush',
+            'description': 'Livepush.io embedded video',
+            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
+            'poster': 'logsiks.png',
+            'avatar': 'https://i.pravatar.cc/100?u=livepush',
+            'access': 'public',
+            'initialLikes': 0,
+            'isLiked': false,
+            'initialComments': 0,
+            'isIframe': true
         }
     ]
 };
@@ -461,6 +475,27 @@
                 section.dataset.index = index;
                 section.dataset.slideId = slideData.id;
 
+                if (slideData.isIframe) {
+                    const tiktokSymulacja = section.querySelector('.tiktok-symulacja');
+                    const videoEl = tiktokSymulacja.querySelector('video');
+                    if (videoEl) videoEl.remove();
+                    const pauseOverlay = tiktokSymulacja.querySelector('.pause-overlay');
+                    if (pauseOverlay) pauseOverlay.remove();
+                    const secretOverlay = tiktokSymulacja.querySelector('.secret-overlay');
+                    if (secretOverlay) secretOverlay.remove();
+                    const errorOverlay = tiktokSymulacja.querySelector('.error-overlay');
+                    if (errorOverlay) errorOverlay.remove();
+
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.src = slideData.iframeUrl;
+                    iframe.frameBorder = "0";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+                    tiktokSymulacja.prepend(iframe);
+                }
+
                 section.querySelector('.tiktok-symulacja').dataset.access = slideData.access;
                 section.querySelector('.profileButton img').src = slideData.avatar;
                 section.querySelector('.text-user').textContent = slideData.user;
@@ -567,12 +602,15 @@
     }
 
     function initPlayer(sectionEl) {
-        const video = sectionEl.querySelector('.player');
-        if (!video) return;
-
         const slideId = sectionEl.dataset.slideId;
         const slideData = slidesData.find(s => s.id === slideId);
         if (!slideData) return;
+
+        if (slideData.isIframe) {
+            return;
+        }
+        const video = sectionEl.querySelector('.player');
+        if (!video) return;
 
         const source = slideData.hlsUrl || slideData.mp4Url;
         const isHls = !!slideData.hlsUrl;
@@ -737,9 +775,33 @@
             if (p && p.pause) p.pause();
         });
 
+        swiper.slides.forEach(slideEl => {
+            const slideId = slideEl.dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData && slideData.isIframe) {
+                const iframe = slideEl.querySelector('iframe');
+                if (iframe) {
+                    if (!iframe.dataset.originalSrc) {
+                        iframe.dataset.originalSrc = iframe.src;
+                    }
+                    iframe.src = '';
+                }
+            }
+        });
+
         const activeSlide = swiper.slides[swiper.activeIndex];
         if (activeSlide) {
             const slideId = activeSlide.dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+
+            if (slideData && slideData.isIframe) {
+                const iframe = activeSlide.querySelector('iframe');
+                if (iframe && iframe.dataset.originalSrc) {
+                    iframe.src = iframe.dataset.originalSrc;
+                }
+                return;
+            }
+
             if (slideId && players[slideId]) {
                 const player = players[slideId];
                 // Próbuj odtworzyć z opóźnieniem
