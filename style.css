@@ -204,6 +204,15 @@
         /* ==========================================================================
            --- GŁÓWNY LAYOUT (TIKTOK-LIKE) ---
            ========================================================================== */
+#app-frame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
         .tiktok-symulacja {
             position: relative;
             width: 100%;
@@ -322,10 +331,9 @@
     top: 0;
     left: 0;
     width: 100%; /* teraz 100% szerokości #app-frame */
-    height: var(--topbar-height);
+    height: var(--topbar-base-height);
     padding-top: var(--safe-area-top);
     z-index: 115;
-    padding: 0;
     font: inherit;
     color: inherit;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -373,14 +381,13 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            min-height: 110px;
+            min-height: var(--bottombar-base-height);
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-    padding: 10px 75px 10px 12px;
+            padding: 10px 75px calc(10px + var(--safe-area-bottom)) 12px;
             color: white;
             z-index: 105;
-            padding-bottom: calc(10px + var(--safe-area-bottom));
         }
         .tiktok-symulacja .text-info {
             flex: none;
