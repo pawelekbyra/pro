@@ -89,74 +89,15 @@
     isLoggedIn: false,
     slides: [
         {
-            'id': 'slide-001',
-            'likeId': '1',
-            'user': 'Big Buck Bunny',
-            'description': 'Big Buck Bunny',
-            'mp4Url': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            'hlsUrl': '',
-            'poster': 'https://picsum.photos/720/1280?random=1',
-            'avatar': 'https://i.pravatar.cc/100?u=bunny',
+
             'access': 'public',
-            'initialLikes': 101,
+            'initialLikes': 0,
             'isLiked': false,
-            'initialComments': 11
+            'initialComments': 0,
+            'isIframe': true
         },
         {
-            'id': 'slide-002',
-            'likeId': '2',
-            'user': 'Elephants Dream',
-            'description': 'Elephants Dream',
-            'mp4Url': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-            'hlsUrl': '',
-            'poster': 'https://picsum.photos/720/1280?random=2',
-            'avatar': 'https://i.pravatar.cc/100?u=elephant',
-            'access': 'public',
-            'initialLikes': 202,
-            'isLiked': false,
-            'initialComments': 22
-        },
-        {
-            'id': 'slide-003',
-            'likeId': '3',
-            'user': 'For Bigger Blazes',
-            'description': 'For Bigger Blazes',
-            'mp4Url': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-            'hlsUrl': '',
-            'poster': 'https://picsum.photos/720/1280?random=3',
-            'avatar': 'https://i.pravatar.cc/100?u=blaze',
-            'access': 'public',
-            'initialLikes': 303,
-            'isLiked': false,
-            'initialComments': 33
-        },
-        {
-            'id': 'slide-004',
-            'likeId': '4',
-            'user': 'For Bigger Escapes',
-            'description': 'For Bigger Escapes',
-            'mp4Url': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-            'hlsUrl': '',
-            'poster': 'https://picsum.photos/720/1280?random=4',
-            'avatar': 'https://i.pravatar.cc/100?u=escape',
-            'access': 'secret',
-            'initialLikes': 404,
-            'isLiked': false,
-            'initialComments': 44
-        },
-        {
-            'id': 'slide-005',
-            'likeId': '5',
-            'user': 'For Bigger Fun',
-            'description': 'For Bigger Fun',
-            'mp4Url': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-            'hlsUrl': '',
-            'poster': 'https://picsum.photos/720/1280?random=5',
-            'avatar': 'https://i.pravatar.cc/100?u=fun',
-            'access': 'public',
-            'initialLikes': 505,
-            'isLiked': false,
-            'initialComments': 55
+
         }
     ]
 };
@@ -461,6 +402,27 @@
                 section.dataset.index = index;
                 section.dataset.slideId = slideData.id;
 
+                if (slideData.isIframe) {
+                    const tiktokSymulacja = section.querySelector('.tiktok-symulacja');
+                    const videoEl = tiktokSymulacja.querySelector('video');
+                    if (videoEl) videoEl.remove();
+                    const pauseOverlay = tiktokSymulacja.querySelector('.pause-overlay');
+                    if (pauseOverlay) pauseOverlay.remove();
+                    const secretOverlay = tiktokSymulacja.querySelector('.secret-overlay');
+                    if (secretOverlay) secretOverlay.remove();
+                    const errorOverlay = tiktokSymulacja.querySelector('.error-overlay');
+                    if (errorOverlay) errorOverlay.remove();
+
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.src = slideData.iframeUrl;
+                    iframe.frameBorder = "0";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                    iframe.allowFullscreen = true;
+                    tiktokSymulacja.prepend(iframe);
+                }
+
                 section.querySelector('.tiktok-symulacja').dataset.access = slideData.access;
                 section.querySelector('.profileButton img').src = slideData.avatar;
                 section.querySelector('.text-user').textContent = slideData.user;
@@ -567,12 +529,15 @@
     }
 
     function initPlayer(sectionEl) {
-        const video = sectionEl.querySelector('.player');
-        if (!video) return;
-
         const slideId = sectionEl.dataset.slideId;
         const slideData = slidesData.find(s => s.id === slideId);
         if (!slideData) return;
+
+        if (slideData.isIframe) {
+            return;
+        }
+        const video = sectionEl.querySelector('.player');
+        if (!video) return;
 
         const source = slideData.hlsUrl || slideData.mp4Url;
         const isHls = !!slideData.hlsUrl;
@@ -737,9 +702,33 @@
             if (p && p.pause) p.pause();
         });
 
+        swiper.slides.forEach(slideEl => {
+            const slideId = slideEl.dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData && slideData.isIframe) {
+                const iframe = slideEl.querySelector('iframe');
+                if (iframe) {
+                    if (!iframe.dataset.originalSrc) {
+                        iframe.dataset.originalSrc = iframe.src;
+                    }
+                    iframe.src = '';
+                }
+            }
+        });
+
         const activeSlide = swiper.slides[swiper.activeIndex];
         if (activeSlide) {
             const slideId = activeSlide.dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+
+            if (slideData && slideData.isIframe) {
+                const iframe = activeSlide.querySelector('iframe');
+                if (iframe && iframe.dataset.originalSrc) {
+                    iframe.src = iframe.dataset.originalSrc;
+                }
+                return;
+            }
+
             if (slideId && players[slideId]) {
                 const player = players[slideId];
                 // Próbuj odtworzyć z opóźnieniem
