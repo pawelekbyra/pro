@@ -140,7 +140,6 @@
            ========================================================================== */
         :root {
             --app-height: 100vh;
-    --app-safe-height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom));
             --accent-color: #ff0055;
             --main-ui-bg-color: #696969;
             --transition-speed: 0.4s;
@@ -158,48 +157,49 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-html, body {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #000;
-    color: white;
-    overscroll-behavior-y: contain;
-    user-select: none;
-    -webkit-user-select: none;
-    height: 100vh; /* Ważna zmiana */
-}
-
-#app-frame {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh; /* Ważna zmiana */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-#webyx-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s linear;
-    overflow: hidden;
-}
-
-.webyx-section {
-    width: 100vw;
-    height: var(--app-height); /* Używamy zmiennej, która jest ustawiana w JS */
-    overflow: hidden;
-    position: relative;
-}
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            overscroll-behavior-y: contain; /* Prevent bounce scroll */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body::-webkit-scrollbar, #webyx-container::-webkit-scrollbar {
+            display: none;
+        }
+        body, #webyx-container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        #webyx-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0; /* Hidden initially */
+            transition: opacity 0.5s linear;
+            overflow: hidden; /* Swiper handles overflow */
+        }
+        #webyx-container.ready {
+            opacity: 1;
+        }
+        #webyx-container.no-transition {
+            /* This might be handled by swiper's allowTouchMove parameter */
+        }
+        .webyx-section {
+            width: 100vw;
+            height: 100vh;
+            height: var(--app-height); /* Use var, remove 1px patch for scroll-snap */
+            overflow: hidden;
+            position: relative;
+            -webkit-transform: translate3d(0, 0, 0); /* Wymuś nową warstwę (zapobiega migotaniu) */
+            transform: translate3d(0, 0, 0); /* Wymuś nową warstwę (zapobiega migotaniu) */
+        }
 
         /* ==========================================================================
            --- GŁÓWNY LAYOUT (TIKTOK-LIKE) ---
@@ -314,21 +314,22 @@ html, body {
             backdrop-filter: blur(8px);
         }
 .topbar {
-    position: absolute;
+    position: absolute; /* Zmienione z 'fixed' na 'absolute' */
     display: flex;
     justify-content: center;
     align-items: center;
     text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
     top: 0;
     left: 0;
-    width: 100%;
-    height: var(--topbar-height); /* Użycie zmiennej, która uwzględnia bezpieczny obszar */
+    width: 100%; /* teraz 100% szerokości #app-frame */
+    height: var(--topbar-height);
+    padding-top: var(--safe-area-top);
+    z-index: 115;
     padding: 0;
     font: inherit;
     color: inherit;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     transition: border-color 0.3s ease-out;
-    padding-top: var(--safe-area-top); /* Usunięcie podwójnego paddingu */
 }
         .topbar.login-panel-active {
             border-bottom-color: transparent;
@@ -356,31 +357,31 @@ html, body {
             margin-left: 6px;
             transition: transform 0.3s ease;
         }
-.tiktok-symulacja .sidebar {
-    position: absolute;
-    top: 50%; /* Zmieniamy na 50%, aby umieścić pasek pośrodku */
-    right: -4px;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    z-index: 105;
-}
-.tiktok-symulacja .bottombar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    min-height: 110px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+        .tiktok-symulacja .sidebar {
+            position: absolute;
+            top: calc((var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 + var(--topbar-height));
+            right: -4px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: 105;
+        }
+        .tiktok-symulacja .bottombar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            min-height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
     padding: 10px 75px 10px 12px;
-    color: white;
-    z-index: 105;
-    padding-bottom: var(--safe-area-bottom); /* Użycie zmiennej, która uwzględnia bezpieczny obszar */
-}
+            color: white;
+            z-index: 105;
+            padding-bottom: calc(10px + var(--safe-area-bottom));
+        }
         .tiktok-symulacja .text-info {
             flex: none;
             min-width: 0;
