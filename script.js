@@ -211,8 +211,8 @@
                     State.set('lastUserGestureTimestamp', Date.now());
                 },
                 setAppHeightVar: () => {
-    document.documentElement.style.setProperty('--app-height', `calc(${window.innerHeight}px - var(--safe-area-top) - var(--safe-area-bottom))`);
-}
+                  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+                }
             };
         })();
 
