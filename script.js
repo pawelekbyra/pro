@@ -109,7 +109,7 @@
             'initialComments': 8,
             'isIframe': true,
             'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
-            'user': 'Filmik 2',
+            'user': 'Paweł polutek',
             'description': 'Podpis do filmiku 2',
             'avatar': 'https://i.pravatar.cc/100?u=2',
             'likeId': '102'
