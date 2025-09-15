@@ -2023,6 +2023,10 @@
    --- TIKTOK PUBLIC PROFILE MODAL ---
    ========================================================================== */
 
+#tiktok-profile-modal {
+    transition: visibility 0.4s linear;
+}
+
 #tiktok-profile-modal .tiktok-profile-content {
     background-color: #121212;
     color: #fff;
@@ -2031,7 +2035,7 @@
     display: flex;
     flex-direction: column;
     transform: translateX(100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.4s linear;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
