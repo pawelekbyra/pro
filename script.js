@@ -1751,121 +1751,6 @@
             return { init, openAccountModal, closeAccountModal };
         })();
 
-        const Tutorial = (function() {
-            let tour;
-
-            const steps = {
-                pl: [
-                    {
-                        id: 'welcome',
-                        title: 'Witaj w Ting Tong!',
-                        text: 'Krótki przewodnik pokaże Ci, jak korzystać z aplikacji. Zaczynajmy!',
-                        buttons: [{ text: 'Dalej', action() { this.next(); }}]
-                    },
-                    {
-                        id: 'sidebar',
-                        title: 'Interakcje',
-                        text: 'Tutaj znajdziesz wszystkie opcje interakcji z filmem: polubienia, komentarze, udostępnianie i więcej.',
-                        attachTo: { element: '.swiper-slide-active .sidebar', on: 'left' },
-                        buttons: [
-                            { classes: 'shepherd-button-secondary', text: 'Wstecz', action() { this.back(); }},
-                            { text: 'Dalej', action() { this.next(); }}
-                        ]
-                    },
-                    {
-                        id: 'login',
-                        title: 'Twoje Konto',
-                        text: 'Kliknij tutaj, aby się zalogować lub założyć konto. Daje to dostęp do dodatkowych funkcji!',
-                        attachTo: { element: '.topbar-central-trigger', on: 'bottom' },
-                         buttons: [
-                            { classes: 'shepherd-button-secondary', text: 'Wstecz', action() { this.back(); }},
-                            { text: 'Dalej', action() { this.next(); }}
-                        ]
-                    },
-                    {
-                        id: 'final',
-                        title: 'Wszystko gotowe!',
-                        text: 'To już wszystko! Przewijaj filmy i baw się dobrze. Miłego oglądania!',
-                        buttons: [{ text: 'Zakończ', action() { this.complete(); }}]
-                    }
-                ],
-                en: [
-                     {
-                        id: 'welcome',
-                        title: 'Welcome to Ting Tong!',
-                        text: "This short guide will show you how to use the app. Let's get started!",
-                        buttons: [{ text: 'Next', action() { this.next(); }}]
-                    },
-                    {
-                        id: 'sidebar',
-                        title: 'Interactions',
-                        text: "Here you'll find all the options to interact with the video: likes, comments, sharing, and more.",
-                        attachTo: { element: '.swiper-slide-active .sidebar', on: 'left' },
-                        buttons: [
-                            { classes: 'shepherd-button-secondary', text: 'Back', action() { this.back(); }},
-                            { text: 'Next', action() { this.next(); }}
-                        ]
-                    },
-                    {
-                        id: 'login',
-                        title: 'Your Account',
-                        text: 'Click here to log in or create an account. This gives you access to extra features!',
-                        attachTo: { element: '.topbar-central-trigger', on: 'bottom' },
-                         buttons: [
-                            { classes: 'shepherd-button-secondary', text: 'Back', action() { this.back(); }},
-                            { text: 'Next', action() { this.next(); }}
-                        ]
-                    },
-                    {
-                        id: 'final',
-                        title: 'All Set!',
-                        text: "That's it! Scroll through the videos and have fun. Enjoy watching!",
-                        buttons: [{ text: 'Finish', action() { this.complete(); }}]
-                    }
-                ]
-            };
-
-            function init() {
-                try {
-                    if (localStorage.getItem('tingtong_tutorial_completed')) {
-                        return;
-                    }
-
-                    tour = new Shepherd.Tour({
-                        useModalOverlay: true,
-                        defaultStepOptions: {
-                            classes: 'shepherd-theme-arrows',
-                            scrollTo: { behavior: 'smooth', block: 'center' }
-                        }
-                    });
-
-                    const currentLang = State.get('currentLang') || 'pl';
-                    steps[currentLang].forEach(step => tour.addStep(step));
-
-                    tour.on('complete', () => localStorage.setItem('tingtong_tutorial_completed', 'true'));
-                    tour.on('cancel', () => localStorage.setItem('tingtong_tutorial_completed', 'true'));
-
-                    // Start the tour slightly after the app is ready to ensure elements are visible
-                    setTimeout(() => {
-                        // A small hack to ensure the sidebar element is discoverable.
-                        // We need to make sure we're not on an iframe slide.
-                        const swiper = document.querySelector('.swiper').swiper;
-                        const firstRealSlideIndex = slidesData.findIndex(s => !s.isIframe);
-                        if (swiper && firstRealSlideIndex !== -1 && swiper.activeIndex !== firstRealSlideIndex) {
-                           swiper.slideTo(firstRealSlideIndex, 0); // a jump without animation
-                        }
-                        // Now start the tour
-                        tour.start();
-                    }, 2000); // 2-second delay
-
-                } catch (e) {
-                    console.error("Failed to initialize tutorial", e);
-                }
-            }
-
-            return { init };
-        })();
-
 
         /**
          * ==========================================================================
@@ -1934,7 +1819,6 @@
                     UI.renderSlides();
                     UI.updateTranslations();
                     VideoManager.init();
-                    Tutorial.init();
 
                     setTimeout(() => {
                         UI.DOM.preloader.classList.add('preloader-hiding');
