@@ -103,7 +103,7 @@
         },
         {
             'id': 'slide2',
-            'access': 'public',
+            'access': 'secret',
             'initialLikes': 20,
             'isLiked': false,
             'initialComments': 8,
@@ -116,7 +116,7 @@
         },
         {
             'id': 'slide3',
-            'access': 'public',
+            'access': 'pwa',
             'initialLikes': 30,
             'isLiked': false,
             'initialComments': 15,
