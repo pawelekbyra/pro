@@ -94,8 +94,8 @@
             'initialLikes': 10,
             'isLiked': false,
             'initialComments': 5,
-            'isIframe': true,
-            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
+            'isIframe': false,
+            'mp4Url': 'https://file-examples.com/wp-content/storage/2017/04/file_example_MP4_480_1_5MG.mp4',
             'user': 'Filmik 1',
             'description': 'Podpis do filmiku 1',
             'avatar': 'https://i.pravatar.cc/100?u=1',
@@ -107,12 +107,25 @@
             'initialLikes': 20,
             'isLiked': false,
             'initialComments': 8,
-            'isIframe': true,
-            'iframeUrl': 'https://player.livepush.io/video/QOTZxvQpApYmnqE',
+            'isIframe': false,
+            'mp4Url': 'https://file-examples.com/wp-content/storage/2017/04/file_example_MP4_640_3MG.mp4',
             'user': 'Paweł Polutek',
             'description': 'Podpis do filmiku 2',
             'avatar': 'https://i.pravatar.cc/100?u=2',
             'likeId': '102'
+        },
+        {
+            'id': 'slide3',
+            'access': 'public',
+            'initialLikes': 30,
+            'isLiked': false,
+            'initialComments': 15,
+            'isIframe': false,
+            'mp4Url': 'https://labs.inqscribe.com/samples/test-video.mp4',
+            'user': 'Test Video',
+            'description': 'A test video slide.',
+            'avatar': 'https://i.pravatar.cc/100?u=3',
+            'likeId': '103'
         }
     ]
 };
@@ -455,6 +468,11 @@
                     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
                     iframe.allowFullscreen = true;
                     tiktokSymulacja.prepend(iframe);
+                } else if (slideData.mp4Url) {
+                    const videoEl = section.querySelector('video');
+                    if (videoEl) {
+                        videoEl.src = slideData.mp4Url;
+                    }
                 }
 
                 section.querySelector('.tiktok-symulacja').dataset.access = slideData.access;
@@ -534,303 +552,6 @@
         })();
 
 
-        const VideoManager = (function() {
-    let swiper;
-    const players = {};
-    const retryAttempts = new Map(); // Śledzenie prób ponownego ładowania
-
-    function createErrorOverlay(sectionEl, message) {
-        const existingError = sectionEl.querySelector('.video-error-overlay');
-        if (existingError) existingError.remove();
-
-        const errorOverlay = document.createElement('div');
-        errorOverlay.className = 'video-error-overlay';
-        errorOverlay.innerHTML = `
-            <div class="error-content">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                <h3>${Utils.getTranslation('videoErrorTitle')}</h3>
-                <p>${message || Utils.getTranslation('videoErrorSubtitle')}</p>
-                <button class="retry-btn" onclick="VideoManager.retryVideo('${sectionEl.dataset.slideId}')">
-                    ${Utils.getTranslation('videoErrorRetry')}
-                </button>
-            </div>
-        `;
-
-        const playerContainer = sectionEl.querySelector('.player-container');
-        if (playerContainer) {
-            playerContainer.appendChild(errorOverlay);
-        }
-    }
-
-    function initPlayer(sectionEl) {
-        const slideId = sectionEl.dataset.slideId;
-        const slideData = slidesData.find(s => s.id === slideId);
-        if (!slideData) return;
-
-        if (slideData.isIframe) {
-            return;
-        }
-        const video = sectionEl.querySelector('.player');
-        if (!video) return;
-
-        const source = slideData.hlsUrl || slideData.mp4Url;
-        const isHls = !!slideData.hlsUrl;
-
-        video.setAttribute('poster', slideData.poster);
-
-        if (isHls && Hls.isSupported()) {
-            // Konfiguracja HLS.js z lepszym error handlingiem
-            const hls = new Hls({
-                debug: false, // Wyłączamy debug w produkcji
-                enableWorker: false, // Wyłączamy Web Workers jeśli są problemy z CSP
-                lowLatencyMode: false,
-                backBufferLength: 90,
-                maxBufferLength: 30,
-                maxMaxBufferLength: 600,
-                maxBufferSize: 60 * 1000 * 1000,
-                maxBufferHole: 0.5,
-                highBufferWatchdogPeriod: 2,
-                nudgeOffset: 0.1,
-                nudgeMaxRetry: 3,
-                maxFragLookUpTolerance: 0.25,
-                liveSyncDurationCount: 3,
-                liveMaxLatencyDurationCount: Infinity,
-                liveDurationInfinity: false,
-                liveBackBufferLength: Infinity,
-                maxLiveSyncPlaybackRate: 1,
-                liveSyncDuration: undefined,
-                liveMaxLatencyDuration: undefined,
-                maxStarvationDelay: 4,
-                maxLoadingDelay: 4,
-                minAutoBitrate: 0,
-                emeEnabled: false,
-                widevineLicenseUrl: undefined,
-                drmSystemOptions: {},
-                requestMediaKeySystemAccessFunc: null
-            });
-
-            hls.loadSource(source);
-            hls.attachMedia(video);
-
-            // Lepszy error handling
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                console.error('HLS Error:', data);
-                const attempts = retryAttempts.get(slideId) || 0;
-
-                if (data.fatal) {
-                    switch (data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            console.error('Fatal network error encountered for', slideId);
-                            if (attempts < 3) {
-                                console.log(`Retrying... Attempt ${attempts + 1}/3`);
-                                retryAttempts.set(slideId, attempts + 1);
-                                setTimeout(() => {
-                                    hls.startLoad();
-                                }, 1000 * (attempts + 1)); // Exponential backoff
-                            } else {
-                                createErrorOverlay(sectionEl, 'Błąd sieci. Sprawdź połączenie internetowe.');
-                                hls.destroy();
-                            }
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.error('Fatal media error encountered for', slideId);
-                            if (attempts < 2) {
-                                console.log('Trying to recover media error...');
-                                retryAttempts.set(slideId, attempts + 1);
-                                hls.recoverMediaError();
-                            } else {
-                                createErrorOverlay(sectionEl, 'Błąd odtwarzania multimediów.');
-                                hls.destroy();
-                            }
-                            break;
-                        default:
-                            console.error('Fatal error encountered, cannot recover for', slideId, data);
-                            createErrorOverlay(sectionEl, `Błąd odtwarzacza: ${data.details || 'Nieznany błąd'}`);
-                            hls.destroy();
-                            break;
-                    }
-                }
-            });
-
-            // Callback po załadowaniu manifest
-            hls.on(Hls.Events.MANIFEST_LOADED, function(event, data) {
-                console.log('HLS Manifest loaded for', slideId, data);
-                retryAttempts.delete(slideId); // Reset retry counter on success
-            });
-
-            // Inicjalizuj Plyr po pomyślnym załadowaniu HLS
-            hls.on(Hls.Events.MEDIA_ATTACHED, function() {
-                const player = new Plyr(video, {
-                    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                    hideControls: true,
-                    resetOnEnd: true,
-                    keyboard: { focused: false, global: false }
-                });
-
-                players[slideId] = player;
-
-                // Error handling dla Plyr
-                player.on('error', event => {
-                    console.error('Plyr error for', slideId, event);
-                    createErrorOverlay(sectionEl, 'Błąd odtwarzacza wideo.');
-                });
-            });
-
-        } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
-            // Safari native HLS
-            const player = new Plyr(video, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                hideControls: true,
-                resetOnEnd: true,
-                keyboard: { focused: false, global: false }
-            });
-
-            players[slideId] = player;
-
-            player.source = {
-                type: 'video',
-                sources: [{
-                    src: source,
-                    type: 'application/vnd.apple.mpegurl'
-                }],
-                poster: slideData.poster
-            };
-
-            // Error handling
-            player.on('error', event => {
-                console.error('Safari HLS error for', slideId, event);
-                createErrorOverlay(sectionEl, 'Błąd ładowania strumienia wideo.');
-            });
-
-        } else {
-            // Fallback do MP4
-            const player = new Plyr(video, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
-                hideControls: true,
-                resetOnEnd: true,
-                keyboard: { focused: false, global: false }
-            });
-
-            players[slideId] = player;
-
-            player.source = {
-                type: 'video',
-                sources: [{
-                    src: source,
-                    type: 'video/mp4',
-                }],
-                poster: slideData.poster
-            };
-
-            // Error handling
-            player.on('error', event => {
-                console.error('MP4 error for', slideId, event);
-                createErrorOverlay(sectionEl, 'Nie można załadować pliku wideo.');
-            });
-        }
-    }
-
-    function onActiveSlideChanged(swiper) {
-        // Zatrzymaj wszystkie odtwarzacze
-        Object.values(players).forEach(p => {
-            if (p && p.pause) p.pause();
-        });
-
-        swiper.slides.forEach(slideEl => {
-            const slideId = slideEl.dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-            if (slideData && slideData.isIframe) {
-                const iframe = slideEl.querySelector('iframe');
-                if (iframe) {
-                    if (!iframe.dataset.originalSrc) {
-                        iframe.dataset.originalSrc = iframe.src;
-                    }
-                    iframe.src = '';
-                }
-            }
-        });
-
-        const activeSlide = swiper.slides[swiper.activeIndex];
-        if (activeSlide) {
-            const slideId = activeSlide.dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-
-            if (slideData && slideData.isIframe) {
-                const iframe = activeSlide.querySelector('iframe');
-                if (iframe && iframe.dataset.originalSrc) {
-                    iframe.src = iframe.dataset.originalSrc;
-                }
-                return;
-            }
-
-            if (slideId && players[slideId]) {
-                const player = players[slideId];
-                // Próbuj odtworzyć z opóźnieniem
-                setTimeout(() => {
-                    player.play().catch(error => {
-                        console.log('Autoplay blocked for', slideId, error);
-                        const overlay = activeSlide.querySelector('.pause-overlay');
-                        if (overlay) {
-                            overlay.classList.add('visible');
-                        }
-                    });
-                }, 100);
-            }
-        }
-    }
-
-    // Funkcja retry dostępna globalnie
-    window.VideoManager = window.VideoManager || {};
-    window.VideoManager.retryVideo = function(slideId) {
-        const section = document.querySelector(`[data-slide-id="${slideId}"]`);
-        if (section) {
-            const errorOverlay = section.querySelector('.video-error-overlay');
-            if (errorOverlay) errorOverlay.remove();
-
-            // Reset retry counter
-            retryAttempts.delete(slideId);
-
-            // Zniszcz istniejący player
-            if (players[slideId]) {
-                if (players[slideId].destroy) players[slideId].destroy();
-                delete players[slideId];
-            }
-
-            // Reinicjalizuj player
-            initPlayer(section);
-        }
-    };
-
-    return {
-        init: () => {
-            slidesData.forEach((data, index) => {
-                const slideElement = UI.createSlideElement(data, index);
-                UI.DOM.container.querySelector('.swiper-wrapper').appendChild(slideElement);
-                initPlayer(slideElement);
-            });
-
-            swiper = new Swiper('.swiper', {
-                direction: 'vertical',
-                mousewheel: {
-                    releaseOnEdges: true,
-                },
-                loop: true,
-                keyboard: {
-                    enabled: true,
-                    onlyInViewport: false,
-                },
-                speed: 300,
-                on: {
-                    init: onActiveSlideChanged,
-                    slideChange: onActiveSlideChanged,
-                },
-            });
-        },
-        retryVideo: window.VideoManager?.retryVideo
-    };
-})();
 
 
         /**
@@ -1818,7 +1539,65 @@
 
                     UI.renderSlides();
                     UI.updateTranslations();
-                    VideoManager.init();
+
+                    const onActiveSlideChanged = (swiper) => {
+                        // Pause all videos
+                        document.querySelectorAll('.swiper-slide video').forEach(video => {
+                            video.pause();
+                        });
+
+                        // Pause all iframes
+                        document.querySelectorAll('.swiper-slide iframe').forEach(iframe => {
+                            if (iframe.dataset.originalSrc) {
+                                iframe.src = '';
+                            } else {
+                                iframe.dataset.originalSrc = iframe.src;
+                                iframe.src = '';
+                            }
+                        });
+
+                        const activeSlide = swiper.slides[swiper.activeIndex];
+                        if (activeSlide) {
+                            const slideData = slidesData[swiper.realIndex];
+
+                            if (slideData && slideData.isIframe) {
+                                const iframe = activeSlide.querySelector('iframe');
+                                if (iframe && iframe.dataset.originalSrc) {
+                                    iframe.src = iframe.dataset.originalSrc;
+                                }
+                            } else {
+                                const video = activeSlide.querySelector('video');
+                                if (video) {
+                                    setTimeout(() => {
+                                        video.play().catch(error => {
+                                            console.log('Autoplay was prevented for video in slide ' + swiper.activeIndex, error);
+                                            const overlay = activeSlide.querySelector('.pause-overlay');
+                                            if (overlay) {
+                                                overlay.classList.add('visible');
+                                            }
+                                        });
+                                    }, 100);
+                                }
+                            }
+                        }
+                    };
+
+                    const swiper = new Swiper('.swiper', {
+                        direction: 'vertical',
+                        mousewheel: {
+                            releaseOnEdges: true,
+                        },
+                        loop: true,
+                        keyboard: {
+                            enabled: true,
+                            onlyInViewport: false,
+                        },
+                        speed: 300,
+                        on: {
+                            init: onActiveSlideChanged,
+                            slideChange: onActiveSlideChanged,
+                        },
+                    });
 
                     setTimeout(() => {
                         UI.DOM.preloader.classList.add('preloader-hiding');
