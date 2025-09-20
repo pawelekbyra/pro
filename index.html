@@ -163,12 +163,19 @@
         <div class="modal-content" tabindex="-1">
             <div class="modal-header">
                 <h2 id="commentsTitle" data-translate-key="commentsModalTitle">Komentarze</h2>
+                <div class="comment-sort-options">
+                    <button class="sort-btn active" data-sort="newest">Najnowsze</button>
+                    <button class="sort-btn" data-sort="popular">Najpopularniejsze</button>
+                </div>
                 <button class="modal-close-btn" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
             </div>
             <div class="modal-body">
                 <!-- Comments will be rendered here -->
             </div>
             <div class="comment-form-container">
+                <div class="login-to-comment-prompt" style="display: none;">
+                    <p><a href="#" data-action="toggle-login-panel">Zaloguj się</a>, aby dodać komentarz.</p>
+                </div>
                 <form id="comment-form">
                     <input type="text" id="comment-input" placeholder="Dodaj komentarz..." autocomplete="off" aria-label="Dodaj komentarz">
                     <button type="submit" aria-label="Wyślij komentarz">

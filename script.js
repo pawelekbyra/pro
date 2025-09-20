@@ -93,7 +93,7 @@
             'access': 'public',
             'initialLikes': 10,
             'isLiked': false,
-            'initialComments': 3,
+            'initialComments': 4,
             'isIframe': false,
             'mp4Url': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             'user': 'Filmik 1',
@@ -101,9 +101,11 @@
             'avatar': 'https://i.pravatar.cc/100?u=1',
             'likeId': '101',
             'comments': [
-                { 'id': 'c1-1', 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2 min temu' },
-                { 'id': 'c1-2', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Haha, co za królik!', 'timestamp': '1 min temu' },
-                { 'id': 'c1-3', 'user': 'Anna', 'avatar': 'https://i.pravatar.cc/100?u=13', 'text': 'Super! ❤️', 'timestamp': '30 sek temu' }
+                { 'id': 'c1-1', 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2023-10-27T10:00:00Z', 'likes': 15, 'isLiked': false, 'replies': [
+                    { 'id': 'c1-1-1', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Prawda!', 'timestamp': '2023-10-27T10:01:00Z', 'likes': 2, 'isLiked': false, 'replies': [] }
+                ]},
+                { 'id': 'c1-2', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Haha, co za królik!', 'timestamp': '2023-10-27T10:05:00Z', 'likes': 5, 'isLiked': true, 'replies': [] },
+                { 'id': 'c1-3', 'user': 'Anna', 'avatar': 'https://i.pravatar.cc/100?u=13', 'text': 'Super! ❤️', 'timestamp': '2023-10-27T10:10:00Z', 'likes': 25, 'isLiked': false, 'replies': [] }
             ]
         },
         {
@@ -119,8 +121,8 @@
             'avatar': 'https://i.pravatar.cc/100?u=2',
             'likeId': '102',
             'comments': [
-                { 'id': 'c2-1', 'user': 'Admin', 'avatar': 'https://i.pravatar.cc/100?u=12', 'text': 'To jest materiał premium!', 'timestamp': '5 min temu' },
-                { 'id': 'c2-2', 'user': 'Ewa', 'avatar': 'https://i.pravatar.cc/100?u=14', 'text': 'Zgadzam się, świetna jakość.', 'timestamp': '4 min temu' }
+                { 'id': 'c2-1', 'user': 'Admin', 'avatar': 'https://i.pravatar.cc/100?u=12', 'text': 'To jest materiał premium!', 'timestamp': '2023-10-27T11:00:00Z', 'likes': 100, 'isLiked': true, 'replies': [] },
+                { 'id': 'c2-2', 'user': 'Ewa', 'avatar': 'https://i.pravatar.cc/100?u=14', 'text': 'Zgadzam się, świetna jakość.', 'timestamp': '2023-10-27T11:05:00Z', 'likes': 12, 'isLiked': false, 'replies': [] }
             ]
         },
         {
@@ -136,8 +138,8 @@
             'avatar': 'https://i.pravatar.cc/100?u=3',
             'likeId': '103',
             'comments': [
-                { 'id': 'c3-1', 'user': 'Jan', 'avatar': 'https://i.pravatar.cc/100?u=15', 'text': 'Działa!', 'timestamp': '10 min temu' },
-                { 'id': 'c3-2', 'user': 'Zofia', 'avatar': 'https://i.pravatar.cc/100?u=16', 'text': 'Testowy komentarz', 'timestamp': '9 min temu' }
+                { 'id': 'c3-1', 'user': 'Jan', 'avatar': 'https://i.pravatar.cc/100?u=15', 'text': 'Działa!', 'timestamp': '2023-10-27T12:00:00Z', 'likes': 0, 'isLiked': false, 'replies': [] },
+                { 'id': 'c3-2', 'user': 'Zofia', 'avatar': 'https://i.pravatar.cc/100?u=16', 'text': 'Testowy komentarz', 'timestamp': '2023-10-27T12:01:00Z', 'likes': 1, 'isLiked': false, 'replies': [] }
             ]
         }
     ]
@@ -182,6 +184,8 @@
                 lastFocusedElement: null,
                 lastUserGestureTimestamp: 0,
                 activeVideoSession: 0,
+                commentSortOrder: 'newest',
+                replyingToComment: null,
             };
 
             return {
@@ -267,6 +271,17 @@
                 }
             }
 
+            function findCommentById(comments, commentId) {
+                for (const comment of comments) {
+                    if (comment.id === commentId) return comment;
+                    if (comment.replies && comment.replies.length > 0) {
+                        const foundInReply = findCommentById(comment.replies, commentId);
+                        if (foundInReply) return foundInReply;
+                    }
+                }
+                return null;
+            }
+
             return {
                 login: (data) => _request('tt_ajax_login', data),
                 logout: () => _request('tt_ajax_logout'),
@@ -286,24 +301,54 @@
                     }
                     return { success: false, data: { message: 'Comments not found.' } };
                 },
-                postComment: async (slideId, text) => {
+                postComment: async (slideId, text, parentId = null) => {
                     // MOCK: Simulate API delay and response
                     await new Promise(resolve => setTimeout(resolve, 500));
                     const slide = slidesData.find(s => s.id === slideId);
                     if (!slide) {
                         return { success: false, data: { message: 'Slide not found.' } };
                     }
-                    if (!slide.comments) slide.comments = [];
+
                     const newComment = {
                         id: `c${slide.id}-${Date.now()}`,
                         user: 'Ja (Ty)', // Mocked user
                         avatar: 'https://i.pravatar.cc/100?u=99', // Mocked avatar
                         text: text,
-                        timestamp: 'teraz'
+                        timestamp: new Date().toISOString(),
+                        likes: 0,
+                        isLiked: false,
+                        replies: []
                     };
-                    slide.comments.push(newComment);
-                    slide.initialComments = slide.comments.length;
+
+                    if (parentId) {
+                        const parentComment = findCommentById(slide.comments, parentId);
+                        if (parentComment) {
+                            parentComment.replies.push(newComment);
+                        } else {
+                            return { success: false, data: { message: 'Parent comment not found.' } };
+                        }
+                    } else {
+                        slide.comments.push(newComment);
+                    }
+
+                    // Recalculate total comments
+                    const countComments = (comments) => comments.reduce((acc, comment) => acc + 1 + countComments(comment.replies), 0);
+                    slide.initialComments = countComments(slide.comments);
+
                     return { success: true, data: newComment };
+                },
+                toggleCommentLike: async (slideId, commentId) => {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    const slide = slidesData.find(s => s.id === slideId);
+                    if (!slide) return { success: false, data: { message: 'Slide not found.' } };
+
+                    const comment = findCommentById(slide.comments, commentId);
+                    if (!comment) return { success: false, data: { message: 'Comment not found.' } };
+
+                    comment.isLiked = !comment.isLiked;
+                    comment.likes += comment.isLiked ? 1 : -1;
+
+                    return { success: true, data: { isLiked: comment.isLiked, likes: comment.likes } };
                 },
             };
         })();
@@ -423,6 +468,7 @@
             }
 
             function updateUIForLoginState() {
+                UI.updateCommentFormVisibility();
                 const isLoggedIn = State.get('isUserLoggedIn');
                 const currentSlideIndex = State.get('currentSlideIndex');
 
@@ -703,21 +749,62 @@
                 const commentList = document.createElement('div');
                 commentList.className = 'comments-list';
 
-                comments.forEach(comment => {
+                const renderComment = (comment, isReply = false) => {
                     const commentEl = document.createElement('div');
-                    commentEl.className = 'comment-item';
+                    commentEl.className = `comment-item ${isReply ? 'is-reply' : ''}`;
+                    commentEl.dataset.commentId = comment.id;
+
                     commentEl.innerHTML = `
                         <img src="${comment.avatar}" alt="Avatar" class="comment-avatar" loading="lazy">
                         <div class="comment-content">
                             <span class="comment-user">${comment.user}</span>
                             <p class="comment-text">${comment.text}</p>
-                            <span class="comment-timestamp">${comment.timestamp}</span>
+                            <div class="comment-meta">
+                                <span class="comment-timestamp">${new Date(comment.timestamp).toLocaleString()}</span>
+                                <button class="comment-action-btn comment-reply-btn">Reply</button>
+                            </div>
+                            <div class="comment-actions">
+                                <button class="comment-like-btn ${comment.isLiked ? 'active' : ''}">
+                                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                </button>
+                                <span class="comment-like-count">${Utils.formatCount(comment.likes)}</span>
+                            </div>
                         </div>
                     `;
-                    commentList.appendChild(commentEl);
+
+                    const repliesContainer = document.createElement('div');
+                    repliesContainer.className = 'comment-replies';
+                    if (comment.replies && comment.replies.length > 0) {
+                        comment.replies.forEach(reply => {
+                            repliesContainer.appendChild(renderComment(reply, true));
+                        });
+                    }
+                    commentEl.appendChild(repliesContainer);
+
+                    return commentEl;
+                }
+
+                comments.forEach(comment => {
+                    commentList.appendChild(renderComment(comment));
                 });
 
                 modalBody.appendChild(commentList);
+            }
+
+            function updateCommentFormVisibility() {
+                const isLoggedIn = State.get('isUserLoggedIn');
+                const form = document.getElementById('comment-form');
+                const prompt = document.querySelector('.login-to-comment-prompt');
+
+                if (form && prompt) {
+                    if (isLoggedIn) {
+                        form.style.display = 'flex';
+                        prompt.style.display = 'none';
+                    } else {
+                        form.style.display = 'none';
+                        prompt.style.display = 'block';
+                    }
+                }
             }
 
             return {
@@ -732,7 +819,8 @@
                 renderSlides,
                 initGlobalPanels,
                 populateProfileModal,
-                renderComments
+                renderComments,
+                updateCommentFormVisibility
             };
         })();
 
@@ -992,6 +1080,93 @@
                 },
                 mainClickHandler: (e) => {
                     const target = e.target;
+
+                    // Handle comment like clicks
+                    const likeBtn = target.closest('.comment-like-btn');
+                    if (likeBtn) {
+                        const commentItem = likeBtn.closest('.comment-item');
+                        const commentId = commentItem?.dataset.commentId;
+                        const slideId = document.querySelector('.swiper-slide-active')?.dataset.slideId;
+
+                        if (commentId && slideId) {
+                            const countEl = commentItem.querySelector('.comment-like-count');
+                            let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, '')) || 0;
+
+                            likeBtn.classList.toggle('active');
+                            const isLiked = likeBtn.classList.contains('active');
+                            currentLikes += isLiked ? 1 : -1;
+                            countEl.textContent = Utils.formatCount(currentLikes);
+
+                            API.toggleCommentLike(slideId, commentId).then(response => {
+                                if (!response.success) {
+                                    likeBtn.classList.toggle('active'); // Revert on failure
+                                    currentLikes += isLiked ? -1 : 1;
+                                    countEl.textContent = Utils.formatCount(currentLikes);
+                                    UI.showAlert('Failed to update like.', true);
+                                }
+                            });
+                        }
+                        return;
+                    }
+
+                    const sortBtn = target.closest('.sort-btn');
+                    if (sortBtn) {
+                        const newSortOrder = sortBtn.dataset.sort;
+                        if (State.get('commentSortOrder') === newSortOrder) return; // Do nothing if already active
+
+                        State.set('commentSortOrder', newSortOrder);
+
+                        document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+                        sortBtn.classList.add('active');
+
+                        const slideId = document.querySelector('.swiper-slide-active')?.dataset.slideId;
+                        if (slideId) {
+                            UI.DOM.commentsModal.querySelector('.modal-body').innerHTML = '<div class="loading-spinner"></div>';
+                            API.fetchComments(slideId).then(response => {
+                                if (response.success) {
+                                    let comments = response.data;
+                                    if (newSortOrder === 'popular') {
+                                        comments.sort((a, b) => b.likes - a.likes);
+                                    } else {
+                                        comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                                    }
+                                    UI.renderComments(comments);
+                                }
+                            });
+                        }
+                        return;
+                    }
+
+                    const replyBtn = target.closest('.comment-reply-btn');
+                    if (replyBtn) {
+                        const commentItem = replyBtn.closest('.comment-item');
+                        const commentId = commentItem?.dataset.commentId;
+                        const user = commentItem?.querySelector('.comment-user')?.textContent;
+
+                        State.set('replyingToComment', commentId);
+
+                        const formContainer = document.querySelector('.comment-form-container');
+                        let replyContext = formContainer.querySelector('.reply-context');
+                        if (!replyContext) {
+                            replyContext = document.createElement('div');
+                            replyContext.className = 'reply-context';
+                            formContainer.prepend(replyContext);
+                        }
+                        replyContext.innerHTML = `Replying to @${user} <button class="cancel-reply-btn">&times;</button>`;
+                        replyContext.style.display = 'block';
+
+                        document.querySelector('#comment-input').focus();
+                        return;
+                    }
+
+                    const cancelReplyBtn = target.closest('.cancel-reply-btn');
+                    if (cancelReplyBtn) {
+                        State.set('replyingToComment', null);
+                        const replyContext = document.querySelector('.reply-context');
+                        if (replyContext) replyContext.style.display = 'none';
+                        return;
+                    }
+
                     const actionTarget = target.closest('[data-action]');
                     if (!actionTarget) {
                         return;
@@ -1035,13 +1210,21 @@
                                 UI.DOM.commentsModal.querySelector('.modal-body').innerHTML = '<div class="loading-spinner"></div>';
                                 API.fetchComments(slideId).then(response => {
                                     if (response.success) {
-                                        UI.renderComments(response.data);
+                                        let comments = response.data;
+                                        const sortOrder = State.get('commentSortOrder');
+                                        if (sortOrder === 'popular') {
+                                            comments.sort((a, b) => b.likes - a.likes);
+                                        } else { // 'newest'
+                                            comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                                        }
+                                        UI.renderComments(comments);
                                     } else {
                                         UI.renderComments([]); // Show empty state on error
                                     }
                                 });
                             }
                             UI.openModal(UI.DOM.commentsModal);
+                            UI.updateCommentFormVisibility();
                             break;
                         }
                         case 'open-info-modal': mockToggleLogin(); break;
@@ -1135,23 +1318,25 @@
 
                         const slideElement = document.querySelector('.swiper-slide-active');
                         const slideId = slideElement?.dataset.slideId;
+                        const parentId = State.get('replyingToComment');
 
                         if (slideId) {
-                            API.postComment(slideId, text).then(postResponse => {
+                            API.postComment(slideId, text, parentId).then(postResponse => {
                                 if (postResponse.success) {
                                     input.value = '';
+                                    State.set('replyingToComment', null);
+                                    const replyContext = document.querySelector('.reply-context');
+                                    if (replyContext) replyContext.style.display = 'none';
+
                                     const slideData = slidesData.find(s => s.id === slideId);
                                     if (slideData) {
-                                        // The mock API already updated the data, just re-render
                                         UI.renderComments(slideData.comments);
 
-                                        // Update comment count on the main slide icon
                                         const mainSlideCount = slideElement.querySelector('.comment-count');
                                         if(mainSlideCount) {
                                             mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
                                         }
 
-                                        // Scroll to the bottom of comments
                                         const modalBody = UI.DOM.commentsModal.querySelector('.modal-body');
                                         if (modalBody) {
                                             modalBody.scrollTop = modalBody.scrollHeight;
