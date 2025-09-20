@@ -141,7 +141,7 @@
         :root {
             --app-height: 100vh;
             --accent-color: #ff0055;
-            --progress-bar-color: #42A5F5;
+            --progress-bar-color: #4CAF50;
             --main-ui-bg-color: #696969;
             --transition-speed: 0.4s;
             --transition-timing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -402,7 +402,7 @@
     -webkit-tap-highlight-color: transparent;
     display: flex;
     align-items: center;
-    z-index: 10003;
+    z-index: 10004;
 }
 
 .progress-bar::before {
@@ -2459,5 +2459,6 @@
 /* Color for 'Download the app' (in all locations) */
 .secret-subtitle u[data-translate-key="pwaSubtitleAction"],
 .pwa-prompt-description u[data-translate-key="installPwaSubheadingAction"] {
-    border-bottom-color: var(--accent-color);
+    border-bottom: none !important;
+    text-decoration: none !important;
 }
