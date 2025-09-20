@@ -422,14 +422,15 @@
     position: absolute;
     top: 50%;
     left: 0%; /* Will be updated by JS */
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     background-color: white;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease-in-out;
-    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 1; /* Always visible */
     pointer-events: none; /* The whole bar is the target */
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 .progress-bar:hover::before,
 .progress-bar.dragging::before,
@@ -439,8 +440,7 @@
 }
 .progress-bar:hover .progress-bar-handle,
 .progress-bar.dragging .progress-bar-handle {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5);
 }
         .tiktok-symulacja .text-info {
             flex: none;
