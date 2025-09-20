@@ -113,6 +113,7 @@
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
                             </svg>
+                            <div class="icon-label comment-count">0</div>
                         </button>
                         <button class="icon-button shareButton" data-action="share" data-translate-title="shareTitle" data-translate-aria-label="shareAriaLabel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l6 6-6 6M21 11H9a6 6 0 0 0-6 6" /></svg><div class="icon-label" data-translate-key="shareText">Szeruj</div></button>
                         <button class="icon-button infoButton" data-action="open-info-modal" data-translate-title="infoTitle" data-translate-aria-label="infoAriaLabel" aria-controls="infoModal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" /><line x1="8" y1="8" x2="16" y2="8" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="8" y1="16" x2="12" y2="16" /></svg><div class="icon-label" data-translate-key="infoText">Info</div></button>
@@ -165,6 +166,15 @@
                 <button class="modal-close-btn" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Comments will be rendered here -->
+            </div>
+            <div class="comment-form-container">
+                <form id="comment-form">
+                    <input type="text" id="comment-input" placeholder="Dodaj komentarz..." autocomplete="off" aria-label="Dodaj komentarz">
+                    <button type="submit" aria-label="Wyślij komentarz">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
