@@ -2434,3 +2434,13 @@
         transform: scale(1);
     }
 }
+
+.secret-subtitle u {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.secret-subtitle u.login-underline {
+    text-decoration-color: var(--accent-color);
+}
