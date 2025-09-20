@@ -389,7 +389,7 @@
             justify-content: flex-start;
     padding: 10px 75px 10px 12px;
             color: white;
-            z-index: 105;
+            z-index: 10006;
             padding-bottom: calc(10px + var(--safe-area-bottom));
         }
 .progress-bar {
