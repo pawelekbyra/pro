@@ -514,37 +514,43 @@
 
                     videoEl.addEventListener('timeupdate', updateProgress);
 
-                    progressBar.addEventListener('click', seek);
-
                     const startDrag = (e) => {
                         isDragging = true;
                         progressBar.classList.add('dragging');
+                        const wasPlaying = !videoEl.paused;
                         videoEl.pause();
-                        seek(e); // Initial seek on click/touch
+
+                        seek(e);
 
                         const onDrag = (moveEvent) => {
                             if (!isDragging) return;
+                            moveEvent.preventDefault();
                             seek(moveEvent);
                         };
 
                         const endDrag = () => {
+                            if (!isDragging) return;
                             isDragging = false;
                             progressBar.classList.remove('dragging');
-                            videoEl.play();
+                            if (wasPlaying) {
+                                videoEl.play().catch(err => {
+                                    console.error("Play failed after drag:", err);
+                                });
+                            }
                             document.removeEventListener('mousemove', onDrag);
                             document.removeEventListener('mouseup', endDrag);
-                            document.removeEventListener('touchmove', onDrag);
+                            document.removeEventListener('touchmove', onDrag, { passive: false });
                             document.removeEventListener('touchend', endDrag);
                         };
 
                         document.addEventListener('mousemove', onDrag);
                         document.addEventListener('mouseup', endDrag);
-                        document.addEventListener('touchmove', onDrag);
+                        document.addEventListener('touchmove', onDrag, { passive: false });
                         document.addEventListener('touchend', endDrag);
                     };
 
                     progressBar.addEventListener('mousedown', startDrag);
-                    progressBar.addEventListener('touchstart', startDrag);
+                    progressBar.addEventListener('touchstart', startDrag, { passive: true });
                 }
 
                 return section;
