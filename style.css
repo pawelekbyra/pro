@@ -287,7 +287,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: transparent; /* Zmień kolor na przeźroczysty */
             z-index: 101;
             opacity: 0;
             pointer-events: none;
@@ -2809,4 +2809,8 @@
 .pwa-prompt-description u[data-translate-key="installPwaSubheadingAction"] {
     border-bottom: none !important;
     text-decoration: none !important;
+}
+
+.app-frame--pwa-visible .progress-bar {
+    top: -30px;
 }
