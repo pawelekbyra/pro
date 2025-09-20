@@ -364,7 +364,7 @@
             position: absolute;
             top: calc((var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 + var(--topbar-height));
     right: -4px;
-    transform: translateY(-50%) translateX(100%);
+    transform: translateY(-50%) translateX(20px);
             display: flex;
             flex-direction: column;
             align-items: center;
