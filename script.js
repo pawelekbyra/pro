@@ -699,6 +699,10 @@
                 const preloader = document.getElementById('preloader');
                 const showBar = () => {
                     installBar.classList.add('visible');
+                    const firstSlideSidebar = document.querySelector('.webyx-section[data-index="0"] .sidebar');
+                    if (firstSlideSidebar) {
+                        firstSlideSidebar.classList.add('visible');
+                    }
                 };
                 if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
                     const observer = new MutationObserver((mutations, obs) => {
