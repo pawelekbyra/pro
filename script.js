@@ -575,17 +575,18 @@
 
                 if (tiktokSymulacja && videoEl && pauseOverlay) {
                     tiktokSymulacja.addEventListener('click', (e) => {
-                        if (e.target.closest('.sidebar, .bottombar')) {
+                        // Upewnij się, że kliknięcie nie pochodzi z paska bocznego lub dolnego
+                        if (e.target.closest('.sidebar, .bottombar, .secret-overlay')) {
                             return;
                         }
                         if (videoEl.paused) {
-                            videoEl.play();
+                            // Wznów odtwarzanie i ukryj nakładkę
+                            videoEl.play().catch(error => console.log('Błąd odtwarzania:', error));
                             pauseOverlay.classList.remove('visible');
                         } else {
+                            // Spauzuj wideo i pokaż nakładkę z ikoną play
                             videoEl.pause();
-                            if (tiktokSymulacja.classList.contains('video-loaded')) {
-                                pauseOverlay.classList.add('visible');
-                            }
+                            pauseOverlay.classList.add('visible');
                         }
                     });
                 }
@@ -2011,13 +2012,13 @@
                             } else {
                                 const video = activeSlide.querySelector('video');
                                 if (video) {
+                                    // Nowe wideo nie powinno mieć widocznej nakładki pauzy
+                                    const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+                                    if (pauseOverlay) {
+                                        pauseOverlay.classList.remove('visible');
+                                    }
                                     setTimeout(() => {
-                                        video.play().then(() => {
-                                            const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-                                            if (pauseOverlay) {
-                                                pauseOverlay.classList.remove('visible');
-                                            }
-                                        }).catch(error => console.log('Autoplay was prevented for slide ' + swiper.activeIndex, error));
+                                        video.play().catch(error => console.log('Autoplay was prevented for slide ' + swiper.activeIndex, error));
                                     }, 150);
                                 }
                             }
