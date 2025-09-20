@@ -699,10 +699,7 @@
                 const preloader = document.getElementById('preloader');
                 const showBar = () => {
                     installBar.classList.add('visible');
-                    const firstSlideSidebar = document.querySelector('.webyx-section[data-index="0"] .sidebar');
-                    if (firstSlideSidebar) {
-                        firstSlideSidebar.classList.add('visible');
-                    }
+                    document.querySelectorAll('.sidebar').forEach(s => s.classList.add('visible'));
                 };
                 if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
                     const observer = new MutationObserver((mutations, obs) => {
@@ -728,6 +725,7 @@
                 if (isStandalone()) {
                     updatePwaUiForInstalledState();
                     // Do not set up other install listeners if already installed.
+                    document.querySelectorAll('.sidebar').forEach(s => s.classList.add('visible'));
                     return;
                 }
 
