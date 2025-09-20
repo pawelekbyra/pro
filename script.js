@@ -484,6 +484,7 @@
                 likeBtn.dataset.likeId = slideData.likeId;
                 updateLikeButtonState(likeBtn, slideData.isLiked, slideData.initialLikes);
 
+                const videoEl = section.querySelector('video');
                 const progressBar = section.querySelector('.progress-bar');
                 const progressBarFill = section.querySelector('.progress-bar-fill');
 
