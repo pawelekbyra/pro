@@ -146,8 +146,8 @@
           DEBUG_PANEL: true,
           GESTURE_GRACE_PERIOD_MS: 2000,
           TRANSLATIONS: {
-secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitle: '<u>Ściągnij apkę</u>, aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheading: 'Zainstaluj aplikację Ting Tong na swoim telefonie.', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś' },
-                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitle: '<u class="login-underline">Log in</u> to unlock', pwaTitle: 'Top Secret', pwaSubtitle: '<u>Download the app</u> to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheading: 'Install the Ting Tong app on your phone.', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!" }
+                pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Ting Tong', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitleAction: 'Zaloguj się,', secretSubtitleRest: ' aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitleAction: 'Pobierz aplikację,', pwaSubtitleRest: ' aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheadingAction: 'Pobierz aplikację', installPwaSubheadingRest: ' i zobacz więcej!', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś' },
+                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitleAction: 'Log in', secretSubtitleRest: ' to unlock', pwaTitle: 'Top Secret', pwaSubtitleAction: 'Download the app', pwaSubtitleRest: ' to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheadingAction: 'Download the app', installPwaSubheadingRest: ' to see more!', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!" }
           }
         };
 
@@ -419,9 +419,20 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
 
                     if (showSecretOverlay) {
                         const titleKey = isPwaOnly ? 'pwaTitle' : 'secretTitle';
-                        const subtitleKey = isPwaOnly ? 'pwaSubtitle' : 'secretSubtitle';
+                        const subtitleActionKey = isPwaOnly ? 'pwaSubtitleAction' : 'secretSubtitleAction';
+                        const subtitleRestKey = isPwaOnly ? 'pwaSubtitleRest' : 'secretSubtitleRest';
+
                         section.querySelector('.secret-title').textContent = Utils.getTranslation(titleKey);
-                        section.querySelector('.secret-subtitle').innerHTML = Utils.getTranslation(subtitleKey);
+
+                        const subtitleUElement = section.querySelector('.secret-subtitle u');
+                        const subtitleSpanElement = section.querySelector('.secret-subtitle span');
+
+                        if (subtitleUElement && subtitleSpanElement) {
+                           subtitleUElement.dataset.translateKey = subtitleActionKey;
+                           subtitleUElement.textContent = Utils.getTranslation(subtitleActionKey);
+                           subtitleSpanElement.dataset.translateKey = subtitleRestKey;
+                           subtitleSpanElement.textContent = Utils.getTranslation(subtitleRestKey);
+                        }
                     }
 
                     const likeBtn = section.querySelector('.like-button');
@@ -504,6 +515,12 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
                 }
                 const progressBar = section.querySelector('.progress-bar');
                 const progressBarFill = section.querySelector('.progress-bar-fill');
+
+                if (videoEl) {
+                    videoEl.addEventListener('playing', () => {
+                        tiktokSymulacja.classList.add('video-loaded');
+                    }, { once: true });
+                }
 
                 if (videoEl && progressBar && progressBarFill) {
                     const handle = section.querySelector('.progress-bar-handle');
@@ -692,28 +709,6 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
                 if (iosInstructions && iosInstructions.classList.contains('visible')) hideIosInstructions();
             }
 
-            function showInstallBar() {
-                if (!installBar) {
-                    return;
-                }
-                const preloader = document.getElementById('preloader');
-                const showBar = () => {
-                    installBar.classList.add('visible');
-                    document.querySelectorAll('.sidebar').forEach(s => s.classList.add('visible'));
-                };
-                if (preloader && preloader.style.display !== 'none' && !preloader.classList.contains('preloader-hiding')) {
-                    const observer = new MutationObserver((mutations, obs) => {
-                        if (preloader.style.display === 'none') {
-                            showBar();
-                            obs.disconnect();
-                        }
-                    });
-                    observer.observe(preloader, { attributes: true, attributeFilter: ['style'] });
-                } else {
-                    showBar();
-                }
-            }
-
             // Initialization
             function init() {
                 // Always attach event listener to the install button.
@@ -721,16 +716,10 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
                     installButton.addEventListener('click', handleInstallClick);
                 }
 
-                // If running in standalone PWA mode, update the UI to show the installed state.
                 if (isStandalone()) {
                     updatePwaUiForInstalledState();
-                    // Do not set up other install listeners if already installed.
-                    document.querySelectorAll('.sidebar').forEach(s => s.classList.add('visible'));
                     return;
                 }
-
-                // For mobile browsers, always show the installation bar.
-                showInstallBar();
 
                 // For browsers that support `beforeinstallprompt` (like Chrome on Android)
                 if ('onbeforeinstallprompt' in window) {
@@ -811,7 +800,7 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
             }
             // --- END PATCH ---
 
-            return { init, handleInstallClick, closePwaModals };
+            return { init, handleInstallClick, closePwaModals, isStandalone };
         })();
 
         /**
@@ -1631,42 +1620,34 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
                     UI.renderSlides();
                     UI.updateTranslations();
 
-                    PWA.init();
+                    const handleMediaChange = (swiper) => {
+                        const activeSlide = swiper.slides[swiper.activeIndex];
 
-                    const onActiveSlideChanged = (swiper) => {
-                        // Pause all videos
+                        // Pause all videos to prevent background audio.
                         document.querySelectorAll('.swiper-slide video').forEach(video => {
-                            video.pause();
+                            if (!video.paused) video.pause();
                         });
 
-                        // Pause all iframes
+                        // Unload all iframes to save resources.
                         document.querySelectorAll('.swiper-slide iframe').forEach(iframe => {
-                            if (iframe.dataset.originalSrc) {
-                                iframe.src = '';
-                            } else {
-                                iframe.dataset.originalSrc = iframe.src;
+                            if (iframe.src) {
+                                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = iframe.src;
                                 iframe.src = '';
                             }
                         });
 
-                        const activeSlide = swiper.slides[swiper.activeIndex];
+                        // Play media for the new active slide.
                         if (activeSlide) {
                             const slideData = slidesData[swiper.realIndex];
-
                             if (slideData && slideData.isIframe) {
                                 const iframe = activeSlide.querySelector('iframe');
-                                if (iframe && iframe.dataset.originalSrc) {
-                                    iframe.src = iframe.dataset.originalSrc;
-                                }
+                                if (iframe && iframe.dataset.originalSrc) iframe.src = iframe.dataset.originalSrc;
                             } else {
                                 const video = activeSlide.querySelector('video');
                                 if (video) {
                                     setTimeout(() => {
-                                        video.play().catch(error => {
-                                            console.log('Autoplay was prevented for video in slide ' + swiper.activeIndex, error);
-                                            // Overlay is now only shown on manual pause
-                                        });
-                                    }, 100);
+                                        video.play().catch(error => console.log('Autoplay was prevented for slide ' + swiper.activeIndex, error));
+                                    }, 150);
                                 }
                             }
                         }
@@ -1674,18 +1655,26 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
 
                     const swiper = new Swiper('.swiper', {
                         direction: 'vertical',
-                        mousewheel: {
-                            releaseOnEdges: true,
-                        },
+                        mousewheel: { releaseOnEdges: true },
                         loop: true,
-                        keyboard: {
-                            enabled: true,
-                            onlyInViewport: false,
-                        },
+                        keyboard: { enabled: true, onlyInViewport: false },
                         speed: 300,
                         on: {
-                            init: onActiveSlideChanged,
-                            slideChange: onActiveSlideChanged,
+                            init: function (swiper) {
+                                // --- One-time animation on first app load ---
+                                const pwaInstallBar = document.getElementById('pwa-install-bar');
+                                if (pwaInstallBar && !PWA.isStandalone()) {
+                                    pwaInstallBar.classList.add('visible');
+                                }
+                                swiper.slides.forEach(slide => {
+                                    const sidebar = slide.querySelector('.sidebar');
+                                    if (sidebar) sidebar.classList.add('visible');
+                                });
+
+                                // Also handle media for the very first slide on init.
+                                handleMediaChange(swiper);
+                            },
+                            slideChange: handleMediaChange,
                         },
                     });
 
@@ -1695,7 +1684,6 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
                         UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
                     }, 1000);
 
-                    // The old scroll logic is removed. Swiper handles everything.
                 } catch (error) {
                     alert('Application failed to start. Error: ' + error.message + '\\n\\nStack: ' + error.stack);
                     console.error("TingTong App Start Error:", error);
@@ -1728,6 +1716,7 @@ secretSubtitle: '<u class="login-underline">Zaloguj się</u>, aby odblokować', 
                     _initializeGlobalListeners();
                     AccountPanel.init();
                     UI.initGlobalPanels();
+                    PWA.init();
                     _initializePreloader();
                     document.body.classList.add('loaded');
                 },
