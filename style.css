@@ -392,6 +392,11 @@
             z-index: 10006;
             padding-bottom: calc(10px + var(--safe-area-bottom));
         }
+
+/* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
+.app-frame--pwa-visible .bottombar {
+    padding-top: 30px;
+}
 .progress-bar {
     position: absolute;
     top: 0;
