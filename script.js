@@ -509,7 +509,9 @@
                             pauseOverlay.classList.remove('visible');
                         } else {
                             videoEl.pause();
-                            pauseOverlay.classList.add('visible');
+                            if (tiktokSymulacja.classList.contains('video-loaded')) {
+                                pauseOverlay.classList.add('visible');
+                            }
                         }
                     });
                 }
@@ -1662,10 +1664,6 @@
                         on: {
                             init: function (swiper) {
                                 // --- One-time animation on first app load ---
-                                swiper.slides.forEach(slide => {
-                                    const sidebar = slide.querySelector('.sidebar');
-                                    if (sidebar) sidebar.classList.add('visible');
-                                });
 
                                 // Also handle media for the very first slide on init.
                                 handleMediaChange(swiper);
@@ -1681,6 +1679,9 @@
                         if (pwaInstallBar && !PWA.isStandalone()) {
                             pwaInstallBar.classList.add('visible');
                         }
+                        document.querySelectorAll('.sidebar').forEach(sidebar => {
+                            sidebar.classList.add('visible');
+                        });
                         UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
                     }, 1000);
 
