@@ -402,7 +402,7 @@
     -webkit-tap-highlight-color: transparent;
     display: flex;
     align-items: center;
-    z-index: 10004;
+    z-index: 10010;
 }
 
 .progress-bar::before {
@@ -413,7 +413,7 @@
     transform: translateY(-50%);
     width: 100%;
     height: 4px;
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(76, 175, 80, 0.3);
     transition: height 0.2s ease-in-out;
 }
 
