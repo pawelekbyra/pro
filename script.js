@@ -101,11 +101,10 @@
             'avatar': 'https://i.pravatar.cc/100?u=1',
             'likeId': '101',
             'comments': [
-                { 'id': 'c1-1', 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2023-10-27T10:00:00Z', 'likes': 15, 'isLiked': false, 'replies': [
-                    { 'id': 'c1-1-1', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Prawda!', 'timestamp': '2023-10-27T10:01:00Z', 'likes': 2, 'isLiked': false, 'replies': [] }
-                ]},
-                { 'id': 'c1-2', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Haha, co za królik!', 'timestamp': '2023-10-27T10:05:00Z', 'likes': 5, 'isLiked': true, 'replies': [] },
-                { 'id': 'c1-3', 'user': 'Anna', 'avatar': 'https://i.pravatar.cc/100?u=13', 'text': 'Super! ❤️', 'timestamp': '2023-10-27T10:10:00Z', 'likes': 25, 'isLiked': false, 'replies': [] }
+                { 'id': 'c1-1', 'parentId': null, 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2023-10-27T10:00:00Z', 'likes': 15, 'isLiked': false },
+                { 'id': 'c1-1-1', 'parentId': 'c1-1', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Prawda!', 'timestamp': '2023-10-27T10:01:00Z', 'likes': 2, 'isLiked': false },
+                { 'id': 'c1-2', 'parentId': null, 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Haha, co za królik!', 'timestamp': '2023-10-27T10:05:00Z', 'likes': 5, 'isLiked': true },
+                { 'id': 'c1-3', 'parentId': null, 'user': 'Anna', 'avatar': 'https://i.pravatar.cc/100?u=13', 'text': 'Super! ❤️', 'timestamp': '2023-10-27T10:10:00Z', 'likes': 25, 'isLiked': false }
             ]
         },
         {
@@ -121,8 +120,8 @@
             'avatar': 'https://i.pravatar.cc/100?u=2',
             'likeId': '102',
             'comments': [
-                { 'id': 'c2-1', 'user': 'Admin', 'avatar': 'https://i.pravatar.cc/100?u=12', 'text': 'To jest materiał premium!', 'timestamp': '2023-10-27T11:00:00Z', 'likes': 100, 'isLiked': true, 'replies': [] },
-                { 'id': 'c2-2', 'user': 'Ewa', 'avatar': 'https://i.pravatar.cc/100?u=14', 'text': 'Zgadzam się, świetna jakość.', 'timestamp': '2023-10-27T11:05:00Z', 'likes': 12, 'isLiked': false, 'replies': [] }
+                { 'id': 'c2-1', 'parentId': null, 'user': 'Admin', 'avatar': 'https://i.pravatar.cc/100?u=12', 'text': 'To jest materiał premium!', 'timestamp': '2023-10-27T11:00:00Z', 'likes': 100, 'isLiked': true },
+                { 'id': 'c2-2', 'parentId': null, 'user': 'Ewa', 'avatar': 'https://i.pravatar.cc/100?u=14', 'text': 'Zgadzam się, świetna jakość.', 'timestamp': '2023-10-27T11:05:00Z', 'likes': 12, 'isLiked': false }
             ]
         },
         {
@@ -138,8 +137,8 @@
             'avatar': 'https://i.pravatar.cc/100?u=3',
             'likeId': '103',
             'comments': [
-                { 'id': 'c3-1', 'user': 'Jan', 'avatar': 'https://i.pravatar.cc/100?u=15', 'text': 'Działa!', 'timestamp': '2023-10-27T12:00:00Z', 'likes': 0, 'isLiked': false, 'replies': [] },
-                { 'id': 'c3-2', 'user': 'Zofia', 'avatar': 'https://i.pravatar.cc/100?u=16', 'text': 'Testowy komentarz', 'timestamp': '2023-10-27T12:01:00Z', 'likes': 1, 'isLiked': false, 'replies': [] }
+                { 'id': 'c3-1', 'parentId': null, 'user': 'Jan', 'avatar': 'https://i.pravatar.cc/100?u=15', 'text': 'Działa!', 'timestamp': '2023-10-27T12:00:00Z', 'likes': 0, 'isLiked': false },
+                { 'id': 'c3-2', 'parentId': null, 'user': 'Zofia', 'avatar': 'https://i.pravatar.cc/100?u=16', 'text': 'Testowy komentarz', 'timestamp': '2023-10-27T12:01:00Z', 'likes': 1, 'isLiked': false }
             ]
         }
     ]
@@ -272,14 +271,8 @@
             }
 
             function findCommentById(comments, commentId) {
-                for (const comment of comments) {
-                    if (comment.id === commentId) return comment;
-                    if (comment.replies && comment.replies.length > 0) {
-                        const foundInReply = findCommentById(comment.replies, commentId);
-                        if (foundInReply) return foundInReply;
-                    }
-                }
-                return null;
+                if (!comments || !commentId) return null;
+                return comments.find(c => c.id === commentId) || null;
             }
 
             return {
@@ -311,29 +304,19 @@
 
                     const newComment = {
                         id: `c${slide.id}-${Date.now()}`,
+                        parentId: parentId,
                         user: 'Ja (Ty)', // Mocked user
                         avatar: 'https://i.pravatar.cc/100?u=99', // Mocked avatar
                         text: text,
                         timestamp: new Date().toISOString(),
                         likes: 0,
-                        isLiked: false,
-                        replies: []
+                        isLiked: false
                     };
 
-                    if (parentId) {
-                        const parentComment = findCommentById(slide.comments, parentId);
-                        if (parentComment) {
-                            parentComment.replies.push(newComment);
-                        } else {
-                            return { success: false, data: { message: 'Parent comment not found.' } };
-                        }
-                    } else {
-                        slide.comments.push(newComment);
-                    }
+                    slide.comments.push(newComment);
 
                     // Recalculate total comments
-                    const countComments = (comments) => comments.reduce((acc, comment) => acc + 1 + countComments(comment.replies), 0);
-                    slide.initialComments = countComments(slide.comments);
+                    slide.initialComments = slide.comments.length;
 
                     return { success: true, data: newComment };
                 },
@@ -739,7 +722,7 @@
                 const modalBody = DOM.commentsModal.querySelector('.modal-body');
                 if (!modalBody) return;
 
-                modalBody.innerHTML = ''; // Clear previous comments
+                modalBody.innerHTML = '';
 
                 if (!comments || comments.length === 0) {
                     modalBody.innerHTML = '<p class="no-comments-message" data-translate-key="noComments">Brak komentarzy. Bądź pierwszy!</p>';
@@ -749,12 +732,21 @@
                 const commentList = document.createElement('div');
                 commentList.className = 'comments-list';
 
-                const renderComment = (comment, isReply = false) => {
+                const repliesMap = new Map();
+                comments.forEach(comment => {
+                    if (comment.parentId) {
+                        if (!repliesMap.has(comment.parentId)) {
+                            repliesMap.set(comment.parentId, []);
+                        }
+                        repliesMap.get(comment.parentId).push(comment);
+                    }
+                });
+
+                const createCommentElement = (comment) => {
                     const commentEl = document.createElement('div');
-                    commentEl.className = `comment-item ${isReply ? 'is-reply' : ''}`;
+                    commentEl.className = 'comment-item';
                     commentEl.dataset.commentId = comment.id;
 
-                    // 1. Avatar
                     const avatarWrapper = document.createElement('div');
                     avatarWrapper.className = 'comment-avatar-wrapper';
                     const avatarImg = document.createElement('img');
@@ -764,39 +756,28 @@
                     avatarImg.loading = 'lazy';
                     avatarWrapper.appendChild(avatarImg);
 
-                    // 2. Main Content
                     const main = document.createElement('div');
                     main.className = 'comment-main';
 
-                    // 2a. Body
                     const body = document.createElement('div');
                     body.className = 'comment-body';
-
-                    const header = document.createElement('div');
-                    header.className = 'comment-header';
                     const userSpan = document.createElement('span');
                     userSpan.className = 'comment-user';
                     userSpan.textContent = comment.user;
-                    header.appendChild(userSpan);
-
                     const textP = document.createElement('p');
                     textP.className = 'comment-text';
                     textP.textContent = comment.text;
-
-                    body.appendChild(header);
+                    body.appendChild(userSpan);
                     body.appendChild(textP);
 
-                    // 2b. Footer
                     const footer = document.createElement('div');
                     footer.className = 'comment-footer';
                     const timestampSpan = document.createElement('span');
                     timestampSpan.className = 'comment-timestamp';
-                    timestampSpan.textContent = new Date(comment.timestamp).toLocaleString(); // Or a time-ago function
-
+                    timestampSpan.textContent = new Date(comment.timestamp).toLocaleString();
                     const replyBtn = document.createElement('button');
                     replyBtn.className = 'comment-action-btn comment-reply-btn';
                     replyBtn.textContent = 'Reply';
-
                     const likesDiv = document.createElement('div');
                     likesDiv.className = 'comment-likes';
                     const likeBtn = document.createElement('button');
@@ -807,32 +788,38 @@
                     likeCountSpan.textContent = Utils.formatCount(comment.likes);
                     likesDiv.appendChild(likeBtn);
                     likesDiv.appendChild(likeCountSpan);
-
                     footer.appendChild(timestampSpan);
                     footer.appendChild(replyBtn);
                     footer.appendChild(likesDiv);
 
-                    // 2c. Replies
-                    const repliesContainer = document.createElement('div');
-                    repliesContainer.className = 'comment-replies';
-                    if (comment.replies && comment.replies.length > 0) {
-                        comment.replies.forEach(reply => {
-                            repliesContainer.appendChild(renderComment(reply, true));
-                        });
-                    }
-
                     main.appendChild(body);
                     main.appendChild(footer);
-                    main.appendChild(repliesContainer);
 
                     commentEl.appendChild(avatarWrapper);
                     commentEl.appendChild(main);
 
                     return commentEl;
-                }
+                };
 
-                comments.forEach(comment => {
-                    commentList.appendChild(renderComment(comment));
+                const topLevelComments = comments.filter(c => !c.parentId);
+
+                topLevelComments.forEach(comment => {
+                    const threadWrapper = document.createElement('div');
+                    threadWrapper.className = 'comment-thread';
+
+                    const parentEl = createCommentElement(comment);
+                    threadWrapper.appendChild(parentEl);
+
+                    if (repliesMap.has(comment.id)) {
+                        const repliesContainer = document.createElement('div');
+                        repliesContainer.className = 'comment-replies';
+                        repliesMap.get(comment.id).forEach(reply => {
+                            const replyEl = createCommentElement(reply);
+                            repliesContainer.appendChild(replyEl);
+                        });
+                        threadWrapper.appendChild(repliesContainer);
+                    }
+                    commentList.appendChild(threadWrapper);
                 });
 
                 modalBody.appendChild(commentList);
@@ -1156,15 +1143,28 @@
                         return;
                     }
 
-                    const sortBtn = target.closest('.sort-btn');
-                    if (sortBtn) {
-                        const newSortOrder = sortBtn.dataset.sort;
-                        if (State.get('commentSortOrder') === newSortOrder) return; // Do nothing if already active
+                    const sortTrigger = target.closest('.sort-trigger');
+                    if (sortTrigger) {
+                        sortTrigger.parentElement.classList.toggle('open');
+                        return;
+                    }
+
+                    const sortOption = target.closest('.sort-option');
+                    if (sortOption) {
+                        const dropdown = sortOption.closest('.sort-dropdown');
+                        const newSortOrder = sortOption.dataset.sort;
+                        if (State.get('commentSortOrder') === newSortOrder) {
+                            dropdown.classList.remove('open');
+                            return;
+                        }
 
                         State.set('commentSortOrder', newSortOrder);
 
-                        document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-                        sortBtn.classList.add('active');
+                        // Update UI
+                        dropdown.querySelector('.current-sort').textContent = sortOption.textContent;
+                        dropdown.querySelectorAll('.sort-option').forEach(opt => opt.classList.remove('active'));
+                        sortOption.classList.add('active');
+                        dropdown.classList.remove('open');
 
                         const slideId = document.querySelector('.swiper-slide-active')?.dataset.slideId;
                         if (slideId) {
@@ -1179,22 +1179,12 @@
                                 if (response.success) {
                                     let comments = response.data;
 
-                                    const deepSort = (arr, sortFn) => {
-                                        arr.sort(sortFn);
-                                        arr.forEach(c => {
-                                            if (c.replies && c.replies.length > 0) {
-                                                deepSort(c.replies, sortFn);
-                                            }
-                                        });
-                                    };
-
                                     if (newSortOrder === 'popular') {
-                                        deepSort(comments, (a, b) => b.likes - a.likes);
+                                        comments.sort((a, b) => b.likes - a.likes);
                                     } else { // newest
-                                        deepSort(comments, (a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                                        comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                                     }
 
-                                    // A small delay to make the transition visible
                                     setTimeout(() => {
                                         UI.renderComments(comments);
                                     }, 200);
@@ -1961,6 +1951,11 @@
                         !popup.contains(event.target) &&
                         !event.target.closest('[data-action="toggle-notifications"]')) {
                         popup.classList.remove('visible');
+                    }
+
+                    const openDropdown = document.querySelector('.sort-dropdown.open');
+                    if (openDropdown && !openDropdown.contains(event.target)) {
+                        openDropdown.classList.remove('open');
                     }
                 });
 
