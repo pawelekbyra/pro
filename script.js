@@ -484,6 +484,29 @@
                 likeBtn.dataset.likeId = slideData.likeId;
                 updateLikeButtonState(likeBtn, slideData.isLiked, slideData.initialLikes);
 
+                const progressBar = section.querySelector('.progress-bar');
+                const progressBarFill = section.querySelector('.progress-bar-fill');
+
+                if (videoEl && progressBar && progressBarFill) {
+                    videoEl.addEventListener('timeupdate', () => {
+                        if (videoEl.duration > 0) {
+                            const progress = (videoEl.currentTime / videoEl.duration) * 100;
+                            progressBarFill.style.width = `${progress}%`;
+                        }
+                    });
+
+                    progressBar.addEventListener('click', (e) => {
+                        const rect = progressBar.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const width = rect.width;
+                        const duration = videoEl.duration;
+
+                        if (duration > 0) {
+                            videoEl.currentTime = (clickX / width) * duration;
+                        }
+                    });
+                }
+
                 return section;
             }
 
