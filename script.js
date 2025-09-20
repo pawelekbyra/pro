@@ -1648,7 +1648,12 @@
                                 const video = activeSlide.querySelector('video');
                                 if (video) {
                                     setTimeout(() => {
-                                        video.play().catch(error => console.log('Autoplay was prevented for slide ' + swiper.activeIndex, error));
+                                        video.play().then(() => {
+                                            const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+                                            if (pauseOverlay) {
+                                                pauseOverlay.classList.remove('visible');
+                                            }
+                                        }).catch(error => console.log('Autoplay was prevented for slide ' + swiper.activeIndex, error));
                                     }, 150);
                                 }
                             }
