@@ -489,23 +489,62 @@
                 const progressBarFill = section.querySelector('.progress-bar-fill');
 
                 if (videoEl && progressBar && progressBarFill) {
-                    videoEl.addEventListener('timeupdate', () => {
-                        if (videoEl.duration > 0) {
-                            const progress = (videoEl.currentTime / videoEl.duration) * 100;
-                            progressBarFill.style.width = `${progress}%`;
-                        }
-                    });
+                    const handle = section.querySelector('.progress-bar-handle');
+                    let isDragging = false;
 
-                    progressBar.addEventListener('click', (e) => {
+                    const updateProgress = () => {
+                        if (isDragging || !videoEl.duration) return;
+                        const progress = (videoEl.currentTime / videoEl.duration) * 100;
+                        progressBarFill.style.width = `${progress}%`;
+                        if(handle) handle.style.left = `${progress}%`;
+                    };
+
+                    const seek = (e) => {
                         const rect = progressBar.getBoundingClientRect();
-                        const clickX = e.clientX - rect.left;
+                        const clickX = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
                         const width = rect.width;
-                        const duration = videoEl.duration;
+                        const progress = Math.max(0, Math.min(1, clickX / width));
 
-                        if (duration > 0) {
-                            videoEl.currentTime = (clickX / width) * duration;
+                        if (videoEl.duration > 0) {
+                            videoEl.currentTime = progress * videoEl.duration;
+                            progressBarFill.style.width = `${progress * 100}%`;
+                            if(handle) handle.style.left = `${progress * 100}%`;
                         }
-                    });
+                    };
+
+                    videoEl.addEventListener('timeupdate', updateProgress);
+
+                    progressBar.addEventListener('click', seek);
+
+                    const startDrag = (e) => {
+                        isDragging = true;
+                        progressBar.classList.add('dragging');
+                        videoEl.pause();
+                        seek(e); // Initial seek on click/touch
+
+                        const onDrag = (moveEvent) => {
+                            if (!isDragging) return;
+                            seek(moveEvent);
+                        };
+
+                        const endDrag = () => {
+                            isDragging = false;
+                            progressBar.classList.remove('dragging');
+                            videoEl.play();
+                            document.removeEventListener('mousemove', onDrag);
+                            document.removeEventListener('mouseup', endDrag);
+                            document.removeEventListener('touchmove', onDrag);
+                            document.removeEventListener('touchend', endDrag);
+                        };
+
+                        document.addEventListener('mousemove', onDrag);
+                        document.addEventListener('mouseup', endDrag);
+                        document.addEventListener('touchmove', onDrag);
+                        document.addEventListener('touchend', endDrag);
+                    };
+
+                    progressBar.addEventListener('mousedown', startDrag);
+                    progressBar.addEventListener('touchstart', startDrag);
                 }
 
                 return section;
