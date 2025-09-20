@@ -925,8 +925,8 @@
             z-index: 10005;
         }
         #commentsModal .modal-content {
-            background: white;
-            color: #111;
+            background: #181818; /* Dark theme background */
+            color: #fff;
             width: 100%;
             max-width: 100%;
             height: 75vh;
@@ -953,25 +953,31 @@
             margin: 0;
             font-size: 16px;
             font-weight: 600;
+            color: #fff; /* White title */
         }
         #commentsModal .modal-close-btn {
-            color: #111;
+            color: #fff;
+            opacity: 0.7;
             position: absolute;
             top: 50%;
             right: 4px;
             transform: translateY(-50%);
         }
+        #commentsModal .modal-close-btn:hover {
+            opacity: 1;
+        }
         #commentsModal .modal-body {
-            height: 100%;
+            flex: 1; /* Allow body to grow and shrink */
+            min-height: 0; /* Prevent flexbox overflow issues */
             overflow-y: auto;
             padding: 12px;
         }
 
         /* Comment Form */
         .comment-form-container {
-            padding: 8px 12px calc(8px + var(--safe-area-bottom));
-            background: #f8f8f8;
-            border-top: 1px solid #e7e7e7;
+            padding: 12px 16px calc(12px + var(--safe-area-bottom));
+            background: #202020;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             flex-shrink: 0;
         }
 
@@ -983,16 +989,21 @@
 
         #comment-input {
             flex-grow: 1;
-            border: none;
+            border: 1px solid transparent;
             border-radius: 20px;
             padding: 10px 16px;
             font-size: 15px;
-            background: #e9e9e9;
-            color: #111;
+            background: #333;
+            color: #fff;
+            transition: border-color 0.2s;
+        }
+        #comment-input::placeholder {
+            color: #888;
         }
         #comment-input:focus {
             outline: none;
-            box-shadow: 0 0 0 2px var(--accent-color);
+            border-color: var(--accent-color);
+            box-shadow: none;
         }
 
         #comment-form button {
@@ -1022,82 +1033,95 @@
         .comments-list {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            padding: 8px 0;
+            gap: 24px;
+            padding: 16px 0;
         }
 
         .comment-item {
             display: flex;
             gap: 12px;
             align-items: flex-start;
-            padding: 0 12px;
+            padding: 0;
             width: 100%;
-            max-width: 100%; /* Remove max-width */
         }
 
-        .comment-item.is-reply {
-            margin-left: 40px;
-            padding-left: 10px;
-            border-left: 2px solid #eee;
-            width: calc(100% - 40px);
+        .comment-avatar-wrapper {
+            flex-shrink: 0;
         }
 
         .comment-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             flex-shrink: 0;
             object-fit: cover;
         }
 
-        .comment-content {
+        .comment-main {
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
+            gap: 8px;
+        }
+
+        .comment-body {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 10px 14px;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
         }
 
         .comment-user {
             font-weight: 700;
             font-size: 14px;
-            color: #333;
-            margin-bottom: 2px;
+            color: #fff;
         }
 
         .comment-text {
             font-size: 15px;
-            line-height: 1.45;
-            color: #111;
+            line-height: 1.5;
+            color: #eee;
             margin: 0;
             white-space: pre-wrap;
             word-break: break-word;
         }
 
-        .comment-meta {
+        .comment-footer {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-top: 4px;
+            gap: 16px;
+            padding-left: 14px;
+        }
+
+        .comment-timestamp {
             font-size: 12px;
             color: #888;
         }
 
-        .comment-action-btn {
+        .comment-action-btn, .comment-reply-btn {
             background: none;
             border: none;
             cursor: pointer;
-            color: #555;
+            color: #aaa;
             font-weight: 600;
             padding: 0;
             font-size: 12px;
+            transition: color 0.2s;
+        }
+        .comment-action-btn:hover, .comment-reply-btn:hover {
+            color: #fff;
         }
 
-        .comment-actions {
-            position: absolute;
-            right: 12px;
-            top: 10px;
+        .comment-likes {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 6px;
         }
 
         .comment-like-btn {
@@ -1105,17 +1129,20 @@
             border: none;
             cursor: pointer;
             padding: 0;
+            display: flex;
         }
 
         .comment-like-btn svg {
-            width: 20px;
-            height: 20px;
-            stroke: #555;
-            stroke-width: 1.5;
+            width: 18px;
+            height: 18px;
+            stroke: #aaa;
+            stroke-width: 2;
             fill: none;
             transition: all 0.2s ease;
         }
-
+        .comment-like-btn:hover svg {
+            stroke: var(--accent-color);
+        }
         .comment-like-btn.active svg {
             fill: var(--accent-color);
             stroke: var(--accent-color);
@@ -1123,13 +1150,48 @@
 
         .comment-like-count {
             font-size: 12px;
-            color: #555;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .comment-replies {
+            padding-left: 20px;
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .comment-replies::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 1px;
+        }
+
+        .comment-item.is-reply {
+            margin-left: 0;
+            padding-left: 0;
+            border-left: none;
+            width: 100%;
         }
 
         .comment-content {
-            position: relative;
-            flex-grow: 1;
-            padding-right: 40px; /* Space for like button */
+            position: static;
+            padding-right: 0;
+        }
+
+        .comment-actions {
+            position: static;
+        }
+
+        .comment-meta {
+            /* This class is gone */
         }
 
         .comment-sort-options {
@@ -1141,23 +1203,31 @@
             transform: translateY(-50%);
         }
         .sort-btn {
-            background: #eee;
-            border: 1px solid #ddd;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sort-btn:hover {
+            background: #333;
+            border-color: #777;
         }
         .sort-btn.active {
             background: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
+            font-weight: 600;
         }
 
         .no-comments-message {
             text-align: center;
             padding: 60px 20px;
-            color: #999;
+            color: #888;
             font-weight: 500;
         }
 
@@ -1165,56 +1235,42 @@
         #commentsModal .modal-body .loading-spinner {
             display: block;
             margin: 60px auto;
-            border-color: rgba(0,0,0,0.1);
+            border-color: rgba(255, 255, 255, 0.2);
             border-top-color: var(--accent-color);
         }
 
         .reply-context {
             padding: 8px 12px;
-            background: #e0e0e0;
+            background: #333;
             font-size: 13px;
-            color: #555;
+            color: #aaa;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         .cancel-reply-btn {
             background: none;
             border: none;
             font-size: 18px;
             cursor: pointer;
-            color: #777;
+            color: #aaa;
             padding: 0;
             line-height: 1;
         }
-
-        .reply-context {
-            padding: 8px 12px;
-            background: #e0e0e0;
-            font-size: 13px;
-            color: #555;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .cancel-reply-btn {
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: #777;
+        .cancel-reply-btn:hover {
+            color: #fff;
         }
 
         .login-to-comment-prompt {
             text-align: center;
             padding: 20px;
-            background-color: #f0f0f0;
+            background-color: #222;
         }
         .login-to-comment-prompt p {
             margin: 0;
             font-size: 15px;
-            color: #555;
+            color: #aaa;
         }
         .login-to-comment-prompt a {
             color: var(--accent-color);

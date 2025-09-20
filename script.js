@@ -754,24 +754,65 @@
                     commentEl.className = `comment-item ${isReply ? 'is-reply' : ''}`;
                     commentEl.dataset.commentId = comment.id;
 
-                    commentEl.innerHTML = `
-                        <img src="${comment.avatar}" alt="Avatar" class="comment-avatar" loading="lazy">
-                        <div class="comment-content">
-                            <span class="comment-user">${comment.user}</span>
-                            <p class="comment-text">${comment.text}</p>
-                            <div class="comment-meta">
-                                <span class="comment-timestamp">${new Date(comment.timestamp).toLocaleString()}</span>
-                                <button class="comment-action-btn comment-reply-btn">Reply</button>
-                            </div>
-                            <div class="comment-actions">
-                                <button class="comment-like-btn ${comment.isLiked ? 'active' : ''}">
-                                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                </button>
-                                <span class="comment-like-count">${Utils.formatCount(comment.likes)}</span>
-                            </div>
-                        </div>
-                    `;
+                    // 1. Avatar
+                    const avatarWrapper = document.createElement('div');
+                    avatarWrapper.className = 'comment-avatar-wrapper';
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = comment.avatar;
+                    avatarImg.alt = "Avatar";
+                    avatarImg.className = 'comment-avatar';
+                    avatarImg.loading = 'lazy';
+                    avatarWrapper.appendChild(avatarImg);
 
+                    // 2. Main Content
+                    const main = document.createElement('div');
+                    main.className = 'comment-main';
+
+                    // 2a. Body
+                    const body = document.createElement('div');
+                    body.className = 'comment-body';
+
+                    const header = document.createElement('div');
+                    header.className = 'comment-header';
+                    const userSpan = document.createElement('span');
+                    userSpan.className = 'comment-user';
+                    userSpan.textContent = comment.user;
+                    header.appendChild(userSpan);
+
+                    const textP = document.createElement('p');
+                    textP.className = 'comment-text';
+                    textP.textContent = comment.text;
+
+                    body.appendChild(header);
+                    body.appendChild(textP);
+
+                    // 2b. Footer
+                    const footer = document.createElement('div');
+                    footer.className = 'comment-footer';
+                    const timestampSpan = document.createElement('span');
+                    timestampSpan.className = 'comment-timestamp';
+                    timestampSpan.textContent = new Date(comment.timestamp).toLocaleString(); // Or a time-ago function
+
+                    const replyBtn = document.createElement('button');
+                    replyBtn.className = 'comment-action-btn comment-reply-btn';
+                    replyBtn.textContent = 'Reply';
+
+                    const likesDiv = document.createElement('div');
+                    likesDiv.className = 'comment-likes';
+                    const likeBtn = document.createElement('button');
+                    likeBtn.className = `comment-like-btn ${comment.isLiked ? 'active' : ''}`;
+                    likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+                    const likeCountSpan = document.createElement('span');
+                    likeCountSpan.className = 'comment-like-count';
+                    likeCountSpan.textContent = Utils.formatCount(comment.likes);
+                    likesDiv.appendChild(likeBtn);
+                    likesDiv.appendChild(likeCountSpan);
+
+                    footer.appendChild(timestampSpan);
+                    footer.appendChild(replyBtn);
+                    footer.appendChild(likesDiv);
+
+                    // 2c. Replies
                     const repliesContainer = document.createElement('div');
                     repliesContainer.className = 'comment-replies';
                     if (comment.replies && comment.replies.length > 0) {
@@ -779,7 +820,13 @@
                             repliesContainer.appendChild(renderComment(reply, true));
                         });
                     }
-                    commentEl.appendChild(repliesContainer);
+
+                    main.appendChild(body);
+                    main.appendChild(footer);
+                    main.appendChild(repliesContainer);
+
+                    commentEl.appendChild(avatarWrapper);
+                    commentEl.appendChild(main);
 
                     return commentEl;
                 }
@@ -1121,16 +1168,36 @@
 
                         const slideId = document.querySelector('.swiper-slide-active')?.dataset.slideId;
                         if (slideId) {
-                            UI.DOM.commentsModal.querySelector('.modal-body').innerHTML = '<div class="loading-spinner"></div>';
+                            const modalBody = UI.DOM.commentsModal.querySelector('.modal-body');
+                            const commentsList = modalBody.querySelector('.comments-list');
+                            if (commentsList) {
+                                commentsList.style.opacity = '0.5';
+                                commentsList.style.transition = 'opacity 0.2s ease-in-out';
+                            }
+
                             API.fetchComments(slideId).then(response => {
                                 if (response.success) {
                                     let comments = response.data;
+
+                                    const deepSort = (arr, sortFn) => {
+                                        arr.sort(sortFn);
+                                        arr.forEach(c => {
+                                            if (c.replies && c.replies.length > 0) {
+                                                deepSort(c.replies, sortFn);
+                                            }
+                                        });
+                                    };
+
                                     if (newSortOrder === 'popular') {
-                                        comments.sort((a, b) => b.likes - a.likes);
-                                    } else {
-                                        comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                                        deepSort(comments, (a, b) => b.likes - a.likes);
+                                    } else { // newest
+                                        deepSort(comments, (a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                                     }
-                                    UI.renderComments(comments);
+
+                                    // A small delay to make the transition visible
+                                    setTimeout(() => {
+                                        UI.renderComments(comments);
+                                    }, 200);
                                 }
                             });
                         }
