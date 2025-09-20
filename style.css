@@ -293,6 +293,9 @@
             transition: opacity 0.2s ease-in-out;
             visibility: hidden;
         }
+        .tiktok-symulacja:not(.video-loaded) .pause-overlay {
+            display: none !important;
+        }
         .pause-overlay.visible {
             opacity: 1;
             pointer-events: auto;
@@ -367,10 +370,14 @@
             align-items: center;
             gap: 6px;
             z-index: 105;
-            transition: right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            visibility: hidden;
+            transition: right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
         }
         .tiktok-symulacja .sidebar.visible {
             right: -4px;
+            opacity: 1;
+            visibility: visible;
         }
         .tiktok-symulacja .bottombar {
             position: absolute;
@@ -2435,12 +2442,22 @@
     }
 }
 
-.secret-subtitle u {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
+/* --- Underline Styles --- */
+.secret-subtitle u,
+.pwa-prompt-description u {
+    text-decoration: none;
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+    padding-bottom: 1px;
 }
 
-.secret-subtitle u.login-underline {
-    text-decoration-color: var(--accent-color);
+/* Color for 'Log in' in the secret overlay */
+.secret-subtitle u[data-translate-key="secretSubtitleAction"] {
+    border-bottom-color: #87CEEB; /* Sky Blue */
+}
+
+/* Color for 'Download the app' (in all locations) */
+.secret-subtitle u[data-translate-key="pwaSubtitleAction"],
+.pwa-prompt-description u[data-translate-key="installPwaSubheadingAction"] {
+    border-bottom-color: var(--accent-color);
 }
