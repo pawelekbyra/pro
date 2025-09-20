@@ -484,7 +484,24 @@
                 likeBtn.dataset.likeId = slideData.likeId;
                 updateLikeButtonState(likeBtn, slideData.isLiked, slideData.initialLikes);
 
+                const tiktokSymulacja = section.querySelector('.tiktok-symulacja');
                 const videoEl = section.querySelector('video');
+                const pauseOverlay = section.querySelector('.pause-overlay');
+
+                if (tiktokSymulacja && videoEl && pauseOverlay) {
+                    tiktokSymulacja.addEventListener('click', (e) => {
+                        if (e.target.closest('.sidebar, .bottombar')) {
+                            return;
+                        }
+                        if (videoEl.paused) {
+                            videoEl.play();
+                            pauseOverlay.classList.remove('visible');
+                        } else {
+                            videoEl.pause();
+                            pauseOverlay.classList.add('visible');
+                        }
+                    });
+                }
                 const progressBar = section.querySelector('.progress-bar');
                 const progressBarFill = section.querySelector('.progress-bar-fill');
 
@@ -515,6 +532,9 @@
                     videoEl.addEventListener('timeupdate', updateProgress);
 
                     const startDrag = (e) => {
+                        if (e.type === 'touchstart') {
+                            e.preventDefault();
+                        }
                         isDragging = true;
                         progressBar.classList.add('dragging');
                         const wasPlaying = !videoEl.paused;
@@ -550,7 +570,7 @@
                     };
 
                     progressBar.addEventListener('mousedown', startDrag);
-                    progressBar.addEventListener('touchstart', startDrag, { passive: true });
+                    progressBar.addEventListener('touchstart', startDrag, { passive: false });
                 }
 
                 return section;
@@ -1640,10 +1660,7 @@
                                     setTimeout(() => {
                                         video.play().catch(error => {
                                             console.log('Autoplay was prevented for video in slide ' + swiper.activeIndex, error);
-                                            const overlay = activeSlide.querySelector('.pause-overlay');
-                                            if (overlay) {
-                                                overlay.classList.add('visible');
-                                            }
+                                            // Overlay is now only shown on manual pause
                                         });
                                     }, 100);
                                 }
