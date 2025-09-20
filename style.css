@@ -364,19 +364,17 @@
             position: absolute;
             top: calc((var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 + var(--topbar-height));
     right: -4px;
-    transform: translateY(-50%) translateX(20px);
+    transform: translateY(-50%) translateX(100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
             z-index: 105;
-            opacity: 0;
             visibility: hidden;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .tiktok-symulacja .sidebar.visible {
     transform: translateY(-50%) translateX(0);
-            opacity: 1;
             visibility: visible;
         }
         .tiktok-symulacja .bottombar {
