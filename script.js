@@ -1662,10 +1662,6 @@
                         on: {
                             init: function (swiper) {
                                 // --- One-time animation on first app load ---
-                                const pwaInstallBar = document.getElementById('pwa-install-bar');
-                                if (pwaInstallBar && !PWA.isStandalone()) {
-                                    pwaInstallBar.classList.add('visible');
-                                }
                                 swiper.slides.forEach(slide => {
                                     const sidebar = slide.querySelector('.sidebar');
                                     if (sidebar) sidebar.classList.add('visible');
@@ -1681,6 +1677,10 @@
                     setTimeout(() => {
                         UI.DOM.preloader.classList.add('preloader-hiding');
                         UI.DOM.container.classList.add('ready');
+                        const pwaInstallBar = document.getElementById('pwa-install-bar');
+                        if (pwaInstallBar && !PWA.isStandalone()) {
+                            pwaInstallBar.classList.add('visible');
+                        }
                         UI.DOM.preloader.addEventListener('transitionend', () => UI.DOM.preloader.style.display = 'none', { once: true });
                     }, 1000);
 
