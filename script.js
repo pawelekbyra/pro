@@ -93,39 +93,52 @@
             'access': 'public',
             'initialLikes': 10,
             'isLiked': false,
-            'initialComments': 5,
+            'initialComments': 3,
             'isIframe': false,
             'mp4Url': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             'user': 'Filmik 1',
             'description': 'Podpis do filmiku 1',
             'avatar': 'https://i.pravatar.cc/100?u=1',
-            'likeId': '101'
+            'likeId': '101',
+            'comments': [
+                { 'id': 'c1-1', 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2 min temu' },
+                { 'id': 'c1-2', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Haha, co za królik!', 'timestamp': '1 min temu' },
+                { 'id': 'c1-3', 'user': 'Anna', 'avatar': 'https://i.pravatar.cc/100?u=13', 'text': 'Super! ❤️', 'timestamp': '30 sek temu' }
+            ]
         },
         {
             'id': 'slide2',
             'access': 'secret',
             'initialLikes': 20,
             'isLiked': false,
-            'initialComments': 8,
+            'initialComments': 2,
             'isIframe': false,
             'mp4Url': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
             'user': 'Paweł Polutek',
             'description': 'Podpis do filmiku 2',
             'avatar': 'https://i.pravatar.cc/100?u=2',
-            'likeId': '102'
+            'likeId': '102',
+            'comments': [
+                { 'id': 'c2-1', 'user': 'Admin', 'avatar': 'https://i.pravatar.cc/100?u=12', 'text': 'To jest materiał premium!', 'timestamp': '5 min temu' },
+                { 'id': 'c2-2', 'user': 'Ewa', 'avatar': 'https://i.pravatar.cc/100?u=14', 'text': 'Zgadzam się, świetna jakość.', 'timestamp': '4 min temu' }
+            ]
         },
         {
             'id': 'slide3',
             'access': 'pwa',
             'initialLikes': 30,
             'isLiked': false,
-            'initialComments': 15,
+            'initialComments': 2,
             'isIframe': false,
             'mp4Url': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
             'user': 'Test Video',
             'description': 'A test video slide.',
             'avatar': 'https://i.pravatar.cc/100?u=3',
-            'likeId': '103'
+            'likeId': '103',
+            'comments': [
+                { 'id': 'c3-1', 'user': 'Jan', 'avatar': 'https://i.pravatar.cc/100?u=15', 'text': 'Działa!', 'timestamp': '10 min temu' },
+                { 'id': 'c3-2', 'user': 'Zofia', 'avatar': 'https://i.pravatar.cc/100?u=16', 'text': 'Testowy komentarz', 'timestamp': '9 min temu' }
+            ]
         }
     ]
 };
@@ -146,8 +159,8 @@
           DEBUG_PANEL: true,
           GESTURE_GRACE_PERIOD_MS: 2000,
           TRANSLATIONS: {
-                pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Ting Tong', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitleAction: 'Zaloguj się,', secretSubtitleRest: ' aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitleAction: 'Pobierz aplikację,', pwaSubtitleRest: ' aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheadingAction: 'Pobierz aplikację', installPwaSubheadingRest: ' i zobacz więcej!', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś' },
-                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitleAction: 'Log in', secretSubtitleRest: ' to unlock', pwaTitle: 'Top Secret', pwaSubtitleAction: 'Download the app', pwaSubtitleRest: ' to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheadingAction: 'Download the app', installPwaSubheadingRest: ' to see more!', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!" }
+                pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Ting Tong', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitleAction: 'Zaloguj się,', secretSubtitleRest: ' aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitleAction: 'Pobierz aplikację,', pwaSubtitleRest: ' aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheadingAction: 'Pobierz aplikację', installPwaSubheadingRest: ' i zobacz więcej!', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś', noComments: 'Brak komentarzy. Bądź pierwszy!' },
+                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitleAction: 'Log in', secretSubtitleRest: ' to unlock', pwaTitle: 'Top Secret', pwaSubtitleAction: 'Download the app', pwaSubtitleRest: ' to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheadingAction: 'Download the app', installPwaSubheadingRest: ' to see more!', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!", noComments: "No comments yet. Be the first!" }
           }
         };
 
@@ -264,6 +277,34 @@
                     else console.error('Failed to refresh nonce.', json);
                 },
                 fetchSlidesData: () => _request('tt_get_slides_data_ajax'),
+                fetchComments: async (slideId) => {
+                    // MOCK: Simulate API delay
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    const slide = slidesData.find(s => s.id === slideId);
+                    if (slide && slide.comments) {
+                        return { success: true, data: slide.comments };
+                    }
+                    return { success: false, data: { message: 'Comments not found.' } };
+                },
+                postComment: async (slideId, text) => {
+                    // MOCK: Simulate API delay and response
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    const slide = slidesData.find(s => s.id === slideId);
+                    if (!slide) {
+                        return { success: false, data: { message: 'Slide not found.' } };
+                    }
+                    if (!slide.comments) slide.comments = [];
+                    const newComment = {
+                        id: `c${slide.id}-${Date.now()}`,
+                        user: 'Ja (Ty)', // Mocked user
+                        avatar: 'https://i.pravatar.cc/100?u=99', // Mocked avatar
+                        text: text,
+                        timestamp: 'teraz'
+                    };
+                    slide.comments.push(newComment);
+                    slide.initialComments = slide.comments.length;
+                    return { success: true, data: newComment };
+                },
             };
         })();
 
@@ -495,6 +536,10 @@
                 likeBtn.dataset.likeId = slideData.likeId;
                 updateLikeButtonState(likeBtn, slideData.isLiked, slideData.initialLikes);
 
+                const commentsBtn = section.querySelector('.commentsButton');
+                const commentsCountEl = commentsBtn.querySelector('.comment-count');
+                commentsCountEl.textContent = Utils.formatCount(slideData.initialComments);
+
                 const tiktokSymulacja = section.querySelector('.tiktok-symulacja');
                 const videoEl = section.querySelector('video');
                 const pauseOverlay = section.querySelector('.pause-overlay');
@@ -644,6 +689,37 @@
                 }
             }
 
+            function renderComments(comments) {
+                const modalBody = DOM.commentsModal.querySelector('.modal-body');
+                if (!modalBody) return;
+
+                modalBody.innerHTML = ''; // Clear previous comments
+
+                if (!comments || comments.length === 0) {
+                    modalBody.innerHTML = '<p class="no-comments-message" data-translate-key="noComments">Brak komentarzy. Bądź pierwszy!</p>';
+                    return;
+                }
+
+                const commentList = document.createElement('div');
+                commentList.className = 'comments-list';
+
+                comments.forEach(comment => {
+                    const commentEl = document.createElement('div');
+                    commentEl.className = 'comment-item';
+                    commentEl.innerHTML = `
+                        <img src="${comment.avatar}" alt="Avatar" class="comment-avatar" loading="lazy">
+                        <div class="comment-content">
+                            <span class="comment-user">${comment.user}</span>
+                            <p class="comment-text">${comment.text}</p>
+                            <span class="comment-timestamp">${comment.timestamp}</span>
+                        </div>
+                    `;
+                    commentList.appendChild(commentEl);
+                });
+
+                modalBody.appendChild(commentList);
+            }
+
             return {
                 DOM,
                 showAlert,
@@ -655,7 +731,8 @@
                 createSlideElement,
                 renderSlides,
                 initGlobalPanels,
-                populateProfileModal
+                populateProfileModal,
+                renderComments
             };
         })();
 
@@ -951,7 +1028,22 @@
                         case 'toggle-like': handleLikeToggle(actionTarget); break;
                         case 'share': handleShare(actionTarget); break;
                         case 'toggle-language': handleLanguageToggle(); break;
-                        case 'open-comments-modal': UI.openModal(UI.DOM.commentsModal); break;
+                        case 'open-comments-modal': {
+                            const slideId = actionTarget.closest('.webyx-section')?.dataset.slideId;
+                            if (slideId) {
+                                // Show a loading state
+                                UI.DOM.commentsModal.querySelector('.modal-body').innerHTML = '<div class="loading-spinner"></div>';
+                                API.fetchComments(slideId).then(response => {
+                                    if (response.success) {
+                                        UI.renderComments(response.data);
+                                    } else {
+                                        UI.renderComments([]); // Show empty state on error
+                                    }
+                                });
+                            }
+                            UI.openModal(UI.DOM.commentsModal);
+                            break;
+                        }
                         case 'open-info-modal': mockToggleLogin(); break;
                         case 'open-desktop-pwa-modal': PWA.openDesktopModal(); break;
                         case 'open-ios-pwa-modal': PWA.openIosModal(); break;
@@ -1023,10 +1115,57 @@
                     }
                 },
                 formSubmitHandler: (e) => {
-                    const form = e.target.closest('form#tt-login-form');
-                    if (form) {
+                    const loginForm = e.target.closest('form#tt-login-form');
+                    if (loginForm) {
                         e.preventDefault();
                         mockToggleLogin();
+                        return;
+                    }
+
+                    const commentForm = e.target.closest('form#comment-form');
+                    if (commentForm) {
+                        e.preventDefault();
+                        const input = commentForm.querySelector('#comment-input');
+                        if (!input) return;
+                        const text = input.value.trim();
+                        if (!text) return;
+
+                        const button = commentForm.querySelector('button[type="submit"]');
+                        if(button) button.disabled = true;
+
+                        const slideElement = document.querySelector('.swiper-slide-active');
+                        const slideId = slideElement?.dataset.slideId;
+
+                        if (slideId) {
+                            API.postComment(slideId, text).then(postResponse => {
+                                if (postResponse.success) {
+                                    input.value = '';
+                                    const slideData = slidesData.find(s => s.id === slideId);
+                                    if (slideData) {
+                                        // The mock API already updated the data, just re-render
+                                        UI.renderComments(slideData.comments);
+
+                                        // Update comment count on the main slide icon
+                                        const mainSlideCount = slideElement.querySelector('.comment-count');
+                                        if(mainSlideCount) {
+                                            mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                                        }
+
+                                        // Scroll to the bottom of comments
+                                        const modalBody = UI.DOM.commentsModal.querySelector('.modal-body');
+                                        if (modalBody) {
+                                            modalBody.scrollTop = modalBody.scrollHeight;
+                                        }
+                                    }
+                                } else {
+                                    UI.showAlert(postResponse.data?.message || 'Failed to post comment.', true);
+                                }
+                                if(button) button.disabled = false;
+                                input.focus();
+                            });
+                        } else {
+                            if(button) button.disabled = false;
+                        }
                     }
                 }
             };
@@ -1549,7 +1688,7 @@
                 });
 
                 document.body.addEventListener('click', Handlers.mainClickHandler);
-                UI.DOM.container.addEventListener('submit', Handlers.formSubmitHandler);
+                document.body.addEventListener('submit', Handlers.formSubmitHandler);
 
                 document.querySelectorAll('.modal-overlay:not(#accountModal)').forEach(modal => {
                     modal.addEventListener('click', (e) => { if (e.target === modal) UI.closeModal(modal); });
