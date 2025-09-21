@@ -165,9 +165,9 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #000;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overscroll-behavior-y: contain; /* Prevent bounce scroll */
+            user-select: none;
+            -webkit-user-select: none;
         }
         body::-webkit-scrollbar, #webyx-container::-webkit-scrollbar {
             display: none;
@@ -399,11 +399,11 @@
 .app-frame--pwa-visible .bottombar {
 }
 .progress-bar {
-    position: fixed;
-    bottom: var(--bottombar-height);
+    position: absolute;
+    top: 0;
     left: 0;
     width: 100%;
-    height: 10px;
+    height: 10px; /* Increased height to make it a better touch target */
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     display: flex;
@@ -2257,14 +2257,11 @@
         }
 
 #app-frame {
-    width: 100%;
-    height: 100%;
-    max-width: calc(9 / 16 * 100vh);
-    max-height: calc(16 / 9 * 100vw);
-    aspect-ratio: 9 / 16;
-    position: relative;
+    position: fixed;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
     transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -2857,4 +2854,23 @@
 .app-frame--pwa-visible .progress-bar {
     top: auto;
     bottom: 100%;
+}
+
+@media (min-aspect-ratio: 9/16) {
+    html, body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background-color: #000;
+    }
+
+    #app-frame {
+        width: 100%;
+        height: 100%;
+        max-width: calc(9 / 16 * 100vh);
+        max-height: calc(16 / 9 * 100vw);
+        aspect-ratio: 9 / 16;
+        position: relative;
+    }
 }
