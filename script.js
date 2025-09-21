@@ -1288,8 +1288,6 @@
                             if (slideId) {
                                 const slideData = slidesData.find(s => s.id === slideId);
                                 if (slideData) {
-                                    const commentsTitle = UI.DOM.commentsModal.querySelector('#commentsTitle');
-                                    commentsTitle.textContent = `Komentarze (${slideData.initialComments})`;
                                 }
 
                                 // Show a loading state
