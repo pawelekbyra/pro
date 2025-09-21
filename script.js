@@ -407,21 +407,24 @@
 
             function closeModal(modal) {
                 const modalContent = modal.querySelector('.modal-content, .tiktok-profile-content');
-                if (modal.id === 'tiktok-profile-modal' && modalContent) {
-                    const onTransitionEnd = (event) => {
-                        if (event.target === modalContent && event.propertyName === 'transform') {
-                            modal.classList.remove('visible');
-                            modal.classList.remove('is-hiding');
-                            modalContent.removeEventListener('transitionend', onTransitionEnd);
-                            if (modal._focusTrapDispose) { modal._focusTrapDispose(); delete modal._focusTrapDispose; }
-                            DOM.container.removeAttribute('aria-hidden');
-                            State.get('lastFocusedElement')?.focus();
+
+                if ((modal.id === 'tiktok-profile-modal' || modal.id === 'commentsModal') && modalContent) {
+                    if (modal.classList.contains('is-hiding')) return;
+
+                    const onTransitionEnd = () => {
+                        modal.classList.remove('visible', 'is-hiding');
+                        if (modal._focusTrapDispose) {
+                            modal._focusTrapDispose();
+                            delete modal._focusTrapDispose;
                         }
+                        DOM.container.removeAttribute('aria-hidden');
+                        State.get('lastFocusedElement')?.focus();
                     };
-                    modalContent.addEventListener('transitionend', onTransitionEnd);
+
+                    modalContent.addEventListener('transitionend', onTransitionEnd, { once: true });
                     modal.classList.add('is-hiding');
-                    // The CSS will now trigger the transform animation.
-                    // After the animation, the 'transitionend' event will clean up.
+                    modal.setAttribute('aria-hidden', 'true');
+
                 } else {
                     // Fallback for other modals
                     modal.classList.remove('visible');

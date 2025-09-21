@@ -943,6 +943,9 @@
         #commentsModal.visible .modal-content {
             transform: translateY(0);
         }
+        #commentsModal.is-hiding .modal-content {
+            transform: translateY(100%);
+        }
         #commentsModal .modal-header {
             display: flex;
             justify-content: space-between; /* Change to space-between */
