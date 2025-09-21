@@ -811,13 +811,32 @@
                     const parentEl = createCommentElement(comment);
                     threadWrapper.appendChild(parentEl);
 
-                    if (repliesMap.has(comment.id)) {
+                    const commentReplies = repliesMap.get(comment.id);
+                    if (commentReplies && commentReplies.length > 0) {
                         const repliesContainer = document.createElement('div');
                         repliesContainer.className = 'comment-replies';
-                        repliesMap.get(comment.id).forEach(reply => {
+
+                        commentReplies.forEach(reply => {
                             const replyEl = createCommentElement(reply);
                             repliesContainer.appendChild(replyEl);
                         });
+
+                        const toggleBtn = document.createElement('button');
+                        toggleBtn.className = 'toggle-replies-btn';
+                        toggleBtn.innerHTML = `<span class="arrow"></span> Rozwiń odpowiedzi (${commentReplies.length})`;
+
+                        toggleBtn.addEventListener('click', () => {
+                            repliesContainer.classList.toggle('visible');
+                            toggleBtn.classList.toggle('expanded');
+                            if (repliesContainer.classList.contains('visible')) {
+                                toggleBtn.innerHTML = `<span class="arrow"></span> Ukryj odpowiedzi`;
+                            } else {
+                                toggleBtn.innerHTML = `<span class="arrow"></span> Rozwiń odpowiedzi (${commentReplies.length})`;
+                            }
+                        });
+
+                        // Insert the toggle button after the parent comment's main content
+                        parentEl.querySelector('.comment-main').appendChild(toggleBtn);
                         threadWrapper.appendChild(repliesContainer);
                     }
                     commentList.appendChild(threadWrapper);
@@ -1264,6 +1283,12 @@
                         case 'open-comments-modal': {
                             const slideId = actionTarget.closest('.webyx-section')?.dataset.slideId;
                             if (slideId) {
+                                const slideData = slidesData.find(s => s.id === slideId);
+                                if (slideData) {
+                                    const commentsTitle = UI.DOM.commentsModal.querySelector('#commentsTitle');
+                                    commentsTitle.textContent = `Komentarze (${slideData.initialComments})`;
+                                }
+
                                 // Show a loading state
                                 UI.DOM.commentsModal.querySelector('.modal-body').innerHTML = '<div class="loading-spinner"></div>';
                                 API.fetchComments(slideId).then(response => {
@@ -1393,6 +1418,11 @@
                                         const mainSlideCount = slideElement.querySelector('.comment-count');
                                         if(mainSlideCount) {
                                             mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                                        }
+
+                                        const commentsTitle = UI.DOM.commentsModal.querySelector('#commentsTitle');
+                                        if (commentsTitle) {
+                                            commentsTitle.textContent = `Komentarze (${slideData.initialComments})`;
                                         }
 
                                         const modalBody = UI.DOM.commentsModal.querySelector('.modal-body');
