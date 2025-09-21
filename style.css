@@ -2871,7 +2871,7 @@
         aspect-ratio: 9 / 16;
         position: relative;
     }
-    .topbar {
+    .topbar, .login-panel {
         position: fixed;
         width: 100%;
         max-width: 100%;
