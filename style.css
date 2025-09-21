@@ -2496,8 +2496,8 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    transform: translateX(-100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateX(100%);
+    transition: transform 0.4s linear;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -2506,18 +2506,18 @@
 }
 
 #tiktok-profile-modal.is-hiding .tiktok-profile-content {
-    transform: translateX(-100%);
+    transform: translateX(100%);
 }
 
 .tiktok-profile-header {
     height: var(--topbar-height);
     display: grid;
-    grid-template-columns: 60px auto 1fr;
+    grid-template-columns: 60px 1fr 60px;
     align-items: center;
     padding: 0;
     padding-top: var(--safe-area-top);
-    background-color: transparent;
-    border-bottom: none;
+    background-color: #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
 }
 
