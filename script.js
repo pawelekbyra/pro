@@ -498,6 +498,9 @@
                         const subtitleSpanElement = section.querySelector('.secret-subtitle span');
 
                         if (subtitleUElement && subtitleSpanElement) {
+                           // The data-action attribute is used by the global mainClickHandler
+                           // to trigger the correct action when this element is clicked.
+                           subtitleUElement.dataset.action = isPwaOnly ? 'install-pwa' : 'toggle-login-panel';
                            subtitleUElement.dataset.translateKey = subtitleActionKey;
                            subtitleUElement.textContent = Utils.getTranslation(subtitleActionKey);
                            subtitleSpanElement.dataset.translateKey = subtitleRestKey;

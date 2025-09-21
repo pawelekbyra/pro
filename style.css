@@ -1326,12 +1326,12 @@
         .login-to-comment-prompt {
             text-align: center;
             padding: 20px;
-            background-color: #F0F2F5;
+            background-color: #18191A;
         }
         .login-to-comment-prompt p {
             margin: 0;
             font-size: 15px;
-            color: #65676B;
+            color: #E4E6EB;
         }
         .login-to-comment-prompt a {
             color: var(--accent-color);
@@ -2842,6 +2842,7 @@
     border-bottom-width: 2px;
     border-bottom-style: solid;
     padding-bottom: 1px;
+    cursor: pointer;
 }
 
 /* Color for 'Log in' and 'Download' in the secret overlay */
