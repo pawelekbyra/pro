@@ -2861,8 +2861,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
-        background-color: #000;
     }
 
     #app-frame {
