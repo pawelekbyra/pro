@@ -123,6 +123,10 @@
                         </button>
                     </div>
                     <div class="bottombar">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill"></div>
+                            <div class="progress-bar-handle"></div>
+                        </div>
                         <div class="text-info">
                             <div class="text-user"></div>
                             <div class="text-description"></div>
@@ -135,10 +139,26 @@
             <div class="swiper-wrapper">
             </div>
         </div>
-    </div>
-    <div class="progress-bar">
-        <div class="progress-bar-fill"></div>
-        <div class="progress-bar-handle"></div>
+        <div id="pwa-install-bar" class="pwa-prompt">
+            <div class="pwa-prompt-content">
+                <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Zobacz więcej!</p>
+                <p class="pwa-prompt-description">
+                    <u data-translate-key="installPwaSubheadingAction"></u><span data-translate-key="installPwaSubheadingRest"></span>
+                </p>
+            </div>
+            <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction">Zainstaluj</button>
+        </div>
+        <div id="pwa-ios-instructions" class="pwa-prompt-ios">
+            <div class="pwa-ios-header">
+                <h3>Jak zainstalować aplikację</h3>
+                <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
+            </div>
+            <div class="pwa-ios-body">
+                <p>1. Stuknij ikonę <strong>udostępniania</strong> w przeglądarce.</p>
+                <p>2. Wybierz <strong>"Dodaj do ekranu początkowego"</strong>.</p>
+                <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
+            </div>
+        </div>
     </div>
     <div id="alertBox" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
@@ -432,28 +452,6 @@
     <div class="crop-modal" id="cropModal">
         </div>
     <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
-
-    <div id="pwa-install-bar" class="pwa-prompt">
-        <div class="pwa-prompt-content">
-            <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Zobacz więcej!</p>
-            <p class="pwa-prompt-description">
-                <u data-translate-key="installPwaSubheadingAction"></u><span data-translate-key="installPwaSubheadingRest"></span>
-            </p>
-        </div>
-        <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction">Zainstaluj</button>
-    </div>
-
-    <div id="pwa-ios-instructions" class="pwa-prompt-ios">
-        <div class="pwa-ios-header">
-            <h3>Jak zainstalować aplikację</h3>
-            <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
-        </div>
-        <div class="pwa-ios-body">
-            <p>1. Stuknij ikonę <strong>udostępniania</strong> w przeglądarce.</p>
-            <p>2. Wybierz <strong>"Dodaj do ekranu początkowego"</strong>.</p>
-            <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
-        </div>
-    </div>
 
     <div id="pwa-desktop-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
         <div class="modal-content" tabindex="-1">
