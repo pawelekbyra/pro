@@ -395,7 +395,6 @@
 
 /* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
 .app-frame--pwa-visible .bottombar {
-    padding-top: 30px;
 }
 .progress-bar {
     position: absolute;
@@ -2858,5 +2857,6 @@
 }
 
 .app-frame--pwa-visible .progress-bar {
-    top: -30px;
+    top: auto;
+    bottom: 100%;
 }
