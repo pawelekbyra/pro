@@ -2493,7 +2493,7 @@
 }
 
 #tiktok-profile-modal .tiktok-profile-content {
-    background-color: #121212;
+    background-color: #1a1a1a;
     color: #fff;
     width: 100%;
     height: 100%;
@@ -2519,7 +2519,7 @@
     align-items: center;
     padding: 0;
     padding-top: var(--safe-area-top);
-    background-color: #000;
+    background-color: #1F1F1F;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
 }
