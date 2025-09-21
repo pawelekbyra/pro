@@ -1346,6 +1346,9 @@
                             break;
                         case 'toggle-login-panel':
                             if (!State.get('isUserLoggedIn')) {
+                                if (UI.DOM.commentsModal.classList.contains('visible')) {
+                                    UI.closeModal(UI.DOM.commentsModal);
+                                }
                                 if (loginPanel) loginPanel.classList.toggle('active');
                                 if (topbar) topbar.classList.toggle('login-panel-active');
                             }
