@@ -406,17 +406,23 @@
             }
 
             function closeModal(modal) {
-                const modalContent = modal.querySelector('.modal-content, .tiktok-profile-content, .account-modal-content');
+                if (!modal) return;
 
-                if ((modal.id === 'tiktok-profile-modal' || modal.id === 'commentsModal' || modal.id === 'accountModal') && modalContent) {
+                const modalContent = modal.querySelector('.modal-content, .tiktok-profile-content, .account-modal-content');
+                const isAnimated = modalContent && (modal.id === 'tiktok-profile-modal' || modal.id === 'commentsModal' || modal.id === 'accountModal');
+
+                if (isAnimated) {
                     if (modal.classList.contains('is-hiding')) return;
 
-                    let animationFinished = false;
+                    let cleanedUp = false;
                     const cleanup = () => {
-                        if (animationFinished) return;
-                        animationFinished = true;
+                        if (cleanedUp) return;
+                        cleanedUp = true;
+
+                        modalContent.removeEventListener('transitionend', cleanup);
 
                         modal.classList.remove('visible', 'is-hiding');
+
                         if (modal._focusTrapDispose) {
                             modal._focusTrapDispose();
                             delete modal._focusTrapDispose;
@@ -425,9 +431,12 @@
                         State.get('lastFocusedElement')?.focus();
                     };
 
-                    modalContent.addEventListener('transitionend', cleanup, { once: true });
-                    // Fallback timeout in case the transitionend event doesn't fire
-                    setTimeout(cleanup, 500);
+                    const timeoutId = setTimeout(cleanup, 500);
+
+                    modalContent.addEventListener('transitionend', () => {
+                        clearTimeout(timeoutId);
+                        cleanup();
+                    }, { once: true });
 
                     modal.classList.add('is-hiding');
                     modal.setAttribute('aria-hidden', 'true');
