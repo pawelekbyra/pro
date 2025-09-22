@@ -406,9 +406,9 @@
             }
 
             function closeModal(modal) {
-                const modalContent = modal.querySelector('.modal-content, .tiktok-profile-content');
+                const modalContent = modal.querySelector('.modal-content, .tiktok-profile-content, .account-modal-content');
 
-                if ((modal.id === 'tiktok-profile-modal' || modal.id === 'commentsModal') && modalContent) {
+                if ((modal.id === 'tiktok-profile-modal' || modal.id === 'commentsModal' || modal.id === 'accountModal') && modalContent) {
                     if (modal.classList.contains('is-hiding')) return;
 
                     const onTransitionEnd = () => {
