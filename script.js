@@ -411,7 +411,11 @@
                 if ((modal.id === 'tiktok-profile-modal' || modal.id === 'commentsModal' || modal.id === 'accountModal') && modalContent) {
                     if (modal.classList.contains('is-hiding')) return;
 
-                    const onTransitionEnd = () => {
+                    let animationFinished = false;
+                    const cleanup = () => {
+                        if (animationFinished) return;
+                        animationFinished = true;
+
                         modal.classList.remove('visible', 'is-hiding');
                         if (modal._focusTrapDispose) {
                             modal._focusTrapDispose();
@@ -421,7 +425,10 @@
                         State.get('lastFocusedElement')?.focus();
                     };
 
-                    modalContent.addEventListener('transitionend', onTransitionEnd, { once: true });
+                    modalContent.addEventListener('transitionend', cleanup, { once: true });
+                    // Fallback timeout in case the transitionend event doesn't fire
+                    setTimeout(cleanup, 500);
+
                     modal.classList.add('is-hiding');
                     modal.setAttribute('aria-hidden', 'true');
 
