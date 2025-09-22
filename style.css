@@ -2663,6 +2663,7 @@
 .profile-tabs {
     display: flex;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 2px;
 }
 
 .profile-tabs .tab {
@@ -2672,10 +2673,18 @@
     cursor: pointer;
     position: relative;
     color: rgba(255, 255, 255, 0.8);
+    background-color: #1F1F1F;
+    border-radius: 4px 4px 0 0;
+    transition: background-color 0.2s ease;
+}
+
+.profile-tabs .tab:hover {
+    background-color: #2a2a2a;
 }
 
 .profile-tabs .tab.active {
-    color: var(--accent-color);
+    color: #fff;
+    background-color: #3a3a3a;
 }
 
 .profile-tabs .tab.active::after {
