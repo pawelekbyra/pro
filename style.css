@@ -2510,6 +2510,7 @@
 
 #tiktok-profile-modal.is-hiding .tiktok-profile-content {
     transform: translateX(100%);
+	transition-duration: 0.8s;
 }
 
 .tiktok-profile-header {
