@@ -883,6 +883,47 @@
                 }
             }
 
+            function initKeyboardListener() {
+                if (!('visualViewport' in window)) {
+                    return;
+                }
+
+                const commentsModal = DOM.commentsModal;
+                if (!commentsModal) return;
+
+                let initialViewportHeight = window.visualViewport.height;
+
+                const handleViewportResize = () => {
+                    const currentHeight = window.visualViewport.height;
+                    const keyboardHeight = initialViewportHeight > currentHeight ? initialViewportHeight - currentHeight : 0;
+                    const isKeyboardVisible = keyboardHeight > 150; // Threshold to avoid false positives
+
+                    commentsModal.classList.toggle('keyboard-visible', isKeyboardVisible);
+
+                    if (isKeyboardVisible) {
+                        // Calculate the height of the keyboard, considering the safe area at the bottom for iOS.
+                        const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom'), 10) || 0;
+                        const keyboardOffset = window.innerHeight - window.visualViewport.height - safeAreaBottom;
+                        commentsModal.style.setProperty('--keyboard-offset', `${keyboardOffset}px`);
+                    } else {
+                        commentsModal.style.setProperty('--keyboard-offset', `0px`);
+                    }
+                };
+
+                // Store initial height when the comment modal is opened
+                const observer = new MutationObserver(mutations => {
+                    for (let mutation of mutations) {
+                        if (mutation.attributeName === 'class' && commentsModal.classList.contains('visible')) {
+                             initialViewportHeight = window.visualViewport.height;
+                        }
+                    }
+                });
+
+                observer.observe(commentsModal, { attributes: true });
+
+                window.visualViewport.addEventListener('resize', handleViewportResize);
+            }
+
             return {
                 DOM,
                 showAlert,
@@ -896,7 +937,8 @@
                 initGlobalPanels,
                 populateProfileModal,
                 renderComments,
-                updateCommentFormVisibility
+                updateCommentFormVisibility,
+                initKeyboardListener
             };
         })();
 
@@ -2114,6 +2156,7 @@
                     _initializeGlobalListeners();
                     AccountPanel.init();
                     UI.initGlobalPanels();
+                    UI.initKeyboardListener();
                     PWA.init();
                     _initializePreloader();
                     document.body.classList.add('loaded');

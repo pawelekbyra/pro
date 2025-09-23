@@ -973,6 +973,11 @@
             min-height: 0; /* Prevent flexbox overflow issues */
             overflow-y: auto;
             padding: 8px; /* Reduced padding */
+            transition: padding-bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        #commentsModal.keyboard-visible .modal-body {
+            padding-bottom: calc(var(--keyboard-offset, 0px) + 8px);
         }
 
         /* Comment Form */
@@ -981,6 +986,12 @@
             background: #18191A; /* Match modal background */
             border-top: 1px solid #3A3B3C;
             flex-shrink: 0;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        #commentsModal.keyboard-visible .comment-form-container {
+            transform: translateY(calc(-1 * var(--keyboard-offset, 0px)));
         }
 
         #comment-form {
