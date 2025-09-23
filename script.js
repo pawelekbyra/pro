@@ -295,43 +295,63 @@
                     return { success: false, data: { message: 'Comments not found.' } };
                 },
                 postComment: async (slideId, text, parentId = null) => {
-                    // MOCK: Simulate API delay and response
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    const slide = slidesData.find(s => s.id === slideId);
-                    if (!slide) {
-                        return { success: false, data: { message: 'Slide not found.' } };
+                    const response = await _request('tt_post_comment', {
+                        slide_id: slideId,
+                        text,
+                        parent_id: parentId
+                    });
+
+                    if (response.success) {
+                        return response;
+                    } else {
+                        // MOCK FALLBACK
+                        console.warn("AJAX tt_post_comment failed, using mock fallback.");
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        const slide = slidesData.find(s => s.id === slideId);
+                        if (!slide) {
+                            return { success: false, data: { message: 'Slide not found.' } };
+                        }
+
+                        const newComment = {
+                            id: `c${slide.id}-${Date.now()}`,
+                            parentId: parentId,
+                            user: 'Ja (Ty)', // Mocked user
+                            avatar: 'https://i.pravatar.cc/100?u=99', // Mocked avatar
+                            text: text,
+                            timestamp: new Date().toISOString(),
+                            likes: 0,
+                            isLiked: false
+                        };
+
+                        slide.comments.push(newComment);
+                        slide.initialComments = slide.comments.length;
+
+                        return { success: true, data: newComment };
                     }
-
-                    const newComment = {
-                        id: `c${slide.id}-${Date.now()}`,
-                        parentId: parentId,
-                        user: 'Ja (Ty)', // Mocked user
-                        avatar: 'https://i.pravatar.cc/100?u=99', // Mocked avatar
-                        text: text,
-                        timestamp: new Date().toISOString(),
-                        likes: 0,
-                        isLiked: false
-                    };
-
-                    slide.comments.push(newComment);
-
-                    // Recalculate total comments
-                    slide.initialComments = slide.comments.length;
-
-                    return { success: true, data: newComment };
                 },
                 toggleCommentLike: async (slideId, commentId) => {
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    const slide = slidesData.find(s => s.id === slideId);
-                    if (!slide) return { success: false, data: { message: 'Slide not found.' } };
+                    const response = await _request('tt_toggle_comment_like', {
+                        slide_id: slideId,
+                        comment_id: commentId
+                    });
 
-                    const comment = findCommentById(slide.comments, commentId);
-                    if (!comment) return { success: false, data: { message: 'Comment not found.' } };
+                    if (response.success) {
+                        return response;
+                    } else {
+                        // MOCK FALLBACK
+                        console.warn("AJAX tt_toggle_comment_like failed, using mock fallback.");
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        const slide = slidesData.find(s => s.id === slideId);
+                        if (!slide) return { success: false, data: { message: 'Slide not found.' } };
 
-                    comment.isLiked = !comment.isLiked;
-                    comment.likes += comment.isLiked ? 1 : -1;
+                        const comment = findCommentById(slide.comments, commentId);
+                        if (!comment) return { success: false, data: { message: 'Comment not found.' } };
 
-                    return { success: true, data: { isLiked: comment.isLiked, likes: comment.likes } };
+                        comment.isLiked = !comment.isLiked;
+                        comment.likes += comment.isLiked ? 1 : -1;
+
+                        return { success: true, data: { isLiked: comment.isLiked, likes: comment.likes } };
+                    }
                 },
             };
         })();
@@ -891,35 +911,20 @@
                 const commentsModal = DOM.commentsModal;
                 if (!commentsModal) return;
 
-                let initialViewportHeight = window.visualViewport.height;
-
                 const handleViewportResize = () => {
-                    const currentHeight = window.visualViewport.height;
-                    const keyboardHeight = initialViewportHeight > currentHeight ? initialViewportHeight - currentHeight : 0;
-                    const isKeyboardVisible = keyboardHeight > 150; // Threshold to avoid false positives
+                    // Use the layout viewport height as the stable reference
+                    const layoutViewportHeight = document.documentElement.clientHeight;
+                    const visualViewportHeight = window.visualViewport.height;
+
+                    // A significant difference implies the keyboard is visible.
+                    const keyboardHeight = layoutViewportHeight - visualViewportHeight;
+                    const isKeyboardVisible = keyboardHeight > 150;
 
                     commentsModal.classList.toggle('keyboard-visible', isKeyboardVisible);
 
-                    if (isKeyboardVisible) {
-                        // Calculate the height of the keyboard, considering the safe area at the bottom for iOS.
-                        const safeAreaBottom = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom'), 10) || 0;
-                        const keyboardOffset = window.innerHeight - window.visualViewport.height - safeAreaBottom;
-                        commentsModal.style.setProperty('--keyboard-offset', `${keyboardOffset}px`);
-                    } else {
-                        commentsModal.style.setProperty('--keyboard-offset', `0px`);
-                    }
+                    // The offset is simply the calculated height of the keyboard.
+                    commentsModal.style.setProperty('--keyboard-offset', `${keyboardHeight}px`);
                 };
-
-                // Store initial height when the comment modal is opened
-                const observer = new MutationObserver(mutations => {
-                    for (let mutation of mutations) {
-                        if (mutation.attributeName === 'class' && commentsModal.classList.contains('visible')) {
-                             initialViewportHeight = window.visualViewport.height;
-                        }
-                    }
-                });
-
-                observer.observe(commentsModal, { attributes: true });
 
                 window.visualViewport.addEventListener('resize', handleViewportResize);
             }
