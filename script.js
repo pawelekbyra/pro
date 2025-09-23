@@ -1375,6 +1375,13 @@
                             }
                             UI.openModal(UI.DOM.commentsModal);
                             UI.updateCommentFormVisibility();
+                            // Scroll to bottom after a short delay to ensure content is rendered
+                            setTimeout(() => {
+                                const modalBody = UI.DOM.commentsModal.querySelector('.modal-body');
+                                if (modalBody) {
+                                    modalBody.scrollTop = modalBody.scrollHeight;
+                                }
+                            }, 100);
                             break;
                         }
                         case 'open-info-modal': mockToggleLogin(); break;
