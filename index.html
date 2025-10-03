@@ -159,30 +159,36 @@
             </div>
         </div>
     </div>
-    <div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Komentarze" aria-hidden="true">
+    <div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
         <div class="modal-content" tabindex="-1">
             <div class="modal-header">
+                <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
                 <div class="comment-sort-options">
                     <div class="sort-dropdown">
-                        <button class="sort-trigger">Sortuj według: <span class="current-sort">Fresz</span> ▼</button>
+                        <button class="sort-trigger">
+                            <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
+                            <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
+                        </button>
                         <div class="sort-options">
-                            <button class="sort-option" data-sort="newest">Fresz</button>
-                            <button class="sort-option" data-sort="popular">Best</button>
+                            <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
+                            <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
                         </div>
                     </div>
                 </div>
-                <button class="modal-close-btn" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
+                <button class="modal-close-btn" data-action="close-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
             </div>
             <div class="modal-body">
                 <!-- Comments will be rendered here -->
             </div>
             <div class="comment-form-container">
                 <div class="login-to-comment-prompt" style="display: none;">
-                    <p><a href="#" data-action="toggle-login-panel">Zaloguj się</a>, aby dodać komentarz.</p>
+                    <p>
+                        <a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">Zaloguj się</a><span data-translate-key="loginToCommentRest">, aby dodać komentarz.</span>
+                    </p>
                 </div>
                 <form id="comment-form">
-                    <input type="text" id="comment-input" placeholder="Dodaj komentarz..." autocomplete="off" aria-label="Dodaj komentarz">
-                    <button type="submit" aria-label="Wyślij komentarz">
+                    <input type="text" id="comment-input" data-translate-placeholder="addCommentPlaceholder" placeholder="Dodaj komentarz..." autocomplete="off" data-translate-aria-label="addCommentPlaceholder" aria-label="Dodaj komentarz">
+                    <button type="submit" data-translate-aria-label="sendCommentAriaLabel" aria-label="Wyślij komentarz">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
                     </button>
                 </form>
@@ -206,14 +212,14 @@
     <div class="account-modal-overlay" id="accountModal">
         <div class="account-modal-content">
             <div class="account-header">
-                <h2>Profil</h2>
-                <button class="close-btn" data-action="close-account-modal">&times;</button>
+                <h2 data-translate-key="accountModalTitleProfile">Profil</h2>
+                <button class="close-btn" data-action="close-account-modal" data-translate-aria-label="closeAccountAriaLabel">&times;</button>
             </div>
 
             <div class="account-tabs">
-                <button class="tab-btn active" data-tab="profile">Profil</button>
-                <button class="tab-btn" data-tab="password">Hasło</button>
-                <button class="tab-btn" data-tab="delete">Usuń konto</button>
+                <button class="tab-btn active" data-tab="profile" data-translate-key="profileTab">Profil</button>
+                <button class="tab-btn" data-tab="password" data-translate-key="passwordTab">Hasło</button>
+                <button class="tab-btn" data-tab="delete" data-translate-key="deleteTab">Usuń konto</button>
             </div>
 
             <div class="account-content">
@@ -223,7 +229,7 @@
                             <div class="avatar-container">
                                 <img src="" alt="Avatar" class="avatar-img" id="userAvatar">
                             </div>
-                            <button class="avatar-edit-btn" id="avatarEditBtn" title="Zmień avatar">
+                            <button class="avatar-edit-btn" id="avatarEditBtn" data-translate-title="avatarEditBtnTitle" title="Zmień avatar">
                                 +
                             </button>
                         </div>
@@ -234,143 +240,127 @@
                                 <svg class="badge-icon" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
                                 </svg>
-                                Patron Miłości
+                                <span data-translate-key="patronBadgeText">Patron Miłości</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <h3 class="section-title">Dane osobowe</h3>
+                        <h3 class="section-title" data-translate-key="personalDataHeader">Dane osobowe</h3>
 
                         <form id="profileForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Imię</label>
-                                    <input type="text" class="form-input" placeholder="Twoje imię" id="firstName" value="">
+                                    <label class="form-label" data-translate-key="firstNameLabel">Imię</label>
+                                    <input type="text" class="form-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Twoje imię" id="firstName" value="">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Nazwisko</label>
-                                    <input type="text" class="form-input" placeholder="Twoje nazwisko" id="lastName" value="">
+                                    <label class="form-label" data-translate-key="lastNameLabel">Nazwisko</label>
+                                    <input type="text" class="form-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Twoje nazwisko" id="lastName" value="">
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-input" placeholder="email@domena.pl" id="email" value="">
+                                <label class="form-label" data-translate-key="emailLabel">Email</label>
+                                <input type="email" class="form-input" data-translate-placeholder="emailPlaceholder" placeholder="email@domena.pl" id="email" value="">
                             </div>
 
-                            <button type="submit" class="btn-primary" id="saveProfileBtn">
+                            <button type="submit" class="btn-primary" id="saveProfileBtn" data-translate-key="saveProfileBtn">
                                 Zapisz zmiany
                             </button>
-                            <div class="status-message status-success" id="profileSuccess">
-                                Profil został zaktualizowany!
-                            </div>
-                            <div class="status-message status-error" id="profileError">
-                                Wystąpił błąd podczas aktualizacji profilu.
-                            </div>
+                            <div class="status-message status-success" id="profileSuccess"></div>
+                            <div class="status-message status-error" id="profileError"></div>
                         </form>
                     </div>
 
                     <div class="settings-section">
-                        <h3 class="section-title">Ustawienia</h3>
+                        <h3 class="section-title" data-translate-key="settingsHeader">Ustawienia</h3>
 
                         <div class="toggle-container">
-                            <label class="toggle-label">Zgoda na maile</label>
+                            <label class="toggle-label" data-translate-key="emailConsentLabel">Zgoda na maile</label>
                             <div class="toggle-switch" id="emailConsent">
                                 <div class="toggle-slider"></div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Język maili</label>
+                            <label class="form-label" data-translate-key="emailLanguageLabel">Język maili</label>
                             <div class="language-selector">
-                                <div class="language-option active" data-lang="pl">
+                                <div class="language-option active" data-lang="pl" data-translate-key="emailLangPolish">
                                     Polski
                                 </div>
-                                <div class="language-option" data-lang="en">
+                                <div class="language-option" data-lang="en" data-translate-key="emailLangEnglish">
                                     English
                                 </div>
                             </div>
                         </div>
 
-                        <button type="button" class="btn-primary" id="saveSettingsBtn">
+                        <button type="button" class="btn-primary" id="saveSettingsBtn" data-translate-key="saveSettingsBtn">
                             Zapisz ustawienia
                         </button>
 
-                        <div class="status-message status-success" id="settingsSuccess">
-                            Ustawienia zostały zapisane!
-                        </div>
-                        <div class="status-message status-error" id="settingsError">
-                            Wystąpił błąd podczas zapisywania ustawień.
-                        </div>
+                        <div class="status-message status-success" id="settingsSuccess"></div>
+                        <div class="status-message status-error" id="settingsError"></div>
                     </div>
                 </div>
 
                 <div class="tab-pane" id="password-tab">
                     <div class="profile-section">
-                        <h3 class="section-title">Zmiana hasła</h3>
+                        <h3 class="section-title" data-translate-key="changePasswordHeader">Zmiana hasła</h3>
 
                         <form id="passwordForm">
                             <div class="form-group">
-                                <label class="form-label">Obecne hasło</label>
-                                <input type="password" class="form-input" placeholder="Wprowadź obecne hasło" id="currentPassword">
+                                <label class="form-label" data-translate-key="currentPasswordLabel">Obecne hasło</label>
+                                <input type="password" class="form-input" data-translate-placeholder="currentPasswordPlaceholder" placeholder="Wprowadź obecne hasło" id="currentPassword">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Nowe hasło</label>
-                                <input type="password" class="form-input" placeholder="Minimum 8 znaków" id="newPassword">
+                                <label class="form-label" data-translate-key="newPasswordLabel">Nowe hasło</label>
+                                <input type="password" class="form-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Minimum 8 znaków" id="newPassword">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Powtórz nowe hasło</label>
-                                <input type="password" class="form-input" placeholder="Powtórz nowe hasło" id="confirmPassword">
-                                <div class="helper-text">
+                                <label class="form-label" data-translate-key="confirmPasswordLabel">Powtórz nowe hasło</label>
+                                <input type="password" class="form-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Powtórz nowe hasło" id="confirmPassword">
+                                <div class="helper-text" data-translate-key="passwordHelperText">
                                     Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn-primary" id="changePasswordBtn">
+                            <button type="submit" class="btn-primary" id="changePasswordBtn" data-translate-key="changePasswordBtn">
                                 Zmień hasło
                             </button>
-                             <div class="status-message status-success" id="passwordSuccess">
-                                Hasło zostało zmienione!
-                            </div>
-                            <div class="status-message status-error" id="passwordError">
-                                Wystąpił błąd podczas zmiany hasła.
-                            </div>
+                             <div class="status-message status-success" id="passwordSuccess"></div>
+                            <div class="status-message status-error" id="passwordError"></div>
                         </form>
                     </div>
                 </div>
 
                 <div class="tab-pane" id="delete-tab">
                     <div class="profile-section">
-                        <h3 class="section-title">Usuń konto</h3>
+                        <h3 class="section-title" data-translate-key="deleteAccountHeader">Usuń konto</h3>
 
                         <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                            <h4 style="color: #ef4444; margin-bottom: 12px; font-size: 16px;">⚠️ Uwaga!</h4>
-                            <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; line-height: 1.5;">
+                            <h4 style="color: #ef4444; margin-bottom: 12px; font-size: 16px;" data-translate-key="deleteWarningHeader">⚠️ Uwaga!</h4>
+                            <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; line-height: 1.5;" data-translate-key="deleteWarningBody">
                                 Ta operacja jest nieodwracalna. Wszystkie Twoje dane, filmy i ustawienia zostaną trwale usunięte.
                             </p>
                         </div>
 
                         <form id="deleteForm">
                             <div class="form-group">
-                                <label class="form-label">Aby potwierdzić, wpisz: <strong>USUWAM KONTO</strong></label>
-                                <input type="text" class="form-input" placeholder="USUWAM KONTO" id="deleteConfirmation">
-                                <div class="helper-text">
+                                <label class="form-label" data-translate-key="deleteConfirmationLabel">Aby potwierdzić, wpisz: <strong>USUWAM KONTO</strong></label>
+                                <input type="text" class="form-input" data-translate-placeholder="deleteConfirmationPlaceholder" placeholder="USUWAM KONTO" id="deleteConfirmation">
+                                <div class="helper-text" data-translate-key="deleteHelperText">
                                     Po usunięciu konta zostaniesz automatycznie wylogowany.
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn-danger" id="deleteAccountBtn" disabled>
+                            <button type="submit" class="btn-danger" id="deleteAccountBtn" data-translate-key="deleteAccountBtn" disabled>
                                 Trwale usuń konto
                             </button>
-                            <div class="status-message status-success" id="deleteSuccess">
-                                Konto zostało usunięte. Trwa wylogowywanie...
-                            </div>
-                            <div class="status-message status-error" id="deleteError">
-                                Wystąpił błąd podczas usuwania konta.
-                            </div>
+                            <div class="status-message status-success" id="deleteSuccess"></div>
+                            <div class="status-message status-error" id="deleteError"></div>
                         </form>
                     </div>
                 </div>
@@ -393,21 +383,21 @@
                     <div class="profile-stats">
                         <div class="stat-item">
                             <span class="stat-number" id="tiktok-following-count">0</span>
-                            <span class="stat-label">Obserwuje</span>
+                            <span class="stat-label" data-translate-key="profileFollowingLabel">Obserwuje</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-number" id="tiktok-followers-count">0</span>
-                            <span class="stat-label">Obserwujący</span>
+                            <span class="stat-label" data-translate-key="profileFollowersLabel">Obserwujący</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-number" id="tiktok-likes-count">0</span>
-                            <span class="stat-label">Polubienia</span>
+                            <span class="stat-label" data-translate-key="profileLikesLabel">Polubienia</span>
                         </div>
                     </div>
                 </div>
                 <p class="profile-bio" id="tiktok-profile-bio"></p>
                 <div class="profile-actions">
-                    <button class="follow-button">Obserwuj</button>
+                    <button class="follow-button" data-translate-key="profileFollowBtn">Obserwuj</button>
                     <button class="icon-button"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></button>
                 </div>
 

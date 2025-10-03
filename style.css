@@ -1895,12 +1895,9 @@
         }
 
         .form-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 16px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
         }
 
         .form-label {
@@ -1930,7 +1927,7 @@
         }
 
         .form-input::placeholder {
-            color: (255, 255, 255, 0.5); [cite: 352];
+            color: rgba(255, 255, 255, 0.5);
         }
         .form-section .form-group:last-of-type,
         .settings-section .form-group:last-of-type,
@@ -2236,10 +2233,6 @@
             }
             .profile-section, .avatar-section, .form-section, .settings-section {
                 padding: 16px;
-            }
-            .form-row {
-                flex-direction: column;
-                gap: 0;
             }
             .crop-container {
                 margin: 10px;
