@@ -160,8 +160,318 @@
           DEBUG_PANEL: true,
           GESTURE_GRACE_PERIOD_MS: 2000,
           TRANSLATIONS: {
-                pl: { loggedOutText: "Nie masz psychy się zalogować", loggedInText: 'Ting Tong', loginSuccess: "Zalogowano pomyślnie!", loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.", accountHeaderText: 'Konto', menuAriaLabel: 'Menu', subscribeAriaLabel: 'subskrajbować', shareTitle: 'Udostępnij', shareAriaLabel: 'Udostępnij', shareText: 'Szeruj', infoTitle: 'OCB?!', infoAriaLabel: 'OCB?!', infoText: 'OCB?!', tipTitle: 'Napiwek', tipAriaLabel: 'Napiwek', tipText: 'Napiwek', languageAriaLabel: 'Zmień język', languageText: 'PL', subscribeAlert: 'Zaloguj się, aby subskrajbować.', likeAlert: 'Zaloguj się, aby lajkować.', notificationAlert: 'Zaloguj się i bądź na bieżąco.', menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.', logoutSuccess: 'Zostałeś wylogowany.', likeError: 'Błąd komunikacji z serwerem.', secretTitle: 'Ściśle Tajne', secretSubtitleAction: 'Zaloguj się,', secretSubtitleRest: ' aby odblokować', pwaTitle: 'Ściśle Tajne', pwaSubtitleAction: 'Pobierz aplikację,', pwaSubtitleRest: ' aby zobaczyć', infoModalTitle: 'OCB?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Zamknij panel konta', closeInfoAriaLabel: 'Zamknij informacje', accountMenuButton: 'Konto', logoutLink: 'Wyloguj', profileTab: 'Profil', passwordTab: 'Hasło', deleteTab: 'Usuń konto', loggedInState: 'Zalogowany', loggedOutState: 'Gość', linkCopied: 'Link skopiowany do schowka!', likeAriaLabel: 'Polub', notificationAriaLabel: 'Powiadomienia', commentsAriaLabel: 'Komentarze', commentsModalTitle: 'Komentarze', closeCommentsAriaLabel: 'Zamknij komentarze', likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}', unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}', notificationsTitle: 'Powiadomienia', closeNotificationsAriaLabel: 'Zamknij powiadomienia', notificationsEmpty: 'Wszystko na bieżąco!', notif1Preview: 'Nowa wiadomość od Admina', notif1Time: '2 min temu', notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!', notif2Preview: 'Twój profil został zaktualizowany', notif2Time: '10 min temu', notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.', notif3Preview: 'Specjalna oferta czeka na Ciebie!', notif3Time: '1 godz. temu', notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.', pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!', pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.', installPwaHeading: 'Zobacz więcej!', installPwaSubheadingAction: 'Pobierz aplikację', installPwaSubheadingRest: ' i zobacz więcej!', installPwaAction: 'Zainstaluj', openPwaAction: 'Otwórz', videoErrorTitle: 'Błąd Wideo', videoErrorSubtitle: 'Nie można załadować materiału.', videoErrorRetry: 'Spróbuj ponownie', alreadyInstalledText: 'Przecież już ściągłeś', noComments: 'Brak komentarzy. Bądź pierwszy!' },
-                en: { loggedOutText: "You don't have the guts to log in", loggedInText: 'You are logged in', loginSuccess: "Logged in successfully!", loginFailed: "Login failed. Please try again.", accountHeaderText: 'Account', menuAriaLabel: 'Menu', subscribeAriaLabel: 'Subscribe', shareTitle: 'Share', shareAriaLabel: 'Share', shareText: 'Share', infoTitle: 'WTF?!', infoAriaLabel: 'WTF?!', infoText: 'WTF?!', tipTitle: 'Tip', tipAriaLabel: 'Tip', tipText: 'Tip', languageAriaLabel: 'Change language', languageText: 'EN', subscribeAlert: 'Log in to subscribe.', profileViewAlert: 'Log in to see the profile.', likeAlert: 'Log in to like.', notificationAlert: 'Log in to stay up to date.', menuAccessAlert: 'Log in to access the menu.', logoutSuccess: 'You have been logged out.', likeError: 'Server communication error.', secretTitle: 'Top Secret', secretSubtitleAction: 'Log in', secretSubtitleRest: ' to unlock', pwaTitle: 'Top Secret', pwaSubtitleAction: 'Download the app', pwaSubtitleRest: ' to view', infoModalTitle: 'WTF?!', infoModalBodyP1: 'Lorem ipsum dolor sit amet...', infoModalBodyP2: 'Ut in nulla enim...', infoModalBodyTip: 'Enjoying the app? Leave a tip...', infoModalBodyP3: 'Donec id elit non mi porta...', closeAccountAriaLabel: 'Close account panel', closeInfoAriaLabel: 'Close information', accountMenuButton: 'Account', logoutLink: 'Logout', profileTab: 'Profile', passwordTab: 'Password', deleteTab: 'Delete account', loggedInState: 'Logged In', loggedOutState: 'Guest', linkCopied: 'Link copied to clipboard!', likeAriaLabel: 'Like', notificationAriaLabel: 'Notifications', commentsAriaLabel: 'Comments', commentsModalTitle: 'Comments', closeCommentsAriaLabel: 'Close comments', likeAriaLabelWithCount: 'Like. Current likes: {count}', unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}', notificationsTitle: 'Notifications', closeNotificationsAriaLabel: 'Close notifications', notificationsEmpty: 'You are all caught up!', notif1Preview: 'New message from Admin', notif1Time: '2 mins ago', notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!', notif2Preview: 'Your profile has been updated', notif2Time: '10 mins ago', notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.', notif3Preview: 'A special offer is waiting for you!', notif3Time: '1 hour ago', notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.', pwaModalTitle: 'The full Ting Tong experience is on your phone!', pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.', installPwaHeading: 'See more!', installPwaSubheadingAction: 'Download the app', installPwaSubheadingRest: ' to see more!', installPwaAction: 'Install', openPwaAction: 'Open', videoErrorTitle: 'Video Error', videoErrorSubtitle: 'Could not load the content.', videoErrorRetry: 'Try Again', alreadyInstalledText: "You've already installed the app!", noComments: "No comments yet. Be the first!" }
+                pl: {
+                    loggedOutText: "Nie masz psychy się zalogować",
+                    loggedInText: 'Ting Tong',
+                    loginSuccess: "Zalogowano pomyślnie!",
+                    loginFailed: "Logowanie nie powiodło się. Spróbuj ponownie.",
+                    accountHeaderText: 'Konto',
+                    menuAriaLabel: 'Menu',
+                    subscribeAriaLabel: 'subskrajbować',
+                    shareTitle: 'Udostępnij',
+                    shareAriaLabel: 'Udostępnij',
+                    shareText: 'Szeruj',
+                    infoTitle: 'OCB?!',
+                    infoAriaLabel: 'OCB?!',
+                    infoText: 'OCB?!',
+                    tipTitle: 'Napiwek',
+                    tipAriaLabel: 'Napiwek',
+                    tipText: 'Napiwek',
+                    languageAriaLabel: 'Zmień język',
+                    languageText: 'PL',
+                    subscribeAlert: 'Zaloguj się, aby subskrajbować.',
+                    likeAlert: 'Zaloguj się, aby lajkować.',
+                    notificationAlert: 'Zaloguj się i bądź na bieżąco.',
+                    menuAccessAlert: 'Zaloguj się, aby uzyskać dostęp do menu.',
+                    logoutSuccess: 'Zostałeś wylogowany.',
+                    likeError: 'Błąd komunikacji z serwerem.',
+                    secretTitle: 'Ściśle Tajne',
+                    secretSubtitleAction: 'Zaloguj się,',
+                    secretSubtitleRest: ' aby odblokować',
+                    pwaTitle: 'Ściśle Tajne',
+                    pwaSubtitleAction: 'Pobierz aplikację,',
+                    pwaSubtitleRest: ' aby zobaczyć',
+                    infoModalTitle: 'OCB?!',
+                    infoModalBodyP1: 'Lorem ipsum dolor sit amet...',
+                    infoModalBodyP2: 'Ut in nulla enim...',
+                    infoModalBodyTip: 'Podoba Ci się? Zostaw napiwek...',
+                    infoModalBodyP3: 'Donec id elit non mi porta...',
+                    closeAccountAriaLabel: 'Zamknij panel konta',
+                    closeInfoAriaLabel: 'Zamknij informacje',
+                    accountMenuButton: 'Konto',
+                    logoutLink: 'Wyloguj',
+                    profileTab: 'Profil',
+                    passwordTab: 'Hasło',
+                    deleteTab: 'Usuń konto',
+                    loggedInState: 'Zalogowany',
+                    loggedOutState: 'Gość',
+                    linkCopied: 'Link skopiowany do schowka!',
+                    likeAriaLabel: 'Polub',
+                    notificationAriaLabel: 'Powiadomienia',
+                    commentsAriaLabel: 'Komentarze',
+                    commentsModalTitle: 'Komentarze',
+                    closeCommentsAriaLabel: 'Zamknij komentarze',
+                    likeAriaLabelWithCount: 'Polub. Aktualna liczba polubień: {count}',
+                    unlikeAriaLabelWithCount: 'Cofnij polubienie. Aktualna liczba polubień: {count}',
+                    notificationsTitle: 'Powiadomienia',
+                    closeNotificationsAriaLabel: 'Zamknij powiadomienia',
+                    notificationsEmpty: 'Wszystko na bieżąco!',
+                    notif1Preview: 'Nowa wiadomość od Admina',
+                    notif1Time: '2 min temu',
+                    notif1Full: 'Cześć! Chcieliśmy tylko dać znać, że nowa wersja aplikacji jest już dostępna. Sprawdź nowe funkcje w panelu konta!',
+                    notif2Preview: 'Twój profil został zaktualizowany',
+                    notif2Time: '10 min temu',
+                    notif2Full: 'Twoje zmiany w profilu zostały pomyślnie zapisane. Możesz je przejrzeć w dowolnym momencie, klikając w swój awatar.',
+                    notif3Preview: 'Specjalna oferta czeka na Ciebie!',
+                    notif3Time: '1 godz. temu',
+                    notif3Full: 'Nie przegap! Przygotowaliśmy dla Ciebie specjalną letnią promocję. Zgarnij dodatkowe bonusy już teraz. Oferta ograniczona czasowo.',
+                    pwaModalTitle: 'Pełne doświadczenie Ting Tong na Twoim telefonie!',
+                    pwaModalBody: 'Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.',
+                    installPwaHeading: 'Zobacz więcej!',
+                    installPwaSubheadingAction: 'Pobierz aplikację',
+                    installPwaSubheadingRest: ' i zobacz więcej!',
+                    installPwaAction: 'Zainstaluj',
+                    openPwaAction: 'Otwórz',
+                    videoErrorTitle: 'Błąd Wideo',
+                    videoErrorSubtitle: 'Nie można załadować materiału.',
+                    videoErrorRetry: 'Spróbuj ponownie',
+                    alreadyInstalledText: 'Przecież już ściągłeś',
+                    noComments: 'Brak komentarzy. Bądź pierwszy!',
+                    commentSortTriggerText: 'Sortuj według: ',
+                    commentSortNewest: 'Fresz',
+                    commentSortBest: 'Best',
+                    toggleRepliesShow: 'Rozwiń odpowiedzi ({count})',
+                    toggleRepliesHide: 'Ukryj odpowiedzi',
+                    loginToCommentAction: 'Zaloguj się',
+                    loginToCommentRest: ', aby dodać komentarz.',
+                    addCommentPlaceholder: 'Dodaj komentarz...',
+                    sendCommentAriaLabel: 'Wyślij komentarz',
+                    commentReplyAction: 'Reply',
+                    replyingTo: 'Odpowiadasz @{user}',
+                    cancelReplyAriaLabel: 'Anuluj odpowiedź',
+                    failedToUpdateLike: 'Nie udało się zaktualizować polubienia.',
+                    accountModalTitleProfile: "Profil",
+                    accountModalTitlePassword: "Hasło",
+                    accountModalTitleDelete: "Usuń konto",
+                    avatarEditBtnTitle: "Zmień avatar",
+                    patronBadgeText: "Patron Miłości",
+                    personalDataHeader: "Dane osobowe",
+                    firstNameLabel: "Imię",
+                    firstNamePlaceholder: "Twoje imię",
+                    lastNameLabel: "Nazwisko",
+                    lastNamePlaceholder: "Twoje nazwisko",
+                    emailLabel: "Email",
+                    emailPlaceholder: "email@domena.pl",
+                    saveProfileBtn: "Zapisz zmiany",
+                    settingsHeader: "Ustawienia",
+                    emailConsentLabel: "Zgoda na maile",
+                    emailLanguageLabel: "Język maili",
+                    emailLangPolish: "Polski",
+                    emailLangEnglish: "English",
+                    saveSettingsBtn: "Zapisz ustawienia",
+                    changePasswordHeader: "Zmiana hasła",
+                    currentPasswordLabel: "Obecne hasło",
+                    currentPasswordPlaceholder: "Wprowadź obecne hasło",
+                    newPasswordLabel: "Nowe hasło",
+                    newPasswordPlaceholder: "Minimum 8 znaków",
+                    confirmPasswordLabel: "Powtórz nowe hasło",
+                    confirmPasswordPlaceholder: "Powtórz nowe hasło",
+                    passwordHelperText: "Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.",
+                    changePasswordBtn: "Zmień hasło",
+                    deleteAccountHeader: "Usuń konto",
+                    deleteWarningHeader: "⚠️ Uwaga!",
+                    deleteWarningBody: "Ta operacja jest nieodwracalna. Wszystkie Twoje dane, filmy i ustawienia zostaną trwale usunięte.",
+                    deleteConfirmationLabel: "Aby potwierdzić, wpisz: <strong>USUWAM KONTO</strong>",
+                    deleteConfirmationPlaceholder: "USUWAM KONTO",
+                    deleteHelperText: "Po usunięciu konta zostaniesz automatycznie wylogowany.",
+                    deleteAccountBtn: "Trwale usuń konto",
+                    profileFollowingLabel: "Obserwuje",
+                    profileFollowersLabel: "Obserwujący",
+                    profileLikesLabel: "Polubienia",
+                    profileFollowBtn: "Obserwuj",
+                    savingButtonText: "Zapisywanie...",
+                    changingButtonText: "Zmienianie...",
+                    deletingButtonText: "Usuwanie...",
+                    settingsUpdateSuccess: "Ustawienia zostały zapisane! (DEMO)",
+                    settingsUpdateError: "Wystąpił błąd podczas zapisywania ustawień.",
+                    fileSelectImageError: "Proszę wybrać plik obrazu.",
+                    fileTooLargeError: "Plik jest za duży. Maksymalny rozmiar to 5MB.",
+                    avatarUpdateSuccess: "Avatar został zaktualizowany!",
+                    avatarUpdateError: "Nie otrzymano URL avatara",
+                    imageProcessingError: "Błąd podczas przetwarzania obrazu.",
+                    allFieldsRequiredError: "Wszystkie pola są wymagane.",
+                    invalidEmailError: "Podaj prawidłowy adres email.",
+                    profileUpdateSuccess: "Profil został zaktualizowany!",
+                    profileUpdateError: "Wystąpił błąd podczas aktualizacji profilu.",
+                    profileUpdateFailedError: "Błąd aktualizacji profilu.",
+                    passwordUpdateSuccess: "Hasło zostało zmienione!",
+                    passwordUpdateError: "Błąd zmiany hasła.",
+                    passwordLengthError: "Nowe hasło musi mieć minimum 8 znaków.",
+                    passwordsMismatchError: "Nowe hasła muszą być identyczne.",
+                    passwordChangeFailedError: "Błąd zmiany hasła.",
+                    deleteAccountSuccess: "Konto zostało usunięte. Trwa wylogowywanie...",
+                    deleteAccountError: "Błąd usuwania konta.",
+                    deleteAccountFailedError: "Błąd usuwania konta.",
+                    deleteConfirmationError: "Wpisz dokładnie: {confirmationText}",
+                    deleteConfirmationString: "USUWAM KONTO",
+                    postCommentError: "Nie udało się opublikować komentarza."
+                },
+                en: {
+                    loggedOutText: "You don't have the guts to log in",
+                    loggedInText: 'You are logged in',
+                    loginSuccess: "Logged in successfully!",
+                    loginFailed: "Login failed. Please try again.",
+                    accountHeaderText: 'Account',
+                    menuAriaLabel: 'Menu',
+                    subscribeAriaLabel: 'Subscribe',
+                    shareTitle: 'Share',
+                    shareAriaLabel: 'Share',
+                    shareText: 'Share',
+                    infoTitle: 'WTF?!',
+                    infoAriaLabel: 'WTF?!',
+                    infoText: 'WTF?!',
+                    tipTitle: 'Tip',
+                    tipAriaLabel: 'Tip',
+                    tipText: 'Tip',
+                    languageAriaLabel: 'Change language',
+                    languageText: 'EN',
+                    subscribeAlert: 'Log in to subscribe.',
+                    profileViewAlert: 'Log in to see the profile.',
+                    likeAlert: 'Log in to like.',
+                    notificationAlert: 'Log in to stay up to date.',
+                    menuAccessAlert: 'Log in to access the menu.',
+                    logoutSuccess: 'You have been logged out.',
+                    likeError: 'Server communication error.',
+                    secretTitle: 'Top Secret',
+                    secretSubtitleAction: 'Log in',
+                    secretSubtitleRest: ' to unlock',
+                    pwaTitle: 'Top Secret',
+                    pwaSubtitleAction: 'Download the app',
+                    pwaSubtitleRest: ' to view',
+                    infoModalTitle: 'WTF?!',
+                    infoModalBodyP1: 'Lorem ipsum dolor sit amet...',
+                    infoModalBodyP2: 'Ut in nulla enim...',
+                    infoModalBodyTip: 'Enjoying the app? Leave a tip...',
+                    infoModalBodyP3: 'Donec id elit non mi porta...',
+                    closeAccountAriaLabel: 'Close account panel',
+                    closeInfoAriaLabel: 'Close information',
+                    accountMenuButton: 'Account',
+                    logoutLink: 'Logout',
+                    profileTab: 'Profile',
+                    passwordTab: 'Password',
+                    deleteTab: 'Delete account',
+                    loggedInState: 'Logged In',
+                    loggedOutState: 'Guest',
+                    linkCopied: 'Link copied to clipboard!',
+                    likeAriaLabel: 'Like',
+                    notificationAriaLabel: 'Notifications',
+                    commentsAriaLabel: 'Comments',
+                    commentsModalTitle: 'Comments',
+                    closeCommentsAriaLabel: 'Close comments',
+                    likeAriaLabelWithCount: 'Like. Current likes: {count}',
+                    unlikeAriaLabelWithCount: 'Unlike. Current likes: {count}',
+                    notificationsTitle: 'Notifications',
+                    closeNotificationsAriaLabel: 'Close notifications',
+                    notificationsEmpty: 'You are all caught up!',
+                    notif1Preview: 'New message from Admin',
+                    notif1Time: '2 mins ago',
+                    notif1Full: 'Hi there! Just wanted to let you know that a new version of the app is available. Check out the new features in your account panel!',
+                    notif2Preview: 'Your profile has been updated',
+                    notif2Time: '10 mins ago',
+                    notif2Full: 'Your profile changes have been saved successfully. You can review them anytime by clicking on your avatar.',
+                    notif3Preview: 'A special offer is waiting for you!',
+                    notif3Time: '1 hour ago',
+                    notif3Full: 'Don\'t miss out! We have prepared a special summer promotion just for you. Grab your extra bonuses now. Limited time offer.',
+                    pwaModalTitle: 'The full Ting Tong experience is on your phone!',
+                    pwaModalBody: 'Scan the QR code below or visit us on your phone to download the app and unlock the full experience.',
+                    installPwaHeading: 'See more!',
+                    installPwaSubheadingAction: 'Download the app',
+                    installPwaSubheadingRest: ' to see more!',
+                    installPwaAction: 'Install',
+                    openPwaAction: 'Open',
+                    videoErrorTitle: 'Video Error',
+                    videoErrorSubtitle: 'Could not load the content.',
+                    videoErrorRetry: 'Try Again',
+                    alreadyInstalledText: "You've already installed the app!",
+                    noComments: "No comments yet. Be the first!",
+                    commentSortTriggerText: 'Sort by: ',
+                    commentSortNewest: 'Newest',
+                    commentSortBest: 'Best',
+                    toggleRepliesShow: 'Show replies ({count})',
+                    toggleRepliesHide: 'Hide replies',
+                    loginToCommentAction: 'Log in',
+                    loginToCommentRest: ' to add a comment.',
+                    addCommentPlaceholder: 'Add a comment...',
+                    sendCommentAriaLabel: 'Send comment',
+                    commentReplyAction: 'Reply',
+                    replyingTo: 'Replying to @{user}',
+                    cancelReplyAriaLabel: 'Cancel reply',
+                    failedToUpdateLike: 'Failed to update like.',
+                    accountModalTitleProfile: "Profile",
+                    accountModalTitlePassword: "Password",
+                    accountModalTitleDelete: "Delete Account",
+                    avatarEditBtnTitle: "Change avatar",
+                    patronBadgeText: "Patron of Love",
+                    personalDataHeader: "Personal Data",
+                    firstNameLabel: "First Name",
+                    firstNamePlaceholder: "Your first name",
+                    lastNameLabel: "Last Name",
+                    lastNamePlaceholder: "Your last name",
+                    emailLabel: "Email",
+                    emailPlaceholder: "email@domain.com",
+                    saveProfileBtn: "Save changes",
+                    settingsHeader: "Settings",
+                    emailConsentLabel: "Email Consent",
+                    emailLanguageLabel: "Email Language",
+                    emailLangPolish: "Polish",
+                    emailLangEnglish: "English",
+                    saveSettingsBtn: "Save settings",
+                    changePasswordHeader: "Change Password",
+                    currentPasswordLabel: "Current Password",
+                    currentPasswordPlaceholder: "Enter current password",
+                    newPasswordLabel: "New Password",
+                    newPasswordPlaceholder: "Minimum 8 characters",
+                    confirmPasswordLabel: "Repeat new password",
+                    confirmPasswordPlaceholder: "Repeat new password",
+                    passwordHelperText: "Password must be at least 8 characters long. We recommend using letters, numbers, and special characters.",
+                    changePasswordBtn: "Change password",
+                    deleteAccountHeader: "Delete Account",
+                    deleteWarningHeader: "⚠️ Warning!",
+                    deleteWarningBody: "This operation is irreversible. All your data, videos, and settings will be permanently deleted.",
+                    deleteConfirmationLabel: "To confirm, type: <strong>DELETE ACCOUNT</strong>",
+                    deleteConfirmationPlaceholder: "DELETE ACCOUNT",
+                    deleteHelperText: "After deleting your account, you will be automatically logged out.",
+                    deleteAccountBtn: "Permanently delete account",
+                    profileFollowingLabel: "Following",
+                    profileFollowersLabel: "Followers",
+                    profileLikesLabel: "Likes",
+                    profileFollowBtn: "Follow",
+                    savingButtonText: "Saving...",
+                    changingButtonText: "Changing...",
+                    deletingButtonText: "Deleting...",
+                    settingsUpdateSuccess: "Settings have been saved! (DEMO)",
+                    settingsUpdateError: "An error occurred while saving settings.",
+                    fileSelectImageError: "Please select an image file.",
+                    fileTooLargeError: "File is too large. Maximum size is 5MB.",
+                    avatarUpdateSuccess: "Avatar has been updated!",
+                    avatarUpdateError: "Avatar URL not received",
+                    imageProcessingError: "Error processing image.",
+                    allFieldsRequiredError: "All fields are required.",
+                    invalidEmailError: "Please provide a valid email address.",
+                    profileUpdateSuccess: "Profile has been updated!",
+                    profileUpdateError: "An error occurred while updating the profile.",
+                    profileUpdateFailedError: "Profile update failed.",
+                    passwordUpdateSuccess: "Password has been changed!",
+                    passwordUpdateError: "Error changing password.",
+                    passwordLengthError: "New password must be at least 8 characters long.",
+                    passwordsMismatchError: "New passwords must be identical.",
+                    passwordChangeFailedError: "Password change failed.",
+                    deleteAccountSuccess: "Account has been deleted. Logging you out...",
+                    deleteAccountError: "Error deleting account.",
+                    deleteAccountFailedError: "Account deletion failed.",
+                    deleteConfirmationError: "Please type exactly: {confirmationText}",
+                    deleteConfirmationString: "DELETE ACCOUNT"
+                }
           }
         };
 
@@ -560,9 +870,33 @@
             function updateTranslations() {
                 const lang = State.get('currentLang');
                 document.documentElement.lang = lang;
-                document.querySelectorAll('[data-translate-key]').forEach(el => el.textContent = Utils.getTranslation(el.dataset.translateKey));
-                document.querySelectorAll('[data-translate-aria-label]').forEach(el => el.setAttribute('aria-label', Utils.getTranslation(el.dataset.translateAriaLabel)));
-                document.querySelectorAll('[data-translate-title]').forEach(el => el.setAttribute('title', Utils.getTranslation(el.dataset.translateTitle)));
+
+                document.querySelectorAll('[data-translate-key]').forEach(el => {
+                    el.textContent = Utils.getTranslation(el.dataset.translateKey);
+                });
+                document.querySelectorAll('[data-translate-aria-label]').forEach(el => {
+                    el.setAttribute('aria-label', Utils.getTranslation(el.dataset.translateAriaLabel));
+                });
+                document.querySelectorAll('[data-translate-title]').forEach(el => {
+                    el.setAttribute('title', Utils.getTranslation(el.dataset.translateTitle));
+                });
+                document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                    el.setAttribute('placeholder', Utils.getTranslation(el.dataset.translatePlaceholder));
+                });
+
+                // Handle composite elements
+                const sortTrigger = document.querySelector('.sort-trigger');
+                if (sortTrigger) {
+                    const sortOrder = State.get('commentSortOrder');
+                    const currentSortText = Utils.getTranslation(sortOrder === 'popular' ? 'commentSortBest' : 'commentSortNewest');
+                    sortTrigger.innerHTML = `${Utils.getTranslation('commentSortTriggerText')}<span class="current-sort">${currentSortText}</span> ▼`;
+                }
+
+                const loginPrompt = document.querySelector('.login-to-comment-prompt p');
+                if (loginPrompt) {
+                    loginPrompt.innerHTML = `<a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">${Utils.getTranslation('loginToCommentAction')}</a><span data-translate-key="loginToCommentRest">${Utils.getTranslation('loginToCommentRest')}</span>`;
+                }
+
                 updateUIForLoginState();
             }
 
@@ -820,7 +1154,7 @@
                     timestampSpan.textContent = new Date(comment.timestamp).toLocaleString();
                     const replyBtn = document.createElement('button');
                     replyBtn.className = 'comment-action-btn comment-reply-btn';
-                    replyBtn.textContent = 'Reply';
+                    replyBtn.textContent = Utils.getTranslation('commentReplyAction');
                     const likesDiv = document.createElement('div');
                     likesDiv.className = 'comment-likes';
                     const likeBtn = document.createElement('button');
@@ -865,17 +1199,20 @@
 
                         const toggleBtn = document.createElement('button');
                         toggleBtn.className = 'toggle-replies-btn';
-                        toggleBtn.innerHTML = `<span class="arrow"></span> Rozwiń odpowiedzi (${commentReplies.length})`;
+                        const updateToggleText = () => {
+                            const isVisible = repliesContainer.classList.contains('visible');
+                            const key = isVisible ? 'toggleRepliesHide' : 'toggleRepliesShow';
+                            const text = Utils.getTranslation(key).replace('{count}', commentReplies.length);
+                            toggleBtn.innerHTML = `<span class="arrow"></span> ${text}`;
+                        };
 
                         toggleBtn.addEventListener('click', () => {
                             repliesContainer.classList.toggle('visible');
                             toggleBtn.classList.toggle('expanded');
-                            if (repliesContainer.classList.contains('visible')) {
-                                toggleBtn.innerHTML = `<span class="arrow"></span> Ukryj odpowiedzi`;
-                            } else {
-                                toggleBtn.innerHTML = `<span class="arrow"></span> Rozwiń odpowiedzi (${commentReplies.length})`;
-                            }
+                            updateToggleText();
                         });
+
+                        updateToggleText(); // Set initial text
 
                         // Insert the toggle button after the parent comment's main content
                         parentEl.querySelector('.comment-main').appendChild(toggleBtn);
@@ -1225,7 +1562,7 @@
                                     likeBtn.classList.toggle('active'); // Revert on failure
                                     currentLikes += isLiked ? -1 : 1;
                                     countEl.textContent = Utils.formatCount(currentLikes);
-                                    UI.showAlert('Failed to update like.', true);
+                                    UI.showAlert(Utils.getTranslation('failedToUpdateLike'), true);
                                 }
                             });
                         }
@@ -1248,9 +1585,7 @@
                         }
 
                         State.set('commentSortOrder', newSortOrder);
-
-                        // Update UI
-                        dropdown.querySelector('.current-sort').textContent = sortOption.textContent;
+                        UI.updateTranslations(); // This will now update the sort dropdown text
                         dropdown.querySelectorAll('.sort-option').forEach(opt => opt.classList.remove('active'));
                         sortOption.classList.add('active');
                         dropdown.classList.remove('open');
@@ -1298,7 +1633,8 @@
                             replyContext.className = 'reply-context';
                             formContainer.prepend(replyContext);
                         }
-                        replyContext.innerHTML = `Replying to @${user} <button class="cancel-reply-btn">&times;</button>`;
+                        const cancelAriaLabel = Utils.getTranslation('cancelReplyAriaLabel');
+                        replyContext.innerHTML = `${Utils.getTranslation('replyingTo').replace('{user}', user)} <button class="cancel-reply-btn" aria-label="${cancelAriaLabel}">&times;</button>`;
                         replyContext.style.display = 'block';
 
                         document.querySelector('#comment-input').focus();
@@ -1499,7 +1835,7 @@
 
                                         const commentsTitle = UI.DOM.commentsModal.querySelector('#commentsTitle');
                                         if (commentsTitle) {
-                                            commentsTitle.textContent = `Komentarze (${slideData.initialComments})`;
+                                            commentsTitle.textContent = `${Utils.getTranslation('commentsModalTitle')} (${slideData.initialComments})`;
                                         }
 
                                         const modalBody = UI.DOM.commentsModal.querySelector('.modal-body');
@@ -1658,9 +1994,9 @@
                 const originalText = button.textContent;
                 try {
                     button.disabled = true;
-                    button.innerHTML = '<span class="loading-spinner"></span> Zapisywanie...';
+                    button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText')}`;
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    showSuccess('settingsSuccess', 'Ustawienia zostały zapisane! (DEMO)');
+                    showSuccess('settingsSuccess', Utils.getTranslation('settingsUpdateSuccess'));
                 } catch (error) {
                     showError('settingsError', error.message);
                 } finally {
@@ -1676,11 +2012,11 @@
                     if (result.success) {
                         populateProfileForm(result.data);
                     } else {
-                        throw new Error(result.data?.message || 'Nie udało się załadować profilu');
+                        throw new Error(result.data?.message || Utils.getTranslation('profileUpdateError'));
                     }
                 } catch (error) {
                     console.log('Could not load profile data:', error);
-                    showError('profileError', 'Nie można załadować danych profilu.');
+                    showError('profileError', Utils.getTranslation('profileUpdateError'));
                 }
             }
 
@@ -1714,7 +2050,13 @@
                         button.classList.add('active');
                         tabPanes.forEach(pane => pane.classList.remove('active'));
                         document.getElementById(targetTab + '-tab').classList.add('active');
-                        document.querySelector('.account-header h2').textContent = button.textContent;
+                        let headerKey;
+                        switch (targetTab) {
+                            case 'password': headerKey = 'accountModalTitlePassword'; break;
+                            case 'delete': headerKey = 'accountModalTitleDelete'; break;
+                            default: headerKey = 'accountModalTitleProfile';
+                        }
+                        document.querySelector('.account-header h2').textContent = Utils.getTranslation(headerKey);
                     });
                 });
             }
@@ -1735,7 +2077,7 @@
                 const deleteBtn = document.getElementById('deleteAccountBtn');
                 if (deleteInput && deleteBtn) {
                     deleteInput.addEventListener('input', function() {
-                        deleteBtn.disabled = this.value.trim().toUpperCase() !== 'USUWAM KONTO';
+                        deleteBtn.disabled = this.value.trim().toUpperCase() !== Utils.getTranslation('deleteConfirmationString').toUpperCase();
                     });
                 }
 
@@ -1781,8 +2123,8 @@
             function handleFileSelect(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-                if (!file.type.startsWith('image/')) return showError('profileError', 'Proszę wybrać plik obrazu.');
-                if (file.size > 5 * 1024 * 1024) return showError('profileError', 'Plik jest za duży. Maksymalny rozmiar to 5MB.');
+                if (!file.type.startsWith('image/')) return showError('profileError', Utils.getTranslation('fileSelectImageError'));
+                if (file.size > 5 * 1024 * 1024) return showError('profileError', Utils.getTranslation('fileTooLargeError'));
 
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -1860,7 +2202,7 @@
                 const button = document.getElementById('cropSaveBtn');
                 const originalHTML = button.innerHTML;
                 button.disabled = true;
-                button.innerHTML = '<span class="loading-spinner"></span> Zapisywanie...';
+                button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText')}`;
 
                 try {
                     const outputCanvas = document.createElement('canvas');
@@ -1882,14 +2224,14 @@
                         const newAvatarUrl = result.data.url + '?t=' + Date.now();
                         document.getElementById('userAvatar').src = newAvatarUrl;
                         document.querySelectorAll('.profile img, .tiktok-symulacja .profile img').forEach(img => { img.src = newAvatarUrl; });
-                        showSuccess('profileSuccess', 'Avatar został zaktualizowany!');
+                        showSuccess('profileSuccess', Utils.getTranslation('avatarUpdateSuccess'));
                         closeCropModal();
                         document.dispatchEvent(new CustomEvent('tt:avatar-updated', { detail: { url: newAvatarUrl } }));
                     } else {
-                        throw new Error(result.data?.message || 'Nie otrzymano URL avatara');
+                        throw new Error(result.data?.message || Utils.getTranslation('avatarUpdateError'));
                     }
                 } catch (error) {
-                    showError('profileError', error.message || 'Błąd podczas przetwarzania obrazu.');
+                    showError('profileError', error.message || Utils.getTranslation('imageProcessingError'));
                 } finally {
                     button.disabled = false;
                     button.innerHTML = originalHTML;
@@ -1921,16 +2263,16 @@
                 const button = document.getElementById('saveProfileBtn');
                 const originalText = button.textContent;
                 button.disabled = true;
-                button.innerHTML = '<span class="loading-spinner"></span> Zapisywanie...';
+                button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText')}`;
                 try {
                     const data = { first_name: document.getElementById('firstName').value.trim(), last_name: document.getElementById('lastName').value.trim(), email: document.getElementById('email').value.trim() };
-                    if (!data.first_name || !data.last_name || !data.email) throw new Error('Wszystkie pola są wymagane.');
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) throw new Error('Podaj prawidłowy adres email.');
+                    if (!data.first_name || !data.last_name || !data.email) throw new Error(Utils.getTranslation('allFieldsRequiredError'));
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) throw new Error(Utils.getTranslation('invalidEmailError'));
                     const result = await updateProfile(data);
                     if (result.success) {
-                        showSuccess('profileSuccess', 'Profil został zaktualizowany!');
+                        showSuccess('profileSuccess', Utils.getTranslation('profileUpdateSuccess'));
                         populateProfileForm(result.data);
-                    } else { throw new Error(result.data?.message || 'Błąd aktualizacji profilu.'); }
+                    } else { throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError')); }
                 } catch (error) {
                     showError('profileError', error.message);
                 } finally {
@@ -1944,17 +2286,17 @@
                 const button = document.getElementById('changePasswordBtn');
                 const originalText = button.textContent;
                 button.disabled = true;
-                button.innerHTML = '<span class="loading-spinner"></span> Zmienianie...';
+                button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('changingButtonText')}`;
                 try {
                     const currentPassword = document.getElementById('currentPassword').value, newPassword = document.getElementById('newPassword').value, confirmPassword = document.getElementById('confirmPassword').value;
-                    if (!currentPassword || !newPassword || !confirmPassword) throw new Error('Wszystkie pola są wymagane.');
-                    if (newPassword.length < 8) throw new Error('Nowe hasło musi mieć minimum 8 znaków.');
-                    if (newPassword !== confirmPassword) throw new Error('Nowe hasła muszą być identyczne.');
+                    if (!currentPassword || !newPassword || !confirmPassword) throw new Error(Utils.getTranslation('allFieldsRequiredError'));
+                    if (newPassword.length < 8) throw new Error(Utils.getTranslation('passwordLengthError'));
+                    if (newPassword !== confirmPassword) throw new Error(Utils.getTranslation('passwordsMismatchError'));
                     const result = await changePassword({ current_password: currentPassword, new_password_1: newPassword, new_password_2: confirmPassword });
                     if (result.success) {
-                        showSuccess('passwordSuccess', 'Hasło zostało zmienione!');
+                        showSuccess('passwordSuccess', Utils.getTranslation('passwordUpdateSuccess'));
                         document.getElementById('passwordForm').reset();
-                    } else { throw new Error(result.data?.message || 'Błąd zmiany hasła.'); }
+                    } else { throw new Error(result.data?.message || Utils.getTranslation('passwordChangeFailedError')); }
                 } catch (error) {
                     showError('passwordError', error.message);
                 } finally {
@@ -1968,15 +2310,16 @@
                 const button = document.getElementById('deleteAccountBtn');
                 const originalText = button.textContent;
                 button.disabled = true;
-                button.innerHTML = '<span class="loading-spinner"></span> Usuwanie...';
+                button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('deletingButtonText')}`;
                 try {
                     const confirmText = document.getElementById('deleteConfirmation').value;
-                    if (confirmText.trim() !== 'USUWAM KONTO') throw new Error('Wpisz dokładnie: USUWAM KONTO');
+                    const requiredConfirmText = Utils.getTranslation('deleteConfirmationString');
+                    if (confirmText.trim().toUpperCase() !== requiredConfirmText.toUpperCase()) throw new Error(Utils.getTranslation('deleteConfirmationError').replace('{confirmationText}', requiredConfirmText));
                     const result = await deleteAccount(confirmText);
                     if (result.success) {
-                        showSuccess('deleteSuccess', 'Konto zostało usunięte. Trwa wylogowywanie...');
+                        showSuccess('deleteSuccess', Utils.getTranslation('deleteAccountSuccess'));
                         setTimeout(() => window.location.reload(), 2000);
-                    } else { throw new Error(result.data?.message || 'Błąd usuwania konta.'); }
+                    } else { throw new Error(result.data?.message || Utils.getTranslation('deleteAccountFailedError')); }
                 } catch (error) {
                     showError('deleteError', error.message);
                     if(!document.getElementById('deleteSuccess').classList.contains('show')) {
