@@ -101,7 +101,7 @@
             'avatar': 'https://i.pravatar.cc/100?u=1',
             'likeId': '101',
             'comments': [
-                { 'id': 'c1-1', 'parentId': null, 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2023-10-27T10:00:00Z', 'likes': 15, 'isLiked': false },
+                { 'id': 'c1-1', 'parentId': null, 'user': 'Kasia', 'avatar': 'https://i.pravatar.cc/100?u=10', 'text': 'Niesamowite ujęcie! 🐰', 'timestamp': '2023-10-27T10:00:00Z', 'likes': 15, 'isLiked': false, 'canEdit': true },
                 { 'id': 'c1-1-1', 'parentId': 'c1-1', 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Prawda!', 'timestamp': '2023-10-27T10:01:00Z', 'likes': 2, 'isLiked': false },
                 { 'id': 'c1-2', 'parentId': null, 'user': 'Tomek', 'avatar': 'https://i.pravatar.cc/100?u=11', 'text': 'Haha, co za królik!', 'timestamp': '2023-10-27T10:05:00Z', 'likes': 5, 'isLiked': true },
                 { 'id': 'c1-3', 'parentId': null, 'user': 'Anna', 'avatar': 'https://i.pravatar.cc/100?u=13', 'text': 'Super! ❤️', 'timestamp': '2023-10-27T10:10:00Z', 'likes': 25, 'isLiked': false }
@@ -314,7 +314,15 @@
                     deleteAccountFailedError: "Błąd usuwania konta.",
                     deleteConfirmationError: "Wpisz dokładnie: {confirmationText}",
                     deleteConfirmationString: "USUWAM KONTO",
-                    postCommentError: "Nie udało się opublikować komentarza."
+                    postCommentError: "Nie udało się opublikować komentarza.",
+                    commentEditAction: "Edytuj",
+                    commentDeleteAction: "Usuń",
+                    deleteCommentConfirm: "Czy na pewno chcesz usunąć ten komentarz?",
+                    editCommentPrompt: "Edytuj swój komentarz:",
+                    commentUpdateSuccess: "Komentarz zaktualizowany.",
+                    commentUpdateError: "Nie udało się zaktualizować komentarza.",
+                    commentDeleteSuccess: "Komentarz usunięty.",
+                    commentDeleteError: "Nie udało się usunąć komentarza."
                 },
                 en: {
                     loggedOutText: "You don't have the guts to log in",
@@ -596,13 +604,20 @@
                 },
                 fetchSlidesData: () => _request('tt_get_slides_data_ajax'),
                 fetchComments: async (slideId) => {
-                    // MOCK: Simulate API delay
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                    const slide = slidesData.find(s => s.id === slideId);
-                    if (slide && slide.comments) {
-                        return { success: true, data: slide.comments };
+                    const response = await _request('tt_get_comments', { slide_id: slideId });
+
+                    if (response.success) {
+                        return response;
+                    } else {
+                        // MOCK: Simulate API delay
+                        console.warn("AJAX tt_get_comments failed, using mock fallback.");
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        const slide = slidesData.find(s => s.id === slideId);
+                        if (slide && slide.comments) {
+                            return { success: true, data: slide.comments };
+                        }
+                        return { success: false, data: { message: 'Comments not found.' } };
                     }
-                    return { success: false, data: { message: 'Comments not found.' } };
                 },
                 postComment: async (slideId, text, parentId = null) => {
                     const response = await _request('tt_post_comment', {
@@ -630,13 +645,61 @@
                             text: text,
                             timestamp: new Date().toISOString(),
                             likes: 0,
-                            isLiked: false
+                            isLiked: false,
+                            canEdit: true
                         };
 
                         slide.comments.push(newComment);
                         slide.initialComments = slide.comments.length;
 
                         return { success: true, data: newComment };
+                    }
+                },
+                editComment: async (slideId, commentId, newText) => {
+                    const response = await _request('tt_edit_comment', {
+                        slide_id: slideId,
+                        comment_id: commentId,
+                        text: newText
+                    });
+
+                    if (response.success) {
+                        return response;
+                    } else {
+                        // MOCK FALLBACK
+                        console.warn("AJAX tt_edit_comment failed, using mock fallback.");
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        const slide = slidesData.find(s => s.id === slideId);
+                        if (!slide) return { success: false, data: { message: 'Slide not found.' } };
+                        const comment = findCommentById(slide.comments, commentId);
+                        if (!comment) return { success: false, data: { message: 'Comment not found.' } };
+
+                        comment.text = newText;
+                        return { success: true, data: comment };
+                    }
+                },
+
+                deleteComment: async (slideId, commentId) => {
+                    const response = await _request('tt_delete_comment', {
+                        slide_id: slideId,
+                        comment_id: commentId
+                    });
+
+                    if (response.success) {
+                        return response;
+                    } else {
+                        // MOCK FALLBACK
+                        console.warn("AJAX tt_delete_comment failed, using mock fallback.");
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        const slide = slidesData.find(s => s.id === slideId);
+                        if (!slide) return { success: false, data: { message: 'Slide not found.' } };
+
+                        const commentIndex = slide.comments.findIndex(c => c.id === commentId);
+                        if (commentIndex === -1) return { success: false, data: { message: 'Comment not found.' } };
+
+                        slide.comments.splice(commentIndex, 1);
+                        slide.initialComments = slide.comments.length;
+
+                        return { success: true };
                     }
                 },
                 toggleCommentLike: async (slideId, commentId) => {
@@ -1154,19 +1217,42 @@
                     timestampSpan.textContent = new Date(comment.timestamp).toLocaleString();
                     const replyBtn = document.createElement('button');
                     replyBtn.className = 'comment-action-btn comment-reply-btn';
+                    replyBtn.dataset.action = 'reply-to-comment';
                     replyBtn.textContent = Utils.getTranslation('commentReplyAction');
+
+                    const actionsWrapper = document.createElement('div');
+                    actionsWrapper.className = 'comment-actions-wrapper';
+                    actionsWrapper.appendChild(replyBtn);
+
+                    if (comment.canEdit) {
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'comment-action-btn comment-edit-btn';
+                        editBtn.dataset.action = 'edit-comment';
+                        editBtn.textContent = Utils.getTranslation('commentEditAction');
+
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'comment-action-btn comment-delete-btn';
+                        deleteBtn.dataset.action = 'delete-comment';
+                        deleteBtn.textContent = Utils.getTranslation('commentDeleteAction');
+
+                        actionsWrapper.appendChild(editBtn);
+                        actionsWrapper.appendChild(deleteBtn);
+                    }
+
                     const likesDiv = document.createElement('div');
                     likesDiv.className = 'comment-likes';
                     const likeBtn = document.createElement('button');
                     likeBtn.className = `comment-like-btn ${comment.isLiked ? 'active' : ''}`;
+                    likeBtn.dataset.action = 'toggle-comment-like';
                     likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
                     const likeCountSpan = document.createElement('span');
                     likeCountSpan.className = 'comment-like-count';
                     likeCountSpan.textContent = Utils.formatCount(comment.likes);
                     likesDiv.appendChild(likeBtn);
                     likesDiv.appendChild(likeCountSpan);
+
                     footer.appendChild(timestampSpan);
-                    footer.appendChild(replyBtn);
+                    footer.appendChild(actionsWrapper);
                     footer.appendChild(likesDiv);
 
                     main.appendChild(body);
@@ -1540,33 +1626,97 @@
                 },
                 mainClickHandler: (e) => {
                     const target = e.target;
+                    const actionTarget = target.closest('[data-action]');
 
-                    // Handle comment like clicks
-                    const likeBtn = target.closest('.comment-like-btn');
-                    if (likeBtn) {
-                        const commentItem = likeBtn.closest('.comment-item');
-                        const commentId = commentItem?.dataset.commentId;
+                    // Handle comment-related actions first
+                    if (actionTarget && actionTarget.closest('.comment-item')) {
+                        const commentItem = actionTarget.closest('.comment-item');
+                        const commentId = commentItem.dataset.commentId;
                         const slideId = document.querySelector('.swiper-slide-active')?.dataset.slideId;
 
-                        if (commentId && slideId) {
-                            const countEl = commentItem.querySelector('.comment-like-count');
-                            let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, '')) || 0;
+                        if (!slideId || !commentId) return;
 
-                            likeBtn.classList.toggle('active');
-                            const isLiked = likeBtn.classList.contains('active');
-                            currentLikes += isLiked ? 1 : -1;
-                            countEl.textContent = Utils.formatCount(currentLikes);
+                        switch (actionTarget.dataset.action) {
+                            case 'toggle-comment-like': {
+                                const countEl = commentItem.querySelector('.comment-like-count');
+                                let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, '')) || 0;
 
-                            API.toggleCommentLike(slideId, commentId).then(response => {
-                                if (!response.success) {
-                                    likeBtn.classList.toggle('active'); // Revert on failure
-                                    currentLikes += isLiked ? -1 : 1;
-                                    countEl.textContent = Utils.formatCount(currentLikes);
-                                    UI.showAlert(Utils.getTranslation('failedToUpdateLike'), true);
+                                actionTarget.classList.toggle('active');
+                                const isLiked = actionTarget.classList.contains('active');
+                                currentLikes += isLiked ? 1 : -1;
+                                countEl.textContent = Utils.formatCount(currentLikes);
+
+                                API.toggleCommentLike(slideId, commentId).then(response => {
+                                    if (!response.success) {
+                                        actionTarget.classList.toggle('active'); // Revert on failure
+                                        currentLikes += isLiked ? -1 : 1;
+                                        countEl.textContent = Utils.formatCount(currentLikes);
+                                        UI.showAlert(Utils.getTranslation('failedToUpdateLike'), true);
+                                    }
+                                });
+                                break;
+                            }
+                            case 'reply-to-comment': {
+                                const user = commentItem.querySelector('.comment-user')?.textContent;
+                                State.set('replyingToComment', commentId);
+
+                                const formContainer = document.querySelector('.comment-form-container');
+                                let replyContext = formContainer.querySelector('.reply-context');
+                                if (!replyContext) {
+                                    replyContext = document.createElement('div');
+                                    replyContext.className = 'reply-context';
+                                    formContainer.prepend(replyContext);
                                 }
-                            });
+                                const cancelAriaLabel = Utils.getTranslation('cancelReplyAriaLabel');
+                                replyContext.innerHTML = `${Utils.getTranslation('replyingTo').replace('{user}', user)} <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>`;
+                                replyContext.style.display = 'block';
+
+                                document.querySelector('#comment-input').focus();
+                                break;
+                            }
+                            case 'edit-comment': {
+                                const currentText = commentItem.querySelector('.comment-text').textContent;
+                                const newText = prompt(Utils.getTranslation('editCommentPrompt'), currentText);
+
+                                if (newText && newText.trim() !== currentText) {
+                                    API.editComment(slideId, commentId, newText.trim()).then(response => {
+                                        if (response.success) {
+                                            commentItem.querySelector('.comment-text').textContent = newText.trim();
+                                            UI.showAlert(Utils.getTranslation('commentUpdateSuccess'));
+                                        } else {
+                                            UI.showAlert(response.data?.message || Utils.getTranslation('commentUpdateError'), true);
+                                        }
+                                    });
+                                }
+                                break;
+                            }
+                           case 'delete-comment': {
+                                if (confirm(Utils.getTranslation('deleteCommentConfirm'))) {
+                                    API.deleteComment(slideId, commentId).then(response => {
+                                        if (response.success) {
+                                            commentItem.style.transition = 'opacity 0.3s ease-out';
+                                            commentItem.style.opacity = '0';
+                                            setTimeout(() => {
+                                                commentItem.remove();
+                                                // Update global comment count
+                                                const slideData = slidesData.find(s => s.id === slideId);
+                                                if (slideData) {
+                                                    const mainSlideCount = document.querySelector(`.swiper-slide[data-slide-id="${slideId}"] .comment-count`);
+                                                    if(mainSlideCount) {
+                                                        mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                                                    }
+                                                }
+                                            }, 300);
+                                            UI.showAlert(Utils.getTranslation('commentDeleteSuccess'));
+                                        } else {
+                                            UI.showAlert(response.data?.message || Utils.getTranslation('commentDeleteError'), true);
+                                        }
+                                    });
+                                }
+                                break;
+                            }
                         }
-                        return;
+                        return; // Stop further processing
                     }
 
                     const sortTrigger = target.closest('.sort-trigger');
