@@ -2387,7 +2387,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const loginForm = e.target.closest("form#tt-login-form");
         if (loginForm) {
           e.preventDefault();
-          mockToggleLogin();
+          const username = loginForm.querySelector("#tt-username").value;
+          const password = loginForm.querySelector("#tt-password").value;
+          const submitButton = loginForm.querySelector("#tt-login-submit");
+
+          if (!username || !password) {
+            UI.showAlert("Please enter username and password.", true);
+            return;
+          }
+
+          submitButton.disabled = true;
+
+          API.login({ log: username, pwd: password }).then(async (json) => {
+            if (json.success) {
+              State.set("isUserLoggedIn", true);
+              UI.showAlert(Utils.getTranslation("loginSuccess"));
+              await API.refreshNonce();
+              await App.fetchAndUpdateSlideData();
+              UI.updateUIForLoginState();
+            } else {
+              UI.showAlert(
+                json.data?.message || Utils.getTranslation("loginFailed"),
+                true,
+              );
+            }
+            submitButton.disabled = false;
+          });
           return;
         }
 

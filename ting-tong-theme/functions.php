@@ -221,11 +221,22 @@ add_action( 'wp_ajax_tt_get_slides_data_ajax', function() {
 });
 add_action( 'wp_ajax_nopriv_tt_ajax_login', function () {
 	check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
-	$user = wp_signon([
-		'user_login'    => isset( $_POST['log'] ) ? sanitize_user( $_POST['log'] ) : '',
+
+	$login_data = [
 		'user_password' => isset( $_POST['pwd'] ) ? $_POST['pwd'] : '',
 		'remember'      => true,
-	], is_ssl());
+	];
+
+	$user_login = isset( $_POST['log'] ) ? wp_unslash( $_POST['log'] ) : '';
+
+	if ( is_email( $user_login ) ) {
+		$login_data['user_login'] = sanitize_email( $user_login );
+	} else {
+		$login_data['user_login'] = sanitize_user( $user_login );
+	}
+
+	$user = wp_signon( $login_data, is_ssl() );
+
 	if ( is_wp_error( $user ) ) {
 		wp_send_json_error( [ 'message' => 'Błędne dane logowania.' ] );
 	} else {
