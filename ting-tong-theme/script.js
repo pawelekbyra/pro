@@ -2389,13 +2389,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
           submitButton.disabled = true;
 
-          API.login({ log: username, pwd: password }).then(async (json) => {
+          API.login({ log: username, pwd: password }).then((json) => {
             if (json.success) {
+              // Nowy, bogatszy obiekt odpowiedzi jest obsługiwany tutaj
+              const { userData, slidesData: newSlides, new_nonce } = json.data;
+
+              // 1. Zaktualizuj stan aplikacji
               State.set("isUserLoggedIn", true);
-              UI.showAlert(Utils.getTranslation("loginSuccess"));
-              await API.refreshNonce();
-              await App.fetchAndUpdateSlideData();
+              if (new_nonce) {
+                ajax_object.nonce = new_nonce;
+              }
+
+              // 2. Zaktualizuj dane slajdów (zamiast ponownego pobierania)
+              if (newSlides) {
+                slidesData.length = 0; // Wyczyść istniejącą tablicę
+                Array.prototype.push.apply(slidesData, newSlides); // Dodaj nowe dane
+                slidesData.forEach((s) => {
+                    s.likeId = String(s.likeId);
+                });
+              }
+
+              // 3. Zaktualizuj dane w panelu konta (bezpośrednio)
+              if (userData) {
+                AccountPanel.populateProfileForm(userData);
+              }
+
+              // 4. Odśwież cały interfejs
               UI.updateUIForLoginState();
+              UI.showAlert(Utils.getTranslation("loginSuccess"));
+
             } else {
               UI.showAlert(
                 json.data?.message || Utils.getTranslation("loginFailed"),

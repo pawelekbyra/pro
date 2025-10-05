@@ -242,7 +242,23 @@ add_action( 'wp_ajax_nopriv_tt_ajax_login', function () {
 	} else {
 		wp_set_current_user( $user->ID );
 		wp_set_auth_cookie( $user->ID, true, is_ssl() );
-		wp_send_json_success( [ 'message' => 'Zalogowano pomyślnie.' ] );
+
+		// Po zalogowaniu, przygotuj pełny pakiet danych do odświeżenia frontendu
+		$u = wp_get_current_user();
+		wp_send_json_success( [
+			'message'   => 'Zalogowano pomyślnie.',
+			'userData'  => [
+				'user_id'      => (int) $u->ID,
+				'username'     => $u->user_login,
+				'email'        => $u->user_email,
+				'display_name' => $u->display_name,
+				'first_name'   => (string) get_user_meta($u->ID, 'first_name', true),
+				'last_name'    => (string) get_user_meta($u->ID, 'last_name',  true),
+				'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
+			],
+			'slidesData' => tt_get_slides_data(), // Pobierz świeże dane slajdów
+			'new_nonce'  => wp_create_nonce( 'tt_ajax_nonce' ) // Odśwież nonce
+		] );
 	}
 } );
 add_action( 'wp_ajax_tt_ajax_logout', function () {
