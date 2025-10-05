@@ -1776,7 +1776,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (isStandalone()) {
-        if (installBar) installBar.style.display = "none";
+        // The logic to hide the bar is now handled in App._startApp
+        // to ensure it happens after the preloader animation.
         updatePwaUiForInstalledState();
         return;
       }
@@ -3380,10 +3381,15 @@ document.addEventListener("DOMContentLoaded", () => {
           UI.DOM.container.classList.add("ready");
           const pwaInstallBar = document.getElementById("pwa-install-bar");
           const appFrame = document.getElementById("app-frame");
-          if (!PWA.isStandalone()) {
+
+          // This is now the single source of truth for the install bar visibility.
+          if (PWA.isStandalone()) {
+            if (pwaInstallBar) pwaInstallBar.style.display = "none";
+            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+          } else {
             if (pwaInstallBar) {
-                pwaInstallBar.classList.add("visible");
-                if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+              pwaInstallBar.classList.add("visible");
+              if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
             }
           }
           document.querySelectorAll(".sidebar").forEach((sidebar) => {
