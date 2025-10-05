@@ -31,8 +31,8 @@ get_header();
     </div>
     <div class="login-panel" aria-hidden="true">
             <form id="tt-login-form" class="login-form">
-                <input type="text" id="tt-username" aria-label="Username" />
-                <input type="password" id="tt-password" aria-label="Password" />
+                <input type="text" id="tt-username" name="log" aria-label="Username" />
+                <input type="password" id="tt-password" name="pwd" aria-label="Password" />
                 <button type="submit" id="tt-login-submit">ENTER</button>
             </form>
         </div>

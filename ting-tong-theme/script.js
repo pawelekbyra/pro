@@ -2298,7 +2298,7 @@ document.addEventListener("DOMContentLoaded", () => {
             break;
           }
           case "open-info-modal":
-            mockToggleLogin();
+            UI.openModal(UI.DOM.infoModal);
             break;
           case "open-desktop-pwa-modal":
             PWA.openDesktopModal();
