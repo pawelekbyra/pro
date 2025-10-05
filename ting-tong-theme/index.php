@@ -79,7 +79,6 @@ get_header();
                         <div class="icon-label comment-count">0</div>
                     </button>
                     <button class="icon-button shareButton" data-action="share" data-translate-title="shareTitle" data-translate-aria-label="shareAriaLabel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l6 6-6 6M21 11H9a6 6 0 0 0-6 6" /></svg><div class="icon-label" data-translate-key="shareText">Szeruj</div></button>
-                    <button class="icon-button infoButton" data-action="open-info-modal" data-translate-title="infoTitle" data-translate-aria-label="infoAriaLabel" aria-controls="infoModal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" /><line x1="8" y1="8" x2="16" y2="8" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="8" y1="16" x2="12" y2="16" /></svg><div class="icon-label" data-translate-key="infoText">Info</div></button>
                     <button class="icon-button tipButton" data-action="show-tip-jar" data-translate-title="tipTitle" data-translate-aria-label="tipAriaLabel">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
                         <div class="icon-label" data-translate-key="tipText">Napiwek</div>
@@ -106,21 +105,6 @@ get_header();
 <div id="alertBox" role="status" aria-live="polite">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
     <span id="alertText"></span>
-</div>
-<div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="infoTitle" aria-hidden="true">
-    <div class="modal-content" tabindex="-1">
-        <button class="modal-close-btn" data-translate-aria-label="closeInfoAriaLabel" aria-label="Zamknij informacje">&times;</button>
-        <h2 id="infoTitle" data-translate-key="infoModalTitle">Informacje</h2>
-        <div class="modal-body">
-            <p data-translate-key="infoModalBodyP1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor.</p>
-            <p data-translate-key="infoModalBodyP2">Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio.</p>
-            <div class="tip-cta">
-                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm0 4h4v2h-4v-2zm-2-9.75c0-.41.34-.75.75-.75h2.5c.41 0 .75.34.75.75v3.5h-4v-3.5z"/></svg>
-                <p data-translate-key="infoModalBodyTip">Podoba Ci się? Zostaw napiwek i dołącz do grona patronów, aby wspierać rozwój aplikacji!</p>
-            </div>
-            <p data-translate-key="infoModalBodyP3">Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.</p>
-        </div>
-    </div>
 </div>
 <div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
