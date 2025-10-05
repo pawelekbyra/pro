@@ -2677,11 +2677,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateProfileForm(data) {
-      if (data.first_name)
-        document.getElementById("firstName").value = data.first_name;
-      if (data.last_name)
-        document.getElementById("lastName").value = data.last_name;
-      if (data.email) document.getElementById("email").value = data.email;
+      // USUNIĘTO WARUNEK 'IF', ABY PUSTE CIĄGI ZNAKÓW ("") BYŁY PRAWIDŁOWO PRZYPISANE
+      document.getElementById("firstName").value = data.first_name;
+      document.getElementById("lastName").value = data.last_name;
+      document.getElementById("email").value = data.email;
+
+      // Pozostawiamy warunki dla pól wyświetlanych, które mogą nie istnieć lub być krytyczne
       if (data.display_name)
         document.getElementById("displayName").textContent = data.display_name;
       if (data.email)
@@ -2985,7 +2986,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const dataUrl = outputCanvas.toDataURL("image/png", 0.9);
         const result = await uploadAvatar(dataUrl);
 
-        if (result.success && result.data?.url) {
+        if (result?.success && result.data?.url) {
           const newAvatarUrl = result.data.url + "?t=" + Date.now();
           document.getElementById("userAvatar").src = newAvatarUrl;
           document
@@ -3004,16 +3005,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }),
           );
         } else {
-          throw new Error(
-            result.data?.message || Utils.getTranslation("avatarUpdateError"),
-          );
+          // Ulepszona obsługa błędów - bezpieczne odczytanie wiadomości
+          const errorMessage = result?.data?.message || Utils.getTranslation("avatarUpdateError");
+          throw new Error(errorMessage);
         }
       } catch (error) {
+        // Ulepszona obsługa błędów - upewnienie się, że `error` ma sensowną wiadomość
+        const message = error instanceof Error ? error.message : String(error);
         showError(
           "profileError",
-          error.message || Utils.getTranslation("imageProcessingError"),
+          message || Utils.getTranslation("imageProcessingError"),
         );
       } finally {
+        // Ten blok ZAWSZE się wykona, resetując UI, co jest kluczowe
         button.disabled = false;
         button.innerHTML = originalHTML;
       }

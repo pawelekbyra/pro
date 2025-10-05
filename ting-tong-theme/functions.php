@@ -522,47 +522,82 @@ add_action('wp_ajax_tt_profile_update', function () {
     ]);
 });
 add_action('wp_ajax_tt_avatar_upload', function () {
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
-    if ( ! is_user_logged_in() ) {
-        wp_send_json_error(['message' => 'not_logged_in'], 401);
+    try {
+        check_ajax_referer('tt_ajax_nonce', 'nonce');
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error(['message' => 'Brak uprawnień: Musisz być zalogowany.'], 401);
+        }
+
+        $dataUrl = isset($_POST['image']) ? trim( wp_unslash($_POST['image']) ) : '';
+        if (empty($dataUrl) || strpos($dataUrl, 'data:image') !== 0) {
+            wp_send_json_error(['message' => 'Błąd danych: Nieprawidłowy format data URL.'], 400);
+        }
+
+        if ( ! preg_match('#^data:(image/(?:png|jpeg|gif));base64,(.+)$#', $dataUrl, $matches) ) {
+            wp_send_json_error(['message' => 'Błąd formatu: Oczekiwano obrazu PNG, JPEG lub GIF.'], 400);
+        }
+
+        $mime = strtolower($matches[1]);
+        $bin = base64_decode($matches[2]);
+        if ( ! $bin || strlen($bin) > 5 * 1024 * 1024) { // Zwiększony limit do 5MB
+            wp_send_json_error(['message' => 'Błąd pliku: Obraz jest uszkodzony lub za duży (limit 5MB).'], 400);
+        }
+
+        if ( ! function_exists('wp_handle_sideload') ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+        }
+
+        $u = wp_get_current_user();
+        $ext = ($mime === 'image/png') ? 'png' : 'jpg'; // Uproszczenie dla najczęstszych typów
+        $filename = 'tt-avatar-' . (int) $u->ID . '-' . time() . '.' . $ext;
+
+        $upload_dir = wp_upload_dir();
+        $tmp_path = trailingslashit($upload_dir['path']) . $filename;
+
+        $write_result = file_put_contents($tmp_path, $bin);
+        if ($write_result === false) {
+            wp_send_json_error(['message' => 'Błąd zapisu: Nie można zapisać pliku tymczasowego.'], 500);
+        }
+
+        $file_array = ['name' => $filename, 'type' => $mime, 'tmp_name' => $tmp_path, 'error' => 0, 'size' => filesize($tmp_path)];
+        $file = wp_handle_sideload($file_array, ['test_form' => false]);
+
+        if (isset($file['error'])) {
+            @unlink($tmp_path);
+            wp_send_json_error(['message' => 'Błąd WordPress: ' . $file['error']], 500);
+        }
+
+        $attach_id = wp_insert_attachment(['post_mime_type' => $mime, 'post_title' => $filename, 'post_content' => '', 'post_status' => 'inherit'], $file['file']);
+        if (is_wp_error($attach_id)) {
+            @unlink($file['file']);
+            wp_send_json_error(['message' => 'Błąd bazy danych: Nie można utworzyć załącznika.'], 500);
+        }
+
+        $attach_data = wp_generate_attachment_metadata($attach_id, $file['file']);
+        wp_update_attachment_metadata($attach_id, $attach_data);
+
+        // Usuń stary avatar, jeśli istnieje
+        $old_avatar_id = get_user_meta($u->ID, 'tt_avatar_id', true);
+        if ($old_avatar_id && (int) $old_avatar_id !== (int) $attach_id) {
+            wp_delete_attachment((int) $old_avatar_id, true);
+        }
+
+        update_user_meta($u->ID, 'tt_avatar_id', $attach_id);
+        $url = wp_get_attachment_url($attach_id);
+        update_user_meta($u->ID, 'tt_avatar_url', esc_url_raw($url));
+
+        wp_send_json_success(['url' => $url, 'attachment_id' => $attach_id]);
+
+    } catch (Throwable $e) {
+        // Złap wszystkie błędy krytyczne (w tym błędy parsowania, itp.)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            wp_send_json_error(['message' => 'Krytyczny błąd serwera: ' . $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
+        } else {
+            wp_send_json_error(['message' => 'Wystąpił nieoczekiwany błąd serwera.'], 500);
+        }
     }
-    $dataUrl = isset($_POST['image']) ? trim( wp_unslash($_POST['image']) ) : '';
-    if (empty($dataUrl) || strpos($dataUrl, 'data:image') !== 0) {
-        wp_send_json_error(['message' => 'Brak lub błędny obraz.'], 400);
-    }
-    if ( ! preg_match('#^data:(image/[^;]+);base64,(.+)$#', $dataUrl, $m) ) {
-        wp_send_json_error(['message' => 'Nieprawidłowy format obrazu.'], 400);
-    }
-    $mime = strtolower($m[1]);
-    $bin = base64_decode($m[2]);
-    if ( ! $bin || strlen($bin) > 2 * 1024 * 1024) {
-        wp_send_json_error(['message' => 'Błąd dekodowania lub plik za duży.'], 400);
-    }
-    if ( ! function_exists('wp_handle_sideload') ) {
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/media.php';
-        require_once ABSPATH . 'wp-admin/includes/image.php';
-    }
-    $u = wp_get_current_user();
-    $ext = ($mime === 'image/png') ? 'png' : 'jpg';
-    $filename = 'tt-avatar-' . (int) $u->ID . '-' . time() . '.' . $ext;
-    $tmp = wp_tempnam($filename);
-    file_put_contents($tmp, $bin);
-    $file_array = ['name' => $filename, 'type' => $mime, 'tmp_name' => $tmp, 'error' => 0, 'size' => filesize($tmp)];
-    $file = wp_handle_sideload($file_array, ['test_form' => false]);
-    @unlink($tmp);
-    if (isset($file['error'])) {
-        wp_send_json_error(['message' => 'Upload nieudany: ' . $file['error']], 500);
-    }
-    $attach_id = wp_insert_attachment(['post_mime_type' => $mime, 'post_title' => $filename, 'post_content' => '', 'post_status' => 'inherit'], $file['file']);
-    if (is_wp_error($attach_id)) {
-        wp_send_json_error(['message' => 'Nie można utworzyć załącznika.'], 500);
-    }
-    wp_update_attachment_metadata($attach_id, wp_generate_attachment_metadata($attach_id, $file['file']));
-    update_user_meta($u->ID, 'tt_avatar_id',  $attach_id);
-    $url = wp_get_attachment_url($attach_id);
-    update_user_meta($u->ID, 'tt_avatar_url', esc_url_raw($url));
-    wp_send_json_success(['url' => $url, 'attachment_id' => $attach_id]);
 });
 add_action('wp_ajax_tt_password_change', function () {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
