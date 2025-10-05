@@ -2061,26 +2061,30 @@ document.addEventListener("DOMContentLoaded", () => {
               break;
             }
             case "edit-comment": {
-              const currentText =
-                commentItem.querySelector(".comment-text").textContent;
+              const currentText = commentItem.querySelector(".comment-text").textContent;
               const newText = prompt(
                 Utils.getTranslation("editCommentPrompt"),
                 currentText,
               );
 
-              if (newText && newText.trim() !== currentText) {
+              if (newText && newText.trim() && newText.trim() !== currentText) {
                 API.editComment(slideId, commentId, newText.trim()).then(
                   (response) => {
                     if (response.success) {
-                      commentItem.querySelector(".comment-text").textContent =
-                        newText.trim();
-                      UI.showAlert(
-                        Utils.getTranslation("commentUpdateSuccess"),
-                      );
+                      const slideData = slidesData.find((s) => s.id === slideId);
+                      if (slideData) {
+                        // 1. Znajdź i zaktualizuj komentarz w stanie lokalnym
+                        const commentIndex = slideData.comments.findIndex(c => String(c.id) === String(commentId));
+                        if (commentIndex > -1) {
+                          slideData.comments[commentIndex] = response.data;
+                        }
+                        // 2. Wyrenderuj ponownie wszystkie komentarze, aby zapewnić spójność
+                        UI.renderComments(slideData.comments);
+                      }
+                      UI.showToast(Utils.getTranslation("commentUpdateSuccess"));
                     } else {
                       UI.showAlert(
-                        response.data?.message ||
-                          Utils.getTranslation("commentUpdateError"),
+                        response.data?.message || Utils.getTranslation("commentUpdateError"),
                         true,
                       );
                     }
@@ -2093,30 +2097,34 @@ document.addEventListener("DOMContentLoaded", () => {
               if (confirm(Utils.getTranslation("deleteCommentConfirm"))) {
                 API.deleteComment(slideId, commentId).then((response) => {
                   if (response.success) {
-                    commentItem.style.transition = "opacity 0.3s ease-out";
-                    commentItem.style.opacity = "0";
-                    setTimeout(() => {
-                      commentItem.remove();
-                      // Update global comment count
-                      const slideData = slidesData.find(
-                        (s) => s.id === slideId,
-                      );
-                      if (slideData) {
-                        const mainSlideCount = document.querySelector(
-                          `.swiper-slide[data-slide-id="${slideId}"] .comment-count`,
-                        );
-                        if (mainSlideCount) {
-                          mainSlideCount.textContent = Utils.formatCount(
-                            slideData.initialComments,
-                          );
-                        }
+                    const slideData = slidesData.find((s) => s.id === slideId);
+                    if (slideData) {
+                      // 1. Zaktualizuj stan lokalny
+                      const commentIndex = slideData.comments.findIndex(c => String(c.id) === String(commentId));
+                      if (commentIndex > -1) {
+                        slideData.comments.splice(commentIndex, 1);
                       }
-                    }, 300);
-                    UI.showAlert(Utils.getTranslation("commentDeleteSuccess"));
+                      // Użyj nowej liczby komentarzy z odpowiedzi API
+                      slideData.initialComments = response.data.new_count;
+
+                      // 2. Odśwież UI na podstawie nowego stanu
+                      UI.renderComments(slideData.comments);
+
+                      // 3. Zaktualizuj liczniki
+                      const slideElement = document.querySelector(`.swiper-slide-active[data-slide-id="${slideId}"]`);
+                      const mainSlideCount = slideElement?.querySelector(".comment-count");
+                      if (mainSlideCount) {
+                        mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                      }
+                      const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+                      if (commentsTitle) {
+                        commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+                      }
+                    }
+                    UI.showToast(Utils.getTranslation("commentDeleteSuccess"));
                   } else {
                     UI.showAlert(
-                      response.data?.message ||
-                        Utils.getTranslation("commentDeleteError"),
+                      response.data?.message || Utils.getTranslation("commentDeleteError"),
                       true,
                     );
                   }
@@ -2451,31 +2459,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const slideData = slidesData.find((s) => s.id === slideId);
                 if (slideData) {
+                  // 1. Zaktualizuj stan lokalny
+                  const newComment = postResponse.data;
+                  // Upewnij się, że tablica komentarzy istnieje
+                  if (!Array.isArray(slideData.comments)) {
+                    slideData.comments = [];
+                  }
+                  slideData.comments.push(newComment);
+                  slideData.initialComments = slideData.comments.length;
+
+                  // 2. Odśwież UI na podstawie nowego stanu
                   UI.renderComments(slideData.comments);
 
-                  const mainSlideCount =
-                    slideElement.querySelector(".comment-count");
+                  // 3. Zaktualizuj liczniki
+                  const mainSlideCount = slideElement.querySelector(".comment-count");
                   if (mainSlideCount) {
-                    mainSlideCount.textContent = Utils.formatCount(
-                      slideData.initialComments,
-                    );
+                    mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
                   }
-
-                  const commentsTitle =
-                    UI.DOM.commentsModal.querySelector("#commentsTitle");
+                  const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
                   if (commentsTitle) {
                     commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
                   }
 
-                  const modalBody =
-                    UI.DOM.commentsModal.querySelector(".modal-body");
+                  // 4. Przewiń na dół, aby zobaczyć nowy komentarz
+                  const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
                   if (modalBody) {
                     modalBody.scrollTop = modalBody.scrollHeight;
                   }
                 }
               } else {
                 UI.showAlert(
-                  postResponse.data?.message || "Failed to post comment.",
+                  postResponse.data?.message || Utils.getTranslation("postCommentError"),
                   true,
                 );
               }
