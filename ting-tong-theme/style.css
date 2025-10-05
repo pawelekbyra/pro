@@ -2794,17 +2794,17 @@ body,
 /* --- FIX: Poprawki układu formularza --- */
 #profile-tab .form-group {
     display: flex;
-    flex-direction: row; /* Etykieta i input obok siebie */
-    align-items: center;
-    gap: 10px;
+    flex-direction: column; /* Ustawia etykietę i input w kolumnie */
+    align-items: stretch; /* Rozciąga elementy do pełnej szerokości */
+    gap: 8px; /* Odstęp między etykietą a inputem */
 }
 
 #profile-tab .form-label {
-    flex: 0 0 80px; /* Stała szerokość dla etykiety, np. 80px */
-    text-align: right;
-    margin-bottom: 0; /* Usuń margines dolny, bo jest już w .form-group */
+    flex: none; /* Usuwa właściwości flex */
+    text-align: left; /* Wyrównuje tekst etykiety do lewej */
+    margin-bottom: 0; /* Zeruje margines, bo gap jest w .form-group */
 }
 
 #profile-tab .form-input {
-    flex: 1; /* Input zajmie resztę dostępnego miejsca */
+    flex: none; /* Usuwa właściwości flex */
 }
