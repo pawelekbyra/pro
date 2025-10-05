@@ -1795,8 +1795,6 @@ document.addEventListener("DOMContentLoaded", () => {
           installPromptEvent = null;
           isAppInstalled = true; // Set state
           updatePwaUiForInstalledState();
-          const appFrame = document.getElementById("app-frame");
-          if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
         });
       }
 
