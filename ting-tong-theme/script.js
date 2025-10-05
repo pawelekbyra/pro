@@ -1776,6 +1776,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (isStandalone()) {
+        if (installBar) installBar.style.display = "none";
         updatePwaUiForInstalledState();
         return;
       }
@@ -1874,12 +1875,14 @@ document.addEventListener("DOMContentLoaded", () => {
     async function handleLogout(link) {
       if (link.disabled) return;
       link.disabled = true;
+      await API.refreshNonce(); // Odśwież nonce PRZED wylogowaniem
       const json = await API.logout();
       if (json.success) {
         State.set("isUserLoggedIn", false);
         UI.showAlert(Utils.getTranslation("logoutSuccess"));
         slidesData.forEach((slide) => (slide.isLiked = false));
-        await API.refreshNonce();
+        // Po udanym wylogowaniu nonce jest już nieważny, więc nie ma potrzeby go odświeżać ponownie
+        // Jeśli będzie potrzebny nowy, zostanie pobrany przy następnej akcji.
         UI.updateUIForLoginState();
       } else {
         UI.showAlert(json.data?.message || "Logout failed.", true);
@@ -3377,9 +3380,7 @@ document.addEventListener("DOMContentLoaded", () => {
           UI.DOM.container.classList.add("ready");
           const pwaInstallBar = document.getElementById("pwa-install-bar");
           const appFrame = document.getElementById("app-frame");
-          if (PWA.isStandalone()) {
-            if (pwaInstallBar) pwaInstallBar.style.display = 'none';
-          } else {
+          if (!PWA.isStandalone()) {
             if (pwaInstallBar) {
                 pwaInstallBar.classList.add("visible");
                 if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
@@ -3393,7 +3394,7 @@ document.addEventListener("DOMContentLoaded", () => {
             () => {
               UI.DOM.preloader.style.display = "none";
               // Pokaż modal powitalny tylko w przeglądarce, nie w PWA
-              if (!PWA.isStandalone()) {
+              if (!PWA.isStandalone() && UI.DOM.welcomeModal) {
                 setTimeout(() => {
                   UI.openModal(UI.DOM.welcomeModal);
                 }, 300); // Małe opóźnienie dla płynniejszego efektu
