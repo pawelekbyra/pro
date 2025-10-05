@@ -108,143 +108,156 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  const mockSlides = [
+    {
+      id: "slide1",
+      access: "public",
+      initialLikes: 10,
+      isLiked: false,
+      initialComments: 4,
+      isIframe: false,
+      mp4Url:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      user: "Filmik 1",
+      description: "Podpis do filmiku 1",
+      avatar: "https://i.pravatar.cc/100?u=1",
+      likeId: "101",
+      comments: [
+        {
+          id: "c1-1",
+          parentId: null,
+          user: "Kasia",
+          avatar: "https://i.pravatar.cc/100?u=10",
+          text: "Niesamowite ujęcie! 🐰",
+          timestamp: "2023-10-27T10:00:00Z",
+          likes: 15,
+          isLiked: false,
+          canEdit: true,
+        },
+        {
+          id: "c1-1-1",
+          parentId: "c1-1",
+          user: "Tomek",
+          avatar: "https://i.pravatar.cc/100?u=11",
+          text: "Prawda!",
+          timestamp: "2023-10-27T10:01:00Z",
+          likes: 2,
+          isLiked: false,
+        },
+        {
+          id: "c1-2",
+          parentId: null,
+          user: "Tomek",
+          avatar: "https://i.pravatar.cc/100?u=11",
+          text: "Haha, co za królik!",
+          timestamp: "2023-10-27T10:05:00Z",
+          likes: 5,
+          isLiked: true,
+        },
+        {
+          id: "c1-3",
+          parentId: null,
+          user: "Anna",
+          avatar: "https://i.pravatar.cc/100?u=13",
+          text: "Super! ❤️",
+          timestamp: "2023-10-27T10:10:00Z",
+          likes: 25,
+          isLiked: false,
+        },
+      ],
+    },
+    {
+      id: "slide2",
+      access: "secret",
+      initialLikes: 20,
+      isLiked: false,
+      initialComments: 2,
+      isIframe: false,
+      mp4Url:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      user: "Paweł Polutek",
+      description: "Podpis do filmiku 2",
+      avatar: "https://i.pravatar.cc/100?u=2",
+      likeId: "102",
+      comments: [
+        {
+          id: "c2-1",
+          parentId: null,
+          user: "Admin",
+          avatar: "https://i.pravatar.cc/100?u=12",
+          text: "To jest materiał premium!",
+          timestamp: "2023-10-27T11:00:00Z",
+          likes: 100,
+          isLiked: true,
+        },
+        {
+          id: "c2-2",
+          parentId: null,
+          user: "Ewa",
+          avatar: "https://i.pravatar.cc/100?u=14",
+          text: "Zgadzam się, świetna jakość.",
+          timestamp: "2023-10-27T11:05:00Z",
+          likes: 12,
+          isLiked: false,
+        },
+      ],
+    },
+    {
+      id: "slide3",
+      access: "pwa",
+      initialLikes: 30,
+      isLiked: false,
+      initialComments: 2,
+      isIframe: false,
+      mp4Url:
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      user: "Test Video",
+      description: "A test video slide.",
+      avatar: "https://i.pravatar.cc/100?u=3",
+      likeId: "103",
+      comments: [
+        {
+          id: "c3-1",
+          parentId: null,
+          user: "Jan",
+          avatar: "https://i.pravatar.cc/100?u=15",
+          text: "Działa!",
+          timestamp: "2023-10-27T12:00:00Z",
+          likes: 0,
+          isLiked: false,
+        },
+        {
+          id: "c3-2",
+          parentId: null,
+          user: "Zofia",
+          avatar: "https://i.pravatar.cc/100?u=16",
+          text: "Testowy komentarz",
+          timestamp: "2023-10-27T12:01:00Z",
+          likes: 1,
+          isLiked: false,
+        },
+      ],
+    },
+  ];
+
+  // Guard for undefined WordPress objects in standalone mode
+  if (typeof window.ajax_object === "undefined") {
+    console.warn(
+      "`ajax_object` is not defined. Using mock data for standalone development.",
+    );
+    window.ajax_object = {
+      ajax_url: "#", // Prevent actual network requests
+      nonce: "0a1b2c3d4e",
+    };
+  }
+
   if (typeof window.TingTongData === "undefined") {
     console.warn(
       "`TingTongData` is not defined. Using mock data for standalone development.",
     );
     window.TingTongData = {
       isLoggedIn: false,
-      slides: [
-        {
-          id: "slide1",
-          access: "public",
-          initialLikes: 10,
-          isLiked: false,
-          initialComments: 4,
-          isIframe: false,
-          mp4Url:
-            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-          user: "Filmik 1",
-          description: "Podpis do filmiku 1",
-          avatar: "https://i.pravatar.cc/100?u=1",
-          likeId: "101",
-          comments: [
-            {
-              id: "c1-1",
-              parentId: null,
-              user: "Kasia",
-              avatar: "https://i.pravatar.cc/100?u=10",
-              text: "Niesamowite ujęcie! 🐰",
-              timestamp: "2023-10-27T10:00:00Z",
-              likes: 15,
-              isLiked: false,
-              canEdit: true,
-            },
-            {
-              id: "c1-1-1",
-              parentId: "c1-1",
-              user: "Tomek",
-              avatar: "https://i.pravatar.cc/100?u=11",
-              text: "Prawda!",
-              timestamp: "2023-10-27T10:01:00Z",
-              likes: 2,
-              isLiked: false,
-            },
-            {
-              id: "c1-2",
-              parentId: null,
-              user: "Tomek",
-              avatar: "https://i.pravatar.cc/100?u=11",
-              text: "Haha, co za królik!",
-              timestamp: "2023-10-27T10:05:00Z",
-              likes: 5,
-              isLiked: true,
-            },
-            {
-              id: "c1-3",
-              parentId: null,
-              user: "Anna",
-              avatar: "https://i.pravatar.cc/100?u=13",
-              text: "Super! ❤️",
-              timestamp: "2023-10-27T10:10:00Z",
-              likes: 25,
-              isLiked: false,
-            },
-          ],
-        },
-        {
-          id: "slide2",
-          access: "secret",
-          initialLikes: 20,
-          isLiked: false,
-          initialComments: 2,
-          isIframe: false,
-          mp4Url:
-            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-          user: "Paweł Polutek",
-          description: "Podpis do filmiku 2",
-          avatar: "https://i.pravatar.cc/100?u=2",
-          likeId: "102",
-          comments: [
-            {
-              id: "c2-1",
-              parentId: null,
-              user: "Admin",
-              avatar: "https://i.pravatar.cc/100?u=12",
-              text: "To jest materiał premium!",
-              timestamp: "2023-10-27T11:00:00Z",
-              likes: 100,
-              isLiked: true,
-            },
-            {
-              id: "c2-2",
-              parentId: null,
-              user: "Ewa",
-              avatar: "https://i.pravatar.cc/100?u=14",
-              text: "Zgadzam się, świetna jakość.",
-              timestamp: "2023-10-27T11:05:00Z",
-              likes: 12,
-              isLiked: false,
-            },
-          ],
-        },
-        {
-          id: "slide3",
-          access: "pwa",
-          initialLikes: 30,
-          isLiked: false,
-          initialComments: 2,
-          isIframe: false,
-          mp4Url:
-            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-          user: "Test Video",
-          description: "A test video slide.",
-          avatar: "https://i.pravatar.cc/100?u=3",
-          likeId: "103",
-          comments: [
-            {
-              id: "c3-1",
-              parentId: null,
-              user: "Jan",
-              avatar: "https://i.pravatar.cc/100?u=15",
-              text: "Działa!",
-              timestamp: "2023-10-27T12:00:00Z",
-              likes: 0,
-              isLiked: false,
-            },
-            {
-              id: "c3-2",
-              parentId: null,
-              user: "Zofia",
-              avatar: "https://i.pravatar.cc/100?u=16",
-              text: "Testowy komentarz",
-              timestamp: "2023-10-27T12:01:00Z",
-              likes: 1,
-              isLiked: false,
-            },
-          ],
-        },
-      ],
+      slides: mockSlides,
     };
   }
 
@@ -591,9 +604,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- POPRAWIONA LOGIKA WYSZUKIWANIA DANYCH ---
   const slidesData =
     typeof window.TingTongData !== "undefined" &&
-    Array.isArray(window.TingTongData.slides)
+    Array.isArray(window.TingTongData.slides) &&
+    window.TingTongData.slides.length > 0
       ? window.TingTongData.slides
-      : [];
+      : mockSlides;
 
   slidesData.forEach((s) => {
     s.likeId = String(s.likeId);
@@ -1781,8 +1795,6 @@ document.addEventListener("DOMContentLoaded", () => {
           installPromptEvent = null;
           isAppInstalled = true; // Set state
           updatePwaUiForInstalledState();
-          const pwaInstallBar = document.getElementById("pwa-install-bar");
-          if (pwaInstallBar) pwaInstallBar.classList.remove("visible");
           const appFrame = document.getElementById("app-frame");
           if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
         });
@@ -3367,9 +3379,13 @@ document.addEventListener("DOMContentLoaded", () => {
           UI.DOM.container.classList.add("ready");
           const pwaInstallBar = document.getElementById("pwa-install-bar");
           const appFrame = document.getElementById("app-frame");
-          if (pwaInstallBar && !PWA.isStandalone()) {
-            pwaInstallBar.classList.add("visible");
-            if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+          if (PWA.isStandalone()) {
+            if (pwaInstallBar) pwaInstallBar.style.display = 'none';
+          } else {
+            if (pwaInstallBar) {
+                pwaInstallBar.classList.add("visible");
+                if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+            }
           }
           document.querySelectorAll(".sidebar").forEach((sidebar) => {
             sidebar.classList.add("visible");
