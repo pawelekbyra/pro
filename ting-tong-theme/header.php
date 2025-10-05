@@ -11,7 +11,7 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="<?php echo get_template_directory_uri(); ?>/jajeco.jpg">
+    <!-- <link rel="apple-touch-icon" href="<?php echo get_template_directory_uri(); ?>/jajeco.jpg"> -->
 
     <link rel="preconnect" href="https://pawelperfect.pl" crossorigin>
     <link rel="preconnect" href="https://i.pravatar.cc" crossorigin>

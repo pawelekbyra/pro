@@ -175,10 +175,10 @@ function tt_get_slides_data() {
  */
 function tt_enqueue_and_localize_scripts() {
 	wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css', [], '12.0.2' );
-	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], '1.0.1' );
+	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
 	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], '12.0.2', true );
-	wp_enqueue_script( 'tingtong-script', get_template_directory_uri() . '/script.js', [ 'jquery', 'swiper-js' ], '1.0.1', true );
+	wp_enqueue_script( 'tingtong-script', get_template_directory_uri() . '/script.js', [ 'jquery', 'swiper-js' ], null, true );
 
 	wp_localize_script(
 		'tingtong-script',
@@ -645,15 +645,14 @@ add_action('wp_ajax_tt_account_delete', function () {
 // =========================================================================
 
 /**
- * Wyłącza cachowanie strony poprzez wysyłanie odpowiednich nagłówków.
+ * Wyłącza cachowanie strony poprzez wysyłanie odpowiednich nagłówków DLA WSZYSTKICH.
  */
 function tt_disable_caching() {
-    if (!is_user_logged_in()) {
-        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
-        header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-    }
+    // WYMUSZ POBIERANIE ŚWIEŻEJ WERSJI STRONY
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);
+    header("Pragma: no-cache");
+    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 }
 add_action('init', 'tt_disable_caching');
 
