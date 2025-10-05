@@ -2687,17 +2687,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateProfileForm(data) {
-      // USUNIĘTO WARUNEK 'IF', ABY PUSTE CIĄGI ZNAKÓW ("") BYŁY PRAWIDŁOWO PRZYPISANE
-      document.getElementById("firstName").value = data.first_name;
-      document.getElementById("lastName").value = data.last_name;
-      document.getElementById("email").value = data.email;
+      // Zawsze aktualizuj pola formularza, nawet jeśli dane są puste.
+      document.getElementById("firstName").value = data.first_name || '';
+      document.getElementById("lastName").value = data.last_name || '';
+      document.getElementById("email").value = data.email || '';
 
-      // Pozostawiamy warunki dla pól wyświetlanych, które mogą nie istnieć lub być krytyczne
-      if (data.display_name)
-        document.getElementById("displayName").textContent = data.display_name;
-      if (data.email)
-        document.getElementById("userEmail").textContent = data.email;
-      if (data.avatar) document.getElementById("userAvatar").src = data.avatar;
+      // Zawsze aktualizuj dane wyświetlane pod awatarem.
+      document.getElementById("displayName").textContent = data.display_name || '';
+      document.getElementById("userEmail").textContent = data.email || '';
+
+      // Avatar aktualizuj tylko jeśli jest dostępny.
+      if (data.avatar) {
+        document.getElementById("userAvatar").src = data.avatar;
+      }
     }
 
     // Modal visibility functions

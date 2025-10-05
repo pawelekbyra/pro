@@ -2790,3 +2790,21 @@ body,
     max-width: 100%;
   }
 }
+
+/* --- FIX: Poprawki układu formularza --- */
+#profile-tab .form-group {
+    display: flex;
+    flex-direction: row; /* Etykieta i input obok siebie */
+    align-items: center;
+    gap: 10px;
+}
+
+#profile-tab .form-label {
+    flex: 0 0 80px; /* Stała szerokość dla etykiety, np. 80px */
+    text-align: right;
+    margin-bottom: 0; /* Usuń margines dolny, bo jest już w .form-group */
+}
+
+#profile-tab .form-input {
+    flex: 1; /* Input zajmie resztę dostępnego miejsca */
+}

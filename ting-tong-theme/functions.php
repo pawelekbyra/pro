@@ -174,10 +174,10 @@ function tt_get_slides_data() {
  * Dodaje skrypty, style i lokalizuje dane dla frontendu.
  */
 function tt_enqueue_and_localize_scripts() {
-	wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css', [], '12.0.2' );
+	wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css', [], null );
 	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
-	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], '12.0.2', true );
+	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
 	wp_enqueue_script( 'tingtong-script', get_template_directory_uri() . '/script.js', [ 'jquery', 'swiper-js' ], null, true );
 
 	wp_localize_script(
@@ -655,6 +655,21 @@ function tt_disable_caching() {
     header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 }
 add_action('init', 'tt_disable_caching');
+
+/**
+ * Usuwa parametr ?ver z adresów URL skryptów i stylów.
+ *
+ * @param string $src Adres URL zasobu.
+ * @return string Adres URL bez parametru wersji.
+ */
+function tt_remove_version_query_string( $src ) {
+    if ( strpos( $src, 'ver=' ) ) {
+        $src = remove_query_arg( 'ver', $src );
+    }
+    return $src;
+}
+add_filter( 'style_loader_src', 'tt_remove_version_query_string', 9999 );
+add_filter( 'script_loader_src', 'tt_remove_version_query_string', 9999 );
 
 /**
  * Shortcode [tt_login_form] generujący formularz dla AJAX.
