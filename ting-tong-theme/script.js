@@ -587,13 +587,18 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
+
+  // --- POPRAWIONA LOGIKA WYSZUKIWANIA DANYCH ---
   const slidesData =
-    typeof TingTongData !== "undefined" && Array.isArray(TingTongData.slides)
-      ? TingTongData.slides
+    typeof window.TingTongData !== "undefined" &&
+    Array.isArray(window.TingTongData.slides)
+      ? window.TingTongData.slides
       : [];
+
   slidesData.forEach((s) => {
     s.likeId = String(s.likeId);
   });
+  // --- KONIEC POPRAWIONEJ LOGIKI ---
 
   /**
    * ==========================================================================
