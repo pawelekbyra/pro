@@ -2762,6 +2762,11 @@ body,
   flex-wrap: wrap;
 }
 
+#profile-tab .form-row {
+  flex-direction: column;
+  gap: 0;
+}
+
 .form-row .form-group {
   flex: 1;
   min-width: calc(50% - 8px);
