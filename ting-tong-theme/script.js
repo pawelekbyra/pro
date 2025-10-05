@@ -950,6 +950,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ".topbar-icon-btn.desktop-only",
       ),
       toastNotification: document.getElementById("toast-notification"),
+      welcomeModal: document.getElementById("welcome-modal"),
     };
     let alertTimeout;
     let toastTimeout;
@@ -2307,6 +2308,9 @@ document.addEventListener("DOMContentLoaded", () => {
               PWA.closePwaModals();
             }
             break;
+          case "close-welcome-modal":
+            UI.closeModal(UI.DOM.welcomeModal);
+            break;
           case "close-account-modal":
             UI.closeModal(UI.DOM.accountModal);
             break;
@@ -3372,7 +3376,15 @@ document.addEventListener("DOMContentLoaded", () => {
           });
           UI.DOM.preloader.addEventListener(
             "transitionend",
-            () => (UI.DOM.preloader.style.display = "none"),
+            () => {
+              UI.DOM.preloader.style.display = "none";
+              // Pokaż modal powitalny tylko w przeglądarce, nie w PWA
+              if (!PWA.isStandalone()) {
+                setTimeout(() => {
+                  UI.openModal(UI.DOM.welcomeModal);
+                }, 300); // Małe opóźnienie dla płynniejszego efektu
+              }
+            },
             { once: true },
           );
         }, 1000);
