@@ -2762,11 +2762,6 @@ body,
   flex-wrap: wrap;
 }
 
-#profile-tab .form-row {
-  flex-direction: column;
-  gap: 0;
-}
-
 .form-row .form-group {
   flex: 1;
   min-width: calc(50% - 8px);
@@ -2797,19 +2792,17 @@ body,
 }
 
 /* --- FIX: Poprawki układu formularza --- */
+#profile-tab #profileForm,
+#profile-tab .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Spójny odstęp między wszystkimi polami */
+}
+
 #profile-tab .form-group {
-    display: flex;
-    flex-direction: column; /* Ustawia etykietę i input w kolumnie */
-    align-items: stretch; /* Rozciąga elementy do pełnej szerokości */
-    gap: 8px; /* Odstęp między etykietą a inputem */
+    margin-bottom: 0; /* Usuwamy stary margines, polegamy na 'gap' */
 }
 
 #profile-tab .form-label {
-    flex: none; /* Usuwa właściwości flex */
-    text-align: left; /* Wyrównuje tekst etykiety do lewej */
-    margin-bottom: 0; /* Zeruje margines, bo gap jest w .form-group */
-}
-
-#profile-tab .form-input {
-    flex: none; /* Usuwa właściwości flex */
+    margin-bottom: 8px; /* Dodajemy mały odstęp między etykietą a polem input */
 }
