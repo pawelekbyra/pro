@@ -404,4 +404,17 @@ get_header();
 </div>
 <div id="toast-notification" class="toast" role="status" aria-live="polite"></div>
 
+<div id="welcome-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
+    <div class="modal-content">
+        <h2 id="welcome-modal-title">Witaj w Ting Tong!</h2>
+        <div class="modal-body">
+            <p>To aplikacja napiwkowa, stworzona, by wspierać moją twórczość.</p>
+            <p>Przekaż napiwek i zobacz więcej niż inni!</p>
+        </div>
+        <div class="modal-footer">
+            <button id="welcome-modal-ok" class="btn-primary" data-action="close-welcome-modal">OK</button>
+        </div>
+    </div>
+</div>
+
 <?php get_footer(); ?>

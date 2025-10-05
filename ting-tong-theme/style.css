@@ -2669,6 +2669,43 @@ body,
     opacity: 1;
 }
 
+/* --- Welcome Modal --- */
+#welcome-modal .modal-content {
+  background: #242526;
+  color: #e4e6eb;
+  border-radius: 16px;
+  padding: 32px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+#welcome-modal h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 16px;
+  text-shadow: 0 2px 8px rgba(255, 0, 85, 0.3);
+}
+
+#welcome-modal .modal-body p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 auto 12px;
+  max-width: 300px;
+}
+
+#welcome-modal .modal-body p:last-of-type {
+    margin-bottom: 24px;
+}
+
+#welcome-modal .modal-footer {
+    margin-top: 16px;
+}
+
 
 /* Dodaj to do swojego pliku CSS */
 
