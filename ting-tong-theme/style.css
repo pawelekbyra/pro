@@ -2756,6 +2756,17 @@ body,
   bottom: 100%;
 }
 
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: calc(50% - 8px);
+}
+
 @media (min-aspect-ratio: 9/16) {
   html,
   body {

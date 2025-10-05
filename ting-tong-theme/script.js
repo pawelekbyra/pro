@@ -1,3 +1,13 @@
+// DEZAKTYWACJA SERVICE WORKER (USUWANIE CACHE PWA)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister();
+      console.log('Service Worker unregistered');
+    }
+  });
+}
+
 (() => {
   /* ============================
    * 1) CDN helper + preconnect
