@@ -1,0 +1,1 @@
+In `ting-tong-theme/style.css`, the `.form-row` class within the `#profile-tab` should have `flex-direction: column` to ensure form elements like first name and last name are stacked vertically instead of appearing in a single row.
