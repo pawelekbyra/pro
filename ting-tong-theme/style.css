@@ -2710,6 +2710,10 @@ body,
     margin-top: 16px;
 }
 
+#welcome-modal {
+  z-index: 10010;
+}
+
 
 /* Dodaj to do swojego pliku CSS */
 

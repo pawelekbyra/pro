@@ -1880,14 +1880,12 @@ document.addEventListener("DOMContentLoaded", () => {
     async function handleLogout(link) {
       if (link.disabled) return;
       link.disabled = true;
-      await API.refreshNonce(); // Odśwież nonce PRZED wylogowaniem
       const json = await API.logout();
       if (json.success) {
         State.set("isUserLoggedIn", false);
         UI.showAlert(Utils.getTranslation("logoutSuccess"));
+        await API.refreshNonce(); // Odśwież nonce PO wylogowaniu
         slidesData.forEach((slide) => (slide.isLiked = false));
-        // Po udanym wylogowaniu nonce jest już nieważny, więc nie ma potrzeby go odświeżać ponownie
-        // Jeśli będzie potrzebny nowy, zostanie pobrany przy następnej akcji.
         UI.updateUIForLoginState();
       } else {
         UI.showAlert(json.data?.message || "Logout failed.", true);
@@ -2461,12 +2459,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (slideData) {
                   // 1. Zaktualizuj stan lokalny
                   const newComment = postResponse.data;
-                  // Upewnij się, że tablica komentarzy istnieje
                   if (!Array.isArray(slideData.comments)) {
                     slideData.comments = [];
                   }
                   slideData.comments.push(newComment);
-                  slideData.initialComments = slideData.comments.length;
+
+                  // Użyj nowej, autorytatywnej liczby komentarzy z serwera, jeśli jest dostępna
+                  if (typeof postResponse.data.new_comment_count !== 'undefined') {
+                    slideData.initialComments = postResponse.data.new_comment_count;
+                  } else {
+                    slideData.initialComments = slideData.comments.length; // Fallback
+                  }
 
                   // 2. Odśwież UI na podstawie nowego stanu
                   UI.renderComments(slideData.comments);
@@ -3400,15 +3403,18 @@ document.addEventListener("DOMContentLoaded", () => {
           const pwaInstallBar = document.getElementById("pwa-install-bar");
           const appFrame = document.getElementById("app-frame");
 
-          // The install bar is hidden immediately in PWA.js.
-          // This logic now only handles the app frame class and showing the bar in the browser.
-          if (PWA.isStandalone()) {
-            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
-          } else {
-            if (pwaInstallBar) {
+          // [Poprawiony fragment dla paska PWA]
+          // Sprawdza, czy pasek istnieje i CZY JESTEŚMY W TRYBIE PRZEGLĄDARKOWYM.
+          if (pwaInstallBar && !PWA.isStandalone()) {
+              // Tryb przeglądarkowy: Pokaż pasek i dostosuj wysokość app-frame
               pwaInstallBar.classList.add("visible");
               if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-            }
+          } else {
+              // Tryb PWA lub brak paska: Ukryj pasek i upewnij się, że app-frame ma pełną wysokość
+              if (pwaInstallBar) {
+                  pwaInstallBar.classList.remove("visible"); // Upewnienie się, że jest ukryty
+              }
+              if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
           }
           document.querySelectorAll(".sidebar").forEach((sidebar) => {
             sidebar.classList.add("visible");
