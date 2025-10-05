@@ -339,6 +339,7 @@ add_action('wp_ajax_tt_post_comment', function() {
     ]);
     $new_comment_id = $wpdb->insert_id;
     $user_data = get_userdata(get_current_user_id());
+	$new_comment_count = tt_comments_get_count($slide_id);
 
     wp_send_json_success([
         'id'        => $new_comment_id,
@@ -350,6 +351,7 @@ add_action('wp_ajax_tt_post_comment', function() {
         'likes'     => 0,
         'isLiked'   => false,
         'canEdit'   => true,
+		'new_comment_count' => $new_comment_count,
     ]);
 });
 
