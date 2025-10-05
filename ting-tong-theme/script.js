@@ -1763,17 +1763,6 @@ document.addEventListener("DOMContentLoaded", () => {
         installButton.addEventListener("click", handleInstallClick);
       }
 
-      if (isStandalone()) {
-        // If running as a PWA, hide the install bar immediately by adding the
-        // .force-hide class, which has `display: none !important;`.
-        const installBar = document.getElementById("pwa-install-bar");
-        if (installBar) {
-          installBar.classList.add("force-hide");
-        }
-        updatePwaUiForInstalledState();
-        return;
-      }
-
       // For browsers that support `beforeinstallprompt` (like Chrome on Android)
       if ("onbeforeinstallprompt" in window) {
         window.addEventListener("beforeinstallprompt", (e) => {
@@ -3400,15 +3389,17 @@ document.addEventListener("DOMContentLoaded", () => {
           // [Poprawiony fragment dla paska PWA]
           // Sprawdza, czy pasek istnieje i CZY JESTEŚMY W TRYBIE PRZEGLĄDARKOWYM.
           if (pwaInstallBar && !PWA.isStandalone()) {
-              // Tryb przeglądarkowy: Pokaż pasek i dostosuj wysokość app-frame
-              pwaInstallBar.classList.add("visible");
-              if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+            // Tryb przeglądarkowy: Pokaż pasek i dostosuj wysokość app-frame
+            pwaInstallBar.classList.add("visible");
+            if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
           } else {
-              // Tryb PWA lub brak paska: Ukryj pasek i upewnij się, że app-frame ma pełną wysokość
-              if (pwaInstallBar) {
-                  pwaInstallBar.classList.remove("visible"); // Upewnienie się, że jest ukryty
-              }
-              if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+            // Tryb PWA lub brak paska: Jawnie ukryj pasek za pomocą dedykowanej klasy.
+            if (pwaInstallBar) {
+              pwaInstallBar.classList.add("force-hide");
+            }
+            if (appFrame) {
+              appFrame.classList.remove("app-frame--pwa-visible");
+            }
           }
           document.querySelectorAll(".sidebar").forEach((sidebar) => {
             sidebar.classList.add("visible");
