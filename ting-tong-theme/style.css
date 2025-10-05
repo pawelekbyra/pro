@@ -341,6 +341,27 @@ body,
   color: rgba(255, 255, 255, 0.8);
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
 }
+
+.volume-button {
+  position: absolute;
+  top: calc(var(--topbar-height) + 15px);
+  right: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 105;
+  transition: background-color 0.2s;
+}
+
+.volume-button:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
 .topbar {
   background: #000;
 }
