@@ -1,57 +1,57 @@
-# Ting Tong Theme
+# Motyw Ting Tong
 
-A custom WordPress theme for the Ting Tong application, converted from a static HTML project. This theme is designed as a single-page application (SPA) with a TikTok-style vertical swipe interface for viewing video content.
+Niestandardowy motyw WordPress dla aplikacji Ting Tong, przekonwertowany ze statycznego projektu HTML. Ten motyw został zaprojektowany jako aplikacja jednostronicowa (SPA) z interfejsem w stylu TikToka, umożliwiającym przeglądanie treści wideo poprzez przesuwanie w pionie.
 
-## Features
+## Funkcje
 
-- **SPA-like Experience**: The theme uses a vertical swiper powered by SwiperJS to create a seamless, app-like browsing experience without page reloads.
-- **Dynamic Content Loading**: Slides and their content are dynamically generated using JavaScript, with data passed from the WordPress backend.
-- **Progressive Web App (PWA)**: Includes support for PWA installation, allowing users to add the site to their home screen for an app-like experience.
-- **User Authentication**: A complete user authentication system with login, logout, and registration functionalities.
-- **Interactive UI Components**:
-    - **Modals**: A rich set of modals for comments, user profiles, information, and notifications.
-    - **Dynamic Sidebars**: Interactive sidebars with buttons for liking, commenting, sharing, and more.
-- **Localization**: The theme supports both Polish and English, with a language selector and a structured translation system in JavaScript.
-- **Mock Data for Standalone Development**: The theme is configured to use mock data when `TingTongData` is not provided by WordPress, allowing for frontend development without a live backend.
-- **AJAX-Powered Actions**: User actions like liking, commenting, and updating profiles are handled asynchronously via AJAX.
+- **Doświadczenie zbliżone do SPA**: Motyw wykorzystuje pionowy suwak oparty na SwiperJS, aby stworzyć płynne, przypominające aplikację doświadczenie przeglądania bez przeładowywania strony.
+- **Dynamiczne ładowanie treści**: Slajdy i ich zawartość są generowane dynamicznie za pomocą JavaScript, a dane przekazywane są z backendu WordPressa.
+- **Progresywna Aplikacja Webowa (PWA)**: Zawiera wsparcie dla instalacji PWA, co pozwala użytkownikom na dodanie strony do ekranu głównego, aby uzyskać doświadczenie zbliżone do aplikacji.
+- **Uwierzytelnianie użytkownika**: Kompletny system uwierzytelniania użytkowników z funkcjami logowania, wylogowywania i rejestracji.
+- **Interaktywne komponenty UI**:
+    - **Modale**: Bogaty zestaw modali do komentarzy, profili użytkowników, informacji i powiadomień.
+    - **Dynamiczne paski boczne**: Interaktywne paski boczne z przyciskami do polubień, komentowania, udostępniania i innych.
+- **Lokalizacja**: Motyw obsługuje zarówno język polski, jak i angielski, z selektorem języka i ustrukturyzowanym systemem tłumaczeń w JavaScript.
+- **Dane mockowe do samodzielnego rozwoju**: Motyw jest skonfigurowany do używania danych mockowych, gdy `TingTongData` nie jest dostarczane przez WordPress, co pozwala na rozwój frontendu bez działającego backendu.
+- **Akcje oparte na AJAX**: Akcje użytkownika, takie jak polubienia, komentowanie i aktualizowanie profili, są obsługiwane asynchronicznie za pomocą AJAX.
 
-## Project Structure
+## Struktura projektu
 
-The theme is composed of several key files:
+Motyw składa się z kilku kluczowych plików:
 
-- `index.php`: The main template file. It contains the HTML structure for the application, including the Swiper container, slide templates, and all the modals.
-- `functions.php`: Handles the enqueuing of scripts and styles, and passes data from PHP to JavaScript using `wp_localize_script`. It also includes the mock data for the slides.
-- `style.css`: Contains all the styles for the theme, including the theme's metadata.
-- `script.js`: The core JavaScript file that powers the application. It's organized into modules for managing state, UI, API calls, and event handling.
-- `header.php` / `footer.php`: Standard WordPress template files.
+- `index.php`: Główny plik szablonu. Zawiera strukturę HTML aplikacji, w tym kontener Swiper, szablony slajdów i wszystkie modale.
+- `functions.php`: Odpowiada za kolejkowanie skryptów i stylów oraz przekazywanie danych z PHP do JavaScript za pomocą `wp_localize_script`. Zawiera również dane mockowe dla slajdów.
+- `style.css`: Zawiera wszystkie style motywu, w tym jego metadane.
+- `script.js`: Główny plik JavaScript, który napędza aplikację. Jest zorganizowany w moduły do zarządzania stanem, interfejsem użytkownika, wywołaniami API i obsługą zdarzeń.
+- `header.php` / `footer.php`: Standardowe pliki szablonów WordPress.
 
-## Getting Started
+## Pierwsze kroki
 
-To use this theme, follow these steps:
+Aby użyć tego motywu, wykonaj następujące kroki:
 
-1.  Place the `ting-tong-theme` directory in your WordPress `wp-content/themes` folder.
-2.  Activate the theme from the WordPress admin panel under "Appearance" > "Themes".
-3.  The theme is now active and will display the TikTok-style interface on your site's front page.
+1.  Umieść katalog `ting-tong-theme` w folderze `wp-content/themes` swojego WordPressa.
+2.  Aktywuj motyw w panelu administracyjnym WordPressa w sekcji "Wygląd" > "Motywy".
+3.  Motyw jest teraz aktywny i wyświetli interfejs w stylu TikToka na stronie głównej Twojej witryny.
 
-## Frontend Development
+## Rozwój frontendu
 
-The frontend is built with a modular JavaScript architecture. The main `script.js` file is organized into several key components:
+Frontend jest zbudowany w oparciu o modułową architekturę JavaScript. Główny plik `script.js` jest zorganizowany w kilka kluczowych komponentów:
 
-- **Config**: Contains configuration options and the translation strings for both supported languages.
-- **State**: A simple state management object to keep track of the application's state, such as the current language, logged-in status, and current slide.
-- **Utils**: A collection of utility functions for tasks like translation, number formatting, and handling user gestures.
-- **API**: A module for handling all AJAX requests to the WordPress backend. It includes fallback mock data for standalone development.
-- **UI**: A comprehensive module for managing all UI elements, including rendering slides, modals, and updating the DOM based on the application's state.
-- **PWA**: A module for handling Progressive Web App functionalities, including the installation prompt.
-- **Handlers**: A module that centralizes all event handling for the application.
-- **App**: The main application module that initializes the theme and ties all the other modules together.
+- **Config**: Zawiera opcje konfiguracyjne i ciągi tłumaczeń dla obu obsługiwanych języków.
+- **State**: Prosty obiekt do zarządzania stanem aplikacji, taki jak bieżący język, status zalogowania i aktualny slajd.
+- **Utils**: Zbiór funkcji pomocniczych do zadań takich jak tłumaczenie, formatowanie liczb i obsługa gestów użytkownika.
+- **API**: Moduł do obsługi wszystkich żądań AJAX do backendu WordPressa. Zawiera zapasowe dane mockowe do samodzielnego rozwoju.
+- **UI**: Kompleksowy moduł do zarządzania wszystkimi elementami interfejsu użytkownika, w tym renderowaniem slajdów, modali i aktualizowaniem DOM w oparciu o stan aplikacji.
+- **PWA**: Moduł do obsługi funkcjonalności Progresywnej Aplikacji Webowej, w tym monitu o instalację.
+- **Handlers**: Moduł centralizujący całą obsługę zdarzeń w aplikacji.
+- **App**: Główny moduł aplikacji, który inicjalizuje motyw i łączy wszystkie pozostałe moduły.
 
-### Standalone Development
+### Samodzielny rozwój
 
-The theme is designed to be developed without a live WordPress backend. If the `TingTongData` and `ajax_object` global objects are not defined, `script.js` will automatically fall back to using mock data. This allows for easy frontend development and testing.
+Motyw został zaprojektowany tak, aby można go było rozwijać bez działającego backendu WordPressa. Jeśli globalne obiekty `TingTongData` i `ajax_object` nie są zdefiniowane, `script.js` automatycznie przełączy się na używanie danych mockowych. Pozwala to na łatwy rozwój i testowanie frontendu.
 
-## Backend Interaction
+## Interakcja z backendem
 
-The theme uses `wp_localize_script` in `functions.php` to pass data from PHP to JavaScript. The `TingTongData` object contains all the necessary information for the slides, as well as the user's logged-in status. The `ajax_object` provides the AJAX URL and a nonce for secure communication.
+Motyw używa `wp_localize_script` w `functions.php` do przekazywania danych z PHP do JavaScript. Obiekt `TingTongData` zawiera wszystkie niezbędne informacje dla slajdów, a także status zalogowania użytkownika. Obiekt `ajax_object` dostarcza URL AJAX i nonce do bezpiecznej komunikacji.
 
-All asynchronous actions are handled via AJAX calls to the WordPress backend. The API module in `script.js` defines all the available actions and their corresponding functions.
+Wszystkie akcje asynchroniczne są obsługiwane za pomocą wywołań AJAX do backendu WordPressa. Moduł API w `script.js` definiuje wszystkie dostępne akcje i odpowiadające im funkcje.
