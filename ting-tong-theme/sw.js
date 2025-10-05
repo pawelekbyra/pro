@@ -1,3 +1,10 @@
+self.addEventListener('install', (event) => {
+  // Ten event listener jest niezbędny, aby przeglądarka uznała
+  // aplikację za instalowalną PWA. `self.skipWaiting()` zapewnia,
+  // że nowy service worker aktywuje się od razu.
+  self.skipWaiting();
+});
+
 const OFFLINE_PAGE_HTML = `
 <!DOCTYPE html>
 <html lang="pl">
