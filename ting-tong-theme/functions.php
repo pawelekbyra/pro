@@ -375,7 +375,25 @@ add_action('wp_ajax_tt_edit_comment', function() {
     }
 
     $wpdb->update($comments_table, ['content' => $new_text], ['id' => $comment_id]);
-    wp_send_json_success(['message' => 'Komentarz zaktualizowany.']);
+
+    // Po aktualizacji, pobierz pełne dane komentarza, aby zwrócić je do frontendu
+    $updated_comment = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$comments_table} WHERE id = %d", $comment_id));
+    $author_data = get_userdata($updated_comment->user_id);
+    $user_id = get_current_user_id();
+
+    $comment_data = [
+        'id'        => (int) $updated_comment->id,
+        'parentId'  => $updated_comment->parent_id ? (int) $updated_comment->parent_id : null,
+        'user'      => $author_data ? $author_data->display_name : 'Użytkownik',
+        'avatar'    => $author_data ? get_avatar_url($updated_comment->user_id) : '',
+        'text'      => esc_textarea($updated_comment->content),
+        'timestamp' => (new DateTime($updated_comment->created_at))->format(DateTime::ATOM),
+        'likes'     => tt_comment_likes_get_count($updated_comment->id),
+        'isLiked'   => tt_comment_likes_user_has($updated_comment->id, $user_id),
+        'canEdit'   => (int) $updated_comment->user_id === $user_id || current_user_can('manage_options'),
+    ];
+
+    wp_send_json_success($comment_data);
 });
 
 add_action('wp_ajax_tt_delete_comment', function() {
@@ -391,11 +409,13 @@ add_action('wp_ajax_tt_delete_comment', function() {
     }
 
     $comments_table = $wpdb->prefix . 'tt_comments';
-    $comment = $wpdb->get_row($wpdb->prepare("SELECT user_id FROM {$comments_table} WHERE id = %d", $comment_id));
+    $comment = $wpdb->get_row($wpdb->prepare("SELECT user_id, slide_id FROM {$comments_table} WHERE id = %d", $comment_id));
 
     if (!$comment || ((int) $comment->user_id !== get_current_user_id() && !current_user_can('manage_options'))) {
         wp_send_json_error(['message' => 'Brak uprawnień.'], 403);
     }
+
+    $slide_id = $comment->slide_id;
 
     // Usuń polubienia i sam komentarz
     $wpdb->delete($wpdb->prefix . 'tt_comment_likes', ['comment_id' => $comment_id]);
@@ -403,7 +423,9 @@ add_action('wp_ajax_tt_delete_comment', function() {
     // Opcjonalnie: usuń odpowiedzi
     $wpdb->delete($comments_table, ['parent_id' => $comment_id]);
 
-    wp_send_json_success(['message' => 'Komentarz usunięty.']);
+    // Zwróć nową liczbę komentarzy dla slajdu
+    $new_comment_count = tt_comments_get_count($slide_id);
+    wp_send_json_success(['new_count' => $new_comment_count]);
 });
 
 add_action('wp_ajax_tt_toggle_comment_like', function() {
