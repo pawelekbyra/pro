@@ -9,8 +9,8 @@
     <meta name="theme-color" content="#000000">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
+    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> -->
     <!-- <link rel="apple-touch-icon" href="<?php echo get_template_directory_uri(); ?>/jajeco.jpg"> -->
 
     <link rel="preconnect" href="https://pawelperfect.pl" crossorigin>
