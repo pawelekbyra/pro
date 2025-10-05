@@ -2383,10 +2383,6 @@ body,
    --- TIKTOK PUBLIC PROFILE MODAL ---
    ========================================================================== */
 
-#tiktok-profile-modal {
-  transition: visibility 0.4s linear;
-}
-
 #tiktok-profile-modal .tiktok-profile-content {
   background-color: #2d2d2d;
   color: #fff;
@@ -2711,6 +2707,9 @@ body,
 }
 
 #welcome-modal {
+  background: rgba(0, 0, 0, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   z-index: 10010;
 }
 

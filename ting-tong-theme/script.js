@@ -1043,60 +1043,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function closeModal(modal) {
-      if (!modal) return;
+      if (!modal || modal.classList.contains("is-hiding")) return;
 
       const modalContent = modal.querySelector(
-        ".modal-content, .tiktok-profile-content, .account-modal-content",
+        ".modal-content, .tiktok-profile-content, .account-modal-content"
       );
-      const isAnimated =
-        modalContent &&
-        (modal.id === "tiktok-profile-modal" ||
-          modal.id === "commentsModal" ||
-          modal.id === "accountModal");
+      const isAnimated = modalContent && (
+        modal.id === "tiktok-profile-modal" ||
+        modal.id === "commentsModal" ||
+        modal.id === "accountModal"
+      );
 
-      if (isAnimated) {
-        if (modal.classList.contains("is-hiding")) return;
+      modal.classList.add("is-hiding");
+      modal.setAttribute("aria-hidden", "true");
 
-        let cleanedUp = false;
-        const cleanup = () => {
-          if (cleanedUp) return;
-          cleanedUp = true;
-
-          modalContent.removeEventListener("transitionend", cleanup);
-
-          modal.classList.remove("visible", "is-hiding");
-
-          if (modal._focusTrapDispose) {
-            modal._focusTrapDispose();
-            delete modal._focusTrapDispose;
-          }
-          DOM.container.removeAttribute("aria-hidden");
-          State.get("lastFocusedElement")?.focus();
-        };
-
-        const timeoutId = setTimeout(cleanup, 500);
-
-        modalContent.addEventListener(
-          "transitionend",
-          () => {
-            clearTimeout(timeoutId);
-            cleanup();
-          },
-          { once: true },
-        );
-
-        modal.classList.add("is-hiding");
-        modal.setAttribute("aria-hidden", "true");
-      } else {
-        // Fallback for other modals
-        modal.classList.remove("visible");
-        modal.setAttribute("aria-hidden", "true");
+      const cleanup = () => {
+        modal.removeEventListener("transitionend", cleanup);
+        modal.classList.remove("visible", "is-hiding");
         if (modal._focusTrapDispose) {
           modal._focusTrapDispose();
           delete modal._focusTrapDispose;
         }
         DOM.container.removeAttribute("aria-hidden");
         State.get("lastFocusedElement")?.focus();
+      };
+
+      if (isAnimated) {
+        modal.addEventListener("transitionend", cleanup, { once: true });
+        // Fallback timeout
+        setTimeout(cleanup, 500);
+      } else {
+        // For non-animated modals, cleanup immediately
+        cleanup();
       }
     }
 
@@ -3253,7 +3231,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
             if (e.target === modal) UI.closeModal(modal);
