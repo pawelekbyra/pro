@@ -642,6 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeVideoSession: 0,
       commentSortOrder: "newest",
       replyingToComment: null,
+      isSoundMuted: true,
     };
 
     return {
@@ -1654,6 +1655,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    function updateVolumeButton(isMuted) {
+      document.querySelectorAll(".volume-button").forEach(button => {
+        const onIcon = button.querySelector(".volume-on-icon");
+        const offIcon = button.querySelector(".volume-off-icon");
+        if (onIcon && offIcon) {
+          onIcon.style.display = isMuted ? 'none' : 'block';
+          offIcon.style.display = isMuted ? 'block' : 'none';
+        }
+      });
+    }
+
     function initKeyboardListener() {
       if (!("visualViewport" in window)) {
         return;
@@ -1699,6 +1711,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateCommentFormVisibility,
       initKeyboardListener,
       showToast,
+      updateVolumeButton,
     };
   })();
 
@@ -2371,6 +2384,15 @@ document.addEventListener("DOMContentLoaded", () => {
                   .classList.remove("visible");
               }
             }
+            break;
+          case "toggle-volume":
+            const isMuted = !State.get("isSoundMuted");
+            State.set("isSoundMuted", isMuted);
+            const activeSlideVideo = document.querySelector(".swiper-slide-active video");
+            if (activeSlideVideo) {
+              activeSlideVideo.muted = isMuted;
+            }
+            UI.updateVolumeButton(isMuted);
             break;
         }
       },
@@ -3369,6 +3391,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (pauseOverlay) {
                   pauseOverlay.classList.remove("visible");
                 }
+                video.muted = State.get("isSoundMuted");
                 setTimeout(() => {
                   video
                     .play()
@@ -3394,7 +3417,7 @@ document.addEventListener("DOMContentLoaded", () => {
           on: {
             init: function (swiper) {
               // --- One-time animation on first app load ---
-
+              UI.updateVolumeButton(State.get("isSoundMuted"));
               // Also handle media for the very first slide on init.
               handleMediaChange(swiper);
             },
