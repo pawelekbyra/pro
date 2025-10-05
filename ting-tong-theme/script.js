@@ -2429,6 +2429,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 slidesData.forEach((s) => {
                     s.likeId = String(s.likeId);
                 });
+                // RENDERUJ PONOWNIE slajdy, aby mieć pewność, że atrybuty i przyciski polubień są poprawne
+                UI.renderSlides();
               }
 
               // 3. Zaktualizuj dane w panelu konta (bezpośrednio)
@@ -2740,7 +2742,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const modal = document.getElementById("accountModal");
       modal.classList.add("visible");
       document.body.style.overflow = "hidden";
-      loadInitialProfileData(); // Fetch live data when opening
+      // loadInitialProfileData(); // USUNIĘTO - DANE SĄ USTAWIENIE W HANDLERZE LOGOWANIA
     }
 
     // Tab switching
