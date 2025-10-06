@@ -43,6 +43,7 @@ function tt_create_database_tables() {
         user_id BIGINT UNSIGNED NOT NULL,
         parent_id BIGINT UNSIGNED DEFAULT NULL,
         content TEXT NOT NULL,
+        image_url VARCHAR(500) NULL,
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         KEY idx_slide_id (slide_id(191)),
@@ -371,12 +372,6 @@ add_action('wp_ajax_tt_post_comment', function() {
     }
 
     $comments_table = $wpdb->prefix . 'tt_comments';
-
-    // Dodaj kolumnę image_url jeśli nie istnieje
-    $column_exists = $wpdb->get_results("SHOW COLUMNS FROM {$comments_table} LIKE 'image_url'");
-    if (empty($column_exists)) {
-        $wpdb->query("ALTER TABLE {$comments_table} ADD COLUMN image_url VARCHAR(500) NULL AFTER content");
-    }
 
     $wpdb->insert($comments_table, [
         'slide_id'  => $slide_id,
@@ -761,21 +756,6 @@ add_action('wp_ajax_tt_account_delete', function () {
 // =========================================================================
 // 5. SHORTCODES I FILTRY
 // =========================================================================
-
-/**
- * Usuwa parametr ?ver z adresów URL skryptów i stylów.
- *
- * @param string $src Adres URL zasobu.
- * @return string Adres URL bez parametru wersji.
- */
-function tt_remove_version_query_string( $src ) {
-    if ( strpos( $src, 'ver=' ) ) {
-        $src = remove_query_arg( 'ver', $src );
-    }
-    return $src;
-}
-add_filter( 'style_loader_src', 'tt_remove_version_query_string', 9999 );
-add_filter( 'script_loader_src', 'tt_remove_version_query_string', 9999 );
 
 /**
  * Shortcode [tt_login_form] generujący formularz dla AJAX.

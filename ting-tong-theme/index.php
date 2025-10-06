@@ -9,9 +9,6 @@ get_header();
 ?>
 
 <div id="preloader">
-    <div class="preloader-icon-container">
-        <img src="<?php echo get_template_directory_uri(); ?>/jajeco.jpg" alt="Ting Tong Logo" class="splash-icon">
-    </div>
     <div class="preloader-content-container">
         <div class="language-selection">
             <h2>Wybierz Język / Select Language</h2>
