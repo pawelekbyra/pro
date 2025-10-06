@@ -305,9 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
               appFrame.classList.remove("app-frame--pwa-visible");
             }
           }
-          document.querySelectorAll(".sidebar").forEach((sidebar) => {
-            sidebar.classList.add("visible");
-          });
           UI.DOM.preloader.addEventListener(
             "transitionend",
             () => {
