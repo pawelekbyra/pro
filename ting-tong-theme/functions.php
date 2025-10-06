@@ -763,18 +763,6 @@ add_action('wp_ajax_tt_account_delete', function () {
 // =========================================================================
 
 /**
- * Wyłącza cachowanie strony poprzez wysyłanie odpowiednich nagłówków DLA WSZYSTKICH.
- */
-function tt_disable_caching() {
-    // WYMUSZ POBIERANIE ŚWIEŻEJ WERSJI STRONY
-    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-    header("Cache-Control: post-check=0, pre-check=0", false);
-    header("Pragma: no-cache");
-    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-}
-add_action('init', 'tt_disable_caching');
-
-/**
  * Usuwa parametr ?ver z adresów URL skryptów i stylów.
  *
  * @param string $src Adres URL zasobu.
