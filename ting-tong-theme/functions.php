@@ -134,43 +134,30 @@ function tt_get_slides_data() {
 	$simulated_posts = [
 		[
 			'post_id'      => 1,
-			'post_title'   => 'Paweł Polutek',
-			'post_content' => 'To jest dynamicznie załadowany opis dla pierwszego slajdu.
-Działa!',
-			'video_url'    => 'https://pawelperfect.pl/wp-content/uploads/2025/07/17169505-hd_1080_1920_30fps.mp4',
+			'post_title'   => 'Big Buck Bunny',
+			'post_content' => 'Królik w akcji!',
+			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
 			'access'       => 'public',
-			'comments'     => 567,
-			'avatar'       => 'https://i.pravatar.cc/100?u=pawel',
+			'comments'     => 10,
+			'avatar'       => 'https://i.pravatar.cc/100?u=bunny',
 		],
 		[
 			'post_id'      => 2,
-			'post_title'   => 'Web Dev',
-			'post_content' => 'Kolejny slajd, kolejne wideo.
-#efficiency',
-			'video_url'    => 'https://pawelperfect.pl/wp-content/uploads/2025/07/4434150-hd_1080_1920_30fps-1.mp4',
-			'access'       => 'public',
-			'comments'     => 1245,
-			'avatar'       => 'https://i.pravatar.cc/100?u=webdev',
+			'post_title'   => 'Elephants Dream',
+			'post_content' => 'Sen słonia, tylko dla zalogowanych.',
+			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+			'access'       => 'secret',
+			'comments'     => 20,
+			'avatar'       => 'https://i.pravatar.cc/100?u=elephant',
 		],
 		[
 			'post_id'      => 3,
-			'post_title'   => 'Tajemniczy Tester',
-			'post_content' => 'Ten slajd jest tajny!
-🤫',
-			'video_url'    => 'https://pawelperfect.pl/wp-content/uploads/2025/07/4678261-hd_1080_1920_25fps.mp4',
-			'access'       => 'secret',
-			'comments'     => 2,
-			'avatar'       => 'https://i.pravatar.cc/100?u=tester',
-		],
-		[
-			'post_id'      => 4,
-			'post_title'   => 'Artysta AI',
-			'post_content' => 'Generowane przez AI, renderowane przez przeglądarkę.
-#future',
-			'video_url'    => 'https://pawelperfect.pl/wp-content/uploads/2025/07/AdobeStock_631182722-online-video-cutter.com_.mp4',
-			'access'       => 'public',
-			'comments'     => 890,
-			'avatar'       => 'https://i.pravatar.cc/100?u=ai-artist',
+			'post_title'   => 'For Bigger Blazes',
+			'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
+			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+			'access'       => 'pwa secret',
+			'comments'     => 30,
+			'avatar'       => 'https://i.pravatar.cc/100?u=blaze',
 		],
 	];
 
