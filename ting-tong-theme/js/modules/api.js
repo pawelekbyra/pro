@@ -182,7 +182,64 @@ function findCommentById(comments, commentId) {
   return comments.find((c) => c.id === commentId) || null;
 }
 
+// Helper do kompresji obrazu
+async function compressImage(file, maxWidth, maxHeight, quality) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+        }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export const API = {
+  uploadCommentImage: async (file) => {
+    try {
+      // Kompresuj obraz przed wysłaniem
+      const compressedFile = await compressImage(file, 800, 800, 0.8);
+
+      const formData = new FormData();
+      formData.append('action', 'tt_upload_comment_image');
+      formData.append('nonce', ajax_object.nonce);
+      formData.append('image', compressedFile);
+
+      const response = await fetch(ajax_object.ajax_url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+      const json = await response.json();
+      if (json.new_nonce) ajax_object.nonce = json.new_nonce;
+      return json;
+    } catch (error) {
+      console.error('API Client Error for image upload:', error);
+      return { success: false, data: { message: error.message } };
+    }
+  },
   login: (data) => _request("tt_ajax_login", data),
   logout: () => _request("tt_ajax_logout"),
   toggleLike: (postId) => _request("toggle_like", { post_id: postId }),
@@ -210,11 +267,12 @@ export const API = {
       return { success: false, data: { message: "Comments not found." } };
     }
   },
-  postComment: async (slideId, text, parentId = null) => {
+  postComment: async (slideId, text, parentId = null, imageUrl = null) => {
     const response = await _request("tt_post_comment", {
       slide_id: slideId,
       text,
       parent_id: parentId,
+      image_url: imageUrl,
     });
 
     if (response.success) {
@@ -231,9 +289,10 @@ export const API = {
       const newComment = {
         id: `c${slide.id}-${Date.now()}`,
         parentId: parentId,
-        user: "Ja (Ty)", // Mocked user
-        avatar: "https://i.pravatar.cc/100?u=99", // Mocked avatar
+        user: "Ja (Ty)",
+        avatar: "https://i.pravatar.cc/100?u=99",
         text: text,
+        image_url: imageUrl,
         timestamp: new Date().toISOString(),
         likes: 0,
         isLiked: false,

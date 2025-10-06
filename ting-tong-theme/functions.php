@@ -320,7 +320,7 @@ add_action( 'wp_ajax_toggle_like', function () {
 } );
 
 // --- Komentarze ---
-add_action( 'wp_ajax_tt_get_comments', function() {
+add_action('wp_ajax_tt_get_comments', function() {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
     global $wpdb;
     $slide_id = isset($_POST['slide_id']) ? sanitize_text_field($_POST['slide_id']) : '';
@@ -344,6 +344,7 @@ add_action( 'wp_ajax_tt_get_comments', function() {
             'user'      => $author_data ? $author_data->display_name : 'Użytkownik',
             'avatar'    => $author_data ? get_avatar_url($c->user_id) : '',
             'text'      => esc_textarea($c->content),
+            'image_url' => isset($c->image_url) ? esc_url($c->image_url) : null,
             'timestamp' => (new DateTime($c->created_at))->format(DateTime::ATOM),
             'likes'     => tt_comment_likes_get_count($c->id),
             'isLiked'   => tt_comment_likes_user_has($c->id, $user_id),
@@ -363,21 +364,31 @@ add_action('wp_ajax_tt_post_comment', function() {
     $slide_id = isset($_POST['slide_id']) ? sanitize_text_field($_POST['slide_id']) : '';
     $text = isset($_POST['text']) ? sanitize_textarea_field(wp_unslash($_POST['text'])) : '';
     $parent_id = isset($_POST['parent_id']) && !empty($_POST['parent_id']) ? absint($_POST['parent_id']) : null;
+    $image_url = isset($_POST['image_url']) ? esc_url_raw($_POST['image_url']) : null;
 
-    if (empty($slide_id) || empty($text)) {
+    if (empty($slide_id) || (empty($text) && empty($image_url))) {
         wp_send_json_error(['message' => 'Brakujące dane.'], 400);
     }
 
     $comments_table = $wpdb->prefix . 'tt_comments';
+
+    // Dodaj kolumnę image_url jeśli nie istnieje
+    $column_exists = $wpdb->get_results("SHOW COLUMNS FROM {$comments_table} LIKE 'image_url'");
+    if (empty($column_exists)) {
+        $wpdb->query("ALTER TABLE {$comments_table} ADD COLUMN image_url VARCHAR(500) NULL AFTER content");
+    }
+
     $wpdb->insert($comments_table, [
         'slide_id'  => $slide_id,
         'user_id'   => get_current_user_id(),
         'content'   => $text,
         'parent_id' => $parent_id,
+        'image_url' => $image_url,
     ]);
+
     $new_comment_id = $wpdb->insert_id;
     $user_data = get_userdata(get_current_user_id());
-	$new_comment_count = tt_comments_get_count($slide_id);
+    $new_comment_count = tt_comments_get_count($slide_id);
 
     wp_send_json_success([
         'id'        => $new_comment_id,
@@ -385,11 +396,12 @@ add_action('wp_ajax_tt_post_comment', function() {
         'user'      => $user_data->display_name,
         'avatar'    => get_avatar_url($user_data->ID),
         'text'      => $text,
+        'image_url' => $image_url,
         'timestamp' => (new DateTime())->format(DateTime::ATOM),
         'likes'     => 0,
         'isLiked'   => false,
         'canEdit'   => true,
-		'new_comment_count' => $new_comment_count,
+        'new_comment_count' => $new_comment_count,
     ]);
 });
 
@@ -494,6 +506,74 @@ add_action('wp_ajax_tt_toggle_comment_like', function() {
     wp_send_json_success([
         'isLiked' => $isLiked,
         'likes'   => tt_comment_likes_get_count($comment_id),
+    ]);
+});
+
+// --- Upload obrazu do komentarza ---
+add_action('wp_ajax_tt_upload_comment_image', function() {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz się zalogować.'], 401);
+    }
+
+    if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        wp_send_json_error(['message' => 'Nie przesłano pliku.'], 400);
+    }
+
+    $file = $_FILES['image'];
+
+    // Walidacja typu
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!in_array($file['type'], $allowed_types)) {
+        wp_send_json_error(['message' => 'Nieprawidłowy typ pliku. Dozwolone: JPG, PNG, GIF, WEBP'], 400);
+    }
+
+    // Walidacja rozmiaru (max 5MB)
+    if ($file['size'] > 5 * 1024 * 1024) {
+        wp_send_json_error(['message' => 'Plik jest za duży. Maksymalny rozmiar: 5MB'], 400);
+    }
+
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    require_once(ABSPATH . 'wp-admin/includes/media.php');
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+    $upload_overrides = [
+        'test_form' => false,
+        'mimes' => [
+            'jpg|jpeg|jpe' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'png' => 'image/png',
+            'webp' => 'image/webp'
+        ]
+    ];
+
+    $movefile = wp_handle_upload($file, $upload_overrides);
+
+    if (isset($movefile['error'])) {
+        wp_send_json_error(['message' => $movefile['error']], 500);
+    }
+
+    // Utwórz attachment
+    $attachment = [
+        'post_mime_type' => $movefile['type'],
+        'post_title' => sanitize_file_name(pathinfo($movefile['file'], PATHINFO_FILENAME)),
+        'post_content' => '',
+        'post_status' => 'inherit'
+    ];
+
+    $attach_id = wp_insert_attachment($attachment, $movefile['file']);
+
+    if (is_wp_error($attach_id)) {
+        wp_send_json_error(['message' => 'Nie udało się utworzyć załącznika.'], 500);
+    }
+
+    $attach_data = wp_generate_attachment_metadata($attach_id, $movefile['file']);
+    wp_update_attachment_metadata($attach_id, $attach_data);
+
+    wp_send_json_success([
+        'url' => $movefile['url'],
+        'attachment_id' => $attach_id
     ]);
 });
 

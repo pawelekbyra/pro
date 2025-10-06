@@ -1,6 +1,9 @@
+import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
 import { API, slidesData } from './api.js';
+
+let selectedCommentImage = null;
 
 const DOM = {
   container: document.getElementById("webyx-container"),
@@ -485,10 +488,6 @@ function renderSlides() {
   });
 }
 
-function initGlobalPanels() {
-  // This function is now empty as the form is hardcoded in index.html
-}
-
 function populateProfileModal(slideData) {
   if (!slideData || !DOM.tiktokProfileModal) return;
 
@@ -537,6 +536,245 @@ function populateProfileModal(slideData) {
                 `;
     videoGrid.appendChild(thumb);
   }
+}
+
+function updateCommentFormVisibility() {
+  const isLoggedIn = State.get("isUserLoggedIn");
+  const form = document.getElementById("comment-form");
+  const prompt = document.querySelector(".login-to-comment-prompt");
+
+  if (form && prompt) {
+    if (isLoggedIn) {
+      form.style.display = "flex";
+      prompt.style.display = "none";
+    } else {
+      form.style.display = "none";
+      prompt.style.display = "block";
+    }
+  }
+}
+
+function updateVolumeButton(isMuted) {
+  document.querySelectorAll(".volume-button").forEach(button => {
+    const onIcon = button.querySelector(".volume-on-icon");
+    const offIcon = button.querySelector(".volume-off-icon");
+    if (onIcon && offIcon) {
+      onIcon.style.display = isMuted ? 'none' : 'block';
+      offIcon.style.display = isMuted ? 'block' : 'none';
+    }
+  });
+}
+
+function initKeyboardListener() {
+  const commentsModal = DOM.commentsModal;
+  if (!commentsModal) return;
+
+  if (!window.visualViewport) {
+    console.warn('Visual Viewport API not supported');
+    return;
+  }
+
+  let initialHeight = window.visualViewport.height;
+  let isKeyboardVisible = false;
+
+  const handleViewportChange = () => {
+    const currentHeight = window.visualViewport.height;
+    const heightDiff = initialHeight - currentHeight;
+
+    const newKeyboardState = heightDiff > 150;
+
+    if (newKeyboardState !== isKeyboardVisible) {
+      isKeyboardVisible = newKeyboardState;
+      commentsModal.classList.toggle('keyboard-visible', isKeyboardVisible);
+
+      if (isKeyboardVisible) {
+        setTimeout(() => {
+          const modalBody = commentsModal.querySelector('.modal-body');
+          if (modalBody) {
+            modalBody.scrollTop = modalBody.scrollHeight;
+          }
+        }, 100);
+      }
+    }
+
+    commentsModal.style.setProperty('--keyboard-offset', `${heightDiff}px`);
+  };
+
+  window.visualViewport.addEventListener('resize', handleViewportChange);
+  window.visualViewport.addEventListener('scroll', handleViewportChange);
+
+  commentsModal.addEventListener('transitionend', function cleanupOnClose(e) {
+    if (e.target === commentsModal && !commentsModal.classList.contains('visible')) {
+      isKeyboardVisible = false;
+      commentsModal.classList.remove('keyboard-visible');
+      commentsModal.style.removeProperty('--keyboard-offset');
+      initialHeight = window.visualViewport.height;
+    }
+  });
+}
+
+function initEmojiPicker() {
+  const emojiPicker = document.querySelector('.emoji-picker');
+  if (!emojiPicker || emojiPicker.children.length > 0) return;
+
+  const fragment = document.createDocumentFragment();
+  Config.EMOJI_LIST.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'emoji-item';
+    btn.textContent = emoji;
+    btn.setAttribute('aria-label', `Insert ${emoji}`);
+    btn.addEventListener('click', () => insertEmoji(emoji));
+    fragment.appendChild(btn);
+  });
+  emojiPicker.appendChild(fragment);
+}
+
+function insertEmoji(emoji) {
+  const input = document.querySelector('#comment-input');
+  if (!input) return;
+
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const text = input.value;
+
+  input.value = text.substring(0, start) + emoji + text.substring(end);
+  input.selectionStart = input.selectionEnd = start + emoji.length;
+  input.focus();
+
+  hideEmojiPicker();
+}
+
+function toggleEmojiPicker() {
+  const picker = document.querySelector('.emoji-picker');
+  if (!picker) return;
+
+  const isVisible = picker.classList.contains('visible');
+  if (isVisible) {
+    hideEmojiPicker();
+  } else {
+    picker.classList.add('visible');
+
+    // Zamknij po kliknięciu poza pickerem
+    setTimeout(() => {
+      document.addEventListener('click', closeEmojiPickerOnClickOutside, { once: true });
+    }, 0);
+  }
+}
+
+function hideEmojiPicker() {
+  const picker = document.querySelector('.emoji-picker');
+  if (picker) {
+    picker.classList.remove('visible');
+  }
+}
+
+function closeEmojiPickerOnClickOutside(e) {
+  const picker = document.querySelector('.emoji-picker');
+  const emojiBtn = document.querySelector('.emoji-btn');
+
+  if (picker && !picker.contains(e.target) && !emojiBtn.contains(e.target)) {
+    hideEmojiPicker();
+  }
+}
+
+function handleImageAttachment() {
+  const fileInput = document.querySelector('.comment-image-input');
+  if (!fileInput) return;
+
+  fileInput.click();
+}
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Walidacja
+  if (!file.type.startsWith('image/')) {
+    UI.showAlert('Wybierz plik obrazu (JPG, PNG, GIF)', true);
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    UI.showAlert('Obraz jest za duży. Maksymalny rozmiar: 5MB', true);
+    return;
+  }
+
+  selectedCommentImage = file;
+  showImagePreview(file);
+
+  // Wyczyść input żeby można było wybrać ten sam plik ponownie
+  e.target.value = '';
+}
+
+function showImagePreview(file) {
+  const container = document.querySelector('.image-preview-container');
+  if (!container) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    container.innerHTML = `
+      <div class="image-preview">
+        <img src="${e.target.result}" alt="Preview">
+        <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
+      </div>
+    `;
+    container.classList.add('visible');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeCommentImage() {
+  selectedCommentImage = null;
+  const container = document.querySelector('.image-preview-container');
+  if (container) {
+    container.classList.remove('visible');
+    container.innerHTML = '';
+  }
+}
+
+function focusCommentInput() {
+  const input = document.querySelector('#comment-input');
+  if (input) {
+    setTimeout(() => {
+      input.focus();
+
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+}
+
+function scrollToComment(commentId) {
+  const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+  if (commentEl) {
+    commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    commentEl.style.background = 'rgba(255, 0, 85, 0.1)';
+    setTimeout(() => {
+      commentEl.style.background = '';
+    }, 1000);
+  }
+}
+
+function openImageLightbox(imageUrl) {
+  const lightbox = document.querySelector('.image-lightbox');
+  if (!lightbox) return;
+
+  const img = lightbox.querySelector('img');
+  img.src = imageUrl;
+  lightbox.classList.add('visible');
+
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImageLightbox() {
+  const lightbox = document.querySelector('.image-lightbox');
+  if (!lightbox) return;
+
+  lightbox.classList.remove('visible');
+  document.body.style.overflow = '';
 }
 
 function renderComments(comments) {
@@ -592,13 +830,20 @@ function renderComments(comments) {
     body.appendChild(userSpan);
     body.appendChild(textP);
 
+    // DODAJ: Obsługa obrazu w komentarzu
+    if (comment.image_url) {
+      const imageDiv = document.createElement("div");
+      imageDiv.className = "comment-image";
+      imageDiv.innerHTML = `<img src="${comment.image_url}" alt="Comment image" loading="lazy">`;
+      imageDiv.addEventListener('click', () => openImageLightbox(comment.image_url));
+      body.appendChild(imageDiv);
+    }
+
     const footer = document.createElement("div");
     footer.className = "comment-footer";
     const timestampSpan = document.createElement("span");
     timestampSpan.className = "comment-timestamp";
-    timestampSpan.textContent = new Date(
-      comment.timestamp,
-    ).toLocaleString();
+    timestampSpan.textContent = new Date(comment.timestamp).toLocaleString();
     const replyBtn = document.createElement("button");
     replyBtn.className = "comment-action-btn comment-reply-btn";
     replyBtn.dataset.action = "reply-to-comment";
@@ -685,9 +930,8 @@ function renderComments(comments) {
         updateToggleText();
       });
 
-      updateToggleText(); // Set initial text
+      updateToggleText();
 
-      // Insert the toggle button after the parent comment's main content
       parentEl.querySelector(".comment-main").appendChild(toggleBtn);
       threadWrapper.appendChild(repliesContainer);
     }
@@ -697,60 +941,29 @@ function renderComments(comments) {
   modalBody.appendChild(commentList);
 }
 
-function updateCommentFormVisibility() {
-  const isLoggedIn = State.get("isUserLoggedIn");
-  const form = document.getElementById("comment-form");
-  const prompt = document.querySelector(".login-to-comment-prompt");
+function initGlobalPanels() {
+  initEmojiPicker();
 
-  if (form && prompt) {
-    if (isLoggedIn) {
-      form.style.display = "flex";
-      prompt.style.display = "none";
-    } else {
-      form.style.display = "none";
-      prompt.style.display = "block";
-    }
-  }
-}
-
-function updateVolumeButton(isMuted) {
-  document.querySelectorAll(".volume-button").forEach(button => {
-    const onIcon = button.querySelector(".volume-on-icon");
-    const offIcon = button.querySelector(".volume-off-icon");
-    if (onIcon && offIcon) {
-      onIcon.style.display = isMuted ? 'none' : 'block';
-      offIcon.style.display = isMuted ? 'block' : 'none';
-    }
-  });
-}
-
-function initKeyboardListener() {
-  if (!("visualViewport" in window)) {
-    return;
+  // Setup file input handler
+  const fileInput = document.querySelector('.comment-image-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', handleImageSelect);
   }
 
-  const commentsModal = DOM.commentsModal;
-  if (!commentsModal) return;
+  // Setup lightbox close
+  const lightboxClose = document.querySelector('.image-lightbox-close');
+  if (lightboxClose) {
+    lightboxClose.addEventListener('click', closeImageLightbox);
+  }
 
-  const handleViewportResize = () => {
-    // Use the layout viewport height as the stable reference
-    const layoutViewportHeight = document.documentElement.clientHeight;
-    const visualViewportHeight = window.visualViewport.height;
-
-    // A significant difference implies the keyboard is visible.
-    const keyboardHeight = layoutViewportHeight - visualViewportHeight;
-    const isKeyboardVisible = keyboardHeight > 150;
-
-    commentsModal.classList.toggle("keyboard-visible", isKeyboardVisible);
-
-    // The offset is simply the calculated height of the keyboard.
-    commentsModal.style.setProperty(
-      "--keyboard-offset",
-      `${keyboardHeight}px`,
-    );
-  };
-
-  window.visualViewport.addEventListener("resize", handleViewportResize);
+  const lightbox = document.querySelector('.image-lightbox');
+  if (lightbox) {
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeImageLightbox();
+      }
+    });
+  }
 }
 
 export const UI = {
@@ -770,4 +983,12 @@ export const UI = {
   initKeyboardListener,
   showToast,
   updateVolumeButton,
+  toggleEmojiPicker,
+  hideEmojiPicker,
+  handleImageAttachment,
+  removeCommentImage,
+  focusCommentInput,
+  scrollToComment,
+  openImageLightbox,
+  closeImageLightbox,
 };

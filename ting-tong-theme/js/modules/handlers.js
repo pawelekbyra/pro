@@ -194,29 +194,6 @@ export const Handlers = {
           });
           break;
         }
-        case "reply-to-comment": {
-          const user =
-            commentItem.querySelector(".comment-user")?.textContent;
-          State.set("replyingToComment", commentId);
-
-          const formContainer = document.querySelector(
-            ".comment-form-container",
-          );
-          let replyContext = formContainer.querySelector(".reply-context");
-          if (!replyContext) {
-            replyContext = document.createElement("div");
-            replyContext.className = "reply-context";
-            formContainer.prepend(replyContext);
-          }
-          const cancelAriaLabel = Utils.getTranslation(
-            "cancelReplyAriaLabel",
-          );
-          replyContext.innerHTML = `${Utils.getTranslation("replyingTo").replace("{user}", user)} <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>`;
-          replyContext.style.display = "block";
-
-          document.querySelector("#comment-input").focus();
-          break;
-        }
         case "edit-comment": {
           const currentText = commentItem.querySelector(".comment-text").textContent;
           const newText = prompt(
@@ -230,12 +207,10 @@ export const Handlers = {
                 if (response.success) {
                   const slideData = slidesData.find((s) => s.id === slideId);
                   if (slideData) {
-                    // 1. Znajdź i zaktualizuj komentarz w stanie lokalnym
                     const commentIndex = slideData.comments.findIndex(c => String(c.id) === String(commentId));
                     if (commentIndex > -1) {
                       slideData.comments[commentIndex] = response.data;
                     }
-                    // 2. Wyrenderuj ponownie wszystkie komentarze, aby zapewnić spójność
                     UI.renderComments(slideData.comments);
                   }
                   UI.showToast(Utils.getTranslation("commentUpdateSuccess"));
@@ -256,18 +231,14 @@ export const Handlers = {
               if (response.success) {
                 const slideData = slidesData.find((s) => s.id === slideId);
                 if (slideData) {
-                  // 1. Zaktualizuj stan lokalny
                   const commentIndex = slideData.comments.findIndex(c => String(c.id) === String(commentId));
                   if (commentIndex > -1) {
                     slideData.comments.splice(commentIndex, 1);
                   }
-                  // Użyj nowej liczby komentarzy z odpowiedzi API
                   slideData.initialComments = response.data.new_count;
 
-                  // 2. Odśwież UI na podstawie nowego stanu
                   UI.renderComments(slideData.comments);
 
-                  // 3. Zaktualizuj liczniki
                   const slideElement = document.querySelector(`.swiper-slide-active[data-slide-id="${slideId}"]`);
                   const mainSlideCount = slideElement?.querySelector(".comment-count");
                   if (mainSlideCount) {
@@ -290,7 +261,10 @@ export const Handlers = {
           break;
         }
       }
-      return; // Stop further processing
+      // Return to avoid double-handling reply-to-comment
+      if (actionTarget.dataset.action !== 'reply-to-comment') {
+          return;
+      }
     }
 
     const sortTrigger = target.closest(".sort-trigger");
@@ -309,7 +283,7 @@ export const Handlers = {
       }
 
       State.set("commentSortOrder", newSortOrder);
-      UI.updateTranslations(); // This will now update the sort dropdown text
+      UI.updateTranslations();
       dropdown
         .querySelectorAll(".sort-option")
         .forEach((opt) => opt.classList.remove("active"));
@@ -333,7 +307,6 @@ export const Handlers = {
             if (newSortOrder === "popular") {
               comments.sort((a, b) => b.likes - a.likes);
             } else {
-              // newest
               comments.sort(
                 (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
               );
@@ -345,39 +318,6 @@ export const Handlers = {
           }
         });
       }
-      return;
-    }
-
-    const replyBtn = target.closest(".comment-reply-btn");
-    if (replyBtn) {
-      const commentItem = replyBtn.closest(".comment-item");
-      const commentId = commentItem?.dataset.commentId;
-      const user = commentItem?.querySelector(".comment-user")?.textContent;
-
-      State.set("replyingToComment", commentId);
-
-      const formContainer = document.querySelector(
-        ".comment-form-container",
-      );
-      let replyContext = formContainer.querySelector(".reply-context");
-      if (!replyContext) {
-        replyContext = document.createElement("div");
-        replyContext.className = "reply-context";
-        formContainer.prepend(replyContext);
-      }
-      const cancelAriaLabel = Utils.getTranslation("cancelReplyAriaLabel");
-      replyContext.innerHTML = `${Utils.getTranslation("replyingTo").replace("{user}", user)} <button class="cancel-reply-btn" aria-label="${cancelAriaLabel}">&times;</button>`;
-      replyContext.style.display = "block";
-
-      document.querySelector("#comment-input").focus();
-      return;
-    }
-
-    const cancelReplyBtn = target.closest(".cancel-reply-btn");
-    if (cancelReplyBtn) {
-      State.set("replyingToComment", null);
-      const replyContext = document.querySelector(".reply-context");
-      if (replyContext) replyContext.style.display = "none";
       return;
     }
 
@@ -394,6 +334,48 @@ export const Handlers = {
     );
 
     switch (action) {
+      case "toggle-emoji-picker":
+        UI.toggleEmojiPicker();
+        break;
+      case "attach-image":
+        UI.handleImageAttachment();
+        break;
+      case "remove-comment-image":
+        UI.removeCommentImage();
+        break;
+      case "reply-to-comment": {
+        const commentItem = actionTarget.closest(".comment-item");
+        const commentId = commentItem?.dataset.commentId;
+        const user = commentItem?.querySelector(".comment-user")?.textContent;
+
+        State.set("replyingToComment", commentId);
+
+        const formContainer = document.querySelector(".comment-form-container");
+        let replyContext = formContainer.querySelector(".reply-context");
+
+        if (!replyContext) {
+          replyContext = document.createElement("div");
+          replyContext.className = "reply-context";
+          formContainer.prepend(replyContext);
+        }
+
+        const cancelAriaLabel = Utils.getTranslation("cancelReplyAriaLabel");
+        replyContext.innerHTML = `
+          <span class="reply-context-text">${Utils.getTranslation("replyingTo").replace("{user}", user)}</span>
+          <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>
+        `;
+        replyContext.style.display = "flex";
+
+        UI.focusCommentInput();
+        break;
+      }
+      case "cancel-reply": {
+        State.set("replyingToComment", null);
+        const replyContext = document.querySelector(".reply-context");
+        if (replyContext) replyContext.style.display = "none";
+        UI.removeCommentImage();
+        break;
+      }
       case "go-back":
         const modalToClose = actionTarget.closest(".modal-overlay");
         if (modalToClose) {
@@ -430,11 +412,6 @@ export const Handlers = {
         const slideId =
           actionTarget.closest(".webyx-section")?.dataset.slideId;
         if (slideId) {
-          const slideData = slidesData.find((s) => s.id === slideId);
-          if (slideData) {
-          }
-
-          // Show a loading state
           UI.DOM.commentsModal.querySelector(".modal-body").innerHTML =
             '<div class="loading-spinner"></div>';
           API.fetchComments(slideId).then((response) => {
@@ -444,20 +421,18 @@ export const Handlers = {
               if (sortOrder === "popular") {
                 comments.sort((a, b) => b.likes - a.likes);
               } else {
-                // 'newest'
                 comments.sort(
                   (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
                 );
               }
               UI.renderComments(comments);
             } else {
-              UI.renderComments([]); // Show empty state on error
+              UI.renderComments([]);
             }
           });
         }
         UI.openModal(UI.DOM.commentsModal);
         UI.updateCommentFormVisibility();
-        // Scroll to bottom after a short delay to ensure content is rendered
         setTimeout(() => {
           const modalBody =
             UI.DOM.commentsModal.querySelector(".modal-body");
@@ -566,7 +541,7 @@ export const Handlers = {
         break;
     }
   },
-  formSubmitHandler: (e) => {
+  formSubmitHandler: async (e) => {
     const loginForm = e.target.closest("form#tt-login-form");
     if (loginForm) {
       e.preventDefault();
@@ -583,35 +558,24 @@ export const Handlers = {
 
       API.login({ log: username, pwd: password }).then((json) => {
         if (json.success) {
-          // Nowy, bogatszy obiekt odpowiedzi jest obsługiwany tutaj
           const { userData, slidesData: newSlides, new_nonce } = json.data;
-
-          // 1. Zaktualizuj stan aplikacji
           State.set("isUserLoggedIn", true);
           if (new_nonce) {
             ajax_object.nonce = new_nonce;
           }
-
-          // 2. Zaktualizuj dane slajdów (zamiast ponownego pobierania)
           if (newSlides) {
-            slidesData.length = 0; // Wyczyść istniejącą tablicę
-            Array.prototype.push.apply(slidesData, newSlides); // Dodaj nowe dane
+            slidesData.length = 0;
+            Array.prototype.push.apply(slidesData, newSlides);
             slidesData.forEach((s) => {
                 s.likeId = String(s.likeId);
             });
-            // RENDERUJ PONOWNIE slajdy, aby mieć pewność, że atrybuty i przyciski polubień są poprawne
             UI.renderSlides();
           }
-
-          // 3. Zaktualizuj dane w panelu konta (bezpośrednio)
           if (userData) {
             AccountPanel.populateProfileForm(userData);
           }
-
-          // 4. Odśwież cały interfejs
           UI.updateUIForLoginState();
           UI.showAlert(Utils.getTranslation("loginSuccess"));
-
         } else {
           UI.showAlert(
             json.data?.message || Utils.getTranslation("loginFailed"),
@@ -628,8 +592,11 @@ export const Handlers = {
       e.preventDefault();
       const input = commentForm.querySelector("#comment-input");
       if (!input) return;
+
       const text = input.value.trim();
-      if (!text) return;
+      const hasImage = selectedCommentImage !== null;
+
+      if (!text && !hasImage) return;
 
       const button = commentForm.querySelector('button[type="submit"]');
       if (button) button.disabled = true;
@@ -639,48 +606,62 @@ export const Handlers = {
       const parentId = State.get("replyingToComment");
 
       if (slideId) {
-        API.postComment(slideId, text, parentId).then((postResponse) => {
+        let imageUrl = null;
+
+        if (selectedCommentImage) {
+          UI.showToast('Przesyłanie obrazu...');
+          const uploadResult = await API.uploadCommentImage(selectedCommentImage);
+
+          if (uploadResult.success) {
+            imageUrl = uploadResult.data.url;
+          } else {
+            UI.showAlert(uploadResult.data?.message || 'Nie udało się przesłać obrazu', true);
+            if (button) button.disabled = false;
+            return;
+          }
+        }
+
+        API.postComment(slideId, text, parentId, imageUrl).then((postResponse) => {
           if (postResponse.success) {
             input.value = "";
             State.set("replyingToComment", null);
             const replyContext = document.querySelector(".reply-context");
             if (replyContext) replyContext.style.display = "none";
+            UI.removeCommentImage();
 
             UI.showToast(Utils.getTranslation("postCommentSuccess"));
 
             const slideData = slidesData.find((s) => s.id === slideId);
             if (slideData) {
-              // 1. Zaktualizuj stan lokalny
               const newComment = postResponse.data;
               if (!Array.isArray(slideData.comments)) {
                 slideData.comments = [];
               }
               slideData.comments.push(newComment);
 
-              // Użyj nowej, autorytatywnej liczby komentarzy z serwera, jeśli jest dostępna
               if (typeof postResponse.data.new_comment_count !== 'undefined') {
                 slideData.initialComments = postResponse.data.new_comment_count;
               } else {
-                slideData.initialComments = slideData.comments.length; // Fallback
+                slideData.initialComments = slideData.comments.length;
               }
 
-              // 2. Odśwież UI na podstawie nowego stanu
               UI.renderComments(slideData.comments);
 
-              // 3. Zaktualizuj liczniki
               const mainSlideCount = slideElement.querySelector(".comment-count");
               if (mainSlideCount) {
                 mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
               }
+
               const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
               if (commentsTitle) {
                 commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
               }
 
-              // 4. Przewiń na dół, aby zobaczyć nowy komentarz
               const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
               if (modalBody) {
-                modalBody.scrollTop = modalBody.scrollHeight;
+                setTimeout(() => {
+                  modalBody.scrollTop = modalBody.scrollHeight;
+                }, 100);
               }
             }
           } else {
