@@ -1,16 +1,17 @@
-<?php
-/**
- * The main template file
- *
- * @package TingTongTheme
- */
-
-get_header();
-?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1">
+    <title>Ting Tong - Static Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
 <div id="preloader">
     <div class="preloader-icon-container">
-        <img src="<?php echo get_template_directory_uri(); ?>/jajeco.jpg" alt="Ting Tong Logo" class="splash-icon">
+        <img src="jajeco.jpg" alt="Ting Tong Logo" class="splash-icon">
     </div>
     <div class="preloader-content-container">
         <div class="language-selection">
@@ -472,4 +473,7 @@ get_header();
     </div>
 </div>
 
-<?php get_footer(); ?>
+<script src="https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
