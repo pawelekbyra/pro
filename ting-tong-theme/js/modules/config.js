@@ -233,6 +233,11 @@ export const Config = {
       firstLoginWelcomeBack: "Witaj w Ting Tong! 🚀",
       uploadingAvatar: "Przesyłanie avatara...",
       avatarUploadError: "Nie udało się przesłać avatara",
+    // Dodatkowe tłumaczenia dla error handling
+    commentLoadError: "Nie udało się załadować komentarzy",
+    retry: "Spróbuj ponownie",
+    imageInputError: "Nie można załączyć obrazu",
+    fileReadError: "Nie można odczytać pliku",
     },
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -426,6 +431,11 @@ export const Config = {
       firstLoginWelcomeBack: "Welcome to Ting Tong! 🚀",
       uploadingAvatar: "Uploading avatar...",
       avatarUploadError: "Failed to upload avatar",
+    // Additional translations for error handling
+    commentLoadError: "Failed to load comments",
+    retry: "Try again",
+    imageInputError: "Cannot attach image",
+    fileReadError: "Cannot read file",
     },
   },
 };

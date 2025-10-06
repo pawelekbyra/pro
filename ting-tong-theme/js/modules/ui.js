@@ -124,6 +124,27 @@ function closeModal(modal) {
     }
     DOM.container.removeAttribute("aria-hidden");
     State.get("lastFocusedElement")?.focus();
+    // NOWE: Wyczyść state związany z komentarzami przy zamykaniu modala
+    if (modal.id === "commentsModal") {
+      State.set("replyingToComment", null, true); // silent = true
+
+      // Usuń reply context
+      const replyContext = document.querySelector(".reply-context");
+      if (replyContext) {
+        replyContext.style.display = "none";
+      }
+
+      // Wyczyść załączony obraz
+      if (typeof UI.removeCommentImage === 'function') {
+        UI.removeCommentImage();
+      }
+
+      // Wyczyść input
+      const commentInput = document.querySelector("#comment-input");
+      if (commentInput) {
+        commentInput.value = "";
+      }
+    }
   };
 
   if (isAnimated) {
@@ -645,21 +666,46 @@ function insertEmoji(emoji) {
   hideEmojiPicker();
 }
 
+// Dodaj zmienną dla debounce na początku pliku (przed funkcją)
+let emojiPickerTimeout = null;
+let emojiPickerClickListener = null;
+
 function toggleEmojiPicker() {
   const picker = document.querySelector('.emoji-picker');
-  if (!picker) return;
+  if (!picker) {
+    console.warn('Emoji picker element not found');
+    return;
+  }
+
+  // Debounce - zapobiegaj podwójnym kliknięciom
+  if (emojiPickerTimeout) {
+    return;
+  }
 
   const isVisible = picker.classList.contains('visible');
+
   if (isVisible) {
     hideEmojiPicker();
   } else {
     picker.classList.add('visible');
 
-    // Zamknij po kliknięciu poza pickerem
+    // Usuń stary listener jeśli istnieje
+    if (emojiPickerClickListener) {
+      document.removeEventListener('click', emojiPickerClickListener);
+      emojiPickerClickListener = null;
+    }
+
+    // Dodaj nowy listener po micro-delay
     setTimeout(() => {
-      document.addEventListener('click', closeEmojiPickerOnClickOutside, { once: true });
-    }, 0);
+      emojiPickerClickListener = (e) => closeEmojiPickerOnClickOutside(e);
+      document.addEventListener('click', emojiPickerClickListener, { once: true });
+    }, 10);
   }
+
+  // Debounce timer
+  emojiPickerTimeout = setTimeout(() => {
+    emojiPickerTimeout = null;
+  }, 300);
 }
 
 function hideEmojiPicker() {
@@ -667,41 +713,98 @@ function hideEmojiPicker() {
   if (picker) {
     picker.classList.remove('visible');
   }
+
+  // Usuń pending listener
+  if (emojiPickerClickListener) {
+    document.removeEventListener('click', emojiPickerClickListener);
+    emojiPickerClickListener = null;
+  }
 }
 
 function closeEmojiPickerOnClickOutside(e) {
   const picker = document.querySelector('.emoji-picker');
   const emojiBtn = document.querySelector('.emoji-btn');
 
-  if (picker && !picker.contains(e.target) && !emojiBtn.contains(e.target)) {
+  // Walidacja elementów
+  if (!picker || !emojiBtn) {
+    return;
+  }
+
+  // Sprawdź czy kliknięcie było poza pickerem i przyciskiem
+  if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
     hideEmojiPicker();
   }
 }
 
 function handleImageAttachment() {
   const fileInput = document.querySelector('.comment-image-input');
-  if (!fileInput) return;
+
+  if (!fileInput) {
+    console.error('Comment image input not found');
+    UI.showAlert(
+      Utils.getTranslation('imageInputError') || 'Nie można załączyć obrazu',
+      true
+    );
+    return;
+  }
+
+  // Sprawdź czy użytkownik jest zalogowany
+  if (!State.get('isUserLoggedIn')) {
+    UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać obraz', true);
+    return;
+  }
 
   fileInput.click();
 }
 
 function handleImageSelect(e) {
   const file = e.target.files[0];
-  if (!file) return;
 
-  // Walidacja
+  if (!file) {
+    return;
+  }
+
+  // Walidacja typu
   if (!file.type.startsWith('image/')) {
-    UI.showAlert('Wybierz plik obrazu (JPG, PNG, GIF)', true);
+    UI.showAlert(
+      Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG, PNG, GIF)',
+      true
+    );
+    e.target.value = '';
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    UI.showAlert('Obraz jest za duży. Maksymalny rozmiar: 5MB', true);
+  // Walidacja rozmiaru
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    UI.showAlert(
+      Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymalny rozmiar: 5MB',
+      true
+    );
+    e.target.value = '';
     return;
   }
 
-  selectedCommentImage = file;
-  showImagePreview(file);
+  // Sprawdź czy można odczytać plik
+  const reader = new FileReader();
+
+  reader.onerror = () => {
+    console.error('Failed to read file');
+    UI.showAlert(
+      Utils.getTranslation('fileReadError') || 'Nie można odczytać pliku',
+      true
+    );
+    e.target.value = '';
+  };
+
+  reader.onload = () => {
+    // Plik jest OK - zapisz go
+    selectedCommentImage = file;
+    showImagePreview(file);
+  };
+
+  // Rozpocznij odczyt (tylko dla walidacji)
+  reader.readAsDataURL(file);
 
   // Wyczyść input żeby można było wybrać ten sam plik ponownie
   e.target.value = '';
