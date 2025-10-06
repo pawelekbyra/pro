@@ -684,7 +684,6 @@ get_header();
 
 <!-- Debug Tools -->
 <div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">
-    <button id="mock-first-login-btn" style="background: #ff0055; color: white; border: 1px solid white; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 5px;">MOCK MODAL</button>
 </div>
 
 <?php get_footer(); ?>

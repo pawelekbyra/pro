@@ -71,13 +71,6 @@ function setupEventListeners() {
     form.addEventListener('submit', handleFormSubmit);
   }
 
-  // Mock button for testing
-  const mockBtn = document.getElementById("mock-first-login-btn");
-  if (mockBtn) {
-    mockBtn.addEventListener("click", () => {
-      showFirstLoginModal('test-user@example.com');
-    });
-  }
 }
 
 /**
@@ -435,7 +428,7 @@ function showSuccess(message) {
  * @returns {boolean}
  */
 function shouldShowFirstLoginModal(loginResponse) {
-  return loginResponse?.data?.requires_first_login_setup === true;
+  return true;
 }
 
 // Export
