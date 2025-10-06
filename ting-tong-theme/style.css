@@ -342,35 +342,6 @@ body,
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
 }
 
-.replay-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  z-index: 102;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-  visibility: hidden;
-}
-
-.replay-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-  visibility: visible;
-}
-
-.replay-icon {
-  width: 64px;
-  height: 64px;
-  color: rgba(255, 255, 255, 0.9);
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
-}
 
 .volume-button {
   position: absolute;
@@ -3027,153 +2998,255 @@ body,
 }
 
 /* ============================================================================
-   WELCOME MODAL STYLES - Dodaj na końcu style.css
+   WELCOME MODAL STYLES - Premium Design
    ============================================================================ */
 
-/* Overlay z delikatnym blur */
+/* Overlay z mocnym blur */
 .welcome-modal {
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   z-index: 10010;
 }
 
-/* Content - elegancka karta */
+/* Content - premium card */
 .welcome-modal-content {
-  background: linear-gradient(145deg, #1f1f1f 0%, #2d2d2d 100%);
-  border-radius: 24px;
+  background: linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 100%);
+  border-radius: 28px;
   padding: 0;
-  width: 90%;
-  max-width: 440px;
+  width: 92%;
+  max-width: 460px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+  border: 2px solid rgba(255, 0, 85, 0.3);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.9),
+    0 0 80px rgba(255, 0, 85, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   overflow: hidden;
   position: relative;
 }
 
-/* Ikona na górze z gradientem */
-.welcome-icon-wrapper {
-  background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
-  padding: 32px;
-  margin: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.welcome-icon-wrapper::before {
+/* Ambient glow effect */
+.welcome-modal-content::before {
   content: '';
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: shimmer 3s ease-in-out infinite;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 0, 85, 0.08) 0%,
+    transparent 60%
+  );
+  animation: ambientPulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ambientPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+/* Ikona na górze z zaawansowanym gradientem */
+.welcome-icon-wrapper {
+  background: linear-gradient(135deg, #ff0055 0%, #ff4081 50%, #ff0055 100%);
+  background-size: 200% 200%;
+  padding: 40px;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.welcome-icon-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
+  animation: shimmer 4s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(10%, 10%); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(15%, 15%) scale(1.05); }
 }
 
 .welcome-icon {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   color: #fff;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
+  position: relative;
+  z-index: 1;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Signature line (dekoracja) */
+.welcome-signature {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.signature-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff0055, transparent);
+  margin: 0 auto 16px;
+  border-radius: 1px;
+  box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+}
+
+/* Tytuł z efektem świecenia */
+.welcome-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  margin: 28px 24px 12px;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-shadow:
+    0 0 20px rgba(255, 0, 85, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.7);
   position: relative;
   z-index: 1;
 }
 
-/* Tytuł */
-.welcome-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  margin: 24px 24px 8px;
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+.welcome-title-main {
+  animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 20px rgba(255, 0, 85, 0.4); }
+  50% { text-shadow: 0 0 30px rgba(255, 0, 85, 0.7); }
 }
 
 .welcome-title-emoji {
-  font-size: 32px;
-  animation: sparkle 2s ease-in-out infinite;
+  font-size: 36px;
+  animation: sparkle 2.5s ease-in-out infinite;
+  display: inline-block;
 }
 
 @keyframes sparkle {
   0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.1) rotate(10deg); }
+  25% { transform: scale(1.15) rotate(-15deg); }
+  75% { transform: scale(1.15) rotate(15deg); }
 }
 
-/* Body */
+/* Body z efektem glassmorphism */
 .welcome-body {
-  padding: 0 24px 32px;
+  padding: 0 28px 36px;
+  position: relative;
+  z-index: 1;
 }
 
-/* Teksty */
+/* Hero text z premium typografią */
 .welcome-text-hero {
-  font-size: 22px;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 20px;
-  line-height: 1.4;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.welcome-divider {
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #ff0055, transparent);
-  margin: 0 auto 24px;
-  border-radius: 2px;
-  box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
-}
-
-.welcome-text-highlight {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 12px;
-  text-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
-  letter-spacing: 0.5px;
+  margin: 0 0 24px;
+  line-height: 1.3;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.5px;
 }
 
+/* Divider z animacją */
+.welcome-divider {
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #ff0055, #ff4081, transparent);
+  background-size: 200% 100%;
+  margin: 0 auto 28px;
+  border-radius: 2px;
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
+  animation: dividerFlow 3s ease-in-out infinite;
+}
+
+@keyframes dividerFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Highlight text z premium efektami */
+.welcome-text-highlight {
+  font-size: 28px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff 0%, #ff0055 50%, #ff4081 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 16px;
+  letter-spacing: 0.5px;
+  animation: textShimmer 4s ease infinite;
+  text-shadow: 0 0 30px rgba(255, 0, 85, 0.8);
+}
+
+@keyframes textShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Description z lepszą czytelnością */
 .welcome-text-description {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 32px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 36px;
   line-height: 1.6;
   font-weight: 500;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Przyciski */
+/* Premium buttons */
 .welcome-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
 
 .welcome-btn {
-  padding: 16px 24px;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 700;
+  padding: 18px 28px;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   position: relative;
   overflow: hidden;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
+/* Ripple effect */
 .welcome-btn::before {
   content: '';
   position: absolute;
@@ -3182,21 +3255,22 @@ body,
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition: width 0.8s ease-out, height 0.8s ease-out;
 }
 
 .welcome-btn:active::before {
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
 }
 
 .welcome-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   position: relative;
   z-index: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .welcome-btn span {
@@ -3204,108 +3278,149 @@ body,
   z-index: 1;
 }
 
-/* Primary button - główny CTA */
+/* Primary button - premium gradient */
 .welcome-btn-primary {
-  background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
+  background: linear-gradient(135deg, #ff0055 0%, #ff4081 50%, #ff0055 100%);
+  background-size: 200% 200%;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(255, 0, 85, 0.4);
+  box-shadow:
+    0 12px 32px rgba(255, 0, 85, 0.5),
+    0 0 40px rgba(255, 0, 85, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: primaryGradient 3s ease infinite;
+}
+
+@keyframes primaryGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .welcome-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(255, 0, 85, 0.5);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 16px 48px rgba(255, 0, 85, 0.6),
+    0 0 60px rgba(255, 0, 85, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .welcome-btn-primary:active {
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(0.98);
 }
 
-/* Secondary button - drugie opcja */
+/* Secondary button - glassmorphism */
 .welcome-btn-secondary {
   background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .welcome-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .welcome-btn-secondary:active {
-  transform: translateY(0);
+  transform: translateY(-1px) scale(0.98);
 }
 
-/* Footer text */
+/* Footer text z lepszym kontrastem */
 .welcome-footer-text {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
   line-height: 1.6;
   letter-spacing: 0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Responsive */
+.welcome-footer-text strong {
+  color: #ff0055;
+  font-weight: 800;
+}
+
+/* Responsive refinements */
 @media (max-width: 480px) {
   .welcome-modal-content {
-    width: 95%;
-    border-radius: 20px;
+    width: 96%;
+    border-radius: 24px;
+    border-width: 1.5px;
   }
 
   .welcome-icon-wrapper {
-    padding: 24px;
+    padding: 32px;
   }
 
   .welcome-icon {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
   }
 
   .welcome-title {
-    font-size: 24px;
-    margin: 20px 20px 8px;
+    font-size: 26px;
+    margin: 24px 20px 10px;
+  }
+
+  .welcome-title-emoji {
+    font-size: 28px;
   }
 
   .welcome-body {
-    padding: 0 20px 28px;
+    padding: 0 20px 32px;
   }
 
-  .welcome-text-lead {
-    font-size: 16px;
+  .welcome-text-hero {
+    font-size: 20px;
   }
 
-  .welcome-cta-box {
-    padding: 16px;
+  .welcome-text-highlight {
+    font-size: 24px;
+  }
+
+  .welcome-text-description {
+    font-size: 15px;
   }
 
   .welcome-btn {
-    padding: 14px 20px;
+    padding: 16px 24px;
     font-size: 15px;
   }
+
+  .welcome-footer-text {
+    font-size: 13px;
+  }
 }
 
-/* Animacja wejścia */
+/* Ultra-smooth entrance animation */
 .welcome-modal.visible .welcome-modal-content {
-  animation: welcomeSlideUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: premiumEntrance 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@keyframes welcomeSlideUp {
-  from {
+@keyframes premiumEntrance {
+  0% {
     opacity: 0;
-    transform: translateY(30px) scale(0.95);
+    transform: translateY(50px) scale(0.9) rotateX(-10deg);
   }
-  to {
+  60% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(-10px) scale(1.02) rotateX(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0);
   }
 }
 
-
-/* Dodaj to do swojego pliku CSS */
 
 /* Animacja pojawiania się overlay */
-
 @keyframes errorFadeIn {
   from {
     opacity: 0;
@@ -3355,30 +3470,6 @@ body,
   min-width: calc(50% - 8px);
 }
 
-@media (min-aspect-ratio: 9/16) {
-  html,
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #app-frame {
-    width: 100%;
-    height: 100%;
-    max-width: calc(9 / 16 * 100vh);
-    max-height: calc(16 / 9 * 100vw);
-    aspect-ratio: 9 / 16;
-    position: relative;
-  }
-  .topbar,
-  .login-panel {
-    position: fixed;
-    width: 100%;
-    max-width: 100%;
-  }
-}
-
 /* --- FIX: Poprawki układu formularza --- */
 #profile-tab #profileForm,
 #profile-tab .form-row {
@@ -3397,7 +3488,6 @@ body,
 
 /* ============================================================================
    DESKTOP - Zwężenie do proporcji 9:16 (jak telefon)
-   Dodaj na sam koniec style.css
    ============================================================================ */
 
 @media (min-width: 600px) {
@@ -3407,6 +3497,8 @@ body,
     width: calc(100vh * 9 / 16); /* Proporcje 9:16 */
     max-width: 100%;
     margin: 0 auto; /* Wyśrodkowanie */
+    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
+    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
     border-left: 1px solid #333;
     border-right: 1px solid #333;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
@@ -3417,6 +3509,8 @@ body,
     width: calc(100vh * 9 / 16);
     max-width: 100%;
     margin: 0 auto;
+    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
+    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
   }
 
   /* Body - tło po bokach */
@@ -3431,7 +3525,6 @@ body,
 
 @media (min-width: 600px) and (max-width: 1024px) {
   #webyx-container {
-    width: calc(100vh * 9 / 16);
     border-left: 1px solid #444;
     border-right: 1px solid #444;
   }
@@ -3443,7 +3536,6 @@ body,
 
 @media (min-width: 1024px) {
   #webyx-container {
-    width: calc(100vh * 9 / 16);
     border-left: 2px solid #555;
     border-right: 2px solid #555;
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.8);
@@ -3467,291 +3559,5 @@ body,
       radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
     z-index: -1;
     pointer-events: none;
-  }
-} /* Dodaj na końcu style.css */
-@media (min-width: 600px) {
-    #webyx-container {
-        height: 100vh;
-        width: calc(100vh * 9 / 16);
-        max-width: 100%;
-        margin: 0 auto;
-        border-left: 1px solid #333;
-        border-right: 1px solid #333;
-        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-    }
-}
-
-/* ============================================================================
-   WELCOME MODAL STYLES - Dodaj na końcu style.css
-   ============================================================================ */
-
-/* Overlay z delikatnym blur */
-.welcome-modal {
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 10010;
-}
-
-/* Content - elegancka karta */
-.welcome-modal-content {
-  background: linear-gradient(145deg, #1f1f1f 0%, #2d2d2d 100%);
-  border-radius: 24px;
-  padding: 0;
-  width: 90%;
-  max-width: 440px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
-  overflow: hidden;
-  position: relative;
-}
-
-/* Ikona na górze z gradientem */
-.welcome-icon-wrapper {
-  background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
-  padding: 32px;
-  margin: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.welcome-icon-wrapper::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(10%, 10%); }
-}
-
-.welcome-icon {
-  width: 64px;
-  height: 64px;
-  color: #fff;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
-  position: relative;
-  z-index: 1;
-}
-
-/* Tytuł */
-.welcome-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  margin: 24px 24px 8px;
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.welcome-title-emoji {
-  font-size: 32px;
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-@keyframes sparkle {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.1) rotate(10deg); }
-}
-
-/* Body */
-.welcome-body {
-  padding: 0 24px 32px;
-}
-
-/* Teksty */
-.welcome-text-hero {
-  font-size: 22px;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 20px;
-  line-height: 1.4;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.welcome-divider {
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #ff0055, transparent);
-  margin: 0 auto 24px;
-  border-radius: 2px;
-  box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
-}
-
-.welcome-text-highlight {
-  font-size: 26px;
-  font-weight: 800;
-  color: #fff;
-  margin: 0 0 12px;
-  text-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
-  letter-spacing: 0.5px;
-}
-
-.welcome-text-description {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 32px;
-  line-height: 1.6;
-  font-weight: 500;
-}
-
-/* Przyciski */
-.welcome-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.welcome-btn {
-  padding: 16px 24px;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
-}
-
-.welcome-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.welcome-btn:active::before {
-  width: 300px;
-  height: 300px;
-}
-
-.welcome-btn svg {
-  width: 20px;
-  height: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.welcome-btn span {
-  position: relative;
-  z-index: 1;
-}
-
-/* Primary button - główny CTA */
-.welcome-btn-primary {
-  background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(255, 0, 85, 0.4);
-}
-
-.welcome-btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(255, 0, 85, 0.5);
-}
-
-.welcome-btn-primary:active {
-  transform: translateY(-1px);
-}
-
-/* Secondary button - drugie opcja */
-.welcome-btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.welcome-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.welcome-btn-secondary:active {
-  transform: translateY(0);
-}
-
-/* Footer text */
-.welcome-footer-text {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0;
-  line-height: 1.6;
-  letter-spacing: 0.3px;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .welcome-modal-content {
-    width: 95%;
-    border-radius: 20px;
-  }
-
-  .welcome-icon-wrapper {
-    padding: 24px;
-  }
-
-  .welcome-icon {
-    width: 48px;
-    height: 48px;
-  }
-
-  .welcome-title {
-    font-size: 24px;
-    margin: 20px 20px 8px;
-  }
-
-  .welcome-body {
-    padding: 0 20px 28px;
-  }
-
-  .welcome-text-lead {
-    font-size: 16px;
-  }
-
-  .welcome-cta-box {
-    padding: 16px;
-  }
-
-  .welcome-btn {
-    padding: 14px 20px;
-    font-size: 15px;
-  }
-}
-
-/* Animacja wejścia */
-.welcome-modal.visible .welcome-modal-content {
-  animation: welcomeSlideUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-@keyframes welcomeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
