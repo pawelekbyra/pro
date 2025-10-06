@@ -138,11 +138,35 @@ get_header();
                 </p>
             </div>
             <form id="comment-form">
-                <input type="text" id="comment-input" data-translate-placeholder="addCommentPlaceholder" placeholder="Dodaj komentarz..." autocomplete="off" data-translate-aria-label="addCommentPlaceholder" aria-label="Dodaj komentarz">
-                <button type="submit" data-translate-aria-label="sendCommentAriaLabel" aria-label="Wyślij komentarz">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                <div class="image-preview-container"></div>
+                <div class="comment-input-wrapper">
+                    <div class="emoji-picker"></div>
+                    <input type="text" id="comment-input" data-translate-placeholder="addCommentPlaceholder" placeholder="Dodaj komentarz..." autocomplete="off" data-translate-aria-label="addCommentPlaceholder" aria-label="Dodaj komentarz">
+                    <div class="comment-attachments">
+                        <button type="button" class="attachment-btn emoji-btn" data-action="toggle-emoji-picker" aria-label="Dodaj emoji">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                <line x1="9" y1="9" x2="9.01" y2="9"/>
+                                <line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="attachment-btn image-btn" data-action="attach-image" aria-label="Dodaj zdjęcie">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" data-translate-aria-label="sendCommentAriaLabel" aria-label="Wyślij komentarz">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                    </svg>
                 </button>
             </form>
+            <input type="file" class="comment-image-input" accept="image/*">
         </div>
     </div>
 </div>
@@ -465,6 +489,12 @@ get_header();
             </div>
         </div>
     </div>
+</div>
+
+<!-- DODAJ na końcu body, przed zamknięciem </body> -->
+<div class="image-lightbox">
+    <img src="" alt="Preview">
+    <button class="image-lightbox-close">&times;</button>
 </div>
 
 <?php get_footer(); ?>
