@@ -131,13 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
         Handlers.profileModalTabHandler,
       );
 
-      // Mock button for testing
-      const mockBtn = document.getElementById("mock-first-login-btn");
-        if (mockBtn) {
-            mockBtn.addEventListener("click", () => {
-            FirstLoginModal.showFirstLoginModal('test-user@example.com');
-            });
-        }
     }
 
     async function _fetchAndUpdateSlideData() {
@@ -260,24 +253,31 @@ document.addEventListener("DOMContentLoaded", () => {
           const pwaInstallBar = document.getElementById("pwa-install-bar");
           const appFrame = document.getElementById("app-frame");
 
-          // Pokaż pasek instalacji PWA tylko wtedy, gdy aplikacja nie jest
-          // w trybie samodzielnym (standalone).
-          if (pwaInstallBar && !PWA.isStandalone()) {
+          // Sprawdź czy aplikacja NIE jest w trybie standalone
+          const isInStandaloneMode = PWA.isStandalone();
+
+          // Pokaż pasek TYLKO jeśli NIE jesteśmy w trybie standalone
+          if (pwaInstallBar && !isInStandaloneMode) {
             pwaInstallBar.classList.add("visible");
             if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+          } else if (pwaInstallBar && isInStandaloneMode) {
+            // Upewnij się, że pasek jest ukryty w trybie standalone
+            pwaInstallBar.classList.remove("visible");
+            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
           }
+
           UI.DOM.preloader.addEventListener(
             "transitionend",
             () => {
               UI.DOM.preloader.style.display = "none";
               // Pokaż modal powitalny tylko w przeglądarce, nie w PWA, i tylko raz
-              if (!PWA.isStandalone() && UI.DOM.welcomeModal) {
+              if (!isInStandaloneMode && UI.DOM.welcomeModal) {
                 const hasSeenWelcome = localStorage.getItem('tt_seen_welcome');
                 if (!hasSeenWelcome) {
                   setTimeout(() => {
                     UI.openModal(UI.DOM.welcomeModal);
                     localStorage.setItem('tt_seen_welcome', 'true');
-                  }, 1000); // Opóźnienie 1s
+                  }, 1000);
                 }
               }
             },

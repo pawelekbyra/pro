@@ -4089,3 +4089,23 @@ body,
     pointer-events: none;
   }
 }
+
+/* Ukryj pasek PWA w trybie standalone (jako dodatkowe zabezpieczenie) */
+@media (display-mode: standalone) {
+  .pwa-prompt,
+  .pwa-prompt-ios {
+    display: none !important;
+  }
+
+  #app-frame.app-frame--pwa-visible {
+    height: 100% !important;
+  }
+}
+
+/* Ukryj pasek PWA gdy standalone na iOS */
+@media (display-mode: standalone) and (-webkit-touch-callout: none) {
+  .pwa-prompt,
+  .pwa-prompt-ios {
+    display: none !important;
+  }
+}

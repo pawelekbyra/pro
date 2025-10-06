@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1, interactive-widget=resizes-content">
+    <title>Ting Tong - Verification</title>
+    <link rel="stylesheet" href="../../ting-tong-theme/style.css">
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
+</head>
+<body>
+
+<!-- Content from index.php -->
+<div id="preloader">
+    <div class="preloader-icon-container">
+        <img src="https://i.imgur.com/O1h5I7s.png" alt="Splash Icon" class="splash-icon">
+    </div>
+    <div class="preloader-content-container">
+        <div class="language-selection">
+            <h2>Wybierz Język / Select Language</h2>
+            <div class="lang-buttons-container">
+                <button data-lang="pl"><span>Polski</span></button>
+                <button data-lang="en"><span>English</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="app-frame">
+    <div class="topbar" data-view="default">
+        <button class="topbar-icon-btn hamburger-icon" data-action="toggle-main-menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></button>
+        <button class="topbar-central-trigger" data-action="toggle-login-panel"><div class="central-text-wrapper"><span class="topbar-text"></span></div></button>
+        <button class="topbar-icon-btn notification-bell" data-action="toggle-notifications" aria-label="Powiadomienia"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div class="notification-dot"></div></button>
+    </div>
+    <div class="login-panel" aria-hidden="true">
+        <form id="tt-login-form" class="login-form">
+            <input type="text" id="tt-username" name="log" aria-label="Username" />
+            <input type="password" id="tt-password" name="pwd" aria-label="Password" />
+            <button type="submit" id="tt-login-submit">ENTER</button>
+        </form>
+    </div>
+    <div class="logged-in-menu" aria-hidden="true">
+        <a href="#" data-action="open-account-modal" class="accountMenuButton">Konto</a>
+        <a href="#" data-action="logout" class="logout-link">Wyloguj</a>
+    </div>
+
+    <template id="slide-template">
+        <div class="webyx-section swiper-slide">
+            <div class="tiktok-symulacja">
+                <video crossorigin playsinline muted autoplay preload="auto" poster="" class="player"></video>
+                <div class="sidebar visible">
+                    <div class="profile">
+                        <button class="profileButton" data-action="open-public-profile"><img src="https://i.pravatar.cc/100" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <div class="plus" aria-hidden="true">+</div>
+                    </div>
+                </div>
+                <div class="bottombar">
+                    <div class="text-info">
+                        <div class="text-user">@testuser</div>
+                        <div class="text-description">Test description</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <div id="webyx-container" class="swiper">
+        <div class="swiper-wrapper">
+        </div>
+    </div>
+</div>
+<div id="firstLoginModal" class="first-login-modal-overlay">
+  <div class="first-login-modal-content">
+    <div class="first-login-header">
+      <h2 class="first-login-title">Witaj w Ting Tong!</h2>
+      <p class="first-login-subtitle">Uzupełnij swój profil</p>
+    </div>
+    <div class="first-login-body">
+      <p>This is a mock modal for verification.</p>
+    </div>
+  </div>
+</div>
+<div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">
+    <button id="mock-first-login-btn" style="background: #ff0055; color: white; border: 1px solid white; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 5px;">MOCK MODAL</button>
+</div>
+<div id="pwa-install-bar" class="pwa-prompt">
+    <p>Install PWA</p>
+    <button id="pwa-install-button">Install</button>
+</div>
+<!-- Scripts -->
+<script type="module" src="../../ting-tong-theme/js/app.js"></script>
+
+</body>
+</html>

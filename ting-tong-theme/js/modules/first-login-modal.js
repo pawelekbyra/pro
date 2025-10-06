@@ -21,9 +21,8 @@ function showFirstLoginModal(userEmail) {
   const emailEl = document.getElementById('firstLoginEmail');
   if (emailEl) emailEl.textContent = userEmail;
 
-  // Pokaż modal
-  modal.classList.add('visible');
-  document.body.style.overflow = 'hidden';
+  // Pokaż modal za pomocą UI.openModal
+  UI.openModal(modal);
 
   // Focus pierwszy input
   setTimeout(() => {
@@ -70,6 +69,14 @@ function setupEventListeners() {
   const form = document.getElementById('firstLoginForm');
   if (form) {
     form.addEventListener('submit', handleFormSubmit);
+  }
+
+  // Mock button for testing
+  const mockBtn = document.getElementById("mock-first-login-btn");
+  if (mockBtn) {
+    mockBtn.addEventListener("click", () => {
+      showFirstLoginModal('test-user@example.com');
+    });
   }
 }
 
