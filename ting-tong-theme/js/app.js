@@ -8,13 +8,16 @@ import { Handlers } from './modules/handlers.js';
 import { Notifications } from './modules/notifications.js';
 import { AccountPanel } from './modules/account-panel.js';
 
-// DEZAKTYWACJA SERVICE WORKER (USUWANIE CACHE PWA)
+// Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function(registrations) {
-    for(let registration of registrations) {
-      registration.unregister();
-      console.log('Service Worker unregistered');
-    }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/ting-tong-theme/sw.js')
+      .then(registration => {
+        console.log('Service Worker zarejestrowany:', registration);
+      })
+      .catch(error => {
+        console.error('Błąd rejestracji Service Workera:', error);
+      });
   });
 }
 
@@ -281,6 +284,27 @@ document.addEventListener("DOMContentLoaded", () => {
               handleMediaChange(swiper);
             },
             slideChange: handleMediaChange,
+            click: function (swiper, event) {
+              // Ignoruj kliknięcia na elementach interaktywnych (np. przyciski),
+              // ponieważ są one obsługiwane przez dedykowany `mainClickHandler`.
+              if (event.target.closest('[data-action]')) {
+                return;
+              }
+
+              const activeSlide = swiper.slides[swiper.activeIndex];
+              const video = activeSlide ? activeSlide.querySelector('video') : null;
+
+              if (video) {
+                const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+                if (video.paused) {
+                  video.play();
+                  if (pauseOverlay) pauseOverlay.classList.remove('visible');
+                } else {
+                  video.pause();
+                  if (pauseOverlay) pauseOverlay.classList.add('visible');
+                }
+              }
+            },
           },
         });
 
@@ -290,20 +314,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const pwaInstallBar = document.getElementById("pwa-install-bar");
           const appFrame = document.getElementById("app-frame");
 
-          // [Poprawiony fragment dla paska PWA]
-          // Sprawdza, czy pasek istnieje i CZY JESTEŚMY W TRYBIE PRZEGLĄDARKOWYM.
+          // Pokaż pasek instalacji PWA tylko wtedy, gdy aplikacja nie jest
+          // w trybie samodzielnym (standalone).
           if (pwaInstallBar && !PWA.isStandalone()) {
-            // Tryb przeglądarkowy: Pokaż pasek i dostosuj wysokość app-frame
             pwaInstallBar.classList.add("visible");
             if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-          } else {
-            // Tryb PWA lub brak paska: Jawnie ukryj pasek za pomocą dedykowanej klasy.
-            if (pwaInstallBar) {
-              pwaInstallBar.classList.add("force-hide");
-            }
-            if (appFrame) {
-              appFrame.classList.remove("app-frame--pwa-visible");
-            }
           }
           UI.DOM.preloader.addEventListener(
             "transitionend",

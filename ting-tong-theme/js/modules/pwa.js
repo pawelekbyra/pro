@@ -16,9 +16,19 @@ const isIOS = () => {
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   );
 };
-const isStandalone = () =>
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone;
+/**
+ * Sprawdza, czy aplikacja działa w trybie samodzielnym (PWA).
+ * @returns {boolean} True, jeśli aplikacja jest w trybie PWA.
+ */
+const isStandalone = () => {
+  // Standardowy, nowoczesny sposób sprawdzania trybu PWA, działający na większości przeglądarek.
+  const isStandardPWA = window.matchMedia("(display-mode: standalone)").matches;
+
+  // Starszy, niestandardowy sposób wymagany do poprawnego wykrywania na Safari w systemie iOS.
+  const isIosPWA = window.navigator.standalone === true;
+
+  return isStandardPWA || isIosPWA;
+};
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
 // State
