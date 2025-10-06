@@ -7,6 +7,7 @@ import { PWA } from './modules/pwa.js';
 import { Handlers } from './modules/handlers.js';
 import { Notifications } from './modules/notifications.js';
 import { AccountPanel } from './modules/account-panel.js';
+import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 
 // Rejestracja Service Workera
@@ -101,6 +102,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    function _initializeStateListeners() {
+      // Listener dla logowania
+      State.on('user:login', async (data) => {
+        console.log('User logged in:', data.userData.email);
+
+        if (data.slidesData && Array.isArray(data.slidesData)) {
+          slidesData.length = 0;
+          Array.prototype.push.apply(slidesData, data.slidesData);
+          slidesData.forEach((s) => {
+            s.likeId = String(s.likeId);
+          });
+          UI.renderSlides();
+        }
+
+        UI.updateUIForLoginState();
+        UI.updateTranslations();
+
+        if (data.userData && AccountPanel?.populateProfileForm) {
+          AccountPanel.populateProfileForm(data.userData);
+        }
+      });
+
+      // Listener dla wylogowania
+      State.on('user:logout', () => {
+        console.log('User logged out');
+
+        slidesData.forEach(slide => {
+          slide.isLiked = false;
+        });
+
+        UI.updateUIForLoginState();
+        UI.updateTranslations();
+      });
+
+      // Listener dla zmian stanu logowania
+      State.on('state:change:isUserLoggedIn', ({ oldValue, newValue }) => {
+        console.log(`Login state changed: ${oldValue} -> ${newValue}`);
+        UI.updateUIForLoginState();
+      });
+
+      // Listener dla zmian języka
+      State.on('state:change:currentLang', ({ newValue }) => {
+        console.log(`Language changed to: ${newValue}`);
+        UI.updateTranslations();
+      });
+    }
+
+    async function _verifyLoginState() {
+      try {
+        const isLoggedIn = await authManager.checkLoginStatus();
+
+        if (isLoggedIn) {
+          console.log('User is logged in, profile loaded');
+          const userData = State.get('currentUser');
+
+          if (userData && AccountPanel?.populateProfileForm) {
+            AccountPanel.populateProfileForm(userData);
+          }
+        } else {
+          console.log('User is not logged in');
+        }
+      } catch (error) {
+        console.warn('Failed to verify login state:', error);
+      }
+    }
+
     async function _fetchAndUpdateSlideData() {
       const json = await API.fetchSlidesData();
       if (json.success && Array.isArray(json.data)) {
@@ -127,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         State.set("currentLang", selectedLang);
         localStorage.setItem("tt_lang", selectedLang);
 
+        _verifyLoginState(); // Async verification in background
         UI.renderSlides();
         UI.updateTranslations();
 
@@ -296,6 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
       init: () => {
         _setInitialConfig();
         _initializeGlobalListeners();
+        _initializeStateListeners(); // DODANE
         AccountPanel.init();
         FirstLoginModal.init();
         UI.initGlobalPanels();
@@ -307,6 +376,14 @@ document.addEventListener("DOMContentLoaded", () => {
       fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
     };
   })();
+
+  // Debug tools (tylko localhost)
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('local'))) {
+    window.ttAuth = authManager;
+    window.ttState = State;
+    console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
+    console.log('Available: window.ttAuth, window.ttState');
+  }
 
   App.init();
 });

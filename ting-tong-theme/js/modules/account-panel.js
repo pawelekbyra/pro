@@ -1,5 +1,7 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
+import { authManager } from './auth-manager.js';
+import { State } from './state.js';
 
 // Global variables for the panel
 let cropImage = null;
@@ -26,6 +28,24 @@ function init() {
   initializeCropper();
   setupEventListeners();
   loadUserSettings();
+
+  // NOWE: Nasłuchuj zmian w State
+  State.on('user:login', (data) => {
+    if (data.userData) {
+      populateProfileForm(data.userData);
+    }
+  });
+
+  State.on('user:logout', () => {
+    const form = document.getElementById('profileForm');
+    if (form) form.reset();
+
+    const displayName = document.getElementById("displayName");
+    const userEmail = document.getElementById("userEmail");
+
+    if (displayName) displayName.textContent = '';
+    if (userEmail) userEmail.textContent = '';
+  });
 }
 
 // Load user settings - MOCK
@@ -88,42 +108,76 @@ async function saveSettings() {
 // Profile data functions
 async function loadInitialProfileData() {
   try {
+    const cachedUser = State.get('currentUser');
+
+    if (cachedUser && cachedUser.user_id) {
+      console.log('Using cached user data');
+      populateProfileForm(cachedUser);
+      return;
+    }
+
+    console.log('Fetching user data from server');
     const result = await loadUserProfile();
-    if (result.success) {
+
+    if (result.success && result.data) {
       populateProfileForm(result.data);
+      State.set('currentUser', result.data);
     } else {
-      throw new Error(
-        result.data?.message || Utils.getTranslation("profileUpdateError"),
-      );
+      throw new Error(result.data?.message || Utils.getTranslation("profileUpdateError"));
     }
   } catch (error) {
-    console.log("Could not load profile data:", error);
-    showError("profileError", Utils.getTranslation("profileUpdateError"));
+    console.error('Could not load profile data:', error);
+    showError("profileError", error.message || Utils.getTranslation("profileUpdateError"));
   }
 }
 
 function populateProfileForm(data) {
-  // Zawsze aktualizuj pola formularza, nawet jeśli dane są puste.
-  document.getElementById("firstName").value = data.first_name || '';
-  document.getElementById("lastName").value = data.last_name || '';
-  document.getElementById("email").value = data.email || '';
+  if (!data || typeof data !== 'object') {
+    console.error('Invalid data passed to populateProfileForm:', data);
+    return;
+  }
 
-  // Zawsze aktualizuj dane wyświetlane pod awatarem.
-  document.getElementById("displayName").textContent = data.display_name || '';
-  document.getElementById("userEmail").textContent = data.email || '';
+  const firstName = document.getElementById("firstName");
+  const lastName = document.getElementById("lastName");
+  const email = document.getElementById("email");
+  const displayName = document.getElementById("displayName");
+  const userEmail = document.getElementById("userEmail");
+  const userAvatar = document.getElementById("userAvatar");
 
-  // Avatar aktualizuj tylko jeśli jest dostępny.
-  if (data.avatar) {
-    document.getElementById("userAvatar").src = data.avatar;
+  if (firstName) firstName.value = data.first_name || '';
+  if (lastName) lastName.value = data.last_name || '';
+  if (email) email.value = data.email || '';
+  if (displayName) displayName.textContent = data.display_name || data.email || 'User';
+  if (userEmail) userEmail.textContent = data.email || '';
+
+  if (userAvatar && data.avatar) {
+    userAvatar.src = data.avatar;
+    userAvatar.onerror = function() {
+      this.src = 'https://i.pravatar.cc/96?u=' + (data.email || 'default');
+    };
   }
 }
 
 // Modal visibility functions
 function openAccountModal() {
   const modal = document.getElementById("accountModal");
+  if (!modal) {
+    console.error('Account modal element not found');
+    return;
+  }
+
   modal.classList.add("visible");
   document.body.style.overflow = "hidden";
-  // loadInitialProfileData(); // USUNIĘTO - DANE SĄ USTAWIENIE W HANDLERZE LOGOWANIA
+
+  const currentUser = State.get('currentUser');
+
+  if (currentUser && currentUser.user_id) {
+    console.log('Using existing user data');
+    populateProfileForm(currentUser);
+  } else {
+    console.log('Loading fresh user data');
+    loadInitialProfileData();
+  }
 }
 
 // Tab switching
@@ -416,12 +470,17 @@ async function cropAndSave() {
 
     if (result?.success && result.data?.url) {
       const newAvatarUrl = result.data.url + "?t=" + Date.now();
+      // Zaktualizuj wszystkie instancje avatara
       document.getElementById("userAvatar").src = newAvatarUrl;
       document
         .querySelectorAll(".profile img, .tiktok-symulacja .profile img")
         .forEach((img) => {
           img.src = newAvatarUrl;
         });
+      // Zaktualizuj cache w State
+      const currentUser = State.get('currentUser') || {};
+      currentUser.avatar = newAvatarUrl;
+      State.set('currentUser', currentUser);
       showSuccess(
         "profileSuccess",
         Utils.getTranslation("avatarUpdateSuccess"),
@@ -452,23 +511,14 @@ async function cropAndSave() {
 }
 
 async function apiRequest(action, data = {}) {
-  const body = new URLSearchParams({ action, nonce: ajax_object.nonce });
-  for (const key in data) {
-    body.append(key, data[key]);
-  }
   try {
-    const response = await fetch(ajax_object.ajax_url, {
-      method: "POST",
-      body,
-      credentials: "same-origin",
-    });
-    if (!response.ok) throw new Error(`Błąd serwera: ${response.status}`);
-    const result = await response.json();
-    if (result.new_nonce) ajax_object.nonce = result.new_nonce;
-    return result;
+    return await authManager.ajax(action, data);
   } catch (error) {
-    console.error(`Błąd API dla akcji "${action}":`, error);
-    return { success: false, data: { message: error.message } };
+    console.error(`API error for action "${action}":`, error);
+    return {
+      success: false,
+      data: { message: error.message || 'Request failed' }
+    };
   }
 }
 async function uploadAvatar(dataUrl) {
@@ -509,6 +559,13 @@ async function handleProfileSubmit(event) {
         "profileSuccess",
         Utils.getTranslation("profileUpdateSuccess"),
       );
+      // Zaktualizuj cache w State
+      const currentUser = State.get('currentUser') || {};
+      const updatedUser = {
+        ...currentUser,
+        ...result.data
+      };
+      State.set('currentUser', updatedUser);
       populateProfileForm(result.data);
     } else {
       throw new Error(

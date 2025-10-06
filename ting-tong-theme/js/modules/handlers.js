@@ -5,6 +5,7 @@ import { API, slidesData } from './api.js';
 import { PWA } from './pwa.js';
 import { Notifications } from './notifications.js';
 import { AccountPanel } from './account-panel.js';
+import { authManager } from './auth-manager.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -34,22 +35,6 @@ function handleNotificationClick(event) {
   if (item.classList.contains("unread")) {
     item.classList.remove("unread");
   }
-}
-
-async function handleLogout(link) {
-  if (link.disabled) return;
-  link.disabled = true;
-  const json = await API.logout();
-  if (json.success) {
-    State.set("isUserLoggedIn", false);
-    UI.showAlert(Utils.getTranslation("logoutSuccess"));
-    await API.refreshNonce(); // Odśwież nonce PO wylogowaniu
-    slidesData.forEach((slide) => (slide.isLiked = false));
-    UI.updateUIForLoginState();
-  } else {
-    UI.showAlert(json.data?.message || "Logout failed.", true);
-  }
-  link.disabled = false;
 }
 
 async function handleLikeToggle(button) {
@@ -168,96 +153,206 @@ export const Handlers = {
       const slideId = document.querySelector(".swiper-slide-active")
         ?.dataset.slideId;
 
-      if (!slideId || !commentId) return;
+      // Walidacja przed wykonaniem akcji
+      if (!slideId || !commentId) {
+        console.error('Missing slideId or commentId');
+        return;
+      }
+
+      // Sprawdź czy użytkownik jest zalogowany (dla akcji wymagających autoryzacji)
+      const requiresAuth = ['edit-comment', 'delete-comment', 'toggle-comment-like'];
+      if (requiresAuth.includes(actionTarget.dataset.action) && !State.get('isUserLoggedIn')) {
+        UI.showAlert(Utils.getTranslation('likeAlert'), true);
+        return;
+      }
 
       switch (actionTarget.dataset.action) {
         case "toggle-comment-like": {
           const countEl = commentItem.querySelector(".comment-like-count");
-          let currentLikes =
-            parseInt(countEl.textContent.replace(/K|M/g, "")) || 0;
 
+          if (!countEl) {
+            console.error('Like count element not found');
+            return;
+          }
+
+          let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, "")) || 0;
+
+          // Optimistic UI update
           actionTarget.classList.toggle("active");
           const isLiked = actionTarget.classList.contains("active");
           currentLikes += isLiked ? 1 : -1;
           countEl.textContent = Utils.formatCount(currentLikes);
 
-          API.toggleCommentLike(slideId, commentId).then((response) => {
-            if (!response.success) {
-              actionTarget.classList.toggle("active"); // Revert on failure
-              currentLikes += isLiked ? -1 : 1;
-              countEl.textContent = Utils.formatCount(currentLikes);
-              UI.showAlert(
-                Utils.getTranslation("failedToUpdateLike"),
-                true,
-              );
-            }
-          });
+          // Disable button podczas requestu
+          actionTarget.disabled = true;
+
+          API.toggleCommentLike(slideId, commentId)
+            .then((response) => {
+              // Walidacja odpowiedzi
+              if (!response || typeof response.success !== 'boolean') {
+                throw new Error('Invalid response format');
+              }
+
+              if (!response.success) {
+                // Revert on failure
+                actionTarget.classList.toggle("active");
+                currentLikes += isLiked ? -1 : 1;
+                countEl.textContent = Utils.formatCount(currentLikes);
+
+                throw new Error(
+                  response.data?.message || Utils.getTranslation("failedToUpdateLike")
+                );
+              }
+
+              // Zaktualizuj z prawdziwą wartością z serwera
+              if (response.data?.likes !== undefined) {
+                countEl.textContent = Utils.formatCount(response.data.likes);
+              }
+            })
+            .catch((error) => {
+              console.error('Toggle comment like error:', error);
+              UI.showAlert(error.message || Utils.getTranslation("failedToUpdateLike"), true);
+            })
+            .finally(() => {
+              actionTarget.disabled = false;
+            });
           break;
         }
         case "edit-comment": {
-          const currentText = commentItem.querySelector(".comment-text").textContent;
+          const textElement = commentItem.querySelector(".comment-text");
+
+          if (!textElement) {
+            console.error('Comment text element not found');
+            return;
+          }
+
+          const currentText = textElement.textContent;
           const newText = prompt(
             Utils.getTranslation("editCommentPrompt"),
             currentText,
           );
 
-          if (newText && newText.trim() && newText.trim() !== currentText) {
-            API.editComment(slideId, commentId, newText.trim()).then(
-              (response) => {
-                if (response.success) {
-                  const slideData = slidesData.find((s) => s.id === slideId);
-                  if (slideData) {
-                    const commentIndex = slideData.comments.findIndex(c => String(c.id) === String(commentId));
-                    if (commentIndex > -1) {
-                      slideData.comments[commentIndex] = response.data;
-                    }
-                    UI.renderComments(slideData.comments);
-                  }
-                  UI.showToast(Utils.getTranslation("commentUpdateSuccess"));
-                } else {
-                  UI.showAlert(
-                    response.data?.message || Utils.getTranslation("commentUpdateError"),
-                    true,
-                  );
-                }
-              },
-            );
+          // Walidacja input
+          if (!newText || !newText.trim()) {
+            return;
           }
+
+          if (newText.trim() === currentText) {
+            return; // Brak zmian
+          }
+
+          // Disable edit button podczas requestu
+          actionTarget.disabled = true;
+
+          API.editComment(slideId, commentId, newText.trim())
+            .then((response) => {
+              // Walidacja odpowiedzi
+              if (!response || typeof response.success !== 'boolean') {
+                throw new Error('Invalid response format');
+              }
+
+              if (!response.success) {
+                throw new Error(
+                  response.data?.message || Utils.getTranslation("commentUpdateError")
+                );
+              }
+
+              // Sprawdź czy mamy dane komentarza
+              if (!response.data || !response.data.id) {
+                throw new Error('Invalid comment data in response');
+              }
+
+              // Zaktualizuj w slidesData
+              const slideData = slidesData.find((s) => s.id === slideId);
+              if (slideData && Array.isArray(slideData.comments)) {
+                const commentIndex = slideData.comments.findIndex(
+                  c => String(c.id) === String(commentId)
+                );
+                if (commentIndex > -1) {
+                  slideData.comments[commentIndex] = response.data;
+                }
+                UI.renderComments(slideData.comments);
+              }
+
+              UI.showToast(Utils.getTranslation("commentUpdateSuccess"));
+            })
+            .catch((error) => {
+              console.error('Edit comment error:', error);
+              UI.showAlert(error.message || Utils.getTranslation("commentUpdateError"), true);
+            })
+            .finally(() => {
+              actionTarget.disabled = false;
+            });
           break;
         }
         case "delete-comment": {
-          if (confirm(Utils.getTranslation("deleteCommentConfirm"))) {
-            API.deleteComment(slideId, commentId).then((response) => {
-              if (response.success) {
-                const slideData = slidesData.find((s) => s.id === slideId);
-                if (slideData) {
-                  const commentIndex = slideData.comments.findIndex(c => String(c.id) === String(commentId));
+          if (!confirm(Utils.getTranslation("deleteCommentConfirm"))) {
+            return;
+          }
+
+          // Disable delete button podczas requestu
+          actionTarget.disabled = true;
+
+          API.deleteComment(slideId, commentId)
+            .then((response) => {
+              // Walidacja odpowiedzi
+              if (!response || typeof response.success !== 'boolean') {
+                throw new Error('Invalid response format');
+              }
+
+              if (!response.success) {
+                throw new Error(
+                  response.data?.message || Utils.getTranslation("commentDeleteError")
+                );
+              }
+
+              // Sprawdź czy mamy new_count
+              if (typeof response.data?.new_count !== 'number') {
+                console.warn('Missing new_count in response, calculating manually');
+              }
+
+              // Zaktualizuj slidesData
+              const slideData = slidesData.find((s) => s.id === slideId);
+              if (slideData) {
+                // Usuń komentarz z lokalnych danych
+                if (Array.isArray(slideData.comments)) {
+                  const commentIndex = slideData.comments.findIndex(
+                    c => String(c.id) === String(commentId)
+                  );
                   if (commentIndex > -1) {
                     slideData.comments.splice(commentIndex, 1);
                   }
-                  slideData.initialComments = response.data.new_count;
-
-                  UI.renderComments(slideData.comments);
-
-                  const slideElement = document.querySelector(`.swiper-slide-active[data-slide-id="${slideId}"]`);
-                  const mainSlideCount = slideElement?.querySelector(".comment-count");
-                  if (mainSlideCount) {
-                    mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
-                  }
-                  const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
-                  if (commentsTitle) {
-                    commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
-                  }
                 }
-                UI.showToast(Utils.getTranslation("commentDeleteSuccess"));
-              } else {
-                UI.showAlert(
-                  response.data?.message || Utils.getTranslation("commentDeleteError"),
-                  true,
+
+                // Zaktualizuj licznik
+                slideData.initialComments = response.data?.new_count ?? slideData.comments.length;
+
+                // Re-render komentarzy
+                UI.renderComments(slideData.comments);
+
+                // Zaktualizuj licznik w głównym widoku
+                const slideElement = document.querySelector(
+                  `.swiper-slide-active[data-slide-id="${slideId}"]`
                 );
+                const mainSlideCount = slideElement?.querySelector(".comment-count");
+                if (mainSlideCount) {
+                  mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                }
+
+                // Zaktualizuj tytuł modala
+                const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+                if (commentsTitle) {
+                  commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+                }
               }
+
+              UI.showToast(Utils.getTranslation("commentDeleteSuccess"));
+            })
+            .catch((error) => {
+              console.error('Delete comment error:', error);
+              UI.showAlert(error.message || Utils.getTranslation("commentDeleteError"), true);
+              actionTarget.disabled = false; // Re-enable jeśli błąd
             });
-          }
           break;
         }
       }
@@ -277,47 +372,102 @@ export const Handlers = {
     if (sortOption) {
       const dropdown = sortOption.closest(".sort-dropdown");
       const newSortOrder = sortOption.dataset.sort;
+
+      // Jeśli ten sam sort order - tylko zamknij dropdown
       if (State.get("commentSortOrder") === newSortOrder) {
         dropdown.classList.remove("open");
         return;
       }
 
+      // Disable wszystkie opcje podczas requestu
+      const allOptions = dropdown.querySelectorAll(".sort-option");
+      allOptions.forEach(opt => opt.style.pointerEvents = 'none');
+
+      // Zaktualizuj UI
       State.set("commentSortOrder", newSortOrder);
       UI.updateTranslations();
-      dropdown
-        .querySelectorAll(".sort-option")
-        .forEach((opt) => opt.classList.remove("active"));
+      allOptions.forEach((opt) => opt.classList.remove("active"));
       sortOption.classList.add("active");
       dropdown.classList.remove("open");
 
-      const slideId = document.querySelector(".swiper-slide-active")
-        ?.dataset.slideId;
-      if (slideId) {
-        const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
-        const commentsList = modalBody.querySelector(".comments-list");
-        if (commentsList) {
-          commentsList.style.opacity = "0.5";
-          commentsList.style.transition = "opacity 0.2s ease-in-out";
-        }
+      const slideId = document.querySelector(".swiper-slide-active")?.dataset.slideId;
 
-        API.fetchComments(slideId).then((response) => {
-          if (response.success) {
-            let comments = response.data;
+      if (!slideId) {
+        console.error('No active slide found for sorting');
+        allOptions.forEach(opt => opt.style.pointerEvents = '');
+        return;
+      }
 
-            if (newSortOrder === "popular") {
-              comments.sort((a, b) => b.likes - a.likes);
-            } else {
-              comments.sort(
-                (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
-              );
+      const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+      const commentsList = modalBody?.querySelector(".comments-list");
+
+      if (commentsList) {
+        commentsList.style.opacity = "0.5";
+        commentsList.style.transition = "opacity 0.2s ease-in-out";
+      }
+
+      API.fetchComments(slideId)
+        .then((response) => {
+          // Walidacja
+          if (!response || typeof response.success !== 'boolean') {
+            throw new Error('Invalid response format');
+          }
+
+          if (!response.success) {
+            throw new Error(response.data?.message || 'Failed to fetch comments');
+          }
+
+          let comments = response.data;
+
+          if (!Array.isArray(comments)) {
+            console.warn('Comments data is not an array');
+            comments = [];
+          }
+
+          // Sortowanie z zabezpieczeniem przed undefined
+          if (newSortOrder === "popular") {
+            comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+          } else {
+            comments.sort((a, b) => {
+              const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+              const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+              return dateB - dateA;
+            });
+          }
+
+          // Render z opóźnieniem dla animacji
+          setTimeout(() => {
+            UI.renderComments(comments);
+          }, 200);
+        })
+        .catch((error) => {
+          console.error('Sort comments error:', error);
+          UI.showAlert(
+            error.message || Utils.getTranslation('commentLoadError') || 'Błąd sortowania',
+            true
+          );
+
+          // Przywróć poprzedni sort order
+          const previousSort = newSortOrder === 'popular' ? 'newest' : 'popular';
+          State.set("commentSortOrder", previousSort);
+
+          allOptions.forEach((opt) => {
+            opt.classList.remove("active");
+            if (opt.dataset.sort === previousSort) {
+              opt.classList.add("active");
             }
+          });
+        })
+        .finally(() => {
+          // Re-enable opcje
+          allOptions.forEach(opt => opt.style.pointerEvents = '');
 
-            setTimeout(() => {
-              UI.renderComments(comments);
-            }, 200);
+          // Przywróć opacity
+          if (commentsList) {
+            commentsList.style.opacity = "1";
           }
         });
-      }
+
       return;
     }
 
@@ -346,25 +496,63 @@ export const Handlers = {
       case "reply-to-comment": {
         const commentItem = actionTarget.closest(".comment-item");
         const commentId = commentItem?.dataset.commentId;
-        const user = commentItem?.querySelector(".comment-user")?.textContent;
+        const userElement = commentItem?.querySelector(".comment-user");
+
+        // Walidacja
+        if (!commentId || !userElement) {
+          console.error('Invalid reply target');
+          return;
+        }
+
+        const user = userElement.textContent;
+
+        // Sprawdź czy już nie odpowiadamy na ten komentarz
+        const currentReplyId = State.get("replyingToComment");
+        if (currentReplyId === commentId) {
+          // Już odpowiadamy na ten komentarz - tylko focus input
+          UI.focusCommentInput();
+          return;
+        }
 
         State.set("replyingToComment", commentId);
 
         const formContainer = document.querySelector(".comment-form-container");
-        let replyContext = formContainer.querySelector(".reply-context");
-
-        if (!replyContext) {
-          replyContext = document.createElement("div");
-          replyContext.className = "reply-context";
-          formContainer.prepend(replyContext);
+        if (!formContainer) {
+          console.error('Comment form container not found');
+          return;
         }
 
+        // Usuń stary reply context jeśli istnieje (zapobieganie duplikatom)
+        const oldReplyContext = formContainer.querySelector(".reply-context");
+        if (oldReplyContext) {
+          oldReplyContext.remove();
+        }
+
+        // Utwórz nowy reply context
+        const replyContext = document.createElement("div");
+        replyContext.className = "reply-context";
+        formContainer.prepend(replyContext);
+
         const cancelAriaLabel = Utils.getTranslation("cancelReplyAriaLabel");
+        const replyingToText = Utils.getTranslation("replyingTo").replace("{user}", user);
+
         replyContext.innerHTML = `
-          <span class="reply-context-text">${Utils.getTranslation("replyingTo").replace("{user}", user)}</span>
+          <span class="reply-context-text">${replyingToText}</span>
           <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>
         `;
         replyContext.style.display = "flex";
+
+        // Animacja wejścia
+        requestAnimationFrame(() => {
+          replyContext.style.opacity = '0';
+          replyContext.style.transform = 'translateY(-10px)';
+          replyContext.style.transition = 'opacity 0.2s, transform 0.2s';
+
+          requestAnimationFrame(() => {
+            replyContext.style.opacity = '1';
+            replyContext.style.transform = 'translateY(0)';
+          });
+        });
 
         UI.focusCommentInput();
         break;
@@ -409,37 +597,86 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal": {
-        const slideId =
-          actionTarget.closest(".webyx-section")?.dataset.slideId;
-        if (slideId) {
-          UI.DOM.commentsModal.querySelector(".modal-body").innerHTML =
-            '<div class="loading-spinner"></div>';
-          API.fetchComments(slideId).then((response) => {
-            if (response.success) {
-              let comments = response.data;
-              const sortOrder = State.get("commentSortOrder");
-              if (sortOrder === "popular") {
-                comments.sort((a, b) => b.likes - a.likes);
-              } else {
-                comments.sort(
-                  (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
-                );
-              }
-              UI.renderComments(comments);
-            } else {
-              UI.renderComments([]);
-            }
-          });
+        const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+
+        if (!slideId) {
+          console.error('No slideId found for comments modal');
+          return;
         }
+
+        // Pokaż modal z loading spinner
+        const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+        if (!modalBody) {
+          console.error('Modal body not found');
+          return;
+        }
+
+        modalBody.innerHTML = '<div class="loading-spinner"></div>';
         UI.openModal(UI.DOM.commentsModal);
         UI.updateCommentFormVisibility();
-        setTimeout(() => {
-          const modalBody =
-            UI.DOM.commentsModal.querySelector(".modal-body");
-          if (modalBody) {
-            modalBody.scrollTop = modalBody.scrollHeight;
-          }
-        }, 100);
+
+        // Pobierz komentarze z pełnym error handling
+        API.fetchComments(slideId)
+          .then((response) => {
+            // Walidacja odpowiedzi
+            if (!response || typeof response.success !== 'boolean') {
+              throw new Error('Invalid response format');
+            }
+
+            if (!response.success) {
+              throw new Error(response.data?.message || 'Failed to load comments');
+            }
+
+            // Walidacja danych
+            let comments = response.data;
+            if (!Array.isArray(comments)) {
+              console.warn('Comments data is not an array, using empty array');
+              comments = [];
+            }
+
+            // Sortowanie
+            const sortOrder = State.get("commentSortOrder");
+            if (sortOrder === "popular") {
+              comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            } else {
+              comments.sort((a, b) => {
+                const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+                const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+                return dateB - dateA;
+              });
+            }
+
+            // Render komentarzy
+            UI.renderComments(comments);
+
+            // Scroll do dołu
+            setTimeout(() => {
+              if (modalBody && modalBody.scrollHeight) {
+                modalBody.scrollTop = modalBody.scrollHeight;
+              }
+            }, 100);
+          })
+          .catch((error) => {
+            console.error('Failed to load comments:', error);
+
+            // Usuń loading spinner i pokaż błąd
+            modalBody.innerHTML = `
+              <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p style="font-size: 14px; margin: 0;">
+                  ${Utils.getTranslation('commentLoadError') || 'Nie udało się załadować komentarzy'}
+                </p>
+                <button
+                  onclick="this.closest('.modal-overlay').querySelector('[data-action=open-comments-modal]')?.click()"
+                  style="margin-top: 16px; padding: 8px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; cursor: pointer;"
+                >
+                  ${Utils.getTranslation('retry') || 'Spróbuj ponownie'}
+                </button>
+              </div>
+            `;
+          });
         break;
       }
       case "open-info-modal":
@@ -474,7 +711,30 @@ export const Handlers = {
         break;
       case "logout":
         e.preventDefault();
-        handleLogout(actionTarget);
+        (async () => {
+          if (actionTarget.disabled) return;
+
+          actionTarget.disabled = true;
+          const originalText = actionTarget.textContent;
+          actionTarget.textContent = '...';
+
+          try {
+            await authManager.logout();
+
+            slidesData.forEach((slide) => (slide.isLiked = false));
+
+            if (loggedInMenu) loggedInMenu.classList.remove("active");
+
+            UI.showAlert(Utils.getTranslation("logoutSuccess"));
+
+          } catch (error) {
+            console.error('Logout error:', error);
+            UI.showAlert(error.message || 'Logout failed', true);
+          } finally {
+            actionTarget.disabled = false;
+            actionTarget.textContent = originalText;
+          }
+        })();
         break;
       case "toggle-main-menu":
         if (State.get("isUserLoggedIn")) {
@@ -543,86 +803,111 @@ export const Handlers = {
   },
   formSubmitHandler: async (e) => {
     const loginForm = e.target.closest("form#tt-login-form");
+
+    // ========================================================================
+    // OBSŁUGA FORMULARZA LOGOWANIA
+    // ========================================================================
     if (loginForm) {
       e.preventDefault();
-      const username = loginForm.querySelector("#tt-username").value;
-      const password = loginForm.querySelector("#tt-password").value;
+
+      const usernameInput = loginForm.querySelector("#tt-username");
+      const passwordInput = loginForm.querySelector("#tt-password");
       const submitButton = loginForm.querySelector("#tt-login-submit");
 
+      if (!usernameInput || !passwordInput) {
+        UI.showAlert("Form elements not found", true);
+        return;
+      }
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
       if (!username || !password) {
-        UI.showAlert("Please enter username and password.", true);
+        UI.showAlert(Utils.getTranslation("allFieldsRequiredError") || "Please enter username and password.", true);
         return;
       }
 
       submitButton.disabled = true;
+      const originalText = submitButton.textContent;
+      submitButton.innerHTML = '<span class="loading-spinner"></span>';
 
-      API.login({ log: username, pwd: password }).then((json) => {
-        if (json.success) {
-          const { userData, slidesData: newSlides, new_nonce, requires_first_login_setup } = json.data;
+      try {
+        const result = await authManager.login(username, password);
 
-          State.set("isUserLoggedIn", true);
+        if (!result.userData) {
+          throw new Error('Invalid response: missing user data');
+        }
 
-          if (new_nonce) {
-            ajax_object.nonce = new_nonce;
+        if (result.slidesData && Array.isArray(result.slidesData)) {
+          slidesData.length = 0;
+          Array.prototype.push.apply(slidesData, result.slidesData);
+          slidesData.forEach((s) => {
+            s.likeId = String(s.likeId);
+          });
+          UI.renderSlides();
+        }
+
+        if (AccountPanel?.populateProfileForm) {
+          AccountPanel.populateProfileForm(result.userData);
+        }
+
+        if (result.requires_first_login_setup) {
+          const loginPanel = document.querySelector("#app-frame > .login-panel");
+          if (loginPanel) loginPanel.classList.remove("active");
+
+          const topbar = document.querySelector("#app-frame > .topbar");
+          if (topbar) topbar.classList.remove("login-panel-active");
+
+          try {
+            const { FirstLoginModal } = await import('./first-login-modal.js');
+            FirstLoginModal.showFirstLoginModal(result.userData.email);
+          } catch (error) {
+            console.error('Failed to load FirstLoginModal:', error);
+            UI.updateUIForLoginState();
+            UI.showAlert(Utils.getTranslation("loginSuccess"));
           }
-
-          if (newSlides) {
-            slidesData.length = 0;
-            Array.prototype.push.apply(slidesData, newSlides);
-            slidesData.forEach((s) => {
-              s.likeId = String(s.likeId);
-            });
-            UI.renderSlides();
-          }
-
-          if (userData) {
-            AccountPanel.populateProfileForm(userData);
-          }
-
-          // === NOWY KOD: Sprawdź czy wymaga first login setup ===
-          if (requires_first_login_setup) {
-            // Import dynamiczny jeśli nie zaimportowano wcześniej
-            import('./modules/first-login-modal.js').then(module => {
-              const FirstLoginModal = module.FirstLoginModal;
-
-              // Zamknij panel logowania
-              const loginPanel = document.querySelector("#app-frame > .login-panel");
-              if (loginPanel) loginPanel.classList.remove("active");
-              const topbar = document.querySelector("#app-frame > .topbar");
-              if (topbar) topbar.classList.remove("login-panel-active");
-
-              // Pokaż modal pierwszego logowania
-              FirstLoginModal.showFirstLoginModal(userData.email);
-            });
-
-            submitButton.disabled = false;
-            return; // Nie pokazuj standardowego alertu
-          }
-          // === KONIEC NOWEGO KODU ===
-
+        } else {
           UI.updateUIForLoginState();
           UI.showAlert(Utils.getTranslation("loginSuccess"));
-        } else {
-          UI.showAlert(
-            json.data?.message || Utils.getTranslation("loginFailed"),
-            true,
-          );
         }
+
+        usernameInput.value = '';
+        passwordInput.value = '';
+
+      } catch (error) {
+        console.error('Login error:', error);
+        UI.showAlert(
+          error.message || Utils.getTranslation("loginFailed"),
+          true
+        );
+      } finally {
         submitButton.disabled = false;
-      });
+        submitButton.innerHTML = originalText;
+      }
+
       return;
     }
 
+    // ========================================================================
+    // OBSŁUGA FORMULARZA KOMENTARZY (pozostaje bez zmian)
+    // ========================================================================
     const commentForm = e.target.closest("form#comment-form");
     if (commentForm) {
       e.preventDefault();
+
       const input = commentForm.querySelector("#comment-input");
-      if (!input) return;
+      if (!input) {
+        console.error('Comment input not found');
+        return;
+      }
 
       const text = input.value.trim();
-      const hasImage = selectedCommentImage !== null;
+      const hasImage = window.selectedCommentImage !== null;
 
-      if (!text && !hasImage) return;
+      // Walidacja - musi być tekst lub obraz
+      if (!text && !hasImage) {
+        return;
+      }
 
       const button = commentForm.querySelector('button[type="submit"]');
       if (button) button.disabled = true;
@@ -631,77 +916,113 @@ export const Handlers = {
       const slideId = slideElement?.dataset.slideId;
       const parentId = State.get("replyingToComment");
 
-      if (slideId) {
-        let imageUrl = null;
+      if (!slideId) {
+        console.error('No active slide found');
+        if (button) button.disabled = false;
+        return;
+      }
 
-        if (selectedCommentImage) {
-          UI.showToast('Przesyłanie obrazu...');
-          const uploadResult = await API.uploadCommentImage(selectedCommentImage);
+      (async () => {
+        try {
+          let imageUrl = null;
 
-          if (uploadResult.success) {
-            imageUrl = uploadResult.data.url;
-          } else {
-            UI.showAlert(uploadResult.data?.message || 'Nie udało się przesłać obrazu', true);
-            if (button) button.disabled = false;
-            return;
-          }
-        }
+          // Upload obrazu jeśli istnieje
+          if (window.selectedCommentImage) {
+            UI.showToast(Utils.getTranslation('uploadingAvatar') || 'Przesyłanie obrazu...');
 
-        API.postComment(slideId, text, parentId, imageUrl).then((postResponse) => {
-          if (postResponse.success) {
-            input.value = "";
-            State.set("replyingToComment", null);
-            const replyContext = document.querySelector(".reply-context");
-            if (replyContext) replyContext.style.display = "none";
-            UI.removeCommentImage();
+            const uploadResult = await API.uploadCommentImage(window.selectedCommentImage);
 
-            UI.showToast(Utils.getTranslation("postCommentSuccess"));
-
-            const slideData = slidesData.find((s) => s.id === slideId);
-            if (slideData) {
-              const newComment = postResponse.data;
-              if (!Array.isArray(slideData.comments)) {
-                slideData.comments = [];
-              }
-              slideData.comments.push(newComment);
-
-              if (typeof postResponse.data.new_comment_count !== 'undefined') {
-                slideData.initialComments = postResponse.data.new_comment_count;
-              } else {
-                slideData.initialComments = slideData.comments.length;
-              }
-
-              UI.renderComments(slideData.comments);
-
-              const mainSlideCount = slideElement.querySelector(".comment-count");
-              if (mainSlideCount) {
-                mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
-              }
-
-              const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
-              if (commentsTitle) {
-                commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
-              }
-
-              const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
-              if (modalBody) {
-                setTimeout(() => {
-                  modalBody.scrollTop = modalBody.scrollHeight;
-                }, 100);
-              }
+            // Walidacja odpowiedzi
+            if (!uploadResult || typeof uploadResult.success !== 'boolean') {
+              throw new Error('Invalid upload response');
             }
-          } else {
-            UI.showAlert(
-              postResponse.data?.message || Utils.getTranslation("postCommentError"),
-              true,
+
+            if (!uploadResult.success) {
+              throw new Error(
+                uploadResult.data?.message || 'Nie udało się przesłać obrazu'
+              );
+            }
+
+            if (!uploadResult.data?.url) {
+              throw new Error('Missing image URL in response');
+            }
+
+            imageUrl = uploadResult.data.url;
+          }
+
+          // Wyślij komentarz
+          const postResponse = await API.postComment(slideId, text, parentId, imageUrl);
+
+          // Walidacja odpowiedzi
+          if (!postResponse || typeof postResponse.success !== 'boolean') {
+            throw new Error('Invalid comment response');
+          }
+
+          if (!postResponse.success) {
+            throw new Error(
+              postResponse.data?.message || Utils.getTranslation("postCommentError")
             );
           }
+
+          if (!postResponse.data || !postResponse.data.id) {
+            throw new Error('Invalid comment data in response');
+          }
+
+          // Sukces - wyczyść formularz
+          input.value = "";
+          State.set("replyingToComment", null);
+
+          const replyContext = document.querySelector(".reply-context");
+          if (replyContext) replyContext.style.display = "none";
+
+          UI.removeCommentImage();
+
+          UI.showToast(Utils.getTranslation("postCommentSuccess"));
+
+          // Zaktualizuj lokalne dane
+          const slideData = slidesData.find((s) => s.id === slideId);
+          if (slideData) {
+            // Dodaj nowy komentarz
+            if (!Array.isArray(slideData.comments)) {
+              slideData.comments = [];
+            }
+            slideData.comments.push(postResponse.data);
+
+            // Zaktualizuj licznik
+            slideData.initialComments = postResponse.data.new_comment_count ?? slideData.comments.length;
+
+            // Re-render
+            UI.renderComments(slideData.comments);
+
+            // Zaktualizuj licznik w głównym widoku
+            const mainSlideCount = slideElement.querySelector(".comment-count");
+            if (mainSlideCount) {
+              mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+            }
+
+            // Zaktualizuj tytuł modala
+            const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+            if (commentsTitle) {
+              commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+            }
+
+            // Scroll do dołu
+            const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+            if (modalBody) {
+              setTimeout(() => {
+                modalBody.scrollTop = modalBody.scrollHeight;
+              }, 100);
+            }
+          }
+
+        } catch (error) {
+          console.error('Post comment error:', error);
+          UI.showAlert(error.message || Utils.getTranslation("postCommentError"), true);
+        } finally {
           if (button) button.disabled = false;
           input.focus();
-        });
-      } else {
-        if (button) button.disabled = false;
-      }
+        }
+      })();
     }
   },
 };

@@ -1,3 +1,5 @@
+import { authManager } from './auth-manager.js';
+
 if (typeof window.TingTongData === "undefined") {
   console.warn(
     "`TingTongData` is not defined. Using mock data for standalone development.",
@@ -16,24 +18,8 @@ slidesData.forEach((s) => {
 
 async function _request(action, data = {}) {
   try {
-    const body = new URLSearchParams({
-      action,
-      nonce: ajax_object.nonce,
-      ...data,
-    });
-    const response = await fetch(ajax_object.ajax_url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      },
-      credentials: "same-origin",
-      body,
-    });
-    if (!response.ok)
-      throw new Error(`Server responded with ${response.status}`);
-    const json = await response.json();
-    if (json.new_nonce) ajax_object.nonce = json.new_nonce;
-    return json;
+    // Użyj AuthManager zamiast bezpośredniego fetch
+    return await authManager.ajax(action, data);
   } catch (error) {
     console.error(`API Client Error for action "${action}":`, error);
     return { success: false, data: { message: error.message } };
@@ -43,6 +29,19 @@ async function _request(action, data = {}) {
 export const API = {
   uploadCommentImage: async (file) => {
     try {
+      // Walidacja pliku
+      if (!file || !(file instanceof File)) {
+        throw new Error('Invalid file');
+      }
+
+      if (!file.type.startsWith('image/')) {
+        throw new Error('File must be an image');
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File too large (max 5MB)');
+      }
+
       const formData = new FormData();
       formData.append('action', 'tt_upload_comment_image');
       formData.append('nonce', ajax_object.nonce);
@@ -54,13 +53,33 @@ export const API = {
         body: formData,
       });
 
-      if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
       const json = await response.json();
-      if (json.new_nonce) ajax_object.nonce = json.new_nonce;
+
+      // Walidacja odpowiedzi
+      if (!json || typeof json !== 'object') {
+        throw new Error('Invalid response format');
+      }
+
+      if (json.new_nonce) {
+        ajax_object.nonce = json.new_nonce;
+      }
+
+      // Sprawdź czy sukces i czy mamy URL
+      if (json.success && !json.data?.url) {
+        throw new Error('Missing image URL in response');
+      }
+
       return json;
     } catch (error) {
       console.error('API Client Error for image upload:', error);
-      return { success: false, data: { message: error.message } };
+      return {
+        success: false,
+        data: { message: error.message || 'Upload failed' }
+      };
     }
   },
   login: (data) => _request("tt_ajax_login", data),
