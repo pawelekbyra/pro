@@ -642,7 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeVideoSession: 0,
       commentSortOrder: "newest",
       replyingToComment: null,
-      isSoundMuted: true,
+      isSoundMuted: false,
     };
 
     return {
@@ -1307,10 +1307,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const videoEl = section.querySelector("video");
       const pauseOverlay = section.querySelector(".pause-overlay");
 
-      if (tiktokSymulacja && videoEl && pauseOverlay) {
+      const replayOverlay = section.querySelector(".replay-overlay");
+
+      if (tiktokSymulacja && videoEl && pauseOverlay && replayOverlay) {
         tiktokSymulacja.addEventListener("click", (e) => {
           // Upewnij się, że kliknięcie nie pochodzi z paska bocznego lub dolnego
-          if (e.target.closest(".sidebar, .bottombar, .secret-overlay")) {
+          if (e.target.closest(".sidebar, .bottombar, .secret-overlay, .replay-overlay")) {
             return;
           }
           if (videoEl.paused) {
@@ -1318,12 +1320,25 @@ document.addEventListener("DOMContentLoaded", () => {
             videoEl
               .play()
               .catch((error) => console.log("Błąd odtwarzania:", error));
-            pauseOverlay.classList.remove("visible");
           } else {
             // Spauzuj wideo i pokaż nakładkę z ikoną play
             videoEl.pause();
             pauseOverlay.classList.add("visible");
           }
+        });
+
+        videoEl.addEventListener("ended", () => {
+            replayOverlay.classList.add("visible");
+        });
+
+        videoEl.addEventListener("play", () => {
+            replayOverlay.classList.remove("visible");
+            pauseOverlay.classList.remove("visible");
+        });
+
+        videoEl.addEventListener("playing", () => {
+            replayOverlay.classList.remove("visible");
+            pauseOverlay.classList.remove("visible");
         });
       }
       const progressBar = section.querySelector(".progress-bar");
@@ -2373,18 +2388,19 @@ document.addEventListener("DOMContentLoaded", () => {
           case "show-tip-jar":
             document.querySelector("#bmc-wbtn")?.click();
             break;
-          case "play-video":
-            const currentSlide = document.querySelector(".swiper-slide-active");
-            if (currentSlide) {
-              const player = players[currentSlide.dataset.slideId];
-              if (player) {
-                player.play();
-                currentSlide
-                  .querySelector(".pause-overlay")
-                  .classList.remove("visible");
-              }
+          case "play-video": {
+            const video = actionTarget.closest(".tiktok-symulacja").querySelector("video");
+            if(video) video.play();
+            break;
+          }
+          case "replay-video": {
+            const video = actionTarget.closest(".tiktok-symulacja").querySelector("video");
+            if (video) {
+                video.currentTime = 0;
+                video.play();
             }
             break;
+          }
           case "toggle-volume":
             const isMuted = !State.get("isSoundMuted");
             State.set("isSoundMuted", isMuted);
