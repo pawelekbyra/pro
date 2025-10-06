@@ -189,10 +189,10 @@ function tt_enqueue_and_localize_scripts() {
 	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
 	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
-	wp_enqueue_script( 'tingtong-script', get_template_directory_uri() . '/script.js', [ 'jquery', 'swiper-js' ], null, true );
+	wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js' ], null, true );
 
 	wp_localize_script(
-		'tingtong-script',
+		'tingtong-app-script',
 		'TingTongData',
 		[
 			'isLoggedIn' => is_user_logged_in(),
@@ -201,7 +201,7 @@ function tt_enqueue_and_localize_scripts() {
 	);
 
 	wp_localize_script(
-		'tingtong-script',
+		'tingtong-app-script',
 		'ajax_object',
 		[
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -210,6 +210,17 @@ function tt_enqueue_and_localize_scripts() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'tt_enqueue_and_localize_scripts' );
+
+/**
+ * Add type="module" to the app script tag.
+ */
+function tt_add_module_type_to_script( $tag, $handle, $src ) {
+	if ( 'tingtong-app-script' === $handle ) {
+		$tag = str_replace( '<script ', '<script type="module" ', $tag );
+	}
+	return $tag;
+}
+add_filter( 'script_loader_tag', 'tt_add_module_type_to_script', 10, 3 );
 
 /**
  * Dodaje wsparcie dla podstawowych funkcji motywu.
