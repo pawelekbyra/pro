@@ -3513,6 +3513,18 @@ body,
     right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
   }
 
+  /* [FIX] Centrowanie i ograniczanie szerokości paska PWA na desktopie */
+  .pwa-prompt,
+  .pwa-prompt-ios {
+    width: calc(100vh * 9 / 16);
+    max-width: 100%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+  }
+
   /* Body - tło po bokach */
   body {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
