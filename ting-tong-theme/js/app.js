@@ -7,6 +7,7 @@ import { PWA } from './modules/pwa.js';
 import { Handlers } from './modules/handlers.js';
 import { Notifications } from './modules/notifications.js';
 import { AccountPanel } from './modules/account-panel.js';
+import { FirstLoginModal } from './modules/first-login-modal.js';
 
 // Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
@@ -129,6 +130,14 @@ document.addEventListener("DOMContentLoaded", () => {
         "click",
         Handlers.profileModalTabHandler,
       );
+
+      // Mock button for testing
+      const mockBtn = document.getElementById("mock-first-login-btn");
+        if (mockBtn) {
+            mockBtn.addEventListener("click", () => {
+            FirstLoginModal.showFirstLoginModal('test-user@example.com');
+            });
+        }
     }
 
     async function _fetchAndUpdateSlideData() {
@@ -320,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         _setInitialConfig();
         _initializeGlobalListeners();
         AccountPanel.init();
+        FirstLoginModal.init();
         UI.initGlobalPanels();
         UI.initKeyboardListener();
         PWA.init();

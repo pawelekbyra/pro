@@ -24,6 +24,7 @@ get_header();
     <div class="topbar" data-view="default">
         <button class="topbar-icon-btn hamburger-icon" data-action="toggle-main-menu" data-translate-aria-label="menuAriaLabel" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></button>
         <button class="topbar-central-trigger" data-action="toggle-login-panel"><div class="central-text-wrapper"><span class="topbar-text"></span></div></button>
+        <button id="mock-first-login-btn" style="position: absolute; left: 50%; transform: translateX(-50%); z-index: 9999; background: #ff0055; color: white; border: 1px solid white; padding: 2px 5px; font-size: 10px; cursor: pointer;">MOCK MODAL</button>
         <button class="topbar-icon-btn notification-bell" data-action="toggle-notifications" data-translate-aria-label="notificationAriaLabel" aria-label="Powiadomienia"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div class="notification-dot"></div></button>
     </div>
     <div class="login-panel" aria-hidden="true">
@@ -493,5 +494,193 @@ get_header();
     <img src="" alt="Preview">
     <button class="image-lightbox-close">&times;</button>
 </div>
+
+<!-- MODAL PIERWSZEGO LOGOWANIA - Dodaj przed zamknięciem </body> w index.php -->
+
+<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title">
+  <div class="first-login-modal-content">
+
+    <!-- Header z powitaniem -->
+    <div class="first-login-header">
+      <div class="first-login-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+        </svg>
+      </div>
+      <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle">Witaj w Ting Tong!</h2>
+      <p class="first-login-subtitle" data-translate-key="firstLoginSubtitle">Uzupełnij swój profil, aby kontynuować</p>
+    </div>
+
+    <!-- Body ze scrollem -->
+    <div class="first-login-body">
+
+      <!-- Info Box z wyjaśnieniem -->
+      <div class="first-login-info-box">
+        <svg class="first-login-info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="first-login-info-text">
+          <p data-translate-key="firstLoginInfoText">
+            To Twoje pierwsze logowanie! Musisz <strong>ustawić nowe hasło</strong> oraz <strong>uzupełnić dane profilu</strong>.
+            Możesz użyć prawdziwych danych lub <strong>całkowicie zmyślonych</strong> — to Twój wybór! 🎭
+          </p>
+        </div>
+      </div>
+
+      <!-- Wyświetlenie emaila logowania -->
+      <div class="first-login-email-display">
+        <div class="first-login-email-label" data-translate-key="firstLoginEmailLabel">Logujesz się za pomocą</div>
+        <div class="first-login-email-value" id="firstLoginEmail">rurku@wp.pl</div>
+      </div>
+
+      <!-- Formularz -->
+      <form id="firstLoginForm">
+
+        <!-- SEKCJA 1: Avatar (opcjonalnie) -->
+        <div class="first-login-section">
+          <h3 class="first-login-section-title" data-translate-key="firstLoginAvatarTitle">
+            Twój Avatar <span style="font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 400;">(opcjonalnie)</span>
+          </h3>
+          <div class="first-login-avatar-section">
+            <div class="first-login-avatar-wrapper">
+              <div class="first-login-avatar-container">
+                <img id="firstLoginAvatarImg" src="https://i.pravatar.cc/200?u=default" alt="Avatar" class="first-login-avatar-img">
+              </div>
+              <button type="button" class="first-login-avatar-edit-btn" id="firstLoginAvatarEditBtn" data-translate-title="firstLoginAvatarEditBtnTitle" title="Zmień avatar">
+                +
+              </button>
+            </div>
+            <p class="first-login-avatar-hint" data-translate-key="firstLoginAvatarHint">
+              Kliknij +, aby wybrać nowy avatar
+            </p>
+          </div>
+        </div>
+
+        <!-- SEKCJA 2: Dane Osobowe -->
+        <div class="first-login-section">
+          <h3 class="first-login-section-title" data-translate-key="firstLoginPersonalDataTitle">Dane Osobowe</h3>
+
+          <div class="first-login-form-row">
+            <div class="first-login-form-group">
+              <label class="first-login-form-label" for="firstLoginFirstName">
+                <span data-translate-key="firstLoginFirstNameLabel">Imię</span>
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="firstLoginFirstName"
+                class="first-login-form-input"
+                data-translate-placeholder="firstLoginFirstNamePlaceholder"
+                placeholder="Np. Jan lub zmyślone"
+                required
+                autocomplete="given-name"
+              >
+            </div>
+
+            <div class="first-login-form-group">
+              <label class="first-login-form-label" for="firstLoginLastName">
+                <span data-translate-key="firstLoginLastNameLabel">Nazwisko</span>
+                <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="firstLoginLastName"
+                class="first-login-form-input"
+                data-translate-placeholder="firstLoginLastNamePlaceholder"
+                placeholder="Np. Kowalski lub zmyślone"
+                required
+                autocomplete="family-name"
+              >
+            </div>
+          </div>
+
+          <div class="first-login-form-hint" data-translate-key="firstLoginPersonalDataHint">
+            💡 Wskazówka: Możesz użyć prawdziwych lub całkowicie zmyślonych danych
+          </div>
+        </div>
+
+        <!-- SEKCJA 3: Zmiana Hasła -->
+        <div class="first-login-section">
+          <h3 class="first-login-section-title" data-translate-key="firstLoginPasswordTitle">Ustaw Nowe Hasło</h3>
+
+          <div class="first-login-form-group">
+            <label class="first-login-form-label" for="firstLoginCurrentPassword">
+              <span data-translate-key="firstLoginCurrentPasswordLabel">Aktualne hasło</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="firstLoginCurrentPassword"
+              class="first-login-form-input"
+              data-translate-placeholder="firstLoginCurrentPasswordPlaceholder"
+              placeholder="Hasło z emaila powitalnego"
+              required
+              autocomplete="current-password"
+            >
+            <div class="first-login-form-hint" data-translate-key="firstLoginCurrentPasswordHint">
+              Wpisz hasło, które otrzymałeś w emailu powitalnym
+            </div>
+          </div>
+
+          <div class="first-login-form-group">
+            <label class="first-login-form-label" for="firstLoginNewPassword">
+              <span data-translate-key="firstLoginNewPasswordLabel">Nowe hasło</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="firstLoginNewPassword"
+              class="first-login-form-input"
+              data-translate-placeholder="firstLoginNewPasswordPlaceholder"
+              placeholder="Minimum 8 znaków"
+              required
+              autocomplete="new-password"
+            >
+            <div class="password-strength-indicator" id="passwordStrengthIndicator">
+              <div class="password-strength-bar" id="passwordStrengthBar"></div>
+            </div>
+            <div class="password-strength-text" id="passwordStrengthText"></div>
+          </div>
+
+          <div class="first-login-form-group">
+            <label class="first-login-form-label" for="firstLoginConfirmPassword">
+              <span data-translate-key="firstLoginConfirmPasswordLabel">Powtórz nowe hasło</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="password"
+              id="firstLoginConfirmPassword"
+              class="first-login-form-input"
+              data-translate-placeholder="firstLoginConfirmPasswordPlaceholder"
+              placeholder="Wpisz ponownie nowe hasło"
+              required
+              autocomplete="new-password"
+            >
+            <div class="first-login-form-hint" data-translate-key="firstLoginPasswordHelperText">
+              Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Status Messages -->
+      <div class="first-login-status-message first-login-status-success" id="firstLoginSuccess"></div>
+      <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
+
+    </div>
+
+    <!-- Footer z przyciskiem -->
+    <div class="first-login-footer">
+      <button type="submit" form="firstLoginForm" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmitBtn">
+        Gotowe! Przejdź do aplikacji
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Hidden file input for avatar -->
+<input type="file" class="file-input" id="firstLoginAvatarFileInput" accept="image/*">
 
 <?php get_footer(); ?>

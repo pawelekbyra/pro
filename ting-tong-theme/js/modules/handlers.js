@@ -558,22 +558,48 @@ export const Handlers = {
 
       API.login({ log: username, pwd: password }).then((json) => {
         if (json.success) {
-          const { userData, slidesData: newSlides, new_nonce } = json.data;
+          const { userData, slidesData: newSlides, new_nonce, requires_first_login_setup } = json.data;
+
           State.set("isUserLoggedIn", true);
+
           if (new_nonce) {
             ajax_object.nonce = new_nonce;
           }
+
           if (newSlides) {
             slidesData.length = 0;
             Array.prototype.push.apply(slidesData, newSlides);
             slidesData.forEach((s) => {
-                s.likeId = String(s.likeId);
+              s.likeId = String(s.likeId);
             });
             UI.renderSlides();
           }
+
           if (userData) {
             AccountPanel.populateProfileForm(userData);
           }
+
+          // === NOWY KOD: Sprawdź czy wymaga first login setup ===
+          if (requires_first_login_setup) {
+            // Import dynamiczny jeśli nie zaimportowano wcześniej
+            import('./modules/first-login-modal.js').then(module => {
+              const FirstLoginModal = module.FirstLoginModal;
+
+              // Zamknij panel logowania
+              const loginPanel = document.querySelector("#app-frame > .login-panel");
+              if (loginPanel) loginPanel.classList.remove("active");
+              const topbar = document.querySelector("#app-frame > .topbar");
+              if (topbar) topbar.classList.remove("login-panel-active");
+
+              // Pokaż modal pierwszego logowania
+              FirstLoginModal.showFirstLoginModal(userData.email);
+            });
+
+            submitButton.disabled = false;
+            return; // Nie pokazuj standardowego alertu
+          }
+          // === KONIEC NOWEGO KODU ===
+
           UI.updateUIForLoginState();
           UI.showAlert(Utils.getTranslation("loginSuccess"));
         } else {
