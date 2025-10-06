@@ -286,28 +286,13 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           UI.DOM.preloader.classList.add("preloader-hiding");
           UI.DOM.container.classList.add("ready");
-          const pwaInstallBar = document.getElementById("pwa-install-bar");
-          const appFrame = document.getElementById("app-frame");
-
-          // Sprawdź czy aplikacja NIE jest w trybie standalone
-          const isInStandaloneMode = PWA.isStandalone();
-
-          // Pokaż pasek TYLKO jeśli NIE jesteśmy w trybie standalone
-          if (pwaInstallBar && !isInStandaloneMode) {
-            pwaInstallBar.classList.add("visible");
-            if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-          } else if (pwaInstallBar && isInStandaloneMode) {
-            // Upewnij się, że pasek jest ukryty w trybie standalone
-            pwaInstallBar.classList.remove("visible");
-            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
-          }
-
+          // The PWA install bar logic is now fully handled by the PWA module.
           UI.DOM.preloader.addEventListener(
             "transitionend",
             () => {
               UI.DOM.preloader.style.display = "none";
               // Pokaż modal powitalny tylko w przeglądarce, nie w PWA, i tylko raz
-              if (!isInStandaloneMode && UI.DOM.welcomeModal) {
+              if (!PWA.isStandalone() && UI.DOM.welcomeModal) {
                 const hasSeenWelcome = localStorage.getItem('tt_seen_welcome');
                 if (!hasSeenWelcome) {
                   setTimeout(() => {

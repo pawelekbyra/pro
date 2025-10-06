@@ -17,17 +17,35 @@ const isIOS = () => {
   );
 };
 /**
- * Sprawdza, czy aplikacja działa w trybie samodzielnym (PWA).
+ * Sprawdza, czy aplikacja działa w trybie samodzielnym (PWA), używając wielu metod.
  * @returns {boolean} True, jeśli aplikacja jest w trybie PWA.
  */
 const isStandalone = () => {
-  // Standardowy, nowoczesny sposób sprawdzania trybu PWA, działający na większości przeglądarek.
   const isStandardPWA = window.matchMedia("(display-mode: standalone)").matches;
-
-  // Starszy, niestandardowy sposób wymagany do poprawnego wykrywania na Safari w systemie iOS.
   const isIosPWA = window.navigator.standalone === true;
+  const hasPwaFlag = localStorage.getItem("tt_pwa_installed") === "true";
+  const startedWithoutReferrer = document.referrer === "";
 
-  return isStandardPWA || isIosPWA;
+  // Sprawdź, czy URL ma parametr `utm_source=pwa`
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasPwaUrlParam = urlParams.get('utm_source') === 'pwa';
+
+  console.log(`[PWA Debug] Display Mode: ${isStandardPWA}, iOS Standalone: ${isIosPWA}, LocalStorage Flag: ${hasPwaFlag}, No Referrer: ${startedWithoutReferrer}, URL Param: ${hasPwaUrlParam}`);
+
+  // Jeśli flaga jest ustawiona, ufamy jej. To najważniejszy wskaźnik.
+  if (hasPwaFlag) {
+    return true;
+  }
+
+  // Dla urządzeń Apple, `standalone` jest wiarygodnym źródłem.
+  if (isIosPWA) {
+      return true;
+  }
+
+  // `display-mode` jest standardem, ale może zawodzić przy starcie.
+  // Brak referrera to dobry wskaźnik, ale nie stuprocentowy.
+  // Łączymy je, aby zwiększyć pewność, zwłaszcza na Androidzie.
+  return isStandardPWA || (startedWithoutReferrer && hasPwaUrlParam);
 };
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
@@ -44,8 +62,16 @@ function hideIosInstructions() {
   if (iosInstructions) iosInstructions.classList.remove("visible");
 }
 
+function setInstalledFlag() {
+  console.log("[PWA] Setting installation flag in localStorage.");
+  localStorage.setItem("tt_pwa_installed", "true");
+  isAppInstalled = true; // Update in-memory state
+}
+
 function updatePwaUiForInstalledState() {
-  if (!installBar || !installButton) return;
+  if (!installBar) return;
+
+  setInstalledFlag(); // Set the flag whenever we hide the bar permanently
 
   // Ukryj pasek i usuń offset z app-frame
   installBar.classList.remove("visible");
@@ -67,56 +93,67 @@ function closePwaModals() {
     hideIosInstructions();
 }
 
+function runStandaloneCheck() {
+  console.log("[PWA Check] Running standalone check...");
+  const appFrame = document.getElementById("app-frame");
+
+  if (isStandalone()) {
+    console.log("[PWA Check] Standalone detected. Hiding install bar.");
+    if (installBar) installBar.classList.remove("visible");
+    if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+    // Jeśli wykryto tryb standalone, upewnijmy się, że flaga jest ustawiona.
+    setInstalledFlag();
+  } else {
+    console.log("[PWA Check] Standalone not detected. Showing install bar.");
+    // Pokaż pasek TYLKO jeśli NIE jesteśmy w trybie standalone i nie ma promptu
+    if (installBar && !installPromptEvent) {
+        installBar.classList.add("visible");
+        if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+    }
+  }
+}
+
 // Initialization
 function init() {
-  // Always attach event listener to the install button.
   if (installButton) {
     installButton.addEventListener("click", handleInstallClick);
   }
 
-  // For browsers that support `beforeinstallprompt` (like Chrome on Android)
   if ("onbeforeinstallprompt" in window) {
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       installPromptEvent = e;
-      if (installButton) {
-        installButton.disabled = false;
-      }
+      if (installButton) installButton.disabled = false;
+
+      // Ukryj pasek, jeśli pojawi się prośba o instalację
+      if (installBar) installBar.classList.remove("visible");
     });
 
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       installPromptEvent = null;
-      isAppInstalled = true;
+      setInstalledFlag();
       updatePwaUiForInstalledState();
-
-      // Dodatkowe ukrycie paska po instalacji
-      if (installBar) {
-        installBar.classList.remove("visible");
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-          appFrame.classList.remove("app-frame--pwa-visible");
-        }
-      }
     });
   }
 
-  // Attach other event listeners
   if (iosCloseButton) {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Sprawdź ponownie po pełnym załadowaniu
+  // Uruchom wielokrotne sprawdzanie trybu standalone
+  // Czekamy na załadowanie, aby uniknąć problemów z timingiem
   window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (isStandalone() && installBar) {
-        installBar.classList.remove("visible");
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-          appFrame.classList.remove("app-frame--pwa-visible");
-        }
-      }
-    }, 100);
+    [500, 2000, 5000].forEach(delay => {
+      setTimeout(runStandaloneCheck, delay);
+    });
+  });
+
+  // Sprawdzaj również, gdy użytkownik wraca do aplikacji
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      runStandaloneCheck();
+    }
   });
 }
 

@@ -1,11 +1,1 @@
-[Mon Oct  6 19:44:16 2025] PHP 8.3.6 Development Server (http://0.0.0.0:8000) started
-[Mon Oct  6 19:44:17 2025] 127.0.0.1:46922 Accepted
-[Mon Oct  6 19:44:17 2025] PHP Fatal error:  Uncaught Error: Call to undefined function get_header() in /app/ting-tong-theme/index.php:8
-Stack trace:
-#0 {main}
-  thrown in /app/ting-tong-theme/index.php on line 8
-[Mon Oct  6 19:44:17 2025] 127.0.0.1:46922 [500]: GET /ting-tong-theme/ - Uncaught Error: Call to undefined function get_header() in /app/ting-tong-theme/index.php:8
-Stack trace:
-#0 {main}
-  thrown in /app/ting-tong-theme/index.php on line 8
-[Mon Oct  6 19:44:17 2025] 127.0.0.1:46922 Closing
+-bash: php: command not found
