@@ -428,7 +428,7 @@ body,
     (var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 +
       var(--topbar-height)
   );
-  right: -4px;
+  right: 12px; /* Zapewnia widoczność i margines od prawej krawędzi */
   transform: translateY(-50%) translateX(0); /* Od razu na ekranie */
   display: flex;
   flex-direction: column;
@@ -2499,7 +2499,7 @@ body,
   }
 }
 .pwa-prompt {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -2552,7 +2552,7 @@ body,
   pointer-events: auto !important; /* Force clickability */
 }
 .pwa-prompt-ios {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;

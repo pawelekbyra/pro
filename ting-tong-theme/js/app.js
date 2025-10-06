@@ -47,6 +47,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      // --- FIX: Zapobiegaj przesunięciu paska PWA przez klawiaturę podczas logowania ---
+      const loginInputs = document.querySelectorAll('#tt-login-form input');
+      const pwaInstallBar = document.getElementById("pwa-install-bar");
+      const appFrame = document.getElementById("app-frame");
+
+      if (loginInputs.length > 0 && pwaInstallBar && appFrame) {
+          const handleInputFocus = () => {
+              // Ukryj pasek PWA i usuń offset z ramki aplikacji
+              pwaInstallBar.style.display = 'none';
+              appFrame.classList.remove("app-frame--pwa-visible");
+          };
+
+          const handleInputBlur = () => {
+              // Poczekaj chwilę, aby upewnić się, że focus nie przeniósł się na inne pole input
+              setTimeout(() => {
+                  const isAnyLoginInputActive = Array.from(loginInputs).some(input => input === document.activeElement);
+
+                  if (!isAnyLoginInputActive && pwaInstallBar.classList.contains("visible")) {
+                      // Pokaż pasek ponownie, jeśli powinien być widoczny (ma klasę 'visible')
+                      pwaInstallBar.style.display = ''; // Przywróć domyślny display (z CSS)
+                      appFrame.classList.add("app-frame--pwa-visible"); // Przywróć offset ramki
+                  }
+              }, 50);
+          };
+
+          loginInputs.forEach(input => {
+              input.addEventListener('focus', handleInputFocus);
+              input.addEventListener('blur', handleInputBlur);
+              // Dodaj touchstart dla szybszej reakcji na urządzeniach mobilnych
+              input.addEventListener('touchstart', handleInputFocus, { passive: true });
+          });
+      }
+
       document.body.addEventListener("click", Handlers.mainClickHandler);
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
