@@ -1149,7 +1149,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const isSecret = sim.dataset.access === "secret";
         const isPwaOnly = sim.dataset.access === "pwa";
         const isStandalone = () =>
-          window.matchMedia("(display-mode: standalone)").matches;
+          window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
 
         const showSecretOverlay =
           (isSecret && !isLoggedIn) || (isPwaOnly && !isStandalone());
@@ -1306,7 +1306,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
       const videoEl = section.querySelector("video");
       const pauseOverlay = section.querySelector(".pause-overlay");
-
       const replayOverlay = section.querySelector(".replay-overlay");
 
       if (tiktokSymulacja && videoEl && pauseOverlay && replayOverlay) {
@@ -3375,52 +3374,47 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.updateTranslations();
 
         const handleMediaChange = (swiper) => {
-          const activeSlide = swiper.slides[swiper.activeIndex];
-
-          // Pause all videos to prevent background audio.
-          document.querySelectorAll(".swiper-slide video").forEach((video) => {
-            if (!video.paused) video.pause();
+          // First, pause every single video element within the swiper container.
+          swiper.el.querySelectorAll('video').forEach(video => {
+            if (!video.paused) {
+              video.pause();
+            }
           });
 
-          // Unload all iframes to save resources.
-          document
-            .querySelectorAll(".swiper-slide iframe")
-            .forEach((iframe) => {
+          // Also unload all iframes to save resources.
+          swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) => {
               if (iframe.src) {
-                if (!iframe.dataset.originalSrc)
-                  iframe.dataset.originalSrc = iframe.src;
+                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = iframe.src;
                 iframe.src = "";
               }
-            });
+          });
+
+          // Now, get the truly active slide element.
+          const activeSlide = swiper.slides[swiper.activeIndex];
 
           // Play media for the new active slide.
           if (activeSlide) {
+            // Use realIndex to get data from our original array, which is correct for loop mode.
             const slideData = slidesData[swiper.realIndex];
             if (slideData && slideData.isIframe) {
               const iframe = activeSlide.querySelector("iframe");
-              if (iframe && iframe.dataset.originalSrc)
+              if (iframe && iframe.dataset.originalSrc) {
                 iframe.src = iframe.dataset.originalSrc;
+              }
             } else {
               const video = activeSlide.querySelector("video");
               if (video) {
-                // Nowe wideo nie powinno mieć widocznej nakładki pauzy
-                const pauseOverlay =
-                  activeSlide.querySelector(".pause-overlay");
-                if (pauseOverlay) {
-                  pauseOverlay.classList.remove("visible");
-                }
+                // Hide overlays
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
+                if (pauseOverlay) pauseOverlay.classList.remove("visible");
+                const replayOverlay = activeSlide.querySelector(".replay-overlay");
+                if (replayOverlay) replayOverlay.classList.remove("visible");
+
                 video.muted = State.get("isSoundMuted");
-                setTimeout(() => {
-                  video
-                    .play()
-                    .catch((error) =>
-                      console.log(
-                        "Autoplay was prevented for slide " +
-                          swiper.activeIndex,
-                        error,
-                      ),
-                    );
-                }, 150);
+                // We don't reset currentTime here, to allow resuming. The replay button will reset it.
+                video.play().catch((error) => {
+                    console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
+                });
               }
             }
           }
