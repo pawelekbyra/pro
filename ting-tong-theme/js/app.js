@@ -312,11 +312,15 @@ document.addEventListener("DOMContentLoaded", () => {
             "transitionend",
             () => {
               UI.DOM.preloader.style.display = "none";
-              // Pokaż modal powitalny tylko w przeglądarce, nie w PWA
+              // Pokaż modal powitalny tylko w przeglądarce, nie w PWA, i tylko raz
               if (!PWA.isStandalone() && UI.DOM.welcomeModal) {
-                setTimeout(() => {
-                  UI.openModal(UI.DOM.welcomeModal);
-                }, 300); // Małe opóźnienie dla płynniejszego efektu
+                const hasSeenWelcome = localStorage.getItem('tt_seen_welcome');
+                if (!hasSeenWelcome) {
+                  setTimeout(() => {
+                    UI.openModal(UI.DOM.welcomeModal);
+                    localStorage.setItem('tt_seen_welcome', 'true');
+                  }, 1000); // Opóźnienie 1s
+                }
               }
             },
             { once: true },
