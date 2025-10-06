@@ -24,7 +24,6 @@ get_header();
     <div class="topbar" data-view="default">
         <button class="topbar-icon-btn hamburger-icon" data-action="toggle-main-menu" data-translate-aria-label="menuAriaLabel" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></button>
         <button class="topbar-central-trigger" data-action="toggle-login-panel"><div class="central-text-wrapper"><span class="topbar-text"></span></div></button>
-        <button id="mock-first-login-btn" style="position: absolute; left: 50%; transform: translateX(-50%); z-index: 9999; background: #ff0055; color: white; border: 1px solid white; padding: 2px 5px; font-size: 10px; cursor: pointer;">MOCK MODAL</button>
         <button class="topbar-icon-btn notification-bell" data-action="toggle-notifications" data-translate-aria-label="notificationAriaLabel" aria-label="Powiadomienia"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div class="notification-dot"></div></button>
     </div>
     <div class="login-panel" aria-hidden="true">
@@ -682,5 +681,10 @@ get_header();
 
 <!-- Hidden file input for avatar -->
 <input type="file" class="file-input" id="firstLoginAvatarFileInput" accept="image/*">
+
+<!-- Debug Tools -->
+<div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">
+    <button id="mock-first-login-btn" style="background: #ff0055; color: white; border: 1px solid white; padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 5px;">MOCK MODAL</button>
+</div>
 
 <?php get_footer(); ?>

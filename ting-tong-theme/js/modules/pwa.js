@@ -46,6 +46,14 @@ function hideIosInstructions() {
 
 function updatePwaUiForInstalledState() {
   if (!installBar || !installButton) return;
+
+  // Ukryj pasek i usuń offset z app-frame
+  installBar.classList.remove("visible");
+
+  const appFrame = document.getElementById("app-frame");
+  if (appFrame) {
+    appFrame.classList.remove("app-frame--pwa-visible");
+  }
 }
 
 function showDesktopModal() {
@@ -79,8 +87,17 @@ function init() {
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       installPromptEvent = null;
-      isAppInstalled = true; // Set state
+      isAppInstalled = true;
       updatePwaUiForInstalledState();
+
+      // Dodatkowe ukrycie paska po instalacji
+      if (installBar) {
+        installBar.classList.remove("visible");
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+          appFrame.classList.remove("app-frame--pwa-visible");
+        }
+      }
     });
   }
 
@@ -88,6 +105,19 @@ function init() {
   if (iosCloseButton) {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
+
+  // Sprawdź ponownie po pełnym załadowaniu
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (isStandalone() && installBar) {
+        installBar.classList.remove("visible");
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+          appFrame.classList.remove("app-frame--pwa-visible");
+        }
+      }
+    }, 100);
+  });
 }
 
 function handleInstallClick() {
