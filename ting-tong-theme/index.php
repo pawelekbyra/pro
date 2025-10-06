@@ -67,7 +67,7 @@ get_header();
                     <p class="error-subtitle" data-translate-key="videoErrorSubtitle">Nie można załadować materiału.</p>
                     <button class="error-retry-button" data-action="retry-video" data-translate-key="videoErrorRetry">Spróbuj ponownie</button>
                 </div>
-                <div class="sidebar">
+                <div class="sidebar visible">
                     <div class="profile">
                         <button class="profileButton" data-action="open-public-profile" data-translate-aria-label="subscribeAriaLabel" aria-label="Subskrybuj"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>

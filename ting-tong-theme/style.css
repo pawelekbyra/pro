@@ -429,18 +429,14 @@ body,
       var(--topbar-height)
   );
   right: -4px;
-  transform: translateY(-50%) translateX(100%);
+  transform: translateY(-50%) translateX(0); /* Od razu na ekranie */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   z-index: 105;
-  visibility: hidden;
+  visibility: visible; /* Od razu widoczny */
   transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.tiktok-symulacja .sidebar.visible {
-  transform: translateY(-50%) translateX(0);
-  visibility: visible;
 }
 .tiktok-symulacja .bottombar {
   position: absolute;
