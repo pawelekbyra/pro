@@ -351,6 +351,9 @@ function createSlideElement(slideData, index) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
+      if (slideData.access === 'secret') {
+        videoEl.pause();
+      }
     }
   }
 
@@ -371,41 +374,25 @@ function createSlideElement(slideData, index) {
     slideData.initialComments,
   );
 
-  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
   const videoEl = section.querySelector("video");
   const pauseOverlay = section.querySelector(".pause-overlay");
   const replayOverlay = section.querySelector(".replay-overlay");
 
-  if (tiktokSymulacja && videoEl && pauseOverlay && replayOverlay) {
-    tiktokSymulacja.addEventListener("click", (e) => {
-      // Upewnij się, że kliknięcie nie pochodzi z paska bocznego lub dolnego
-      if (e.target.closest(".sidebar, .bottombar, .secret-overlay, .replay-overlay")) {
-        return;
-      }
-      if (videoEl.paused) {
-        // Wznów odtwarzanie i ukryj nakładkę
-        videoEl
-          .play()
-          .catch((error) => console.log("Błąd odtwarzania:", error));
-      } else {
-        // Spauzuj wideo i pokaż nakładkę z ikoną play
-        videoEl.pause();
-        pauseOverlay.classList.add("visible");
-      }
-    });
-
+  if (videoEl && pauseOverlay && replayOverlay) {
+    // Gdy video się kończy - pokaż replay
     videoEl.addEventListener("ended", () => {
-        replayOverlay.classList.add("visible");
+      replayOverlay.classList.add("visible");
     });
 
+    // Gdy video zaczyna grać - ukryj overlays
     videoEl.addEventListener("play", () => {
-        replayOverlay.classList.remove("visible");
-        pauseOverlay.classList.remove("visible");
+      replayOverlay.classList.remove("visible");
+      pauseOverlay.classList.remove("visible");
     });
 
     videoEl.addEventListener("playing", () => {
-        replayOverlay.classList.remove("visible");
-        pauseOverlay.classList.remove("visible");
+      replayOverlay.classList.remove("visible");
+      pauseOverlay.classList.remove("visible");
     });
   }
   const progressBar = section.querySelector(".progress-bar");

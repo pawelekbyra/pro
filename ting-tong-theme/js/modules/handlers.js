@@ -778,15 +778,21 @@ export const Handlers = {
         document.querySelector("#bmc-wbtn")?.click();
         break;
       case "play-video": {
-        const video = actionTarget.closest(".tiktok-symulacja").querySelector("video");
-        if(video) video.play();
+        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
+        if (video) {
+          video.play().catch(err => console.log("Błąd play:", err));
+          const pauseOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".pause-overlay");
+          if (pauseOverlay) pauseOverlay.classList.remove('visible');
+        }
         break;
       }
       case "replay-video": {
-        const video = actionTarget.closest(".tiktok-symulacja").querySelector("video");
+        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
         if (video) {
-            video.currentTime = 0;
-            video.play();
+          video.currentTime = 0;
+          video.play().catch(err => console.log("Błąd replay:", err));
+          const replayOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".replay-overlay");
+          if (replayOverlay) replayOverlay.classList.remove('visible');
         }
         break;
       }

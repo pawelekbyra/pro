@@ -862,16 +862,63 @@ body,
   filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
 }
 
+/* ✅ NOWE: Replay overlay */
+.replay-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  z-index: 101;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+  visibility: hidden;
+}
+
+.tiktok-symulacja:not(.video-loaded) .replay-overlay {
+  display: none !important;
+}
+
+.replay-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.replay-icon {
+  width: 80px;
+  height: 80px;
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 0 12px rgba(0, 0, 0, 0.6));
+  animation: replayPulse 2s ease-in-out infinite;
+}
+
+@keyframes replayPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
 
 .volume-button {
   position: absolute;
-  top: calc(var(--topbar-height) + 15px);
-  right: 15px;
+  bottom: calc(var(--bottombar-height) + 5px);
+  left: 12px;
   background: rgba(0, 0, 0, 0.3);
   border: none;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -948,15 +995,25 @@ body,
     (var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 +
       var(--topbar-height)
   );
-  right: 12px; /* Zapewnia widoczność i margines od prawej krawędzi */
-  transform: translateY(-50%) translateX(0); /* Od razu na ekranie */
+  right: 12px;
+  transform: translateY(-50%) translateX(0);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   z-index: 105;
-  visibility: visible; /* Od razu widoczny */
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.6s ease-out,
+    visibility 0.6s ease-out,
+    transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ✅ NOWE: Pokaż sidebar dopiero gdy video jest załadowane */
+.tiktok-symulacja.video-loaded .sidebar {
+  opacity: 1;
+  visibility: visible;
 }
 .tiktok-symulacja .bottombar {
   position: absolute;
@@ -971,6 +1028,15 @@ body,
   color: white;
   z-index: 10006;
   padding-bottom: calc(10px + var(--safe-area-bottom));
+
+  /* ✅ NOWE: Ukryj bottombar domyślnie */
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+
+/* ✅ NOWE: Pokaż bottombar dopiero gdy video jest załadowane */
+.tiktok-symulacja.video-loaded .bottombar {
+  opacity: 1;
 }
 
 /* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
