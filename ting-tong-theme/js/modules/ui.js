@@ -1,6 +1,7 @@
 import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
+import { PWA } from './pwa.js';
 import { API, slidesData } from './api.js';
 
 let selectedCommentImage = null;
@@ -210,49 +211,59 @@ function updateUIForLoginState() {
   DOM.container.querySelectorAll(".webyx-section").forEach((section) => {
     const sim = section.querySelector(".tiktok-symulacja");
     sim.classList.toggle("is-logged-in", isLoggedIn);
+
     const isSecret = sim.dataset.access === "secret";
-    const isPwaOnly = sim.dataset.access === "pwa";
-    const isStandalone = () =>
-      window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+    const isPwaSecret = sim.dataset.access === "pwa-secret";
+    const isStandalone = PWA.isStandalone();
+    const video = section.querySelector("video");
 
-    const showSecretOverlay =
-      (isSecret && !isLoggedIn) || (isPwaOnly && !isStandalone());
+    // Determine overlay visibility
+    const showSecret = isSecret && !isLoggedIn;
+    const showPwaSecret = isPwaSecret && !isStandalone;
 
+    // Toggle "secret" overlay
     const secretOverlay = section.querySelector(".secret-overlay");
     if (secretOverlay) {
-      secretOverlay.classList.toggle("visible", showSecretOverlay);
+        secretOverlay.classList.toggle("visible", showSecret);
+        if (showSecret) {
+            secretOverlay.querySelector(".secret-title").textContent = Utils.getTranslation("secretTitle");
+            const subtitleUElement = secretOverlay.querySelector(".secret-subtitle u");
+            const subtitleSpanElement = secretOverlay.querySelector(".secret-subtitle span");
+            if (subtitleUElement && subtitleSpanElement) {
+                subtitleUElement.dataset.action = "toggle-login-panel";
+                subtitleUElement.textContent = Utils.getTranslation("secretSubtitleAction");
+                subtitleSpanElement.textContent = " " + Utils.getTranslation("secretSubtitleRest");
+            }
+        }
     }
 
-    if (showSecretOverlay) {
-      const titleKey = isPwaOnly ? "pwaTitle" : "secretTitle";
-      const subtitleActionKey = isPwaOnly
-        ? "pwaSubtitleAction"
-        : "secretSubtitleAction";
-      const subtitleRestKey = isPwaOnly
-        ? "pwaSubtitleRest"
-        : "secretSubtitleRest";
+    // Toggle "pwa-secret" overlay
+    const pwaSecretOverlay = section.querySelector(".pwa-secret-overlay");
+    if (pwaSecretOverlay) {
+        pwaSecretOverlay.classList.toggle("visible", showPwaSecret);
+        if (showPwaSecret) {
+            pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Utils.getTranslation("pwaTitle");
+            const subtitleEl = pwaSecretOverlay.querySelector(".pwa-secret-subtitle");
+            if(subtitleEl){
+                subtitleEl.textContent = Utils.getTranslation("pwaSubtitleAction");
+                subtitleEl.dataset.action = "install-pwa";
+            }
+        }
+    }
 
-      section.querySelector(".secret-title").textContent =
-        Utils.getTranslation(titleKey);
+    // Control video playback based on overlay state
+    if (video) {
+        const isOverlayVisible = showSecret || showPwaSecret;
+        const isCurrentSlide = section.classList.contains('swiper-slide-active');
 
-      const subtitleUElement = section.querySelector(".secret-subtitle u");
-      const subtitleSpanElement = section.querySelector(
-        ".secret-subtitle span",
-      );
-
-      if (subtitleUElement && subtitleSpanElement) {
-        // The data-action attribute is used by the global mainClickHandler
-        // to trigger the correct action when this element is clicked.
-        subtitleUElement.dataset.action = isPwaOnly
-          ? "install-pwa"
-          : "toggle-login-panel";
-        subtitleUElement.dataset.translateKey = subtitleActionKey;
-        subtitleUElement.textContent =
-          Utils.getTranslation(subtitleActionKey);
-        subtitleSpanElement.dataset.translateKey = subtitleRestKey;
-        subtitleSpanElement.textContent =
-          Utils.getTranslation(subtitleRestKey);
-      }
+        if (isOverlayVisible) {
+            if (!video.paused) {
+                video.pause();
+            }
+        } else if (isCurrentSlide && video.paused) {
+            // Only play if it's the active slide and overlays are gone
+            video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
+        }
     }
 
     const likeBtn = section.querySelector(".like-button");
@@ -347,16 +358,16 @@ function createSlideElement(slideData, index) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
-      // Wstrzymaj wideo, jeśli jest to slajd 'secret' lub 'pwa-secret'
+      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli warunki są spełnione.
       if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
         videoEl.pause();
       }
     }
   }
 
-  // Logika dla nakładki PWA Secret
-  const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (slideData.access === 'pwa-secret' && !isStandalone()) {
+  // Ustawienie początkowej widoczności nakładek.
+  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
+  if (slideData.access === 'pwa-secret' && !PWA.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');

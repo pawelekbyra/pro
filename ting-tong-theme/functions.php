@@ -156,7 +156,7 @@ function tt_get_slides_data() {
 			'post_title'   => 'For Bigger Blazes',
 			'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-			'access'       => 'pwa secret',
+			'access'       => 'pwa-secret',
 			'comments'     => 30,
 			'avatar'       => 'https://i.pravatar.cc/100?u=blaze',
 		],
