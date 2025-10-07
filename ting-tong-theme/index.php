@@ -406,7 +406,7 @@ get_header();
     </div>
 <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
 
-<div id="pwa-install-bar" class="pwa-prompt">
+<div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true" style="display: none;">
     <div class="pwa-prompt-content">
         <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Zobacz więcej!</p>
         <p class="pwa-prompt-description">

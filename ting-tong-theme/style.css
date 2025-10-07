@@ -3043,9 +3043,11 @@ body,
   transform: translateY(100%);
   transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   visibility: hidden;
+  display: none; /* DODANE: domyślnie całkowicie ukryty */
   height: var(--bottombar-height);
 }
 .pwa-prompt.visible {
+  display: flex; /* DODANE: musi nadpisać display: none */
   transform: translateY(0);
   visibility: visible;
 }
@@ -4096,15 +4098,33 @@ body,
   }
 }
 
-/* Ukryj pasek PWA w trybie standalone (jako dodatkowe zabezpieczenie) */
+/* WZMOCNIONE ukrywanie w trybie standalone */
 @media (display-mode: standalone) {
   .pwa-prompt,
   .pwa-prompt-ios {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 
   #app-frame.app-frame--pwa-visible {
     height: 100% !important;
+  }
+}
+
+/* DODAJ TAKŻE dla iOS */
+@media (display-mode: fullscreen) {
+  .pwa-prompt,
+  .pwa-prompt-ios {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 }
 
