@@ -16,7 +16,6 @@ const DOM = {
   tiktokProfileModal: document.getElementById("tiktok-profile-modal"),
   notificationPopup: document.getElementById("notificationPopup"),
   pwaDesktopModal: document.getElementById("pwa-desktop-modal"),
-  pwaInstallPrompt: document.getElementById("pwaInstallPrompt"),
   pwaIosInstructions: document.getElementById("pwa-ios-instructions"),
   pwaDesktopInstallButton: document.querySelector(
     ".topbar-icon-btn.desktop-only",
