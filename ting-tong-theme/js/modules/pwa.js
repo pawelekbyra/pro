@@ -70,18 +70,37 @@ function hideIosInstructions() {
 
 // setInstalledFlag function removed
 
-function updatePwaUiForInstalledState() {
-  if (!installBar) return;
+function updatePwaBarForInstalled() {
+  if (!installBar || !installButton) return;
 
-  // setInstalledFlag() call removed
+  // Zmień tekst na "już ściągnąłeś"
+  const titleEl = installBar.querySelector('.pwa-prompt-title');
+  const descEl = installBar.querySelector('.pwa-prompt-description');
 
-  // Ukryj pasek i usuń offset z app-frame
-  installBar.classList.remove("visible");
-
-  const appFrame = document.getElementById("app-frame");
-  if (appFrame) {
-    appFrame.classList.remove("app-frame--pwa-visible");
+  if (titleEl) {
+    titleEl.textContent = Utils.getTranslation("alreadyInstalledText");
   }
+
+  if (descEl) {
+    descEl.innerHTML = ''; // Wyczyść opis
+  }
+
+  // Zmień przycisk na "Otwórz"
+  installButton.textContent = Utils.getTranslation("openPwaAction");
+  installButton.disabled = false;
+
+  // Przycisk "Otwórz" otwiera aplikację (jeśli to możliwe)
+  installButton.onclick = () => {
+    // Próbuj otworzyć jako PWA (działa tylko jeśli zainstalowana)
+    if (window.location.href.includes('?')) {
+      window.location.href = window.location.href.split('?')[0];
+    } else {
+      window.location.href = window.location.href + '?source=homescreen';
+    }
+  };
+
+  // WAŻNE: Pasek POZOSTAJE WIDOCZNY w przeglądarce
+  // (w trybie standalone jest ukryty przez CSS)
 }
 
 function showDesktopModal() {
@@ -139,16 +158,14 @@ function init() {
       e.preventDefault();
       installPromptEvent = e;
       if (installButton) installButton.disabled = false;
-
-      // Celowo nie ukrywamy paska, ma być widoczny zawsze w przeglądarce
-      // if (installBar) installBar.classList.remove("visible");
     });
 
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       installPromptEvent = null;
-      // setInstalledFlag() call removed
-      updatePwaUiForInstalledState();
+
+      // ✅ Zamiast ukrywać pasek, zmień jego zawartość
+      updatePwaBarForInstalled();
     });
   }
 
@@ -156,26 +173,29 @@ function init() {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Natychmiastowe sprawdzenie (dla szybkich urządzeń)
+  // Natychmiastowe sprawdzenie standalone
   const isConfirmed = runStandaloneCheck();
 
   if (!isConfirmed) {
-    // Jeśli nie wykryto od razu, spróbuj ponownie po załadowaniu DOM
     window.addEventListener('load', () => {
       const detected = runStandaloneCheck();
 
       if (!detected) {
-        // Ostatnia próba po 2s (dla wolnych urządzeń)
         setTimeout(() => {
           runStandaloneCheck();
         }, 2000);
+
+        // ✅ NOWE: Sprawdź czy app jest już zainstalowana
+        setTimeout(() => {
+          if (!installPromptEvent && !isStandalone()) {
+            updatePwaBarForInstalled();
+          }
+        }, 3000);
       }
     }, { once: true });
 
-    // Sprawdź gdy użytkownik wraca (może wrócił z home screen)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        // Tylko jeśli wcześniej nie wykryto
         if (!sessionStorage.getItem('pwa_detected')) {
           runStandaloneCheck();
         }
