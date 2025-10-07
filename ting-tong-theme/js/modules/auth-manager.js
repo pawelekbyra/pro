@@ -88,7 +88,7 @@ class AuthManager {
   }
 
   /**
-   * Wykonaj AJAX request z pełną walidacją
+   * Wykonaj AJAX request z pełną walidacją i automatycznym odświeżaniem nonce.
    */
   async ajax(action, data = {}) {
     if (State.get('isMock')) {
@@ -98,37 +98,74 @@ class AuthManager {
         }
         return Promise.resolve({ success: true, data: { message: 'Mocked success' } });
     }
+
+    // Cała operacja (wraz z potencjalnym ponowieniem) jest opakowana w `requestFn`,
+    // aby `safeRequest` mogło ją wykonać jako atomową transakcję.
     const requestFn = async () => {
-      if (!ajax_object?.nonce) {
-        throw new Error('Missing AJAX nonce');
+      try {
+        // Pierwsza próba wykonania żądania
+        const body = new URLSearchParams({ action, nonce: ajax_object.nonce, ...data });
+        const response = await fetch(ajax_object.ajax_url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          credentials: 'same-origin',
+          body
+        });
+        const json = await response.json();
+        const validated = this.validateResponse(response, json);
+
+        if (validated.data?.new_nonce) {
+          ajax_object.nonce = validated.data.new_nonce;
+        }
+        return validated;
+
+      } catch (error) {
+        // Jeśli błąd to 403 (Forbidden), spróbuj odświeżyć nonce i ponów żądanie jeden raz.
+        if (error.message.includes('403') && action !== 'tt_refresh_nonce') {
+          console.warn('[AUTH] Otrzymano błąd 403. Prawdopodobnie wygasł nonce. Próba odświeżenia i ponowienia...');
+
+          // Krok 1: Odśwież nonce (bezpośrednie wywołanie fetch, aby uniknąć deadlocka w kolejce)
+          const refreshBody = new URLSearchParams({ action: 'tt_refresh_nonce' });
+          const refreshResponse = await fetch(ajax_object.ajax_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            credentials: 'same-origin',
+            body: refreshBody,
+          });
+          const refreshJson = await refreshResponse.json();
+          const refreshValidated = this.validateResponse(refreshResponse, refreshJson);
+
+          if (!refreshValidated.success || !refreshValidated.data?.nonce) {
+            console.error('[AUTH] Nie udało się odświeżyć nonce. Oryginalny błąd zostanie rzucony.');
+            throw error; // Rzuć oryginalny błąd, jeśli odświeżenie się nie powiodło
+          }
+          ajax_object.nonce = refreshValidated.data.nonce;
+          console.log('[AUTH] Nonce został pomyślnie odświeżony. Ponawianie oryginalnego żądania...');
+
+          // Krok 2: Ponów oryginalne żądanie z nowym nonce
+          const retryBody = new URLSearchParams({ action, nonce: ajax_object.nonce, ...data });
+          const retryResponse = await fetch(ajax_object.ajax_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            credentials: 'same-origin',
+            body: retryBody,
+          });
+          const retryJson = await retryResponse.json();
+          const retryValidated = this.validateResponse(retryResponse, retryJson);
+          if (retryValidated.data?.new_nonce) {
+            ajax_object.nonce = retryValidated.data.new_nonce;
+          }
+          return retryValidated;
+        }
+
+        // Dla wszystkich innych błędów, rzuć je dalej, aby mogły być obsłużone wyżej.
+        throw error;
       }
-
-      const body = new URLSearchParams({
-        action,
-        nonce: ajax_object.nonce,
-        ...data
-      });
-
-      const response = await fetch(ajax_object.ajax_url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        },
-        credentials: 'same-origin',
-        body
-      });
-
-      const json = await response.json();
-      const validated = this.validateResponse(response, json);
-
-      if (validated.data?.new_nonce) {
-        ajax_object.nonce = validated.data.new_nonce;
-      }
-
-      return validated;
     };
 
-    return this.requestWithRetry(requestFn);
+    // Zastępujemy `requestWithRetry` na rzecz `safeRequest`, ponieważ cała logika ponawiania
+    // jest teraz zawarta w `requestFn`. `safeRequest` zapewnia, że operacja jest kolejkowana.
+    return this.safeRequest(requestFn);
   }
 
   /**
