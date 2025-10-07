@@ -57,7 +57,6 @@ const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
 // State
 let installPromptEvent = null;
-// isAppInstalled variable removed
 
 // Actions
 function showIosInstructions() {
@@ -68,40 +67,7 @@ function hideIosInstructions() {
   if (iosInstructions) iosInstructions.classList.remove("visible");
 }
 
-// setInstalledFlag function removed
-
-function updatePwaBarForInstalled() {
-  if (!installBar || !installButton) return;
-
-  // Zmień tekst na "już ściągnąłeś"
-  const titleEl = installBar.querySelector('.pwa-prompt-title');
-  const descEl = installBar.querySelector('.pwa-prompt-description');
-
-  if (titleEl) {
-    titleEl.textContent = Utils.getTranslation("alreadyInstalledText");
-  }
-
-  if (descEl) {
-    descEl.innerHTML = ''; // Wyczyść opis
-  }
-
-  // Zmień przycisk na "Otwórz"
-  installButton.textContent = Utils.getTranslation("openPwaAction");
-  installButton.disabled = false;
-
-  // Przycisk "Otwórz" otwiera aplikację (jeśli to możliwe)
-  installButton.onclick = () => {
-    // Próbuj otworzyć jako PWA (działa tylko jeśli zainstalowana)
-    if (window.location.href.includes('?')) {
-      window.location.href = window.location.href.split('?')[0];
-    } else {
-      window.location.href = window.location.href + '?source=homescreen';
-    }
-  };
-
-  // WAŻNE: Pasek POZOSTAJE WIDOCZNY w przeglądarce
-  // (w trybie standalone jest ukryty przez CSS)
-}
+// KROK 1: Usunięto funkcję updatePwaBarForInstalled
 
 function showDesktopModal() {
   if (desktopModal) UI.openModal(desktopModal);
@@ -139,17 +105,26 @@ function runStandaloneCheck() {
     // Wyłącz dalsze sprawdzenia - już wiemy że to PWA
     return true;
   } else {
-    console.log("[PWA Check] ⚠️ Standalone NOT detected. Forcing install bar to be visible.");
+    console.log("[PWA Check] ⚠️ Standalone NOT detected.");
 
-    // Jeśli nie jesteśmy w trybie standalone, upewnij się, że pasek jest widoczny.
-    if (installBar) {
+    // KROK 4: Sprawdź czy preloader już zniknął
+    const preloader = document.getElementById("preloader");
+    const container = document.getElementById("webyx-container");
+    const isPreloaderHidden =
+      (preloader && preloader.classList.contains("preloader-hiding")) ||
+      (container && container.classList.contains("ready"));
+
+    // Pokaż pasek TYLKO jeśli preloader już zniknął
+    if (isPreloaderHidden && installBar) {
+      console.log("[PWA Check] Preloader gone, showing install bar.");
       installBar.classList.add("visible");
       installBar.setAttribute('aria-hidden', 'false');
 
-      // Dodaj klasę do app-frame, aby odsunąć zawartość
       if (appFrame) {
         appFrame.classList.add("app-frame--pwa-visible");
       }
+    } else {
+      console.log("[PWA Check] Preloader still active, waiting...");
     }
   }
 
@@ -169,12 +144,24 @@ function init() {
       if (installButton) installButton.disabled = false;
     });
 
+    // KROK 2: Zmieniona obsługa 'appinstalled'
     window.addEventListener("appinstalled", () => {
       console.log("PWA was installed");
       installPromptEvent = null;
 
-      // ✅ Zamiast ukrywać pasek, zmień jego zawartość
-      updatePwaBarForInstalled();
+      // Ukryj pasek i pokaż tylko toast
+      if (installBar) {
+        installBar.classList.remove("visible");
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+          appFrame.classList.remove("app-frame--pwa-visible");
+        }
+      }
+
+      // Pokaż komunikat
+      if (typeof UI !== 'undefined' && UI.showAlert) {
+        UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+      }
     });
   }
 
@@ -194,12 +181,7 @@ function init() {
           runStandaloneCheck();
         }, 2000);
 
-        // ✅ NOWE: Sprawdź czy app jest już zainstalowana
-        setTimeout(() => {
-          if (!installPromptEvent && !isStandalone()) {
-            updatePwaBarForInstalled();
-          }
-        }, 3000);
+        // KROK 3: Usunięto setTimeout sprawdzający, czy aplikacja jest już zainstalowana
       }
     }, { once: true });
 
@@ -209,6 +191,34 @@ function init() {
           runStandaloneCheck();
         }
       }
+    });
+  }
+
+  // KROK 5: Dodano nasłuchiwanie na koniec preloadera
+  const preloader = document.getElementById("preloader");
+  if (preloader) {
+    const checkPreloaderEnd = () => {
+      if (preloader.classList.contains("preloader-hiding")) {
+        console.log("[PWA] Preloader ended, checking if bar should show");
+        setTimeout(() => {
+          if (!isStandalone() && installBar && !installBar.classList.contains("visible")) {
+            installBar.classList.add("visible");
+            installBar.setAttribute('aria-hidden', 'false');
+
+            const appFrame = document.getElementById("app-frame");
+            if (appFrame) {
+              appFrame.classList.add("app-frame--pwa-visible");
+            }
+          }
+        }, 500); // Małe opóźnienie dla płynności
+      }
+    };
+
+    // Sprawdź wielokrotnie bo nie ma zdarzenia transitionend na preloaderze
+    const preloaderObserver = new MutationObserver(checkPreloaderEnd);
+    preloaderObserver.observe(preloader, {
+      attributes: true,
+      attributeFilter: ['class']
     });
   }
 }
@@ -222,12 +232,14 @@ function handleInstallClick() {
 
   if (installPromptEvent) {
     installPromptEvent.prompt();
+    // KROK 6: Zaktualizowano logikę po kliknięciu
     installPromptEvent.userChoice.then((choiceResult) => {
       console.log(`PWA prompt user choice: ${choiceResult.outcome}`);
       if (choiceResult.outcome === "accepted") {
-        // The 'appinstalled' event will handle the UI change.
+        console.log("User accepted PWA installation");
+        // Event 'appinstalled' obsłuży resztę
       } else {
-        // User dismissed the prompt, do nothing.
+        console.log("User dismissed PWA prompt");
       }
     });
   } else if (isIOS()) {
