@@ -850,6 +850,23 @@ body,
 }
 
 
+.cc-button {
+  position: absolute;
+  bottom: calc(var(--bottombar-height) + 44px); /* Positioned above the volume button */
+  left: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: not-allowed; /* Disabled cursor */
+  z-index: 105;
+  opacity: 0.5; /* Make it look disabled */
+}
+
 .volume-button {
   position: absolute;
   bottom: calc(var(--bottombar-height) + 8px);
