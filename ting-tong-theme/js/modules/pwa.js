@@ -21,11 +21,37 @@ const isIOS = () => {
  * @returns {boolean} True, jeśli aplikacja jest w trybie PWA.
  */
 const isStandalone = () => {
-  // Sprawdź tylko AKTUALNY tryb wyświetlania
-  const isStandardPWA = window.matchMedia("(display-mode: standalone)").matches;
-  const isIosPWA = window.navigator.standalone === true;
+  // Metoda 1: Standard Web API
+  if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) {
+    return true;
+  }
 
-  return isStandardPWA || isIosPWA;
+  // Metoda 2: iOS Safari
+  if (window.navigator.standalone === true) {
+    return true;
+  }
+
+  // Metoda 3: Sprawdź czy jest w fullscreen
+  if (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) {
+    return true;
+  }
+
+  // Metoda 4: Android - sprawdź URL query param (jeśli dodano via manifest)
+  if (window.location.search && window.location.search.includes('utm_source=homescreen')) {
+    return true;
+  }
+
+  // Metoda 5: Sprawdź document.referrer (pusty w PWA)
+  if (document.referrer === '' && !window.opener) {
+    // Pusty referrer + brak window.opener sugeruje PWA
+    // ALE może być też bezpośrednie wejście przez URL
+    // Więc sprawdzamy dodatkowo sessionStorage
+    if (sessionStorage.getItem('pwa_detected') === 'true') {
+      return true;
+    }
+  }
+
+  return false;
 };
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
@@ -74,20 +100,32 @@ function runStandaloneCheck() {
   const appFrame = document.getElementById("app-frame");
 
   if (isStandalone()) {
-    console.log("[PWA Check] Standalone detected. Hiding install bar.");
+    console.log("[PWA Check] ✅ Standalone CONFIRMED. Hiding install bar permanently.");
+
+    // Zapisz w sessionStorage żeby pamiętać
+    sessionStorage.setItem('pwa_detected', 'true');
+
     if (installBar) {
+      // WYMUSZAJ ukrycie przez inline style (najsilniejsze)
+      installBar.style.display = 'none';
       installBar.classList.remove("visible");
-      // Upewnij się, że klasa jest usuwana, aby przywrócić wysokość
-      if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+      installBar.setAttribute('aria-hidden', 'true');
+
+      // Usuń offset z app-frame
+      if (appFrame) {
+        appFrame.classList.remove("app-frame--pwa-visible");
+      }
     }
+
+    // Wyłącz dalsze sprawdzenia - już wiemy że to PWA
+    return true;
   } else {
-    console.log("[PWA Check] Standalone not detected. Showing install bar.");
-    // Zawsze pokazuj pasek, jeśli nie jesteśmy w trybie standalone
-    if (installBar) {
-      installBar.classList.add("visible");
-      if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-    }
+    console.log("[PWA Check] ⚠️ Standalone NOT detected - keeping current state.");
+    // NIE ZMIENIAJ STANU - może być false positive
+    // Pasek pokazuje się tylko przez CSS/HTML, nie wymuszamy go
   }
+
+  return false;
 }
 
 // Initialization
@@ -118,20 +156,32 @@ function init() {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Uruchom wielokrotne sprawdzanie trybu standalone
-  // Czekamy na załadowanie, aby uniknąć problemów z timingiem
-  window.addEventListener('load', () => {
-    [500, 2000, 5000].forEach(delay => {
-      setTimeout(runStandaloneCheck, delay);
-    });
-  });
+  // Natychmiastowe sprawdzenie (dla szybkich urządzeń)
+  const isConfirmed = runStandaloneCheck();
 
-  // Sprawdzaj również, gdy użytkownik wraca do aplikacji
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      runStandaloneCheck();
-    }
-  });
+  if (!isConfirmed) {
+    // Jeśli nie wykryto od razu, spróbuj ponownie po załadowaniu DOM
+    window.addEventListener('load', () => {
+      const detected = runStandaloneCheck();
+
+      if (!detected) {
+        // Ostatnia próba po 2s (dla wolnych urządzeń)
+        setTimeout(() => {
+          runStandaloneCheck();
+        }, 2000);
+      }
+    }, { once: true });
+
+    // Sprawdź gdy użytkownik wraca (może wrócił z home screen)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        // Tylko jeśli wcześniej nie wykryto
+        if (!sessionStorage.getItem('pwa_detected')) {
+          runStandaloneCheck();
+        }
+      }
+    });
+  }
 }
 
 function handleInstallClick() {
