@@ -91,6 +91,13 @@ class AuthManager {
    * Wykonaj AJAX request z pełną walidacją
    */
   async ajax(action, data = {}) {
+    if (State.get('isMock')) {
+        console.log(`%c[MOCK] Intercepted AJAX call: ${action}`, 'color: #00aaff;');
+        if (action === 'tt_profile_get') {
+            return Promise.resolve({ success: true, data: State.get('currentUser') });
+        }
+        return Promise.resolve({ success: true, data: { message: 'Mocked success' } });
+    }
     const requestFn = async () => {
       if (!ajax_object?.nonce) {
         throw new Error('Missing AJAX nonce');
@@ -235,6 +242,7 @@ class AuthManager {
    * @param {boolean} isProfileComplete - Czy profil jest kompletny
    */
   mockLogin(email = 'test@example.com', isProfileComplete = true) {
+    State.set('isMock', true);
     console.log(`%c[MOCK] Logowanie jako ${email}, profil kompletny: ${isProfileComplete}`, 'color: #ff0055; font-weight: bold;');
 
     const mockUserData = {
@@ -255,13 +263,37 @@ class AuthManager {
         id: "slide-001",
         likeId: "1",
         user: "Test User",
-        description: "To jest testowy slajd.",
+        description: "To jest testowy slajd publiczny.",
         mp4Url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
         avatar: "https://i.pravatar.cc/100?u=bunny",
         access: "public",
-        initialLikes: 0,
+        initialLikes: 10,
         isLiked: false,
-        initialComments: 0,
+        initialComments: 2,
+      },
+      {
+        id: "slide-002",
+        likeId: "2",
+        user: "Secret Agent",
+        description: "To jest slajd typu 'secret'. Widoczny tylko dla zalogowanych.",
+        mp4Url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        avatar: "https://i.pravatar.cc/100?u=agent",
+        access: "secret",
+        initialLikes: 42,
+        isLiked: false,
+        initialComments: 5,
+      },
+      {
+        id: "slide-003",
+        likeId: "3",
+        user: "PWA Exclusive",
+        description: "To jest slajd 'pwa-secret'. Dostępny tylko w aplikacji PWA.",
+        mp4Url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        avatar: "https://i.pravatar.cc/100?u=pwa",
+        access: "pwa-secret",
+        initialLikes: 101,
+        isLiked: false,
+        initialComments: 8,
       }
     ];
 

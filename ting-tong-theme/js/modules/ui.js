@@ -347,9 +347,19 @@ function createSlideElement(slideData, index) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
-      if (slideData.access === 'secret') {
+      // Wstrzymaj wideo, jeśli jest to slajd 'secret' lub 'pwa-secret'
+      if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
         videoEl.pause();
       }
+    }
+  }
+
+  // Logika dla nakładki PWA Secret
+  const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (slideData.access === 'pwa-secret' && !isStandalone()) {
+    const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
+    if (pwaSecretOverlay) {
+      pwaSecretOverlay.classList.add('visible');
     }
   }
 
