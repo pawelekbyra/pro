@@ -13,12 +13,16 @@ import { FirstLoginModal } from './modules/first-login-modal.js';
 // Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/ting-tong-theme/sw.js')
+    const swUrl = typeof TingTongConfig !== 'undefined'
+      ? TingTongConfig.serviceWorkerUrl
+      : '/wp-content/themes/ting-tong-theme/sw.js';
+
+    navigator.serviceWorker.register(swUrl)
       .then(registration => {
-        console.log('Service Worker zarejestrowany:', registration);
+        console.log('✅ Service Worker zarejestrowany:', registration);
       })
       .catch(error => {
-        console.error('Błąd rejestracji Service Workera:', error);
+        console.error('❌ Błąd rejestracji Service Workera:', error);
       });
   });
 }
@@ -314,12 +318,12 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         }, 1000);
       } catch (error) {
-        alert(
-          "Application failed to start. Error: " +
-            error.message +
-            "\\n\\nStack: " +
-            error.stack,
-        );
+        // alert(
+        //   "Application failed to start. Error: " +
+        //     error.message +
+        //     "\\n\\nStack: " +
+        //     error.stack,
+        // );
         console.error("TingTong App Start Error:", error);
       }
     }

@@ -224,32 +224,45 @@ function init() {
 }
 
 function handleInstallClick() {
-  // Check if the app is already installed and show an alert.
+  console.log('🔍 PWA Debug:', {
+    isStandalone: isStandalone(),
+    hasInstallPrompt: !!installPromptEvent,
+    isIOS: isIOS(),
+    isDesktop: isDesktop(),
+    userAgent: navigator.userAgent
+  });
+
+  // Sprawdź czy już zainstalowane
   if (isStandalone()) {
     UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
     return;
   }
 
+  // Android/Chrome - użyj prompt
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    // KROK 6: Zaktualizowano logikę po kliknięciu
     installPromptEvent.userChoice.then((choiceResult) => {
       console.log(`PWA prompt user choice: ${choiceResult.outcome}`);
       if (choiceResult.outcome === "accepted") {
         console.log("User accepted PWA installation");
-        // Event 'appinstalled' obsłuży resztę
-      } else {
-        console.log("User dismissed PWA prompt");
       }
     });
-  } else if (isIOS()) {
-    // On iOS, we show instructions.
+  }
+  // iOS - pokaż instrukcje
+  else if (isIOS()) {
     showIosInstructions();
-  } else if (isDesktop()) {
+  }
+  // Desktop - pokaż modal z QR
+  else if (isDesktop()) {
     showDesktopModal();
-  } else {
-    // If not on iOS and there's no prompt, the app is likely installed.
-    UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+  }
+  // ✅ POPRAWKA: Inne przeglądarki
+  else {
+    UI.showAlert(
+      "Instalacja PWA nie jest obsługiwana w tej przeglądarce. " +
+      "Spróbuj otworzyć stronę w Chrome na Androidzie lub Safari na iOS.",
+      true
+    );
   }
 }
 
