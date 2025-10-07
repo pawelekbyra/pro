@@ -4,7 +4,8 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
-import { API } from './api.js';
+// ✅ PATCH: Import authManager, bo API.post jest nieprawidłowe w tym kontekście
+import { authManager } from './auth-manager.js';
 
 let dom = {};
 
@@ -151,31 +152,35 @@ async function handleFormSubmit(e) {
 
   // Disable button
   dom.submitBtn.disabled = true;
-  dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText')}`;
+  dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText') || 'Zapisywanie...'}`;
 
   try {
     const formData = getFormData();
-    const result = await API.post('tt_complete_profile', formData);
+    // ✅ FIX: Używamy authManager.ajax zamiast API.post
+    const result = await authManager.ajax('tt_complete_profile', formData);
 
     if (result.success) {
-      showSuccess(Utils.getTranslation('firstLoginSuccess'));
+      showSuccess('Profil skonfigurowany! Witaj ponownie! 🎉');
 
       // Zaktualizuj dane użytkownika w State
-      State.set('currentUser', result.data.userData);
+      if (result.data?.userData) {
+        State.set('currentUser', result.data.userData);
+      }
 
       setTimeout(() => {
         hideModal();
-        UI.showToast(Utils.getTranslation('firstLoginWelcomeBack'));
-        // Nie ma potrzeby przeładowywać strony, UI powinno się samo zaktualizować
-        // Jeśli jest inaczej, można to będzie dodać
+        UI.showToast('Witaj w Ting Tong! 🚀');
       }, 1500);
 
     } else {
-      throw new Error(result.data?.message || Utils.getTranslation('profileUpdateError'));
+      throw new Error(result.data?.message || 'Błąd aktualizacji profilu');
     }
 
   } catch (error) {
-    showError(error.message);
+    console.error('First Login Form submit error:', error);
+    showError(error.message || 'Wystąpił błąd. Spróbuj ponownie.');
+
+    // Re-enable button
     dom.submitBtn.disabled = false;
     dom.submitBtn.textContent = originalText;
   }

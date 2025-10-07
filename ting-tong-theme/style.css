@@ -35,7 +35,7 @@ Text Domain: tingtongtheme
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%; /* ✅ PATCH: Użyj 100% dla spójności z klawiaturą */
   background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -44,9 +44,9 @@ Text Domain: tingtongtheme
   visibility: hidden;
   transition: opacity 0.4s ease, visibility 0.4s ease;
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* ✅ PATCH: Wyrównaj do dołu */
   justify-content: center;
-  padding: 20px;
+  padding: 0; /* ✅ PATCH: Usuń padding, content będzie miał swój */
 }
 
 .first-login-modal-overlay.visible {
@@ -57,25 +57,27 @@ Text Domain: tingtongtheme
 /* Content - premium design */
 .first-login-modal-content {
   background: linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 100%);
-  border-radius: 24px;
+  border-radius: 24px 24px 0 0; /* ✅ PATCH: Krawędzie dla dolnego arkusza */
   width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
+  max-width: 520px; /* Lepszy max-width dla desktop */
+  height: auto; /* ✅ PATCH: Wysokość auto */
+  max-height: 85vh; /* ✅ PATCH: Ograniczenie wysokości */
   display: flex;
   flex-direction: column;
   border: 2px solid rgba(255, 0, 85, 0.3);
   box-shadow:
     0 32px 80px rgba(0, 0, 0, 0.9),
     0 0 80px rgba(255, 0, 85, 0.2);
-  transform: scale(0.9);
-  opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+  transform: translateY(100%); /* ✅ PATCH: Animacja od dołu */
+  opacity: 1; /* Opacity jest na overlayu, więc to może być 1 */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
+  position: relative;
+  will-change: transform;
 }
 
 .first-login-modal-overlay.visible .first-login-modal-content {
-  transform: scale(1);
-  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Header z gradientem */
@@ -85,6 +87,7 @@ Text Domain: tingtongtheme
   text-align: center;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0; /* ✅ PATCH: Nie kurcz się */
 }
 
 .first-login-header::before {
@@ -143,8 +146,11 @@ Text Domain: tingtongtheme
 .first-login-body {
   padding: 24px;
   overflow-y: auto;
-  flex: 1;
   -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto; /* ✅ PATCH: Pozwól na kurczenie i rośnięcie */
+  min-height: 0; /* ✅ PATCH: Kluczowe dla kurczenia się w flexbox */
+  scroll-behavior: smooth;
+  padding-bottom: 80px; /* ✅ PATCH: Zapas na przycisk */
 }
 
 .first-login-body::-webkit-scrollbar {
@@ -367,6 +373,12 @@ Text Domain: tingtongtheme
   padding: 20px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0; /* ✅ PATCH: Nie kurcz się */
+  position: relative; /* ✅ PATCH: Zmienione ze sticky/domyślnego */
+  bottom: auto;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3); /* ✅ PATCH: Mocniejszy cień */
+  z-index: 10;
+  contain: layout; /* ✅ PATCH: Optymalizacja wydajności */
 }
 
 .first-login-submit-btn {
