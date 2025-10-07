@@ -232,22 +232,53 @@ function handleInstallClick() {
     userAgent: navigator.userAgent
   });
 
+  // ✅ FIX 3: Ulepszona obsługa błędów i logika instalacji
+
   // Warunek 1: Aplikacja jest już zainstalowana
   if (isStandalone()) {
-    UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+    if (typeof UI !== 'undefined' && UI.showAlert) {
+      UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+    } else {
+      alert(Utils.getTranslation("alreadyInstalledText"));
+    }
     return;
   }
 
   // Warunek 2: Standardowy prompt instalacji jest dostępny (Chrome/Android)
   if (installPromptEvent) {
-    installPromptEvent.prompt();
-    installPromptEvent.userChoice.then((choiceResult) => {
-      console.log(`PWA prompt user choice: ${choiceResult.outcome}`);
-      if (choiceResult.outcome === "accepted") {
-        console.log("User accepted PWA installation");
+    try {
+      installPromptEvent.prompt();
+      installPromptEvent.userChoice
+        .then((choiceResult) => {
+          console.log(`PWA prompt user choice: ${choiceResult.outcome}`);
+          if (choiceResult.outcome === "accepted") {
+            console.log("✅ User accepted PWA installation");
+            // Ukryj pasek po akceptacji
+            if (installBar) {
+              installBar.classList.remove("visible");
+              const appFrame = document.getElementById("app-frame");
+              if (appFrame) {
+                appFrame.classList.remove("app-frame--pwa-visible");
+              }
+            }
+          } else {
+            console.log("❌ User dismissed PWA installation");
+          }
+        })
+        .catch((error) => {
+          console.error("❌ PWA prompt error:", error);
+          if (typeof UI !== 'undefined' && UI.showAlert) {
+            UI.showAlert("Wystąpił błąd podczas instalacji. Spróbuj ponownie później.", true);
+          }
+        });
+      return;
+    } catch (error) {
+      console.error("❌ Failed to show install prompt:", error);
+      if (typeof UI !== 'undefined' && UI.showAlert) {
+        UI.showAlert("Nie można pokazać okna instalacji. Spróbuj dodać stronę do ekranu głównego manualnie.", true);
       }
-    });
-    return;
+      return;
+    }
   }
 
   // Warunek 3: Użytkownik jest na iOS
@@ -262,9 +293,13 @@ function handleInstallClick() {
     return;
   }
 
-  // Fallback: Kompatybilna przeglądarka, ale prompt nie jest jeszcze gotowy.
-  // Używamy nowego, bardziej adekwatnego komunikatu.
-  UI.showAlert(Utils.getTranslation("installNotReadyText"), true);
+  // Fallback: Przeglądarka nie wspiera PWA lub prompt nie jest gotowy
+  console.warn("⚠️ PWA install not available");
+  if (typeof UI !== 'undefined' && UI.showAlert) {
+    UI.showAlert(Utils.getTranslation("installNotReadyText") || "Instalacja aplikacji nie jest jeszcze dostępna. Spróbuj ponownie za chwilę lub użyj opcji 'Dodaj do ekranu głównego' w menu przeglądarki.", true);
+  } else {
+    alert("Instalacja nie jest dostępna w tej przeglądarce.");
+  }
 }
 
 export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };

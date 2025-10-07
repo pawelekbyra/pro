@@ -179,6 +179,21 @@ function applyLikeStateToDom(likeId, liked, count) {
     .forEach((btn) => updateLikeButtonState(btn, liked, count));
 }
 
+/**
+ * Sprawdza czy dla danego slajdu jest aktywna nakładka blokująca
+ */
+function isSlideOverlayActive(slideElement) {
+  if (!slideElement) return false;
+
+  const secretOverlay = slideElement.querySelector('.secret-overlay');
+  const pwaSecretOverlay = slideElement.querySelector('.pwa-secret-overlay');
+
+  const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
+  const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
+
+  return isSecretVisible || isPwaSecretVisible;
+}
+
 function updateUIForLoginState() {
   UI.updateCommentFormVisibility();
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -1103,4 +1118,5 @@ export const UI = {
   scrollToComment,
   openImageLightbox,
   closeImageLightbox,
+  isSlideOverlayActive, // ✅ NOWE
 };
