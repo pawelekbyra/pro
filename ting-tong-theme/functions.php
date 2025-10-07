@@ -859,3 +859,10 @@ add_action('wp_ajax_tt_complete_profile', function () {
         'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
     ]);
 });
+// Dodaj do functions.php
+add_filter('rest_authentication_errors', function($result) {
+    if (!empty($result)) {
+        return $result;
+    }
+    return true;
+});
