@@ -256,12 +256,15 @@ function updateUIForLoginState() {
         const isOverlayVisible = showSecret || showPwaSecret;
         const isCurrentSlide = section.classList.contains('swiper-slide-active');
 
+        // First, enforce pausing if any overlay is active.
+        // This is the most important rule.
         if (isOverlayVisible) {
             if (!video.paused) {
                 video.pause();
             }
-        } else if (isCurrentSlide && video.paused) {
-            // Only play if it's the active slide and overlays are gone
+        }
+        // Only if no overlays are active, consider playing the video.
+        else if (isCurrentSlide && video.paused) {
             video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
         }
     }

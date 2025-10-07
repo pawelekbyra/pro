@@ -232,13 +232,13 @@ function handleInstallClick() {
     userAgent: navigator.userAgent
   });
 
-  // Sprawdź czy już zainstalowane
+  // Warunek 1: Aplikacja jest już zainstalowana
   if (isStandalone()) {
     UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
     return;
   }
 
-  // Android/Chrome - użyj prompt
+  // Warunek 2: Standardowy prompt instalacji jest dostępny (Chrome/Android)
   if (installPromptEvent) {
     installPromptEvent.prompt();
     installPromptEvent.userChoice.then((choiceResult) => {
@@ -247,23 +247,24 @@ function handleInstallClick() {
         console.log("User accepted PWA installation");
       }
     });
+    return;
   }
-  // iOS - pokaż instrukcje
-  else if (isIOS()) {
+
+  // Warunek 3: Użytkownik jest na iOS
+  if (isIOS()) {
     showIosInstructions();
+    return;
   }
-  // Desktop - pokaż modal z QR
-  else if (isDesktop()) {
+
+  // Warunek 4: Użytkownik jest na desktopie
+  if (isDesktop()) {
     showDesktopModal();
+    return;
   }
-  // ✅ POPRAWKA: Inne przeglądarki
-  else {
-    UI.showAlert(
-      "Instalacja PWA nie jest obsługiwana w tej przeglądarce. " +
-      "Spróbuj otworzyć stronę w Chrome na Androidzie lub Safari na iOS.",
-      true
-    );
-  }
+
+  // Fallback: Kompatybilna przeglądarka, ale prompt nie jest jeszcze gotowy.
+  // Używamy nowego, bardziej adekwatnego komunikatu.
+  UI.showAlert(Utils.getTranslation("installNotReadyText"), true);
 }
 
 export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };
