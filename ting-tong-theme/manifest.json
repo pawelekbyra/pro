@@ -1,8 +1,11 @@
 {
   "name": "Ting Tong App",
   "short_name": "TingTong",
+  "description": "A TikTok-style PWA for vertical video swiping.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#ff0055",
   "icons": [

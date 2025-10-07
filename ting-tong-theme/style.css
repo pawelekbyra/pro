@@ -899,12 +899,12 @@ body,
 .video-controls {
   position: absolute;
   bottom: calc(var(--bottombar-height) + 8px);
-  left: 8px; /* Bliżej lewej krawędzi */
+  left: 4px; /* Bliżej lewej krawędzi */
   z-index: 105;
   display: flex;
   flex-direction: row; /* POPRAWKA: Układ poziomy */
   align-items: center;
-  gap: 8px; /* Mniejszy odstęp dla układu poziomego */
+  gap: 4px; /* Mniejszy odstęp dla układu poziomego */
 }
 
 .video-controls button {

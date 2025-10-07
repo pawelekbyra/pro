@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1, interactive-widget=resizes-content">
+    <title>Ting Tong Verification</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css">
+    <link rel="manifest" href="./manifest.json">
+</head>
+<body>
+    <div id="preloader">
+        <div class="preloader-content-container">
+            <div class="language-selection">
+                <h2>Wybierz Język / Select Language</h2>
+                <div class="lang-buttons-container">
+                    <button data-lang="pl"><span>Polski</span></button>
+                    <button data-lang="en"><span>English</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-frame">
+        <div class="topbar" data-view="default">
+            <button class="topbar-icon-btn hamburger-icon" data-action="toggle-main-menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></button>
+            <button class="topbar-central-trigger" data-action="toggle-login-panel"><div class="central-text-wrapper"><span class="topbar-text"></span></div></button>
+            <button class="topbar-icon-btn notification-bell" data-action="toggle-notifications" aria-label="Powiadomienia"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.73 21a2 2 0 0 1-3.46 0" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div class="notification-dot"></div></button>
+        </div>
+        <div class="login-panel" aria-hidden="true">
+                <form id="tt-login-form" class="login-form">
+                    <input type="text" id="tt-username" name="log" aria-label="Username" />
+                    <input type="password" id="tt-password" name="pwd" aria-label="Password" />
+                    <button type="submit" id="tt-login-submit">ENTER</button>
+                </form>
+            </div>
+        <div class="logged-in-menu" aria-hidden="true">
+            <a href="#" data-action="open-account-modal" class="accountMenuButton">Konto</a>
+            <a href="#" data-action="logout" class="logout-link">Wyloguj</a>
+        </div>
+
+        <template id="slide-template">
+            <div class="webyx-section swiper-slide">
+                <div class="tiktok-symulacja">
+                    <video crossorigin playsinline muted autoplay preload="auto" poster="" class="player"></video>
+                    <div class="video-controls">
+                        <button class="volume-button" data-action="toggle-volume">
+                            <svg class="volume-on-icon" style="display: none;" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                            <svg class="volume-off-icon" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                        </button>
+                        <button class="cc-button" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 0 24 24" width="28" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2v-.5H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2v-.5H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
+                        </button>
+                        <button class="fullscreen-button" data-action="toggle-fullscreen">
+                            <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+                            <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="pause-overlay" aria-hidden="true">
+                        <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                    </div>
+                    <div class="replay-overlay" aria-hidden="true">
+                        <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                    </div>
+                    <div class="sidebar visible">
+                        <div class="profile">
+                            <button class="profileButton" data-action="open-public-profile"><img src="https://i.pravatar.cc/100" alt="Profil" /></button>
+                        </div>
+                        <button class="icon-button like-button" data-action="toggle-like" data-like-id=""><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><div class="like-count icon-label">0</div></button>
+                        <button class="icon-button commentsButton" data-action="open-comments-modal"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg><div class="icon-label comment-count">0</div></button>
+                    </div>
+                    <div class="bottombar">
+                        <div class="progress-bar"><div class="progress-bar-fill"></div><div class="progress-bar-handle"></div></div>
+                        <div class="text-info"><div class="text-user"></div><div class="text-description"></div></div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <div id="webyx-container" class="swiper"><div class="swiper-wrapper"></div></div>
+    </div>
+    <div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true">
+        <div class="pwa-prompt-content">
+            <p class="pwa-prompt-title">Install App</p>
+            <p class="pwa-prompt-description">Install this app to your homescreen.</p>
+        </div>
+        <button id="pwa-install-button" class="pwa-prompt-button">Install</button>
+    </div>
+    <script>
+        var TingTongConfig = {
+            "ajaxUrl": "http://localhost:8090/wp-admin/admin-ajax.php",
+            "nonce": "mock-nonce",
+            "themeUrl": "http://localhost:8090/",
+            "serviceWorkerUrl": "http://localhost:8090/sw.js",
+            "is_user_logged_in": false,
+            "is_profile_complete": false
+        };
+        var TingTongData = [{
+            "isIframe": false,
+            "videoUrl": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+            "access": "public",
+            "user": { "name": "Test User" },
+            "description": "This is a test video.",
+            "likeId": "1",
+            "initialLikes": 10,
+            "initialComments": 5,
+            "isLiked": false
+        }];
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js"></script>
+    <script src="./js/app.js" type="module"></script>
+</body>
+</html>
