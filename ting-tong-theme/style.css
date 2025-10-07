@@ -465,10 +465,19 @@ Text Domain: tingtongtheme
 }
 
 /* Responsive */
+/* ✅ NOWE: Dostosowanie do klawiatury ekranowej */
+.first-login-modal-overlay.keyboard-visible .first-login-modal-content {
+  height: 100%;
+  max-height: 100%;
+  border-radius: 0;
+  transition: height 0.2s ease-out, max-height 0.2s ease-out;
+}
+
 @media (max-width: 480px) {
   .first-login-modal-content {
-    max-width: calc(100% - 20px);
-    max-height: calc(100vh - 40px);
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
   }
 
   .first-login-header {

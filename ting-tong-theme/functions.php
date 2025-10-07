@@ -613,6 +613,7 @@ add_action('wp_ajax_tt_profile_get', function () {
         'first_name'   => (string) get_user_meta($u->ID, 'first_name', true),
         'last_name'    => (string) get_user_meta($u->ID, 'last_name',  true),
         'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
+        'new_nonce'    => wp_create_nonce('tt_ajax_nonce'), // ✅ FIX: Zwróć nowy nonce
     ]);
 });
 add_action('wp_ajax_nopriv_tt_profile_get', function () {

@@ -75,6 +75,7 @@ function init() {
 
   setupEventListeners();
   setupPasswordStrength();
+  setupKeyboardListener(); // ✅ NOWE: Dodajemy listener klawiatury
 }
 
 /**
@@ -275,6 +276,56 @@ function showSuccess(message) {
     requestAnimationFrame(() => dom.successEl.classList.add('show'));
   }
 }
+
+/**
+ * ✅ NOWE: Konfiguracja listenera klawiatury dla tego modala
+ */
+function setupKeyboardListener() {
+  if (!dom.modal) return;
+
+  if (!window.visualViewport) {
+    console.warn('Visual Viewport API not supported');
+    return;
+  }
+
+  let initialHeight = window.visualViewport.height;
+  let isKeyboardVisible = false;
+
+  const handleViewportChange = () => {
+    const currentHeight = window.visualViewport.height;
+    const heightDiff = initialHeight - currentHeight;
+
+    const newKeyboardState = heightDiff > 150;
+
+    if (newKeyboardState !== isKeyboardVisible) {
+      isKeyboardVisible = newKeyboardState;
+      dom.modal.classList.toggle('keyboard-visible', isKeyboardVisible);
+
+      if (isKeyboardVisible) {
+        setTimeout(() => {
+          const activeElement = document.activeElement;
+          if (activeElement && dom.modal.contains(activeElement)) {
+            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
+
+    dom.modal.style.setProperty('--keyboard-offset', `${Math.max(0, heightDiff)}px`);
+  };
+
+  window.visualViewport.addEventListener('resize', handleViewportChange);
+
+  dom.modal.addEventListener('transitionend', function cleanupOnClose(e) {
+    if (e.target === dom.modal && !dom.modal.classList.contains('visible')) {
+      isKeyboardVisible = false;
+      dom.modal.classList.remove('keyboard-visible');
+      dom.modal.style.removeProperty('--keyboard-offset');
+      initialHeight = window.visualViewport.height;
+    }
+  });
+}
+
 
 // Export
 export const FirstLoginModal = {
