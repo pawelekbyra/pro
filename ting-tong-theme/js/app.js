@@ -260,24 +260,36 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-              // Ignoruj kliknięcia na elementach interaktywnych (np. przyciski),
-              // ponieważ są one obsługiwane przez dedykowany `mainClickHandler`.
-              if (event.target.closest('[data-action]')) {
+              // Ignoruj kliknięcia na interaktywnych elementach
+              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay')) {
                 return;
               }
 
               const activeSlide = swiper.slides[swiper.activeIndex];
-              const video = activeSlide ? activeSlide.querySelector('video') : null;
+              const video = activeSlide?.querySelector('video');
 
-              if (video) {
-                const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-                if (video.paused) {
-                  video.play();
-                  if (pauseOverlay) pauseOverlay.classList.remove('visible');
-                } else {
-                  video.pause();
-                  if (pauseOverlay) pauseOverlay.classList.add('visible');
-                }
+              if (!video) return;
+
+              const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+              const replayOverlay = activeSlide.querySelector('.replay-overlay');
+
+              // ✅ PRZYPADEK 1: Film się skończył - replay
+              if (video.ended) {
+                video.currentTime = 0;
+                video.play().catch(err => console.log("Błąd replay:", err));
+                if (replayOverlay) replayOverlay.classList.remove('visible');
+                return;
+              }
+
+              // ✅ PRZYPADEK 2: Film jest spauzowany - odtwórz
+              if (video.paused) {
+                video.play().catch(err => console.log("Błąd play:", err));
+                if (pauseOverlay) pauseOverlay.classList.remove('visible');
+              }
+              // ✅ PRZYPADEK 3: Film gra - spauzuj
+              else {
+                video.pause();
+                if (pauseOverlay) pauseOverlay.classList.add('visible');
               }
             },
           },
