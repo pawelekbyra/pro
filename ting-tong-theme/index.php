@@ -505,8 +505,7 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<!-- MODAL PIERWSZEGO LOGOWANIA - Dodaj przed zamknięciem </body> w index.php -->
-
+<!-- MODAL PIERWSZEGO LOGOWANIA - ZAKTUALIZOWANY -->
 <div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title">
   <div class="first-login-modal-content">
 
@@ -517,56 +516,40 @@ get_header();
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
         </svg>
       </div>
-      <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle">Witaj w Ting Tong!</h2>
+      <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle">Witaj na Ting Tongu!</h2>
       <p class="first-login-subtitle" data-translate-key="firstLoginSubtitle">Uzupełnij swój profil, aby kontynuować</p>
     </div>
 
     <!-- Body ze scrollem -->
     <div class="first-login-body">
 
-      <!-- Info Box z wyjaśnieniem -->
-      <div class="first-login-info-box">
-        <svg class="first-login-info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="first-login-info-text">
-          <p data-translate-key="firstLoginInfoText">
-            To Twoje pierwsze logowanie! Musisz <strong>ustawić nowe hasło</strong> oraz <strong>uzupełnić dane profilu</strong>.
-            Możesz użyć prawdziwych danych lub <strong>całkowicie zmyślonych</strong> — to Twój wybór! 🎭
-          </p>
+      <!-- ✅ NOWA SEKCJA ZGÓD - subtelna, mała -->
+      <div class="first-login-preferences">
+        <div class="preference-row">
+          <span class="preference-label" data-translate-key="emailConsentLabel">Powiadomienia mailowe</span>
+          <div class="toggle-switch active" id="firstLoginEmailConsent">
+            <div class="toggle-slider"></div>
+          </div>
+        </div>
+        <div class="preference-row">
+          <span class="preference-label" data-translate-key="emailLanguageLabel">Język maili</span>
+          <div class="language-selector-compact">
+            <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish">PL</div>
+            <div class="language-option-compact" data-lang="en" data-translate-key="emailLangEnglish">EN</div>
+          </div>
         </div>
       </div>
 
       <!-- Wyświetlenie emaila logowania -->
       <div class="first-login-email-display">
         <div class="first-login-email-label" data-translate-key="firstLoginEmailLabel">Logujesz się za pomocą</div>
-        <div class="first-login-email-value" id="firstLoginEmail">rurku@wp.pl</div>
+        <div class="first-login-email-value" id="firstLoginEmail">user@example.com</div>
       </div>
 
       <!-- Formularz -->
       <form id="firstLoginForm">
 
-        <!-- SEKCJA 1: Avatar (opcjonalnie) -->
-        <div class="first-login-section">
-          <h3 class="first-login-section-title" data-translate-key="firstLoginAvatarTitle">
-            Twój Avatar <span style="font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 400;">(opcjonalnie)</span>
-          </h3>
-          <div class="first-login-avatar-section">
-            <div class="first-login-avatar-wrapper">
-              <div class="first-login-avatar-container">
-                <img id="firstLoginAvatarImg" src="https://i.pravatar.cc/200?u=default" alt="Avatar" class="first-login-avatar-img">
-              </div>
-              <button type="button" class="first-login-avatar-edit-btn" id="firstLoginAvatarEditBtn" data-translate-title="firstLoginAvatarEditBtnTitle" title="Zmień avatar">
-                +
-              </button>
-            </div>
-            <p class="first-login-avatar-hint" data-translate-key="firstLoginAvatarHint">
-              Kliknij +, aby wybrać nowy avatar
-            </p>
-          </div>
-        </div>
-
-        <!-- SEKCJA 2: Dane Osobowe -->
+        <!-- SEKCJA 1: Dane Osobowe -->
         <div class="first-login-section">
           <h3 class="first-login-section-title" data-translate-key="firstLoginPersonalDataTitle">Dane Osobowe</h3>
 
@@ -609,28 +592,9 @@ get_header();
           </div>
         </div>
 
-        <!-- SEKCJA 3: Zmiana Hasła -->
+        <!-- SEKCJA 2: Zmiana Hasła (BEZ CURRENT PASSWORD) -->
         <div class="first-login-section">
           <h3 class="first-login-section-title" data-translate-key="firstLoginPasswordTitle">Ustaw Nowe Hasło</h3>
-
-          <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginCurrentPassword">
-              <span data-translate-key="firstLoginCurrentPasswordLabel">Aktualne hasło</span>
-              <span class="required">*</span>
-            </label>
-            <input
-              type="password"
-              id="firstLoginCurrentPassword"
-              class="first-login-form-input"
-              data-translate-placeholder="firstLoginCurrentPasswordPlaceholder"
-              placeholder="Hasło z emaila powitalnego"
-              required
-              autocomplete="current-password"
-            >
-            <div class="first-login-form-hint" data-translate-key="firstLoginCurrentPasswordHint">
-              Wpisz hasło, które otrzymałeś w emailu powitalnym
-            </div>
-          </div>
 
           <div class="first-login-form-group">
             <label class="first-login-form-label" for="firstLoginNewPassword">
@@ -689,9 +653,6 @@ get_header();
 
   </div>
 </div>
-
-<!-- Hidden file input for avatar -->
-<input type="file" class="file-input" id="firstLoginAvatarFileInput" accept="image/*">
 
 <!-- Debug Tools -->
 <div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">

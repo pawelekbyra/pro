@@ -1,125 +1,111 @@
 // ============================================================================
-// MODUŁ: First Login Modal - Wymuszenie konfiguracji konta
+// MODUŁ: Modal Uzupełniania Profilu (wcześniej First Login Modal)
 // ============================================================================
-// Umieść w: ting-tong-theme/js/modules/first-login-modal.js
-
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
+import { API } from './api.js';
 
-let selectedAvatarFile = null;
+let dom = {};
 
 /**
- * Pokazuje modal pierwszego logowania
- * @param {string} userEmail - Email użytkownika
+ * Sprawdza, czy profil użytkownika jest kompletny i ewentualnie pokazuje modal.
+ * @param {object} userData - Obiekt danych użytkownika z odpowiedzi logowania.
  */
-function showFirstLoginModal(userEmail) {
-  const modal = document.getElementById('firstLoginModal');
-  if (!modal) return;
+function checkProfileAndShowModal(userData) {
+  if (userData && userData.is_profile_complete === false) {
+    console.log('Profile incomplete, showing completion modal.');
+    showProfileCompletionModal(userData.email);
+  } else {
+    console.log('Profile complete, proceeding.');
+  }
+}
 
-  // Ustaw email
-  const emailEl = document.getElementById('firstLoginEmail');
-  if (emailEl) emailEl.textContent = userEmail;
+/**
+ * Pokazuje modal uzupełniania profilu.
+ * @param {string} userEmail - Email użytkownika do wyświetlenia.
+ */
+function showProfileCompletionModal(userEmail) {
+  if (!dom.modal) return;
 
-  // Pokaż modal za pomocą UI.openModal
-  UI.openModal(modal);
+  if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
 
-  // Focus pierwszy input
+  UI.openModal(dom.modal);
+
   setTimeout(() => {
-    document.getElementById('firstLoginFirstName')?.focus();
+    dom.firstNameInput?.focus();
   }, 400);
 }
 
 /**
- * Ukrywa modal pierwszego logowania
+ * Ukrywa modal.
  */
-function hideFirstLoginModal() {
-  const modal = document.getElementById('firstLoginModal');
-  if (!modal) return;
-
-  modal.classList.remove('visible');
-  document.body.style.overflow = '';
+function hideModal() {
+  if (!dom.modal) return;
+  UI.closeModal(dom.modal);
 }
 
 /**
- * Inicjalizacja modalu
+ * Inicjalizacja modułu.
  */
 function init() {
+  // Cache DOM elements
+  dom = {
+    modal: document.getElementById('firstLoginModal'),
+    form: document.getElementById('firstLoginForm'),
+    emailDisplay: document.getElementById('firstLoginEmail'),
+    firstNameInput: document.getElementById('firstLoginFirstName'),
+    lastNameInput: document.getElementById('firstLoginLastName'),
+    newPasswordInput: document.getElementById('firstLoginNewPassword'),
+    confirmPasswordInput: document.getElementById('firstLoginConfirmPassword'),
+    emailConsentToggle: document.getElementById('firstLoginEmailConsent'),
+    languageSelector: document.querySelector('.language-selector-compact'),
+    submitBtn: document.getElementById('firstLoginSubmitBtn'),
+    errorEl: document.getElementById('firstLoginError'),
+    successEl: document.getElementById('firstLoginSuccess'),
+    passwordStrength: {
+      indicator: document.getElementById('passwordStrengthIndicator'),
+      bar: document.getElementById('passwordStrengthBar'),
+      text: document.getElementById('passwordStrengthText'),
+    }
+  };
+
+  if (!dom.modal) return; // Jeśli modalu nie ma, nie rób nic więcej
+
   setupEventListeners();
   setupPasswordStrength();
 }
 
 /**
- * Konfiguracja event listenerów
+ * Konfiguracja event listenerów.
  */
 function setupEventListeners() {
-  // Avatar edit button
-  const avatarEditBtn = document.getElementById('firstLoginAvatarEditBtn');
-  const avatarFileInput = document.getElementById('firstLoginAvatarFileInput');
+  dom.form.addEventListener('submit', handleFormSubmit);
 
-  if (avatarEditBtn && avatarFileInput) {
-    avatarEditBtn.addEventListener('click', () => {
-      avatarFileInput.click();
-    });
+  // Toggle switch
+  dom.emailConsentToggle.addEventListener('click', () => {
+    dom.emailConsentToggle.classList.toggle('active');
+  });
 
-    avatarFileInput.addEventListener('change', handleAvatarSelect);
-  }
-
-  // Form submit
-  const form = document.getElementById('firstLoginForm');
-  if (form) {
-    form.addEventListener('submit', handleFormSubmit);
-  }
-
-}
-
-/**
- * Obsługa wyboru avatara
- */
-function handleAvatarSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  // Walidacja
-  if (!file.type.startsWith('image/')) {
-    showError('Wybierz plik obrazu (JPG, PNG, GIF)');
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    showError('Obraz jest za duży. Maksymalny rozmiar: 5MB');
-    return;
-  }
-
-  selectedAvatarFile = file;
-
-  // Preview
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    const img = document.getElementById('firstLoginAvatarImg');
-    if (img) {
-      img.src = event.target.result;
+  // Language selector
+  dom.languageSelector.addEventListener('click', (e) => {
+    if (e.target.classList.contains('language-option-compact')) {
+      dom.languageSelector.querySelector('.active').classList.remove('active');
+      e.target.classList.add('active');
     }
-  };
-  reader.readAsDataURL(file);
-
-  // Wyczyść input
-  e.target.value = '';
+  });
 }
 
 /**
- * Konfiguracja wskaźnika siły hasła
+ * Konfiguracja wskaźnika siły hasła.
  */
 function setupPasswordStrength() {
-  const newPasswordInput = document.getElementById('firstLoginNewPassword');
-  const indicator = document.getElementById('passwordStrengthIndicator');
-  const bar = document.getElementById('passwordStrengthBar');
-  const text = document.getElementById('passwordStrengthText');
-
-  if (!newPasswordInput || !indicator || !bar || !text) return;
+  const { newPasswordInput, passwordStrength } = dom;
+  if (!newPasswordInput || !passwordStrength.indicator) return;
 
   newPasswordInput.addEventListener('input', () => {
     const password = newPasswordInput.value;
+    const { indicator, bar, text } = passwordStrength;
 
     if (password.length === 0) {
       indicator.classList.remove('visible');
@@ -128,7 +114,6 @@ function setupPasswordStrength() {
 
     indicator.classList.add('visible');
 
-    // Oblicz siłę hasła
     let strength = 0;
     if (password.length >= 8) strength++;
     if (password.length >= 12) strength++;
@@ -136,7 +121,6 @@ function setupPasswordStrength() {
     if (/\d/.test(password)) strength++;
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
-    // Klasyfikacja
     let level = 'weak';
     let levelText = Utils.getTranslation('passwordStrengthWeak');
 
@@ -148,7 +132,6 @@ function setupPasswordStrength() {
       levelText = Utils.getTranslation('passwordStrengthMedium');
     }
 
-    // Aktualizuj UI
     bar.className = `password-strength-bar ${level}`;
     text.className = `password-strength-text ${level}`;
     text.textContent = levelText;
@@ -156,285 +139,140 @@ function setupPasswordStrength() {
 }
 
 /**
- * Obsługa wysłania formularza
+ * Obsługa wysłania formularza.
  */
 async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const button = document.getElementById('firstLoginSubmitBtn');
-  const originalText = button.textContent;
-
-  // Pobierz dane z formularza
-  const firstName = document.getElementById('firstLoginFirstName').value.trim();
-  const lastName = document.getElementById('firstLoginLastName').value.trim();
-  const currentPassword = document.getElementById('firstLoginCurrentPassword').value;
-  const newPassword = document.getElementById('firstLoginNewPassword').value;
-  const confirmPassword = document.getElementById('firstLoginConfirmPassword').value;
+  const originalText = dom.submitBtn.textContent;
 
   // Walidacja
-  if (!firstName || !lastName) {
-    showError(Utils.getTranslation('firstLoginErrorMissingNames'));
-    return;
-  }
-
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    showError(Utils.getTranslation('firstLoginErrorMissingPasswords'));
-    return;
-  }
-
-  if (newPassword.length < 8) {
-    showError(Utils.getTranslation('passwordLengthError'));
-    return;
-  }
-
-  if (newPassword !== confirmPassword) {
-    showError(Utils.getTranslation('passwordsMismatchError'));
-    return;
-  }
+  if (!validateForm()) return;
 
   // Disable button
-  button.disabled = true;
-  button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText')}`;
+  dom.submitBtn.disabled = true;
+  dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText')}`;
 
   try {
-    // 1. Upload avatara (jeśli wybrano)
-    let avatarUrl = null;
-    if (selectedAvatarFile) {
-      UI.showToast(Utils.getTranslation('uploadingAvatar'));
-      const avatarResult = await uploadAvatar(selectedAvatarFile);
+    const formData = getFormData();
+    const result = await API.post('tt_complete_profile', formData);
 
-      if (avatarResult.success) {
-        avatarUrl = avatarResult.data.url;
-      } else {
-        throw new Error(avatarResult.data?.message || Utils.getTranslation('avatarUploadError'));
-      }
-    }
+    if (result.success) {
+      showSuccess(Utils.getTranslation('firstLoginSuccess'));
 
-    // 2. Aktualizuj profil
-    const profileResult = await updateProfile({
-      first_name: firstName,
-      last_name: lastName,
-    });
+      // Zaktualizuj dane użytkownika w State
+      State.set('currentUser', result.data.userData);
 
-    if (!profileResult.success) {
-      throw new Error(profileResult.data?.message || Utils.getTranslation('profileUpdateError'));
-    }
-
-    // 3. Zmień hasło
-    const passwordResult = await changePassword({
-      current_password: currentPassword,
-      new_password_1: newPassword,
-      new_password_2: confirmPassword,
-    });
-
-    if (!passwordResult.success) {
-      throw new Error(passwordResult.data?.message || Utils.getTranslation('passwordChangeFailedError'));
-    }
-
-    // 4. Oznacz, że użytkownik ukończył konfigurację
-    await markFirstLoginComplete();
-
-    // Sukces!
-    showSuccess(Utils.getTranslation('firstLoginSuccess'));
-
-    // Odśwież dane użytkownika w UI
-    if (profileResult.data) {
-      const userData = {
-        ...profileResult.data,
-        avatar: avatarUrl || profileResult.data.avatar,
-      };
-
-      // Aktualizuj panel konta jeśli istnieje moduł
-      if (window.AccountPanel && window.AccountPanel.populateProfileForm) {
-        window.AccountPanel.populateProfileForm(userData);
-      }
-    }
-
-    // Zamknij modal po 1.5s
-    setTimeout(() => {
-      hideFirstLoginModal();
-      UI.showToast(Utils.getTranslation('firstLoginWelcomeBack'));
-
-      // Odśwież stronę aby pobrać nowe dane
       setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    }, 1500);
+        hideModal();
+        UI.showToast(Utils.getTranslation('firstLoginWelcomeBack'));
+        // Nie ma potrzeby przeładowywać strony, UI powinno się samo zaktualizować
+        // Jeśli jest inaczej, można to będzie dodać
+      }, 1500);
+
+    } else {
+      throw new Error(result.data?.message || Utils.getTranslation('profileUpdateError'));
+    }
 
   } catch (error) {
     showError(error.message);
-    button.disabled = false;
-    button.textContent = originalText;
+    dom.submitBtn.disabled = false;
+    dom.submitBtn.textContent = originalText;
   }
 }
 
 /**
- * Upload avatara
+ * Zbiera dane z formularza.
+ * @returns {object}
  */
-async function uploadAvatar(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const dataUrl = e.target.result;
+function getFormData() {
+  const newPassword = dom.newPasswordInput.value;
+  const emailConsent = dom.emailConsentToggle.classList.contains('active');
+  const emailLanguage = dom.languageSelector.querySelector('.active').dataset.lang;
 
-      try {
-        const response = await fetch(ajax_object.ajax_url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          },
-          credentials: 'same-origin',
-          body: new URLSearchParams({
-            action: 'tt_avatar_upload',
-            nonce: ajax_object.nonce,
-            image: dataUrl,
-          }),
-        });
+  const data = {
+    first_name: dom.firstNameInput.value.trim(),
+    last_name: dom.lastNameInput.value.trim(),
+    email_consent: emailConsent,
+    email_language: emailLanguage,
+  };
 
-        const result = await response.json();
-        if (result.new_nonce) ajax_object.nonce = result.new_nonce;
-        resolve(result);
-      } catch (error) {
-        resolve({ success: false, data: { message: error.message } });
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-/**
- * Aktualizuj profil
- */
-async function updateProfile(data) {
-  try {
-    const response = await fetch(ajax_object.ajax_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      credentials: 'same-origin',
-      body: new URLSearchParams({
-        action: 'tt_profile_update',
-        nonce: ajax_object.nonce,
-        ...data,
-      }),
-    });
-
-    const result = await response.json();
-    if (result.new_nonce) ajax_object.nonce = result.new_nonce;
-    return result;
-  } catch (error) {
-    return { success: false, data: { message: error.message } };
+  // Dodaj hasło tylko jeśli zostało wprowadzone
+  if (newPassword) {
+    data.new_password = newPassword;
   }
+
+  return data;
 }
 
 /**
- * Zmień hasło
+ * Waliduje formularz.
+ * @returns {boolean}
  */
-async function changePassword(data) {
-  try {
-    const response = await fetch(ajax_object.ajax_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      credentials: 'same-origin',
-      body: new URLSearchParams({
-        action: 'tt_password_change',
-        nonce: ajax_object.nonce,
-        ...data,
-      }),
-    });
+function validateForm() {
+  const firstName = dom.firstNameInput.value.trim();
+  const lastName = dom.lastNameInput.value.trim();
+  const newPassword = dom.newPasswordInput.value;
+  const confirmPassword = dom.confirmPasswordInput.value;
 
-    const result = await response.json();
-    if (result.new_nonce) ajax_object.nonce = result.new_nonce;
-    return result;
-  } catch (error) {
-    return { success: false, data: { message: error.message } };
+  if (!firstName || !lastName) {
+    showError(Utils.getTranslation('firstLoginErrorMissingNames'));
+    return false;
   }
+
+  // Walidacja hasła tylko jeśli zostało wprowadzone
+  if (newPassword) {
+    if (newPassword.length < 8) {
+      showError(Utils.getTranslation('passwordLengthError'));
+      return false;
+    }
+    if (newPassword !== confirmPassword) {
+      showError(Utils.getTranslation('passwordsMismatchError'));
+      return false;
+    }
+  }
+
+  return true;
 }
 
-/**
- * Oznacz ukończenie pierwszego logowania
- */
-async function markFirstLoginComplete() {
-  try {
-    const response = await fetch(ajax_object.ajax_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      credentials: 'same-origin',
-      body: new URLSearchParams({
-        action: 'tt_mark_first_login_complete',
-        nonce: ajax_object.nonce,
-      }),
-    });
-
-    const result = await response.json();
-    if (result.new_nonce) ajax_object.nonce = result.new_nonce;
-    return result;
-  } catch (error) {
-    return { success: false, data: { message: error.message } };
-  }
-}
 
 /**
- * Pokaż komunikat błędu
+ * Pokaż komunikat błędu.
  */
 function showError(message) {
-  const errorEl = document.getElementById('firstLoginError');
-  const successEl = document.getElementById('firstLoginSuccess');
-
-  if (successEl) {
-    successEl.classList.remove('show');
-    successEl.style.display = 'none';
+  if (dom.successEl) {
+    dom.successEl.classList.remove('show');
+    dom.successEl.style.display = 'none';
   }
-
-  if (errorEl) {
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-    requestAnimationFrame(() => errorEl.classList.add('show'));
+  if (dom.errorEl) {
+    dom.errorEl.textContent = message;
+    dom.errorEl.style.display = 'block';
+    requestAnimationFrame(() => dom.errorEl.classList.add('show'));
 
     setTimeout(() => {
-      errorEl.classList.remove('show');
-      setTimeout(() => (errorEl.style.display = 'none'), 300);
+      dom.errorEl.classList.remove('show');
+      setTimeout(() => (dom.errorEl.style.display = 'none'), 300);
     }, 5000);
   }
 }
 
 /**
- * Pokaż komunikat sukcesu
+ * Pokaż komunikat sukcesu.
  */
 function showSuccess(message) {
-  const successEl = document.getElementById('firstLoginSuccess');
-  const errorEl = document.getElementById('firstLoginError');
-
-  if (errorEl) {
-    errorEl.classList.remove('show');
-    errorEl.style.display = 'none';
+  if (dom.errorEl) {
+    dom.errorEl.classList.remove('show');
+    dom.errorEl.style.display = 'none';
   }
-
-  if (successEl) {
-    successEl.textContent = message;
-    successEl.style.display = 'block';
-    requestAnimationFrame(() => successEl.classList.add('show'));
+  if (dom.successEl) {
+    dom.successEl.textContent = message;
+    dom.successEl.style.display = 'block';
+    requestAnimationFrame(() => dom.successEl.classList.add('show'));
   }
-}
-
-/**
- * Sprawdź czy użytkownik wymaga konfiguracji pierwszego logowania
- * @param {object} loginResponse - Odpowiedź z endpointa logowania
- * @returns {boolean}
- */
-function shouldShowFirstLoginModal(loginResponse) {
-  return true;
 }
 
 // Export
 export const FirstLoginModal = {
   init,
-  showFirstLoginModal,
-  hideFirstLoginModal,
-  shouldShowFirstLoginModal,
-}
+  checkProfileAndShowModal,
+};

@@ -122,6 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.userData && AccountPanel?.populateProfileForm) {
           AccountPanel.populateProfileForm(data.userData);
         }
+
+        // ✅ NOWA LOGIKA: Sprawdź, czy profil jest kompletny
+        FirstLoginModal.checkProfileAndShowModal(data.userData);
       });
 
       // Listener dla wylogowania
@@ -303,16 +306,9 @@ document.addEventListener("DOMContentLoaded", () => {
             "transitionend",
             () => {
               UI.DOM.preloader.style.display = "none";
-              // Pokaż modal powitalny tylko w przeglądarce, nie w PWA, i tylko raz
-              if (!PWA.isStandalone() && UI.DOM.welcomeModal) {
-                const hasSeenWelcome = localStorage.getItem('tt_seen_welcome');
-                if (!hasSeenWelcome) {
-                  setTimeout(() => {
-                    UI.openModal(UI.DOM.welcomeModal);
-                    localStorage.setItem('tt_seen_welcome', 'true');
-                  }, 1000);
-                }
-              }
+              // Logika modalu powitalnego została usunięta i zastąpiona
+              // przez logikę modalu uzupełniania profilu, która jest
+              // wywoływana po zalogowaniu.
             },
             { once: true },
           );
