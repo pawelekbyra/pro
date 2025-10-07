@@ -75,15 +75,17 @@ function runStandaloneCheck() {
 
   if (isStandalone()) {
     console.log("[PWA Check] Standalone detected. Hiding install bar.");
-    if (installBar) installBar.classList.remove("visible");
-    if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
-    // setInstalledFlag() call removed
+    if (installBar) {
+      installBar.classList.remove("visible");
+      // Upewnij się, że klasa jest usuwana, aby przywrócić wysokość
+      if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+    }
   } else {
     console.log("[PWA Check] Standalone not detected. Showing install bar.");
-    // Pokaż pasek TYLKO jeśli NIE jesteśmy w trybie standalone i nie ma promptu
-    if (installBar && !installPromptEvent) {
-        installBar.classList.add("visible");
-        if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+    // Zawsze pokazuj pasek, jeśli nie jesteśmy w trybie standalone
+    if (installBar) {
+      installBar.classList.add("visible");
+      if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
     }
   }
 }
@@ -100,8 +102,8 @@ function init() {
       installPromptEvent = e;
       if (installButton) installButton.disabled = false;
 
-      // Ukryj pasek, jeśli pojawi się prośba o instalację
-      if (installBar) installBar.classList.remove("visible");
+      // Celowo nie ukrywamy paska, ma być widoczny zawsze w przeglądarce
+      // if (installBar) installBar.classList.remove("visible");
     });
 
     window.addEventListener("appinstalled", () => {
