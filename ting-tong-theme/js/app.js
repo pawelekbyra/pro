@@ -228,9 +228,18 @@ document.addEventListener("DOMContentLoaded", () => {
           if (activeSlide) {
             // Use realIndex to get data from our original array, which is correct for loop mode.
             const slideData = slidesData[swiper.realIndex];
+
+            // ✅ FIX 1: Sprawdź stan nakładek PRZED próbą odtworzenia
+            const secretOverlay = activeSlide.querySelector('.secret-overlay');
+            const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay');
+
+            const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
+            const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
+            const isAnyOverlayVisible = isSecretVisible || isPwaSecretVisible;
+
             if (slideData && slideData.isIframe) {
               const iframe = activeSlide.querySelector("iframe");
-              if (iframe && iframe.dataset.originalSrc) {
+              if (iframe && iframe.dataset.originalSrc && !isAnyOverlayVisible) {
                 iframe.src = iframe.dataset.originalSrc;
               }
             } else {
@@ -243,10 +252,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (replayOverlay) replayOverlay.classList.remove("visible");
 
                 video.muted = State.get("isSoundMuted");
-                // We don't reset currentTime here, to allow resuming. The replay button will reset it.
-                video.play().catch((error) => {
-                    console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
-                });
+
+                // ✅ FIX 1: Odtwórz tylko jeśli NIE MA nakładki
+                if (!isAnyOverlayVisible) {
+                  video.play().catch((error) => {
+                      console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
+                  });
+                } else {
+                  console.log("Video paused due to overlay visibility on slide " + swiper.realIndex);
+                  video.pause();
+                  video.currentTime = 0; // Reset do początku dla konsystencji
+                }
               }
             }
           }
