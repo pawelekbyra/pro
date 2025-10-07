@@ -228,6 +228,53 @@ class AuthManager {
       return false;
     }
   }
+
+  /**
+   * Mockup logowania do celów testowych
+   * @param {string} email - Email użytkownika
+   * @param {boolean} isProfileComplete - Czy profil jest kompletny
+   */
+  mockLogin(email = 'test@example.com', isProfileComplete = true) {
+    console.log(`%c[MOCK] Logowanie jako ${email}, profil kompletny: ${isProfileComplete}`, 'color: #ff0055; font-weight: bold;');
+
+    const mockUserData = {
+      user_id: 123,
+      username: 'testuser',
+      email: email,
+      display_name: 'Test User',
+      first_name: isProfileComplete ? 'Test' : '',
+      last_name: isProfileComplete ? 'User' : '',
+      avatar: 'https://i.pravatar.cc/100?u=test',
+      email_consent: true,
+      email_language: 'pl',
+      is_profile_complete: isProfileComplete,
+    };
+
+    const mockSlidesData = [
+      {
+        id: "slide-001",
+        likeId: "1",
+        user: "Test User",
+        description: "To jest testowy slajd.",
+        mp4Url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        avatar: "https://i.pravatar.cc/100?u=bunny",
+        access: "public",
+        initialLikes: 0,
+        isLiked: false,
+        initialComments: 0,
+      }
+    ];
+
+    State.set('isUserLoggedIn', true);
+    State.set('currentUser', mockUserData);
+
+    State.emit('user:login', {
+      userData: mockUserData,
+      slidesData: mockSlidesData,
+    });
+
+    return { success: true, userData: mockUserData };
+  }
 }
 
 // Singleton instance

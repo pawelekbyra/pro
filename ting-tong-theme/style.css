@@ -26,7 +26,7 @@ Text Domain: tingtongtheme
 }
 
 /* ============================================================================
-   MODAL PIERWSZEGO LOGOWANIA - Wymuszenie konfiguracji konta
+   MODAL UZUPEŁNIANIA PROFILU (First Login Modal)
    ============================================================================ */
 
 /* Overlay z wysokim priorytetem */
@@ -98,11 +98,6 @@ Text Domain: tingtongtheme
   animation: headerShimmer 6s ease infinite;
 }
 
-@keyframes headerShimmer {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(15%, 15%); }
-}
-
 .first-login-icon {
   width: 64px;
   height: 64px;
@@ -165,34 +160,52 @@ Text Domain: tingtongtheme
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Info Box - wyjaśnienie */
-.first-login-info-box {
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.3);
+/* NOWE: Sekcja preferencji */
+.first-login-preferences {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 24px;
   display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.first-login-info-icon {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  color: #ffd700;
+.preference-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.first-login-info-text {
-  flex: 1;
+.preference-label {
   font-size: 14px;
-  line-height: 1.5;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
 }
 
-.first-login-info-text strong {
-  color: #ffd700;
-  font-weight: 700;
+.language-selector-compact {
+  display: flex;
+  background: rgba(0,0,0,0.2);
+  border-radius: 16px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.language-option-compact {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255,255,255,0.6);
+}
+
+.language-option-compact.active {
+  background: #fff;
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 /* Email Display */
@@ -247,74 +260,6 @@ Text Domain: tingtongtheme
   height: 18px;
   background: linear-gradient(180deg, #ff0055, #ff4081);
   border-radius: 2px;
-}
-
-/* Avatar Section */
-.first-login-avatar-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.first-login-avatar-wrapper {
-  position: relative;
-  width: 100px;
-  height: 100px;
-}
-
-.first-login-avatar-container {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
-}
-
-.first-login-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.first-login-avatar-edit-btn {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 36px;
-  height: 36px;
-  background: var(--accent-color);
-  border: 3px solid #2d2d2d;
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.first-login-avatar-edit-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(255, 0, 85, 0.5);
-}
-
-.first-login-avatar-edit-btn:active {
-  transform: scale(0.95);
-}
-
-.first-login-avatar-hint {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
 }
 
 /* Form Groups */
@@ -528,11 +473,6 @@ Text Domain: tingtongtheme
 
   .first-login-form-row {
     grid-template-columns: 1fr;
-  }
-
-  .first-login-avatar-wrapper {
-    width: 80px;
-    height: 80px;
   }
 }
 

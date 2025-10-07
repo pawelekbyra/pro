@@ -266,28 +266,30 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
         wp_set_current_user($user->ID);
         wp_set_auth_cookie($user->ID, true, is_ssl());
 
-        // Sprawdź czy wymaga pierwszej konfiguracji
-        $requires_setup = tt_user_requires_first_login_setup($user->ID);
-
-        // Przygotuj dane użytkownika
+        // Przygotuj pełne dane użytkownika
         $u = wp_get_current_user();
+        $first_name = get_user_meta($u->ID, 'first_name', true);
+        $last_name = get_user_meta($u->ID, 'last_name', true);
+
         $user_data = [
-            'user_id'      => (int) $u->ID,
-            'username'     => $u->user_login,
-            'email'        => $u->user_email,
-            'display_name' => $u->display_name,
-            'first_name'   => (string) get_user_meta($u->ID, 'first_name', true),
-            'last_name'    => (string) get_user_meta($u->ID, 'last_name', true),
-            'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
+            'user_id'             => (int) $u->ID,
+            'username'            => $u->user_login,
+            'email'               => $u->user_email,
+            'display_name'        => $u->display_name,
+            'first_name'          => (string) $first_name,
+            'last_name'           => (string) $last_name,
+            'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
+            'email_consent'       => (bool) get_user_meta($u->ID, 'tt_email_consent', true),
+            'email_language'      => (string) get_user_meta($u->ID, 'tt_email_language', true) ?: 'pl',
+            'is_profile_complete' => ! empty($first_name) && ! empty($last_name),
         ];
 
-        // Response
+        // Zwróć odpowiedź
         wp_send_json_success([
-            'message'                  => 'Zalogowano pomyślnie.',
-            'userData'                 => $user_data,
-            'slidesData'               => tt_get_slides_data(),
-            'new_nonce'                => wp_create_nonce('tt_ajax_nonce'),
-            'requires_first_login_setup' => $requires_setup, // NOWA FLAGA
+            'message'    => 'Zalogowano pomyślnie.',
+            'userData'   => $user_data,
+            'slidesData' => tt_get_slides_data(),
+            'new_nonce'  => wp_create_nonce('tt_ajax_nonce'),
         ]);
     }
 });
@@ -794,201 +796,66 @@ add_filter('get_avatar_url', function ($url, $id_or_email, $args) {
     return $url;
 }, 10, 3);
 
-// =========================================================================
-// BACKEND: First Login Modal
-// =========================================================================
-
-// 1. FLAGA PIERWSZEGO LOGOWANIA
-// =========================================================================
-
 /**
- * Sprawdź czy użytkownik wymaga konfiguracji pierwszego logowania
+ * Handler AJAX do uzupełniania profilu po pierwszym logowaniu.
+ * Aktualizuje imię, nazwisko, hasło i preferencje email.
  */
-function tt_user_requires_first_login_setup($user_id) {
-    $completed = get_user_meta($user_id, 'tt_first_login_completed', true);
-    return empty($completed);
-}
-
-/**
- * Oznacz, że użytkownik ukończył konfigurację pierwszego logowania
- */
-function tt_mark_first_login_complete($user_id) {
-    update_user_meta($user_id, 'tt_first_login_completed', true);
-    update_user_meta($user_id, 'tt_first_login_completed_date', current_time('mysql'));
-}
-
-// 2. AJAX HANDLER: Oznacz ukończenie pierwszego logowania
-// =========================================================================
-
-add_action('wp_ajax_tt_mark_first_login_complete', function () {
+add_action('wp_ajax_tt_complete_profile', function () {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
-
     if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'not_logged_in'], 401);
+        wp_send_json_error(['message' => 'Musisz być zalogowany.'], 401);
     }
 
-    $user_id = get_current_user_id();
-    tt_mark_first_login_complete($user_id);
+    $u = wp_get_current_user();
+
+    // Sanityzacja i walidacja danych wejściowych
+    $first_name = isset($_POST['first_name']) ? sanitize_text_field(wp_unslash($_POST['first_name'])) : '';
+    $last_name = isset($_POST['last_name']) ? sanitize_text_field(wp_unslash($_POST['last_name'])) : '';
+    $new_password = isset($_POST['new_password']) ? wp_unslash($_POST['new_password']) : '';
+    $email_consent = isset($_POST['email_consent']) ? filter_var($_POST['email_consent'], FILTER_VALIDATE_BOOLEAN) : false;
+    $email_language = isset($_POST['email_language']) && in_array($_POST['email_language'], ['pl', 'en']) ? $_POST['email_language'] : 'pl';
+
+    if (empty($first_name) || empty($last_name)) {
+        wp_send_json_error(['message' => 'Imię i nazwisko są wymagane.'], 400);
+    }
+
+    // Aktualizacja metadanych użytkownika
+    update_user_meta($u->ID, 'first_name', $first_name);
+    update_user_meta($u->ID, 'last_name', $last_name);
+    update_user_meta($u->ID, 'tt_email_consent', $email_consent);
+    update_user_meta($u->ID, 'tt_email_language', $email_language);
+
+    // Aktualizacja display_name
+    $display_name = trim($first_name . ' ' . $last_name);
+    if (!empty($display_name)) {
+        wp_update_user(['ID' => $u->ID, 'display_name' => $display_name]);
+    }
+
+    // Aktualizacja hasła (jeśli zostało podane)
+    if (!empty($new_password)) {
+        if (strlen($new_password) < 8) {
+            wp_send_json_error(['message' => 'Hasło musi mieć co najmniej 8 znaków.'], 400);
+        }
+        wp_set_password($new_password, $u->ID);
+    }
+
+    // Przygotuj zaktualizowane dane użytkownika do zwrotu
+    $updated_user_data = [
+        'user_id'             => (int) $u->ID,
+        'username'            => $u->user_login,
+        'email'               => $u->user_email,
+        'display_name'        => $display_name,
+        'first_name'          => $first_name,
+        'last_name'           => $last_name,
+        'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
+        'email_consent'       => $email_consent,
+        'email_language'      => $email_language,
+        'is_profile_complete' => true, // Profil jest teraz kompletny
+    ];
 
     wp_send_json_success([
-        'message' => 'Konfiguracja pierwszego logowania ukończona.',
+        'message'   => 'Profil został pomyślnie zaktualizowany.',
+        'userData'  => $updated_user_data,
         'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
     ]);
-});
-
-// 3. FUNKCJA POMOCNICZA: Tworzenie użytkownika z tymczasowym hasłem
-// =========================================================================
-
-/**
- * Utwórz nowego użytkownika z tymczasowym hasłem
- * Przydatne przy rejestracji przez admina
- *
- * @param string $email Email użytkownika
- * @param string $username Opcjonalna nazwa użytkownika (domyślnie z emaila)
- * @return array ['success' => bool, 'user_id' => int, 'temp_password' => string]
- */
-function tt_create_user_with_temp_password($email, $username = null) {
-    if (!is_email($email)) {
-        return [
-            'success' => false,
-            'message' => 'Nieprawidłowy adres email.',
-        ];
-    }
-
-    // Sprawdź czy email już istnieje
-    if (email_exists($email)) {
-        return [
-            'success' => false,
-            'message' => 'Ten email jest już zarejestrowany.',
-        ];
-    }
-
-    // Wygeneruj nazwę użytkownika z emaila jeśli nie podano
-    if (empty($username)) {
-        $username = sanitize_user(current(explode('@', $email)), true);
-
-        // Jeśli username zajęty, dodaj licznik
-        $base_username = $username;
-        $counter = 1;
-        while (username_exists($username)) {
-            $username = $base_username . $counter;
-            $counter++;
-        }
-    }
-
-    // Wygeneruj silne tymczasowe hasło
-    $temp_password = wp_generate_password(16, true, true);
-
-    // Utwórz użytkownika
-    $user_id = wp_create_user($username, $temp_password, $email);
-
-    if (is_wp_error($user_id)) {
-        return [
-            'success' => false,
-            'message' => $user_id->get_error_message(),
-        ];
-    }
-
-    // Ustaw domyślną rolę
-    $user = new WP_User($user_id);
-    $user->set_role('subscriber');
-
-    // Ustaw meta, że wymaga pierwszego logowania
-    // (domyślnie użytkownik nie ma flagi tt_first_login_completed)
-
-    return [
-        'success'       => true,
-        'user_id'       => $user_id,
-        'username'      => $username,
-        'email'         => $email,
-        'temp_password' => $temp_password,
-    ];
-}
-
-// 4. PRZYKŁAD UŻYCIA: Shortcode tworzenia użytkownika
-// =========================================================================
-
-/**
- * Shortcode do tworzenia nowego użytkownika (tylko dla adminów)
- * Użycie: [tt_create_user email="user@example.com"]
- */
-add_shortcode('tt_create_user', function ($atts) {
-    // Tylko admin może używać tego shortcode
-    if (!current_user_can('manage_options')) {
-        return '<p style="color: red;">Brak uprawnień.</p>';
-    }
-
-    $atts = shortcode_atts([
-        'email' => '',
-    ], $atts);
-
-    if (empty($atts['email'])) {
-        return '<p style="color: red;">Podaj adres email: [tt_create_user email="user@example.com"]</p>';
-    }
-
-    $result = tt_create_user_with_temp_password($atts['email']);
-
-    if (!$result['success']) {
-        return '<p style="color: red;">Błąd: ' . esc_html($result['message']) . '</p>';
-    }
-
-    // Wyświetl dane nowego użytkownika
-    $output = '<div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0;">';
-    $output .= '<h3 style="margin-top: 0; color: #22c55e;">✓ Użytkownik utworzony pomyślnie!</h3>';
-    $output .= '<p><strong>Email:</strong> ' . esc_html($result['email']) . '</p>';
-    $output .= '<p><strong>Login:</strong> ' . esc_html($result['username']) . '</p>';
-    $output .= '<p><strong>Tymczasowe hasło:</strong> <code style="background: #fff; padding: 4px 8px; border-radius: 4px;">' . esc_html($result['temp_password']) . '</code></p>';
-    $output .= '<p style="color: #ff0055; font-weight: bold;">⚠️ Skopiuj hasło teraz! Nie zostanie ponownie wyświetlone.</p>';
-    $output .= '<p style="font-size: 14px; color: #666;">Użytkownik będzie musiał zmienić hasło przy pierwszym logowaniu.</p>';
-    $output .= '</div>';
-
-    return $output;
-});
-
-// 5. EMAIL POWITALNY (OPCJONALNIE)
-// =========================================================================
-
-/**
- * Wyślij email powitalny z tymczasowym hasłem
- *
- * @param int $user_id ID użytkownika
- * @param string $temp_password Tymczasowe hasło
- */
-function tt_send_welcome_email($user_id, $temp_password) {
-    $user = get_userdata($user_id);
-    if (!$user) return false;
-
-    $to = $user->user_email;
-    $subject = 'Witaj w Ting Tong!';
-
-    $message = "Witaj!\n\n";
-    $message .= "Twoje konto zostało utworzone w aplikacji Ting Tong.\n\n";
-    $message .= "Dane do logowania:\n";
-    $message .= "Email: " . $user->user_email . "\n";
-    $message .= "Tymczasowe hasło: " . $temp_password . "\n\n";
-    $message .= "WAŻNE: Przy pierwszym logowaniu zostaniesz poproszony o:\n";
-    $message .= "- Zmianę hasła na własne\n";
-    $message .= "- Uzupełnienie imienia i nazwiska\n";
-    $message .= "- Opcjonalnie: zmianę avatara\n\n";
-    $message .= "Link do aplikacji: " . home_url() . "\n\n";
-    $message .= "Pozdrawiamy!\nZespół Ting Tong";
-
-    $headers = ['Content-Type: text/plain; charset=UTF-8'];
-
-    return wp_mail($to, $subject, $message, $headers);
-}
-
-// 6. HOOK: Automatyczne oznaczanie że admin nie wymaga setup
-// =========================================================================
-
-/**
- * Administratorzy nie wymagają setup przy pierwszym logowaniu
- */
-add_action('user_register', function ($user_id) {
-    $user = get_userdata($user_id);
-
-    // Jeśli admin - oznacz jako skonfigurowany
-    if ($user && in_array('administrator', (array) $user->roles)) {
-        tt_mark_first_login_complete($user_id);
-    }
 });
