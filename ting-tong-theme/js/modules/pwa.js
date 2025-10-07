@@ -139,9 +139,18 @@ function runStandaloneCheck() {
     // Wyłącz dalsze sprawdzenia - już wiemy że to PWA
     return true;
   } else {
-    console.log("[PWA Check] ⚠️ Standalone NOT detected - keeping current state.");
-    // NIE ZMIENIAJ STANU - może być false positive
-    // Pasek pokazuje się tylko przez CSS/HTML, nie wymuszamy go
+    console.log("[PWA Check] ⚠️ Standalone NOT detected. Forcing install bar to be visible.");
+
+    // Jeśli nie jesteśmy w trybie standalone, upewnij się, że pasek jest widoczny.
+    if (installBar) {
+      installBar.classList.add("visible");
+      installBar.setAttribute('aria-hidden', 'false');
+
+      // Dodaj klasę do app-frame, aby odsunąć zawartość
+      if (appFrame) {
+        appFrame.classList.add("app-frame--pwa-visible");
+      }
+    }
   }
 
   return false;
