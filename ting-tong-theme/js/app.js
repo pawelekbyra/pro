@@ -13,9 +13,16 @@ import { FirstLoginModal } from './modules/first-login-modal.js';
 // Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    const swUrl = typeof TingTongConfig !== 'undefined'
+    const themeUrl = typeof TingTongConfig !== 'undefined'
+      ? TingTongConfig.themeUrl
+      : '/wp-content/themes/ting-tong-theme/';
+
+    let swUrl = typeof TingTongConfig !== 'undefined'
       ? TingTongConfig.serviceWorkerUrl
       : '/wp-content/themes/ting-tong-theme/sw.js';
+
+    // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
+    swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
 
     navigator.serviceWorker.register(swUrl)
       .then(registration => {
