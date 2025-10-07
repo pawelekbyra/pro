@@ -17,9 +17,6 @@ const DOM = {
   notificationPopup: document.getElementById("notificationPopup"),
   pwaDesktopModal: document.getElementById("pwa-desktop-modal"),
   pwaIosInstructions: document.getElementById("pwa-ios-instructions"),
-  pwaDesktopInstallButton: document.querySelector(
-    ".topbar-icon-btn.desktop-only",
-  ),
   toastNotification: document.getElementById("toast-notification"),
   welcomeModal: document.getElementById("welcome-modal"),
 };
