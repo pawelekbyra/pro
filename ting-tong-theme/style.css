@@ -26,27 +26,28 @@ Text Domain: tingtongtheme
 }
 
 /* ============================================================================
-   MODAL UZUPEŁNIANIA PROFILU (First Login Modal)
+   MODAL UZUPEŁNIANIA PROFILU - MOBILE OPTIMIZED
    ============================================================================ */
 
-/* Overlay z wysokim priorytetem */
+/* Overlay - pełny ekran */
 .first-login-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%; /* ✅ PATCH: Użyj 100% dla spójności z klawiaturą */
+  height: 100%;
   background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  z-index: 10020; /* Wyżej niż wszystko */
+  z-index: 10020;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   display: flex;
-  align-items: flex-end; /* ✅ PATCH: Wyrównaj do dołu */
+  align-items: flex-end;
   justify-content: center;
-  padding: 0; /* ✅ PATCH: Usuń padding, content będzie miał swój */
+  padding: 0;
+  overflow: hidden;
 }
 
 .first-login-modal-overlay.visible {
@@ -54,23 +55,21 @@ Text Domain: tingtongtheme
   visibility: visible;
 }
 
-/* Content - premium design */
+/* Content - bottom sheet style */
 .first-login-modal-content {
   background: linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 100%);
-  border-radius: 24px 24px 0 0; /* ✅ PATCH: Krawędzie dla dolnego arkusza */
+  border-radius: 24px 24px 0 0;
   width: 100%;
-  max-width: 520px; /* Lepszy max-width dla desktop */
-  height: auto; /* ✅ PATCH: Wysokość auto */
-  max-height: 85vh; /* ✅ PATCH: Ograniczenie wysokości */
+  max-width: 100%;
+  height: 90vh;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   border: 2px solid rgba(255, 0, 85, 0.3);
-  box-shadow:
-    0 32px 80px rgba(0, 0, 0, 0.9),
-    0 0 80px rgba(255, 0, 85, 0.2);
-  transform: translateY(100%); /* ✅ PATCH: Animacja od dołu */
-  opacity: 1; /* Opacity jest na overlayu, więc to może być 1 */
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-bottom: none;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.9);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
   position: relative;
   will-change: transform;
@@ -80,128 +79,108 @@ Text Domain: tingtongtheme
   transform: translateY(0);
 }
 
-/* Header z gradientem */
+/* Header - kompaktowy */
 .first-login-header {
   background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
-  padding: 32px 24px;
+  padding: 20px 20px 16px;
   text-align: center;
   position: relative;
-  overflow: hidden;
-  flex-shrink: 0; /* ✅ PATCH: Nie kurcz się */
-}
-
-.first-login-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
-  animation: headerShimmer 6s ease infinite;
+  flex-shrink: 0;
+  border-radius: 24px 24px 0 0;
 }
 
 .first-login-icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 16px;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  position: relative;
-  z-index: 1;
 }
 
 .first-login-icon svg {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   color: white;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .first-login-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 900;
   color: white;
-  margin: 0 0 8px;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  position: relative;
-  z-index: 1;
+  margin: 0 0 4px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .first-login-subtitle {
-  font-size: 16px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.95);
   margin: 0;
-  line-height: 1.5;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  position: relative;
-  z-index: 1;
+  line-height: 1.4;
 }
 
 /* Body - scrollowalna zawartość */
 .first-login-body {
-  padding: 24px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  flex: 1 1 auto; /* ✅ PATCH: Pozwól na kurczenie i rośnięcie */
-  min-height: 0; /* ✅ PATCH: Kluczowe dla kurczenia się w flexbox */
+  padding: 16px 20px 20px;
   scroll-behavior: smooth;
-  padding-bottom: 80px; /* ✅ PATCH: Zapas na przycisk */
+  overscroll-behavior: contain;
 }
 
 .first-login-body::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .first-login-body::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
-.first-login-body::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-/* NOWE: Sekcja preferencji */
+/* Sekcja preferencji - kompaktowa */
 .first-login-preferences {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 12px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .preference-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .preference-label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
+  flex: 1;
 }
 
 .language-selector-compact {
   display: flex;
   background: rgba(0,0,0,0.2);
-  border-radius: 16px;
-  padding: 4px;
+  border-radius: 14px;
+  padding: 3px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .language-option-compact {
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 11px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -211,7 +190,7 @@ Text Domain: tingtongtheme
 .language-option-compact.active {
   background: #fff;
   color: #1a1a1a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 /* Email Display */
@@ -219,31 +198,31 @@ Text Domain: tingtongtheme
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 12px;
+  margin-bottom: 16px;
   text-align: center;
 }
 
 .first-login-email-label {
-  font-size: 13px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
 }
 
 .first-login-email-value {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   color: #ff0055;
   font-family: 'Courier New', monospace;
   word-break: break-all;
 }
 
-/* Section Headers */
+/* Sekcje formularza */
 .first-login-section {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .first-login-section:last-child {
@@ -251,34 +230,34 @@ Text Domain: tingtongtheme
 }
 
 .first-login-section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: white;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .first-login-section-title::before {
   content: '';
-  width: 4px;
-  height: 18px;
+  width: 3px;
+  height: 16px;
   background: linear-gradient(180deg, #ff0055, #ff4081);
   border-radius: 2px;
 }
 
 /* Form Groups */
 .first-login-form-group {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .first-login-form-label {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: white;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .first-login-form-label .required {
@@ -288,7 +267,7 @@ Text Domain: tingtongtheme
 
 .first-login-form-input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
@@ -296,6 +275,8 @@ Text Domain: tingtongtheme
   font-size: 16px;
   transition: all 0.3s ease;
   font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .first-login-form-input:focus {
@@ -310,16 +291,16 @@ Text Domain: tingtongtheme
 }
 
 .first-login-form-hint {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
-  margin-top: 6px;
-  line-height: 1.4;
+  margin-top: 4px;
+  line-height: 1.3;
 }
 
-/* Password Strength Indicator */
+/* Password Strength */
 .password-strength-indicator {
-  margin-top: 8px;
-  height: 4px;
+  margin-top: 6px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;
@@ -352,8 +333,8 @@ Text Domain: tingtongtheme
 }
 
 .password-strength-text {
-  font-size: 12px;
-  margin-top: 4px;
+  font-size: 11px;
+  margin-top: 3px;
   font-weight: 600;
 }
 
@@ -365,80 +346,54 @@ Text Domain: tingtongtheme
 .first-login-form-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
-/* Footer with Action Button */
+/* Footer - sticky na dole */
 .first-login-footer {
-  padding: 20px 24px;
+  padding: 16px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
-  flex-shrink: 0; /* ✅ PATCH: Nie kurcz się */
-  position: relative; /* ✅ PATCH: Zmienione ze sticky/domyślnego */
-  bottom: auto;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3); /* ✅ PATCH: Mocniejszy cień */
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  flex-shrink: 0;
+  position: relative;
   z-index: 10;
-  contain: layout; /* ✅ PATCH: Optymalizacja wydajności */
 }
 
 .first-login-submit-btn {
   width: 100%;
-  padding: 16px 24px;
+  padding: 14px 20px;
   background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
   border: none;
   border-radius: 12px;
   color: white;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 24px rgba(255, 0, 85, 0.4);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 0, 85, 0.4);
 }
 
-.first-login-submit-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
-}
-
-.first-login-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(255, 0, 85, 0.6);
-}
-
-.first-login-submit-btn:active {
-  transform: translateY(0);
-}
-
-.first-login-submit-btn:active::before {
-  width: 300px;
-  height: 300px;
+.first-login-submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .first-login-submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 4px 12px rgba(255, 0, 85, 0.2);
 }
 
 /* Status Messages */
 .first-login-status-message {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 8px;
-  margin-top: 16px;
-  font-size: 14px;
+  margin-top: 12px;
+  font-size: 13px;
   font-weight: 500;
   display: none;
   opacity: 0;
@@ -464,45 +419,44 @@ Text Domain: tingtongtheme
   color: #ef4444;
 }
 
-/* Responsive */
-/* ✅ NOWE: Dostosowanie do klawiatury ekranowej */
+/* Obsługa klawiatury mobilnej */
 .first-login-modal-overlay.keyboard-visible .first-login-modal-content {
-  height: 100%;
-  max-height: 100%;
+  height: 100vh;
+  max-height: 100vh;
   border-radius: 0;
-  transition: height 0.2s ease-out, max-height 0.2s ease-out;
 }
 
-@media (max-width: 480px) {
-  .first-login-modal-content {
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-
-  .first-login-header {
-    padding: 24px 20px;
-  }
-
-  .first-login-title {
-    font-size: 24px;
-  }
-
-  .first-login-body {
-    padding: 20px;
-  }
-
+/* Małe ekrany */
+@media (max-width: 380px) {
   .first-login-form-row {
     grid-template-columns: 1fr;
   }
+
+  .first-login-title {
+    font-size: 20px;
+  }
+
+  .first-login-body {
+    padding: 14px 16px 16px;
+  }
 }
 
-/* Desktop - Centrowanie jak w głównej aplikacji */
+/* Desktop - centrowanie */
 @media (min-width: 600px) {
   .first-login-modal-overlay {
-    left: 0;
-    right: 0;
-    margin: 0 auto;
+    align-items: center;
+  }
+
+  .first-login-modal-content {
+    max-width: 520px;
+    height: auto;
+    max-height: 90vh;
+    border-radius: 24px;
+    border: 2px solid rgba(255, 0, 85, 0.3);
+  }
+
+  .first-login-header {
+    border-radius: 24px 24px 0 0;
   }
 }
 .preloader-hiding {
@@ -4193,15 +4147,16 @@ body,
 @media (display-mode: standalone) {
   .pwa-prompt,
   .pwa-prompt-ios {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
   }
 
-  #app-frame.app-frame--pwa-visible {
+  /* ✅ FIX: Gwarantuje pełną wysokość w trybie PWA */
+  #app-frame {
     height: 100% !important;
   }
 }
@@ -4210,12 +4165,12 @@ body,
 @media (display-mode: fullscreen) {
   .pwa-prompt,
   .pwa-prompt-ios {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
   }
 }
 
@@ -4223,6 +4178,6 @@ body,
 @media (display-mode: standalone) and (-webkit-touch-callout: none) {
   .pwa-prompt,
   .pwa-prompt-ios {
-    display: none !important;
+    display: none;
   }
 }

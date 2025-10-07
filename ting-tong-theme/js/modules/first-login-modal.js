@@ -1,45 +1,58 @@
 // ============================================================================
-// MODUŁ: Modal Uzupełniania Profilu (wcześniej First Login Modal)
+// MODUŁ: Modal Uzupełniania Profilu (First Login Modal) - FIXED
 // ============================================================================
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
-// ✅ PATCH: Import authManager, bo API.post jest nieprawidłowe w tym kontekście
 import { authManager } from './auth-manager.js';
 
 let dom = {};
 
 /**
- * Sprawdza, czy profil użytkownika jest kompletny i ewentualnie pokazuje modal.
- * @param {object} userData - Obiekt danych użytkownika z odpowiedzi logowania.
+ * Sprawdza czy profil użytkownika jest kompletny i pokazuje modal
  */
 function checkProfileAndShowModal(userData) {
-  if (userData && userData.is_profile_complete === false) {
-    console.log('Profile incomplete, showing completion modal.');
-    showProfileCompletionModal(userData.email);
+  if (!userData) {
+    console.warn('No user data provided');
+    return;
+  }
+
+  if (userData.is_profile_complete === false) {
+    console.log('Profile incomplete, showing modal');
+    showProfileCompletionModal(userData.email || 'user@example.com');
   } else {
-    console.log('Profile complete, proceeding.');
+    console.log('Profile complete');
   }
 }
 
 /**
- * Pokazuje modal uzupełniania profilu.
- * @param {string} userEmail - Email użytkownika do wyświetlenia.
+ * Pokazuje modal
  */
 function showProfileCompletionModal(userEmail) {
-  if (!dom.modal) return;
+  if (!dom.modal) {
+    console.error('Modal element not found');
+    return;
+  }
 
-  if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
+  if (dom.emailDisplay) {
+    dom.emailDisplay.textContent = userEmail;
+  }
 
   UI.openModal(dom.modal);
 
+  // Scroll na górę
+  if (dom.body) {
+    dom.body.scrollTop = 0;
+  }
+
+  // Focus na pierwszym polu po opóźnieniu
   setTimeout(() => {
     dom.firstNameInput?.focus();
-  }, 400);
+  }, 500);
 }
 
 /**
- * Ukrywa modal.
+ * Ukrywa modal
  */
 function hideModal() {
   if (!dom.modal) return;
@@ -47,13 +60,14 @@ function hideModal() {
 }
 
 /**
- * Inicjalizacja modułu.
+ * Inicjalizacja modułu
  */
 function init() {
-  // Cache DOM elements
+  // Cache DOM
   dom = {
     modal: document.getElementById('firstLoginModal'),
     form: document.getElementById('firstLoginForm'),
+    body: document.querySelector('.first-login-body'),
     emailDisplay: document.getElementById('firstLoginEmail'),
     firstNameInput: document.getElementById('firstLoginFirstName'),
     lastNameInput: document.getElementById('firstLoginLastName'),
@@ -71,35 +85,45 @@ function init() {
     }
   };
 
-  if (!dom.modal) return; // Jeśli modalu nie ma, nie rób nic więcej
+  if (!dom.modal) {
+    console.warn('First login modal not found in DOM');
+    return;
+  }
 
   setupEventListeners();
   setupPasswordStrength();
-  setupKeyboardListener(); // ✅ NOWE: Dodajemy listener klawiatury
+  setupKeyboardListener();
 }
 
 /**
- * Konfiguracja event listenerów.
+ * Event listeners
  */
 function setupEventListeners() {
+  if (!dom.form) return;
+
   dom.form.addEventListener('submit', handleFormSubmit);
 
   // Toggle switch
-  dom.emailConsentToggle.addEventListener('click', () => {
-    dom.emailConsentToggle.classList.toggle('active');
-  });
+  if (dom.emailConsentToggle) {
+    dom.emailConsentToggle.addEventListener('click', () => {
+      dom.emailConsentToggle.classList.toggle('active');
+    });
+  }
 
   // Language selector
-  dom.languageSelector.addEventListener('click', (e) => {
-    if (e.target.classList.contains('language-option-compact')) {
-      dom.languageSelector.querySelector('.active').classList.remove('active');
-      e.target.classList.add('active');
-    }
-  });
+  if (dom.languageSelector) {
+    dom.languageSelector.addEventListener('click', (e) => {
+      if (e.target.classList.contains('language-option-compact')) {
+        const active = dom.languageSelector.querySelector('.active');
+        if (active) active.classList.remove('active');
+        e.target.classList.add('active');
+      }
+    });
+  }
 }
 
 /**
- * Konfiguracja wskaźnika siły hasła.
+ * Password strength indicator
  */
 function setupPasswordStrength() {
   const { newPasswordInput, passwordStrength } = dom;
@@ -141,15 +165,63 @@ function setupPasswordStrength() {
 }
 
 /**
- * Obsługa wysłania formularza.
+ * Keyboard handler dla mobilnych urządzeń
+ */
+function setupKeyboardListener() {
+  if (!dom.modal || !window.visualViewport) return;
+
+  let initialHeight = window.visualViewport.height;
+  let isKeyboardVisible = false;
+
+  const handleViewportChange = () => {
+    const currentHeight = window.visualViewport.height;
+    const heightDiff = initialHeight - currentHeight;
+    const newKeyboardState = heightDiff > 150;
+
+    if (newKeyboardState !== isKeyboardVisible) {
+      isKeyboardVisible = newKeyboardState;
+      dom.modal.classList.toggle('keyboard-visible', isKeyboardVisible);
+
+      // Scroll do aktywnego pola
+      if (isKeyboardVisible) {
+        setTimeout(() => {
+          const activeElement = document.activeElement;
+          if (activeElement && dom.modal.contains(activeElement)) {
+            const formGroup = activeElement.closest('.first-login-form-group');
+            if (formGroup && dom.body) {
+              // Scroll w body modalu
+              const offsetTop = formGroup.offsetTop - 20;
+              dom.body.scrollTo({ top: offsetTop, behavior: 'smooth' });
+            }
+          }
+        }, 100);
+      }
+    }
+  };
+
+  window.visualViewport.addEventListener('resize', handleViewportChange);
+  window.visualViewport.addEventListener('scroll', handleViewportChange);
+
+  // Cleanup przy zamknięciu
+  dom.modal.addEventListener('transitionend', function cleanupOnClose(e) {
+    if (e.target === dom.modal && !dom.modal.classList.contains('visible')) {
+      isKeyboardVisible = false;
+      dom.modal.classList.remove('keyboard-visible');
+      initialHeight = window.visualViewport.height;
+    }
+  });
+}
+
+/**
+ * Obsługa wysłania formularza
  */
 async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const originalText = dom.submitBtn.textContent;
-
   // Walidacja
   if (!validateForm()) return;
+
+  const originalText = dom.submitBtn.textContent;
 
   // Disable button
   dom.submitBtn.disabled = true;
@@ -157,20 +229,36 @@ async function handleFormSubmit(e) {
 
   try {
     const formData = getFormData();
-    // ✅ FIX: Używamy authManager.ajax zamiast API.post
-    const result = await authManager.ajax('tt_complete_profile', formData);
+
+    // FIXED: Dodaj explicit nonce do requestu
+    const requestData = {
+      ...formData,
+      nonce: ajax_object.nonce
+    };
+
+    console.log('Submitting profile completion with data:', requestData);
+
+    const result = await authManager.ajax('tt_complete_profile', requestData);
+
+    console.log('Profile completion result:', result);
 
     if (result.success) {
-      showSuccess('Profil skonfigurowany! Witaj ponownie! 🎉');
+      showSuccess(Utils.getTranslation('firstLoginSuccess') || 'Profil skonfigurowany!');
 
-      // Zaktualizuj dane użytkownika w State
+      // Aktualizuj dane użytkownika
       if (result.data?.userData) {
         State.set('currentUser', result.data.userData);
       }
 
+      // Aktualizuj nonce jeśli zwrócony
+      if (result.data?.new_nonce) {
+        ajax_object.nonce = result.data.new_nonce;
+      }
+
+      // Zamknij modal po opóźnieniu
       setTimeout(() => {
         hideModal();
-        UI.showToast('Witaj w Ting Tong! 🚀');
+        UI.showToast(Utils.getTranslation('firstLoginWelcomeBack') || 'Witaj w Ting Tong! 🚀');
       }, 1500);
 
     } else {
@@ -178,8 +266,16 @@ async function handleFormSubmit(e) {
     }
 
   } catch (error) {
-    console.error('First Login Form submit error:', error);
-    showError(error.message || 'Wystąpił błąd. Spróbuj ponownie.');
+    console.error('Profile completion error:', error);
+
+    let errorMessage = error.message || 'Wystąpił błąd';
+
+    // Obsługa błędu 403
+    if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {
+      errorMessage = 'Błąd autoryzacji. Spróbuj się wylogować i zalogować ponownie.';
+    }
+
+    showError(errorMessage);
 
     // Re-enable button
     dom.submitBtn.disabled = false;
@@ -188,13 +284,12 @@ async function handleFormSubmit(e) {
 }
 
 /**
- * Zbiera dane z formularza.
- * @returns {object}
+ * Zbiera dane z formularza
  */
 function getFormData() {
-  const newPassword = dom.newPasswordInput.value;
-  const emailConsent = dom.emailConsentToggle.classList.contains('active');
-  const emailLanguage = dom.languageSelector.querySelector('.active').dataset.lang;
+  const newPassword = dom.newPasswordInput.value.trim();
+  const emailConsent = dom.emailConsentToggle?.classList.contains('active') || false;
+  const emailLanguage = dom.languageSelector?.querySelector('.active')?.dataset.lang || 'pl';
 
   const data = {
     first_name: dom.firstNameInput.value.trim(),
@@ -212,8 +307,7 @@ function getFormData() {
 }
 
 /**
- * Waliduje formularz.
- * @returns {boolean}
+ * Walidacja formularza
  */
 function validateForm() {
   const firstName = dom.firstNameInput.value.trim();
@@ -222,18 +316,18 @@ function validateForm() {
   const confirmPassword = dom.confirmPasswordInput.value;
 
   if (!firstName || !lastName) {
-    showError(Utils.getTranslation('firstLoginErrorMissingNames'));
+    showError(Utils.getTranslation('firstLoginErrorMissingNames') || 'Uzupełnij imię i nazwisko');
     return false;
   }
 
   // Walidacja hasła tylko jeśli zostało wprowadzone
   if (newPassword) {
     if (newPassword.length < 8) {
-      showError(Utils.getTranslation('passwordLengthError'));
+      showError(Utils.getTranslation('passwordLengthError') || 'Hasło musi mieć min. 8 znaków');
       return false;
     }
     if (newPassword !== confirmPassword) {
-      showError(Utils.getTranslation('passwordsMismatchError'));
+      showError(Utils.getTranslation('passwordsMismatchError') || 'Hasła muszą być identyczne');
       return false;
     }
   }
@@ -241,9 +335,8 @@ function validateForm() {
   return true;
 }
 
-
 /**
- * Pokaż komunikat błędu.
+ * Pokaż błąd
  */
 function showError(message) {
   if (dom.successEl) {
@@ -263,7 +356,7 @@ function showError(message) {
 }
 
 /**
- * Pokaż komunikat sukcesu.
+ * Pokaż sukces
  */
 function showSuccess(message) {
   if (dom.errorEl) {
@@ -277,57 +370,6 @@ function showSuccess(message) {
   }
 }
 
-/**
- * ✅ NOWE: Konfiguracja listenera klawiatury dla tego modala
- */
-function setupKeyboardListener() {
-  if (!dom.modal) return;
-
-  if (!window.visualViewport) {
-    console.warn('Visual Viewport API not supported');
-    return;
-  }
-
-  let initialHeight = window.visualViewport.height;
-  let isKeyboardVisible = false;
-
-  const handleViewportChange = () => {
-    const currentHeight = window.visualViewport.height;
-    const heightDiff = initialHeight - currentHeight;
-
-    const newKeyboardState = heightDiff > 150;
-
-    if (newKeyboardState !== isKeyboardVisible) {
-      isKeyboardVisible = newKeyboardState;
-      dom.modal.classList.toggle('keyboard-visible', isKeyboardVisible);
-
-      if (isKeyboardVisible) {
-        setTimeout(() => {
-          const activeElement = document.activeElement;
-          if (activeElement && dom.modal.contains(activeElement)) {
-            activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }, 100);
-      }
-    }
-
-    dom.modal.style.setProperty('--keyboard-offset', `${Math.max(0, heightDiff)}px`);
-  };
-
-  window.visualViewport.addEventListener('resize', handleViewportChange);
-
-  dom.modal.addEventListener('transitionend', function cleanupOnClose(e) {
-    if (e.target === dom.modal && !dom.modal.classList.contains('visible')) {
-      isKeyboardVisible = false;
-      dom.modal.classList.remove('keyboard-visible');
-      dom.modal.style.removeProperty('--keyboard-offset');
-      initialHeight = window.visualViewport.height;
-    }
-  });
-}
-
-
-// Export
 export const FirstLoginModal = {
   init,
   checkProfileAndShowModal,
