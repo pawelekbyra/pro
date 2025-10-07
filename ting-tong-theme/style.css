@@ -897,21 +897,21 @@ body,
 
 .video-controls {
   position: absolute;
-  bottom: calc(var(--bottombar-height) + 8px);
-  left: 8px;
+  bottom: calc(var(--bottombar-height) + 10px); /* Zwiększono, aby było bliżej paska */
+  left: 12px; /* Wyrównano z tekstem opisu */
   z-index: 105;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* Zmniejszono odstęp */
 }
 
 .video-controls button {
   background: rgba(0, 0, 0, 0.4);
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 36px; /* Zmniejszono rozmiar */
+  height: 36px; /* Zmniejszono rozmiar */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -921,8 +921,8 @@ body,
 }
 
 .video-controls button svg {
-    width: 24px;
-    height: 24px;
+    width: 20px; /* Zmniejszono ikonę */
+    height: 20px; /* Zmniejszono ikonę */
 }
 
 

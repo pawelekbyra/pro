@@ -209,6 +209,15 @@ function tt_enqueue_and_localize_scripts() {
 			'nonce'    => wp_create_nonce( 'tt_ajax_nonce' ),
 		]
 	);
+
+	wp_localize_script(
+		'tingtong-app-script',
+		'TingTongConfig',
+		[
+			'serviceWorkerUrl' => get_template_directory_uri() . '/sw.js',
+			'themeUrl'         => get_template_directory_uri(),
+		]
+	);
 }
 add_action( 'wp_enqueue_scripts', 'tt_enqueue_and_localize_scripts' );
 
