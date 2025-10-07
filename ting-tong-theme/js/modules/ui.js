@@ -374,6 +374,7 @@ function createSlideElement(slideData, index) {
     slideData.initialComments,
   );
 
+  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
   const videoEl = section.querySelector("video");
   const pauseOverlay = section.querySelector(".pause-overlay");
   const replayOverlay = section.querySelector(".replay-overlay");
@@ -390,6 +391,7 @@ function createSlideElement(slideData, index) {
       pauseOverlay.classList.remove("visible");
     });
 
+    // Gdy video jest odtwarzane (po play) - ukryj overlays
     videoEl.addEventListener("playing", () => {
       replayOverlay.classList.remove("visible");
       pauseOverlay.classList.remove("visible");
