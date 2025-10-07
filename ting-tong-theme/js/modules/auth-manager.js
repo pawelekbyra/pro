@@ -238,24 +238,30 @@ class AuthManager {
 
   /**
    * Mockup logowania do celów testowych
-   * @param {string} email - Email użytkownika
-   * @param {boolean} isProfileComplete - Czy profil jest kompletny
+   * @param {object} options - Opcje logowania
+   * @param {string} [options.email='test@example.com'] - Email użytkownika
+   * @param {boolean} [options.is_profile_complete=true] - Czy profil jest kompletny
    */
-  mockLogin(email = 'test@example.com', isProfileComplete = true) {
+  mockLogin(options = {}) {
+    const {
+      email = 'test@example.com',
+      is_profile_complete = true,
+    } = options;
+
     State.set('isMock', true);
-    console.log(`%c[MOCK] Logowanie jako ${email}, profil kompletny: ${isProfileComplete}`, 'color: #ff0055; font-weight: bold;');
+    console.log(`%c[MOCK] Logowanie jako ${email}, profil kompletny: ${is_profile_complete}`, 'color: #ff0055; font-weight: bold;');
 
     const mockUserData = {
       user_id: 123,
       username: 'testuser',
       email: email,
       display_name: 'Test User',
-      first_name: isProfileComplete ? 'Test' : '',
-      last_name: isProfileComplete ? 'User' : '',
+      first_name: is_profile_complete ? 'Test' : '',
+      last_name: is_profile_complete ? 'User' : '',
       avatar: 'https://i.pravatar.cc/100?u=test',
       email_consent: true,
       email_language: 'pl',
-      is_profile_complete: isProfileComplete,
+      is_profile_complete: is_profile_complete,
     };
 
     const mockSlidesData = [

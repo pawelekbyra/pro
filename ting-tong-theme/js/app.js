@@ -397,13 +397,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   })();
 
-  // Debug tools (tylko localhost)
-  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('local'))) {
+  App.init();
+
+  // Debug tools - aktywowane przez parametr URL lub localhost
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDebugMode = urlParams.get('debug') === 'true';
+
+  if (isDebugMode || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('local')))) {
     window.ttAuth = authManager;
     window.ttState = State;
     console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
     console.log('Available: window.ttAuth, window.ttState');
   }
-
-  App.init();
 });
