@@ -1,0 +1,22 @@
+127.0.0.1 - - [07/Oct/2025 14:33:44] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:44] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:45] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/state.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/ui.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/pwa.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/auth-manager.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/notifications.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/first-login-modal.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/account-panel.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /js/modules/handlers.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Oct/2025 14:33:46] code 404, message File not found
+127.0.0.1 - - [07/Oct/2025 14:33:46] "GET /ting-tong-theme/sw.js HTTP/1.1" 404 -
+127.0.0.1 - - [07/Oct/2025 14:33:48] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [07/Oct/2025 14:33:48] "POST /index.html HTTP/1.1" 501 -
+127.0.0.1 - - [07/Oct/2025 14:33:49] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [07/Oct/2025 14:33:49] "POST /index.html HTTP/1.1" 501 -
+127.0.0.1 - - [07/Oct/2025 14:33:51] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [07/Oct/2025 14:33:51] "POST /index.html HTTP/1.1" 501 -

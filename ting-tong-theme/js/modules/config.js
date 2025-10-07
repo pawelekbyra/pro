@@ -103,7 +103,7 @@ export const Config = {
       videoErrorTitle: "Błąd Wideo",
       videoErrorSubtitle: "Nie można załadować materiału.",
       videoErrorRetry: "Spróbuj ponownie",
-      alreadyInstalledText: "Przecież już ściągłeś",
+      alreadyInstalledText: "Już ją pobrałeś/aś!",
       noComments: "Brak komentarzy. Bądź pierwszy!",
       commentSortTriggerText: "Sortuj według: ",
       commentSortNewest: "Fresz",
