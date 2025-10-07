@@ -4,6 +4,13 @@
  *
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
+/* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
+if ( ! function_exists( 'wp_new_user_notification' ) ) {
+    function wp_new_user_notification( $user_id, $deprecated = '', $notify = '' ) {
+        // Ta funkcja jest teraz pusta. Blokuje domyślne powiadomienia WP.
+        return;
+    }
+}
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Zabezpieczenie przed bezpośrednim dostępem.
