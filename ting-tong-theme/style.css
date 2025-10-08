@@ -1324,6 +1324,17 @@ body,
   padding: 10px 15px;
   background: transparent !important;
 }
+.login-panel .login-form {
+  background: white;
+  padding: 10px 20px 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  margin: -10px auto 0;
+}
 
 /* === LOGIN PANEL NEW STYLE === */
 .login-panel .login-form input[type="text"],
