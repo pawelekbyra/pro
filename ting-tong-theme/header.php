@@ -10,8 +10,8 @@
     <link rel="manifest" href="<?php echo home_url('/manifest.json'); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
-    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link rel="preconnect" href="https://pawelperfect.pl" crossorigin>
     <link rel="preconnect" href="https://i.pravatar.cc" crossorigin>
