@@ -210,6 +210,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         _verifyLoginState(); // Async verification in background
         UI.renderSlides();
+
+        // ✅ FIX: Fallback - pokaż UI po 2 sekundach nawet jeśli video się nie załadowało
+        setTimeout(() => {
+          document.querySelectorAll('.tiktok-symulacja').forEach(sim => {
+            if (!sim.classList.contains('video-loaded')) {
+              console.log('Forcing video-loaded class after timeout for slide:', sim.closest('.webyx-section')?.dataset.slideId);
+              sim.classList.add('video-loaded');
+            }
+          });
+        }, 2000);
+
         UI.updateTranslations();
 
         const handleMediaChange = (swiper) => {
