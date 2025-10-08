@@ -1011,7 +1011,7 @@ body,
   justify-content: flex-start;
   padding: 10px 75px 10px 12px;
   color: white;
-  z-index: 10006;
+  z-index: 10050;
   padding-bottom: calc(10px + var(--safe-area-bottom));
 
   /* ✅ NOWE: Ukryj bottombar domyślnie */
@@ -1037,7 +1037,7 @@ body,
   -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
-  z-index: 10010;
+  z-index: 10050;
 }
 
 .progress-bar::before {
@@ -4023,10 +4023,6 @@ body,
   text-decoration: none !important;
 }
 
-.app-frame--pwa-visible .progress-bar {
-  top: auto;
-  bottom: 100%;
-}
 
 .form-row {
   display: flex;
@@ -4283,13 +4279,6 @@ body,
   display: flex !important;
 }
 
-/* Dostosowanie dla przeglądarki (nie-PWA) */
-@media not all and (display-mode: standalone) {
-  .progress-bar {
-    bottom: 100%;
-    top: auto;
-  }
-}
 }/*
 Theme Name: Ting Tong Theme
 Theme URI: https://example.com/ting-tong-theme/
