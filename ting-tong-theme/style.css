@@ -4300,36 +4300,21 @@ body,
    --- NOWE: TRYB PEŁNEGO EKRANU (IMMERSYJNY) ---
    ============================================================================ */
 
-/* KROK 1: Przesuń dolny pasek (bottombar) w dół, pozostawiając tylko progress bar */
-.tiktok-symulacja .bottombar {
-    /* Upewnij się, że jest transformacja do animacji */
-    transform: translateY(0);
-    transition: transform 0.3s ease-out;
-}
-
-.tiktok-symulacja.hide-ui .bottombar {
-    /* Przesuń w dół o wysokość sekcji tekstowej + padding, ukrywając text-info */
-    transform: translateY(calc(var(--bottombar-base-height) - 4px));
-}
-
-/* KROK 2: Przesuń kontrole wideo (video-controls) w dół, tuż nad progress bar */
+/* Dodajemy płynne przejścia do animowanych elementów */
+.tiktok-symulacja .bottombar,
 .tiktok-symulacja .video-controls {
-    /* Upewnij się, że jest transformacja do animacji */
-    transition: bottom 0.3s ease-out;
+    transition: transform 0.3s ease-out, bottom 0.3s ease-out;
 }
 
-.tiktok-symulacja.hide-ui .video-controls {
-    /* Nowa pozycja: 4px progress bar + 8px padding + safe-area-bottom */
-    bottom: calc(4px + 8px + var(--safe-area-bottom));
+/* KROK 1: Całkowicie schowaj dolny pasek, gdy tryb immersyjny jest aktywny */
+#app-frame.hide-ui .bottombar {
+    transform: translateY(100%);
 }
 
-/* KROK 3: Ukryj boczny pasek (sidebar) */
-.tiktok-symulacja .sidebar {
-    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+/* KROK 2: Przesuń kontrolki wideo na sam dół ekranu */
+#app-frame.hide-ui .video-controls {
+    bottom: calc(8px + var(--safe-area-bottom));
 }
 
-.tiktok-symulacja.hide-ui .sidebar {
-    /* Przesuń poza prawą krawędź */
-    transform: translateY(-50%) translateX(70px);
-    opacity: 0;
-}
+/* KROK 3: Sidebar nie jest już ukrywany. Pozostaje widoczny. */
+/* Celowo usunięto regułę dla #app-frame.hide-ui .sidebar */
