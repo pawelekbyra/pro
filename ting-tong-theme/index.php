@@ -429,7 +429,7 @@ get_header();
             <u data-translate-key="installPwaSubheadingAction"></u><span data-translate-key="installPwaSubheadingRest"></span>
         </p>
     </div>
-    <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction">Zainstaluj</button>
+    <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction" disabled>Zainstaluj</button>
 </div>
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">

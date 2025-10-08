@@ -6,22 +6,24 @@ import { API, slidesData } from './api.js';
 
 let selectedCommentImage = null;
 
-const DOM = {
-  container: document.getElementById("webyx-container"),
-  template: document.getElementById("slide-template"),
-  preloader: document.getElementById("preloader"),
-  alertBox: document.getElementById("alertBox"),
-  alertText: document.getElementById("alertText"),
-  commentsModal: document.getElementById("commentsModal"),
-  accountModal: document.getElementById("accountModal"),
-  tiktokProfileModal: document.getElementById("tiktok-profile-modal"),
-  notificationPopup: document.getElementById("notificationPopup"),
-  pwaDesktopModal: document.getElementById("pwa-desktop-modal"),
-  pwaIosInstructions: document.getElementById("pwa-ios-instructions"),
-  toastNotification: document.getElementById("toast-notification"),
-  welcomeModal: document.getElementById("welcome-modal"),
-};
+const DOM = {};
 let alertTimeout;
+
+function initDOMCache() {
+  DOM.container = document.getElementById("webyx-container");
+  DOM.template = document.getElementById("slide-template");
+  DOM.preloader = document.getElementById("preloader");
+  DOM.alertBox = document.getElementById("alertBox");
+  DOM.alertText = document.getElementById("alertText");
+  DOM.commentsModal = document.getElementById("commentsModal");
+  DOM.accountModal = document.getElementById("accountModal");
+  DOM.tiktokProfileModal = document.getElementById("tiktok-profile-modal");
+  DOM.notificationPopup = document.getElementById("notificationPopup");
+  DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
+  DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
+  DOM.toastNotification = document.getElementById("toast-notification");
+  DOM.welcomeModal = document.getElementById("welcome-modal");
+}
 let toastTimeout;
 
 function showToast(message) {
@@ -1119,6 +1121,7 @@ function initGlobalPanels() {
 }
 
 export const UI = {
+  initDOMCache,
   DOM,
   showAlert,
   openModal,

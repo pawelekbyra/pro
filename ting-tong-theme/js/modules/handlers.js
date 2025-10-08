@@ -817,6 +817,24 @@ export const Handlers = {
         }
         UI.updateVolumeButton(isMuted);
         break;
+      case "toggle-fullscreen": {
+        const activeSymulacja = actionTarget.closest(".tiktok-symulacja");
+        if (activeSymulacja) {
+            const isHiding = activeSymulacja.classList.toggle("hide-ui");
+            const btn = activeSymulacja.querySelector('.fullscreen-button');
+            const enterIcon = btn.querySelector('.fullscreen-enter-icon');
+            const exitIcon = btn.querySelector('.fullscreen-exit-icon');
+
+            if (isHiding) {
+                enterIcon.style.display = 'none';
+                exitIcon.style.display = 'block';
+            } else {
+                enterIcon.style.display = 'block';
+                exitIcon.style.display = 'none';
+            }
+        }
+        break;
+      }
     }
   },
   formSubmitHandler: async (e) => {
