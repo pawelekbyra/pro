@@ -818,19 +818,25 @@ export const Handlers = {
         UI.updateVolumeButton(isMuted);
         break;
       case "toggle-fullscreen": {
-        const activeSymulacja = actionTarget.closest(".tiktok-symulacja");
-        if (activeSymulacja) {
-            const isHiding = activeSymulacja.classList.toggle("hide-ui");
-            const btn = activeSymulacja.querySelector('.fullscreen-button');
-            const enterIcon = btn.querySelector('.fullscreen-enter-icon');
-            const exitIcon = btn.querySelector('.fullscreen-exit-icon');
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+            const isHiding = appFrame.classList.toggle("hide-ui");
 
-            if (isHiding) {
-                enterIcon.style.display = 'none';
-                exitIcon.style.display = 'block';
-            } else {
-                enterIcon.style.display = 'block';
-                exitIcon.style.display = 'none';
+            // Znajdź przycisk w aktywnym slajdzie, aby zaktualizować jego ikonę
+            const activeSlide = document.querySelector('.swiper-slide-active');
+            const btn = activeSlide?.querySelector('.fullscreen-button');
+
+            if (btn) {
+                const enterIcon = btn.querySelector('.fullscreen-enter-icon');
+                const exitIcon = btn.querySelector('.fullscreen-exit-icon');
+
+                if (isHiding) {
+                    enterIcon.style.display = 'none';
+                    exitIcon.style.display = 'block';
+                } else {
+                    enterIcon.style.display = 'block';
+                    exitIcon.style.display = 'none';
+                }
             }
         }
         break;
