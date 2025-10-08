@@ -1319,13 +1319,9 @@ body,
   opacity: 1;
   pointer-events: auto;
 }
-.login-panel > div {
-  padding: 10px 15px;
-  background: transparent !important;
-}
-
+.login-panel > div,
 .login-panel > form {
-  padding: 0 15px 10px; /* ✅ 0 od góry, 15px po bokach, 10px od dołu */
+  padding: 10px 15px;
   background: transparent !important;
 }
 
