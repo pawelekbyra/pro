@@ -221,7 +221,7 @@ function tt_enqueue_and_localize_scripts() {
 		'tingtong-app-script',
 		'TingTongConfig',
 		[
-			'serviceWorkerUrl' => get_template_directory_uri() . '/sw.js',
+			'serviceWorkerUrl' => home_url('/sw.js'),
 			'themeUrl'         => get_template_directory_uri(),
 		]
 	);
@@ -940,3 +940,99 @@ add_filter('rest_authentication_errors', function($result) {
     }
     return true;
 });
+
+// ============================================================================
+// SERVICE WORKER AT ROOT
+// ============================================================================
+add_action('init', function() {
+    add_rewrite_rule('^sw\\.js$', 'index.php?tt_sw=1', 'top');
+});
+
+add_filter('query_vars', function($vars) {
+    $vars[] = 'tt_sw';
+    return $vars;
+});
+
+add_action('template_redirect', function() {
+    if (get_query_var('tt_sw')) {
+        header('Content-Type: application/javascript; charset=utf-8');
+        header('Service-Worker-Allowed: /');
+
+        $sw_path = get_template_directory() . '/sw.js';
+        if (file_exists($sw_path)) {
+            readfile($sw_path);
+        }
+        exit;
+    }
+});
+
+// ============================================================================
+// DYNAMICZNY MANIFEST PWA
+// ============================================================================
+
+/**
+ * Rejestracja endpoint dla manifestu PWA
+ */
+add_action('init', function() {
+    add_rewrite_rule('^manifest\.json$', 'index.php?tt_manifest=1', 'top');
+    add_rewrite_rule('^tt-manifest\.json$', 'index.php?tt_manifest=1', 'top');
+});
+
+/**
+ * Dodaj query var dla manifestu
+ */
+add_filter('query_vars', function($vars) {
+    $vars[] = 'tt_manifest';
+    return $vars;
+});
+
+/**
+ * Obsługa żądania manifestu PWA
+ */
+add_action('template_redirect', function() {
+    if (get_query_var('tt_manifest')) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: public, max-age=3600'); // Cache na 1h
+
+        $manifest = [
+            'name' => get_bloginfo('name') . ' - Ting Tong',
+            'short_name' => 'TingTong',
+            'description' => 'Aplikacja wideo w stylu TikTok',
+            'start_url' => home_url('/?pwa=1'),
+            'scope' => home_url('/'),
+            'display' => 'standalone',
+            'orientation' => 'portrait',
+            'background_color' => '#000000',
+            'theme_color' => '#ff0055',
+            'icons' => [
+                [
+                    'src' => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' style='stop-color:%23ff0055'/%3E%3Cstop offset='100%25' style='stop-color:%23ff4081'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='192' height='192' fill='url(%23g)'/%3E%3Ctext x='96' y='130' font-size='90' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3ETT%3C/text%3E%3C/svg%3E",
+                    'sizes' => '192x192',
+                    'type' => 'image/svg+xml',
+                    'purpose' => 'any maskable'
+                ],
+                [
+                    'src' => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' style='stop-color:%23ff0055'/%3E%3Cstop offset='100%25' style='stop-color:%23ff4081'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='url(%23g)'/%3E%3Ctext x='256' y='340' font-size='240' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3ETT%3C/text%3E%3C/svg%3E",
+                    'sizes' => '512x512',
+                    'type' => 'image/svg+xml',
+                    'purpose' => 'any maskable'
+                ]
+            ]
+        ];
+
+        echo json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        exit;
+    }
+});
+
+/**
+ * OPCJONALNE: Detekcja PWA mode dla specjalnej logiki
+ */
+add_action('wp', function() {
+    if (isset($_GET['pwa']) && $_GET['pwa'] === '1') {
+        // PWA mode detected - możesz tutaj dodać specjalną logikę
+        // np. ukryć header/footer WordPress, wyłączyć niepotrzebne skrypty itp.
+    }
+});
+
+// Tymczasowy kod do odświeżania reguł został usunięty.
