@@ -886,8 +886,8 @@ body,
   background: rgba(0, 0, 0, 0.5);
   border: none;
   border-radius: 50%;
-  width: 40px; /* Zwiększono dla lepszej klikalności */
-  height: 40px;
+  width: 34px; /* Zmniejszono */
+  height: 34px; /* Zmniejszono */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -899,8 +899,8 @@ body,
 }
 
 .video-controls button svg {
-  width: 22px;
-  height: 22px;
+  width: 18px; /* Zmniejszono */
+  height: 18px; /* Zmniejszono */
 }
 
 .video-controls button:hover {
@@ -980,7 +980,7 @@ body,
     (var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 +
       var(--topbar-height)
   );
-  right: 12px;
+  right: 5px;
   transform: translateY(-50%) translateX(0);
   display: flex;
   flex-direction: column;
@@ -1040,6 +1040,7 @@ body,
   -webkit-tap-highlight-color: transparent;
   z-index: 10051; /* Wyższe niż bottombar */
   transition: height 0.2s ease-in-out;
+  transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
 
 /* 2. Usuń stare reguły dla app-frame--pwa-visible - pozostaje bez zmian */
@@ -1053,7 +1054,7 @@ body,
   .progress-bar {
     bottom: 100%;
     top: auto;
-    transform: none;
+    transform: translateY(2px); /* Przesunięcie w dół o 2px */
   }
 }
 

@@ -16,6 +16,8 @@ const _state = {
   commentSortOrder: "newest",
   replyingToComment: null,
   isSoundMuted: false,
+  videoPlaybackState: null,
+  swiper: null,
 };
 
 const _listeners = {};
