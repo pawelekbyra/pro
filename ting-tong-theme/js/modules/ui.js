@@ -436,10 +436,35 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
+    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
-      "playing",
+      "loadedmetadata",
       () => {
         tiktokSymulacja.classList.add("video-loaded");
+      },
+      { once: true },
+    );
+
+    // Spróbuj odtworzyć (może zadziałać lub nie - ale UI już będzie widoczny)
+    videoEl.addEventListener(
+      "canplay",
+      () => {
+        // Tylko jeśli to aktywny slajd i brak overlay
+        if (section.classList.contains('swiper-slide-active')) {
+          const secretOverlay = section.querySelector('.secret-overlay');
+          const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
+          const isOverlayVisible =
+            (secretOverlay && secretOverlay.classList.contains('visible')) ||
+            (pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible'));
+
+          if (!isOverlayVisible && videoEl.paused) {
+            videoEl.play().catch(e => {
+              console.log("Autoplay prevented, showing pause overlay");
+              const pauseOverlay = section.querySelector('.pause-overlay');
+              if (pauseOverlay) pauseOverlay.classList.add('visible');
+            });
+          }
+        }
       },
       { once: true },
     );
