@@ -125,6 +125,35 @@ document.addEventListener("DOMContentLoaded", () => {
             s.likeId = String(s.likeId);
           });
           UI.renderSlides();
+
+          // ✅ NOWA LOGIKA: Przywróć pozycję wideo po zalogowaniu
+          const playbackState = State.get('videoPlaybackState');
+          const swiper = State.get('swiper');
+
+          if (playbackState && swiper) {
+            const slideIndex = slidesData.findIndex(s => s.id === playbackState.slideId);
+            if (slideIndex !== -1) {
+              // Używamy `slideToLoop` bo swiper jest w trybie pętli
+              swiper.slideToLoop(slideIndex, 0); // Przejdź do slajdu bez animacji
+
+              // Dajemy chwilę na renderowanie DOM
+              setTimeout(() => {
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const video = activeSlide?.querySelector('video');
+                if (video) {
+                  // Upewnij się, że metadata jest załadowana przed ustawieniem currentTime
+                  if (video.readyState >= 1) {
+                     video.currentTime = playbackState.currentTime;
+                  } else {
+                    video.addEventListener('loadedmetadata', () => {
+                      video.currentTime = playbackState.currentTime;
+                    }, { once: true });
+                  }
+                }
+              }, 100);
+            }
+            State.set('videoPlaybackState', null); // Wyczyść stan
+          }
         }
 
         UI.updateUIForLoginState();
@@ -335,6 +364,8 @@ document.addEventListener("DOMContentLoaded", () => {
             },
           },
         });
+
+        State.set('swiper', swiper);
 
         setTimeout(() => {
           UI.DOM.preloader.classList.add("preloader-hiding");

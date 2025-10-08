@@ -746,6 +746,18 @@ export const Handlers = {
         break;
       case "toggle-login-panel":
         if (!State.get("isUserLoggedIn")) {
+          const swiper = State.get('swiper');
+          if (swiper) {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            const video = activeSlide?.querySelector('video');
+            if (video) {
+              State.set('videoPlaybackState', {
+                slideId: activeSlide.dataset.slideId,
+                currentTime: video.currentTime,
+              });
+            }
+          }
+
           if (UI.DOM.commentsModal.classList.contains("visible")) {
             UI.closeModal(UI.DOM.commentsModal);
           }
@@ -842,19 +854,6 @@ export const Handlers = {
 
         if (!result.userData) {
           throw new Error('Invalid response: missing user data');
-        }
-
-        if (result.slidesData && Array.isArray(result.slidesData)) {
-          slidesData.length = 0;
-          Array.prototype.push.apply(slidesData, result.slidesData);
-          slidesData.forEach((s) => {
-            s.likeId = String(s.likeId);
-          });
-          UI.renderSlides();
-        }
-
-        if (AccountPanel?.populateProfileForm) {
-          AccountPanel.populateProfileForm(result.userData);
         }
 
         if (result.requires_first_login_setup) {
