@@ -1027,17 +1027,36 @@ body,
 /* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
 .app-frame--pwa-visible .bottombar {
 }
+/* === PATCH: Pasek progressu na górnej krawędzi bottombar === */
+
+/* 1. Zmień pozycjonowanie - progress bar ma być częścią bottombar */
 .progress-bar {
   position: absolute;
-  top: 0;
+  bottom: 100%; /* Na górnej krawędzi bottombar */
   left: 0;
   width: 100%;
-  height: 10px; /* Increased height to make it a better touch target */
+  height: 10px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
-  z-index: 10050;
+  z-index: 10051; /* Wyższe niż bottombar */
+}
+
+/* 2. Usuń stare reguły dla app-frame--pwa-visible */
+.app-frame--pwa-visible .progress-bar {
+  /* Usuń te reguły - nie są już potrzebne */
+  top: unset;
+  bottom: 100%; /* Pozostaje na górnej krawędzi bottombar */
+}
+
+/* 3. Dla przeglądarki (nie-PWA) - usuń transform */
+@media not all and (display-mode: standalone) {
+  .progress-bar {
+    bottom: 100%; /* Zawsze na górnej krawędzi bottombar */
+    top: auto;
+    transform: none; /* Usuń transform */
+  }
 }
 
 .progress-bar::before {
@@ -4276,45 +4295,4 @@ body,
   opacity: 1 !important;
   visibility: visible !important;
   display: flex !important;
-}
-
-/* ==========================================================================
-   PROGRESS BAR - OSTATECZNA POPRAWKA
-   ========================================================================== */
-
-/* Z-index i wysokość */
-.progress-bar {
-  z-index: 10099;
-  height: 16px;
-}
-.progress-bar-handle {
-  z-index: 10100;
-}
-
-/* Dla PWA, zostaje na górze .bottombar (zachowanie domyślne) */
-@media (display-mode: standalone) {
-  .progress-bar {
-    position: absolute;
-    top: 0;
-    bottom: auto;
-    transform: none;
-  }
-}
-
-/* Dla przeglądarki z paskiem PWA, pozycjonujemy DOKŁADNIE nad tym paskiem */
-@media not all and (display-mode: standalone) {
-  .app-frame--pwa-visible .progress-bar {
-    position: fixed;
-    top: auto;
-    bottom: var(--bottombar-height);
-    transform: none; /* Reset na wszelki wypadek */
-
-    /* Poprawki dla centrowania na desktopie */
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%; /* Szerokość na mobile */
-    max-width: calc(100vh * 9 / 16); /* Szerokość na desktopie */
-  }
 }
