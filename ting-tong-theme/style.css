@@ -4181,3 +4181,11 @@ body,
     display: none;
   }
 }
+/* Dostosowanie dla przeglądarki (nie-PWA) */
+@media not all and (display-mode: standalone) {
+  .progress-bar {
+    bottom: 100%;
+    top: auto;
+    transform: translateY(calc(-1 * var(--safe-area-bottom)));
+  }
+}
