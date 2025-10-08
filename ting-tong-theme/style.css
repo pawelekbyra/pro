@@ -4290,4 +4290,57 @@ body,
     top: auto;
     transform: translateY(calc(-1 * var(--safe-area-bottom)));
   }
+           /* ============================================================================
+   FIX: Buy Me A Coffee Widget - Ograniczenie do kontenera telefonu (Desktop)
+   ============================================================================ */
+
+@media (min-width: 600px) {
+  /* Widget BMC - ograniczenie do zwężonego kontenera (proporcje 9:16) */
+  #bmc-wbtn,
+  iframe[src*="buymeacoffee"] {
+    position: fixed !important;
+    
+    /* Obliczenie pozycji w zwężonym kontenerze */
+    /* Kontener ma szerokość: calc(100vh * 9 / 16) */
+    /* Musimy przeliczyć prawą krawędź */
+    
+    right: calc(50vw - (100vh * 9 / 16 / 2) + 18px) !important;
+    
+    /* Alternatywnie, jeśli widget ma być w środku ekranu: */
+    /* left: 50% !important;
+    transform: translateX(calc(-50% + (100vh * 9 / 16 / 2) - 36px)) !important; */
+    
+    /* Zachowaj oryginalny bottom */
+    bottom: 18px !important;
+    
+    /* Upewnij się, że jest nad aplikacją */
+    z-index: 10015 !important;
+  }
+
+  /* Iframe wewnętrzny widgetu BMC */
+  .bmc-btn-container,
+  .bmc-btn {
+    max-width: 100% !important;
+  }
+}
+
+/* Alternatywne rozwiązanie - jeśli powyższe nie działa idealnie */
+@media (min-width: 600px) {
+  /* Kontener wrapper dla BMC */
+  body::after {
+    content: '';
+    position: fixed;
+    right: calc(50vw - (100vh * 9 / 16 / 2));
+    top: 0;
+    width: calc(100vh * 9 / 16);
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10014;
+  }
+  
+  /* Widget musi być wewnątrz tego wrappera */
+  #bmc-wbtn {
+    right: calc(50vw - (100vh * 9 / 16 / 2) + 18px) !important;
+  }
+}
 }
