@@ -262,7 +262,7 @@ function updateUIForLoginState() {
             pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Utils.getTranslation("pwaTitle");
             const subtitleEl = pwaSecretOverlay.querySelector(".pwa-secret-subtitle");
             if(subtitleEl){
-                subtitleEl.textContent = Utils.getTranslation("pwaSubtitleAction");
+                subtitleEl.textContent = Utils.getTranslation("pwaSecretSubtitleNew");
                 subtitleEl.dataset.action = "install-pwa";
             }
         }
