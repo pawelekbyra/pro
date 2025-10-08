@@ -4279,6 +4279,55 @@ body,
   display: flex !important;
 }
 
+/* ==========================================================================
+   PROGRESS BAR - POPRAWKI POZYCJONOWANIA I Z-INDEX
+   ========================================================================== */
+
+/* Fix 1: Zwiększ z-index pileczki, żeby była nad wszystkim */
+.progress-bar-handle {
+  z-index: 10100; /* Wyższy niż pasek instalacji (10002) i bottombar (10050) */
+}
+
+/* Fix 2: Zwiększ z-index całego progress bara */
+.progress-bar {
+  z-index: 10099; /* Tuż pod handlem, ale nad wszystkim innym */
+}
+
+/* Fix 3: W wersji NON-PWA (przeglądarka) przesuń progress bar DOKŁADNIE nad pasek instalacji */
+@media not all and (display-mode: standalone) {
+  .progress-bar {
+    /* Przesuń progress bar z góry bottombar do spodu bottombar */
+    top: auto;
+    bottom: 0;
+
+    /* A następnie przesuń go o wysokość paska instalacji w górę */
+    transform: translateY(-100%);
+
+    /* Alternatywnie możesz użyć calc (lepsze dla precyzji): */
+    /* transform: translateY(calc(-1 * var(--bottombar-height))); */
+  }
+
+  /* Zapewnij, że handle też ma odpowiedni z-index */
+  .progress-bar-handle {
+    z-index: 10100;
+  }
+}
+
+/* Fix 4: W trybie PWA progress bar zostaje na górze bottombar (jak jest teraz) */
+@media (display-mode: standalone) {
+  .progress-bar {
+    top: 0;
+    bottom: auto;
+    transform: none;
+  }
+}
+
+/* Fix 5: OPCJONALNIE - Zwiększ wysokość paska dla lepszej klikalności */
+.progress-bar {
+  height: 16px; /* Było 10px, teraz 16px */
+  /* Możesz też zostawić 10px jeśli preferujesz mniejszy */
+}
+
 }/*
 Theme Name: Ting Tong Theme
 Theme URI: https://example.com/ting-tong-theme/
