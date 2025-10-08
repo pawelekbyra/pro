@@ -893,7 +893,7 @@ body,
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  transition: background-color 0.3s ease-out, transform 0.1s, opacity 0.3s ease-out; /* ✅ Aktualizacja */
   padding: 0;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -902,6 +902,7 @@ body,
 .video-controls button svg {
   width: 18px; /* Zmniejszono */
   height: 18px; /* Zmniejszono */
+  transition: fill 0.3s ease-out, stroke 0.3s ease-out; /* ✅ Dodano animację dla ikony */
 }
 
 .video-controls button:hover {
@@ -991,6 +992,7 @@ body,
   opacity: 0;
   visibility: hidden;
   transition:
+    top 0.3s ease-out, /* ✅ Dodano animację dla pozycji */
     opacity 0.6s ease-out,
     visibility 0.6s ease-out,
     transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -4318,3 +4320,23 @@ body,
 
 /* KROK 3: Sidebar nie jest już ukrywany. Pozostaje widoczny. */
 /* Celowo usunięto regułę dla #app-frame.hide-ui .sidebar */
+
+/* ✅ NOWE: Wyśrodkuj sidebar w pionie, gdy dolny pasek jest ukryty */
+#app-frame.hide-ui .sidebar {
+    top: calc((var(--app-height) - var(--topbar-height)) / 2 + var(--topbar-height));
+}
+
+/* ✅ NOWE: Aktywuj i zmień styl przycisku CC w trybie immersyjnym */
+#app-frame.hide-ui .cc-button {
+    opacity: 1;
+    cursor: pointer;
+    background-color: white;
+}
+
+#app-frame.hide-ui .cc-button svg {
+    stroke: black;
+}
+
+#app-frame.hide-ui .cc-button:hover {
+    background-color: #e0e0e0; /* Lekko szare tło po najechaniu */
+}
