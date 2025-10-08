@@ -321,6 +321,12 @@ document.addEventListener("DOMContentLoaded", () => {
           loop: true,
           keyboard: { enabled: true, onlyInViewport: false },
           speed: 300,
+          // iOS-specific touch settings for performance and better UX
+          touchEventsTarget: 'wrapper',
+          resistance: true,
+          resistanceRatio: 0.85,
+          preventInteractionOnTransition: true,
+          edgeSwipeDetection: 'prevent',
           on: {
             init: function (swiper) {
               // --- One-time animation on first app load ---

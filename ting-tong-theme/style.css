@@ -627,7 +627,7 @@ body {
     sans-serif;
   background-color: #000;
   color: white;
-  overscroll-behavior-y: contain; /* Prevent bounce scroll */
+  overscroll-behavior: none; /* Prevent bounce scroll and pull-to-refresh on iOS */
   user-select: none;
   -webkit-user-select: none;
 }
@@ -659,16 +659,16 @@ body,
   height: var(--app-height); /* Use var, remove 1px patch for scroll-snap */
   overflow: hidden;
   position: relative;
-  -webkit-transform: translate3d(
-    0,
-    0,
-    0
-  ); /* Wymuś nową warstwę (zapobiega migotaniu) */
-  transform: translate3d(
-    0,
-    0,
-    0
-  ); /* Wymuś nową warstwę (zapobiega migotaniu) */
+
+  /* GPU acceleration and rendering optimization for iOS */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  contain: layout paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 100vw 100vh; /* Fallback size for when the element is not rendered */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* ==========================================================================
@@ -790,6 +790,7 @@ body,
   left: 0;
   width: 100%;
   height: 100%;
+  transform: translate3d(0, 0, 0); /* Fix for video flickering on iOS */
 }
 .pause-overlay {
   position: absolute;
