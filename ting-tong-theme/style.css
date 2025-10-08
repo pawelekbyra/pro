@@ -1027,82 +1027,79 @@ body,
 /* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
 .app-frame--pwa-visible .bottombar {
 }
-/* === PATCH: Pasek progressu na górnej krawędzi bottombar === */
+/* === PATCH: Pasek progressu na górnej krawędzi bottombar (v2 - Pixel Perfect) === */
 
-/* 1. Zmień pozycjonowanie - progress bar ma być częścią bottombar */
+/* 1. Zmień pozycjonowanie i wysokość - progress bar ma być częścią bottombar */
 .progress-bar {
   position: absolute;
   bottom: 100%; /* Na górnej krawędzi bottombar */
   left: 0;
   width: 100%;
-  height: 10px;
+  height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  display: flex;
-  align-items: center;
   z-index: 10051; /* Wyższe niż bottombar */
+  transition: height 0.2s ease-in-out;
 }
 
-/* 2. Usuń stare reguły dla app-frame--pwa-visible */
+/* 2. Usuń stare reguły dla app-frame--pwa-visible - pozostaje bez zmian */
 .app-frame--pwa-visible .progress-bar {
-  /* Usuń te reguły - nie są już potrzebne */
   top: unset;
-  bottom: 100%; /* Pozostaje na górnej krawędzi bottombar */
+  bottom: 100%;
 }
 
-/* 3. Dla przeglądarki (nie-PWA) - usuń transform */
+/* 3. Dla przeglądarki (nie-PWA) - usuń transform - pozostaje bez zmian */
 @media not all and (display-mode: standalone) {
   .progress-bar {
-    bottom: 100%; /* Zawsze na górnej krawędzi bottombar */
+    bottom: 100%;
     top: auto;
-    transform: none; /* Usuń transform */
+    transform: none;
   }
 }
 
+/* 4. Dostosuj pseudo-elementy do nowej wysokości kontenera */
 .progress-bar::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
   width: 100%;
-  height: 4px;
+  height: 100%; /* Wypełnia całą wysokość kontenera */
   background-color: rgba(255, 0, 85, 0.3);
-  transition: height 0.2s ease-in-out;
 }
 
 .progress-bar-fill {
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
   width: 0%;
-  height: 4px;
+  height: 100%; /* Wypełnia całą wysokość kontenera */
   background-color: var(--progress-bar-color);
   border-radius: 2px;
-  transition: height 0.2s ease-in-out;
   pointer-events: none;
 }
+
 .progress-bar-handle {
   position: absolute;
-  top: 50%;
-  left: 0%; /* Will be updated by JS */
+  top: 50%; /* Pozostaje wycentrowany w pionie */
+  left: 0%;
   width: 12px;
   height: 12px;
   border-radius: 50%;
   background-color: white;
   transform: translate(-50%, -50%) scale(1);
   transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  opacity: 1; /* Always visible */
-  pointer-events: none; /* The whole bar is the target */
+  opacity: 1;
+  pointer-events: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
 }
-.progress-bar:hover::before,
-.progress-bar.dragging::before,
-.progress-bar:hover .progress-bar-fill,
-.progress-bar.dragging .progress-bar-fill {
-  height: 6px;
+
+/* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
+.progress-bar:hover,
+.progress-bar.dragging {
+  height: 6px; /* Zwiększamy wysokość całego paska */
 }
+
 .progress-bar:hover .progress-bar-handle,
 .progress-bar.dragging .progress-bar-handle {
   transform: translate(-50%, -50%) scale(1.5);
