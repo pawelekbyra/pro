@@ -982,7 +982,7 @@ body,
     (var(--app-height) - var(--topbar-height) - var(--bottombar-height)) / 2 +
       var(--topbar-height)
   );
-  right: 4px;
+  right: 2px;
   transform: translateY(-50%) translateX(0);
   display: flex;
   flex-direction: column;
