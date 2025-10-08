@@ -4288,8 +4288,8 @@ body,
   .progress-bar {
     bottom: 100%;
     top: auto;
-    transform: translateY(calc(-1 * var(--safe-area-bottom)));
   }
+}
 }/*
 Theme Name: Ting Tong Theme
 Theme URI: https://example.com/ting-tong-theme/
