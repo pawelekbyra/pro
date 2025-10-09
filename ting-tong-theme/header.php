@@ -20,6 +20,37 @@
 
     <script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="pawelperfect" data-description="Support me on Buy me a coffee!" data-message="" data-color="#FF5F5F" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 
+    <!-- ═══════════════════════════════════════════════════════════════
+     iOS OPTIMIZATIONS
+     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- iOS PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TingTong">
+
+<!-- Disable iOS auto zoom na input focus (opcjonalne) -->
+<meta name="format-detection" content="telephone=no">
+
+<!-- iOS Performance Hints -->
+<style>
+/* Force GPU acceleration globally */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent iOS text size adjust */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Smooth scrolling hint */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+</style>
     <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
