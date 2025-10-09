@@ -67,7 +67,14 @@ function hideIosInstructions() {
   if (iosInstructions) iosInstructions.classList.remove("visible");
 }
 
-// KROK 1: Usunięto funkcję updatePwaBarForInstalled
+function updateInstallButtonForInstalledState() {
+  if (installButton) {
+    installButton.textContent = Utils.getTranslation("alreadyInstalledText");
+    installButton.disabled = true;
+    installButton.classList.add('installed');
+    console.log('[PWA] ✅ Install button updated to "installed" state.');
+  }
+}
 
 function showDesktopModal() {
   if (desktopModal) UI.openModal(desktopModal);
@@ -85,36 +92,29 @@ function runStandaloneCheck() {
   const appFrame = document.getElementById("app-frame");
 
   if (isStandalone()) {
-    console.log("[PWA Check] ✅ Standalone CONFIRMED. Hiding install bar permanently.");
-
-    // Zapisz w sessionStorage żeby pamiętać
+    console.log("[PWA Check] ✅ Standalone CONFIRMED. Updating install button.");
     sessionStorage.setItem('pwa_detected', 'true');
 
-    if (installBar) {
-      // WYMUSZAJ ukrycie przez inline style (najsilniejsze)
-      installBar.style.display = 'none';
-      installBar.classList.remove("visible");
-      installBar.setAttribute('aria-hidden', 'true');
+    // Zamiast ukrywać pasek, zaktualizuj przycisk i upewnij się, że pasek jest widoczny.
+    updateInstallButtonForInstalledState();
 
-      // Usuń offset z app-frame
-      if (appFrame) {
-        appFrame.classList.remove("app-frame--pwa-visible");
-      }
+    if (installBar && !installBar.classList.contains("visible")) {
+        installBar.classList.add("visible");
+        installBar.setAttribute('aria-hidden', 'false');
+        if (appFrame) {
+            appFrame.classList.add("app-frame--pwa-visible");
+        }
     }
-
-    // Wyłącz dalsze sprawdzenia - już wiemy że to PWA
-    return true;
+    return true; // Stan obsłużony
   } else {
     console.log("[PWA Check] ⚠️ Standalone NOT detected.");
 
-    // KROK 4: Sprawdź czy preloader już zniknął
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden =
       (preloader && preloader.classList.contains("preloader-hiding")) ||
       (container && container.classList.contains("ready"));
 
-    // Pokaż pasek TYLKO jeśli preloader już zniknął
     if (isPreloaderHidden && installBar) {
       console.log("[PWA Check] Preloader gone, showing install bar.");
       installBar.classList.add("visible");
@@ -138,7 +138,6 @@ function init() {
     installButton.addEventListener("click", handleInstallClick);
   }
 
-  // ✅ POPRAWKA: Przechwyć beforeinstallprompt ZANIM sprawdzamy standalone
   if ("onbeforeinstallprompt" in window) {
     window.addEventListener("beforeinstallprompt", (e) => {
       console.log('[PWA] 📱 beforeinstallprompt event fired');
@@ -153,11 +152,8 @@ function init() {
     window.addEventListener("appinstalled", () => {
       console.log('[PWA] ✅ PWA was installed');
       installPromptEvent = null;
-
-      // Pasek instalacji pozostaje widoczny celowo.
-
-      // The alert is intentionally removed to prevent showing the "already installed" message immediately after installation.
-      // The message will now only appear on subsequent install clicks.
+      // Zaktualizuj przycisk, aby odzwierciedlić stan po instalacji.
+      updateInstallButtonForInstalledState();
     });
   } else {
     console.warn('[PWA] ⚠️ beforeinstallprompt not supported on this browser');
