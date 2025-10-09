@@ -818,11 +818,16 @@ export const Handlers = {
         UI.updateVolumeButton(isMuted);
         break;
       case "toggle-fullscreen": {
+        // This action should only work in PWA mode.
+        if (!PWA.isStandalone()) {
+          return;
+        }
+
         const appFrame = document.getElementById("app-frame");
         if (appFrame) {
             const isHiding = appFrame.classList.toggle("hide-ui");
 
-            // Znajdź przycisk w aktywnym slajdzie, aby zaktualizować jego ikonę
+            // Find the button in the active slide to update its icon
             const activeSlide = document.querySelector('.swiper-slide-active');
             const btn = activeSlide?.querySelector('.fullscreen-button');
 

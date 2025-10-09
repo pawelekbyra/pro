@@ -761,7 +761,8 @@ body,
   opacity: 1;
   pointer-events: auto;
 }
-.pwa-secret-overlay .pwa-secret-icon {
+.pwa-secret-overlay .pwa-secret-icon,
+.pwa-secret-overlay .secret-icon {
   width: 64px;
   height: 64px;
   margin-bottom: 24px;
@@ -792,10 +793,10 @@ body,
 }
 .pause-overlay {
   position: absolute;
-  top: 0;
+  top: var(--topbar-height);
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -803,7 +804,7 @@ body,
   z-index: 101;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
+  transition: top 0.3s ease-out, height 0.3s ease-out, opacity 0.2s ease-in-out;
   visibility: hidden;
 }
 .tiktok-symulacja:not(.video-loaded) .pause-overlay {
@@ -824,10 +825,10 @@ body,
 /* ✅ NOWE: Replay overlay */
 .replay-overlay {
   position: absolute;
-  top: 0;
+  top: var(--topbar-height);
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -835,7 +836,7 @@ body,
   z-index: 101;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
+  transition: top 0.3s ease-out, height 0.3s ease-out, opacity 0.2s ease-in-out;
   visibility: hidden;
 }
 
