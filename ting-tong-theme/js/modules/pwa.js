@@ -80,137 +80,87 @@ function closePwaModals() {
     hideIosInstructions();
 }
 
+/**
+ * Uproszczona funkcja sprawdzająca. Jej jedynym zadaniem jest ukrycie
+ * paska instalacji, jeśli aplikacja JEST JUŻ w trybie standalone.
+ */
 function runStandaloneCheck() {
-  console.log("[PWA Check] Running standalone check...");
-  const appFrame = document.getElementById("app-frame");
-
   if (isStandalone()) {
-    console.log("[PWA Check] ✅ Standalone CONFIRMED. Hiding install bar permanently.");
-
-    // Zapisz w sessionStorage żeby pamiętać
+    console.log("[PWA Check] ✅ Standalone CONFIRMED. Hiding install bar.");
     sessionStorage.setItem('pwa_detected', 'true');
+    if (installBar) {
+      installBar.style.display = 'none'; // Użyj stylu inline, aby nadpisać wszystko
+    }
+    return true; // Zwróć true, aby zatrzymać dalsze sprawdzanie
+  }
+  console.log("[PWA Check] ⚠️ Standalone NOT detected.");
+  return false;
+}
+
+/**
+ * Inicjalizacja modułu PWA.
+ */
+function init() {
+  console.log('[PWA] 🚀 Initializing PWA module...');
+
+  // 1. Sprawdź od razu, czy już nie jesteśmy w PWA. Jeśli tak, nie rób nic więcej.
+  if (runStandaloneCheck()) {
+    return;
+  }
+
+  // 2. Nasłuchuj na zdarzenie `beforeinstallprompt` - to jedyne źródło prawdy.
+  window.addEventListener("beforeinstallprompt", (e) => {
+    console.log('[PWA] 📱 beforeinstallprompt event fired. App is installable.');
+    e.preventDefault();
+    installPromptEvent = e;
+
+    // Pokaż pasek i aktywuj przycisk TYLKO TERAZ
+    if (installBar && installButton) {
+      console.log('[PWA] ✅ Showing install bar and enabling button.');
+      installBar.classList.add("visible");
+      installBar.setAttribute('aria-hidden', 'false');
+      installButton.disabled = false;
+
+      // Dodaj obramowanie do app-frame
+      const appFrame = document.getElementById("app-frame");
+      if (appFrame) {
+        appFrame.classList.add("app-frame--pwa-visible");
+      }
+
+      // Dodaj listener kliknięcia dopiero teraz, gdy jest co obsłużyć
+      installButton.addEventListener("click", handleInstallClick);
+    }
+  });
+
+  // 3. Nasłuchuj na zdarzenie `appinstalled` do posprzątania.
+  window.addEventListener("appinstalled", () => {
+    console.log('[PWA] ✅ PWA was successfully installed');
+    installPromptEvent = null;
 
     if (installBar) {
-      // WYMUSZAJ ukrycie przez inline style (najsilniejsze)
-      installBar.style.display = 'none';
       installBar.classList.remove("visible");
-      installBar.setAttribute('aria-hidden', 'true');
-
-      // Usuń offset z app-frame
+      const appFrame = document.getElementById("app-frame");
       if (appFrame) {
         appFrame.classList.remove("app-frame--pwa-visible");
       }
     }
+    // Można tu dodać powiadomienie o sukcesie, jeśli jest taka potrzeba.
+  });
 
-    // Wyłącz dalsze sprawdzenia - już wiemy że to PWA
-    return true;
-  } else {
-    console.log("[PWA Check] ⚠️ Standalone NOT detected.");
-
-    // KROK 4: Sprawdź czy preloader już zniknął
-    const preloader = document.getElementById("preloader");
-    const container = document.getElementById("webyx-container");
-    const isPreloaderHidden =
-      (preloader && preloader.classList.contains("preloader-hiding")) ||
-      (container && container.classList.contains("ready"));
-
-    // Pokaż pasek TYLKO jeśli preloader już zniknął
-    if (isPreloaderHidden && installBar) {
-      console.log("[PWA Check] Preloader gone, showing install bar.");
-      installBar.classList.add("visible");
-      installBar.setAttribute('aria-hidden', 'false');
-
-      if (appFrame) {
-        appFrame.classList.add("app-frame--pwa-visible");
-      }
-    } else {
-      console.log("[PWA Check] Preloader still active, waiting...");
-    }
-  }
-
-  return false;
-}
-
-function init() {
-  console.log('[PWA] 🚀 Initializing PWA module...');
-
-  if (installButton) {
-    // Hybrydowe rozwiązanie: Przycisk jest zawsze aktywny.
-    // Logika w handleInstallClick decyduje, co pokazać.
-    installButton.disabled = false;
-    installButton.addEventListener("click", handleInstallClick);
-    console.log('[PWA] ✅ Install button enabled by default');
-  }
-
-  // Nasłuchuj zdarzenia, aby przechwycić możliwość instalacji
-  if ("onbeforeinstallprompt" in window) {
-    window.addEventListener("beforeinstallprompt", (e) => {
-      console.log('[PWA] 📱 beforeinstallprompt event fired');
-      e.preventDefault();
-      installPromptEvent = e;
-      // Przycisk jest już aktywny, więc nic tu nie robimy
-    });
-
-    window.addEventListener("appinstalled", () => {
-      console.log('[PWA] ✅ PWA was installed');
-      installPromptEvent = null;
-
-      if (installBar) {
-        installBar.classList.remove("visible");
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-          appFrame.classList.remove("app-frame--pwa-visible");
-        }
-      }
-
-      if (typeof UI !== 'undefined' && UI.showAlert) {
-        UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
-      }
-    });
-  } else {
-    console.warn('[PWA] ⚠️ beforeinstallprompt not supported on this browser');
-  }
-
+  // 4. Obsługa przycisku zamykania dla instrukcji iOS.
   if (iosCloseButton) {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Delay initial check
-  setTimeout(() => {
-    console.log('[PWA] 🔍 Running initial standalone check...');
-    const isConfirmed = runStandaloneCheck();
-
-    if (!isConfirmed) {
-      // Listen for page visibility changes
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && !sessionStorage.getItem('pwa_detected')) {
-          runStandaloneCheck();
-        }
-      });
-
-      // Recheck after preloader ends
-      const preloader = document.getElementById("preloader");
-      if (preloader) {
-        const observer = new MutationObserver(() => {
-          if (preloader.classList.contains("preloader-hiding")) {
-            setTimeout(() => {
-              if (!isStandalone() && installBar && !installBar.classList.contains("visible")) {
-                console.log('[PWA] 📣 Showing install bar after preloader');
-                installBar.classList.add("visible");
-                installBar.setAttribute('aria-hidden', 'false');
-
-                const appFrame = document.getElementById("app-frame");
-                if (appFrame) {
-                  appFrame.classList.add("app-frame--pwa-visible");
-                }
-              }
-            }, 500);
-          }
-        });
-        observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
+  // 5. Dodaj listener do wszystkich elementów, które mogą inicjować instalację
+  //    (np. link w treści slajdu)
+  document.body.addEventListener('click', (e) => {
+      if (e.target.dataset.action === 'install-pwa') {
+          handleInstallClick();
       }
-    }
-  }, 1000); // ✅ POPRAWKA: Delay 1s aby beforeinstallprompt miał czas
+  });
+
+  console.log('[PWA] Initialization complete. Waiting for beforeinstallprompt event...');
 }
 
 function handleInstallClick() {
