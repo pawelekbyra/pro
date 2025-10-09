@@ -238,6 +238,11 @@ function updateUIForLoginState() {
     const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
 
+    // If an overlay is active, force the UI to be visible
+    if (showSecret || showPwaSecret) {
+      sim.classList.add("video-loaded");
+    }
+
     // Toggle "secret" overlay
     const secretOverlay = section.querySelector(".secret-overlay");
     if (secretOverlay) {

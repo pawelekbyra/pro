@@ -820,6 +820,7 @@ export const Handlers = {
       case "toggle-fullscreen": {
         // This action should only work in PWA mode.
         if (!PWA.isStandalone()) {
+          UI.showToast(Utils.getTranslation("immersiveModePwaOnly"));
           return;
         }
 

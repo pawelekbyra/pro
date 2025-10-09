@@ -4029,8 +4029,8 @@ body,
 }
 
 /* Color for 'Log in' and 'Download' in the secret overlay */
-.secret-subtitle u[data-translate-key="secretSubtitleAction"],
-.pwa-secret-subtitle u[data-translate-key="pwaSecretSubtitleAction"] {
+.secret-subtitle u,
+.pwa-secret-subtitle u {
   border-bottom-color: #fff; /* White */
 }
 
@@ -4343,4 +4343,17 @@ body,
 #app-frame.hide-ui .replay-overlay {
     top: var(--topbar-height);
     height: calc(100% - var(--topbar-height));
+}
+
+/* NOWE: Wizualne wyłączenie przycisku immersji w trybie przeglądarki */
+@media not all and (display-mode: standalone) {
+  .fullscreen-button {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* NOWE: Domyślnie ukryj ikonę wyjścia z trybu immersyjnego */
+.fullscreen-exit-icon {
+  display: none;
 }
