@@ -696,14 +696,14 @@ body,
 }
 .secret-overlay {
   position: absolute;
-  top: var(--topbar-height); /* Start below top bar */
+  top: 0;
   left: 0;
   width: 100%;
-  height: calc(100% - var(--topbar-height));
+  height: 100%;
   background: rgba(0, 0, 0, 0.4);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   backdrop-filter: blur(12px) saturate(120%);
-  z-index: 10060;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -739,14 +739,14 @@ body,
 }
 .pwa-secret-overlay {
   position: absolute;
-  top: var(--topbar-height);
+  top: 0;
   left: 0;
   width: 100%;
-  height: calc(100% - var(--topbar-height));
+  height: 100%;
   background: rgba(0, 0, 0, 0.4);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   backdrop-filter: blur(12px) saturate(120%);
-  z-index: 10060;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
