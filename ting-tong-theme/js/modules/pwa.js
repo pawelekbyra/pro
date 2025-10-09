@@ -69,8 +69,8 @@ function hideIosInstructions() {
 
 function updateInstallButtonForInstalledState() {
   if (installButton) {
-    installButton.textContent = Utils.getTranslation("alreadyInstalledText");
-    installButton.disabled = true;
+    // Nie zmieniaj tekstu ani nie wyłączaj przycisku.
+    // Po prostu dodaj klasę, aby `handleInstallClick` wiedział, że aplikacja jest zainstalowana.
     installButton.classList.add('installed');
     console.log('[PWA] ✅ Install button updated to "installed" state.');
   }
@@ -216,10 +216,11 @@ function handleInstallClick() {
     userAgent: navigator.userAgent
   });
 
-  // 1. Już zainstalowane
-  if (isStandalone()) {
-    console.log('[PWA] ℹ️ Already installed');
+  // 1. Już zainstalowane (sprawdź tryb standalone lub klasę 'installed')
+  if (isStandalone() || (installButton && installButton.classList.contains('installed'))) {
+    console.log('[PWA] ℹ️ Already installed, showing toast.');
     if (typeof UI !== 'undefined' && UI.showToast) {
+      // Użyj tłumaczenia z config.js
       UI.showToast(Utils.getTranslation("alreadyInstalledText"));
     }
     return;
