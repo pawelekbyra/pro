@@ -49,6 +49,7 @@ export const Config = {
       languageAriaLabel: "Zmień język",
       languageText: "PL",
       subscribeAlert: "Zaloguj się, aby subskrajbować.",
+      profileViewAlert: "Zaloguj sie aby zajrzec",
       likeAlert: "Zaloguj się, aby lajkować.",
       notificationAlert: "Zaloguj się i bądź na bieżąco.",
       menuAccessAlert: "Zaloguj się, aby uzyskać dostęp do menu.",
