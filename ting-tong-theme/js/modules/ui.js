@@ -21,19 +21,10 @@ function initDOMCache() {
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
-  DOM.toastNotification = document.getElementById("toast-notification");
   DOM.welcomeModal = document.getElementById("welcome-modal");
 }
-let toastTimeout;
-
-function showToast(message) {
-    if (!DOM.toastNotification) return;
-    clearTimeout(toastTimeout);
-    DOM.toastNotification.textContent = message;
-    DOM.toastNotification.classList.add("visible");
-    toastTimeout = setTimeout(() => {
-        DOM.toastNotification.classList.remove("visible");
-    }, 3000);
+function showToast(message, isError = false) {
+    showAlert(message, isError);
 }
 
 function showAlert(message, isError = false) {
@@ -398,6 +389,8 @@ function createSlideElement(slideData, index) {
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
     }
+    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był widoczny
+    section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 
   section.querySelector(".tiktok-symulacja").dataset.access =
