@@ -454,8 +454,6 @@ get_header();
         </div>
     </div>
 </div>
-<div id="toast-notification" class="toast" role="status" aria-live="polite"></div>
-
 <div id="welcome-modal" class="modal-overlay welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
     <div class="modal-content welcome-modal-content">
         <!-- Ikona na górze -->
