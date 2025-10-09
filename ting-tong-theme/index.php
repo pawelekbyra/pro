@@ -424,9 +424,9 @@ get_header();
 
 <div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true">
     <div class="pwa-prompt-content">
-        <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Zobacz więcej!</p>
+        <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Ting Tong</p>
         <p class="pwa-prompt-description">
-            <u data-translate-key="installPwaSubheadingAction"></u><span data-translate-key="installPwaSubheadingRest"></span>
+            <span data-translate-key="installPwaFullDescription"></span>
         </p>
     </div>
     <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction" disabled>Zainstaluj</button>
