@@ -1,9 +1,8 @@
-const CACHE_NAME = 'ting-tong-cache-v5';
+const CACHE_NAME = 'ting-tong-cache-v6';
 
-// ✅ Minimalna lista - tylko kluczowe zasoby
+// ✅ Minimalna lista - tylko kluczowe zasoby. Manifest jest dynamiczny, nie cachujemy go.
 const ESSENTIAL_URLS = [
   'style.css',
-  'manifest.json'
 ];
 
 // Instalacja
@@ -17,10 +16,8 @@ self.addEventListener('install', event => {
         const themeUrl = urlParams.get('themeUrl') || '';
 
         if (!themeUrl) {
-          console.warn('[SW] ⚠️ No themeUrl - minimal cache only');
-          return cache.add('manifest.json').catch(err => {
-            console.warn('[SW] Could not cache manifest:', err.message);
-          });
+          console.warn('[SW] ⚠️ No themeUrl, cannot cache essential assets.');
+          return Promise.resolve();
         }
 
         console.log(`[SW] 📁 Theme URL: ${themeUrl}`);
@@ -32,7 +29,6 @@ self.addEventListener('install', event => {
             .then(() => console.log(`[SW] ✅ Cached: ${url}`))
             .catch(err => {
               console.warn(`[SW] ⚠️ Failed to cache ${url}:`, err.message);
-              // Nie blokuj instalacji
             });
         });
 
@@ -63,7 +59,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch - Network for AJAX/POST, Cache-first for others
+// Fetch - Network-first for AJAX/POST, Cache-first for others
 self.addEventListener('fetch', event => {
   const { request } = event;
 
@@ -72,14 +68,16 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Zawsze używaj sieci dla żądań AJAX do WordPressa i dla wszystkich żądań POST
-  if (request.url.includes('admin-ajax.php') || request.method !== 'GET') {
-    console.log(`[SW] 🌐 Network request (AJAX/POST): ${request.url}`);
-    // Przekaż żądanie do sieci, nie używaj cache
+  // Dla żądań non-GET lub zapytań AJAX, zawsze idź do sieci.
+  if (request.method !== 'GET' || request.url.includes('admin-ajax.php')) {
+    console.log(`[SW] 🌐 Network-only request: ${request.url}`);
+    // Jawnie obsłuż żądanie, przekazując je do sieci.
+    // To kluczowe dla spełnienia kryteriów PWA.
+    event.respondWith(fetch(request));
     return;
   }
 
-  // Dla pozostałych żądań GET, użyj strategii "cache-first"
+  // Dla wszystkich innych żądań GET, użyj strategii "cache-first"
   event.respondWith(
     caches.match(request)
       .then(cachedResponse => {
