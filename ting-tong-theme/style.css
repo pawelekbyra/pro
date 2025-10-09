@@ -1092,6 +1092,7 @@ body,
   opacity: 1;
   pointer-events: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  z-index: 1; /* FIX: Zapewnia, że uchwyt jest nad innymi elementami w progress-bar */
 }
 
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
