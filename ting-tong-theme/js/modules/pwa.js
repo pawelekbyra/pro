@@ -156,9 +156,8 @@ function init() {
 
       // Pasek instalacji pozostaje widoczny celowo.
 
-      if (typeof UI !== 'undefined' && UI.showAlert) {
-        UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
-      }
+      // The alert is intentionally removed to prevent showing the "already installed" message immediately after installation.
+      // The message will now only appear on subsequent install clicks.
     });
   } else {
     console.warn('[PWA] ⚠️ beforeinstallprompt not supported on this browser');
