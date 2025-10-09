@@ -92,21 +92,25 @@ function runStandaloneCheck() {
   const appFrame = document.getElementById("app-frame");
 
   if (isStandalone()) {
-    console.log("[PWA Check] ✅ Standalone CONFIRMED. Updating install button.");
+    console.log("[PWA Check] ✅ Standalone CONFIRMED. Hiding install bar permanently.");
     sessionStorage.setItem('pwa_detected', 'true');
 
-    // Zamiast ukrywać pasek, zaktualizuj przycisk i upewnij się, że pasek jest widoczny.
-    updateInstallButtonForInstalledState();
+    if (installBar) {
+      // Aplikacja jest w trybie PWA, więc pasek instalacji jest niepotrzebny.
+      // Używamy stylu inline, aby mieć pewność, że zostanie ukryty.
+      installBar.style.display = 'none';
+      installBar.classList.remove("visible");
+      installBar.setAttribute('aria-hidden', 'true');
 
-    if (installBar && !installBar.classList.contains("visible")) {
-        installBar.classList.add("visible");
-        installBar.setAttribute('aria-hidden', 'false');
-        if (appFrame) {
-            appFrame.classList.add("app-frame--pwa-visible");
-        }
+      // Usuń odsunięcie z głównego kontenera aplikacji.
+      if (appFrame) {
+        appFrame.classList.remove("app-frame--pwa-visible");
+      }
     }
-    return true; // Stan obsłużony
+    // Zakończ dalsze sprawdzanie, ponieważ stan jest już znany.
+    return true;
   } else {
+    // Aplikacja działa w przeglądarce.
     console.log("[PWA Check] ⚠️ Standalone NOT detected.");
 
     const preloader = document.getElementById("preloader");
@@ -115,6 +119,7 @@ function runStandaloneCheck() {
       (preloader && preloader.classList.contains("preloader-hiding")) ||
       (container && container.classList.contains("ready"));
 
+    // Pokaż pasek instalacji, jeśli preloader już zniknął.
     if (isPreloaderHidden && installBar) {
       console.log("[PWA Check] Preloader gone, showing install bar.");
       installBar.classList.add("visible");
