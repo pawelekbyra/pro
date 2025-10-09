@@ -71,6 +71,7 @@ function updateInstallButtonForInstalledState() {
   if (installButton) {
     installButton.textContent = Utils.getTranslation("alreadyInstalledText");
     installButton.classList.add('installed');
+    installButton.disabled = false; // Upewnij się, że przycisk jest klikalny, aby pokazać toast.
     console.log('[PWA] ✅ Install button updated to "installed" state.');
   }
 }
@@ -140,11 +141,21 @@ function init() {
 
   if (installButton) {
     installButton.addEventListener("click", handleInstallClick);
+    // Sprawdź, czy aplikacja jest już oznaczona jako zainstalowana w localStorage
+    if (localStorage.getItem('tingTongPwaInstalled') === 'true') {
+      console.log('[PWA] 💾 App is already marked as installed in localStorage.');
+      updateInstallButtonForInstalledState();
+    }
   }
 
   if ("onbeforeinstallprompt" in window) {
     window.addEventListener("beforeinstallprompt", (e) => {
       console.log('[PWA] 📱 beforeinstallprompt event fired');
+      // Nie pokazuj promptu, jeśli wiemy, że apka jest zainstalowana
+      if (localStorage.getItem('tingTongPwaInstalled') === 'true') {
+        console.log('[PWA] 🚫 Suppressing beforeinstallprompt because app is already installed.');
+        return;
+      }
       e.preventDefault();
       installPromptEvent = e;
       if (installButton) {
@@ -156,6 +167,8 @@ function init() {
     window.addEventListener("appinstalled", () => {
       console.log('[PWA] ✅ PWA was installed');
       installPromptEvent = null;
+      // Zapisz stan instalacji w localStorage
+      localStorage.setItem('tingTongPwaInstalled', 'true');
       // Zaktualizuj przycisk, aby odzwierciedlić stan po instalacji.
       updateInstallButtonForInstalledState();
     });
