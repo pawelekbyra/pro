@@ -424,9 +424,9 @@ get_header();
 
 <div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true">
     <div class="pwa-prompt-content">
-        <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Ting Tong</p>
+        <p class="pwa-prompt-title" data-translate-key="installPwaHeading">Pobierz apkę!</p>
         <p class="pwa-prompt-description">
-            <span data-translate-key="installPwaFullDescription"></span>
+            <span data-translate-key="installPwaFullDescription">Zainstaluj Ting Tonga na swoim telefonie.</span>
         </p>
     </div>
     <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction" disabled>Zainstaluj</button>

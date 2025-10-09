@@ -70,7 +70,6 @@ function hideIosInstructions() {
 function updateInstallButtonForInstalledState() {
   if (installButton) {
     installButton.textContent = Utils.getTranslation("alreadyInstalledText");
-    installButton.disabled = true;
     installButton.classList.add('installed');
     console.log('[PWA] ✅ Install button updated to "installed" state.');
   }
@@ -216,11 +215,11 @@ function handleInstallClick() {
     userAgent: navigator.userAgent
   });
 
-  // 1. Już zainstalowane
-  if (isStandalone()) {
+  // 1. Już zainstalowane (w trybie PWA lub wykryte przez klasę)
+  if (isStandalone() || (installButton && installButton.classList.contains('installed'))) {
     console.log('[PWA] ℹ️ Already installed');
     if (typeof UI !== 'undefined' && UI.showToast) {
-      UI.showToast(Utils.getTranslation("alreadyInstalledText"));
+      UI.showToast(Utils.getTranslation("alreadyInstalledToast"));
     }
     return;
   }
@@ -238,8 +237,6 @@ function handleInstallClick() {
 
           if (choiceResult.outcome === "accepted") {
             console.log('[PWA] ✅ User accepted installation');
-
-            // Pasek instalacji pozostaje widoczny celowo.
           } else {
             console.log('[PWA] ❌ User dismissed installation');
           }
@@ -276,7 +273,6 @@ function handleInstallClick() {
   // 5. Fallback - prompt nie gotowy
   console.warn('[PWA] ⚠️ Install prompt not available');
 
-  // ✅ NOWE: Zaproponuj refresh strony
   if (typeof UI !== 'undefined' && UI.showAlert) {
     UI.showAlert(
       "Instalacja nie jest jeszcze gotowa. Odśwież stronę (F5) i spróbuj ponownie za chwilę.",
