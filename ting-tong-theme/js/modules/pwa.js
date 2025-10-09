@@ -135,19 +135,20 @@ function init() {
   console.log('[PWA] 🚀 Initializing PWA module...');
 
   if (installButton) {
+    // Hybrydowe rozwiązanie: Przycisk jest zawsze aktywny.
+    // Logika w handleInstallClick decyduje, co pokazać.
+    installButton.disabled = false;
     installButton.addEventListener("click", handleInstallClick);
+    console.log('[PWA] ✅ Install button enabled by default');
   }
 
-  // ✅ POPRAWKA: Przechwyć beforeinstallprompt ZANIM sprawdzamy standalone
+  // Nasłuchuj zdarzenia, aby przechwycić możliwość instalacji
   if ("onbeforeinstallprompt" in window) {
     window.addEventListener("beforeinstallprompt", (e) => {
       console.log('[PWA] 📱 beforeinstallprompt event fired');
       e.preventDefault();
       installPromptEvent = e;
-      if (installButton) {
-        installButton.disabled = false;
-        console.log('[PWA] ✅ Install button enabled');
-      }
+      // Przycisk jest już aktywny, więc nic tu nie robimy
     });
 
     window.addEventListener("appinstalled", () => {
