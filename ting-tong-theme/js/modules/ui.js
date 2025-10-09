@@ -260,10 +260,11 @@ function updateUIForLoginState() {
         pwaSecretOverlay.classList.toggle("visible", showPwaSecret);
         if (showPwaSecret) {
             pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Utils.getTranslation("pwaTitle");
-            const subtitleEl = pwaSecretOverlay.querySelector(".pwa-secret-subtitle");
-            if(subtitleEl){
-                subtitleEl.textContent = Utils.getTranslation("pwaSecretSubtitleNew");
-                subtitleEl.dataset.action = "install-pwa";
+            const subtitleUElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle u");
+            const subtitleSpanElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle span");
+            if (subtitleUElement && subtitleSpanElement) {
+                subtitleUElement.textContent = Utils.getTranslation("pwaSecretSubtitleAction");
+                subtitleSpanElement.textContent = Utils.getTranslation("pwaSecretSubtitleRest");
             }
         }
     }
