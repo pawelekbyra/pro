@@ -379,19 +379,6 @@ function createSlideElement(slideData, index) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
-
-      // PATCH 4: Add critical attributes for iOS performance and autoplay.
-      videoEl.setAttribute('playsinline', '');
-      videoEl.setAttribute('webkit-playsinline', '');
-      videoEl.setAttribute('preload', 'metadata');
-      videoEl.style.transform = 'translate3d(0,0,0)';
-      videoEl.style.backfaceVisibility = 'hidden';
-      videoEl.loop = true;
-      // Start muted. This is required for autoplay on most mobile browsers.
-      // The Swiper's `slideChange` event will later set the correct mute state
-      // based on the global `State.isSoundMuted`.
-      videoEl.muted = true;
-
       // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli warunki są spełnione.
       if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
         videoEl.pause();

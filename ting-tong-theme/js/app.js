@@ -9,7 +9,6 @@ import { Notifications } from './modules/notifications.js';
 import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
-import { videoManager } from './modules/ios-video-manager.js';
 
 // Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
@@ -254,197 +253,123 @@ document.addEventListener("DOMContentLoaded", () => {
 
         UI.updateTranslations();
 
-        // ============================================================================
-        // SWIPER CONFIGURATION - OPTIMIZED FOR iOS (iPhone 7+)
-        // ============================================================================
-        const swiper = new Swiper('.swiper', {
-          // ──────────────────────────────────────────────────────────────────
-          // BASIC SETUP (Merged from old and new)
-          // ──────────────────────────────────────────────────────────────────
-          direction: 'vertical',
-          slidesPerView: 1,
-          spaceBetween: 0,
-          loop: true, // Retained from old config
-          keyboard: { enabled: true, onlyInViewport: false }, // Retained from old config
-          mousewheel: { releaseOnEdges: true }, // Retained from old config
+        const handleMediaChange = (swiper) => {
+          // First, pause every single video element within the swiper container.
+          swiper.el.querySelectorAll('video').forEach(video => {
+            if (!video.paused) {
+              video.pause();
+            }
+          });
 
-          // ──────────────────────────────────────────────────────────────────
-          // SPEED - KRYTYCZNE DLA SMOOTH ANIMATIONS
-          // ──────────────────────────────────────────────────────────────────
-          speed: 350, // Optimal dla iPhone 7 - nie za szybki, nie za wolny
+          // Also unload all iframes to save resources.
+          swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) => {
+              if (iframe.src) {
+                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = iframe.src;
+                iframe.src = "";
+              }
+          });
 
-          // ──────────────────────────────────────────────────────────────────
-          // TOUCH HANDLING - iOS OPTIMIZATION
-          // ──────────────────────────────────────────────────────────────────
-          touchRatio: 1,
-          touchAngle: 45,
-          threshold: 5, // Minimum 5px prevents accidental swipes
-          longSwipes: true,
-          longSwipesRatio: 0.3,
-          longSwipesMs: 200,
+          // Now, get the truly active slide element.
+          const activeSlide = swiper.slides[swiper.activeIndex];
 
-          // ──────────────────────────────────────────────────────────────────
-          // RESISTANCE - SMOOTH EDGES
-          // ──────────────────────────────────────────────────────────────────
+          // Play media for the new active slide.
+          if (activeSlide) {
+            // Use realIndex to get data from our original array, which is correct for loop mode.
+            const slideData = slidesData[swiper.realIndex];
+
+            // ✅ FIX 1: Sprawdź stan nakładek PRZED próbą odtworzenia
+            const secretOverlay = activeSlide.querySelector('.secret-overlay');
+            const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay');
+
+            const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
+            const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
+            const isAnyOverlayVisible = isSecretVisible || isPwaSecretVisible;
+
+            if (slideData && slideData.isIframe) {
+              const iframe = activeSlide.querySelector("iframe");
+              if (iframe && iframe.dataset.originalSrc && !isAnyOverlayVisible) {
+                iframe.src = iframe.dataset.originalSrc;
+              }
+            } else {
+              const video = activeSlide.querySelector("video");
+              if (video) {
+                // Hide overlays
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
+                if (pauseOverlay) pauseOverlay.classList.remove("visible");
+                const replayOverlay = activeSlide.querySelector(".replay-overlay");
+                if (replayOverlay) replayOverlay.classList.remove("visible");
+
+                video.muted = State.get("isSoundMuted");
+
+                // ✅ FIX 1: Odtwórz tylko jeśli NIE MA nakładki
+                if (!isAnyOverlayVisible) {
+                  video.play().catch((error) => {
+                      console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
+                  });
+                } else {
+                  console.log("Video paused due to overlay visibility on slide " + swiper.realIndex);
+                  video.pause();
+                  video.currentTime = 0; // Reset do początku dla konsystencji
+                }
+              }
+            }
+          }
+        };
+
+        const swiper = new Swiper(".swiper", {
+          direction: "vertical",
+          mousewheel: { releaseOnEdges: true },
+          loop: true,
+          keyboard: { enabled: true, onlyInViewport: false },
+          speed: 300,
+          // iOS-specific touch settings for performance and better UX
+          touchEventsTarget: 'wrapper',
           resistance: true,
           resistanceRatio: 0.85,
-
-          // ──────────────────────────────────────────────────────────────────
-          // PREVENT INTERACTION DURING TRANSITION - ELIMINUJE POP-IN
-          // ──────────────────────────────────────────────────────────────────
           preventInteractionOnTransition: true,
-
-          // ──────────────────────────────────────────────────────────────────
-          // iOS SPECIFIC
-          // ──────────────────────────────────────────────────────────────────
-          touchStartPreventDefault: false, // Allow native iOS behaviors
-          touchStartForcePreventDefault: false,
-          passiveListeners: true, // CRITICAL dla iOS performance
-
-          // ──────────────────────────────────────────────────────────────────
-          // PREVENT iOS BACK NAVIGATION
-          // ──────────────────────────────────────────────────────────────────
           edgeSwipeDetection: 'prevent',
-
-          // ──────────────────────────────────────────────────────────────────
-          // PRELOADING - MEMORY EFFICIENT
-          // ──────────────────────────────────────────────────────────────────
-          watchSlidesProgress: true,
-          watchSlidesVisibility: false,
-          preloadImages: false,
-          lazy: {
-            loadPrevNext: true,
-            loadPrevNextAmount: 1,
-            loadOnTransitionStart: false,
-          },
-
-          // ──────────────────────────────────────────────────────────────────
-          // LIFECYCLE EVENTS - SYNCHRONIZACJA UI
-          // ──────────────────────────────────────────────────────────────────
           on: {
-            // ═══════════════════════════════════════════════════════════════
-            // INIT - Setup GPU acceleration and play first video
-            // ═══════════════════════════════════════════════════════════════
-            init: function () {
-              console.log('✅ Swiper initialized with iOS optimizations');
-              this.$wrapperEl[0].style.transform = 'translate3d(0, 0, 0)';
-
-              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-              if (isIOS) {
-                this.$el[0].classList.add('swiper-ios');
-              }
-
-              // Show first slide UI immediately
-              const firstSlide = this.slides[0];
-              if (firstSlide) {
-                firstSlide.classList.add('swiper-slide-active');
-                const sidebar = firstSlide.querySelector('.sidebar');
-                const bottombar = firstSlide.querySelector('.bottombar');
-                if (sidebar) {
-                  sidebar.style.transition = 'none';
-                  sidebar.style.opacity = '1';
-                  sidebar.style.transform = 'translate3d(0, 0, 0)';
-                  setTimeout(() => sidebar.style.transition = '', 50);
-                }
-                if (bottombar) {
-                  bottombar.style.transition = 'none';
-                  bottombar.style.opacity = '1';
-                  bottombar.style.transform = 'translate3d(0, 0, 0)';
-                  setTimeout(() => bottombar.style.transition = '', 50);
-                }
-              }
-
-              // Retained from old config: set initial volume icon
+            init: function (swiper) {
+              // --- One-time animation on first app load ---
               UI.updateVolumeButton(State.get("isSoundMuted"));
-
-              // Play first video
-              const activeSlide = this.slides[this.activeIndex];
-              const video = activeSlide?.querySelector('video');
-              if (video) {
-                video.muted = State.get("isSoundMuted");
-                video.play().catch(error => console.warn('Initial video autoplay blocked:', error));
-              }
+              // Also handle media for the very first slide on init.
+              handleMediaChange(swiper);
             },
-
-            // ═══════════════════════════════════════════════════════════════
-            // SLIDE CHANGE TRANSITION START - Hide old UI
-            // ═══════════════════════════════════════════════════════════════
-            slideChangeTransitionStart: function () {
-              const previousSlide = this.slides[this.previousIndex];
-              if (previousSlide) {
-                previousSlide.querySelector('video')?.pause();
-              }
-              this.$wrapperEl[0].style.willChange = 'transform';
-            },
-
-            // ═══════════════════════════════════════════════════════════════
-            // SLIDE CHANGE TRANSITION END - Show new UI and play video
-            // ═══════════════════════════════════════════════════════════════
-            slideChangeTransitionEnd: function () {
-              const activeSlide = this.slides[this.activeIndex];
-              if (activeSlide) {
-                const video = activeSlide.querySelector('video');
-                if (video) {
-                   // ✅ FIX 1: Sprawdź stan nakładek PRZED próbą odtworzenia
-                  const isOverlayVisible = UI.isSlideOverlayActive(activeSlide);
-
-                  video.muted = State.get("isSoundMuted");
-
-                  if (!isOverlayVisible) {
-                     video.play().catch(error => console.warn('Video autoplay blocked:', error));
-                  } else {
-                     console.log("Video paused due to overlay visibility on slide " + this.realIndex);
-                     video.pause();
-                     video.currentTime = 0;
-                  }
-                }
-              }
-
-              // PATCH 5: Aggressive memory management for iOS
-              videoManager.manageVideos(this);
-
-              this.$wrapperEl[0].style.willChange = 'auto';
-            },
-
-            // ═══════════════════════════════════════════════════════════════
-            // CLICK HANDLER - Retained for tap-to-pause functionality
-            // ═══════════════════════════════════════════════════════════════
+            slideChange: handleMediaChange,
             click: function (swiper, event) {
-              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay, .pwa-secret-overlay')) {
+              // Ignoruj kliknięcia na interaktywnych elementach
+              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay')) {
                 return;
               }
+
               const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector('video');
+
               if (!video) return;
 
               const pauseOverlay = activeSlide.querySelector('.pause-overlay');
               const replayOverlay = activeSlide.querySelector('.replay-overlay');
 
+              // ✅ PRZYPADEK 1: Film się skończył - replay
               if (video.ended) {
                 video.currentTime = 0;
-                video.play().catch(err => console.log("Replay error:", err));
+                video.play().catch(err => console.log("Błąd replay:", err));
                 if (replayOverlay) replayOverlay.classList.remove('visible');
-              } else if (video.paused) {
-                video.play().catch(err => console.log("Play error:", err));
+                return;
+              }
+
+              // ✅ PRZYPADEK 2: Film jest spauzowany - odtwórz
+              if (video.paused) {
+                video.play().catch(err => console.log("Błąd play:", err));
                 if (pauseOverlay) pauseOverlay.classList.remove('visible');
-              } else {
+              }
+              // ✅ PRZYPADEK 3: Film gra - spauzuj
+              else {
                 video.pause();
                 if (pauseOverlay) pauseOverlay.classList.add('visible');
               }
             },
-
-            // ═══════════════════════════════════════════════════════════════
-            // TOUCH EVENTS - Performance hints
-            // ═══════════════════════════════════════════════════════════════
-            touchStart: function () {
-              this.$wrapperEl[0].style.willChange = 'transform';
-            },
-            touchEnd: function () {
-              setTimeout(() => {
-                this.$wrapperEl[0].style.willChange = 'auto';
-              }, 400);
-            },
-          }
+          },
         });
 
         State.set('swiper', swiper);
