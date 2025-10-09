@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ting-tong-cache-v4';
+const CACHE_NAME = 'ting-tong-cache-v5';
 
 // ✅ Minimalna lista - tylko kluczowe zasoby
 const ESSENTIAL_URLS = [
@@ -63,37 +63,51 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch - cache-first strategy
+// Fetch - Network for AJAX/POST, Cache-first for others
 self.addEventListener('fetch', event => {
-  // Ignoruj non-GET requests
-  if (event.request.method !== 'GET') return;
+  const { request } = event;
 
-  // Ignoruj chrome-extension i inne non-http(s)
-  if (!event.request.url.startsWith('http')) return;
+  // Ignoruj żądania non-HTTP/HTTPS
+  if (!request.url.startsWith('http')) {
+    return;
+  }
 
+  // Zawsze używaj sieci dla żądań AJAX do WordPressa i dla wszystkich żądań POST
+  if (request.url.includes('admin-ajax.php') || request.method !== 'GET') {
+    console.log(`[SW] 🌐 Network request (AJAX/POST): ${request.url}`);
+    // Przekaż żądanie do sieci, nie używaj cache
+    return;
+  }
+
+  // Dla pozostałych żądań GET, użyj strategii "cache-first"
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          console.log(`[SW] 💾 Serving from cache: ${event.request.url}`);
-          return response;
+    caches.match(request)
+      .then(cachedResponse => {
+        if (cachedResponse) {
+          console.log(`[SW] 💾 Serving from cache: ${request.url}`);
+          return cachedResponse;
         }
 
-        return fetch(event.request).then(response => {
-          // Cache successful responses
-          if (response && response.status === 200) {
-            const responseClone = response.clone();
+        console.log(`[SW] ☁️ Fetching from network: ${request.url}`);
+        return fetch(request).then(networkResponse => {
+          // Klonuj odpowiedź i zapisz w cache, jeśli jest poprawna
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseClone);
+              console.log(`[SW]  caching new asset: ${request.url}`);
+              cache.put(request, responseToCache);
             });
           }
-          return response;
+          return networkResponse;
         });
       })
-      .catch(err => {
-        console.error('[SW] ❌ Fetch error:', err);
-        // Możesz zwrócić offline page tutaj
-        return new Response('Offline', { status: 503 });
+      .catch(error => {
+        console.error(`[SW] ❌ Fetch error for ${request.url}:`, error);
+        // Zwróć prostą odpowiedź błędu sieciowego
+        return new Response('Network error occurred', {
+          status: 408,
+          headers: { 'Content-Type': 'text/plain' },
+        });
       })
   );
 });
