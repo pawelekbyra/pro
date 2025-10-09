@@ -1,23 +1,3 @@
-/**
- * ============================================================================
- * KOMPLEKSOWY PATCH DLA PRZYCISKU INSTALACJI PWA
- * ============================================================================
- *
- * PROBLEM:
- * - Przycisk "Zainstaluj" jest zablokowany (disabled) i nigdy nie zostaje odblokowany
- * - Przycisk czeka na event 'beforeinstallprompt', który może nie wystąpić
- * - Gdy aplikacja jest już zainstalowana, nie pokazuje się komunikat
- *
- * ROZWIĄZANIE:
- * - Odblokuj przycisk domyślnie przy inicjalizacji
- * - Zawsze pokazuj toast "Już ją pobrałeś/aś!" gdy aplikacja zainstalowana
- * - Uproszczona logika - działa zawsze, nie tylko gdy event wystąpi
- *
- * INSTRUKCJA:
- * Zastąp CAŁĄ zawartość pliku: ting-tong-theme/js/modules/pwa.js
- * ============================================================================
- */
-
 import { UI } from './ui.js';
 import { Utils } from './utils.js';
 
@@ -36,7 +16,6 @@ const isIOS = () => {
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   );
 };
-
 /**
  * Sprawdza, czy aplikacja działa w trybie samodzielnym (PWA).
  * @returns {boolean} True, jeśli aplikacja jest w trybie PWA.
@@ -64,6 +43,9 @@ const isStandalone = () => {
 
   // Metoda 5: Sprawdź document.referrer (pusty w PWA)
   if (document.referrer === '' && !window.opener) {
+    // Pusty referrer + brak window.opener sugeruje PWA
+    // ALE może być też bezpośrednie wejście przez URL
+    // Więc sprawdzamy dodatkowo sessionStorage
     if (sessionStorage.getItem('pwa_detected') === 'true') {
       return true;
     }
@@ -71,7 +53,6 @@ const isStandalone = () => {
 
   return false;
 };
-
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
 // State
@@ -86,6 +67,8 @@ function hideIosInstructions() {
   if (iosInstructions) iosInstructions.classList.remove("visible");
 }
 
+// KROK 1: Usunięto funkcję updatePwaBarForInstalled
+
 function showDesktopModal() {
   if (desktopModal) UI.openModal(desktopModal);
 }
@@ -97,11 +80,8 @@ function closePwaModals() {
     hideIosInstructions();
 }
 
-/**
- * Sprawdza czy aplikacja jest już zainstalowana i ukrywa pasek instalacji
- */
 function runStandaloneCheck() {
-  console.log("[PWA Check] 🔍 Running standalone check...");
+  console.log("[PWA Check] Running standalone check...");
   const appFrame = document.getElementById("app-frame");
 
   if (isStandalone()) {
@@ -122,11 +102,12 @@ function runStandaloneCheck() {
       }
     }
 
+    // Wyłącz dalsze sprawdzenia - już wiemy że to PWA
     return true;
   } else {
     console.log("[PWA Check] ⚠️ Standalone NOT detected.");
 
-    // Sprawdź czy preloader już zniknął
+    // KROK 4: Sprawdź czy preloader już zniknął
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden =
@@ -135,7 +116,7 @@ function runStandaloneCheck() {
 
     // Pokaż pasek TYLKO jeśli preloader już zniknął
     if (isPreloaderHidden && installBar) {
-      console.log("[PWA Check] 📣 Preloader gone, showing install bar.");
+      console.log("[PWA Check] Preloader gone, showing install bar.");
       installBar.classList.add("visible");
       installBar.setAttribute('aria-hidden', 'false');
 
@@ -143,33 +124,30 @@ function runStandaloneCheck() {
         appFrame.classList.add("app-frame--pwa-visible");
       }
     } else {
-      console.log("[PWA Check] ⏳ Preloader still active, waiting...");
+      console.log("[PWA Check] Preloader still active, waiting...");
     }
   }
 
   return false;
 }
 
-/**
- * Inicjalizacja modułu PWA
- */
 function init() {
   console.log('[PWA] 🚀 Initializing PWA module...');
 
-  // ✅ FIX #1: ZAWSZE odblokuj przycisk przy starcie
   if (installButton) {
-    installButton.disabled = false;
     installButton.addEventListener("click", handleInstallClick);
-    console.log('[PWA] ✅ Install button enabled by default');
   }
 
-  // Przechwyć beforeinstallprompt gdy wystąpi
+  // ✅ POPRAWKA: Przechwyć beforeinstallprompt ZANIM sprawdzamy standalone
   if ("onbeforeinstallprompt" in window) {
     window.addEventListener("beforeinstallprompt", (e) => {
       console.log('[PWA] 📱 beforeinstallprompt event fired');
       e.preventDefault();
       installPromptEvent = e;
-      console.log('[PWA] 📦 Install prompt event stored');
+      if (installButton) {
+        installButton.disabled = false;
+        console.log('[PWA] ✅ Install button enabled');
+      }
     });
 
     window.addEventListener("appinstalled", () => {
@@ -184,21 +162,19 @@ function init() {
         }
       }
 
-      // ✅ FIX #2: Pokaż toast po instalacji
-      if (typeof UI !== 'undefined' && UI.showToast) {
-        UI.showToast(Utils.getTranslation("alreadyInstalledText"));
+      if (typeof UI !== 'undefined' && UI.showAlert) {
+        UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
       }
     });
   } else {
     console.warn('[PWA] ⚠️ beforeinstallprompt not supported on this browser');
   }
 
-  // iOS close button
   if (iosCloseButton) {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Delay initial check - daj czas na załadowanie
+  // Delay initial check
   setTimeout(() => {
     console.log('[PWA] 🔍 Running initial standalone check...');
     const isConfirmed = runStandaloneCheck();
@@ -233,12 +209,9 @@ function init() {
         observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
       }
     }
-  }, 1000);
+  }, 1000); // ✅ POPRAWKA: Delay 1s aby beforeinstallprompt miał czas
 }
 
-/**
- * Obsługa kliknięcia przycisku instalacji
- */
 function handleInstallClick() {
   console.log('[PWA] 🖱️ Install button clicked');
   console.log('[PWA] 📊 Debug info:', {
@@ -249,21 +222,16 @@ function handleInstallClick() {
     userAgent: navigator.userAgent
   });
 
-  // ✅ FIX #3: NAJPIERW sprawdź czy już zainstalowane
+  // 1. Już zainstalowane
   if (isStandalone()) {
-    console.log('[PWA] ℹ️ Already installed - showing toast');
-
-    // Pokaż toast zamiast alert
-    if (typeof UI !== 'undefined' && UI.showToast) {
-      UI.showToast(Utils.getTranslation("alreadyInstalledText"));
-    } else if (typeof UI !== 'undefined' && UI.showAlert) {
-      // Fallback do alert jeśli toast nie działa
+    console.log('[PWA] ℹ️ Already installed');
+    if (typeof UI !== 'undefined' && UI.showAlert) {
       UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
     }
     return;
   }
 
-  // Standardowy prompt (Chrome/Edge/Android)
+  // 2. Standardowy prompt (Chrome/Edge/Android)
   if (installPromptEvent) {
     console.log('[PWA] 🎯 Triggering install prompt...');
 
@@ -272,7 +240,7 @@ function handleInstallClick() {
 
       installPromptEvent.userChoice
         .then((choiceResult) => {
-          console.log(`[PWA] 👤 User choice: ${choiceResult.outcome}`);
+          console.log(`[PWA] User choice: ${choiceResult.outcome}`);
 
           if (choiceResult.outcome === "accepted") {
             console.log('[PWA] ✅ User accepted installation');
@@ -304,34 +272,32 @@ function handleInstallClick() {
     }
   }
 
-  // iOS - pokaż instrukcje
+  // 3. iOS - pokaż instrukcje
   if (isIOS()) {
     console.log('[PWA] 🍎 iOS detected - showing instructions');
     showIosInstructions();
     return;
   }
 
-  // Desktop - pokaż modal
+  // 4. Desktop - pokaż modal
   if (isDesktop()) {
     console.log('[PWA] 💻 Desktop detected - showing modal');
     showDesktopModal();
     return;
   }
 
-  // ✅ FIX #4: Fallback - prompt nie gotowy (uproszczony komunikat)
+  // 5. Fallback - prompt nie gotowy
   console.warn('[PWA] ⚠️ Install prompt not available');
 
-  if (typeof UI !== 'undefined' && UI.showToast) {
-    UI.showToast("Instalacja niedostępna w tej przeglądarce. Spróbuj Chrome lub Edge.");
-  } else if (typeof UI !== 'undefined' && UI.showAlert) {
-    UI.showAlert(Utils.getTranslation("installNotReadyText"));
+  // ✅ NOWE: Zaproponuj refresh strony
+  if (typeof UI !== 'undefined' && UI.showAlert) {
+    UI.showAlert(
+      "Instalacja nie jest jeszcze gotowa. Odśwież stronę (F5) i spróbuj ponownie za chwilę.",
+      true
+    );
+  } else {
+    alert("Instalacja nie jest jeszcze gotowa. Odśwież stronę i spróbuj ponownie.");
   }
 }
 
-// Export
-export const PWA = {
-  init,
-  handleInstallClick,
-  closePwaModals,
-  isStandalone
-};
+export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };
