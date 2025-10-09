@@ -154,13 +154,7 @@ function init() {
       console.log('[PWA] ✅ PWA was installed');
       installPromptEvent = null;
 
-      if (installBar) {
-        installBar.classList.remove("visible");
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-          appFrame.classList.remove("app-frame--pwa-visible");
-        }
-      }
+      // Pasek instalacji pozostaje widoczny celowo.
 
       if (typeof UI !== 'undefined' && UI.showAlert) {
         UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
@@ -245,14 +239,7 @@ function handleInstallClick() {
           if (choiceResult.outcome === "accepted") {
             console.log('[PWA] ✅ User accepted installation');
 
-            // Ukryj pasek po akceptacji
-            if (installBar) {
-              installBar.classList.remove("visible");
-              const appFrame = document.getElementById("app-frame");
-              if (appFrame) {
-                appFrame.classList.remove("app-frame--pwa-visible");
-              }
-            }
+            // Pasek instalacji pozostaje widoczny celowo.
           } else {
             console.log('[PWA] ❌ User dismissed installation');
           }
