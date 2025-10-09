@@ -218,8 +218,8 @@ function handleInstallClick() {
   // 1. Już zainstalowane
   if (isStandalone()) {
     console.log('[PWA] ℹ️ Already installed');
-    if (typeof UI !== 'undefined' && UI.showAlert) {
-      UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+    if (typeof UI !== 'undefined' && UI.showToast) {
+      UI.showToast(Utils.getTranslation("alreadyInstalledText"));
     }
     return;
   }

@@ -696,10 +696,10 @@ body,
 }
 .secret-overlay {
   position: absolute;
-  top: 0;
+  top: var(--topbar-height);
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
   background: rgba(0, 0, 0, 0.4);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   backdrop-filter: blur(12px) saturate(120%);
@@ -712,7 +712,7 @@ body,
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
 }
 .secret-overlay.visible {
   opacity: 1;
@@ -739,10 +739,10 @@ body,
 }
 .pwa-secret-overlay {
   position: absolute;
-  top: 0;
+  top: var(--topbar-height);
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
   background: rgba(0, 0, 0, 0.4);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   backdrop-filter: blur(12px) saturate(120%);
@@ -755,7 +755,7 @@ body,
   padding: 20px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
 }
 .pwa-secret-overlay.visible {
   opacity: 1;
@@ -780,8 +780,6 @@ body,
   font-size: 16px;
   color: rgba(255, 255, 255, 0.8);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  border-bottom: 2px solid #87ceeb;
-  padding-bottom: 2px;
 }
 .player {
   position: absolute;
@@ -4031,8 +4029,8 @@ body,
 
 /* Color for 'Log in' and 'Download' in the secret overlay */
 .secret-subtitle u[data-translate-key="secretSubtitleAction"],
-.secret-subtitle u[data-translate-key="pwaSubtitleAction"] {
-  border-bottom-color: #87ceeb; /* Sky Blue */
+.pwa-secret-subtitle u[data-translate-key="pwaSecretSubtitleAction"] {
+  border-bottom-color: #fff; /* White */
 }
 
 /* Color for 'Download the app' (in all locations) */
