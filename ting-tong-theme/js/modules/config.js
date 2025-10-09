@@ -61,7 +61,7 @@ export const Config = {
       pwaSubtitleAction: "Pobierz aplikację,",
       pwaSubtitleRest: " aby zobaczyć",
       pwaSecretSubtitleAction: "Ściągnij apkę",
-      pwaSecretSubtitleRest: ", aby obczaic.",
+      pwaSecretSubtitleRest: ", aby obczaić.",
       closeAccountAriaLabel: "Zamknij panel konta",
       accountMenuButton: "Konto",
       logoutLink: "Wyloguj",
@@ -241,6 +241,7 @@ export const Config = {
     retry: "Spróbuj ponownie",
     imageInputError: "Nie można załączyć obrazu",
     fileReadError: "Nie można odczytać pliku",
+    immersiveModePwaOnly: "Działa w apce",
     },
     en: {
       loggedOutText: "You don't have the guts to log in",
