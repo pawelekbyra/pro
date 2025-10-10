@@ -4338,33 +4338,23 @@ body,
 }
 
 /* ============================================================================
-   KEYBOARD VISIBILITY PATCH (v2)
+   KEYBOARD VISIBILITY PATCH (v3)
    ============================================================================ */
 
 /*
- * Kiedy klawiatura jest widoczna (body.keyboard-visible), chcemy, aby
- * większość elementów UI pozostała na swoim miejscu i została przykryta
- * przez klawiaturę, zamiast przesuwać się w górę. Osiągamy to, "zamrażając"
- * ich pozycję względem góry okna, zamiast dołu.
+ * Kiedy klawiatura jest widoczna, zapobiegamy kurczeniu się głównego
+ * kontenera aplikacji (#app-frame), ustawiając jego wysokość na 100vh.
+ * To sprawia, że elementy pozycjonowane na dole (bottom: 0) pozostają
+ * na swoim miejscu i są przykrywane przez klawiaturę, a nie przesuwane w górę.
  */
-
-body.keyboard-visible .pwa-prompt,
-body.keyboard-visible .pwa-prompt-ios {
-  /* Pozostają na dole, klawiatura je przykryje */
-  bottom: 0;
-  top: auto;
-}
-
-body.keyboard-visible .tiktok-symulacja .bottombar {
-  /* Pozostaje na dole, klawiatura go przykryje */
-  bottom: 0;
-  top: auto;
+body.keyboard-visible #app-frame {
+  height: 100vh !important; /* Użyj pełnej wysokości widoku, ignorując klawiaturę */
 }
 
 /*
- * Kontener formularza komentarzy jest jedynym wyjątkiem.
- * Dzięki `position: sticky` i `bottom: 0` automatycznie
- * "przyklei się" do górnej krawędzi klawiatury.
+ * Kontener formularza komentarzy jest wyjątkiem. Musi on pozostać
+ * "przyklejony" do góry klawiatury. `position: sticky` wewnątrz
+ * scrollowalnego kontenera (modal-body) załatwia sprawę.
  */
 .comment-form-container {
   position: sticky;
@@ -4373,11 +4363,12 @@ body.keyboard-visible .tiktok-symulacja .bottombar {
 }
 
 /*
- * Modal komentarzy musi dostosować swoją wysokość, gdy klawiatura jest
- * widoczna, aby umożliwić scrollowanie całej listy komentarzy.
- * Ta reguła jest już w sekcji modala komentarzy, ale jest tu dla jasności.
+ * Dodatkowa reguła dla modala komentarzy, aby poprawnie dostosował
+ * swoją wysokość, gdy klawiatura jest widoczna.
  */
 #commentsModal.keyboard-visible .modal-content {
+  height: calc(100vh - var(--keyboard-offset, 0px));
+  max-height: calc(100vh - var(--keyboard-offset, 0px));
   transition: height 0.2s ease-out, max-height 0.2s ease-out;
 }
 

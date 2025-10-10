@@ -234,15 +234,9 @@ function init() {
     window.addEventListener("appinstalled", () => {
       console.log('[PWA] ✅ PWA was installed');
       installPromptEvent = null;
-
-      if (installBar) {
-        installBar.classList.remove("visible");
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-          appFrame.classList.remove("app-frame--pwa-visible");
-        }
-      }
-
+      // DEVELOPER NOTE (v2): Usunięto ukrywanie paska z tego eventu.
+      // Widoczność jest teraz w pełni zarządzana przez runStandaloneCheck(),
+      // co zapobiega przedwczesnemu zniknięciu paska.
       if (typeof UI !== 'undefined' && UI.showAlert) {
         UI.showAlert("Aplikacja została zainstalowana!");
       }
