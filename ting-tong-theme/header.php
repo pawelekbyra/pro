@@ -7,7 +7,7 @@
 
     <meta name="description" content="Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.">
     <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="<?php echo home_url( '/manifest.json' ); ?>">
+    <link rel="manifest" href="<?php echo get_template_directory_uri(); ?>/manifest.json">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
