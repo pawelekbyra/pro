@@ -1,3 +1,9 @@
+// ============================================================================
+// PWA.JS - PATCH FIX
+// Naprawia detekcję instalacji: sprawdza czy aplikacja faktycznie
+// jest zainstalowana w systemie, a nie tylko czy była w przeszłości
+// ============================================================================
+
 import { UI } from './ui.js';
 import { Utils } from './utils.js';
 
@@ -16,12 +22,13 @@ const isIOS = () => {
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   );
 };
+
 /**
- * Sprawdza, czy aplikacja działa w trybie samodzielnym (PWA).
- * @returns {boolean} True, jeśli aplikacja jest w trybie PWA.
+ * ✅ POPRAWIONA FUNKCJA - sprawdza czy aplikacja AKTUALNIE jest zainstalowana
+ * Nie używa sessionStorage - tylko czyste API przeglądarki
  */
 const isStandalone = () => {
-  // Metoda 1: Standard Web API
+  // Metoda 1: Standard Web API (najbardziej niezawodna)
   if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) {
     return true;
   }
@@ -31,33 +38,24 @@ const isStandalone = () => {
     return true;
   }
 
-  // Metoda 3: Sprawdź czy jest w fullscreen
+  // Metoda 3: Fullscreen mode
   if (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) {
     return true;
   }
 
-  // Metoda 4: Android - sprawdź URL query param (jeśli dodano via manifest)
+  // Metoda 4: Android - sprawdź URL query param
   if (window.location.search && window.location.search.includes('utm_source=homescreen')) {
     return true;
   }
 
-  // Metoda 5: Sprawdź document.referrer (pusty w PWA)
-  if (document.referrer === '' && !window.opener) {
-    // Pusty referrer + brak window.opener sugeruje PWA
-    // ALE może być też bezpośrednie wejście przez URL
-    // Więc sprawdzamy dodatkowo sessionStorage
-    if (sessionStorage.getItem('pwa_detected') === 'true') {
-      return true;
-    }
-  }
-
+  // ❌ USUNIĘTO: sessionStorage i document.referrer - niereliable po odinstalowaniu
   return false;
 };
+
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
 
 // State
 let installPromptEvent = null;
-let isWaitingForPrompt = false; // NOWE: flaga oczekiwania na prompt
 
 // Actions
 function showIosInstructions() {
@@ -79,14 +77,15 @@ function closePwaModals() {
     hideIosInstructions();
 }
 
+/**
+ * ✅ UPROSZCZONA FUNKCJA - sprawdza tylko aktualny stan, bez sessionStorage
+ */
 function runStandaloneCheck() {
   console.log("[PWA Check] Running standalone check...");
   const appFrame = document.getElementById("app-frame");
 
   if (isStandalone()) {
-    console.log("[PWA Check] ✅ Standalone CONFIRMED. Hiding install bar permanently.");
-
-    sessionStorage.setItem('pwa_detected', 'true');
+    console.log("[PWA Check] ✅ App IS installed - hiding install bar");
 
     if (installBar) {
       installBar.style.display = 'none';
@@ -100,7 +99,7 @@ function runStandaloneCheck() {
 
     return true;
   } else {
-    console.log("[PWA Check] ⚠️ Standalone NOT detected.");
+    console.log("[PWA Check] ⚠️ App NOT installed - can show install bar");
 
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
@@ -109,19 +108,113 @@ function runStandaloneCheck() {
       (container && container.classList.contains("ready"));
 
     if (isPreloaderHidden && installBar) {
-      console.log("[PWA Check] Preloader gone, showing install bar.");
+      console.log("[PWA Check] Showing install bar");
       installBar.classList.add("visible");
       installBar.setAttribute('aria-hidden', 'false');
 
       if (appFrame) {
         appFrame.classList.add("app-frame--pwa-visible");
       }
-    } else {
-      console.log("[PWA Check] Preloader still active, waiting...");
     }
   }
 
   return false;
+}
+
+/**
+ * ✅ KLUCZOWA POPRAWKA - zawsze sprawdza aktualny stan przed działaniem
+ */
+function handleInstallClick() {
+  console.log('[PWA] 🖱️ Install button clicked');
+
+  // ✅ ZAWSZE sprawdź aktualny stan instalacji (realtime check)
+  const currentlyInstalled = isStandalone();
+
+  console.log('[PWA] 📊 Debug info:', {
+    currentlyInstalled,
+    hasPrompt: !!installPromptEvent,
+    isIOS: isIOS(),
+    isDesktop: isDesktop(),
+    userAgent: navigator.userAgent
+  });
+
+  // 1. ✅ Jeśli aplikacja JUŻ JEST zainstalowana - pokaż toast
+  if (currentlyInstalled) {
+    console.log('[PWA] ℹ️ App already installed - showing toast');
+    if (typeof UI !== 'undefined' && UI.showAlert) {
+      UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+    }
+    return;
+  }
+
+  // 2. ✅ Aplikacja NIE jest zainstalowana - kontynuuj instalację
+  console.log('[PWA] ✅ App not installed - proceeding with installation');
+
+  // Standardowy prompt (Chrome/Edge/Android)
+  if (installPromptEvent) {
+    console.log('[PWA] 🎯 Triggering install prompt...');
+
+    try {
+      installPromptEvent.prompt();
+
+      installPromptEvent.userChoice
+        .then((choiceResult) => {
+          console.log(`[PWA] User choice: ${choiceResult.outcome}`);
+
+          if (choiceResult.outcome === "accepted") {
+            console.log('[PWA] ✅ User accepted installation');
+
+            // Ukryj pasek po akceptacji
+            if (installBar) {
+              installBar.classList.remove("visible");
+              const appFrame = document.getElementById("app-frame");
+              if (appFrame) {
+                appFrame.classList.remove("app-frame--pwa-visible");
+              }
+            }
+          } else {
+            console.log('[PWA] ❌ User dismissed installation');
+          }
+
+          installPromptEvent = null;
+        })
+        .catch((error) => {
+          console.error('[PWA] ❌ Prompt error:', error);
+          if (typeof UI !== 'undefined' && UI.showAlert) {
+            UI.showAlert("Wystąpił błąd podczas instalacji. Odśwież stronę i spróbuj ponownie.", true);
+          }
+        });
+
+      return;
+    } catch (error) {
+      console.error('[PWA] ❌ Failed to show prompt:', error);
+    }
+  }
+
+  // iOS - pokaż instrukcje
+  if (isIOS()) {
+    console.log('[PWA] 🍎 iOS detected - showing instructions');
+    showIosInstructions();
+    return;
+  }
+
+  // Desktop - pokaż modal
+  if (isDesktop()) {
+    console.log('[PWA] 💻 Desktop detected - showing modal');
+    showDesktopModal();
+    return;
+  }
+
+  // Fallback - prompt nie gotowy
+  console.warn('[PWA] ⚠️ Install prompt not available');
+  if (typeof UI !== 'undefined' && UI.showAlert) {
+    UI.showAlert(
+      "Instalacja nie jest jeszcze gotowa. Odśwież stronę (F5) i spróbuj ponownie za chwilę.",
+      true
+    );
+  } else {
+    alert("Instalacja nie jest jeszcze gotowa. Odśwież stronę i spróbuj ponownie.");
+  }
 }
 
 function init() {
@@ -131,54 +224,33 @@ function init() {
     installButton.addEventListener("click", handleInstallClick);
   }
 
-  // ✅ POPRAWKA: Przechwyć beforeinstallprompt z automatycznym retry kliknięcia
+  // Przechwyć beforeinstallprompt
   if ("onbeforeinstallprompt" in window) {
     window.addEventListener("beforeinstallprompt", (e) => {
       console.log('[PWA] 📱 beforeinstallprompt event fired');
       e.preventDefault();
       installPromptEvent = e;
-
       if (installButton) {
         installButton.disabled = false;
-        installButton.style.opacity = '1';
         console.log('[PWA] ✅ Install button enabled');
-      }
-
-      // ✅ NOWE: Jeśli użytkownik czekał na prompt, uruchom automatycznie
-      if (isWaitingForPrompt) {
-        console.log('[PWA] 🔄 Auto-triggering prompt after user clicked...');
-        isWaitingForPrompt = false;
-
-        // Przywróć tekst przycisku
-        if (installButton) {
-          const translations = document.querySelectorAll('[data-translate-key="installPwaAction"]');
-          translations.forEach(el => {
-            if (el === installButton) {
-              installButton.textContent = installButton.getAttribute('data-translate-key')
-                ? Utils.getTranslation("installPwaAction")
-                : 'Zainstaluj';
-            }
-          });
-        }
-
-        // Krótkie opóźnienie dla UX
-        setTimeout(() => {
-          handleInstallClick();
-        }, 300);
       }
     });
 
     window.addEventListener("appinstalled", () => {
       console.log('[PWA] ✅ PWA was installed');
       installPromptEvent = null;
-      isWaitingForPrompt = false;
 
-      // ✅ NOWE: Ustaw flagę w localStorage, że apka jest zainstalowana
-      localStorage.setItem('tt_pwa_installed', 'true');
+      if (installBar) {
+        installBar.classList.remove("visible");
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+          appFrame.classList.remove("app-frame--pwa-visible");
+        }
+      }
 
-      // Pasek instalacji pozostaje widoczny w trybie przeglądarki,
-      // ale z nową logiką kliknięcia.
-      // Nie pokazujemy alertu natychmiast po instalacji.
+      if (typeof UI !== 'undefined' && UI.showAlert) {
+        UI.showAlert("Aplikacja została zainstalowana!");
+      }
     });
   } else {
     console.warn('[PWA] ⚠️ beforeinstallprompt not supported on this browser');
@@ -188,20 +260,22 @@ function init() {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Delay initial check
+  // Initial check po opóźnieniu
   setTimeout(() => {
     console.log('[PWA] 🔍 Running initial standalone check...');
     const isConfirmed = runStandaloneCheck();
 
+    // ✅ Tylko jeśli NIE jest zainstalowana, obserwuj zmiany
     if (!isConfirmed) {
-      // Listen for page visibility changes
+      // Sprawdź ponownie gdy użytkownik wraca do karty
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && !sessionStorage.getItem('pwa_detected')) {
+        if (document.visibilityState === 'visible') {
+          console.log('[PWA] 👁️ Page visible - rechecking installation status');
           runStandaloneCheck();
         }
       });
 
-      // Recheck after preloader ends
+      // Obserwuj koniec preloadera
       const preloader = document.getElementById("preloader");
       if (preloader) {
         const observer = new MutationObserver(() => {
@@ -226,121 +300,16 @@ function init() {
   }, 1000);
 }
 
-function handleInstallClick() {
-  console.log('[PWA] 🖱️ Install button clicked');
-  console.log('[PWA] 📊 Debug info:', {
-    isStandalone: isStandalone(),
-    hasPrompt: !!installPromptEvent,
-    isWaitingForPrompt: isWaitingForPrompt,
-    isIOS: isIOS(),
-    isDesktop: isDesktop(),
-    userAgent: navigator.userAgent
-  });
-
-  // 1. Sprawdź, czy aplikacja jest już zainstalowana lub działa w trybie PWA.
-  if (isStandalone() || localStorage.getItem('tt_pwa_installed') === 'true') {
-    const reason = isStandalone() ? 'in standalone mode' : 'localStorage flag found';
-    console.log(`[PWA] ℹ️ Already installed or in PWA mode (${reason}).`);
-    if (typeof UI !== 'undefined' && UI.showAlert) {
-      UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
-    }
-    return;
-  }
-
-  // 2. Standardowy prompt (Chrome/Edge/Android)
-  if (installPromptEvent) {
-    console.log('[PWA] 🎯 Triggering install prompt...');
-
-    try {
-      installPromptEvent.prompt();
-
-      installPromptEvent.userChoice
-        .then((choiceResult) => {
-          console.log(`[PWA] User choice: ${choiceResult.outcome}`);
-
-          if (choiceResult.outcome === "accepted") {
-            console.log('[PWA] ✅ User accepted installation');
-
-            // Nie ukrywamy już paska tutaj.
-            // Pasek pozostaje widoczny w przeglądarce.
-            // Zniknie dopiero przy następnym uruchomieniu w trybie PWA
-            // dzięki logice w `runStandaloneCheck`.
-
-          } else {
-            console.log('[PWA] ❌ User dismissed installation');
-          }
-
-          installPromptEvent = null;
-          isWaitingForPrompt = false;
-        })
-        .catch((error) => {
-          console.error('[PWA] ❌ Prompt error:', error);
-          isWaitingForPrompt = false;
-          if (typeof UI !== 'undefined' && UI.showAlert) {
-            UI.showAlert("Wystąpił błąd podczas instalacji. Odśwież stronę i spróbuj ponownie.", true);
-          }
-        });
-
-      return;
-    } catch (error) {
-      console.error('[PWA] ❌ Failed to show prompt:', error);
-      isWaitingForPrompt = false;
-    }
-  }
-
-  // 3. iOS - pokaż instrukcje
-  if (isIOS()) {
-    console.log('[PWA] 🍎 iOS detected - showing instructions');
-    showIosInstructions();
-    return;
-  }
-
-  // 4. Desktop - pokaż modal
-  if (isDesktop()) {
-    console.log('[PWA] 💻 Desktop detected - showing modal');
-    showDesktopModal();
-    return;
-  }
-
-  // 5. NOWE: Prompt jeszcze się nie załadował - czekaj
-  if (!isWaitingForPrompt) {
-    console.log('[PWA] ⏳ Waiting for install prompt to load...');
-    isWaitingForPrompt = true;
-
-    // Wyłącz przycisk wizualnie
-    if (installButton) {
-      installButton.disabled = true;
-      installButton.style.opacity = '0.5';
-      const originalText = installButton.textContent;
-      installButton.textContent = 'Ładowanie...';
-
-      // Timeout 5 sekund - jeśli prompt się nie pojawi
-      setTimeout(() => {
-        if (isWaitingForPrompt && !installPromptEvent) {
-          console.warn('[PWA] ⚠️ Install prompt timeout');
-          isWaitingForPrompt = false;
-
-          if (installButton) {
-            installButton.disabled = false;
-            installButton.style.opacity = '1';
-            installButton.textContent = originalText;
-          }
-
-          if (typeof UI !== 'undefined' && UI.showAlert) {
-            UI.showAlert(
-              "Przeglądarka nie obsługuje instalacji. Spróbuj użyć Chrome lub Edge.",
-              true
-            );
-          }
-        }
-      }, 5000);
-    }
-
-    return;
-  }
-
-  // 6. Fallback - nadal czeka
-  console.log('[PWA] ⏳ Still waiting for prompt...');
-}
-
 export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };
+
+// ============================================================================
+// PODSUMOWANIE ZMIAN:
+// ============================================================================
+// 1. ✅ Usunięto sessionStorage.setItem('pwa_detected') - niereliable
+// 2. ✅ Usunięto sprawdzanie document.referrer - może dawać false positives
+// 3. ✅ handleInstallClick() ZAWSZE wywołuje isStandalone() na początku
+// 4. ✅ Jeśli isStandalone() === true → pokazuje toast i return
+// 5. ✅ Jeśli isStandalone() === false → kontynuuje instalację normalnie
+// 6. ✅ runStandaloneCheck() nie używa żadnego cache - tylko czyste API
+// 7. ✅ Dodano recheck przy powrocie do karty (visibilitychange)
+// ============================================================================
