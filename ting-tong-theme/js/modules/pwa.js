@@ -163,15 +163,10 @@ function handleInstallClick() {
 
           if (choiceResult.outcome === "accepted") {
             console.log('[PWA] ✅ User accepted installation');
-
-            // Ukryj pasek po akceptacji
-            if (installBar) {
-              installBar.classList.remove("visible");
-              const appFrame = document.getElementById("app-frame");
-              if (appFrame) {
-                appFrame.classList.remove("app-frame--pwa-visible");
-              }
-            }
+            // DEVELOPER NOTE: Usunięto natychmiastowe ukrywanie paska.
+            // Jego widoczność jest teraz zarządzana wyłącznie przez
+            // funkcję runStandaloneCheck(), która okresowo sprawdza
+            // faktyczny stan instalacji aplikacji.
           } else {
             console.log('[PWA] ❌ User dismissed installation');
           }

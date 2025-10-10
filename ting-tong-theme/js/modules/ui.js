@@ -637,11 +637,8 @@ function updateVolumeButton(isMuted) {
 }
 
 function initKeyboardListener() {
-  const commentsModal = DOM.commentsModal;
-  if (!commentsModal) return;
-
   if (!window.visualViewport) {
-    console.warn('Visual Viewport API not supported');
+    console.warn("Visual Viewport API not supported");
     return;
   }
 
@@ -651,37 +648,53 @@ function initKeyboardListener() {
   const handleViewportChange = () => {
     const currentHeight = window.visualViewport.height;
     const heightDiff = initialHeight - currentHeight;
-
     const newKeyboardState = heightDiff > 150;
 
     if (newKeyboardState !== isKeyboardVisible) {
       isKeyboardVisible = newKeyboardState;
-      commentsModal.classList.toggle('keyboard-visible', isKeyboardVisible);
+      // Global class on body
+      document.body.classList.toggle("keyboard-visible", isKeyboardVisible);
 
-      if (isKeyboardVisible) {
-        setTimeout(() => {
-          const modalBody = commentsModal.querySelector('.modal-body');
-          if (modalBody) {
-            modalBody.scrollTop = modalBody.scrollHeight;
-          }
-        }, 100);
+      // The comments modal still needs its own class for resizing.
+      const commentsModal = DOM.commentsModal;
+      if (commentsModal) {
+        commentsModal.classList.toggle("keyboard-visible", isKeyboardVisible);
+
+        if (isKeyboardVisible && commentsModal.classList.contains("visible")) {
+          setTimeout(() => {
+            const modalBody = commentsModal.querySelector(".modal-body");
+            if (modalBody) {
+              modalBody.scrollTop = modalBody.scrollHeight;
+            }
+          }, 100);
+        }
       }
     }
 
-    commentsModal.style.setProperty('--keyboard-offset', `${heightDiff}px`);
+    const commentsModal = DOM.commentsModal;
+    if (commentsModal) {
+      commentsModal.style.setProperty("--keyboard-offset", `${heightDiff}px`);
+    }
   };
 
-  window.visualViewport.addEventListener('resize', handleViewportChange);
-  window.visualViewport.addEventListener('scroll', handleViewportChange);
+  window.visualViewport.addEventListener("resize", handleViewportChange);
+  window.visualViewport.addEventListener("scroll", handleViewportChange);
 
-  commentsModal.addEventListener('transitionend', function cleanupOnClose(e) {
-    if (e.target === commentsModal && !commentsModal.classList.contains('visible')) {
-      isKeyboardVisible = false;
-      commentsModal.classList.remove('keyboard-visible');
-      commentsModal.style.removeProperty('--keyboard-offset');
-      initialHeight = window.visualViewport.height;
-    }
-  });
+  // Cleanup when comments modal is closed
+  const commentsModal = DOM.commentsModal;
+  if (commentsModal) {
+    commentsModal.addEventListener("transitionend", (e) => {
+      if (e.target === commentsModal && !commentsModal.classList.contains("visible")) {
+        if (isKeyboardVisible) {
+          isKeyboardVisible = false;
+          document.body.classList.remove("keyboard-visible");
+          commentsModal.classList.remove("keyboard-visible");
+        }
+        commentsModal.style.removeProperty("--keyboard-offset");
+        initialHeight = window.visualViewport.height;
+      }
+    });
+  }
 }
 
 function initEmojiPicker() {
