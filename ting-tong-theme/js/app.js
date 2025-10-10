@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ NOWA LOGIKA: Sprawdź, czy profil jest kompletny
+        // ✅ KLUCZOWE: Sprawdź, czy profil jest kompletny
         FirstLoginModal.checkProfileAndShowModal(data.userData);
       });
 
@@ -459,5 +459,17 @@ document.addEventListener("DOMContentLoaded", () => {
     window.ttState = State;
     console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
     console.log('Available: window.ttAuth, window.ttState');
+
+    // ✅ LOGIKA MOCK BUTTON
+    const mockBtn = document.getElementById('mockLoginBtn');
+    if (mockBtn) {
+      mockBtn.style.display = 'block';
+      mockBtn.addEventListener('click', () => {
+        // Użyj mockLogin, aby symulować pierwsze logowanie (is_profile_complete: false)
+        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
+        UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+      });
+    }
+    // Koniec LOGIKA MOCK BUTTON
   }
 });

@@ -287,6 +287,10 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
         $first_name = get_user_meta($u->ID, 'first_name', true);
         $last_name = get_user_meta($u->ID, 'last_name', true);
 
+        // KLUCZOWA LOGIKA: Sprawdź flagę pierwszego logowania
+        $is_profile_complete = ! empty($first_name) && ! empty($last_name);
+        $requires_setup = ! $is_profile_complete;
+
         $user_data = [
             'user_id'             => (int) $u->ID,
             'username'            => $u->user_login,
@@ -297,15 +301,16 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
             'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
             'email_consent'       => (bool) get_user_meta($u->ID, 'tt_email_consent', true),
             'email_language'      => (string) get_user_meta($u->ID, 'tt_email_language', true) ?: 'pl',
-            'is_profile_complete' => ! empty($first_name) && ! empty($last_name),
+            'is_profile_complete' => $is_profile_complete,
         ];
 
         // Zwróć odpowiedź
         wp_send_json_success([
-            'message'    => 'Zalogowano pomyślnie.',
-            'userData'   => $user_data,
-            'slidesData' => tt_get_slides_data(),
-            'new_nonce'  => wp_create_nonce('tt_ajax_nonce'),
+            'message'                      => 'Zalogowano pomyślnie.',
+            'userData'                     => $user_data,
+            'slidesData'                   => tt_get_slides_data(),
+            'new_nonce'                    => wp_create_nonce('tt_ajax_nonce'),
+            'requires_first_login_setup'   => $requires_setup, // NOWA FLAGA
         ]);
     }
 });
@@ -813,44 +818,19 @@ add_filter('get_avatar_url', function ($url, $id_or_email, $args) {
     return $url;
 }, 10, 3);
 
-/**
- * Handler AJAX do uzupełniania profilu po pierwszym logowaniu - FIXED
- * Naprawia błąd 403 i problemy z autoryzacją
- */
 add_action('wp_ajax_tt_complete_profile', function () {
-    // FIXED: Lepsze logowanie błędów
-    error_log('tt_complete_profile called');
-    error_log('POST data: ' . print_r($_POST, true));
-    error_log('User logged in: ' . (is_user_logged_in() ? 'yes' : 'no'));
-    error_log('Nonce: ' . (isset($_POST['nonce']) ? $_POST['nonce'] : 'missing'));
-
-    // FIXED: Najpierw sprawdź czy użytkownik jest zalogowany
     if (!is_user_logged_in()) {
-        error_log('User not logged in - returning 401');
         wp_send_json_error(['message' => 'Musisz być zalogowany.'], 401);
         return;
     }
 
-    // FIXED: Następnie sprawdź nonce
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-    if (empty($nonce)) {
-        error_log('Nonce missing');
-        wp_send_json_error(['message' => 'Brak tokenu bezpieczeństwa.'], 403);
-        return;
-    }
-
-    // FIXED: Użyj wp_verify_nonce zamiast check_ajax_referer dla lepszej kontroli
-    $nonce_verified = wp_verify_nonce($nonce, 'tt_ajax_nonce');
-    if ($nonce_verified === false) {
-        error_log('Nonce verification failed');
+    if (empty($nonce) || wp_verify_nonce($nonce, 'tt_ajax_nonce') === false) {
         wp_send_json_error(['message' => 'Nieprawidłowy token bezpieczeństwa.'], 403);
         return;
     }
 
-    error_log('Nonce verified successfully');
-
     $u = wp_get_current_user();
-    error_log('Current user ID: ' . $u->ID);
 
     // Sanityzacja danych wejściowych
     $first_name = isset($_POST['first_name']) ? sanitize_text_field(wp_unslash($_POST['first_name'])) : '';
@@ -861,14 +841,27 @@ add_action('wp_ajax_tt_complete_profile', function () {
 
     // Walidacja
     if (empty($first_name) || empty($last_name)) {
-        error_log('First name or last name empty');
         wp_send_json_error(['message' => 'Imię i nazwisko są wymagane.'], 400);
         return;
     }
 
-    error_log('Updating user meta...');
+    // Sprawdź, czy profil był wcześniej kompletny, ZANIM zaktualizujemy dane
+    $was_profile_complete = !empty(get_user_meta($u->ID, 'first_name', true)) && !empty(get_user_meta($u->ID, 'last_name', true));
 
-    // Aktualizacja metadanych
+    // Aktualizacja hasła (jeśli podane lub jeśli to pierwsze logowanie)
+    if (!empty($new_password)) {
+        if (strlen($new_password) < 8) {
+            wp_send_json_error(['message' => 'Hasło musi mieć co najmniej 8 znaków.'], 400);
+            return;
+        }
+        wp_set_password($new_password, $u->ID);
+    } elseif (!$was_profile_complete) {
+        // Hasło musi być podane, jeśli to pierwsze logowanie
+        wp_send_json_error(['message' => 'Musisz ustawić nowe hasło.'], 400);
+        return;
+    }
+
+    // Jeśli doszliśmy tutaj, walidacja hasła się powiodła. Teraz aktualizujemy resztę.
     update_user_meta($u->ID, 'first_name', $first_name);
     update_user_meta($u->ID, 'last_name', $last_name);
     update_user_meta($u->ID, 'tt_email_consent', $email_consent);
@@ -877,30 +870,14 @@ add_action('wp_ajax_tt_complete_profile', function () {
     // Aktualizacja display_name
     $display_name = trim($first_name . ' ' . $last_name);
     if (!empty($display_name)) {
-        $update_result = wp_update_user([
+        wp_update_user([
             'ID' => $u->ID,
             'display_name' => $display_name
         ]);
-
-        if (is_wp_error($update_result)) {
-            error_log('Display name update error: ' . $update_result->get_error_message());
-        } else {
-            error_log('Display name updated successfully');
-        }
     }
 
-    // Aktualizacja hasła (jeśli podane)
-    if (!empty($new_password)) {
-        if (strlen($new_password) < 8) {
-            error_log('Password too short');
-            wp_send_json_error(['message' => 'Hasło musi mieć co najmniej 8 znaków.'], 400);
-            return;
-        }
-        wp_set_password($new_password, $u->ID);
-        error_log('Password updated');
-    }
-
-    error_log('Profile update complete');
+    // Oznacz profil jako kompletny (na wszelki wypadek, choć logika opiera się na first/last name)
+    update_user_meta($u->ID, 'is_profile_complete', true);
 
     // Przygotuj zaktualizowane dane użytkownika
     $updated_user_data = [
@@ -916,22 +893,11 @@ add_action('wp_ajax_tt_complete_profile', function () {
         'is_profile_complete' => true,
     ];
 
-    // Wygeneruj nowy nonce
-    $new_nonce = wp_create_nonce('tt_ajax_nonce');
-
-    error_log('Sending success response');
-
     wp_send_json_success([
         'message'   => 'Profil został pomyślnie zaktualizowany.',
         'userData'  => $updated_user_data,
-        'new_nonce' => $new_nonce,
+        'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
     ]);
-});
-
-// FIXED: Dodaj także handler dla niepustego logowania (bez niego może być 403)
-add_action('wp_ajax_nopriv_tt_complete_profile', function() {
-    error_log('tt_complete_profile called without login');
-    wp_send_json_error(['message' => 'Musisz być zalogowany.'], 401);
 });
 // Dodaj do functions.php
 add_filter('rest_authentication_errors', function($result) {
