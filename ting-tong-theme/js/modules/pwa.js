@@ -10,36 +10,11 @@ const desktopModal = document.getElementById("pwa-desktop-modal");
 
 let installPromptEvent = null;
 
-// --- Helper to show the install bar ---
-const showInstallBar = () => {
-  if (isStandalone()) return; // Don't show if already in PWA mode
-
-  const appFrame = document.getElementById("app-frame");
-  if (installBar && !installBar.classList.contains('visible')) {
-    console.log('[PWA] 📣 Showing PWA install bar.');
-    installBar.classList.add("visible");
-    installBar.setAttribute('aria-hidden', 'false');
-    if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-    if (installButton) installButton.disabled = false;
-  }
-};
-
-// --- Immediate listener for the install prompt ---
-// This runs as soon as the module is loaded to prevent missing the event.
-window.addEventListener("beforeinstallprompt", (e) => {
-  console.log('[PWA] 📱 `beforeinstallprompt` event fired and caught immediately.');
-  e.preventDefault();
-  installPromptEvent = e;
-  showInstallBar(); // Show the bar as soon as the prompt is available
-  // We set a flag to prevent the fallback logic from running unnecessarily.
-  window.pwaInstallPromptCaught = true;
-});
-
 const isIOS = () => {
   if (typeof window === "undefined" || !window.navigator) return false;
   return (
     /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1 && !window.MSStream)
   );
 };
 
@@ -71,33 +46,54 @@ function closePwaModals() {
     hideIosInstructions();
 }
 
-async function init() {
-  console.log('[PWA] 🚀 Initializing PWA module...');
+// Helper to show the install bar, now with more intelligent logic
+const showInstallBar = () => {
+  if (isStandalone()) return; // Don't show if already in PWA mode
 
-  // --- Main Initialization Logic ---
-  // 1. Check if the app is already installed.
-  if (navigator.getInstalledRelatedApps) {
-    try {
-      const relatedApps = await navigator.getInstalledRelatedApps();
-      if (relatedApps && relatedApps.length > 0) {
-        console.log('[PWA] ✅ App is already installed. Hiding bar and flagging for toast.');
-        if (installBar) installBar.style.display = 'none';
-        sessionStorage.setItem('showAlreadyInstalledToast', 'true');
-        return; // Stop further PWA initialization
-      }
-    } catch (error) {
-      console.error('[PWA] Error checking for installed apps, proceeding as if not installed:', error);
-    }
-  }
+  // Only show the bar if we have a way to install (prompt or instructions)
+  const canInstall = installPromptEvent || isIOS() || isDesktop();
 
-  // 2. If already in standalone mode, do nothing.
-  if (isStandalone()) {
-    console.log("[PWA] ✅ App is in standalone mode. Hiding install bar.");
+  if (!canInstall) {
+    console.log('[PWA] Cannot install, hiding bar.');
     if (installBar) installBar.style.display = 'none';
     return;
   }
 
-  // 3. Attach click handlers for the installation process.
+  const appFrame = document.getElementById("app-frame");
+  if (installBar && !installBar.classList.contains('visible')) {
+    console.log('[PWA] 📣 Showing PWA install bar.');
+    installBar.classList.add("visible");
+    installBar.setAttribute('aria-hidden', 'false');
+    if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+    if (installButton) installButton.disabled = false;
+  }
+};
+
+// --- Listener for the install prompt ---
+window.addEventListener("beforeinstallprompt", (e) => {
+  console.log('[PWA] 📱 `beforeinstallprompt` event fired.');
+  e.preventDefault();
+  installPromptEvent = e;
+  // Set a flag to indicate the prompt is ready
+  window.pwaInstallPromptReady = true;
+  // Now that the prompt is ready, show the bar.
+  showInstallBar();
+});
+
+async function init() {
+  console.log('[PWA] 🚀 Initializing PWA module...');
+
+  // 1. Check if the app is already installed.
+  if (isStandalone() || (navigator.getInstalledRelatedApps && (await navigator.getInstalledRelatedApps()).length > 0)) {
+    console.log('[PWA] ✅ App is already installed or in standalone mode. Hiding install bar.');
+    if (installBar) installBar.style.display = 'none';
+    if (!isStandalone()) {
+        sessionStorage.setItem('showAlreadyInstalledToast', 'true');
+    }
+    return;
+  }
+
+  // 2. Attach click handlers
   if (installButton) {
     installButton.addEventListener("click", handleInstallClick);
   }
@@ -110,27 +106,21 @@ async function init() {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // 4. Fallback for browsers that do not support `beforeinstallprompt` (e.g., Safari).
-  // This will only run if the immediate listener at the top didn't fire.
-  if (!window.pwaInstallPromptCaught) {
-    console.log('[PWA] ⚠️ `beforeinstallprompt` was not caught. Using fallback for Safari/other browsers.');
-    const preloader = document.getElementById("preloader");
-    if (preloader) {
-      const observer = new MutationObserver((mutations) => {
-        if (mutations.some(m => m.target.classList.contains('preloader-hiding'))) {
-          console.log('[PWA] Preloader is hiding. Showing bar for instructions via fallback.');
-          setTimeout(showInstallBar, 500);
-          observer.disconnect();
-        }
-      });
-      observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
-    } else {
-      // If no preloader, show immediately.
-      showInstallBar();
+  // 3. Fallback logic: Show the bar on a delay for non-prompt browsers (iOS/Desktop)
+  // We wait a bit to ensure the main app UI is ready.
+  setTimeout(() => {
+    // If the native prompt is not ready, check if we should show instructions instead.
+    if (!window.pwaInstallPromptReady) {
+      if (isIOS() || isDesktop()) {
+        console.log('[PWA] Fallback: Showing bar for manual instructions on iOS/Desktop.');
+        showInstallBar();
+      } else {
+        console.log('[PWA] Fallback: Native prompt not ready and not on iOS/Desktop. Bar remains hidden.');
+      }
     }
-  }
+  }, 2000); // 2-second delay
 
-  // 5. Listen for the appinstalled event to hide the bar after successful installation.
+  // 4. Listen for the appinstalled event
   window.addEventListener("appinstalled", () => {
     console.log('[PWA] ✅ PWA was successfully installed.');
     installPromptEvent = null;
@@ -147,13 +137,12 @@ async function init() {
 function handleInstallClick() {
   console.log('[PWA] 🖱️ Install button clicked');
 
-  // If already in standalone, show a toast. This is a safeguard.
   if (isStandalone()) {
     UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
     return;
   }
 
-  // Standard prompt (Chrome/Edge/Android)
+  // A. Standard prompt (Chrome/Edge/Android)
   if (installPromptEvent) {
     installPromptEvent.prompt();
     installPromptEvent.userChoice.then((choiceResult) => {
@@ -164,26 +153,26 @@ function handleInstallClick() {
       installPromptEvent = null;
     }).catch(error => {
       console.error('[PWA] ❌ Prompt error:', error);
-      UI.showAlert("Wystąpił błąd podczas instalacji. Odśwież stronę i spróbuj ponownie.", true);
+      UI.showAlert("Wystąpił błąd podczas instalacji.", true);
     });
     return;
   }
 
-  // iOS instructions
+  // B. iOS instructions
   if (isIOS()) {
     showIosInstructions();
     return;
   }
 
-  // Desktop modal
+  // C. Desktop modal (for browsers like Safari on macOS)
   if (isDesktop()) {
     showDesktopModal();
     return;
   }
 
-  // Fallback if prompt is not ready
-  console.warn('[PWA] ⚠️ Install prompt not available on click.');
-  UI.showAlert("Instalacja nie jest jeszcze gotowa. Odśwież stronę i spróbuj ponownie.", true);
+  // D. Fallback (should no longer be reached with the new logic)
+  console.warn('[PWA] ⚠️ Install button was clicked, but no action is available.');
+  UI.showAlert("Instalacja nie jest dostępna w tej przeglądarce.", true);
 }
 
 export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };
