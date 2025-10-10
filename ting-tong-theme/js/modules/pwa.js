@@ -173,17 +173,12 @@ function init() {
       installPromptEvent = null;
       isWaitingForPrompt = false;
 
-      if (installBar) {
-        installBar.classList.remove("visible");
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-          appFrame.classList.remove("app-frame--pwa-visible");
-        }
-      }
+      // ✅ NOWE: Ustaw flagę w localStorage, że apka jest zainstalowana
+      localStorage.setItem('tt_pwa_installed', 'true');
 
-      if (typeof UI !== 'undefined' && UI.showAlert) {
-        UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
-      }
+      // Pasek instalacji pozostaje widoczny w trybie przeglądarki,
+      // ale z nową logiką kliknięcia.
+      // Nie pokazujemy alertu natychmiast po instalacji.
     });
   } else {
     console.warn('[PWA] ⚠️ beforeinstallprompt not supported on this browser');
@@ -242,9 +237,10 @@ function handleInstallClick() {
     userAgent: navigator.userAgent
   });
 
-  // 1. Już zainstalowane
-  if (isStandalone()) {
-    console.log('[PWA] ℹ️ Already installed');
+  // 1. Sprawdź, czy aplikacja jest już zainstalowana lub działa w trybie PWA.
+  if (isStandalone() || localStorage.getItem('tt_pwa_installed') === 'true') {
+    const reason = isStandalone() ? 'in standalone mode' : 'localStorage flag found';
+    console.log(`[PWA] ℹ️ Already installed or in PWA mode (${reason}).`);
     if (typeof UI !== 'undefined' && UI.showAlert) {
       UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
     }
@@ -265,14 +261,11 @@ function handleInstallClick() {
           if (choiceResult.outcome === "accepted") {
             console.log('[PWA] ✅ User accepted installation');
 
-            // Ukryj pasek po akceptacji
-            if (installBar) {
-              installBar.classList.remove("visible");
-              const appFrame = document.getElementById("app-frame");
-              if (appFrame) {
-                appFrame.classList.remove("app-frame--pwa-visible");
-              }
-            }
+            // Nie ukrywamy już paska tutaj.
+            // Pasek pozostaje widoczny w przeglądarce.
+            // Zniknie dopiero przy następnym uruchomieniu w trybie PWA
+            // dzięki logice w `runStandaloneCheck`.
+
           } else {
             console.log('[PWA] ❌ User dismissed installation');
           }
