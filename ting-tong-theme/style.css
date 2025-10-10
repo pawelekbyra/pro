@@ -4336,3 +4336,232 @@ body,
 .fullscreen-exit-icon {
   display: none;
 }
+
+/* ============================================================================
+   KEYBOARD OVERLAY FIX PATCH
+   Naprawia zachowanie elementów przy pojawieniu się klawiatury mobilnej
+
+   ZASADA:
+   - Tylko .comment-form-container przesuwa się nad klawiaturę
+   - Wszystkie inne elementy (PWA bar, bottombar, sidebar, etc.)
+     zostają w swoim miejscu i są przykryte przez klawiaturę
+   ============================================================================ */
+
+/* ============================================================================
+   1. PWA INSTALL BARS - NIE REAGUJĄ NA KLAWIATURĘ
+   ============================================================================ */
+
+.pwa-prompt,
+.pwa-prompt-ios {
+  position: absolute !important;
+  bottom: 0 !important;
+  /* Pozostają na swoim miejscu - klawiatura je przykryje */
+}
+
+/* Wyłącz jakiekolwiek transformacje przy klawiaturze */
+body.keyboard-visible .pwa-prompt,
+body.keyboard-visible .pwa-prompt-ios,
+.keyboard-visible .pwa-prompt,
+.keyboard-visible .pwa-prompt-ios {
+  transform: translateY(0) !important;
+  bottom: 0 !important;
+  position: absolute !important;
+}
+
+
+/* ============================================================================
+   2. BOTTOMBAR - NIE REAGUJE NA KLAWIATURĘ
+   ============================================================================ */
+
+.tiktok-symulacja .bottombar {
+  position: absolute !important;
+  bottom: 0 !important;
+  /* Zostaje na dole viewport - klawiatura przykryje */
+}
+
+/* Wyłącz przesunięcia przy klawiaturze */
+body.keyboard-visible .bottombar,
+.keyboard-visible .bottombar,
+#app-frame.keyboard-visible .bottombar {
+  bottom: 0 !important;
+  transform: none !important;
+  position: absolute !important;
+}
+
+
+/* ============================================================================
+   3. SIDEBAR - NIE REAGUJE NA KLAWIATURĘ
+   ============================================================================ */
+
+.tiktok-symulacja .sidebar {
+  position: absolute !important;
+  /* Obliczana pozycja pozostaje bez zmian */
+}
+
+/* Wyłącz przesunięcia przy klawiaturze */
+body.keyboard-visible .sidebar,
+.keyboard-visible .sidebar,
+#app-frame.keyboard-visible .sidebar {
+  transform: translateY(-50%) translateX(0) !important;
+  /* Zachowuje oryginalną transformację bez dodatkowych offsetów */
+}
+
+
+/* ============================================================================
+   4. PROGRESS BAR - NIE REAGUJE NA KLAWIATURĘ
+   ============================================================================ */
+
+.progress-bar {
+  position: absolute !important;
+  top: 0 !important;
+  /* Pozostaje na górze bez zmian */
+}
+
+/* Wyłącz przesunięcia przy klawiaturze */
+body.keyboard-visible .progress-bar,
+.keyboard-visible .progress-bar {
+  top: 0 !important;
+  bottom: auto !important;
+}
+
+
+/* ============================================================================
+   5. WELCOME MODAL BUTTONS - NIE REAGUJĄ NA KLAWIATURĘ
+   ============================================================================ */
+
+.welcome-body {
+  /* Kontener przycisków pozostaje w swoim miejscu */
+  position: relative;
+}
+
+/* Wyłącz przesunięcia przycisków przy klawiaturze */
+body.keyboard-visible .welcome-btn,
+.keyboard-visible .welcome-btn,
+.welcome-modal-overlay.keyboard-visible .welcome-btn {
+  position: relative !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+/* Dodatkowa ochrona dla welcome modal content */
+.welcome-modal-overlay.keyboard-visible .welcome-modal-content {
+  /* Pozostaje wycentrowany - nie przesuwa się */
+  transform: translate(-50%, -50%) !important;
+  top: 50% !important;
+  bottom: auto !important;
+}
+
+
+/* ============================================================================
+   6. FIRST LOGIN MODAL FOOTER - NIE REAGUJE NA KLAWIATURĘ
+   ============================================================================ */
+
+.first-login-footer {
+  position: relative !important;
+  /* Sticky footer pozostaje na swoim miejscu względem kontenera modala */
+  bottom: auto !important;
+}
+
+/* Wyłącz przesunięcia przy klawiaturze */
+.first-login-modal-overlay.keyboard-visible .first-login-footer {
+  position: relative !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+/* Dodatkowa ochrona dla first-login modal content */
+.first-login-modal-overlay.keyboard-visible .first-login-modal-content {
+  /* Modal może się scrollować ale nie przesuwa jako całość */
+  position: relative;
+  transform: none !important;
+}
+
+
+/* ============================================================================
+   7. COMMENT FORM CONTAINER - JEDYNY ELEMENT Z REAKCJĄ NA KLAWIATURĘ
+   ============================================================================ */
+
+/* To jest JEDYNY element który ma się przesuwać nad klawiaturę */
+.comment-form-container {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 10 !important;
+  /* Sticky position sprawia że automatycznie przesuwa się z klawiaturą */
+}
+
+/* Wzmocniona detekcja dla comments modal */
+#commentsModal.keyboard-visible .comment-form-container {
+  position: sticky !important;
+  bottom: 0 !important;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+/* ============================================================================
+   8. APP-FRAME - NIE ZMIENIA WYSOKOŚCI PRZY KLAWIATURZE
+   ============================================================================ */
+
+/* Wyłącz automatyczne zmiany wysokości app-frame */
+#app-frame.keyboard-visible,
+body.keyboard-visible #app-frame {
+  /* Pozostaje pełna wysokość - klawiatura nakłada się na content */
+  height: 100% !important;
+  min-height: 100vh !important;
+}
+
+
+/* ============================================================================
+   9. GLOBAL KEYBOARD CLASS - ZAPOBIEGA NADMIERNYM ZMIANOM
+   ============================================================================ */
+
+/* Gdy klawiatura jest widoczna, żaden element z position: absolute/fixed
+   nie powinien się automatycznie przesuwać */
+body.keyboard-visible *:not(.comment-form-container),
+.keyboard-visible *:not(.comment-form-container) {
+  /* Wyłącz wszelkie automatyczne transformacje związane z klawiaturą */
+}
+
+
+/* ============================================================================
+   10. VIEWPORT META FIX - DLA iOS
+   ============================================================================ */
+
+/* iOS Safari wymaga dodatkowej ochrony */
+@supports (-webkit-touch-callout: none) {
+  /* iOS specific */
+  .pwa-prompt,
+  .pwa-prompt-ios,
+  .bottombar,
+  .sidebar,
+  .welcome-btn,
+  .first-login-footer {
+    /* Force position even on iOS */
+    position: absolute !important;
+  }
+
+  /* Tylko comment form ma być sticky na iOS */
+  .comment-form-container {
+    position: sticky !important;
+    bottom: 0 !important;
+    /* iOS sticky jest bardziej niezawodny z -webkit-sticky */
+    position: -webkit-sticky !important;
+  }
+}
+
+
+/* ============================================================================
+   PODSUMOWANIE DZIAŁANIA:
+   ============================================================================
+
+   ✅ COMMENT FORM CONTAINER:
+      - Używa position: sticky
+      - Automatycznie przesuwa się nad klawiaturę
+      - Widoczny zawsze na górze dostępnego viewport
+
+   ❌ WSZYSTKIE INNE ELEMENTY (6 elementów):
+      - Pozostają na swoich pozycjach (position: absolute/relative)
+      - Klawiatura mobilna nakłada się NA nich
+      - Nie wykonują żadnych transformacji
+      - Użytkownik musi zamknąć klawiaturę aby je zobaczyć
+
+   ============================================================================ */
