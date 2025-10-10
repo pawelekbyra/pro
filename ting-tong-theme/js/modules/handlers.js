@@ -853,7 +853,7 @@ export const Handlers = {
     const loginForm = e.target.closest("form#tt-login-form");
 
     // ========================================================================
-    // OBSŁUGA FORMULARZA LOGOWANIA
+    // OBSŁUGA FORMULARZA LOGOWANIA - Z AKTUALIZACJĄ O MODAL PIERWSZEGO LOGOWANIA
     // ========================================================================
     if (loginForm) {
       e.preventDefault();
@@ -880,12 +880,14 @@ export const Handlers = {
       submitButton.innerHTML = '<span class="loading-spinner"></span>';
 
       try {
+        // Zaloguj się
         const result = await authManager.login(username, password);
 
         if (!result.userData) {
           throw new Error('Invalid response: missing user data');
         }
 
+        // Sprawdź, czy wymagana jest konfiguracja
         if (result.requires_first_login_setup) {
           const loginPanel = document.querySelector("#app-frame > .login-panel");
           if (loginPanel) loginPanel.classList.remove("active");
@@ -893,15 +895,17 @@ export const Handlers = {
           const topbar = document.querySelector("#app-frame > .topbar");
           if (topbar) topbar.classList.remove("login-panel-active");
 
+          // Pokaż modal, używając danych z logowania.
           try {
             const { FirstLoginModal } = await import('./first-login-modal.js');
-            FirstLoginModal.showFirstLoginModal(result.userData.email);
+            FirstLoginModal.checkProfileAndShowModal(result.userData);
           } catch (error) {
             console.error('Failed to load FirstLoginModal:', error);
             UI.updateUIForLoginState();
             UI.showAlert(Utils.getTranslation("loginSuccess"));
           }
         } else {
+          // Standardowe logowanie
           UI.updateUIForLoginState();
           UI.showAlert(Utils.getTranslation("loginSuccess"));
         }

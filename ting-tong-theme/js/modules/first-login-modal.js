@@ -11,12 +11,13 @@ let dom = {};
 /**
  * Sprawdza czy profil użytkownika jest kompletny i pokazuje modal
  */
-function checkProfileAndShowModal(userData) {
+export function checkProfileAndShowModal(userData) {
   if (!userData) {
     console.warn('No user data provided');
     return;
   }
 
+  // Używaj flagi is_profile_complete z danych użytkownika.
   if (userData.is_profile_complete === false) {
     console.log('Profile incomplete, showing modal');
     showProfileCompletionModal(userData.email || 'user@example.com');
@@ -37,6 +38,16 @@ function showProfileCompletionModal(userEmail) {
   if (dom.emailDisplay) {
     dom.emailDisplay.textContent = userEmail;
   }
+
+  // Wyczyść formularz i komunikaty
+  dom.form?.reset();
+  dom.errorEl?.classList.remove('show');
+  dom.successEl?.classList.remove('show');
+  dom.errorEl.style.display = 'none';
+  dom.successEl.style.display = 'none';
+
+  // Ustaw domyślny stan toggle
+  dom.emailConsentToggle?.classList.add('active');
 
   UI.openModal(dom.modal);
 
@@ -184,6 +195,12 @@ function setupKeyboardListener() {
 
       // Scroll do aktywnego pola
       if (isKeyboardVisible) {
+        // Dodaj klasę do body, aby uruchomić CSS-Fix
+        document.body.classList.add('keyboard-visible');
+
+        // Ustaw keyboard offset dla komentarzy (jeśli jest otwarta, FirstLoginModal używa własnej logiki)
+        dom.modal.style.setProperty("--keyboard-offset", `${heightDiff}px`);
+
         setTimeout(() => {
           const activeElement = document.activeElement;
           if (activeElement && dom.modal.contains(activeElement)) {
@@ -195,6 +212,10 @@ function setupKeyboardListener() {
             }
           }
         }, 100);
+      } else {
+        // Usuń klasę z body i resetuj offset
+        document.body.classList.remove('keyboard-visible');
+        dom.modal.style.removeProperty("--keyboard-offset");
       }
     }
   };
@@ -207,6 +228,7 @@ function setupKeyboardListener() {
     if (e.target === dom.modal && !dom.modal.classList.contains('visible')) {
       isKeyboardVisible = false;
       dom.modal.classList.remove('keyboard-visible');
+      document.body.classList.remove('keyboard-visible');
       initialHeight = window.visualViewport.height;
     }
   });
@@ -238,6 +260,7 @@ async function handleFormSubmit(e) {
 
     console.log('Submitting profile completion with data:', requestData);
 
+    // Użyj authManager do requestu AJAX
     const result = await authManager.ajax('tt_complete_profile', requestData);
 
     console.log('Profile completion result:', result);
@@ -248,6 +271,7 @@ async function handleFormSubmit(e) {
       // Aktualizuj dane użytkownika
       if (result.data?.userData) {
         State.set('currentUser', result.data.userData);
+        State.set('isUserLoggedIn', true); // Upewnij się, że jest ustawiony
       }
 
       // Aktualizuj nonce jeśli zwrócony
@@ -259,6 +283,9 @@ async function handleFormSubmit(e) {
       setTimeout(() => {
         hideModal();
         UI.showToast(Utils.getTranslation('firstLoginWelcomeBack') || 'Witaj w Ting Tong! 🚀');
+
+        // Odśwież UI po zamknięciu modala
+        UI.updateUIForLoginState();
       }, 1500);
 
     } else {
@@ -320,7 +347,7 @@ function validateForm() {
     return false;
   }
 
-  // Walidacja hasła tylko jeśli zostało wprowadzone
+  // Walidacja hasła
   if (newPassword) {
     if (newPassword.length < 8) {
       showError(Utils.getTranslation('passwordLengthError') || 'Hasło musi mieć min. 8 znaków');
@@ -330,6 +357,10 @@ function validateForm() {
       showError(Utils.getTranslation('passwordsMismatchError') || 'Hasła muszą być identyczne');
       return false;
     }
+  } else {
+    // Hasło jest wymagane
+    showError(Utils.getTranslation('firstLoginErrorMissingPasswords') || 'Uzupełnij wszystkie pola hasła');
+    return false;
   }
 
   return true;
