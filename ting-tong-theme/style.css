@@ -4380,9 +4380,7 @@ body.keyboard-visible .modal-overlay,
 body.keyboard-visible .notification-popup,
 body.keyboard-visible .image-lightbox,
 body.keyboard-visible #pwa-install-bar,
-body.keyboard-visible #pwa-ios-instructions,
-body.keyboard-visible .account-modal-overlay,
-body.keyboard-visible .first-login-modal-overlay {
+body.keyboard-visible #pwa-ios-instructions {
   position: absolute !important;
 }
 
