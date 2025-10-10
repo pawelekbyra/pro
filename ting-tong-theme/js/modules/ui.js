@@ -638,60 +638,85 @@ function updateVolumeButton(isMuted) {
 
 function initKeyboardListener() {
   if (!window.visualViewport) {
-    console.warn("Visual Viewport API not supported");
+    console.warn("Visual Viewport API not supported, keyboard detection disabled.");
     return;
   }
 
-  let initialHeight = window.visualViewport.height;
-  let isKeyboardVisible = false;
+  // Use an object to store dimensions, allows for easier updates.
+  let viewportState = {
+    height: window.visualViewport.height,
+    width: window.visualViewport.width,
+    isKeyboardVisible: false,
+  };
 
   const handleViewportChange = () => {
-    const currentHeight = window.visualViewport.height;
-    const heightDiff = initialHeight - currentHeight;
+    const { visualViewport } = window;
+    const newHeight = visualViewport.height;
+    const newWidth = visualViewport.width;
+
+    // Condition 1: Detect orientation change.
+    // If aspect ratio flips, it's likely an orientation change, not keyboard.
+    const isOrientationChange =
+      (newWidth > newHeight && viewportState.width < viewportState.height) ||
+      (newWidth < newHeight && viewportState.width > viewportState.height);
+
+    if (isOrientationChange) {
+      console.log("Orientation change detected. Resetting keyboard state.");
+      // If orientation changes, we must reset the base height and keyboard state.
+      document.body.classList.remove("keyboard-visible");
+      DOM.commentsModal?.classList.remove("keyboard-visible");
+      viewportState = {
+        height: newHeight,
+        width: newWidth,
+        isKeyboardVisible: false,
+      };
+      return; // Exit early, don't process for keyboard.
+    }
+
+    // Condition 2: Detect keyboard visibility.
+    // A significant height reduction without an orientation change implies a keyboard.
+    const heightDiff = viewportState.height - newHeight;
     const newKeyboardState = heightDiff > 150;
 
-    if (newKeyboardState !== isKeyboardVisible) {
-      isKeyboardVisible = newKeyboardState;
-      // Global class on body
-      document.body.classList.toggle("keyboard-visible", isKeyboardVisible);
+    // Only update DOM if the state has actually changed.
+    if (newKeyboardState !== viewportState.isKeyboardVisible) {
+      viewportState.isKeyboardVisible = newKeyboardState;
+      document.body.classList.toggle("keyboard-visible", newKeyboardState);
+      DOM.commentsModal?.classList.toggle("keyboard-visible", newKeyboardState);
 
-      // The comments modal still needs its own class for resizing.
-      const commentsModal = DOM.commentsModal;
-      if (commentsModal) {
-        commentsModal.classList.toggle("keyboard-visible", isKeyboardVisible);
-
-        if (isKeyboardVisible && commentsModal.classList.contains("visible")) {
-          setTimeout(() => {
-            const modalBody = commentsModal.querySelector(".modal-body");
-            if (modalBody) {
-              modalBody.scrollTop = modalBody.scrollHeight;
-            }
-          }, 100);
-        }
+      // Auto-scroll comments modal when keyboard appears.
+      if (newKeyboardState && DOM.commentsModal?.classList.contains("visible")) {
+        setTimeout(() => {
+          const modalBody = DOM.commentsModal.querySelector(".modal-body");
+          if (modalBody) {
+            modalBody.scrollTop = modalBody.scrollHeight;
+          }
+        }, 100);
       }
     }
 
-    const commentsModal = DOM.commentsModal;
-    if (commentsModal) {
-      commentsModal.style.setProperty("--keyboard-offset", `${heightDiff}px`);
-    }
+    // Always update the keyboard offset for the comments modal.
+    DOM.commentsModal?.style.setProperty("--keyboard-offset", `${Math.max(0, heightDiff)}px`);
   };
 
+  // Add listeners.
   window.visualViewport.addEventListener("resize", handleViewportChange);
   window.visualViewport.addEventListener("scroll", handleViewportChange);
 
-  // Cleanup when comments modal is closed
-  const commentsModal = DOM.commentsModal;
-  if (commentsModal) {
-    commentsModal.addEventListener("transitionend", (e) => {
-      if (e.target === commentsModal && !commentsModal.classList.contains("visible")) {
-        if (isKeyboardVisible) {
-          isKeyboardVisible = false;
+  // Cleanup logic for when the comments modal is closed.
+  if (DOM.commentsModal) {
+    DOM.commentsModal.addEventListener("transitionend", (e) => {
+      // Ensure we're listening to the main modal overlay transition.
+      if (e.target === DOM.commentsModal && !DOM.commentsModal.classList.contains("visible")) {
+        // If the keyboard was visible when the modal closed, clean up the state.
+        if (viewportState.isKeyboardVisible) {
           document.body.classList.remove("keyboard-visible");
-          commentsModal.classList.remove("keyboard-visible");
+          DOM.commentsModal.classList.remove("keyboard-visible");
+          viewportState.isKeyboardVisible = false;
         }
-        commentsModal.style.removeProperty("--keyboard-offset");
-        initialHeight = window.visualViewport.height;
+        DOM.commentsModal.style.removeProperty("--keyboard-offset");
+        // Reset the base height to the current viewport height.
+        viewportState.height = window.visualViewport.height;
       }
     });
   }
