@@ -382,9 +382,11 @@ document.addEventListener("DOMContentLoaded", () => {
             "transitionend",
             () => {
               UI.DOM.preloader.style.display = "none";
-              // Logika modalu powitalnego została usunięta i zastąpiona
-              // przez logikę modalu uzupełniania profilu, która jest
-              // wywoływana po zalogowaniu.
+              // Sprawdź, czy należy wyświetlić toast o zainstalowanej aplikacji
+              if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true') {
+                UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);
+                sessionStorage.removeItem('showAlreadyInstalledToast'); // Wyczyść flagę
+              }
             },
             { once: true },
           );
