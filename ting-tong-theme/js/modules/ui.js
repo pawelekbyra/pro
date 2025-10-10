@@ -645,6 +645,10 @@ function initKeyboardListener() {
   let initialHeight = window.visualViewport.height;
   let isKeyboardVisible = false;
 
+  // Pobierz referencje do pasków PWA raz
+  const pwaInstallBar = document.getElementById('pwa-install-bar');
+  const pwaIosBar = document.getElementById('pwa-ios-instructions');
+
   const handleViewportChange = () => {
     const currentHeight = window.visualViewport.height;
     const heightDiff = initialHeight - currentHeight;
@@ -652,23 +656,28 @@ function initKeyboardListener() {
 
     if (newKeyboardState !== isKeyboardVisible) {
       isKeyboardVisible = newKeyboardState;
-      // Global class on body
       document.body.classList.toggle("keyboard-visible", isKeyboardVisible);
 
-      // The comments modal still needs its own class for resizing.
       const commentsModal = DOM.commentsModal;
       if (commentsModal) {
         commentsModal.classList.toggle("keyboard-visible", isKeyboardVisible);
-
         if (isKeyboardVisible && commentsModal.classList.contains("visible")) {
           setTimeout(() => {
             const modalBody = commentsModal.querySelector(".modal-body");
-            if (modalBody) {
-              modalBody.scrollTop = modalBody.scrollHeight;
-            }
+            if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
           }, 100);
         }
       }
+    }
+
+    // Dynamiczne pozycjonowanie pasków PWA i modali
+    const keyboardHeight = isKeyboardVisible ? (window.innerHeight - currentHeight) : 0;
+
+    if (pwaInstallBar) {
+      pwaInstallBar.style.bottom = isKeyboardVisible ? `${keyboardHeight}px` : '0';
+    }
+    if (pwaIosBar) {
+      pwaIosBar.style.bottom = isKeyboardVisible ? `${keyboardHeight}px` : '0';
     }
 
     const commentsModal = DOM.commentsModal;
@@ -680,7 +689,6 @@ function initKeyboardListener() {
   window.visualViewport.addEventListener("resize", handleViewportChange);
   window.visualViewport.addEventListener("scroll", handleViewportChange);
 
-  // Cleanup when comments modal is closed
   const commentsModal = DOM.commentsModal;
   if (commentsModal) {
     commentsModal.addEventListener("transitionend", (e) => {
