@@ -3087,7 +3087,7 @@ body,
   }
 }
 .pwa-prompt {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -3142,7 +3142,7 @@ body,
   pointer-events: auto !important; /* Force clickability */
 }
 .pwa-prompt-ios {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -4379,8 +4379,8 @@ body.keyboard-visible #app-frame {
 body.keyboard-visible .modal-overlay,
 body.keyboard-visible .notification-popup,
 body.keyboard-visible .image-lightbox,
-body.keyboard-visible #pwa-install-bar,
-body.keyboard-visible #pwa-ios-instructions {
+body.keyboard-visible .pwa-prompt,
+body.keyboard-visible .pwa-prompt-ios {
   position: absolute !important;
 }
 
