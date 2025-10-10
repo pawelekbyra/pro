@@ -1428,7 +1428,7 @@ body,
            --- KOMPONENTY UI: MODALE I ALERTY ---
            ========================================================================== */
 #alertBox {
-  position: fixed;
+  position: absolute;
   bottom: calc(var(--bottombar-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
@@ -4379,4 +4379,9 @@ body.keyboard-visible .tiktok-symulacja .bottombar {
  */
 #commentsModal.keyboard-visible .modal-content {
   transition: height 0.2s ease-out, max-height 0.2s ease-out;
+}
+
+body.keyboard-visible {
+  height: 100vh !important;
+  overflow: hidden !important;
 }
