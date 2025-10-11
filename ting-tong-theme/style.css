@@ -359,6 +359,140 @@ Text Domain: tingtongtheme
 }
 
 /* --- Koniec NOWY MODAL PIERWSZEGO LOGOWANIA --- */
+
+.preloader-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+.preloader-icon-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 192px;
+  height: 192px;
+}
+.splash-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: pulse-glow 2.5s infinite ease-in-out;
+}
+@keyframes pulse-glow {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+.preloader-content-container {
+  position: absolute;
+  top: calc(50% + 96px); /* 96px is half of the icon's 192px height */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* FIX: Vertically center content in the available space */
+  overflow-y: auto; /* FIX: Allow scrolling on extremely small screens as a safeguard */
+  padding: 10px 20px calc(15px + var(--safe-area-bottom));
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(100%);
+  transition:
+    transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55),
+    opacity 0.6s ease-out,
+    padding 0.3s ease-out;
+}
+.preloader-content-container::-webkit-scrollbar {
+  display: none;
+}
+.preloader-content-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+#preloader.content-visible .preloader-content-container {
+  opacity: 1;
+  transform: translateY(0);
+}
+.language-selection {
+  margin-top: 0; /* FIX: Remove margin, as justify-content now handles vertical position */
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  flex-shrink: 0; /* FIX: Prevent shrinking on flex parent */
+}
+.language-selection h2 {
+  font-size: clamp(1.1rem, 3vh, 1.3rem); /* Approx 17.6px to 20.8px */
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: clamp(10px, 3vh, 20px);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  transition:
+    font-size 0.3s ease-out,
+    margin-bottom 0.3s ease-out;
+}
+.language-selection .lang-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vh, 15px);
+  width: 100%;
+  justify-content: center;
+  transition: gap 0.3s ease-out;
+}
+@keyframes subtle-flicker-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 64, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 16px 8px rgba(255, 64, 129, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 64, 129, 0);
+  }
+}
+.language-selection button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: clamp(8px, 2vh, 16px) clamp(18px, 3vw, 24px);
+  margin: 0;
+  font-size: clamp(0.875rem, 2.2vh, 1.125rem); /* Approx 14px to 18px */
+  font-weight: 600;
+  border-radius: clamp(12px, 2vh, 16px);
+  cursor: pointer;
+  width: 100%;
+  max-width: 400px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  -webkit-tap-highlight-color: transparent;
+}
+.language-selection button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.language-selection button:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.98);
+  transition-duration: 0.1s;
+}
+.language-selection button.is-selected {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #fff;
+  animation: subtle-flicker-glow 1s ease-out;
+}
+.language-selection button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ==========================================================================
            --- STYLE GŁÓWNE, RESET I SCROLLING ---
            ========================================================================== */
