@@ -548,35 +548,72 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<!-- NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA "ZAJEBISTA" (Bottom Sheet) -->
 <div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title" aria-hidden="true">
   <div class="first-login-modal-content-wrapper">
     <form id="firstLoginForm" class="first-login-modal-content">
-      <!-- Uchwyt do przeciągania -->
       <div class="drag-handle-container">
         <div class="drag-handle"></div>
       </div>
 
-      <!-- Nagłówek ze wskaźnikiem postępu -->
       <div class="first-login-header">
         <div class="progress-bar-container">
           <div class="progress-bar-fill" id="firstLoginProgressBar"></div>
         </div>
-        <h2 id="first-login-title" class="first-login-title"></h2>
+        <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle"></h2>
       </div>
 
-      <!-- Kontener na dynamiczną treść kroku -->
-      <div class="first-login-body">
-        <div class="step-icon-container" id="firstLoginStepIcon"></div>
-        <p class="step-description" id="firstLoginStepDescription"></p>
-        <div class="step-fields-container" id="firstLoginStepFields">
-          <!-- Pola formularza będą renderowane tutaj przez JS -->
+      <div class="first-login-body" id="firstLoginBody">
+        <div class="first-login-status-message first-login-status-error" id="firstLoginError" style="display: none;"></div>
+
+        <div class="first-login-step" data-step="1">
+          <p class="step-description" data-translate-key="firstLoginStep1Desc"></p>
+          <div class="step-fields-container">
+            <label class="preference-row first-login-consent-row">
+              <span class="preference-label" data-translate-key="firstLoginConsentLabel"></span>
+              <div class="toggle-switch" id="fl_email_consent">
+                <div class="toggle-slider"></div>
+              </div>
+            </label>
+            <div id="languageOptions" class="language-selector-compact" style="display:none;">
+              <div class="language-option-compact active" data-lang="pl">
+                <span data-translate-key="emailLangPolish"></span>
+              </div>
+              <div class="language-option-compact" data-lang="en">
+                <span data-translate-key="emailLangEnglish"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="first-login-step" data-step="2" style="display:none;">
+          <p class="step-description" data-translate-key="firstLoginStep2Desc"></p>
+          <div class="step-fields-container">
+            <div class="first-login-form-group">
+              <input type="text" id="fl_firstname" class="first-login-form-input" placeholder="" data-translate-placeholder="firstNamePlaceholder" required autocomplete="given-name">
+            </div>
+            <div class="first-login-form-group">
+              <input type="text" id="fl_lastname" class="first-login-form-input" placeholder="" data-translate-placeholder="lastNamePlaceholder" required autocomplete="family-name">
+            </div>
+            <p class="hint-text" data-translate-key="firstLoginNameHint"></p>
+          </div>
+        </div>
+
+        <div class="first-login-step" data-step="3" style="display:none;">
+          <p class="step-description" data-translate-key="firstLoginStep3Desc">
+            <span class="login-email-display" id="fl_login_email"></span>
+          </p>
+          <div class="step-fields-container">
+            <div class="first-login-form-group">
+              <input type="password" id="fl_new_password" class="first-login-form-input" placeholder="" data-translate-placeholder="newPasswordPlaceholder" required autocomplete="new-password" minlength="8">
+            </div>
+            <div class="first-login-form-group">
+              <input type="password" id="fl_confirm_password" class="first-login-form-input" placeholder="" data-translate-placeholder="confirmPasswordPlaceholder" required autocomplete="new-password" minlength="8">
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Stopka z przyciskami i komunikatami -->
       <div class="first-login-footer">
-        <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
         <div class="footer-buttons">
           <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" style="display: none;">Wstecz</button>
           <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn">Dalej</button>
@@ -586,8 +623,6 @@ get_header();
     </form>
   </div>
 </div>
-
-<!-- Debug Tools -->
 <div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">
   <button id="mockLoginBtn" style="background: #ff0055; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; display: none;">
     MOCK: Pokaż FirstLoginModal
