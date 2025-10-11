@@ -861,7 +861,7 @@ add_action('wp_ajax_tt_complete_profile', function () {
     }
 
     // Odczytaj dane z ciała żądania, ponieważ authManager wysyła JSON
-    check_ajax_referer('tt_ajax_nonce', 'nonce'); // Standardowa weryfikacja nonce z nagłówków/POST
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
 
     $data = json_decode(file_get_contents('php://input'), true);
     if (json_last_error() !== JSON_ERROR_NONE) {

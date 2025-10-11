@@ -548,111 +548,36 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<!-- NOWY MODAL PIERWSZEGO LOGOWANIA - 3 ETAPY -->
-<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title">
+<!-- NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA PREMIUM -->
+<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title" aria-hidden="true">
   <form id="firstLoginForm" class="first-login-modal-content">
 
-    <!-- Nagłówek i wskaźnik postępu -->
+    <!-- Nagłówek ze wskaźnikiem postępu -->
     <div class="first-login-header">
-      <div class="progress-indicator-container">
-        <div class="progress-step active" data-step="1">1</div>
-        <div class="progress-line"></div>
-        <div class="progress-step" data-step="2">2</div>
-        <div class="progress-line"></div>
-        <div class="progress-step" data-step="3">3</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="firstLoginProgressBar"></div>
       </div>
-      <h2 id="first-login-title" class="first-login-title">Witaj na Ting Tongu!</h2>
+      <h2 id="first-login-title" class="first-login-title"></h2>
     </div>
 
-    <!-- Kontener na etapy -->
-    <div class="first-login-steps-container">
-
-      <!-- ETAP 1: Powitanie i E-mail -->
-      <div class="first-login-step active" data-step="1">
-        <div class="first-login-step-content">
-          <div class="step-icon">👋</div>
-          <h3 class="step-title" data-translate-key="firstLoginStep1Title">Zanim zaczniemy...</h3>
-          <p class="step-description" data-translate-key="firstLoginStep1Description">
-            Musimy uzupełnić kilka informacji w Twoim profilu. To zajmie tylko chwilę.
-          </p>
-          <div class="first-login-email-display">
-            <div class="first-login-email-label" data-translate-key="firstLoginEmailLabel">Twój e-mail do logowania to:</div>
-            <div class="first-login-email-value" id="firstLoginEmail"></div>
-            <p class="step-description-small" data-translate-key="firstLoginEmailHint">
-              <strong>Zapamiętaj go!</strong> Będziesz go używać do logowania w przyszłości.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- ETAP 2: Dane i Hasło -->
-      <div class="first-login-step" data-step="2">
-        <div class="first-login-step-content">
-          <div class="step-icon">👤</div>
-          <h3 class="step-title" data-translate-key="firstLoginStep2Title">Twoje dane i hasło</h3>
-          <p class="step-description" data-translate-key="firstLoginStep2Description">
-            Możesz podać prawdziwe dane lub zmyślone. Ważne, aby hasło było bezpieczne.
-          </p>
-
-          <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginFirstName" data-translate-key="firstNameLabel">Imię</label>
-            <input type="text" id="firstLoginFirstName" class="first-login-form-input" required autocomplete="given-name">
-          </div>
-
-          <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginLastName" data-translate-key="lastNameLabel">Nazwisko</label>
-            <input type="text" id="firstLoginLastName" class="first-login-form-input" required autocomplete="family-name">
-          </div>
-
-          <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginNewPassword" data-translate-key="newPasswordLabel">Nowe hasło</label>
-            <input type="password" id="firstLoginNewPassword" class="first-login-form-input" required autocomplete="new-password" minlength="8">
-          </div>
-
-          <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginConfirmPassword" data-translate-key="confirmPasswordLabel">Powtórz hasło</label>
-            <input type="password" id="firstLoginConfirmPassword" class="first-login-form-input" required autocomplete="new-password" minlength="8">
-          </div>
-        </div>
-      </div>
-
-      <!-- ETAP 3: Ustawienia i Zgody -->
-      <div class="first-login-step" data-step="3">
-        <div class="first-login-step-content">
-          <div class="step-icon">⚙️</div>
-          <h3 class="step-title" data-translate-key="firstLoginStep3Title">Ustawienia końcowe</h3>
-          <p class="step-description" data-translate-key="firstLoginStep3Description">
-            Wybierz, jak chcesz otrzymywać od nas wiadomości.
-          </p>
-
-          <div class="preference-row">
-            <span class="preference-label" data-translate-key="emailConsentLabel">Zgoda na powiadomienia e-mail</span>
-            <div class="toggle-switch active" id="firstLoginEmailConsent">
-              <div class="toggle-slider"></div>
-            </div>
-          </div>
-
-          <div class="preference-row">
-            <span class="preference-label" data-translate-key="emailLanguageLabel">Język wiadomości e-mail</span>
-            <div class="language-selector-compact">
-              <div class="language-option-compact active" data-lang="pl">PL</div>
-              <div class="language-option-compact" data-lang="en">EN</div>
-            </div>
-          </div>
-        </div>
+    <!-- Kontener na dynamiczną treść kroku -->
+    <div class="first-login-body">
+      <div class="step-icon-container" id="firstLoginStepIcon"></div>
+      <p class="step-description" id="firstLoginStepDescription"></p>
+      <div class="step-fields-container" id="firstLoginStepFields">
+        <!-- Pola formularza będą renderowane tutaj przez JS -->
       </div>
     </div>
 
-    <!-- Komunikaty o błędach/sukcesie -->
-    <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
-
-    <!-- Stopka z przyciskami nawigacyjnymi -->
+    <!-- Stopka z przyciskami i komunikatami -->
     <div class="first-login-footer">
-      <button type="button" class="first-login-nav-btn" id="firstLoginPrevBtn" data-translate-key="prevButton" style="display: none;">Wstecz</button>
-      <button type="button" class="first-login-nav-btn" id="firstLoginNextBtn" data-translate-key="nextButton">Dalej</button>
-      <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmitBtn" style="display: none;">Gotowe!</button>
+      <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
+      <div class="footer-buttons">
+        <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" style="display: none;">Wstecz</button>
+        <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn">Dalej</button>
+        <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" style="display: none;">Ukończ konfigurację</button>
+      </div>
     </div>
-
   </form>
 </div>
 
