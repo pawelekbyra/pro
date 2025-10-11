@@ -305,19 +305,19 @@ function validateForm() {
     return false;
   }
 
-  // Walidacja hasła
-  if (newPassword) {
-    if (newPassword.length < 8) {
-      showError(Utils.getTranslation('passwordLengthError') || 'Hasło musi mieć min. 8 znaków');
-      return false;
-    }
-    if (newPassword !== confirmPassword) {
-      showError(Utils.getTranslation('passwordsMismatchError') || 'Hasła muszą być identyczne');
-      return false;
-    }
-  } else {
-    // Hasło jest wymagane
-    showError(Utils.getTranslation('firstLoginErrorMissingPasswords') || 'Uzupełnij wszystkie pola hasła');
+  // Walidacja hasła - hasło jest zawsze wymagane przy pierwszym logowaniu
+  if (!newPassword || !confirmPassword) {
+    showError(Utils.getTranslation('firstLoginErrorMissingPasswords') || 'Uzupełnij oba pola hasła');
+    return false;
+  }
+
+  if (newPassword.length < 8) {
+    showError(Utils.getTranslation('passwordLengthError') || 'Hasło musi mieć min. 8 znaków');
+    return false;
+  }
+
+  if (newPassword !== confirmPassword) {
+    showError(Utils.getTranslation('passwordsMismatchError') || 'Hasła muszą być identyczne');
     return false;
   }
 
