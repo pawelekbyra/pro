@@ -1,3 +1,5 @@
+// File: ting-tong-theme/js/modules/first-login-modal.js
+
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
@@ -7,7 +9,6 @@ let dom = {};
 let currentStep = 1;
 const totalSteps = 3;
 let formData = {};
-let stepDefinitions = {};
 
 function cacheDOM() {
   dom = {
@@ -15,125 +16,61 @@ function cacheDOM() {
     form: document.getElementById('firstLoginForm'),
     title: document.getElementById('first-login-title'),
     progressBar: document.getElementById('firstLoginProgressBar'),
-    stepIcon: document.getElementById('firstLoginStepIcon'),
-    stepDescription: document.getElementById('firstLoginStepDescription'),
-    stepFields: document.getElementById('firstLoginStepFields'),
+    stepContainer: document.getElementById('firstLoginBody'),
+    steps: document.querySelectorAll('.first-login-step'), // Static steps
     prevBtn: document.getElementById('firstLoginPrevBtn'),
     nextBtn: document.getElementById('firstLoginNextBtn'),
     submitBtn: document.getElementById('firstLoginSubmitBtn'),
     errorEl: document.getElementById('firstLoginError'),
+    // Step specific elements
+    consentToggle: document.getElementById('fl_email_consent'),
+    langOptions: document.getElementById('languageOptions'),
+    firstName: document.getElementById('fl_firstname'),
+    lastName: document.getElementById('fl_lastname'),
+    newPassword: document.getElementById('fl_new_password'),
+    confirmPassword: document.getElementById('fl_confirm_password'),
+    loginEmailDisplay: document.getElementById('fl_login_email'),
   };
 }
 
-function initializeStepDefinitions() {
-    stepDefinitions = {
-        1: {
-            icon: '🌐',
-            titleKey: 'firstLoginStep1Title',
-            descriptionKey: 'firstLoginStep1Desc',
-            renderFields: () => `
-                <div class="language-selector-compact first-login-lang-selector">
-                    <div class="language-option-compact active" data-lang="pl">Polski</div>
-                    <div class="language-option-compact" data-lang="en">English</div>
-                </div>
-            `,
-            validate: () => true,
-            collectData: () => {
-                formData.email_language = dom.stepFields.querySelector('.language-option-compact.active').dataset.lang;
-            }
-        },
-        2: {
-            icon: '🔔',
-            titleKey: 'firstLoginStep2Title',
-            descriptionKey: 'firstLoginStep2Desc',
-            renderFields: () => `
-                <div class="preference-row first-login-consent-row">
-                    <div class="toggle-switch active" id="fl_email_consent"><div class="toggle-slider"></div></div>
-                    <label for="fl_email_consent" class="preference-label">${Utils.getTranslation('firstLoginConsentLabel')}</label>
-                </div>
-            `,
-            validate: () => true,
-            collectData: () => {
-                formData.email_consent = dom.stepFields.querySelector('#fl_email_consent').classList.contains('active');
-            }
-        },
-        3: {
-            icon: '👤',
-            titleKey: 'firstLoginStep3Title',
-            descriptionKey: 'firstLoginStep3Desc',
-            renderFields: () => `
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_firstname">${Utils.getTranslation('firstNameLabel')}</label>
-                    <input type="text" id="fl_firstname" class="first-login-form-input" required autocomplete="given-name">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_lastname">${Utils.getTranslation('lastNameLabel')}</label>
-                    <input type="text" id="fl_lastname" class="first-login-form-input" required autocomplete="family-name">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_new_password">${Utils.getTranslation('newPasswordLabel')}</label>
-                    <input type="password" id="fl_new_password" class="first-login-form-input" required autocomplete="new-password" minlength="8">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_confirm_password">${Utils.getTranslation('confirmPasswordLabel')}</label>
-                    <input type="password" id="fl_confirm_password" class="first-login-form-input" required autocomplete="new-password" minlength="8">
-                </div>
-            `,
-            validate: () => {
-                hideError();
-                const firstName = dom.stepFields.querySelector('#fl_firstname').value.trim();
-                const lastName = dom.stepFields.querySelector('#fl_lastname').value.trim();
-                const password = dom.stepFields.querySelector('#fl_new_password').value;
-                const confirmPassword = dom.stepFields.querySelector('#fl_confirm_password').value;
-
-                if (!firstName || !lastName) {
-                    showError(Utils.getTranslation('errorMissingNames'));
-                    return false;
-                }
-                if (password.length < 8) {
-                    showError(Utils.getTranslation('errorMinPasswordLength'));
-                    return false;
-                }
-                if (password !== confirmPassword) {
-                    showError(Utils.getTranslation('errorPasswordsMismatch'));
-                    return false;
-                }
-                return true;
-            },
-            collectData: () => {
-                formData.first_name = dom.stepFields.querySelector('#fl_firstname').value.trim();
-                formData.last_name = dom.stepFields.querySelector('#fl_lastname').value.trim();
-                formData.new_password = dom.stepFields.querySelector('#fl_new_password').value;
-            }
-        }
-    };
-}
-
+// Function to attach event listeners to static elements
 function setupEventListeners() {
     if (!dom.modal) return;
     dom.nextBtn?.addEventListener('click', handleNextStep);
     dom.prevBtn?.addEventListener('click', handlePrevStep);
     dom.form?.addEventListener('submit', handleFormSubmit);
 
-    // Delegacja zdarzeń dla dynamicznie tworzonych pól
-    dom.stepFields?.addEventListener('click', (e) => {
-        const toggle = e.target.closest('.toggle-switch');
-        if (toggle) {
-            toggle.classList.toggle('active');
-        }
-
-        const langOption = e.target.closest('.language-option-compact');
-        if (langOption) {
-            dom.stepFields.querySelector('.language-option-compact.active')?.classList.remove('active');
-            langOption.classList.add('active');
+    // Step 1 Listeners (Consent Toggle)
+    dom.consentToggle?.addEventListener('click', (e) => {
+        dom.consentToggle.classList.toggle('active');
+        // Toggle language options visibility
+        if (dom.consentToggle.classList.contains('active')) {
+            dom.langOptions.style.display = 'flex';
+        } else {
+            dom.langOptions.style.display = 'none';
         }
     });
-}
 
+    // Step 1 Listeners (Language Selector)
+    dom.langOptions?.querySelectorAll('.language-option-compact').forEach(opt => {
+        opt.addEventListener('click', () => {
+            dom.langOptions.querySelectorAll('.language-option-compact').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+        });
+    });
+}
 
 function showProfileCompletionModal() {
     if (!dom.modal) return;
     resetModal();
+
+    // Set initial title and email
+    dom.title.textContent = Utils.getTranslation('firstLoginTitle');
+    const userEmail = State.get('currentUser')?.email || '';
+    if (dom.loginEmailDisplay) {
+        dom.loginEmailDisplay.textContent = userEmail;
+    }
+
     renderStep(currentStep);
     UI.openModal(dom.modal, {
         onOpen: () => document.dispatchEvent(new CustomEvent('tt:pause-video')),
@@ -143,7 +80,7 @@ function showProfileCompletionModal() {
 
 function hideModal() {
     if (!dom.modal) return;
-    UI.closeModal(dom.modal); // UI.closeModal samo wywoła onClose, więc tt:play-video jest już obsługiwane
+    UI.closeModal(dom.modal);
 }
 
 function resetModal() {
@@ -151,50 +88,127 @@ function resetModal() {
     formData = {};
     dom.form?.reset();
     hideError();
+
+    // Reset step states in DOM
+    dom.steps.forEach((step, index) => {
+        step.style.display = index === 0 ? 'block' : 'none';
+    });
+
+    // Set initial values from State (if available, e.g. after mock login)
+    const currentUser = State.get('currentUser') || {};
+    if (dom.firstName) dom.firstName.value = currentUser.first_name || '';
+    if (dom.lastName) dom.lastName.value = currentUser.last_name || '';
+
+
+    // Reset Step 1 toggle/language
+    if (dom.consentToggle && dom.langOptions) {
+        const initialConsent = currentUser.email_consent === true || true; // Default to active for clean starting state
+
+        dom.consentToggle.classList.toggle('active', initialConsent);
+        dom.langOptions.style.display = initialConsent ? 'flex' : 'none';
+
+        const lang = currentUser.email_language || 'pl';
+        dom.langOptions.querySelectorAll('.language-option-compact').forEach(opt => {
+            opt.classList.toggle('active', opt.dataset.lang === lang);
+        });
+    }
 }
 
-function renderStep(stepNumber) {
-    const step = stepDefinitions[stepNumber];
-    if (!step) return;
+function renderStep(stepNumber, direction = 'next') {
+    if (dom.steps.length === 0) return;
 
-    // Animacja wyjścia dla starych treści
-    const elementsToAnimate = [dom.stepIcon, dom.stepDescription, dom.stepFields];
-    elementsToAnimate.forEach(el => el.classList.add('is-exiting'));
+    const oldStepIndex = stepNumber === 1 && direction === 'prev' ? 0 : direction === 'prev' ? stepNumber : stepNumber - 2;
+    const newStepIndex = stepNumber - 1;
 
-    setTimeout(() => {
-        // Aktualizacja treści
-        dom.title.textContent = Utils.getTranslation(step.titleKey);
-        dom.stepIcon.innerHTML = step.icon;
-        dom.stepDescription.innerHTML = Utils.getTranslation(step.descriptionKey);
-        dom.stepFields.innerHTML = step.renderFields();
+    // Validation/Boundary check
+    if (newStepIndex < 0 || newStepIndex >= dom.steps.length) return;
 
-        // Aktualizacja przycisków
-        dom.prevBtn.textContent = Utils.getTranslation('firstLoginPrev');
-        dom.nextBtn.textContent = Utils.getTranslation('firstLoginNext');
-        dom.submitBtn.textContent = Utils.getTranslation('firstLoginSubmit');
+    // Animate out old step if applicable
+    if (oldStepIndex >= 0 && oldStepIndex < dom.steps.length) {
+        dom.steps[oldStepIndex].style.display = 'none';
+    }
 
-        // Animacja wejścia dla nowych treści
-        elementsToAnimate.forEach(el => {
-            el.classList.remove('is-exiting');
-            void el.offsetWidth; // Trigger reflow
-        });
+    // Animate in new step
+    const newStep = dom.steps[newStepIndex];
+    newStep.style.display = 'block';
+    newStep.classList.remove('is-exiting');
+    void newStep.offsetWidth; // Trigger reflow
 
-        // Aktualizacja UI
-        dom.progressBar.style.width = `${(stepNumber / totalSteps) * 100}%`;
-        dom.prevBtn.style.display = stepNumber > 1 ? 'inline-flex' : 'none';
-        dom.nextBtn.style.display = stepNumber < totalSteps ? 'inline-flex' : 'none';
-        dom.submitBtn.style.display = stepNumber === totalSteps ? 'inline-flex' : 'none';
-    }, 250);
+    // Update UI elements
+    dom.progressBar.style.width = `${(stepNumber / totalSteps) * 100}%`;
+    dom.prevBtn.style.display = stepNumber > 1 ? 'inline-flex' : 'none';
+    dom.nextBtn.style.display = stepNumber < totalSteps ? 'inline-flex' : 'none';
+    dom.submitBtn.style.display = stepNumber === totalSteps ? 'inline-flex' : 'none';
+
+    // Update button translations (they are hardcoded but for consistency)
+    dom.prevBtn.textContent = Utils.getTranslation('firstLoginPrev');
+    dom.nextBtn.textContent = Utils.getTranslation('firstLoginNext');
+    dom.submitBtn.textContent = Utils.getTranslation('firstLoginSubmit');
+
+    // Step 3 (Password) specific logic
+    if (stepNumber === 3) {
+        // Scroll password fields into view (especially for mobile keyboard)
+        setTimeout(() => dom.newPassword.focus(), 300);
+    }
+}
+
+
+function validateStep(stepNumber) {
+    hideError();
+    switch (stepNumber) {
+        case 1:
+            return true;
+        case 2:
+            const firstName = dom.firstName.value.trim();
+            const lastName = dom.lastName.value.trim();
+            if (!firstName || !lastName) {
+                showError(Utils.getTranslation('errorMissingNames'));
+                return false;
+            }
+            return true;
+        case 3:
+            const password = dom.newPassword.value;
+            const confirmPassword = dom.confirmPassword.value;
+            if (!password || !confirmPassword) {
+                showError(Utils.getTranslation('errorPasswordRequired'));
+                return false;
+            }
+            if (password.length < 8) {
+                showError(Utils.getTranslation('errorMinPasswordLength'));
+                return false;
+            }
+            if (password !== confirmPassword) {
+                showError(Utils.getTranslation('errorPasswordsMismatch'));
+                return false;
+            }
+            return true;
+        default:
+            return true;
+    }
+}
+
+function collectData(stepNumber) {
+    switch (stepNumber) {
+        case 1:
+            formData.email_consent = dom.consentToggle.classList.contains('active');
+            formData.email_language = dom.langOptions.querySelector('.language-option-compact.active')?.dataset.lang || 'pl';
+            break;
+        case 2:
+            formData.first_name = dom.firstName.value.trim();
+            formData.last_name = dom.lastName.value.trim();
+            break;
+        case 3:
+            formData.new_password = dom.newPassword.value;
+            break;
+    }
 }
 
 function handleNextStep() {
-    hideError();
-    const step = stepDefinitions[currentStep];
-    if (step.validate()) {
-        step.collectData();
+    if (validateStep(currentStep)) {
+        collectData(currentStep);
         if (currentStep < totalSteps) {
             currentStep++;
-            renderStep(currentStep);
+            renderStep(currentStep, 'next');
         }
     }
 }
@@ -203,26 +217,25 @@ function handlePrevStep() {
     hideError();
     if (currentStep > 1) {
         currentStep--;
-        renderStep(currentStep);
+        renderStep(currentStep, 'prev');
     }
 }
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-    const step = stepDefinitions[currentStep];
-    if (!step.validate()) {
-        showError(Utils.getTranslation('errorValidationFailed'));
+
+    if (!validateStep(currentStep)) {
         return;
     }
 
-    hideError();
-    step.collectData();
+    collectData(currentStep);
 
     const originalText = dom.submitBtn.innerHTML;
     dom.submitBtn.disabled = true;
     dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
     try {
+        // Send ALL collected data to the backend
         const result = await authManager.ajax('tt_complete_profile', formData, true);
 
         if (result.success) {
@@ -230,17 +243,19 @@ async function handleFormSubmit(e) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
 
-            // Wywołaj event, aby inne części aplikacji mogły zareagować
+            // Trigger video play/stop
             document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
 
-            UI.showToast(result.data.message || Utils.getTranslation('profileUpdateSuccess'), 'success');
+            UI.showToast(Utils.getTranslation('profileUpdateSuccess') || 'Profil zaktualizowany!', 'success');
 
             setTimeout(() => {
                 hideModal();
-            }, 1500);
+                // To ensure clean login state, trigger reload after a short delay
+                setTimeout(() => location.reload(), 500);
+            }, 500);
 
         } else {
-            throw new Error(result.data?.message || Utils.getTranslation('errorUnknown'));
+            throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError'));
         }
     } catch (error) {
         showError(error.message);
@@ -253,6 +268,7 @@ function showError(message) {
     if (!dom.errorEl) return;
     dom.errorEl.textContent = message;
     dom.errorEl.style.display = 'block';
+    setTimeout(() => hideError(), 4000);
 }
 
 function hideError() {
@@ -264,12 +280,18 @@ function hideError() {
 function init() {
     cacheDOM();
     if (dom.modal) {
-        initializeStepDefinitions();
         setupEventListeners();
+        // Default to active for clean starting state. ResetModal handles the initial UX.
+        // if (dom.consentToggle) dom.consentToggle.classList.add('active');
     }
 }
 
 export const FirstLoginModal = {
     init,
     showProfileCompletionModal,
+    checkProfileAndShowModal: (userData) => {
+        if (userData && !userData.is_profile_complete) {
+            showProfileCompletionModal();
+        }
+    }
 };

@@ -212,23 +212,21 @@ export const Config = {
       immersiveModePwaOnly: "Działa w apce",
 
       // --- KLUCZE DLA MODALA PIERWSZEGO LOGOWANIA ---
-      // Ogólne
+      firstLoginTitle: "Witaj w Ting Tong! 👋",
       firstLoginPrev: "Wstecz",
       firstLoginNext: "Dalej",
-      firstLoginSubmit: "Zapisz i zakończ",
+      firstLoginSubmit: "Zakończ 🎯",
 
-      // Krok 1: Język
-      firstLoginStep1Title: "Wybierz język powiadomień",
-      firstLoginStep1Desc: "Będziemy wysyłać Ci powiadomienia i maile w wybranym języku. Zawsze możesz to zmienić w ustawieniach konta.",
+      // Krok 1: Zgoda i Język
+      firstLoginStep1Desc: "Cieszymy się, że dołączyłeś! 😊 Na start możesz zdecydować, czy chcesz otrzymywać od nas maile z nowościami i poradami.",
+      firstLoginConsentLabel: "Chcę otrzymywać maile",
 
-      // Krok 2: Zgoda
-      firstLoginStep2Title: "Zgoda na powiadomienia",
-      firstLoginStep2Desc: "Chcemy wysyłać Ci okazjonalnie informacje o nowościach i promocjach. Obiecujemy nie spamować!",
-      firstLoginConsentLabel: "Tak, chcę otrzymywać powiadomienia",
+      // Krok 2: Dane
+      firstLoginStep2Desc: "Powiedz nam, jak się nazywasz (lub wymyśl coś kreatywnego 😉).",
+      firstLoginNameHint: "Nie musisz podawać prawdziwego imienia i nazwiska.",
 
-      // Krok 3: Dane i hasło
-      firstLoginStep3Title: "Uzupełnij swój profil",
-      firstLoginStep3Desc: "To ostatni krok! Ustaw swoje imię, nazwisko oraz nowe, bezpieczne hasło, którego będziesz używać do logowania.",
+      // Krok 3: Hasło
+      firstLoginStep3Desc: "Świetnie! 🎉 Do logowania będziesz używać swojego adresu e-mail:",
 
       // Błędy
       errorMinPasswordLength: 'Hasło musi mieć co najmniej 8 znaków.',
@@ -407,23 +405,21 @@ export const Config = {
       immersiveModePwaOnly: "Works in app",
 
       // --- KEYS FOR FIRST LOGIN MODAL ---
-      // General
+      firstLoginTitle: "Welcome to Ting Tong! 👋",
       firstLoginPrev: "Back",
       firstLoginNext: "Next",
-      firstLoginSubmit: "Save and finish",
+      firstLoginSubmit: "Finish 🎯",
 
-      // Step 1: Language
-      firstLoginStep1Title: "Choose notification language",
-      firstLoginStep1Desc: "We will send you notifications and emails in the selected language. You can always change this in your account settings.",
+      // Step 1: Consent and Language
+      firstLoginStep1Desc: "We're glad you joined! 😊 To start, you can decide whether you want to receive emails from us with news and tips.",
+      firstLoginConsentLabel: "I want to receive emails",
 
-      // Step 2: Consent
-      firstLoginStep2Title: "Notification Consent",
-      firstLoginStep2Desc: "We would like to occasionally send you information about new features and promotions. We promise not to spam!",
-      firstLoginConsentLabel: "Yes, I want to receive notifications",
+      // Step 2: Data
+      firstLoginStep2Desc: "Tell us your name (or invent something creative 😉).",
+      firstLoginNameHint: "You don't need to provide your real first and last name.",
 
-      // Step 3: Data and Password
-      firstLoginStep3Title: "Complete Your Profile",
-      firstLoginStep3Desc: "This is the final step! Set your first name, last name, and a new, secure password that you will use to log in.",
+      // Step 3: Password
+      firstLoginStep3Desc: "Great! 🎉 You will use your email address to log in:",
 
       // Errors
       errorMinPasswordLength: 'Password must be at least 8 characters long.',
