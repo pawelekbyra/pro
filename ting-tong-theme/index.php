@@ -458,7 +458,7 @@ get_header();
             <span data-translate-key="installPwaFullDescription">Zainstaluj Ting Tonga na swoim telefonie.</span>
         </p>
     </div>
-    <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction">Zainstaluj</button>
+    <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction" disabled>Zainstaluj</button>
 </div>
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">

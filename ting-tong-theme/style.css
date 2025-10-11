@@ -1470,7 +1470,7 @@ body,
   background-color: #000000;
   color: white;
   padding: 12px 24px;
-  border-radius: 24px;
+  border-radius: 8px; /* Subtelne zaokrąglenie */
   font-size: 14px;
   font-weight: 500;
   display: none;
@@ -1482,6 +1482,7 @@ body,
   width: fit-content; /* Szerokość dopasowana do treści */
   max-width: calc(100% - 40px); /* Maksymalna szerokość z marginesami */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  border: 1px solid #000; /* Czarna ramka */
   animation: fadeInOut 4s ease-in-out forwards;
 }
 
