@@ -4607,9 +4607,9 @@ body.keyboard-visible #commentsModal.keyboard-visible .modal-content {
 
 /* 1. Resetuj logikę "zamrażania" body (kluczowe) */
 body.keyboard-visible {
-  position: static !important; /* Pozwala klawiaturze zakryć */
-  top: auto !important;
-  left: auto !important;
+  position: fixed !important; /* Pozwala klawiaturze zakryć */
+  top: 0 !important;
+  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
   overflow: auto !important;

@@ -637,9 +637,8 @@ function updateVolumeButton(isMuted) {
 }
 
 /**
- * Globalny Keyboard Listener (ZMODYFIKOWANY)
- * Oryginalna logika scrollowania i obliczania offsetu została usunięta,
- * aby zablokować ruch elementów na dole ekranu.
+ * Globalny Keyboard Listener (v2 - Niezawodny)
+ * Odporny na zmiany orientacji i poprawnie współpracuje z CSS "Freezer".
  */
 function initKeyboardListener() {
   if (!window.visualViewport) {
@@ -647,30 +646,65 @@ function initKeyboardListener() {
     return;
   }
 
-  // Wymuszamy dodawanie klasy na body na podstawie prostej różnicy wysokości.
-  // CSS zajmie się resztą, co spowoduje, że klawiatura zakryje elementy.
-  const handleViewportChange = () => {
-    const { visualViewport } = window;
-    // Jeśli wysokość visualViewport jest znacznie mniejsza niż pełna wysokość, zakładamy, że klawiatura jest widoczna.
-    const isKeyboardVisible = visualViewport.height < window.innerHeight - 150;
-
-    document.body.classList.toggle("keyboard-visible", isKeyboardVisible);
-    DOM.commentsModal?.classList.toggle("keyboard-visible", isKeyboardVisible);
-
-    // Usuń zmienną offsetową, aby jej nie używać w obliczeniach CSS.
-    DOM.commentsModal?.style.removeProperty("--keyboard-offset");
+  // Przechowujemy ostatnie znane wymiary, aby wykryć zmiany.
+  let lastKnown = {
+    width: window.visualViewport.width,
+    height: window.visualViewport.height,
   };
 
-  // Dodaj Listenery.
-  window.visualViewport.addEventListener("resize", handleViewportChange);
-  window.visualViewport.addEventListener("scroll", handleViewportChange);
+  const handleViewportChange = () => {
+    const vv = window.visualViewport;
 
-  // Dodaj czyszczenie klasy na body, gdy modale są zamykane.
+    // Jeśli szerokość się zmieniła, to na 99% jest to obrót ekranu.
+    // W takim przypadku resetujemy "znany" stan i nie robimy nic więcej.
+    if (vv.width !== lastKnown.width) {
+      lastKnown.width = vv.width;
+      lastKnown.height = vv.height;
+      // Usuń klasę na wszelki wypadek, gdyby została po poprzednim stanie.
+      document.body.classList.remove("keyboard-visible");
+      DOM.commentsModal?.classList.remove("keyboard-visible");
+      DOM.commentsModal?.style.removeProperty("--keyboard-offset");
+      return;
+    }
+
+    // Klawiatura jest widoczna, jeśli wysokość ZNACZNIE się zmniejszyła
+    // przy tej samej szerokości.
+    const isKeyboardVisible = vv.height < lastKnown.height - 150;
+
+    document.body.classList.toggle("keyboard-visible", isKeyboardVisible);
+
+    // Specyficzna obsługa dla modala komentarzy
+    const commentsModal = DOM.commentsModal;
+    if (commentsModal) {
+      commentsModal.classList.toggle("keyboard-visible", isKeyboardVisible);
+      if (isKeyboardVisible) {
+        // Oblicz i ustaw offset dla CSS, aby modal mógł się dostosować.
+        const keyboardOffset = window.innerHeight - vv.height;
+        commentsModal.style.setProperty("--keyboard-offset", `${keyboardOffset}px`);
+      } else {
+        commentsModal.style.removeProperty("--keyboard-offset");
+      }
+    }
+
+    // Zaktualizuj ostatni znany stan wysokości, jeśli nie jest to stan przejściowy
+    // (np. powolne zamykanie klawiatury na niektórych urządzeniach).
+    if (vv.height > lastKnown.height || !isKeyboardVisible) {
+      lastKnown.height = vv.height;
+    }
+  };
+
+  window.visualViewport.addEventListener("resize", handleViewportChange);
+
+  // Logika czyszcząca, gdy modal komentarzy jest zamykany.
   if (DOM.commentsModal) {
     DOM.commentsModal.addEventListener("transitionend", (e) => {
+      // Upewnij się, że to event od głównego kontenera modala i że jest on ukrywany.
       if (e.target === DOM.commentsModal && !DOM.commentsModal.classList.contains("visible")) {
         document.body.classList.remove("keyboard-visible");
         DOM.commentsModal.classList.remove("keyboard-visible");
+        DOM.commentsModal.style.removeProperty("--keyboard-offset");
+        // Zresetuj wysokość odniesienia po zamknięciu modala.
+        lastKnown.height = window.visualViewport.height;
       }
     });
   }
