@@ -860,7 +860,14 @@ add_action('wp_ajax_tt_complete_profile', function () {
         return;
     }
 
-    $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+    // Odczytaj dane z ciała żądania, ponieważ authManager wysyła JSON
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        wp_send_json_error(['message' => 'Nieprawidłowy format danych JSON.'], 400);
+        return;
+    }
+
+    $nonce = isset($data['nonce']) ? sanitize_text_field(wp_unslash($data['nonce'])) : '';
     if (empty($nonce) || wp_verify_nonce($nonce, 'tt_ajax_nonce') === false) {
         wp_send_json_error(['message' => 'Nieprawidłowy token bezpieczeństwa.'], 403);
         return;
@@ -869,11 +876,11 @@ add_action('wp_ajax_tt_complete_profile', function () {
     $u = wp_get_current_user();
 
     // Sanityzacja danych wejściowych
-    $first_name = isset($_POST['first_name']) ? sanitize_text_field(wp_unslash($_POST['first_name'])) : '';
-    $last_name = isset($_POST['last_name']) ? sanitize_text_field(wp_unslash($_POST['last_name'])) : '';
-    $new_password = isset($_POST['new_password']) ? wp_unslash($_POST['new_password']) : '';
-    $email_consent = isset($_POST['email_consent']) ? filter_var($_POST['email_consent'], FILTER_VALIDATE_BOOLEAN) : false;
-    $email_language = isset($_POST['email_language']) && in_array($_POST['email_language'], ['pl', 'en']) ? $_POST['email_language'] : 'pl';
+    $first_name = isset($data['first_name']) ? sanitize_text_field(wp_unslash($data['first_name'])) : '';
+    $last_name = isset($data['last_name']) ? sanitize_text_field(wp_unslash($data['last_name'])) : '';
+    $new_password = isset($data['new_password']) ? wp_unslash($data['new_password']) : '';
+    $email_consent = isset($data['email_consent']) ? filter_var($data['email_consent'], FILTER_VALIDATE_BOOLEAN) : false;
+    $email_language = isset($data['email_language']) && in_array($data['email_language'], ['pl', 'en']) ? $data['email_language'] : 'pl';
 
     // Walidacja
     if (empty($first_name) || empty($last_name)) {
