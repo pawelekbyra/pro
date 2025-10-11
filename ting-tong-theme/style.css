@@ -1479,9 +1479,8 @@ body,
   z-index: 2001;
   white-space: normal;
   text-align: center;
-  width: fit-content;
-  min-width: 280px;
-  max-width: 35rem;
+  width: fit-content; /* Szerokość dopasowana do treści */
+  max-width: calc(100% - 40px); /* Maksymalna szerokość z marginesami */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   animation: fadeInOut 4s ease-in-out forwards;
 }

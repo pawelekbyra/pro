@@ -120,9 +120,9 @@ class AuthManager {
         return validated;
 
       } catch (error) {
-        // Jeśli błąd to 403 (Forbidden), spróbuj odświeżyć nonce i ponów żądanie jeden raz.
-        if (error.message.includes('403') && action !== 'tt_refresh_nonce') {
-          console.warn('[AUTH] Otrzymano błąd 403. Prawdopodobnie wygasł nonce. Próba odświeżenia i ponowienia...');
+        // Jeśli błąd to 403 (Forbidden) lub 400 (Bad Request), spróbuj odświeżyć nonce i ponów żądanie.
+        if ((error.message.includes('403') || error.message.includes('400')) && action !== 'tt_refresh_nonce') {
+          console.warn(`[AUTH] Otrzymano błąd ${error.message.match(/\d{3}/)[0]}. Prawdopodobnie wygasł nonce. Próba odświeżenia i ponowienia...`);
 
           // Krok 1: Odśwież nonce (bezpośrednie wywołanie fetch, aby uniknąć deadlocka w kolejce)
           const refreshBody = new URLSearchParams({ action: 'tt_refresh_nonce' });
@@ -220,6 +220,9 @@ class AuthManager {
     const result = await this.ajax('tt_ajax_logout');
 
     if (result.success) {
+      if (result.data?.new_nonce) {
+        ajax_object.nonce = result.data.new_nonce;
+      }
       State.set('isUserLoggedIn', false);
       State.set('currentUser', null);
       State.emit('user:logout');
