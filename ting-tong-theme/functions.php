@@ -832,10 +832,25 @@ add_filter('get_avatar_url', function ($url, $id_or_email, $args) {
     elseif (is_object($id_or_email) && isset($id_or_email->user_id)) $user_id = (int) $id_or_email->user_id;
     elseif (is_string($id_or_email) && ($user = get_user_by('email', $id_or_email))) $user_id = (int) $user->ID;
 
+    // Definicja Twojego domyślnego pliku
+    $default_avatar_url = get_template_directory_uri() . '/assets/img/default-user.png';
+
     if ($user_id > 0) {
+        // KROK 1: Sprawdź niestandardowy awatar motywu
         $custom = get_user_meta($user_id, 'tt_avatar_url', true);
-        if ($custom) return esc_url($custom);
+        if ($custom) {
+            return esc_url($custom); // Użyj awatara użytkownika, jeśli istnieje
+        }
+
+        // KROK 2: Jeśli brak awatara niestandardowego, zwróć Twój domyślny plik
+        return $default_avatar_url;
     }
+
+    // KROK 3: Dla wszystkich innych scenariuszy, gdzie WordPress normalnie użyłby Gravatara/domyślnego WP
+    if (strpos($url, 'gravatar.com') !== false || strpos($url, 's.w.org') !== false) {
+        return $default_avatar_url;
+    }
+
     return $url;
 }, 10, 3);
 

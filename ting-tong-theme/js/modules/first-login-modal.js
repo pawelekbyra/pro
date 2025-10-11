@@ -176,62 +176,20 @@ function setupPasswordStrength() {
 }
 
 /**
- * Keyboard handler dla mobilnych urządzeń
+ * Keyboard handler dla mobilnych urządzeń (WYŁĄCZONY)
+ * Ta funkcja została zastąpiona pustą wersją, aby wyłączyć reagowanie na klawiaturę
+ * i zablokować ruch modala na żądanie użytkownika.
  */
 function setupKeyboardListener() {
-  if (!dom.modal || !window.visualViewport) return;
+  if (!dom.modal) return;
 
-  let initialHeight = window.visualViewport.height;
-  let isKeyboardVisible = false;
-
-  const handleViewportChange = () => {
-    const currentHeight = window.visualViewport.height;
-    const heightDiff = initialHeight - currentHeight;
-    const newKeyboardState = heightDiff > 150;
-
-    if (newKeyboardState !== isKeyboardVisible) {
-      isKeyboardVisible = newKeyboardState;
-      dom.modal.classList.toggle('keyboard-visible', isKeyboardVisible);
-
-      // Scroll do aktywnego pola
-      if (isKeyboardVisible) {
-        // Dodaj klasę do body, aby uruchomić CSS-Fix
-        document.body.classList.add('keyboard-visible');
-
-        // Ustaw keyboard offset dla komentarzy (jeśli jest otwarta, FirstLoginModal używa własnej logiki)
-        dom.modal.style.setProperty("--keyboard-offset", `${heightDiff}px`);
-
-        setTimeout(() => {
-          const activeElement = document.activeElement;
-          if (activeElement && dom.modal.contains(activeElement)) {
-            const formGroup = activeElement.closest('.first-login-form-group');
-            if (formGroup && dom.body) {
-              // Scroll w body modalu
-              const offsetTop = formGroup.offsetTop - 20;
-              dom.body.scrollTo({ top: offsetTop, behavior: 'smooth' });
-            }
-          }
-        }, 100);
-      } else {
-        // Usuń klasę z body i resetuj offset
-        document.body.classList.remove('keyboard-visible');
-        dom.modal.style.removeProperty("--keyboard-offset");
-      }
+  // Upewniamy się, że klasa body zostanie usunięta przy zamknięciu modala.
+  const cleanupOnClose = (e) => {
+    if (e.target === dom.modal && !dom.modal.classList.contains('visible')) {
+      document.body.classList.remove('keyboard-visible');
     }
   };
-
-  window.visualViewport.addEventListener('resize', handleViewportChange);
-  window.visualViewport.addEventListener('scroll', handleViewportChange);
-
-  // Cleanup przy zamknięciu
-  dom.modal.addEventListener('transitionend', function cleanupOnClose(e) {
-    if (e.target === dom.modal && !dom.modal.classList.contains('visible')) {
-      isKeyboardVisible = false;
-      dom.modal.classList.remove('keyboard-visible');
-      document.body.classList.remove('keyboard-visible');
-      initialHeight = window.visualViewport.height;
-    }
-  });
+  dom.modal.addEventListener('transitionend', cleanupOnClose);
 }
 
 /**
