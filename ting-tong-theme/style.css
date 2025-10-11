@@ -26,7 +26,7 @@ Text Domain: tingtongtheme
 }
 
 /* ============================================================================
-   NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA "BOTTOM SHEET" (v2)
+   NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA "BOTTOM SHEET" (v4 - Finalna)
    ============================================================================ */
 .first-login-modal-overlay {
   position: fixed;
@@ -39,7 +39,7 @@ Text Domain: tingtongtheme
   -webkit-backdrop-filter: blur(8px) saturate(120%);
   z-index: 10020;
   display: flex;
-  align-items: flex-end; /* Kluczowe dla bottom-sheet */
+  align-items: flex-end;
   justify-content: center;
   opacity: 0;
   visibility: hidden;
@@ -53,7 +53,7 @@ Text Domain: tingtongtheme
 
 .first-login-modal-content-wrapper {
   width: 100%;
-  max-width: 600px; /* Ograniczenie na desktopie */
+  max-width: 600px;
   transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -69,9 +69,9 @@ Text Domain: tingtongtheme
   box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  height: 90vh; /* Wysokość modala */
+  height: 90vh;
   max-height: 700px;
-  position: relative; /* Dla .first-login-error */
+  position: relative;
 }
 
 .drag-handle-container {
@@ -131,25 +131,10 @@ Text Domain: tingtongtheme
   display: none;
 }
 
-/* Step containers for animation */
 .first-login-step {
   width: 100%;
-  animation: fadeIn 0.5s ease forwards;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.first-login-step[style*="display: none"] {
-    animation: none;
-}
-
-.first-login-body .is-exiting {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  max-width: 380px; /* Ograniczenie szerokości kontentu w kroku */
+  display: none; /* Ukryte domyślnie, JS zarządza widocznością */
 }
 
 .step-description {
@@ -157,7 +142,6 @@ Text Domain: tingtongtheme
   color: #8e8e93;
   line-height: 1.5;
   margin-bottom: 24px;
-  max-width: 380px;
 }
 
 .step-fields-container {
@@ -167,7 +151,6 @@ Text Domain: tingtongtheme
   gap: 16px;
 }
 
-/* Form inputs (reused Account Panel style) */
 .first-login-form-input {
   width: 100%;
   padding: 14px 16px;
@@ -194,7 +177,6 @@ Text Domain: tingtongtheme
     padding-left: 8px;
 }
 
-/* Preference Row (reused Account Panel style) */
 .preference-row {
   display: flex;
   justify-content: space-between;
@@ -209,44 +191,13 @@ Text Domain: tingtongtheme
   color: white;
 }
 
-/* Toggle Switch (reused Account Panel style) */
-#fl_email_consent {
-  position: relative;
-  width: 50px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-#fl_email_consent.active {
-  background: linear-gradient(135deg, #ff0055, #ff4081);
-  border-color: #ff0055;
-}
-#fl_email_consent .toggle-slider {
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 22px;
-  height: 22px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-#fl_email_consent.active .toggle-slider {
-  transform: translateX(26px);
-}
-
-/* Language Selector */
 .language-selector-compact {
   display: flex;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 4px;
-  margin-top: 8px; /* Offset od checkboxa */
+  margin-top: 8px;
 }
 .language-option-compact {
   flex: 1;
@@ -264,7 +215,6 @@ Text Domain: tingtongtheme
   color: white;
 }
 
-/* Email Display */
 .login-email-display {
   display: block;
   background: #2c2c2e;
@@ -273,7 +223,7 @@ Text Domain: tingtongtheme
   padding: 12px 16px;
   color: white;
   font-weight: 600;
-  margin-top: 8px;
+  margin: 8px 0 16px; /* Poprawiony margines */
   text-align: center;
 }
 
@@ -292,7 +242,6 @@ Text Domain: tingtongtheme
   gap: 12px;
 }
 
-/* Buttons (reused theme styles) */
 .first-login-nav-btn, .first-login-submit-btn {
   padding: 14px 24px;
   border-radius: 12px;
@@ -315,12 +264,8 @@ Text Domain: tingtongtheme
   background: #3a3a3c;
 }
 
-.first-login-nav-btn.next {
+.first-login-nav-btn.next, .first-login-submit-btn {
   background: var(--accent-color);
-  color: white;
-}
-.first-login-submit-btn {
-  background: var(--accent-color); /* Zgodne z przyciskiem Akcji */
   color: white;
 }
 
@@ -349,15 +294,6 @@ Text Domain: tingtongtheme
   background: rgba(255, 59, 48, 0.2);
   color: #ff453a;
 }
-
-/* Klawiatura visible patch */
-.first-login-modal-overlay.keyboard-visible .first-login-modal-content {
-  height: 90vh !important;
-  max-height: 90vh !important;
-  border-radius: 24px 24px 0 0 !important;
-  transform: translateY(0) !important;
-}
-
 /* --- Koniec NOWY MODAL PIERWSZEGO LOGOWANIA --- */
 
 .preloader-hiding {

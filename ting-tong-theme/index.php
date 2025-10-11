@@ -548,85 +548,67 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
+<!-- === First Login Modal (Mobile Bottom Sheet, Friendly UX, 3 Steps) === -->
 <div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title" aria-hidden="true">
   <div class="first-login-modal-content-wrapper">
     <form id="firstLoginForm" class="first-login-modal-content">
-      <div class="drag-handle-container">
-        <div class="drag-handle"></div>
-      </div>
+      <div class="drag-handle-container"><div class="drag-handle"></div></div>
 
       <div class="first-login-header">
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="firstLoginProgressBar"></div>
-        </div>
+        <div class="progress-bar-container"><div class="progress-bar-fill" id="firstLoginProgressBar"></div></div>
         <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle"></h2>
       </div>
 
       <div class="first-login-body" id="firstLoginBody">
         <div class="first-login-status-message first-login-status-error" id="firstLoginError" style="display: none;"></div>
 
+        <!-- Step 1 -->
         <div class="first-login-step" data-step="1">
           <p class="step-description" data-translate-key="firstLoginStep1Desc"></p>
           <div class="step-fields-container">
             <label class="preference-row first-login-consent-row">
               <span class="preference-label" data-translate-key="firstLoginConsentLabel"></span>
               <div class="toggle-switch" id="fl_email_consent">
-                <div class="toggle-slider"></div>
+                  <div class="toggle-slider"></div>
               </div>
             </label>
             <div id="languageOptions" class="language-selector-compact" style="display:none;">
-              <div class="language-option-compact active" data-lang="pl">
-                <span data-translate-key="emailLangPolish"></span>
-              </div>
-              <div class="language-option-compact" data-lang="en">
-                <span data-translate-key="emailLangEnglish"></span>
-              </div>
+              <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish">Polski</div>
+              <div class="language-option-compact" data-lang="en" data-translate-key="emailLangEnglish">English</div>
             </div>
           </div>
         </div>
 
+        <!-- Step 2 -->
         <div class="first-login-step" data-step="2" style="display:none;">
           <p class="step-description" data-translate-key="firstLoginStep2Desc"></p>
           <div class="step-fields-container">
-            <div class="first-login-form-group">
-              <input type="text" id="fl_firstname" class="first-login-form-input" placeholder="" data-translate-placeholder="firstNamePlaceholder" required autocomplete="given-name">
-            </div>
-            <div class="first-login-form-group">
-              <input type="text" id="fl_lastname" class="first-login-form-input" placeholder="" data-translate-placeholder="lastNamePlaceholder" required autocomplete="family-name">
-            </div>
+            <input type="text" id="fl_firstname" class="first-login-form-input" data-translate-placeholder="firstNamePlaceholder" autocomplete="given-name">
+            <input type="text" id="fl_lastname" class="first-login-form-input" data-translate-placeholder="lastNamePlaceholder" autocomplete="family-name">
             <p class="hint-text" data-translate-key="firstLoginNameHint"></p>
           </div>
         </div>
 
+        <!-- Step 3 -->
         <div class="first-login-step" data-step="3" style="display:none;">
-          <p class="step-description" data-translate-key="firstLoginStep3Desc">
-            <span class="login-email-display" id="fl_login_email"></span>
-          </p>
+          <p class="step-description" data-translate-key="firstLoginStep3Desc"></p>
+          <span class="login-email-display" id="fl_login_email"></span>
           <div class="step-fields-container">
-            <div class="first-login-form-group">
-              <input type="password" id="fl_new_password" class="first-login-form-input" placeholder="" data-translate-placeholder="newPasswordPlaceholder" required autocomplete="new-password" minlength="8">
-            </div>
-            <div class="first-login-form-group">
-              <input type="password" id="fl_confirm_password" class="first-login-form-input" placeholder="" data-translate-placeholder="confirmPasswordPlaceholder" required autocomplete="new-password" minlength="8">
-            </div>
+            <input type="password" id="fl_new_password" class="first-login-form-input" data-translate-placeholder="newPasswordPlaceholder" autocomplete="new-password">
+            <input type="password" id="fl_confirm_password" class="first-login-form-input" data-translate-placeholder="confirmPasswordPlaceholder" autocomplete="new-password">
           </div>
         </div>
       </div>
 
       <div class="first-login-footer">
         <div class="footer-buttons">
-          <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" style="display: none;">Wstecz</button>
-          <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn">Dalej</button>
-          <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" style="display: none;">Ukończ konfigurację</button>
+          <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" data-translate-key="firstLoginPrev"></button>
+          <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn" data-translate-key="firstLoginNext"></button>
+          <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmit"></button>
         </div>
       </div>
     </form>
   </div>
-</div>
-<div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">
-  <button id="mockLoginBtn" style="background: #ff0055; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; display: none;">
-    MOCK: Pokaż FirstLoginModal
-  </button>
 </div>
 
 <?php get_footer(); ?>
