@@ -218,6 +218,8 @@ export const Config = {
       firstLoginSubmit: "Zakończ 🎯",
       firstLoginStep1Desc: "Cieszymy się, że dołączyłeś! 😊<br>Na start możesz zdecydować, czy chcesz otrzymywać od nas maile z nowościami i poradami.",
       firstLoginConsentLabel: "Chcę otrzymywać maile",
+      emailLangPolish: "Polski",
+      emailLangEnglish: "English",
       firstLoginStep2Desc: "Powiedz nam, jak się nazywasz (lub wymyśl coś kreatywnego 😉).",
       firstLoginNameHint: "Nie musisz podawać prawdziwego imienia i nazwiska.",
       firstLoginStep3Desc: "Świetnie! 🎉<br>Do logowania będziesz używać swojego adresu e-mail:",
@@ -229,7 +231,6 @@ export const Config = {
       lastNamePlaceholder: "Nazwisko",
       newPasswordPlaceholder: "Nowe hasło",
       confirmPasswordPlaceholder: "Powtórz hasło",
-
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -407,6 +408,8 @@ export const Config = {
       firstLoginSubmit: "Finish 🎯",
       firstLoginStep1Desc: "We're glad you joined! 😊<br>To start, you can decide if you want to receive emails from us with news and tips.",
       firstLoginConsentLabel: "I want to receive emails",
+      emailLangPolish: "Polish",
+      emailLangEnglish: "English",
       firstLoginStep2Desc: "Tell us your name (or come up with something creative 😉).",
       firstLoginNameHint: "You don't have to use your real name.",
       firstLoginStep3Desc: "Great! 🎉<br>You'll use your email address to log in:",

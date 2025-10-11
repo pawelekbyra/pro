@@ -548,8 +548,9 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
+
 <!-- === First Login Modal (Mobile Bottom Sheet, Friendly UX, 3 Steps) === -->
-<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title" aria-hidden="true">
+<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="first-login-modal-content-wrapper">
     <form id="firstLoginForm" class="first-login-modal-content">
       <div class="drag-handle-container"><div class="drag-handle"></div></div>
@@ -560,17 +561,13 @@ get_header();
       </div>
 
       <div class="first-login-body" id="firstLoginBody">
-        <div class="first-login-status-message first-login-status-error" id="firstLoginError" style="display: none;"></div>
-
         <!-- Step 1 -->
         <div class="first-login-step" data-step="1">
           <p class="step-description" data-translate-key="firstLoginStep1Desc"></p>
           <div class="step-fields-container">
             <label class="preference-row first-login-consent-row">
               <span class="preference-label" data-translate-key="firstLoginConsentLabel"></span>
-              <div class="toggle-switch" id="fl_email_consent">
-                  <div class="toggle-slider"></div>
-              </div>
+              <input type="checkbox" id="emailConsent" class="first-login-checkbox">
             </label>
             <div id="languageOptions" class="language-selector-compact" style="display:none;">
               <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish"></div>
@@ -583,8 +580,8 @@ get_header();
         <div class="first-login-step" data-step="2" style="display:none;">
           <p class="step-description" data-translate-key="firstLoginStep2Desc"></p>
           <div class="step-fields-container">
-            <input type="text" id="fl_firstname" class="first-login-form-input" data-translate-placeholder="firstNamePlaceholder" autocomplete="given-name">
-            <input type="text" id="fl_lastname" class="first-login-form-input" data-translate-placeholder="lastNamePlaceholder" autocomplete="family-name">
+            <input type="text" id="firstName" class="first-login-form-input" data-translate-placeholder="firstNamePlaceholder">
+            <input type="text" id="lastName" class="first-login-form-input" data-translate-placeholder="lastNamePlaceholder">
             <p class="hint-text" data-translate-key="firstLoginNameHint"></p>
           </div>
         </div>
@@ -592,10 +589,10 @@ get_header();
         <!-- Step 3 -->
         <div class="first-login-step" data-step="3" style="display:none;">
           <p class="step-description" data-translate-key="firstLoginStep3Desc"></p>
-          <span class="login-email-display" id="fl_login_email"></span>
+          <span class="login-email-display"></span>
           <div class="step-fields-container">
-            <input type="password" id="fl_new_password" class="first-login-form-input" data-translate-placeholder="newPasswordPlaceholder" autocomplete="new-password">
-            <input type="password" id="fl_confirm_password" class="first-login-form-input" data-translate-placeholder="confirmPasswordPlaceholder" autocomplete="new-password">
+            <input type="password" id="password" class="first-login-form-input" data-translate-placeholder="newPasswordPlaceholder">
+            <input type="password" id="confirmPassword" class="first-login-form-input" data-translate-placeholder="confirmPasswordPlaceholder">
           </div>
         </div>
       </div>

@@ -860,14 +860,7 @@ export const Handlers = {
           if (topbar) topbar.classList.remove("login-panel-active");
 
           // Pokaż modal, używając danych z logowania.
-          try {
-            const { FirstLoginModal } = await import('./first-login-modal.js');
-            FirstLoginModal.showProfileCompletionModal();
-          } catch (error) {
-            console.error('Failed to load FirstLoginModal:', error);
-            UI.updateUIForLoginState();
-            UI.showAlert(Utils.getTranslation("loginSuccess"));
-          }
+          // LOGIKA ZOSTANIE PRZENIESIONA DO app.js
         } else {
           // Standardowe logowanie
           UI.updateUIForLoginState();
