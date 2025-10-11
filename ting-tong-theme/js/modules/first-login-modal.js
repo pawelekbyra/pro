@@ -301,22 +301,20 @@ function validateForm() {
     return false;
   }
 
-  // Walidacja hasła - tylko jeśli użytkownik je wprowadza
-  if (newPassword || confirmPassword) {
-    if (!newPassword || !confirmPassword) {
-      showError(Utils.getTranslation('firstLoginErrorMissingPasswords') || 'Uzupełnij oba pola hasła, jeśli chcesz je zmienić');
-      return false;
-    }
+  // Walidacja hasła - teraz jest zawsze wymagane przy pierwszym logowaniu.
+  if (!newPassword || !confirmPassword) {
+    showError(Utils.getTranslation('firstLoginErrorPasswordRequired') || 'Musisz ustawić nowe hasło.');
+    return false;
+  }
 
-    if (newPassword.length < 8) {
-      showError(Utils.getTranslation('passwordLengthError') || 'Hasło musi mieć min. 8 znaków');
-      return false;
-    }
+  if (newPassword.length < 8) {
+    showError(Utils.getTranslation('passwordLengthError') || 'Hasło musi mieć min. 8 znaków');
+    return false;
+  }
 
-    if (newPassword !== confirmPassword) {
-      showError(Utils.getTranslation('passwordsMismatchError') || 'Hasła muszą być identyczne');
-      return false;
-    }
+  if (newPassword !== confirmPassword) {
+    showError(Utils.getTranslation('passwordsMismatchError') || 'Hasła muszą być identyczne');
+    return false;
   }
 
   return true;
