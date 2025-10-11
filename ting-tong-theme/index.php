@@ -36,7 +36,7 @@ get_header();
                         <svg class="eye-icon-closed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
                     </button>
                 </div>
-                <button type="submit" id="tt-login-submit">ENTER</button>
+                <button type="submit" id="tt-login-submit">ENTER.</button>
             </form>
         </div>
     <div class="logged-in-menu" aria-hidden="true">
@@ -548,116 +548,149 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<!-- MODAL PIERWSZEGO LOGOWANIA - NOWA, 3-ETAPOWA WERSJA -->
+<!-- MODAL PIERWSZEGO LOGOWANIA - ZAKTUALIZOWANY -->
 <div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title">
+  <!-- ✅ FIX: Formularz obejmuje teraz całą zawartość modala -->
   <form id="firstLoginForm" class="first-login-modal-content">
 
-    <!-- Nagłówek i Pasek Postępu -->
+    <!-- Header z powitaniem -->
     <div class="first-login-header">
-      <h2 id="first-login-title" class="first-login-title">Konfiguracja Konta</h2>
-      <div class="first-login-progress-bar">
-        <div class="progress-step active" data-step="1">
-          <div class="step-icon">1</div>
-          <div class="step-label" data-translate-key="flmStep1">Dane</div>
-        </div>
-        <div class="progress-step" data-step="2">
-          <div class="step-icon">2</div>
-          <div class="step-label" data-translate-key="flmStep2">Hasło</div>
-        </div>
-        <div class="progress-step" data-step="3">
-          <div class="step-icon">3</div>
-          <div class="step-label" data-translate-key="flmStep3">Zgody</div>
-        </div>
+      <div class="first-login-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+        </svg>
       </div>
+      <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle">Witaj na Ting Tongu!</h2>
+      <p class="first-login-subtitle" data-translate-key="firstLoginSubtitle">Uzupełnij swój profil, aby kontynuować</p>
     </div>
 
-    <!-- Kontener na kroki -->
-    <div class="first-login-steps-container">
+    <!-- Body ze scrollem -->
+    <div class="first-login-body">
 
-      <!-- Krok 1: Dane Osobowe -->
-      <div class="first-login-step active" data-step="1">
-        <div class="first-login-step-header">
-          <h3 class="first-login-step-title" data-translate-key="flmStep1Title">Opowiedz nam coś o sobie</h3>
-          <p class="first-login-step-subtitle" data-translate-key="flmStep1Subtitle">Wypełnij podstawowe informacje, abyśmy wiedzieli, jak się do Ciebie zwracać.</p>
+      <!-- ✅ NOWA SEKCJA ZGÓD - subtelna, mała -->
+      <div class="first-login-preferences">
+        <div class="preference-row">
+          <span class="preference-label" data-translate-key="emailConsentLabel">Powiadomienia mailowe</span>
+          <div class="toggle-switch active" id="firstLoginEmailConsent">
+            <div class="toggle-slider"></div>
+          </div>
         </div>
-        <div class="first-login-email-display">
-            <span class="first-login-email-label" data-translate-key="firstLoginEmailLabel">Logujesz się jako:</span>
-            <strong id="firstLoginEmail">user@example.com</strong>
+        <div class="preference-row">
+          <span class="preference-label" data-translate-key="emailLanguageLabel">Język maili</span>
+          <div class="language-selector-compact">
+            <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish">PL</div>
+            <div class="language-option-compact" data-lang="en" data-translate-key="emailLangEnglish">EN</div>
+          </div>
         </div>
+      </div>
+
+      <!-- Wyświetlenie emaila logowania -->
+      <div class="first-login-email-display">
+        <div class="first-login-email-label" data-translate-key="firstLoginEmailLabel">Logujesz się za pomocą</div>
+        <div class="first-login-email-value" id="firstLoginEmail">user@example.com</div>
+      </div>
+
+      <!-- SEKCJA 1: Dane Osobowe -->
+      <div class="first-login-section">
+        <h3 class="first-login-section-title" data-translate-key="firstLoginPersonalDataTitle">Dane Osobowe</h3>
+
         <div class="first-login-form-row">
           <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginFirstName"><span data-translate-key="firstNameLabel">Imię</span><span class="required">*</span></label>
-            <input type="text" id="firstLoginFirstName" class="first-login-form-input" placeholder="Np. Jan" required autocomplete="given-name">
+            <label class="first-login-form-label" for="firstLoginFirstName">
+              <span data-translate-key="firstLoginFirstNameLabel">Imię</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstLoginFirstName"
+              class="first-login-form-input"
+              data-translate-placeholder="firstLoginFirstNamePlaceholder"
+              placeholder="Np. Jan lub zmyślone"
+              required
+              autocomplete="given-name"
+            >
           </div>
+
           <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginLastName"><span data-translate-key="lastNameLabel">Nazwisko</span><span class="required">*</span></label>
-            <input type="text" id="firstLoginLastName" class="first-login-form-input" placeholder="Np. Kowalski" required autocomplete="family-name">
+            <label class="first-login-form-label" for="firstLoginLastName">
+              <span data-translate-key="firstLoginLastNameLabel">Nazwisko</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstLoginLastName"
+              class="first-login-form-input"
+              data-translate-placeholder="firstLoginLastNamePlaceholder"
+              placeholder="Np. Kowalski lub zmyślone"
+              required
+              autocomplete="family-name"
+            >
           </div>
         </div>
+
         <div class="first-login-form-hint" data-translate-key="firstLoginPersonalDataHint">
-          💡 Możesz użyć prawdziwych lub całkowicie zmyślonych danych.
+          💡 Wskazówka: Możesz użyć prawdziwych lub całkowicie zmyślonych danych
         </div>
       </div>
 
-      <!-- Krok 2: Ustawienie Hasła -->
-      <div class="first-login-step" data-step="2">
-        <div class="first-login-step-header">
-          <h3 class="first-login-step-title" data-translate-key="flmStep2Title">Zabezpiecz swoje konto</h3>
-          <p class="first-login-step-subtitle" data-translate-key="flmStep2Subtitle">Utwórz silne hasło, aby nikt niepowołany nie dostał się na Twoje konto.</p>
-        </div>
+      <!-- SEKCJA 2: Zmiana Hasła (BEZ CURRENT PASSWORD) -->
+      <div class="first-login-section">
+        <h3 class="first-login-section-title" data-translate-key="firstLoginPasswordTitle">Ustaw Nowe Hasło</h3>
+
         <div class="first-login-form-group">
-          <label class="first-login-form-label" for="firstLoginNewPassword"><span data-translate-key="newPasswordLabel">Nowe hasło</span><span class="required">*</span></label>
-          <input type="password" id="firstLoginNewPassword" class="first-login-form-input" placeholder="Minimum 8 znaków" required autocomplete="new-password">
+          <label class="first-login-form-label" for="firstLoginNewPassword">
+            <span data-translate-key="firstLoginNewPasswordLabel">Nowe hasło</span>
+            <span class="required">*</span>
+          </label>
+          <input
+            type="password"
+            id="firstLoginNewPassword"
+            class="first-login-form-input"
+            data-translate-placeholder="firstLoginNewPasswordPlaceholder"
+            placeholder="Minimum 8 znaków"
+            required
+            autocomplete="new-password"
+          >
           <div class="password-strength-indicator" id="passwordStrengthIndicator">
-              <div class="password-strength-bar" id="passwordStrengthBar"></div>
-              <div class="password-strength-text" id="passwordStrengthText"></div>
+            <div class="password-strength-bar" id="passwordStrengthBar"></div>
           </div>
+          <div class="password-strength-text" id="passwordStrengthText"></div>
         </div>
+
         <div class="first-login-form-group">
-          <label class="first-login-form-label" for="firstLoginConfirmPassword"><span data-translate-key="confirmPasswordLabel">Powtórz hasło</span><span class="required">*</span></label>
-          <input type="password" id="firstLoginConfirmPassword" class="first-login-form-input" placeholder="Wpisz ponownie nowe hasło" required autocomplete="new-password">
-        </div>
-      </div>
-
-      <!-- Krok 3: Zgody i Ustawienia -->
-      <div class="first-login-step" data-step="3">
-        <div class="first-login-step-header">
-          <h3 class="first-login-step-title" data-translate-key="flmStep3Title">Ostatnie szlify</h3>
-          <p class="first-login-step-subtitle" data-translate-key="flmStep3Subtitle">Dostosuj ustawienia powiadomień do swoich preferencji.</p>
-        </div>
-        <div class="first-login-preferences">
-          <div class="preference-row">
-            <div class="preference-text">
-                <label class="preference-label" data-translate-key="emailConsentLabel">Powiadomienia mailowe</label>
-                <p class="preference-description" data-translate-key="emailConsentDesc">Otrzymuj informacje o nowościach i ważnych aktualizacjach.</p>
-            </div>
-            <div class="toggle-switch active" id="firstLoginEmailConsent">
-              <div class="toggle-slider"></div>
-            </div>
-          </div>
-          <div class="preference-row">
-            <div class="preference-text">
-                <label class="preference-label" data-translate-key="emailLanguageLabel">Język powiadomień</label>
-                <p class="preference-description" data-translate-key="emailLanguageDesc">Wybierz język, w którym będziemy się z Tobą kontaktować.</p>
-            </div>
-            <div class="language-selector-compact">
-              <div class="language-option-compact active" data-lang="pl">PL</div>
-              <div class="language-option-compact" data-lang="en">EN</div>
-            </div>
+          <label class="first-login-form-label" for="firstLoginConfirmPassword">
+            <span data-translate-key="firstLoginConfirmPasswordLabel">Powtórz nowe hasło</span>
+            <span class="required">*</span>
+          </label>
+          <input
+            type="password"
+            id="firstLoginConfirmPassword"
+            class="first-login-form-input"
+            data-translate-placeholder="firstLoginConfirmPasswordPlaceholder"
+            placeholder="Wpisz ponownie nowe hasło"
+            required
+            autocomplete="new-password"
+          >
+          <div class="first-login-form-hint" data-translate-key="firstLoginPasswordHelperText">
+            Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Stopka z przyciskami i wiadomościami -->
-    <div class="first-login-footer">
+      <!-- Status Messages -->
+      <div class="first-login-status-message first-login-status-success" id="firstLoginSuccess"></div>
       <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
-      <div class="first-login-nav">
-        <button type="button" class="first-login-nav-btn prev-step-btn" data-translate-key="flmBackBtn">Wstecz</button>
-        <button type="button" class="first-login-nav-btn next-step-btn" data-translate-key="flmNextBtn">Dalej</button>
-        <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="flmSubmitBtn">Zakończ konfigurację</button>
-      </div>
+
     </div>
+
+    <!-- Footer z przyciskiem -->
+    <div class="first-login-footer">
+      <!-- ✅ FIX: Usunięto atrybut `form`, ponieważ przycisk jest teraz wewnątrz formularza -->
+      <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmitBtn">
+        Gotowe! Przejdź do aplikacji
+      </button>
+    </div>
+
   </form>
 </div>
 
