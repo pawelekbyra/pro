@@ -484,6 +484,21 @@ export const Handlers = {
     );
 
     switch (action) {
+      case "toggle-password-visibility":
+        const passwordInput = document.getElementById('tt-password');
+        const eyeOpen = actionTarget.querySelector('.eye-icon-open');
+        const eyeClosed = actionTarget.querySelector('.eye-icon-closed');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeOpen.style.display = 'none';
+            eyeClosed.style.display = 'block';
+        } else {
+            passwordInput.type = 'password';
+            eyeOpen.style.display = 'block';
+            eyeClosed.style.display = 'none';
+        }
+        break;
       case "toggle-emoji-picker":
         UI.toggleEmojiPicker();
         break;

@@ -277,7 +277,16 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
     $user = wp_signon($login_data, is_ssl());
 
     if (is_wp_error($user)) {
-        wp_send_json_error(['message' => 'Błędne dane logowania.']);
+        $error_code = $user->get_error_code();
+        $error_message = 'Błędne dane logowania. Spróbuj ponownie.';
+
+        if ($error_code === 'invalid_username' || $error_code === 'invalid_email') {
+            $error_message = 'Użytkownik o podanej nazwie lub e-mailu nie istnieje.';
+        } elseif ($error_code === 'incorrect_password') {
+            $error_message = 'Podane hasło jest nieprawidłowe. Sprawdź je i spróbuj jeszcze raz.';
+        }
+
+        wp_send_json_error(['message' => $error_message]);
     } else {
         wp_set_current_user($user->ID);
         wp_set_auth_cookie($user->ID, true, is_ssl());
