@@ -211,64 +211,30 @@ export const Config = {
       fileReadError: "Nie można odczytać pliku",
       immersiveModePwaOnly: "Działa w apce",
 
-      // --- NOWE KLUCZE DLA MODALA PIERWSZEGO LOGOWANIA (WERSJA PREMIUM) ---
-      firstLoginStep1Title: {
-        pl: 'Witaj w Ting Tong!',
-        en: 'Welcome to Ting Tong!',
-      },
-      firstLoginStep1Description: {
-        pl: 'Zanim zaczniemy, musimy uzupełnić kilka informacji w Twoim profilu. To zajmie tylko chwilę.',
-        en: "Before we start, we need to complete some information in your profile. It'll just take a moment.",
-      },
-      firstLoginEmailLabel: {
-        pl: 'Twój e-mail do logowania to:',
-        en: 'Your login email is:',
-      },
-      firstLoginEmailHint: {
-        pl: '<strong>Zapamiętaj go!</strong> Będziesz go używać do logowania w przyszłości.',
-        en: '<strong>Remember it!</strong> You will use it to log in in the future.',
-      },
-      firstLoginStep2Title: {
-        pl: 'Uzupełnij swoje dane',
-        en: 'Complete your details',
-      },
-      firstLoginStep2Description: {
-        pl: 'Możesz użyć prawdziwych lub zmyślonych danych. Twoja prywatność jest dla nas ważna.',
-        en: 'You can use real or made-up data. Your privacy is important to us.',
-      },
-      firstLoginStep3Title: {
-        pl: 'Ustawienia powiadomień',
-        en: 'Notification Settings',
-      },
-      firstLoginStep3Description: {
-        pl: 'Wybierz, w jaki sposób i w jakim języku chcesz otrzymywać od nas wiadomości.',
-        en: 'Choose how and in what language you want to receive messages from us.',
-      },
-      firstLoginSubmitBtn: {
-        pl: 'Ukończ konfigurację',
-        en: 'Complete setup',
-      },
-      prevButton: {
-        pl: 'Wstecz',
-        en: 'Back',
-      },
-      nextButton: {
-        pl: 'Dalej',
-        en: 'Next',
-      },
-      // Komunikaty o błędach
-      errorMinPasswordLength: {
-        pl: 'Hasło musi mieć co najmniej 8 znaków.',
-        en: 'Password must be at least 8 characters long.',
-      },
-      errorPasswordsMismatch: {
-        pl: 'Wprowadzone hasła nie są identyczne.',
-        en: 'The entered passwords do not match.',
-      },
-      errorMissingNames: {
-        pl: 'Imię i nazwisko są polami wymaganymi.',
-        en: 'First and last name are required fields.',
-      },
+      // --- KLUCZE DLA MODALA PIERWSZEGO LOGOWANIA ---
+      // Ogólne
+      firstLoginPrev: "Wstecz",
+      firstLoginNext: "Dalej",
+      firstLoginSubmit: "Zapisz i zakończ",
+
+      // Krok 1: Język
+      firstLoginStep1Title: "Wybierz język powiadomień",
+      firstLoginStep1Desc: "Będziemy wysyłać Ci powiadomienia i maile w wybranym języku. Zawsze możesz to zmienić w ustawieniach konta.",
+
+      // Krok 2: Zgoda
+      firstLoginStep2Title: "Zgoda na powiadomienia",
+      firstLoginStep2Desc: "Chcemy wysyłać Ci okazjonalnie informacje o nowościach i promocjach. Obiecujemy nie spamować!",
+      firstLoginConsentLabel: "Tak, chcę otrzymywać powiadomienia",
+
+      // Krok 3: Dane i hasło
+      firstLoginStep3Title: "Uzupełnij swój profil",
+      firstLoginStep3Desc: "To ostatni krok! Ustaw swoje imię, nazwisko oraz nowe, bezpieczne hasło, którego będziesz używać do logowania.",
+
+      // Błędy
+      errorMinPasswordLength: 'Hasło musi mieć co najmniej 8 znaków.',
+      errorPasswordsMismatch: 'Wprowadzone hasła nie są identyczne.',
+      errorMissingNames: 'Imię i nazwisko są polami wymaganymi.',
+      errorPasswordRequired: 'Musisz ustawić nowe hasło.',
 
     }, // KONIEC 'pl'
     en: {
@@ -440,50 +406,30 @@ export const Config = {
       fileReadError: "Cannot read file",
       immersiveModePwaOnly: "Works in app",
 
-      // --- NEW KEYS FOR PREMIUM FIRST LOGIN MODAL ---
-      firstLoginStep1Title: {
-        en: 'Welcome to Ting Tong!',
-      },
-      firstLoginStep1Description: {
-        en: "Before we start, we need to complete some information in your profile. It'll just take a moment.",
-      },
-      firstLoginEmailLabel: {
-        en: 'Your login email is:',
-      },
-      firstLoginEmailHint: {
-        en: '<strong>Remember it!</strong> You will use it to log in in the future.',
-      },
-      firstLoginStep2Title: {
-        en: 'Complete your details',
-      },
-      firstLoginStep2Description: {
-        en: 'You can use real or made-up data. Your privacy is important to us.',
-      },
-      firstLoginStep3Title: {
-        en: 'Notification Settings',
-      },
-      firstLoginStep3Description: {
-        en: 'Choose how and in what language you want to receive messages from us.',
-      },
-      firstLoginSubmitBtn: {
-        en: 'Complete setup',
-      },
-      prevButton: {
-        en: 'Back',
-      },
-      nextButton: {
-        en: 'Next',
-      },
-      // Error Messages
-      errorMinPasswordLength: {
-        en: 'Password must be at least 8 characters long.',
-      },
-      errorPasswordsMismatch: {
-        en: 'The entered passwords do not match.',
-      },
-      errorMissingNames: {
-        en: 'First and last name are required fields.',
-      },
+      // --- KEYS FOR FIRST LOGIN MODAL ---
+      // General
+      firstLoginPrev: "Back",
+      firstLoginNext: "Next",
+      firstLoginSubmit: "Save and finish",
+
+      // Step 1: Language
+      firstLoginStep1Title: "Choose notification language",
+      firstLoginStep1Desc: "We will send you notifications and emails in the selected language. You can always change this in your account settings.",
+
+      // Step 2: Consent
+      firstLoginStep2Title: "Notification Consent",
+      firstLoginStep2Desc: "We would like to occasionally send you information about new features and promotions. We promise not to spam!",
+      firstLoginConsentLabel: "Yes, I want to receive notifications",
+
+      // Step 3: Data and Password
+      firstLoginStep3Title: "Complete Your Profile",
+      firstLoginStep3Desc: "This is the final step! Set your first name, last name, and a new, secure password that you will use to log in.",
+
+      // Errors
+      errorMinPasswordLength: 'Password must be at least 8 characters long.',
+      errorPasswordsMismatch: 'The entered passwords do not match.',
+      errorMissingNames: 'First and last name are required fields.',
+      errorPasswordRequired: 'You must set a new password.',
 
     }, // KONIEC 'en'
   },
