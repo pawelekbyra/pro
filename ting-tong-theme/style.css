@@ -297,6 +297,45 @@ Text Domain: tingtongtheme
   color: white;
 }
 
+/* NOWE STYLE DLA KROKÓW W MODALU PIERWSZEGO LOGOWANIA */
+
+/* Krok 1: Wybór języka */
+.first-login-lang-selector {
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+.first-login-lang-selector .language-option-compact {
+  font-size: 16px;
+  padding: 14px 28px;
+  border: 1px solid #4a4a4a;
+}
+.first-login-lang-selector .language-option-compact.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+}
+
+/* Krok 2: Zgoda na powiadomienia */
+.first-login-consent-row {
+  padding: 24px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 16px;
+  border: 1px solid #4a4a4a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.first-login-consent-row:hover {
+  border-color: #666;
+}
+.first-login-consent-row .preference-label {
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.first-login-consent-row .toggle-switch {
+  transform: scale(1.2);
+}
+
 .preloader-hiding {
   opacity: 0;
   pointer-events: none;
