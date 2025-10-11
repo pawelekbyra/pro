@@ -573,8 +573,8 @@ get_header();
               </div>
             </label>
             <div id="languageOptions" class="language-selector-compact" style="display:none;">
-              <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish">Polski</div>
-              <div class="language-option-compact" data-lang="en" data-translate-key="emailLangEnglish">English</div>
+              <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish"></div>
+              <div class="language-option-compact" data-lang="en" data-translate-key="emailLangEnglish"></div>
             </div>
           </div>
         </div>
