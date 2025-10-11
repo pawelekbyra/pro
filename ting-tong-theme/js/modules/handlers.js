@@ -686,6 +686,11 @@ export const Handlers = {
 
             UI.showAlert(Utils.getTranslation("logoutSuccess"));
 
+            // W ostateczności, przeładuj stronę, aby zapewnić czysty stan
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+
           } catch (error) {
             console.error('Logout error:', error);
             UI.showAlert(error.message || 'Logout failed', true);
@@ -857,7 +862,7 @@ export const Handlers = {
           // Pokaż modal, używając danych z logowania.
           try {
             const { FirstLoginModal } = await import('./first-login-modal.js');
-            FirstLoginModal.checkProfileAndShowModal(result.userData);
+            FirstLoginModal.showProfileCompletionModal();
           } catch (error) {
             console.error('Failed to load FirstLoginModal:', error);
             UI.updateUIForLoginState();

@@ -130,12 +130,6 @@ function setupEventListeners() {
     });
 }
 
-function checkProfileAndShowModal(userData) {
-    // Pokaż modal, jeśli flaga `requires_first_login_setup` jest prawdziwa
-    if (userData && userData.requires_first_login_setup) {
-        showProfileCompletionModal();
-    }
-}
 
 function showProfileCompletionModal() {
     if (!dom.modal) return;
@@ -270,5 +264,5 @@ function init() {
 
 export const FirstLoginModal = {
     init,
-    checkProfileAndShowModal,
+    showProfileCompletionModal,
 };
