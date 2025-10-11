@@ -152,8 +152,6 @@ function init() {
     lastNameInput: document.getElementById('firstLoginLastName'),
     newPasswordInput: document.getElementById('firstLoginNewPassword'),
     confirmPasswordInput: document.getElementById('firstLoginConfirmPassword'),
-    emailConsentToggle: document.getElementById('firstLoginEmailConsent'),
-    languageSelector: document.querySelector('.language-selector-compact'),
 
     // Komunikaty i wskaźniki
     errorEl: document.getElementById('firstLoginError'),
@@ -177,28 +175,34 @@ function init() {
  * Konfiguracja wszystkich event listenerów dla modalu.
  */
 function setupEventListeners() {
-  dom.form.addEventListener('submit', handleFormSubmit);
+    if (!dom.form) return;
 
-  dom.nextBtn.addEventListener('click', () => {
-    if (validateStep()) {
-        goToStep(state.currentStep + 1);
-    }
-  });
+    dom.form.addEventListener('submit', handleFormSubmit);
 
-  dom.prevBtn.addEventListener('click', () => {
-    goToStep(state.currentStep - 1);
-  });
+    dom.nextBtn.addEventListener('click', () => {
+        if (validateStep()) {
+            goToStep(state.currentStep + 1);
+        }
+    });
 
-  dom.emailConsentToggle?.addEventListener('click', () => {
-    dom.emailConsentToggle.classList.toggle('active');
-  });
+    dom.prevBtn.addEventListener('click', () => {
+        goToStep(state.currentStep - 1);
+    });
 
-  dom.languageSelector?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('language-option-compact')) {
-      dom.languageSelector.querySelector('.active')?.classList.remove('active');
-      e.target.classList.add('active');
-    }
-  });
+    // Delegacja obsługi kliknięć dla dynamicznych elementów kroku 3
+    dom.form.addEventListener('click', (e) => {
+        const consentToggle = e.target.closest('#firstLoginEmailConsent');
+        if (consentToggle) {
+            consentToggle.classList.toggle('active');
+        }
+
+        const langOption = e.target.closest('.language-option-compact');
+        if (langOption) {
+            const langSelector = langOption.closest('.language-selector-compact');
+            langSelector.querySelector('.active')?.classList.remove('active');
+            langOption.classList.add('active');
+        }
+    });
 }
 
 /**
@@ -248,8 +252,11 @@ async function handleFormSubmit(e) {
   e.preventDefault();
 
   // Zbierz dane z ostatniego kroku
-  state.formData.email_consent = dom.emailConsentToggle.classList.contains('active');
-  state.formData.email_language = dom.languageSelector.querySelector('.active').dataset.lang || 'pl';
+  const emailConsentToggle = dom.form.querySelector('#firstLoginEmailConsent');
+  const languageSelector = dom.form.querySelector('.language-selector-compact');
+
+  state.formData.email_consent = emailConsentToggle?.classList.contains('active') ?? false;
+  state.formData.email_language = languageSelector?.querySelector('.active')?.dataset.lang || 'pl';
 
   const originalText = dom.submitBtn.textContent;
   dom.submitBtn.disabled = true;
