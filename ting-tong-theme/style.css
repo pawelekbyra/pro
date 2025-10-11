@@ -1475,8 +1475,10 @@ body,
   align-items: center;
   gap: 8px;
   z-index: 2001;
-  white-space: nowrap;
-  animation: fadeInOut 3s ease-in-out forwards;
+  white-space: normal; /* Allow text to wrap */
+  text-align: center; /* Center the text */
+  max-width: 90%; /* Prevent it from touching the screen edges */
+  animation: fadeInOut 4s ease-in-out forwards; /* Increased duration for longer messages */
 }
 #alertBox.visible {
   display: flex;
