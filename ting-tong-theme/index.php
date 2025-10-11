@@ -548,37 +548,43 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<!-- NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA PREMIUM -->
+<!-- NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA "ZAJEBISTA" (Bottom Sheet) -->
 <div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title" aria-hidden="true">
-  <form id="firstLoginForm" class="first-login-modal-content">
-
-    <!-- Nagłówek ze wskaźnikiem postępu -->
-    <div class="first-login-header">
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill" id="firstLoginProgressBar"></div>
+  <div class="first-login-modal-content-wrapper">
+    <form id="firstLoginForm" class="first-login-modal-content">
+      <!-- Uchwyt do przeciągania -->
+      <div class="drag-handle-container">
+        <div class="drag-handle"></div>
       </div>
-      <h2 id="first-login-title" class="first-login-title"></h2>
-    </div>
 
-    <!-- Kontener na dynamiczną treść kroku -->
-    <div class="first-login-body">
-      <div class="step-icon-container" id="firstLoginStepIcon"></div>
-      <p class="step-description" id="firstLoginStepDescription"></p>
-      <div class="step-fields-container" id="firstLoginStepFields">
-        <!-- Pola formularza będą renderowane tutaj przez JS -->
+      <!-- Nagłówek ze wskaźnikiem postępu -->
+      <div class="first-login-header">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="firstLoginProgressBar"></div>
+        </div>
+        <h2 id="first-login-title" class="first-login-title"></h2>
       </div>
-    </div>
 
-    <!-- Stopka z przyciskami i komunikatami -->
-    <div class="first-login-footer">
-      <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
-      <div class="footer-buttons">
-        <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" style="display: none;">Wstecz</button>
-        <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn">Dalej</button>
-        <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" style="display: none;">Ukończ konfigurację</button>
+      <!-- Kontener na dynamiczną treść kroku -->
+      <div class="first-login-body">
+        <div class="step-icon-container" id="firstLoginStepIcon"></div>
+        <p class="step-description" id="firstLoginStepDescription"></p>
+        <div class="step-fields-container" id="firstLoginStepFields">
+          <!-- Pola formularza będą renderowane tutaj przez JS -->
+        </div>
       </div>
-    </div>
-  </form>
+
+      <!-- Stopka z przyciskami i komunikatami -->
+      <div class="first-login-footer">
+        <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
+        <div class="footer-buttons">
+          <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" style="display: none;">Wstecz</button>
+          <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn">Dalej</button>
+          <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" style="display: none;">Ukończ konfigurację</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Debug Tools -->

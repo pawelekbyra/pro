@@ -77,74 +77,83 @@ function trapFocus(modal) {
   return () => modal.removeEventListener("keydown", handleKeyDown);
 }
 
-function openModal(modal) {
-  State.set("lastFocusedElement", document.activeElement);
-  DOM.container.setAttribute("aria-hidden", "true");
-  modal.classList.add("visible");
-  modal.setAttribute("aria-hidden", "false");
-  const focusable = getFocusable(modal);
-  (focusable.length > 0
-    ? focusable[0]
-    : modal.querySelector(".modal-content")
-  )?.focus();
-  modal._focusTrapDispose = trapFocus(modal);
+const activeModals = new Set();
+
+function openModal(modal, options = {}) {
+    if (!modal) return;
+
+    modal.classList.add('visible');
+    activeModals.add(modal);
+
+    if (activeModals.size === 1) {
+        document.body.style.overflow = 'hidden';
+    }
+
+    if (options.onOpen) {
+        options.onOpen();
+    }
+
+    // Store the onClose callback on the element itself
+    if (options.onClose) {
+        modal.onCloseCallback = options.onClose;
+    }
+
+    State.set("lastFocusedElement", document.activeElement);
+    DOM.container.setAttribute("aria-hidden", "true");
+    modal.setAttribute("aria-hidden", "false");
+    const focusable = getFocusable(modal);
+    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .first-login-modal-content"))?.focus();
+    modal._focusTrapDispose = trapFocus(modal);
 }
 
 function closeModal(modal) {
-  if (!modal || modal.classList.contains("is-hiding")) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
 
-  const modalContent = modal.querySelector(
-    ".modal-content, .tiktok-profile-content, .account-modal-content"
-  );
-  const isAnimated = modalContent && (
-    modal.id === "tiktok-profile-modal" ||
-    modal.id === "commentsModal" ||
-    modal.id === "accountModal"
-  );
+    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
 
-  modal.classList.add("is-hiding");
-  modal.setAttribute("aria-hidden", "true");
+    modal.classList.add("is-hiding");
+    modal.setAttribute("aria-hidden", "true");
 
-  const cleanup = () => {
-    modal.removeEventListener("transitionend", cleanup);
-    modal.classList.remove("visible", "is-hiding");
-    if (modal._focusTrapDispose) {
-      modal._focusTrapDispose();
-      delete modal._focusTrapDispose;
+    const cleanup = () => {
+        modal.removeEventListener("transitionend", cleanup);
+        modal.classList.remove("visible", "is-hiding");
+
+        if (modal._focusTrapDispose) {
+            modal._focusTrapDispose();
+            delete modal._focusTrapDispose;
+        }
+
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            document.body.style.overflow = '';
+        }
+
+        DOM.container.removeAttribute("aria-hidden");
+        State.get("lastFocusedElement")?.focus();
+
+        // Execute and clear the onClose callback
+        if (typeof modal.onCloseCallback === 'function') {
+            modal.onCloseCallback();
+            delete modal.onCloseCallback;
+        }
+
+        if (modal.id === "commentsModal") {
+            State.set("replyingToComment", null, true);
+            const replyContext = document.querySelector(".reply-context");
+            if (replyContext) replyContext.style.display = "none";
+            if (typeof UI.removeCommentImage === 'function') UI.removeCommentImage();
+            const commentInput = document.querySelector("#comment-input");
+            if (commentInput) commentInput.value = "";
+        }
+    };
+
+    if (isAnimated) {
+        modal.addEventListener("transitionend", cleanup, { once: true });
+        setTimeout(cleanup, 500); // Fallback
+    } else {
+        cleanup();
     }
-    DOM.container.removeAttribute("aria-hidden");
-    State.get("lastFocusedElement")?.focus();
-    // NOWE: Wyczyść state związany z komentarzami przy zamykaniu modala
-    if (modal.id === "commentsModal") {
-      State.set("replyingToComment", null, true); // silent = true
-
-      // Usuń reply context
-      const replyContext = document.querySelector(".reply-context");
-      if (replyContext) {
-        replyContext.style.display = "none";
-      }
-
-      // Wyczyść załączony obraz
-      if (typeof UI.removeCommentImage === 'function') {
-        UI.removeCommentImage();
-      }
-
-      // Wyczyść input
-      const commentInput = document.querySelector("#comment-input");
-      if (commentInput) {
-        commentInput.value = "";
-      }
-    }
-  };
-
-  if (isAnimated) {
-    modal.addEventListener("transitionend", cleanup, { once: true });
-    // Fallback timeout
-    setTimeout(cleanup, 500);
-  } else {
-    // For non-animated modals, cleanup immediately
-    cleanup();
-  }
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
