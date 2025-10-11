@@ -1662,20 +1662,29 @@ body,
 /* Header */
 #commentsModal .modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Center title */
   align-items: center;
   position: relative;
-  padding: 4px 8px;
+  padding: 0 12px;
   flex-shrink: 0;
-  height: 40px;
-  border-bottom: 1px solid #333;
+  height: 44px;
+  border-bottom: 1px solid #3a3b3c;
+}
+
+#commentsModal .modal-title {
+  font-size: 15px; /* Reduced font size */
+  font-weight: 600; /* Less bold */
+  color: #e4e6eb;
+  margin: 0;
 }
 
 #commentsModal .modal-close-btn {
   color: #b0b3b8;
   opacity: 1;
-  position: static;
-  transform: none;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 30px;
   height: 30px;
   font-size: 24px;
@@ -2184,8 +2193,10 @@ body,
 
 /* Sort Options */
 .comment-sort-options {
-  position: static;
-  transform: none;
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 10;
   flex-shrink: 0;
 }

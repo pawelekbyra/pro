@@ -373,101 +373,40 @@ export const Handlers = {
       const dropdown = sortOption.closest(".sort-dropdown");
       const newSortOrder = sortOption.dataset.sort;
 
-      // Jeśli ten sam sort order - tylko zamknij dropdown
       if (State.get("commentSortOrder") === newSortOrder) {
         dropdown.classList.remove("open");
         return;
       }
 
-      // Disable wszystkie opcje podczas requestu
-      const allOptions = dropdown.querySelectorAll(".sort-option");
-      allOptions.forEach(opt => opt.style.pointerEvents = 'none');
-
-      // Zaktualizuj UI
       State.set("commentSortOrder", newSortOrder);
-      UI.updateTranslations();
-      allOptions.forEach((opt) => opt.classList.remove("active"));
+      dropdown.querySelectorAll(".sort-option").forEach((opt) => opt.classList.remove("active"));
       sortOption.classList.add("active");
+      UI.updateTranslations();
       dropdown.classList.remove("open");
 
       const slideId = document.querySelector(".swiper-slide-active")?.dataset.slideId;
+      if (!slideId) return;
 
-      if (!slideId) {
-        console.error('No active slide found for sorting');
-        allOptions.forEach(opt => opt.style.pointerEvents = '');
+      const slideData = slidesData.find(s => s.id === slideId);
+      if (!slideData || !Array.isArray(slideData.comments)) {
+        console.error("No local comments to sort for slide:", slideId);
+        UI.showAlert(Utils.getTranslation("commentSortError"), true);
         return;
       }
 
-      const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
-      const commentsList = modalBody?.querySelector(".comments-list");
+      let comments = [...slideData.comments]; // Create a copy to sort
 
-      if (commentsList) {
-        commentsList.style.opacity = "0.5";
-        commentsList.style.transition = "opacity 0.2s ease-in-out";
+      if (newSortOrder === "popular") {
+        comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      } else { // 'newest'
+        comments.sort((a, b) => {
+            const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+            const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+            return dateB - dateA;
+        });
       }
 
-      API.fetchComments(slideId)
-        .then((response) => {
-          // Walidacja
-          if (!response || typeof response.success !== 'boolean') {
-            throw new Error('Invalid response format');
-          }
-
-          if (!response.success) {
-            throw new Error(response.data?.message || 'Failed to fetch comments');
-          }
-
-          let comments = response.data;
-
-          if (!Array.isArray(comments)) {
-            console.warn('Comments data is not an array');
-            comments = [];
-          }
-
-          // Sortowanie z zabezpieczeniem przed undefined
-          if (newSortOrder === "popular") {
-            comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-          } else {
-            comments.sort((a, b) => {
-              const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
-              const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
-              return dateB - dateA;
-            });
-          }
-
-          // Render z opóźnieniem dla animacji
-          setTimeout(() => {
-            UI.renderComments(comments);
-          }, 200);
-        })
-        .catch((error) => {
-          console.error('Sort comments error:', error);
-          UI.showAlert(
-            error.message || Utils.getTranslation('commentLoadError') || 'Błąd sortowania',
-            true
-          );
-
-          // Przywróć poprzedni sort order
-          const previousSort = newSortOrder === 'popular' ? 'newest' : 'popular';
-          State.set("commentSortOrder", previousSort);
-
-          allOptions.forEach((opt) => {
-            opt.classList.remove("active");
-            if (opt.dataset.sort === previousSort) {
-              opt.classList.add("active");
-            }
-          });
-        })
-        .finally(() => {
-          // Re-enable opcje
-          allOptions.forEach(opt => opt.style.pointerEvents = '');
-
-          // Przywróć opacity
-          if (commentsList) {
-            commentsList.style.opacity = "1";
-          }
-        });
-
+      UI.renderComments(comments);
       return;
     }
 
@@ -647,6 +586,12 @@ export const Handlers = {
             if (!Array.isArray(comments)) {
               console.warn('Comments data is not an array, using empty array');
               comments = [];
+            }
+
+            // Store comments in local cache
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData) {
+                slideData.comments = comments;
             }
 
             // Sortowanie
