@@ -4122,7 +4122,7 @@ body,
     border-left: 1px solid #333;
     border-right: 1px solid #333;
     /* ZMIEŃ: Użyj intensywnego cienia z akcentem kolorystycznym */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 0, 85, 0.15);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 85, 0.25);
   }
 
   /* App frame - jeśli używasz */
@@ -4163,19 +4163,19 @@ body,
     height: 100%;
     background: radial-gradient(
       circle at center,
-      rgba(255, 0, 85, 0.07) 0%, /* Jasny punkt w centrum */
-      rgba(255, 0, 85, 0.03) 25%,
-      transparent 70%
+      rgba(255, 0, 85, 0.12) 0%, /* Jaśniejszy punkt w centrum */
+      rgba(255, 0, 85, 0.05) 30%, /* Większy zasięg */
+      transparent 65%
     );
-    opacity: 0.8;
+    opacity: 0.9;
     z-index: -1;
     pointer-events: none;
-    animation: subtleShimmer 10s ease-in-out infinite;
+    animation: subtleShimmer 8s ease-in-out infinite;
   }
 
   @keyframes subtleShimmer {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 0.9; }
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.1); opacity: 1; }
   }
 }
 
