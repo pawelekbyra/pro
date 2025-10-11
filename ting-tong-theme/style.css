@@ -53,7 +53,7 @@ Text Domain: tingtongtheme
   visibility: visible;
 }
 
-/* Content - full height modal, CAŁOŚĆ przewijalna */
+/* Content - Kontener formularza, który teraz jest elastyczny */
 .first-login-modal-content {
   background: #1f1f1f;
   width: 100%;
@@ -62,7 +62,8 @@ Text Domain: tingtongtheme
   flex-direction: column;
   position: relative;
   opacity: 1;
-  overflow-y: auto; /* CAŁY modal jest przewijalny */
+  /* ✅ FIX: Usunięto overflow, przewijanie będzie w `.first-login-body` */
+  overflow-y: hidden;
   border-radius: 0;
   border: none;
   box-shadow: none;
@@ -73,7 +74,7 @@ Text Domain: tingtongtheme
   transform: none;
 }
 
-/* Header - statyczny, przewija się z resztą */
+/* Header - statyczny, nie przewija się */
 .first-login-header {
   background: linear-gradient(135deg, #ff0055 0%, #ff4081 100%);
   padding: 20px 20px 16px;
@@ -82,7 +83,7 @@ Text Domain: tingtongtheme
   position: relative;
   flex-shrink: 0;
   border-radius: 0;
-  z-index: 1; /* Obniżony z-index, nie jest już potrzebny wysoki */
+  z-index: 1;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
@@ -118,12 +119,13 @@ Text Domain: tingtongtheme
   line-height: 1.4;
 }
 
-/* Body - już nie potrzebuje własnego scrolla */
+/* Body - teraz to jest główny obszar przewijania */
 .first-login-body {
   padding: 16px 20px 20px;
   flex-grow: 1;
   min-height: 0;
-  /* usunięto overflow-y: auto; */
+  /* ✅ FIX: Dodano przewijanie tylko dla tej części */
+  overflow-y: auto;
 }
 
 /* Sekcja preferencji - kompaktowa */
@@ -333,16 +335,16 @@ Text Domain: tingtongtheme
   gap: 12px;
 }
 
-/* Footer - dopracowany, z lepszym oddzieleniem wizualnym */
+/* Footer - teraz jest statyczny na dole */
 .first-login-footer {
   padding: 16px 20px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   flex-shrink: 0;
-  background: #1f1f1f; /* Dopasowanie do tła body dla płynniejszego wyglądu */
+  background: #1f1f1f;
   border-top: 1px solid rgba(255,255,255,0.1);
   z-index: 1;
-  /* Dodajemy cień, aby stworzyć iluzję głębi przy przewijaniu */
-  box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
+  /* ✅ FIX: Usunięto cień, który był potrzebny przy przewijaniu */
+  box-shadow: none;
 }
 
 .first-login-submit-btn {
