@@ -15,6 +15,9 @@ let lastX = 0;
 let lastY = 0;
 let minScale = 1;
 let maxScale = 3;
+// NOWE: Zmienne do obsługi pinch-to-zoom
+let initialPinchDistance = null;
+let lastScale = 1;
 
 // Global state for settings
 let userSettings = {
@@ -301,12 +304,12 @@ function handleFileSelect(event) {
   if (!file) return;
   if (!file.type.startsWith("image/"))
     return showError(
-      "profileError",
+      "avatarError",
       Utils.getTranslation("fileSelectImageError"),
     );
   if (file.size > 5 * 1024 * 1024)
     return showError(
-      "profileError",
+      "avatarError",
       Utils.getTranslation("fileTooLargeError"),
     );
 
@@ -403,21 +406,52 @@ function drag(event) {
 function endDrag() {
   isDragging = false;
   cropCanvas.style.cursor = "grab";
+  // Resetuj stan pinch-to-zoom po zakończeniu przeciągania lub szczypania
+  initialPinchDistance = null;
+  lastScale = 1;
 }
+
+function getDistance(p1, p2) {
+  const dx = p1.clientX - p2.clientX;
+  const dy = p1.clientY - p2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
 function handleTouchStart(event) {
   event.preventDefault();
   if (event.touches.length === 1) {
     const touch = event.touches[0];
     startDrag({ clientX: touch.clientX, clientY: touch.clientY });
+  } else if (event.touches.length === 2) {
+    isDragging = false; // Zatrzymaj przeciąganie, aby uniknąć konfliktów
+    initialPinchDistance = getDistance(event.touches[0], event.touches[1]);
+    lastScale = scale; // Zaczynamy skalowanie od bieżącej skali
   }
 }
+
 function handleTouchMove(event) {
   event.preventDefault();
   if (event.touches.length === 1 && isDragging) {
     const touch = event.touches[0];
     drag({ clientX: touch.clientX, clientY: touch.clientY });
+  } else if (event.touches.length === 2 && initialPinchDistance) {
+    const newDistance = getDistance(event.touches[0], event.touches[1]);
+    const scaleMultiplier = newDistance / initialPinchDistance;
+    let newScale = lastScale * scaleMultiplier;
+
+    // Ogranicz skalę do zdefiniowanych min/max
+    newScale = Math.max(minScale, Math.min(maxScale, newScale));
+
+    // Bezpośrednio zaktualizuj skalę i suwak
+    scale = newScale;
+    document.getElementById("zoomSlider").value = scale;
+
+    // Przerysuj canvas z nową skalą
+    constrainOffsets();
+    drawCropCanvas();
   }
 }
+
 function adjustZoom(delta) {
   const newScale = Math.max(minScale, Math.min(maxScale, scale + delta));
   scale = newScale;
@@ -482,7 +516,7 @@ async function cropAndSave() {
       currentUser.avatar = newAvatarUrl;
       State.set('currentUser', currentUser);
       showSuccess(
-        "profileSuccess",
+        "avatarSuccess",
         Utils.getTranslation("avatarUpdateSuccess"),
       );
       closeCropModal();
@@ -500,7 +534,7 @@ async function cropAndSave() {
     // Ulepszona obsługa błędów - upewnienie się, że `error` ma sensowną wiadomość
     const message = error instanceof Error ? error.message : String(error);
     showError(
-      "profileError",
+      "avatarError",
       message || Utils.getTranslation("imageProcessingError"),
     );
   } finally {
