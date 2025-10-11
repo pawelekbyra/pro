@@ -716,7 +716,6 @@ export const Handlers = {
 
           actionTarget.disabled = true;
           const originalText = actionTarget.textContent;
-          actionTarget.textContent = '...';
 
           try {
             await authManager.logout();
