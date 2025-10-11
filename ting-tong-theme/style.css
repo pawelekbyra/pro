@@ -1354,16 +1354,50 @@ body,
 }
 
 /* === LOGIN PANEL NEW STYLE === */
+.login-panel .login-form .password-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .login-panel .login-form input[type="text"],
 .login-panel .login-form input[type="password"] {
   background: white;
   border: 2px solid black;
   font-weight: bold;
   color: black;
-  padding: 8px 10px;
+  padding: 8px 40px 8px 10px; /* Add padding to the right for the icon */
   border-radius: 4px;
   width: 100%;
   font-size: 16px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.password-toggle-btn:hover {
+  opacity: 1;
+}
+
+.password-toggle-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: black;
 }
 
 .login-panel .login-form button[type="submit"] {
