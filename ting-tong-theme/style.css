@@ -1386,18 +1386,19 @@ body,
   align-items: center;
   justify-content: center;
   padding: 0;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  opacity: 1; /* Make fully opaque */
+  transition: transform 0.2s;
 }
 
 .password-toggle-btn:hover {
-  opacity: 1;
+  transform: scale(1.1);
 }
 
 .password-toggle-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: black;
+  width: 22px; /* Slightly larger */
+  height: 22px; /* Slightly larger */
+  fill: black; /* Use fill for solid icons */
+  stroke: none; /* No stroke needed */
 }
 
 .login-panel .login-form button[type="submit"] {
@@ -1466,20 +1467,29 @@ body,
   bottom: calc(var(--bottombar-height) + 20px);
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: #000000; /* Solid black background */
   color: white;
-  padding: 10px 16px;
-  border-radius: 20px;
+  padding: 12px 20px; /* Increased padding */
+  border-radius: 24px; /* Slightly larger radius */
   font-size: 14px;
+  font-weight: 500;
   display: none;
   align-items: center;
-  gap: 8px;
+  gap: 10px; /* Increased gap */
   z-index: 2001;
-  white-space: normal; /* Allow text to wrap */
-  text-align: center; /* Center the text */
-  max-width: 90%; /* Prevent it from touching the screen edges */
-  animation: fadeInOut 4s ease-in-out forwards; /* Increased duration for longer messages */
+  white-space: normal;
+  text-align: center;
+  max-width: 80%; /* Adjusted max-width to encourage two lines */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* Stronger shadow */
+  animation: fadeInOut 4s ease-in-out forwards;
 }
+
+#alertBox svg {
+    width: 22px !important; /* Increased icon size */
+    height: 22px !important; /* Increased icon size */
+    flex-shrink: 0;
+}
+
 #alertBox.visible {
   display: flex;
 }
