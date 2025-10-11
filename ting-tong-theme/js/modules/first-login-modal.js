@@ -12,30 +12,39 @@ function cacheDOM() {
     dom = {
         modal: document.getElementById('firstLoginModal'),
         form: document.getElementById('firstLoginForm'),
-        title: document.getElementById('first-login-title'),
-        progressBar: document.getElementById('firstLoginProgressBar'),
-        steps: document.querySelectorAll('.first-login-step'),
-        prevBtn: document.getElementById('firstLoginPrevBtn'),
-        nextBtn: document.getElementById('firstLoginNextBtn'),
-        submitBtn: document.getElementById('firstLoginSubmitBtn'),
-
-        consentCheckbox: document.getElementById('emailConsent'),
-        langOptions: document.getElementById('languageOptions'),
-        firstNameInput: document.querySelector('.first-login-step[data-step="2"] #firstName'),
-        lastNameInput: document.querySelector('.first-login-step[data-step="2"] #lastName'),
-        passwordInput: document.querySelector('.first-login-step[data-step="3"] #password'),
-        confirmPasswordInput: document.querySelector('.first-login-step[data-step="3"] #confirmPassword'),
-        emailDisplay: document.querySelector('.login-email-display'),
+        title: document.getElementById('flTitle'),
+        progressBar: document.getElementById('flProgressBar'),
+        steps: document.querySelectorAll('.fl-step'),
+        prevBtn: document.getElementById('flPrevBtn'),
+        nextBtn: document.getElementById('flNextBtn'),
+        submitBtn: document.getElementById('flSubmitBtn'),
+        consentCheckbox: document.getElementById('flEmailConsent'),
+        langOptionsContainer: document.getElementById('flLanguageOptions'),
+        langOptions: document.querySelectorAll('.fl-language-option'),
+        firstNameInput: document.getElementById('flFirstName'),
+        lastNameInput: document.getElementById('flLastName'),
+        passwordInput: document.getElementById('flPassword'),
+        confirmPasswordInput: document.getElementById('flConfirmPassword'),
+        emailDisplay: document.querySelector('.fl-email-display'),
     };
 }
 
 function updateStepDisplay() {
     if (!dom.modal) return;
-    dom.steps.forEach((s, i) => s.style.display = i === currentStep ? 'block' : 'none');
-    dom.prevBtn.style.display = currentStep === 0 ? 'none' : 'block';
-    dom.nextBtn.style.display = currentStep === totalSteps - 1 ? 'none' : 'block';
-    dom.submitBtn.style.display = currentStep === totalSteps - 1 ? 'block' : 'none';
-    if(dom.progressBar) {
+
+    dom.steps.forEach((stepEl, i) => {
+        if (i === currentStep) {
+            stepEl.classList.add('active');
+        } else {
+            stepEl.classList.remove('active');
+        }
+    });
+
+    dom.prevBtn.style.display = currentStep === 0 ? 'none' : 'inline-flex';
+    dom.nextBtn.style.display = currentStep === totalSteps - 1 ? 'none' : 'inline-flex';
+    dom.submitBtn.style.display = currentStep === totalSteps - 1 ? 'inline-flex' : 'none';
+
+    if (dom.progressBar) {
         dom.progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
     }
 }
@@ -58,20 +67,19 @@ function handlePrevStep() {
 }
 
 function validateStep(step) {
-    // Prosta walidacja, można rozbudować
-    if (step === 1) {
+    if (step === 1) { // Krok Imię/Nazwisko
         if (!dom.firstNameInput.value.trim() || !dom.lastNameInput.value.trim()) {
-            UI.showAlert('Imię i nazwisko są wymagane.', true);
+            UI.showAlert(Utils.getTranslation('firstLoginNameError'), true);
             return false;
         }
     }
-    if (step === 2) {
+    if (step === 2) { // Krok Hasło
         if (dom.passwordInput.value.length < 8) {
-            UI.showAlert('Hasło musi mieć co najmniej 8 znaków.', true);
+            UI.showAlert(Utils.getTranslation('firstLoginPasswordLengthError'), true);
             return false;
         }
         if (dom.passwordInput.value !== dom.confirmPasswordInput.value) {
-            UI.showAlert('Hasła nie są takie same.', true);
+            UI.showAlert(Utils.getTranslation('firstLoginPasswordMismatchError'), true);
             return false;
         }
     }
@@ -81,7 +89,7 @@ function validateStep(step) {
 function collectData(step) {
     if (step === 0) {
         formData.email_consent = dom.consentCheckbox.checked;
-        const activeLang = dom.langOptions.querySelector('.language-option-compact.active');
+        const activeLang = dom.langOptionsContainer.querySelector('.fl-language-option.active');
         formData.email_language = activeLang ? activeLang.dataset.lang : 'pl';
     } else if (step === 1) {
         formData.first_name = dom.firstNameInput.value.trim();
@@ -96,7 +104,7 @@ async function handleFormSubmit(e) {
     if (!validateStep(currentStep)) return;
     collectData(currentStep);
 
-    UI.showToast('Zapisywanie danych...');
+    UI.showToast(Utils.getTranslation('savingDataToast'));
 
     try {
         const result = await authManager.ajax('tt_complete_profile', formData, true);
@@ -104,11 +112,11 @@ async function handleFormSubmit(e) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
             document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
-            UI.showToast('Profil zaktualizowany! 🎉', 'success');
+            UI.showToast(Utils.getTranslation('profileUpdatedToast'), 'success');
             hideModal();
             setTimeout(() => location.reload(), 500);
         } else {
-            throw new Error(result.data?.message || 'Wystąpił błąd.');
+            throw new Error(result.data?.message || Utils.getTranslation('genericError'));
         }
     } catch (error) {
         UI.showAlert(error.message, true);
@@ -122,12 +130,12 @@ function setupEventListeners() {
     dom.form?.addEventListener('submit', handleFormSubmit);
 
     dom.consentCheckbox?.addEventListener('change', e => {
-        dom.langOptions.style.display = e.target.checked ? 'flex' : 'none';
+        dom.langOptionsContainer.classList.toggle('visible', e.target.checked);
     });
 
-    dom.langOptions?.querySelectorAll('.language-option-compact').forEach(opt => {
+    dom.langOptions?.forEach(opt => {
         opt.addEventListener('click', () => {
-            dom.langOptions.querySelectorAll('.language-option-compact').forEach(o => o.classList.remove('active'));
+            dom.langOptions.forEach(o => o.classList.remove('active'));
             opt.classList.add('active');
         });
     });
