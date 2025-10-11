@@ -419,7 +419,27 @@ get_header();
 </div>
 
 <div class="crop-modal" id="cropModal">
+    <div class="crop-modal-content">
+        <div class="crop-header">
+            <h3 data-translate-key="cropAvatarTitle">Przytnij avatar</h3>
+            <button id="cropCloseBtn" class="close-btn" data-translate-aria-label="closeAriaLabel">&times;</button>
+        </div>
+        <div class="crop-body">
+            <div class="crop-canvas-container">
+                <canvas id="cropCanvas" width="300" height="300"></canvas>
+                <div class="crop-overlay-circle"></div>
+            </div>
+        </div>
+        <div class="crop-footer">
+            <div class="zoom-controls">
+                <button id="zoomOutBtn" class="zoom-btn" data-translate-aria-label="zoomOutAriaLabel" aria-label="Oddal">-</button>
+                <input type="range" id="zoomSlider" class="zoom-slider" min="1" max="3" step="0.01">
+                <button id="zoomInBtn" class="zoom-btn" data-translate-aria-label="zoomInAriaLabel" aria-label="Przybliż">+</button>
+            </div>
+            <button id="cropSaveBtn" class="btn-primary" data-translate-key="saveAvatarBtn">Zapisz avatar</button>
+        </div>
     </div>
+</div>
 <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
 
 <div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true">
