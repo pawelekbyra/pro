@@ -326,7 +326,10 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
 add_action( 'wp_ajax_tt_ajax_logout', function () {
 	check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
 	wp_logout();
-	wp_send_json_success( [ 'message' => 'Wylogowano pomyślnie.' ] );
+	wp_send_json_success( [
+		'message'   => 'Wylogowano pomyślnie.',
+		'new_nonce' => wp_create_nonce( 'tt_ajax_nonce' ),
+	] );
 } );
 add_action( 'wp_ajax_tt_refresh_nonce', function() {
 	wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
