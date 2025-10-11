@@ -4378,10 +4378,21 @@ body.keyboard-visible #app-frame {
  */
 body.keyboard-visible .modal-overlay,
 body.keyboard-visible .notification-popup,
-body.keyboard-visible .image-lightbox,
+body.keyboard-visible .image-lightbox {
+  position: absolute !important;
+}
+
+/*
+ * KROK 3.1: Napraw pozycjonowanie paska PWA.
+ * Musi stać się `position: absolute` i być przyklejony do dołu.
+ */
 body.keyboard-visible .pwa-prompt,
 body.keyboard-visible .pwa-prompt-ios {
   position: absolute !important;
+  bottom: 0 !important;
+  /* Upewniamy się, że transformacja nie przesuwa go w górę.
+     Pasek powinien być już widoczny (translateY(0)), gdy pojawia się klawiatura. */
+  transform: translateY(0) !important;
 }
 
 /*
