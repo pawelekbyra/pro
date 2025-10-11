@@ -244,6 +244,10 @@ get_header();
                     </div>
                 </div>
 
+                <!-- ✅ NOWE: Kontenery na wiadomości o statusie avatara -->
+                <div class="status-message status-success" id="avatarSuccess" style="margin-top: 16px;"></div>
+                <div class="status-message status-error" id="avatarError" style="margin-top: 16px;"></div>
+
                 <div class="form-section">
                     <h3 class="section-title" data-translate-key="personalDataHeader">Dane osobowe</h3>
 
