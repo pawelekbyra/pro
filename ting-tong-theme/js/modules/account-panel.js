@@ -155,9 +155,8 @@ function populateProfileForm(data) {
 
   if (userAvatar && data.avatar) {
     userAvatar.src = data.avatar;
-    userAvatar.onerror = function() {
-      this.src = 'https://i.pravatar.cc/96?u=' + (data.email || 'default');
-    };
+    // Usunięcie sekcji .onerror gwarantuje, że nie będzie używany losowy awatar z i.pravatar.cc.
+    // Wszelkie błędy ładowania będą wyświetlać pusty obraz, aż do załadowania tego z functions.php.
   }
 }
 
