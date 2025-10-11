@@ -550,7 +550,8 @@ get_header();
 
 <!-- MODAL PIERWSZEGO LOGOWANIA - ZAKTUALIZOWANY -->
 <div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title">
-  <div class="first-login-modal-content">
+  <!-- ✅ FIX: Formularz obejmuje teraz całą zawartość modala -->
+  <form id="firstLoginForm" class="first-login-modal-content">
 
     <!-- Header z powitaniem -->
     <div class="first-login-header">
@@ -589,97 +590,92 @@ get_header();
         <div class="first-login-email-value" id="firstLoginEmail">user@example.com</div>
       </div>
 
-      <!-- Formularz -->
-      <form id="firstLoginForm">
+      <!-- SEKCJA 1: Dane Osobowe -->
+      <div class="first-login-section">
+        <h3 class="first-login-section-title" data-translate-key="firstLoginPersonalDataTitle">Dane Osobowe</h3>
 
-        <!-- SEKCJA 1: Dane Osobowe -->
-        <div class="first-login-section">
-          <h3 class="first-login-section-title" data-translate-key="firstLoginPersonalDataTitle">Dane Osobowe</h3>
-
-          <div class="first-login-form-row">
-            <div class="first-login-form-group">
-              <label class="first-login-form-label" for="firstLoginFirstName">
-                <span data-translate-key="firstLoginFirstNameLabel">Imię</span>
-                <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstLoginFirstName"
-                class="first-login-form-input"
-                data-translate-placeholder="firstLoginFirstNamePlaceholder"
-                placeholder="Np. Jan lub zmyślone"
-                required
-                autocomplete="given-name"
-              >
-            </div>
-
-            <div class="first-login-form-group">
-              <label class="first-login-form-label" for="firstLoginLastName">
-                <span data-translate-key="firstLoginLastNameLabel">Nazwisko</span>
-                <span class="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstLoginLastName"
-                class="first-login-form-input"
-                data-translate-placeholder="firstLoginLastNamePlaceholder"
-                placeholder="Np. Kowalski lub zmyślone"
-                required
-                autocomplete="family-name"
-              >
-            </div>
-          </div>
-
-          <div class="first-login-form-hint" data-translate-key="firstLoginPersonalDataHint">
-            💡 Wskazówka: Możesz użyć prawdziwych lub całkowicie zmyślonych danych
-          </div>
-        </div>
-
-        <!-- SEKCJA 2: Zmiana Hasła (BEZ CURRENT PASSWORD) -->
-        <div class="first-login-section">
-          <h3 class="first-login-section-title" data-translate-key="firstLoginPasswordTitle">Ustaw Nowe Hasło</h3>
-
+        <div class="first-login-form-row">
           <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginNewPassword">
-              <span data-translate-key="firstLoginNewPasswordLabel">Nowe hasło</span>
+            <label class="first-login-form-label" for="firstLoginFirstName">
+              <span data-translate-key="firstLoginFirstNameLabel">Imię</span>
               <span class="required">*</span>
             </label>
             <input
-              type="password"
-              id="firstLoginNewPassword"
+              type="text"
+              id="firstLoginFirstName"
               class="first-login-form-input"
-              data-translate-placeholder="firstLoginNewPasswordPlaceholder"
-              placeholder="Minimum 8 znaków"
+              data-translate-placeholder="firstLoginFirstNamePlaceholder"
+              placeholder="Np. Jan lub zmyślone"
               required
-              autocomplete="new-password"
+              autocomplete="given-name"
             >
-            <div class="password-strength-indicator" id="passwordStrengthIndicator">
-              <div class="password-strength-bar" id="passwordStrengthBar"></div>
-            </div>
-            <div class="password-strength-text" id="passwordStrengthText"></div>
           </div>
 
           <div class="first-login-form-group">
-            <label class="first-login-form-label" for="firstLoginConfirmPassword">
-              <span data-translate-key="firstLoginConfirmPasswordLabel">Powtórz nowe hasło</span>
+            <label class="first-login-form-label" for="firstLoginLastName">
+              <span data-translate-key="firstLoginLastNameLabel">Nazwisko</span>
               <span class="required">*</span>
             </label>
             <input
-              type="password"
-              id="firstLoginConfirmPassword"
+              type="text"
+              id="firstLoginLastName"
               class="first-login-form-input"
-              data-translate-placeholder="firstLoginConfirmPasswordPlaceholder"
-              placeholder="Wpisz ponownie nowe hasło"
+              data-translate-placeholder="firstLoginLastNamePlaceholder"
+              placeholder="Np. Kowalski lub zmyślone"
               required
-              autocomplete="new-password"
+              autocomplete="family-name"
             >
-            <div class="first-login-form-hint" data-translate-key="firstLoginPasswordHelperText">
-              Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.
-            </div>
           </div>
         </div>
 
-      </form>
+        <div class="first-login-form-hint" data-translate-key="firstLoginPersonalDataHint">
+          💡 Wskazówka: Możesz użyć prawdziwych lub całkowicie zmyślonych danych
+        </div>
+      </div>
+
+      <!-- SEKCJA 2: Zmiana Hasła (BEZ CURRENT PASSWORD) -->
+      <div class="first-login-section">
+        <h3 class="first-login-section-title" data-translate-key="firstLoginPasswordTitle">Ustaw Nowe Hasło</h3>
+
+        <div class="first-login-form-group">
+          <label class="first-login-form-label" for="firstLoginNewPassword">
+            <span data-translate-key="firstLoginNewPasswordLabel">Nowe hasło</span>
+            <span class="required">*</span>
+          </label>
+          <input
+            type="password"
+            id="firstLoginNewPassword"
+            class="first-login-form-input"
+            data-translate-placeholder="firstLoginNewPasswordPlaceholder"
+            placeholder="Minimum 8 znaków"
+            required
+            autocomplete="new-password"
+          >
+          <div class="password-strength-indicator" id="passwordStrengthIndicator">
+            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+          </div>
+          <div class="password-strength-text" id="passwordStrengthText"></div>
+        </div>
+
+        <div class="first-login-form-group">
+          <label class="first-login-form-label" for="firstLoginConfirmPassword">
+            <span data-translate-key="firstLoginConfirmPasswordLabel">Powtórz nowe hasło</span>
+            <span class="required">*</span>
+          </label>
+          <input
+            type="password"
+            id="firstLoginConfirmPassword"
+            class="first-login-form-input"
+            data-translate-placeholder="firstLoginConfirmPasswordPlaceholder"
+            placeholder="Wpisz ponownie nowe hasło"
+            required
+            autocomplete="new-password"
+          >
+          <div class="first-login-form-hint" data-translate-key="firstLoginPasswordHelperText">
+            Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.
+          </div>
+        </div>
+      </div>
 
       <!-- Status Messages -->
       <div class="first-login-status-message first-login-status-success" id="firstLoginSuccess"></div>
@@ -689,12 +685,13 @@ get_header();
 
     <!-- Footer z przyciskiem -->
     <div class="first-login-footer">
-      <button type="submit" form="firstLoginForm" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmitBtn">
+      <!-- ✅ FIX: Usunięto atrybut `form`, ponieważ przycisk jest teraz wewnątrz formularza -->
+      <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmitBtn">
         Gotowe! Przejdź do aplikacji
       </button>
     </div>
 
-  </div>
+  </form>
 </div>
 
 <!-- Debug Tools -->
