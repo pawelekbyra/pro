@@ -216,6 +216,7 @@ function init() {
   console.log('[PWA] 🚀 Initializing PWA module...');
 
   if (installButton) {
+    installButton.disabled = true;
     installButton.addEventListener("click", handleInstallClick);
   }
 
@@ -249,44 +250,42 @@ function init() {
     iosCloseButton.addEventListener("click", hideIosInstructions);
   }
 
-  // Initial check po opóźnieniu
-  setTimeout(() => {
-    console.log('[PWA] 🔍 Running initial standalone check...');
-    const isConfirmed = runStandaloneCheck();
+  // Initial check
+  console.log('[PWA] 🔍 Running initial standalone check...');
+  const isConfirmed = runStandaloneCheck();
 
-    // ✅ Tylko jeśli NIE jest zainstalowana, obserwuj zmiany
-    if (!isConfirmed) {
-      // Sprawdź ponownie gdy użytkownik wraca do karty
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          console.log('[PWA] 👁️ Page visible - rechecking installation status');
-          runStandaloneCheck();
+  // ✅ Tylko jeśli NIE jest zainstalowana, obserwuj zmiany
+  if (!isConfirmed) {
+    // Sprawdź ponownie gdy użytkownik wraca do karty
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[PWA] 👁️ Page visible - rechecking installation status');
+        runStandaloneCheck();
+      }
+    });
+
+    // Obserwuj koniec preloadera
+    const preloader = document.getElementById("preloader");
+    if (preloader) {
+      const observer = new MutationObserver(() => {
+        if (preloader.classList.contains("preloader-hiding")) {
+          setTimeout(() => {
+            if (!isStandalone() && installBar && !installBar.classList.contains("visible")) {
+              console.log('[PWA] 📣 Showing install bar after preloader');
+              installBar.classList.add("visible");
+              installBar.setAttribute('aria-hidden', 'false');
+
+              const appFrame = document.getElementById("app-frame");
+              if (appFrame) {
+                appFrame.classList.add("app-frame--pwa-visible");
+              }
+            }
+          }, 500);
         }
       });
-
-      // Obserwuj koniec preloadera
-      const preloader = document.getElementById("preloader");
-      if (preloader) {
-        const observer = new MutationObserver(() => {
-          if (preloader.classList.contains("preloader-hiding")) {
-            setTimeout(() => {
-              if (!isStandalone() && installBar && !installBar.classList.contains("visible")) {
-                console.log('[PWA] 📣 Showing install bar after preloader');
-                installBar.classList.add("visible");
-                installBar.setAttribute('aria-hidden', 'false');
-
-                const appFrame = document.getElementById("app-frame");
-                if (appFrame) {
-                  appFrame.classList.add("app-frame--pwa-visible");
-                }
-              }
-            }, 500);
-          }
-        });
-        observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
-      }
+      observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
     }
-  }, 1000);
+  }
 }
 
 export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };

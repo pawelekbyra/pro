@@ -71,9 +71,16 @@ self.addEventListener('fetch', event => {
   // Dla żądań non-GET lub zapytań AJAX, zawsze idź do sieci.
   if (request.method !== 'GET' || request.url.includes('admin-ajax.php')) {
     console.log(`[SW] 🌐 Network-only request: ${request.url}`);
-    // Jawnie obsłuż żądanie, przekazując je do sieci.
-    // To kluczowe dla spełnienia kryteriów PWA.
-    event.respondWith(fetch(request));
+    event.respondWith(
+      fetch(request).catch(error => {
+        console.error(`[SW] ❌ Network-only fetch error for ${request.url}:`, error);
+        // Zwróć prostą odpowiedź błędu, aby nie przerwać SW
+        return new Response('Network error', {
+          status: 503,
+          statusText: 'Service Unavailable',
+        });
+      })
+    );
     return;
   }
 
