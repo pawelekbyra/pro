@@ -26,27 +26,26 @@ Text Domain: tingtongtheme
 }
 
 /* ============================================================================
-   NOWY MODAL PIERWSZEGO LOGOWANIA (3-ETAPOWY)
+   NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA PREMIUM
    ============================================================================ */
 
-/* --- Główny kontener --- */
 .first-login-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 10020;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 .first-login-modal-overlay.visible {
@@ -54,142 +53,101 @@ Text Domain: tingtongtheme
   visibility: visible;
 }
 
-/* --- Karta modala --- */
 .first-login-modal-content {
-  background: #1f1f1f;
+  background: linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 100%);
   width: 100%;
-  max-width: 420px;
-  border-radius: 16px;
+  max-width: 440px;
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Ważne dla animacji kroków */
-  transform: scale(0.95);
-  transition: transform 0.3s ease;
+  transform: scale(0.95) translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.4s ease;
 }
 
 .first-login-modal-overlay.visible .first-login-modal-content {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
-/* --- Nagłówek i postęp --- */
 .first-login-header {
-  padding: 16px 20px;
-  text-align: center;
+  padding: 20px 24px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.progress-indicator-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
+.progress-bar-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-bottom: 16px;
+  overflow: hidden;
 }
 
-.progress-step {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #3a3a3a;
-  color: #888;
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.progress-step.active {
+.progress-bar-fill {
+  width: 0%;
+  height: 100%;
   background: var(--accent-color);
-  color: white;
-  transform: scale(1.1);
-}
-
-.progress-line {
-  height: 2px;
-  width: 40px;
-  background: #3a3a3a;
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .first-login-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   color: white;
-  margin: 0;
-}
-
-/* --- Kontener na kroki (klucz do animacji) --- */
-.first-login-steps-container {
-  display: flex;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 350px; /* Stała wysokość dla płynności */
-}
-
-/* --- Poszczególne kroki --- */
-.first-login-step {
-  width: 100%;
-  flex-shrink: 0;
-  padding: 24px;
-  box-sizing: border-box;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.first-login-step.active {
-  opacity: 1;
-}
-
-.first-login-step-content {
   text-align: center;
+  transition: opacity 0.3s ease;
 }
 
-.step-icon {
-  font-size: 40px;
+.first-login-body {
+  padding: 0 24px 24px;
+  text-align: center;
+  overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.step-icon-container {
+  font-size: 48px;
   margin-bottom: 16px;
-}
-
-.step-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 8px;
+  line-height: 1;
+  animation: step-icon-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .step-description {
-  font-size: 14px;
-  color: #aaa;
-  line-height: 1.5;
+  font-size: 15px;
+  color: #b0b3b8;
+  line-height: 1.6;
   margin-bottom: 24px;
+  max-width: 320px;
+  animation: step-content-in 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s forwards;
 }
 
-.step-description-small {
-  font-size: 12px;
-  color: #888;
-  margin-top: 8px;
+.step-fields-container {
+  width: 100%;
+  animation: step-content-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards;
 }
 
-/* --- Elementy formularza --- */
-.first-login-email-display {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 16px;
+.first-login-body .is-exiting {
+  animation: step-content-out 0.4s ease-out forwards !important;
 }
 
-.first-login-email-label {
-  font-size: 12px;
-  color: #aaa;
+@keyframes step-icon-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
-
-.first-login-email-value {
-  font-size: 16px;
-  font-weight: bold;
-  color: var(--accent-color);
-  margin-top: 4px;
-  word-break: break-all;
+@keyframes step-content-in {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes step-content-out {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-20px); opacity: 0; }
 }
 
 .first-login-form-group {
@@ -201,113 +159,78 @@ Text Domain: tingtongtheme
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #ddd;
-  margin-bottom: 6px;
+  color: #b0b3b8;
+  margin-bottom: 8px;
 }
 
 .first-login-form-input {
   width: 100%;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid #444;
-  border-radius: 8px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #4a4a4a;
+  border-radius: 12px;
   color: white;
-  font-size: 15px;
-  transition: border-color 0.2s;
+  font-size: 16px;
+  transition: all 0.2s ease;
 }
 
 .first-login-form-input:focus {
   outline: none;
   border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(255, 0, 85, 0.2);
 }
 
-/* --- Ustawienia (krok 3) --- */
-.preference-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #333;
-}
-.preference-row:last-child {
-  border-bottom: none;
-}
-
-.preference-label {
-  font-size: 14px;
-  color: #ddd;
-  text-align: left;
-}
-
-.language-selector-compact {
-  display: flex;
-  background: rgba(0,0,0,0.2);
-  border-radius: 14px;
-  padding: 3px;
-}
-
-.language-option-compact {
-  padding: 5px 10px;
-  border-radius: 11px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  color: #aaa;
-}
-
-.language-option-compact.active {
-  background: var(--accent-color);
-  color: white;
-}
-
-/* --- Stopka i przyciski --- */
 .first-login-footer {
-  padding: 16px 20px;
+  padding: 20px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.footer-buttons {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #2a2a2a;
 }
 
 .first-login-nav-btn, .first-login-submit-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
 }
 
-/* Przycisk "Wstecz" */
-#firstLoginPrevBtn {
+.first-login-nav-btn.prev {
   background: transparent;
-  color: #aaa;
+  color: #888;
 }
-#firstLoginPrevBtn:hover {
+.first-login-nav-btn.prev:hover {
   color: white;
 }
 
-/* Przycisk "Dalej" i "Gotowe" */
-#firstLoginNextBtn, #firstLoginSubmitBtn {
+.first-login-nav-btn.next, .first-login-submit-btn {
   background: var(--accent-color);
   color: white;
+  box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
 }
-#firstLoginNextBtn:hover, #firstLoginSubmitBtn:hover {
-  opacity: 0.9;
+.first-login-nav-btn.next:hover, .first-login-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 0, 85, 0.4);
 }
-#firstLoginNextBtn:disabled, #firstLoginSubmitBtn:disabled {
+.first-login-nav-btn:disabled, .first-login-submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-/* --- Komunikaty --- */
 .first-login-status-message {
-  padding: 10px;
-  margin: 0 20px 10px;
+  padding: 12px;
+  margin-bottom: 16px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   display: none;
   text-align: center;
@@ -316,7 +239,64 @@ Text Domain: tingtongtheme
 .first-login-status-error {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
+
+/* Style dla specyficznych elementów (email, toggles) */
+.first-login-email-display {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid #4a4a4a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+.first-login-email-label {
+  font-size: 12px;
+  color: #b0b3b8;
+}
+.first-login-email-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--accent-color);
+  margin-top: 4px;
+  word-break: break-all;
+}
+
+.preference-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #3a3a3a;
+  text-align: left;
+}
+.preference-row:last-child {
+  border-bottom: none;
+}
+.preference-label {
+  font-size: 15px;
+  color: #ddd;
+}
+.language-selector-compact {
+  display: flex;
+  background: rgba(0,0,0,0.3);
+  border-radius: 16px;
+  padding: 4px;
+}
+.language-option-compact {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #aaa;
+  transition: all 0.2s ease;
+}
+.language-option-compact.active {
+  background: var(--accent-color);
+  color: white;
+}
+
 .preloader-hiding {
   opacity: 0;
   pointer-events: none;

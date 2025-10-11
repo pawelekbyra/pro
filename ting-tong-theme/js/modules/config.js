@@ -200,41 +200,9 @@ export const Config = {
       commentDeleteSuccess: "Komentarz usunięty.",
       commentDeleteError: "Nie udało się usunąć komentarza.",
       postCommentSuccess: "Komentarz został opublikowany!",
-      // First Login Modal
-      firstLoginTitle: "Witaj w Ting Tong!",
-      firstLoginSubtitle: "Uzupełnij swój profil, aby kontynuować",
-      firstLoginInfoText: "To Twoje pierwsze logowanie! Musisz ustawić nowe hasło oraz uzupełnić dane profilu. Możesz użyć prawdziwych danych lub całkowicie zmyślonych — to Twój wybór! 🎭",
-      firstLoginEmailLabel: "Logujesz się za pomocą",
-      firstLoginAvatarTitle: "Twój Avatar",
-      firstLoginAvatarEditBtnTitle: "Zmień avatar",
-      firstLoginAvatarHint: "Kliknij +, aby wybrać nowy avatar",
-      firstLoginPersonalDataTitle: "Dane Osobowe",
-      firstLoginFirstNameLabel: "Imię",
-      firstLoginFirstNamePlaceholder: "Np. Jan lub zmyślone",
-      firstLoginLastNameLabel: "Nazwisko",
-      firstLoginLastNamePlaceholder: "Np. Kowalski lub zmyślone",
-      firstLoginPersonalDataHint: "💡 Wskazówka: Możesz użyć prawdziwych lub całkowicie zmyślonych danych",
-      firstLoginPasswordTitle: "Ustaw Nowe Hasło",
-      firstLoginCurrentPasswordLabel: "Aktualne hasło",
-      firstLoginCurrentPasswordPlaceholder: "Hasło z emaila powitalnego",
-      firstLoginCurrentPasswordHint: "Wpisz hasło, które otrzymałeś w emailu powitalnym",
-      firstLoginNewPasswordLabel: "Nowe hasło",
-      firstLoginNewPasswordPlaceholder: "Minimum 8 znaków",
-      firstLoginConfirmPasswordLabel: "Powtórz nowe hasło",
-      firstLoginConfirmPasswordPlaceholder: "Wpisz ponownie nowe hasło",
-      firstLoginPasswordHelperText: "Hasło musi zawierać minimum 8 znaków. Zalecamy użycie liter, cyfr i znaków specjalnych.",
-      firstLoginSubmitBtn: "Gotowe! Przejdź do aplikacji",
-
-      // Password strength
       passwordStrengthWeak: "Słabe hasło",
       passwordStrengthMedium: "Średnie hasło",
       passwordStrengthStrong: "Silne hasło",
-
-      // Messages
-      firstLoginSuccess: "Profil skonfigurowany! Witaj ponownie! 🎉",
-      firstLoginErrorMissingNames: "Uzupełnij imię i nazwisko",
-      firstLoginErrorMissingPasswords: "Uzupełnij wszystkie pola hasła",
-      firstLoginWelcomeBack: "Witaj w Ting Tong! 🚀",
       uploadingAvatar: "Przesyłanie avatara...",
       avatarUploadError: "Nie udało się przesłać avatara",
       commentLoadError: "Nie udało się załadować komentarzy",
@@ -242,6 +210,66 @@ export const Config = {
       imageInputError: "Nie można załączyć obrazu",
       fileReadError: "Nie można odczytać pliku",
       immersiveModePwaOnly: "Działa w apce",
+
+      // --- NOWE KLUCZE DLA MODALA PIERWSZEGO LOGOWANIA (WERSJA PREMIUM) ---
+      firstLoginStep1Title: {
+        pl: 'Witaj w Ting Tong!',
+        en: 'Welcome to Ting Tong!',
+      },
+      firstLoginStep1Description: {
+        pl: 'Zanim zaczniemy, musimy uzupełnić kilka informacji w Twoim profilu. To zajmie tylko chwilę.',
+        en: "Before we start, we need to complete some information in your profile. It'll just take a moment.",
+      },
+      firstLoginEmailLabel: {
+        pl: 'Twój e-mail do logowania to:',
+        en: 'Your login email is:',
+      },
+      firstLoginEmailHint: {
+        pl: '<strong>Zapamiętaj go!</strong> Będziesz go używać do logowania w przyszłości.',
+        en: '<strong>Remember it!</strong> You will use it to log in in the future.',
+      },
+      firstLoginStep2Title: {
+        pl: 'Uzupełnij swoje dane',
+        en: 'Complete your details',
+      },
+      firstLoginStep2Description: {
+        pl: 'Możesz użyć prawdziwych lub zmyślonych danych. Twoja prywatność jest dla nas ważna.',
+        en: 'You can use real or made-up data. Your privacy is important to us.',
+      },
+      firstLoginStep3Title: {
+        pl: 'Ustawienia powiadomień',
+        en: 'Notification Settings',
+      },
+      firstLoginStep3Description: {
+        pl: 'Wybierz, w jaki sposób i w jakim języku chcesz otrzymywać od nas wiadomości.',
+        en: 'Choose how and in what language you want to receive messages from us.',
+      },
+      firstLoginSubmitBtn: {
+        pl: 'Ukończ konfigurację',
+        en: 'Complete setup',
+      },
+      prevButton: {
+        pl: 'Wstecz',
+        en: 'Back',
+      },
+      nextButton: {
+        pl: 'Dalej',
+        en: 'Next',
+      },
+      // Komunikaty o błędach
+      errorMinPasswordLength: {
+        pl: 'Hasło musi mieć co najmniej 8 znaków.',
+        en: 'Password must be at least 8 characters long.',
+      },
+      errorPasswordsMismatch: {
+        pl: 'Wprowadzone hasła nie są identyczne.',
+        en: 'The entered passwords do not match.',
+      },
+      errorMissingNames: {
+        pl: 'Imię i nazwisko są polami wymaganymi.',
+        en: 'First and last name are required fields.',
+      },
+
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -401,41 +429,9 @@ export const Config = {
       deleteConfirmationError: "Please type exactly: {confirmationText}",
       deleteConfirmationString: "DELETE ACCOUNT",
       postCommentSuccess: "Comment published successfully!",
-      // First Login Modal
-      firstLoginTitle: "Welcome to Ting Tong!",
-      firstLoginSubtitle: "Complete your profile to continue",
-      firstLoginInfoText: "This is your first login! You must set a new password and complete your profile. You can use real data or completely made up — it's your choice! 🎭",
-      firstLoginEmailLabel: "You are logging in with",
-      firstLoginAvatarTitle: "Your Avatar",
-      firstLoginAvatarEditBtnTitle: "Change avatar",
-      firstLoginAvatarHint: "Click + to choose a new avatar",
-      firstLoginPersonalDataTitle: "Personal Data",
-      firstLoginFirstNameLabel: "First Name",
-      firstLoginFirstNamePlaceholder: "E.g. John or fictional",
-      firstLoginLastNameLabel: "Last Name",
-      firstLoginLastNamePlaceholder: "E.g. Smith or fictional",
-      firstLoginPersonalDataHint: "💡 Tip: You can use real or completely fictional data",
-      firstLoginPasswordTitle: "Set New Password",
-      firstLoginCurrentPasswordLabel: "Current password",
-      firstLoginCurrentPasswordPlaceholder: "Password from welcome email",
-      firstLoginCurrentPasswordHint: "Enter the password you received in the welcome email",
-      firstLoginNewPasswordLabel: "New password",
-      firstLoginNewPasswordPlaceholder: "Minimum 8 characters",
-      firstLoginConfirmPasswordLabel: "Repeat new password",
-      firstLoginConfirmPasswordPlaceholder: "Enter new password again",
-      firstLoginPasswordHelperText: "Password must be at least 8 characters. We recommend using letters, numbers, and special characters.",
-      firstLoginSubmitBtn: "Done! Go to App",
-
-      // Password strength
       passwordStrengthWeak: "Weak password",
       passwordStrengthMedium: "Medium password",
       passwordStrengthStrong: "Strong password",
-
-      // Messages
-      firstLoginSuccess: "Profile configured! Welcome back! 🎉",
-      firstLoginErrorMissingNames: "Fill in first and last name",
-      firstLoginErrorMissingPasswords: "Fill in all password fields",
-      firstLoginWelcomeBack: "Welcome to Ting Tong! 🚀",
       uploadingAvatar: "Uploading avatar...",
       avatarUploadError: "Failed to upload avatar",
       commentLoadError: "Failed to load comments",
@@ -443,6 +439,52 @@ export const Config = {
       imageInputError: "Cannot attach image",
       fileReadError: "Cannot read file",
       immersiveModePwaOnly: "Works in app",
+
+      // --- NEW KEYS FOR PREMIUM FIRST LOGIN MODAL ---
+      firstLoginStep1Title: {
+        en: 'Welcome to Ting Tong!',
+      },
+      firstLoginStep1Description: {
+        en: "Before we start, we need to complete some information in your profile. It'll just take a moment.",
+      },
+      firstLoginEmailLabel: {
+        en: 'Your login email is:',
+      },
+      firstLoginEmailHint: {
+        en: '<strong>Remember it!</strong> You will use it to log in in the future.',
+      },
+      firstLoginStep2Title: {
+        en: 'Complete your details',
+      },
+      firstLoginStep2Description: {
+        en: 'You can use real or made-up data. Your privacy is important to us.',
+      },
+      firstLoginStep3Title: {
+        en: 'Notification Settings',
+      },
+      firstLoginStep3Description: {
+        en: 'Choose how and in what language you want to receive messages from us.',
+      },
+      firstLoginSubmitBtn: {
+        en: 'Complete setup',
+      },
+      prevButton: {
+        en: 'Back',
+      },
+      nextButton: {
+        en: 'Next',
+      },
+      // Error Messages
+      errorMinPasswordLength: {
+        en: 'Password must be at least 8 characters long.',
+      },
+      errorPasswordsMismatch: {
+        en: 'The entered passwords do not match.',
+      },
+      errorMissingNames: {
+        en: 'First and last name are required fields.',
+      },
+
     }, // KONIEC 'en'
   },
 };
