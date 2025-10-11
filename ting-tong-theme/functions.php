@@ -363,15 +363,20 @@ add_action( 'wp_ajax_toggle_like', function () {
 } );
 
 // --- Komentarze ---
-add_action('wp_ajax_tt_get_comments', function() {
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
+function tt_get_comments_callback() {
+    // Nonce jest sprawdzany tylko jeśli użytkownik jest zalogowany,
+    // ponieważ niezalogowani nie mają nonca, ale powinni widzieć komentarze.
+    if (is_user_logged_in()) {
+        check_ajax_referer('tt_ajax_nonce', 'nonce');
+    }
+
     global $wpdb;
     $slide_id = isset($_POST['slide_id']) ? sanitize_text_field($_POST['slide_id']) : '';
     if (empty($slide_id)) {
         wp_send_json_error(['message' => 'Brak ID slajdu.'], 400);
     }
 
-    $user_id = get_current_user_id();
+    $user_id = get_current_user_id(); // Zwróci 0 dla niezalogowanych
     $comments_table = $wpdb->prefix . 'tt_comments';
     $results = $wpdb->get_results($wpdb->prepare(
         "SELECT * FROM {$comments_table} WHERE slide_id = %s ORDER BY created_at ASC",
@@ -381,6 +386,8 @@ add_action('wp_ajax_tt_get_comments', function() {
     $comments = [];
     foreach ($results as $c) {
         $author_data = get_userdata($c->user_id);
+        $can_edit = $user_id > 0 && ((int) $c->user_id === $user_id || current_user_can('manage_options'));
+
         $comments[] = [
             'id'        => (int) $c->id,
             'parentId'  => $c->parent_id ? (int) $c->parent_id : null,
@@ -390,12 +397,14 @@ add_action('wp_ajax_tt_get_comments', function() {
             'image_url' => isset($c->image_url) ? esc_url($c->image_url) : null,
             'timestamp' => (new DateTime($c->created_at))->format(DateTime::ATOM),
             'likes'     => tt_comment_likes_get_count($c->id),
-            'isLiked'   => tt_comment_likes_user_has($c->id, $user_id),
-            'canEdit'   => (int) $c->user_id === $user_id || current_user_can('manage_options'),
+            'isLiked'   => tt_comment_likes_user_has($c->id, $user_id), // Zwróci false dla niezalogowanych
+            'canEdit'   => $can_edit,
         ];
     }
     wp_send_json_success($comments);
-});
+}
+add_action('wp_ajax_tt_get_comments', 'tt_get_comments_callback');
+add_action('wp_ajax_nopriv_tt_get_comments', 'tt_get_comments_callback');
 
 add_action('wp_ajax_tt_post_comment', function() {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
