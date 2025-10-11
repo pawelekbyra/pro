@@ -26,7 +26,7 @@ Text Domain: tingtongtheme
 }
 
 /* ============================================================================
-   NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA PREMIUM
+   NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA PREMIUM (ZJAWISKOWY STYL)
    ============================================================================ */
 
 .first-login-modal-overlay {
@@ -36,8 +36,8 @@ Text Domain: tingtongtheme
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
   z-index: 10020;
   display: flex;
   align-items: center;
@@ -54,12 +54,12 @@ Text Domain: tingtongtheme
 }
 
 .first-login-modal-content {
-  background: linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 100%);
+  background: linear-gradient(165deg, #222225 0%, #18181a 100%);
   width: 100%;
   max-width: 440px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 0, 85, 0.1);
   display: flex;
   flex-direction: column;
   transform: scale(0.95) translateY(20px);
@@ -73,42 +73,56 @@ Text Domain: tingtongtheme
 .first-login-header {
   padding: 20px 24px;
   flex-shrink: 0;
+  position: relative;
 }
+.first-login-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+}
+
 
 .progress-bar-container {
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
   margin-bottom: 16px;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .progress-bar-fill {
   width: 0%;
   height: 100%;
-  background: var(--accent-color);
-  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-color), #ff4081);
+  border-radius: 3px;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
 }
 
 .first-login-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: white;
   text-align: center;
   transition: opacity 0.3s ease;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 .first-login-body {
-  padding: 0 24px 24px;
+  padding: 16px 32px 24px;
   text-align: center;
   overflow: hidden;
   min-height: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
 }
 
@@ -116,49 +130,51 @@ Text Domain: tingtongtheme
   font-size: 48px;
   margin-bottom: 16px;
   line-height: 1;
-  animation: step-icon-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  transition: transform 0.4s ease;
 }
 
 .step-description {
-  font-size: 15px;
+  font-size: 16px;
   color: #b0b3b8;
   line-height: 1.6;
-  margin-bottom: 24px;
-  max-width: 320px;
-  animation: step-content-in 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s forwards;
+  margin-bottom: 32px;
+  max-width: 340px;
+  font-weight: 500;
 }
 
 .step-fields-container {
   width: 100%;
-  animation: step-content-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .first-login-body .is-exiting {
-  animation: step-content-out 0.4s ease-out forwards !important;
+  animation: step-content-out 0.3s ease-in forwards !important;
+}
+.first-login-body *:not(.is-exiting) {
+  animation: step-content-in 0.5s cubic-bezier(0.215, 0.610, 0.355, 1.000) 0.1s forwards;
 }
 
-@keyframes step-icon-in {
-  from { transform: scale(0.5); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
 @keyframes step-content-in {
-  from { transform: translateY(20px); opacity: 0; }
+  from { transform: translateY(25px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 @keyframes step-content-out {
   from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(-25px); opacity: 0; }
 }
 
 .first-login-form-group {
-  margin-bottom: 16px;
   text-align: left;
+  width: 100%;
 }
 
 .first-login-form-label {
   display: block;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: #b0b3b8;
   margin-bottom: 8px;
 }
@@ -173,57 +189,74 @@ Text Domain: tingtongtheme
   font-size: 16px;
   transition: all 0.2s ease;
 }
+.first-login-form-input::placeholder { color: #6a6a6a; }
 
 .first-login-form-input:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(255, 0, 85, 0.2);
+  box-shadow: 0 0 0 4px rgba(255, 0, 85, 0.2);
+  background: rgba(0,0,0,0.1);
 }
 
 .first-login-footer {
   padding: 20px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
+  margin-top: auto;
 }
 
 .footer-buttons {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .first-login-nav-btn, .first-login-submit-btn {
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 15px;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
+  flex-grow: 1;
 }
 
 .first-login-nav-btn.prev {
-  background: transparent;
-  color: #888;
+  background: rgba(255,255,255,0.1);
+  color: #ccc;
+  flex-grow: 0;
 }
 .first-login-nav-btn.prev:hover {
+  background: rgba(255,255,255,0.2);
   color: white;
 }
 
 .first-login-nav-btn.next, .first-login-submit-btn {
   background: var(--accent-color);
   color: white;
-  box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 0, 85, 0.35);
 }
 .first-login-nav-btn.next:hover, .first-login-submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 0, 85, 0.4);
+  box-shadow: 0 6px 25px rgba(255, 0, 85, 0.45);
 }
 .first-login-nav-btn:disabled, .first-login-submit-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  background: #444;
+}
+.first-login-nav-btn.shake, .first-login-submit-btn.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+  40%, 60% { transform: translate3d(3px, 0, 0); }
 }
 
 .first-login-status-message {
@@ -245,48 +278,63 @@ Text Domain: tingtongtheme
 /* Style dla specyficznych elementów (email, toggles) */
 .first-login-email-display {
   background: rgba(0, 0, 0, 0.2);
-  border: 1px solid #4a4a4a;
+  border: 1px dashed #4a4a4a;
   border-radius: 12px;
   padding: 16px;
-  margin-top: 16px;
+  width: 100%;
+  text-align: center;
 }
 .first-login-email-label {
-  font-size: 12px;
+  font-size: 13px;
   color: #b0b3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .first-login-email-value {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: var(--accent-color);
   margin-top: 4px;
   word-break: break-all;
+  text-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
 }
 
 .preference-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #3a3a3a;
+  padding: 16px;
+  border: 1px solid #3a3a3a;
+  border-radius: 14px;
   text-align: left;
+  background: rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
 }
-.preference-row:last-child {
-  border-bottom: none;
+.preference-row:hover {
+  border-color: #555;
+  background: rgba(0,0,0,0.15);
 }
+
 .preference-label {
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
   color: #ddd;
+  cursor: pointer;
+}
+.first-login-consent-row {
+  cursor: pointer;
 }
 .language-selector-compact {
   display: flex;
   background: rgba(0,0,0,0.3);
   border-radius: 16px;
   padding: 4px;
+  border: 1px solid #222;
 }
 .language-option-compact {
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   color: #aaa;
@@ -295,45 +343,7 @@ Text Domain: tingtongtheme
 .language-option-compact.active {
   background: var(--accent-color);
   color: white;
-}
-
-/* NOWE STYLE DLA KROKÓW W MODALU PIERWSZEGO LOGOWANIA */
-
-/* Krok 1: Wybór języka */
-.first-login-lang-selector {
-  justify-content: center;
-  gap: 12px;
-  padding: 16px 0;
-}
-.first-login-lang-selector .language-option-compact {
-  font-size: 16px;
-  padding: 14px 28px;
-  border: 1px solid #4a4a4a;
-}
-.first-login-lang-selector .language-option-compact.active {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
-}
-
-/* Krok 2: Zgoda na powiadomienia */
-.first-login-consent-row {
-  padding: 24px;
-  background: rgba(0,0,0,0.2);
-  border-radius: 16px;
-  border: 1px solid #4a4a4a;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.first-login-consent-row:hover {
-  border-color: #666;
-}
-.first-login-consent-row .preference-label {
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.first-login-consent-row .toggle-switch {
-  transform: scale(1.2);
+  box-shadow: 0 2px 10px rgba(255,0,85,0.2);
 }
 
 .preloader-hiding {
