@@ -103,22 +103,28 @@ class AuthManager {
     }
 
     const performFetch = async (currentNonce) => {
-        const url = `${ajax_object.ajax_url}?action=${action}`;
-        const headers = {
-            'X-WP-Nonce': currentNonce,
-            'Credentials': 'same-origin'
-        };
+        let url = ajax_object.ajax_url;
+        const headers = { 'Credentials': 'same-origin' };
         let body;
 
         if (sendAsJSON) {
+            // Dla JSON: akcja w URL, nonce w nagłówku, ciało to czysty JSON
+            url = `${ajax_object.ajax_url}?action=${action}`;
             headers['Content-Type'] = 'application/json; charset=UTF-8';
+            headers['X-WP-Nonce'] = currentNonce;
             body = JSON.stringify(data);
         } else {
+            // Dla standardowych żądań: akcja i nonce w ciele
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-            body = new URLSearchParams({ action, ...data }).toString();
+            const bodyData = new URLSearchParams({
+                action,
+                nonce: currentNonce,
+                ...data
+            });
+            body = bodyData.toString();
         }
 
-        const response = await fetch(ajax_object.ajax_url, {
+        const response = await fetch(url, {
             method: 'POST',
             headers,
             body
