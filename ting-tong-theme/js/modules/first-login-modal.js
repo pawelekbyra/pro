@@ -28,80 +28,68 @@ function cacheDOM() {
 function initializeStepDefinitions() {
     stepDefinitions = {
         1: {
-            icon: '🌍',
+            icon: '🌐',
             titleKey: 'firstLoginStep1Title',
             descriptionKey: 'firstLoginStep1Desc',
             renderFields: () => `
-                <div class="preference-row">
-                    <label class="preference-label">${Utils.getTranslation('emailLanguageLabel')}</label>
-                    <div class="language-selector-compact first-login-lang-selector">
-                        <div class="language-option-compact active" data-lang="pl">Polski</div>
-                        <div class="language-option-compact" data-lang="en">English</div>
-                    </div>
-                </div>
-                 <div class="preference-row first-login-consent-row" data-action="toggle-consent">
-                    <label for="fl_email_consent" class="preference-label">${Utils.getTranslation('firstLoginConsentLabel')}</label>
-                    <div class="toggle-switch active" id="fl_email_consent"><div class="toggle-slider"></div></div>
+                <div class="language-selector-compact first-login-lang-selector">
+                    <div class="language-option-compact active" data-lang="pl">Polski</div>
+                    <div class="language-option-compact" data-lang="en">English</div>
                 </div>
             `,
-            validate: () => true, // Zawsze można przejść dalej
+            validate: () => true,
             collectData: () => {
                 formData.email_language = dom.stepFields.querySelector('.language-option-compact.active').dataset.lang;
-                formData.email_consent = dom.stepFields.querySelector('#fl_email_consent').classList.contains('active');
             }
         },
         2: {
-            icon: '🎭',
+            icon: '🔔',
             titleKey: 'firstLoginStep2Title',
             descriptionKey: 'firstLoginStep2Desc',
             renderFields: () => `
+                <div class="preference-row first-login-consent-row">
+                    <div class="toggle-switch active" id="fl_email_consent"><div class="toggle-slider"></div></div>
+                    <label for="fl_email_consent" class="preference-label">${Utils.getTranslation('firstLoginConsentLabel')}</label>
+                </div>
+            `,
+            validate: () => true,
+            collectData: () => {
+                formData.email_consent = dom.stepFields.querySelector('#fl_email_consent').classList.contains('active');
+            }
+        },
+        3: {
+            icon: '👤',
+            titleKey: 'firstLoginStep3Title',
+            descriptionKey: 'firstLoginStep3Desc',
+            renderFields: () => `
                 <div class="first-login-form-group">
                     <label class="first-login-form-label" for="fl_firstname">${Utils.getTranslation('firstNameLabel')}</label>
-                    <input type="text" id="fl_firstname" class="first-login-form-input" required autocomplete="given-name" placeholder="${Utils.getTranslation('firstNamePlaceholder')}">
+                    <input type="text" id="fl_firstname" class="first-login-form-input" required autocomplete="given-name">
                 </div>
                 <div class="first-login-form-group">
                     <label class="first-login-form-label" for="fl_lastname">${Utils.getTranslation('lastNameLabel')}</label>
-                    <input type="text" id="fl_lastname" class="first-login-form-input" required autocomplete="family-name" placeholder="${Utils.getTranslation('lastNamePlaceholder')}">
+                    <input type="text" id="fl_lastname" class="first-login-form-input" required autocomplete="family-name">
+                </div>
+                <div class="first-login-form-group">
+                    <label class="first-login-form-label" for="fl_new_password">${Utils.getTranslation('newPasswordLabel')}</label>
+                    <input type="password" id="fl_new_password" class="first-login-form-input" required autocomplete="new-password" minlength="8">
+                </div>
+                <div class="first-login-form-group">
+                    <label class="first-login-form-label" for="fl_confirm_password">${Utils.getTranslation('confirmPasswordLabel')}</label>
+                    <input type="password" id="fl_confirm_password" class="first-login-form-input" required autocomplete="new-password" minlength="8">
                 </div>
             `,
             validate: () => {
                 hideError();
                 const firstName = dom.stepFields.querySelector('#fl_firstname').value.trim();
                 const lastName = dom.stepFields.querySelector('#fl_lastname').value.trim();
+                const password = dom.stepFields.querySelector('#fl_new_password').value;
+                const confirmPassword = dom.stepFields.querySelector('#fl_confirm_password').value;
+
                 if (!firstName || !lastName) {
                     showError(Utils.getTranslation('errorMissingNames'));
                     return false;
                 }
-                return true;
-            },
-            collectData: () => {
-                formData.first_name = dom.stepFields.querySelector('#fl_firstname').value.trim();
-                formData.last_name = dom.stepFields.querySelector('#fl_lastname').value.trim();
-            }
-        },
-        3: {
-            icon: '🔑',
-            titleKey: 'firstLoginStep3Title',
-            descriptionKey: 'firstLoginStep3Desc',
-            renderFields: () => `
-                <div class="first-login-email-display">
-                    <div class="first-login-email-label">${Utils.getTranslation('loginEmailLabel')}</div>
-                    <div class="first-login-email-value">${State.get('currentUser')?.user_email || ''}</div>
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_new_password">${Utils.getTranslation('newPasswordLabel')}</label>
-                    <input type="password" id="fl_new_password" class="first-login-form-input" required autocomplete="new-password" minlength="8" placeholder="••••••••">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_confirm_password">${Utils.getTranslation('confirmPasswordLabel')}</label>
-                    <input type="password" id="fl_confirm_password" class="first-login-form-input" required autocomplete="new-password" minlength="8" placeholder="••••••••">
-                </div>
-            `,
-            validate: () => {
-                hideError();
-                const password = dom.stepFields.querySelector('#fl_new_password').value;
-                const confirmPassword = dom.stepFields.querySelector('#fl_confirm_password').value;
-
                 if (password.length < 8) {
                     showError(Utils.getTranslation('errorMinPasswordLength'));
                     return false;
@@ -113,6 +101,8 @@ function initializeStepDefinitions() {
                 return true;
             },
             collectData: () => {
+                formData.first_name = dom.stepFields.querySelector('#fl_firstname').value.trim();
+                formData.last_name = dom.stepFields.querySelector('#fl_lastname').value.trim();
                 formData.new_password = dom.stepFields.querySelector('#fl_new_password').value;
             }
         }
@@ -127,9 +117,9 @@ function setupEventListeners() {
 
     // Delegacja zdarzeń dla dynamicznie tworzonych pól
     dom.stepFields?.addEventListener('click', (e) => {
-        const toggleRow = e.target.closest('[data-action="toggle-consent"]');
-        if (toggleRow) {
-            toggleRow.querySelector('.toggle-switch').classList.toggle('active');
+        const toggle = e.target.closest('.toggle-switch');
+        if (toggle) {
+            toggle.classList.toggle('active');
         }
 
         const langOption = e.target.closest('.language-option-compact');
@@ -138,25 +128,22 @@ function setupEventListeners() {
             langOption.classList.add('active');
         }
     });
-
-    // Umożliwienie walidacji w czasie rzeczywistym
-    dom.stepFields?.addEventListener('input', () => {
-        updateButtonStates();
-    });
 }
+
 
 function showProfileCompletionModal() {
     if (!dom.modal) return;
     resetModal();
     renderStep(currentStep);
-    UI.openModal(dom.modal);
-    document.dispatchEvent(new CustomEvent('tt:pause-video'));
+    UI.openModal(dom.modal, {
+        onOpen: () => document.dispatchEvent(new CustomEvent('tt:pause-video')),
+        onClose: () => document.dispatchEvent(new CustomEvent('tt:play-video'))
+    });
 }
 
 function hideModal() {
     if (!dom.modal) return;
-    UI.closeModal(dom.modal);
-    document.dispatchEvent(new CustomEvent('tt:play-video'));
+    UI.closeModal(dom.modal); // UI.closeModal samo wywoła onClose, więc tt:play-video jest już obsługiwane
 }
 
 function resetModal() {
@@ -166,28 +153,17 @@ function resetModal() {
     hideError();
 }
 
-function updateButtonStates() {
-    const isStepValid = stepDefinitions[currentStep].validate();
-    if (currentStep < totalSteps) {
-        dom.nextBtn.disabled = !isStepValid;
-    } else {
-        dom.submitBtn.disabled = !isStepValid;
-    }
-}
-
 function renderStep(stepNumber) {
     const step = stepDefinitions[stepNumber];
     if (!step) return;
 
-    const elementsToAnimate = [dom.stepIcon, dom.stepDescription, dom.stepFields, dom.title];
-
-    // Uruchom animację wyjścia
+    // Animacja wyjścia dla starych treści
+    const elementsToAnimate = [dom.stepIcon, dom.stepDescription, dom.stepFields];
     elementsToAnimate.forEach(el => el.classList.add('is-exiting'));
 
-    // Poczekaj na zakończenie animacji wyjścia
     setTimeout(() => {
         // Aktualizacja treści
-        dom.title.innerHTML = Utils.getTranslation(step.titleKey);
+        dom.title.textContent = Utils.getTranslation(step.titleKey);
         dom.stepIcon.innerHTML = step.icon;
         dom.stepDescription.innerHTML = Utils.getTranslation(step.descriptionKey);
         dom.stepFields.innerHTML = step.renderFields();
@@ -197,9 +173,10 @@ function renderStep(stepNumber) {
         dom.nextBtn.textContent = Utils.getTranslation('firstLoginNext');
         dom.submitBtn.textContent = Utils.getTranslation('firstLoginSubmit');
 
-        // Usuń klasę wyjścia i dodaj klasę wejścia (jeśli używasz)
+        // Animacja wejścia dla nowych treści
         elementsToAnimate.forEach(el => {
             el.classList.remove('is-exiting');
+            void el.offsetWidth; // Trigger reflow
         });
 
         // Aktualizacja UI
@@ -207,30 +184,18 @@ function renderStep(stepNumber) {
         dom.prevBtn.style.display = stepNumber > 1 ? 'inline-flex' : 'none';
         dom.nextBtn.style.display = stepNumber < totalSteps ? 'inline-flex' : 'none';
         dom.submitBtn.style.display = stepNumber === totalSteps ? 'inline-flex' : 'none';
-
-        // Ustaw stan przycisków po renderowaniu
-        updateButtonStates();
-
-        // Ustaw fokus na pierwszym polu formularza w kroku
-        const firstInput = dom.stepFields.querySelector('input, select, button');
-        firstInput?.focus();
-
-    }, 300); // Czas musi pasować do czasu trwania animacji CSS
+    }, 250);
 }
 
 function handleNextStep() {
+    hideError();
     const step = stepDefinitions[currentStep];
     if (step.validate()) {
-        hideError();
         step.collectData();
         if (currentStep < totalSteps) {
             currentStep++;
             renderStep(currentStep);
         }
-    } else {
-        // Opcjonalnie: potrząśnij przyciskiem, żeby pokazać, że coś jest nie tak
-        dom.nextBtn.classList.add('shake');
-        setTimeout(() => dom.nextBtn.classList.remove('shake'), 500);
     }
 }
 
@@ -244,39 +209,43 @@ function handlePrevStep() {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-    hideError();
     const step = stepDefinitions[currentStep];
-    if (step.validate()) {
-        step.collectData();
+    if (!step.validate()) {
+        showError(Utils.getTranslation('errorValidationFailed'));
+        return;
+    }
 
-        const originalText = dom.submitBtn.innerHTML;
-        dom.submitBtn.disabled = true;
-        dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
+    hideError();
+    step.collectData();
 
-        try {
-            // Używamy teraz `authManager.ajax` który wysyła dane jako JSON
-            const result = await authManager.ajax('tt_complete_profile', formData, true); // `true` dla wysłania jako JSON
+    const originalText = dom.submitBtn.innerHTML;
+    dom.submitBtn.disabled = true;
+    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
-            if (result.success) {
-                State.set('currentUser', result.data.userData);
-                // Flaga `is_profile_complete` w `State` zostanie zaktualizowana
-                State.get('currentUser').is_profile_complete = true;
+    try {
+        const result = await authManager.ajax('tt_complete_profile', formData, true);
 
-                UI.showToast(result.data.message || 'Profil zaktualizowany!', 'success');
-                setTimeout(() => {
-                    hideModal();
-                    // Nie ma potrzeby ręcznej aktualizacji UI, bo stan się zmienił
-                    // i odpowiednie eventy powinny to obsłużyć.
-                }, 1500);
-            } else {
-                throw new Error(result.data?.message || 'Wystąpił nieznany błąd.');
-            }
-        } catch (error) {
-            showError(error.message);
-        } finally {
-            dom.submitBtn.disabled = false;
-            dom.submitBtn.innerHTML = originalText;
+        if (result.success) {
+            // Zaktualizuj dane użytkownika w stanie globalnym
+            const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
+            State.set('currentUser', updatedUser);
+
+            // Wywołaj event, aby inne części aplikacji mogły zareagować
+            document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
+
+            UI.showToast(result.data.message || Utils.getTranslation('profileUpdateSuccess'), 'success');
+
+            setTimeout(() => {
+                hideModal();
+            }, 1500);
+
+        } else {
+            throw new Error(result.data?.message || Utils.getTranslation('errorUnknown'));
         }
+    } catch (error) {
+        showError(error.message);
+        dom.submitBtn.disabled = false;
+        dom.submitBtn.innerHTML = originalText;
     }
 }
 
