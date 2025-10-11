@@ -216,15 +216,11 @@ export const Config = {
       firstLoginPrev: "Wstecz",
       firstLoginNext: "Dalej",
       firstLoginSubmit: "Zakończ 🎯",
-      // Krok 1: Zgoda i Język
       firstLoginStep1Desc: "Cieszymy się, że dołączyłeś! 😊<br>Na start możesz zdecydować, czy chcesz otrzymywać od nas maile z nowościami i poradami.",
       firstLoginConsentLabel: "Chcę otrzymywać maile",
-      // Krok 2: Dane
       firstLoginStep2Desc: "Powiedz nam, jak się nazywasz (lub wymyśl coś kreatywnego 😉).",
       firstLoginNameHint: "Nie musisz podawać prawdziwego imienia i nazwiska.",
-      // Krok 3: Hasło
       firstLoginStep3Desc: "Świetnie! 🎉<br>Do logowania będziesz używać swojego adresu e-mail:",
-      // Błędy i placeholdery
       errorMinPasswordLength: 'Hasło musi mieć co najmniej 8 znaków.',
       errorPasswordsMismatch: 'Wprowadzone hasła nie są identyczne.',
       errorMissingNames: 'Imię i nazwisko są polami wymaganymi.',
@@ -233,6 +229,7 @@ export const Config = {
       lastNamePlaceholder: "Nazwisko",
       newPasswordPlaceholder: "Nowe hasło",
       confirmPasswordPlaceholder: "Powtórz hasło",
+
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -408,15 +405,11 @@ export const Config = {
       firstLoginPrev: "Back",
       firstLoginNext: "Next",
       firstLoginSubmit: "Finish 🎯",
-      // Step 1: Consent and Language
       firstLoginStep1Desc: "We're glad you joined! 😊<br>To start, you can decide if you want to receive emails from us with news and tips.",
       firstLoginConsentLabel: "I want to receive emails",
-      // Step 2: Data
       firstLoginStep2Desc: "Tell us your name (or come up with something creative 😉).",
       firstLoginNameHint: "You don't have to use your real name.",
-      // Step 3: Password
       firstLoginStep3Desc: "Great! 🎉<br>You'll use your email address to log in:",
-      // Errors and placeholders
       errorMinPasswordLength: 'Password must be at least 8 characters long.',
       errorPasswordsMismatch: 'The entered passwords do not match.',
       errorMissingNames: 'First and last name are required fields.',
