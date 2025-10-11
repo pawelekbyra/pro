@@ -293,8 +293,8 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
 
         // Przygotuj pełne dane użytkownika
         $u = wp_get_current_user();
-        $first_name = get_user_meta($u->ID, 'first_name', true);
-        $last_name = get_user_meta($u->ID, 'last_name', true);
+        $first_name = trim(get_user_meta($u->ID, 'first_name', true));
+        $last_name = trim(get_user_meta($u->ID, 'last_name', true));
 
         // KLUCZOWA LOGIKA: Sprawdź flagę pierwszego logowania
         $is_profile_complete = ! empty($first_name) && ! empty($last_name);
@@ -323,14 +323,32 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
         ]);
     }
 });
-add_action( 'wp_ajax_tt_ajax_logout', function () {
-	check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
-	wp_logout();
+/**
+ * Obsługuje żądanie wylogowania użytkownika.
+ * Ta funkcja jest wywoływana zarówno dla zalogowanych, jak i niezalogowanych użytkowników,
+ * aby zapewnić spójność stanu po stronie klienta, nawet jeśli sesja wygasła.
+ */
+function tt_ajax_logout_callback() {
+	// Sprawdź nonce, jeśli został dostarczony, ale nie przerywaj, jeśli go nie ma.
+	// Pozwala to na obsługę sytuacji, gdy sesja już wygasła.
+	if ( isset( $_REQUEST['nonce'] ) ) {
+		check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
+	}
+
+	// Jeśli użytkownik jest zalogowany, wyloguj go.
+	if ( is_user_logged_in() ) {
+		wp_logout();
+	}
+
+	// Zawsze zwracaj sukces, aby klient mógł zaktualizować swój stan.
+	// Generujemy nowy nonce dla sesji gościa.
 	wp_send_json_success( [
 		'message'   => 'Wylogowano pomyślnie.',
 		'new_nonce' => wp_create_nonce( 'tt_ajax_nonce' ),
 	] );
-} );
+}
+add_action( 'wp_ajax_tt_ajax_logout', 'tt_ajax_logout_callback' );
+add_action( 'wp_ajax_nopriv_tt_ajax_logout', 'tt_ajax_logout_callback' );
 add_action( 'wp_ajax_tt_refresh_nonce', function() {
 	wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
 } );
