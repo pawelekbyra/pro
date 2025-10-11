@@ -861,15 +861,11 @@ add_action('wp_ajax_tt_complete_profile', function () {
     }
 
     // Odczytaj dane z ciała żądania, ponieważ authManager wysyła JSON
+    check_ajax_referer('tt_ajax_nonce', 'nonce'); // Standardowa weryfikacja nonce z nagłówków/POST
+
     $data = json_decode(file_get_contents('php://input'), true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         wp_send_json_error(['message' => 'Nieprawidłowy format danych JSON.'], 400);
-        return;
-    }
-
-    $nonce = isset($data['nonce']) ? sanitize_text_field(wp_unslash($data['nonce'])) : '';
-    if (empty($nonce) || wp_verify_nonce($nonce, 'tt_ajax_nonce') === false) {
-        wp_send_json_error(['message' => 'Nieprawidłowy token bezpieczeństwa.'], 403);
         return;
     }
 
