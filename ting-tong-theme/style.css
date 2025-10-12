@@ -800,11 +800,11 @@ body,
   gap: 6px;
   z-index: 105;
   opacity: 0;
-  visibility: hidden;
+  /*visibility: hidden; <--- USUNIĘTO */
   transition:
     top 0.3s ease-out,
     opacity 0.6s ease-out,
-    visibility 0.6s ease-out,
+    /*visibility 0.6s ease-out, <--- USUNIĘTO */
     transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -4472,22 +4472,21 @@ body,
    ============================================================================ */
 
 /*
- * KROK 1: Zmodyfikuj body, aby ZAWSZE zajmowało pełną wysokość widoku (100vh)
- * w trybie klawiatury. Jest to kluczowe do uniknięcia przesuwania viewportu.
+ * KROK 1: Zmodyfikuj body, aby ZAWSZE zajmowało pełną wysokość widoku (100vh).
+ * KLUCZOWE: Zapobiega to przesuwaniu całego layoutu.
  */
 body.keyboard-visible {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: 100vh !important; /* KLUCZOWY FIX: Używamy 100vh, ignorując skurczenie */
+  height: 100vh !important; /* KLUCZOWY FIX: Wymuś pełną wysokość widoku */
   overflow: hidden !important;
 }
 
 /*
- * KROK 2: Wymuś na głównym kontenerze aplikacji (`#app-frame`) i zawartości wideo
- * użycie 100vh i pozycjonowanie FIXED do górnej krawędzi. Dzięki temu, gdy
- * klawiatura wejdzie, zostanie ona ZAKRYTA, a nie wypchnięta.
+ * KROK 2: Wymuś na głównym kontenerze aplikacji i zawartości wideo
+ * użycie 100vh, aby klawiatura została ZAKRYTA.
  */
 body.keyboard-visible #app-frame {
   position: fixed !important; /* Musi być FIXED względem viewportu */
@@ -4504,12 +4503,13 @@ body.keyboard-visible .tiktok-symulacja {
 
 /*
  * KROK 3: Napraw pozycjonowanie sidebara.
- * Sidebar musi być pozycjonowany względem pełnej, NIESKRÓCONEJ wysokości 100vh.
+ * Nadpisz obliczenia sidebara, aby zawsze centrował się w pełnej przestrzeni
+ * pod topbar, ignorując znikający bottombar i skurczony viewport.
  */
 body.keyboard-visible .tiktok-symulacja .sidebar {
-  /* Zmień pozycjonowanie na centrowanie względem PEŁNEGO EKRANU */
-  top: 50% !important;
-  transform: translateY(-50%) !important;
+    /* Obliczenia: (100vh - topbar_height) / 2 + topbar_height */
+    top: calc( (100vh - var(--topbar-height)) / 2 + var(--topbar-height) ) !important;
+    transform: translateY(-50%) !important;
 }
 
 /* KROK 4: Zachowaj ukrywanie elementów, które MUSZĄ zniknąć (bottombar, PWA) */
