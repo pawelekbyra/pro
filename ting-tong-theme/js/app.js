@@ -170,6 +170,10 @@ document.addEventListener("DOMContentLoaded", () => {
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
+
+          // ✅ KLUCZOWE: Sprawdź również tutaj, czy profil jest kompletny
+          FirstLoginModal.checkProfileAndShowModal(userData);
+
         } else {
           console.log('User is not logged in');
         }
