@@ -182,6 +182,21 @@ function openAccountModal() {
   }
 }
 
+function closeAccountModal() {
+  const modal = document.getElementById("accountModal");
+  if (!modal) return;
+
+  modal.classList.add("is-hiding");
+  modal.addEventListener(
+    "transitionend",
+    () => {
+      modal.classList.remove("visible", "is-hiding");
+      document.body.style.overflow = "";
+    },
+    { once: true },
+  );
+}
+
 // Tab switching
 function initializeModal() {
   const tabButtons = document.querySelectorAll(".account-tabs .tab-btn");
@@ -296,6 +311,20 @@ function setupEventListeners() {
       }
     }
   });
+
+  const accountModal = document.getElementById("accountModal");
+  if (accountModal) {
+    accountModal.addEventListener("click", (event) => {
+      if (event.target === accountModal) {
+        closeAccountModal();
+      }
+    });
+  }
+
+  const accountCloseBtn = document.querySelector("#accountModal .close-btn");
+  if (accountCloseBtn) {
+    accountCloseBtn.addEventListener("click", closeAccountModal);
+  }
 }
 
 function handleFileSelect(event) {
@@ -729,4 +758,4 @@ function showError(elementId, message) {
   }, 4000);
 }
 
-export const AccountPanel = { init, openAccountModal, populateProfileForm };
+export const AccountPanel = { init, openAccountModal, closeAccountModal, populateProfileForm };
