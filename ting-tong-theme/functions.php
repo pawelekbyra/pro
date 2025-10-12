@@ -907,15 +907,13 @@ add_action('wp_ajax_tt_complete_profile', function () {
     if (empty($first_name) || empty($last_name)) {
         wp_send_json_error(['message' => 'Imię i nazwisko są polami wymaganymi.'], 400);
     }
-    if (empty($new_password)) {
-        wp_send_json_error(['message' => 'Musisz ustawić nowe hasło, aby kontynuować.'], 400);
-    }
-    if (strlen($new_password) < 8) {
-        wp_send_json_error(['message' => 'Hasło musi zawierać co najmniej 8 znaków.'], 400);
-    }
-
     // 3. Aktualizacja danych w bazie
-    wp_set_password($new_password, $u->ID);
+    if (!empty($new_password)) {
+        if (strlen($new_password) < 8) {
+            wp_send_json_error(['message' => 'Hasło musi zawierać co najmniej 8 znaków.'], 400);
+        }
+        wp_set_password($new_password, $u->ID);
+    }
 
     // Po zmianie hasła, użytkownik jest automatycznie wylogowywany.
     // Musimy go ponownie zalogować, aby sesja była kontynuowana.

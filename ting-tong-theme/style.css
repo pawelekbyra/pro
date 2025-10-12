@@ -1297,8 +1297,8 @@ body,
   z-index: 2001;
   white-space: normal;
   text-align: center;
-  width: calc(100% - 40px); /* Użyj niemal pełnej szerokości kontenera */
-  max-width: 500px; /* Maksymalna szerokość na dużych ekranach */
+  width: auto;
+  max-width: calc(100% - 40px); /* Zapobiega dotykaniu krawędzi */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
