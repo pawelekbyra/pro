@@ -63,6 +63,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       document.body.addEventListener("click", Handlers.mainClickHandler);
+
+      // ✅ FIX: Dedykowany listener dla przycisku komentarzy, aby obejść potencjalne problemy w mainClickHandler
+      document.body.addEventListener('click', (e) => {
+        const commentsButton = e.target.closest('.commentsButton[data-action="open-comments-modal"]');
+        if (commentsButton) {
+          Handlers.handleCommentButtonClick(e);
+        }
+      });
+
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
