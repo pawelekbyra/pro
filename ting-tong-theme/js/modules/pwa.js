@@ -63,6 +63,17 @@ function runStandaloneCheck() {
   return false;
 }
 
+// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
+// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPromptEvent = e;
+  console.log("✅ `beforeinstallprompt` event fired and captured.");
+  // Pokazujemy pasek instalacji, gdy tylko przechwycimy zdarzenie,
+  // pod warunkiem, że preloader jest już ukryty.
+  runStandaloneCheck();
+});
+
 function handleInstallClick() {
   // 1. Sprawdź, czy aplikacja nie jest już zainstalowana
   if (isStandalone()) {
@@ -98,13 +109,6 @@ function init() {
     installButton.disabled = false; // Przycisk instalacji jest zawsze włączony
     installButton.addEventListener("click", handleInstallClick);
   }
-
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    installPromptEvent = e;
-    console.log("✅ `beforeinstallprompt` event fired and captured.");
-    // Nie musimy już tutaj włączać przycisku, bo jest zawsze włączony
-  });
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
