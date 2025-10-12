@@ -4513,15 +4513,11 @@ body.keyboard-visible .image-lightbox {
 }
 
 /*
- * KROK 3.1: Napraw pozycjonowanie paska PWA i kontrolek wideo.
- * Muszą stać się `position: fixed`, aby pozostały na dole okna przeglądarki.
- */
+/* KROK 3.1: UKRYJ paski PWA, gdy klawiatura jest widoczna, aby uniknąć nakładania się */
 body.keyboard-visible .pwa-prompt,
 body.keyboard-visible .pwa-prompt-ios {
-  position: fixed !important;
-  bottom: 0 !important;
-  transform: translateY(0) !important;
-  z-index: 2000 !important; /* Upewnij się, że jest na wierzchu */
+  display: none !important; /* UKRYJ CAŁKOWICIE */
+  visibility: hidden !important;
 }
 
 body.keyboard-visible .video-controls {
