@@ -104,7 +104,10 @@ async function handleFormSubmit(e) {
     if (!validateStep(currentStep)) return;
     collectData(currentStep);
 
-    UI.showToast(Utils.getTranslation('savingDataToast'));
+    const submitBtn = dom.submitBtn;
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
     try {
         const result = await authManager.ajax('tt_complete_profile', formData, true);
@@ -112,13 +115,22 @@ async function handleFormSubmit(e) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
             document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
-            UI.showToast(Utils.getTranslation('profileUpdatedToast'), 'success');
+            UI.showToast(Utils.getTranslation('profileUpdateSuccess'));
             hideModal();
+            // Reset form state for next time
+            currentStep = 0;
+            formData = {};
+            updateStepDisplay();
+            dom.form.reset();
+
         } else {
-            throw new Error(result.data?.message || Utils.getTranslation('genericError'));
+            throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError'));
         }
     } catch (error) {
         UI.showAlert(error.message, true);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
     }
 }
 

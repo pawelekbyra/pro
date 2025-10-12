@@ -232,6 +232,7 @@ export const Config = {
       lastNamePlaceholder: "Nazwisko",
       newPasswordPlaceholder: "Nowe hasło",
       confirmPasswordPlaceholder: "Powtórz hasło",
+      genericError: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -423,6 +424,7 @@ export const Config = {
       lastNamePlaceholder: "Last Name",
       newPasswordPlaceholder: "New Password",
       confirmPasswordPlaceholder: "Confirm Password",
+      genericError: "An unexpected error occurred. Please try again.",
     }, // KONIEC 'en'
   },
 };
