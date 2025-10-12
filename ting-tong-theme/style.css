@@ -1297,7 +1297,8 @@ body,
   z-index: 2001;
   white-space: normal;
   text-align: center;
-  max-width: calc(100% - 40px);
+  width: auto;
+  max-width: calc(100vw - 40px); /* Użyj niemal pełnej szerokości widoku */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
@@ -2508,7 +2509,7 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(20px + var(--safe-area-bottom)); /* FIX: Add padding to prevent content from being cut off */
+  padding-bottom: calc(40px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
 }
 
 .account-content::-webkit-scrollbar {
