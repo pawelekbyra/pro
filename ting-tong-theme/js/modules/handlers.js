@@ -686,11 +686,6 @@ export const Handlers = {
 
             UI.showAlert(Utils.getTranslation("logoutSuccess"));
 
-            // W ostateczności, przeładuj stronę, aby zapewnić czysty stan
-            setTimeout(() => {
-                location.reload();
-            }, 500);
-
           } catch (error) {
             console.error('Logout error:', error);
             UI.showAlert(error.message || 'Logout failed', true);

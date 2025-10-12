@@ -595,6 +595,7 @@ get_header();
         <div class="fl-step" data-step="2">
           <p class="fl-step-description" data-translate-key="firstLoginStep3Desc">Zabezpiecz swoje konto.</p>
           <div class="fl-fields-container">
+            <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
             <span class="fl-email-display"></span>
             <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
             <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
@@ -608,7 +609,7 @@ get_header();
         <div class="fl-footer-buttons">
           <button type="button" id="flPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="firstLoginPrev">Wstecz</button>
           <button type="button" id="flNextBtn" class="fl-btn fl-btn-next" data-translate-key="firstLoginNext">Dalej</button>
-          <button type="button" id="flSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="firstLoginSubmit">Zakończ</button>
+          <button type="submit" id="flSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="firstLoginSubmit">Zakończ</button>
         </div>
       </div>
 

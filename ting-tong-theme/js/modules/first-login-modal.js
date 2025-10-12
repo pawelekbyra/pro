@@ -123,10 +123,10 @@ async function handleFormSubmit(e) {
 }
 
 function setupEventListeners() {
-    if (!dom.modal) return;
+    if (!dom.modal || !dom.form) return;
     dom.nextBtn?.addEventListener('click', handleNextStep);
     dom.prevBtn?.addEventListener('click', handlePrevStep);
-    dom.submitBtn?.addEventListener('click', handleFormSubmit);
+    dom.form.addEventListener('submit', handleFormSubmit);
 
     dom.consentCheckbox?.addEventListener('change', e => {
         dom.langOptionsContainer.classList.toggle('visible', e.target.checked);
