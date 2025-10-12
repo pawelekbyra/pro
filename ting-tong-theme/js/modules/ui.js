@@ -102,7 +102,7 @@ function openModal(modal, options = {}) {
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
     const focusable = getFocusable(modal);
-    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content"))?.focus();
+    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .first-login-modal-content"))?.focus();
     modal._focusTrapDispose = trapFocus(modal);
 }
 
