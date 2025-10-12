@@ -2,7 +2,7 @@
 <html <?php language_attributes(); ?>>
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1, interactive-widget=overlays-content">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: data: blob:; worker-src 'self' blob:; script-src 'self' 'unsafe-inline' https: blob:">
 
     <meta name="description" content="Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.">

@@ -409,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
         AccountPanel.init();
         FirstLoginModal.init();
         UI.initGlobalPanels();
-        UI.initKeyboardListener();
         PWA.init();
         _initializePreloader();
         document.body.classList.add("loaded");
