@@ -4468,85 +4468,76 @@ body,
 }
 
 /* ============================================================================
-   KEYBOARD VISIBILITY PATCH (v4) - The Freezer
+   KEYBOARD VISIBILITY PATCH (v4) - The Freezer - FIXED
    ============================================================================ */
 
-/* KROK 1: "Zamroź" ciało dokumentu.
- * ...
+/*
+ * KROK 1: Zmodyfikuj body, aby ZAWSZE zajmowało pełną wysokość widoku (100vh)
+ * w trybie klawiatury. To wymusza nakładanie się klawiatury na treść.
  */
 body.keyboard-visible {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: var(--app-height) !important; /* FIX: Ogranicza body do widocznego obszaru! */
+  height: 100vh !important; /* FIX: Użyj 100vh, ignorując shrunken var(--app-height) */
   overflow: hidden !important;
 }
 
 /*
- * KROK 2: Dostosuj główne kontenery, aby współpracowały z nowym body.
- * #app-frame, który był `fixed`, teraz może być `absolute`, ponieważ
- * jego rodzic (body) jest `fixed`. To upraszcza kontekst pozycjonowania.
+ * KROK 2: Wymuś na głównym kontenerze i sekcjach użycie 100vh.
+ * Dzięki temu cała zawartość (wideo i sidebar) pozostanie na swojej
+ * pozycji na dole ekranu, zamiast przesuwać się w górę.
  */
 body.keyboard-visible #app-frame {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100% !important; /* FIX: Zapobiega kurczeniu się głównego kontenera */
+  position: fixed !important; /* Zmień na FIXED do viewportu */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100vh !important; /* FIX: Użyj 100vh zamiast 100% shrunken height */
+}
+
+body.keyboard-visible .webyx-section,
+body.keyboard-visible .tiktok-symulacja {
+    height: 100vh !important; /* Wymuś pełną wysokość na kontenerze wideo */
 }
 
 /*
- * KROK 3: Napraw pozycjonowanie modali i nakładek.
- * Wszystkie modale, które były `position: fixed`, muszą teraz stać się
- * `position: absolute`, aby pozycjonowały się wewnątrz `body`, a nie
- * kurczącego się okna przeglądarki.
+ * KROK 3: Napraw pozycjonowanie sidebara (który używa calc z --app-height),
+ * zmuszając go do użycia 100vh w obliczeniach.
  */
-body.keyboard-visible .modal-overlay,
-body.keyboard-visible .notification-popup,
-body.keyboard-visible .image-lightbox {
-  position: absolute !important;
+body.keyboard-visible .tiktok-symulacja .sidebar {
+    top: calc(
+      (100vh - var(--topbar-height) - var(--bottombar-base-height)) / 2 +
+      var(--topbar-height)
+    ) !important; /* FIX: Używa 100vh w obliczeniach, co utrzymuje pozycję */
 }
 
-/*
-/* KROK 3.1: UKRYJ paski PWA, gdy klawiatura jest widoczna, aby uniknąć nakładania się */
+/* KROK 3.1: UKRYJ paski PWA i bottombar, gdy klawiatura jest widoczna (poprzednie poprawki) */
 body.keyboard-visible .pwa-prompt,
 body.keyboard-visible .pwa-prompt-ios {
-  display: none !important; /* UKRYJ CAŁKOWICIE */
+  display: none !important;
   visibility: hidden !important;
 }
 
+body.keyboard-visible .tiktok-symulacja .bottombar {
+  display: none !important;
+}
+
 body.keyboard-visible .video-controls {
-  position: fixed !important;
+  position: fixed !important; /* Utrzymaj kontrolki fixed, aby nie znikały za klawiaturą */
   bottom: calc(var(--safe-area-bottom) + 8px) !important;
   left: 4px !important;
-  transform: none !important; /* Reset transform, aby uniknąć konfliktów */
-  z-index: 106 !important; /* Upewnij się, że jest nad wideo */
-}
-
-/* DODATKOWO: Poprawka dla dolnego paska informacyjnego - UKRYJ go, gdy klawiatura jest widoczna */
-body.keyboard-visible .tiktok-symulacja .bottombar {
-  display: none !important; /* Wymuś ukrycie w trybie klawiatury */
+  transform: none !important;
+  z-index: 106 !important;
 }
 
 /*
- * KROK 4: Wyjątek dla modala komentarzy.
- * Ten modal musi się dostosować, aby pole tekstowe było widoczne
- * nad klawiaturą. Używamy zmiennej --keyboard-offset z JS,
- * aby precyzyjnie ustawić jego wysokość.
+ * KROK 4: Zachowaj oryginalną logikę modala komentarzy, która działała
+ * (używa zmiennej JS do prawidłowego przeliczania wysokości).
  */
 body.keyboard-visible #commentsModal.keyboard-visible .modal-content {
-  height: calc(100% - var(--keyboard-offset, 0px));
-  max-height: calc(100% - var(--keyboard-offset, 0px));
-  transition: height 0.2s ease-out, max-height 0.2s ease-out;
-}
-
-/*
- * Kontener formularza komentarzy pozostaje przyklejony do dołu
- * swojego przewijanego kontenera (modal-body), co jest pożądanym zachowaniem.
- */
-.comment-form-container {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+  height: calc(100% - var(--keyboard-offset, 0px));
+  max-height: calc(100% - var(--keyboard-offset, 0px));
+  transition: height 0.2s ease-out, max-height 0.2s ease-out;
 }
