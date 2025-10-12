@@ -130,7 +130,10 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // USUNIĘTE: Ta logika została przeniesiona do _verifyLoginState i opiera się na sessionStorage
+        // ✅ NOWA LOGIKA: Sprawdź, czy pokazać modal pierwszego logowania
+        if (data.requires_first_login_setup) {
+          FirstLoginModal.showProfileCompletionModal();
+        }
       });
 
       // Listener dla wylogowania
@@ -169,13 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
-
-          // ✅ NOWA LOGIKA: Sprawdź flagę w sessionStorage, aby pokazać modal
-          if (sessionStorage.getItem('showFirstLoginModal') === 'true') {
-            FirstLoginModal.checkProfileAndShowModal(userData);
-            sessionStorage.removeItem('showFirstLoginModal');
-          }
-
         } else {
           console.log('User is not logged in');
         }

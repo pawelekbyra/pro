@@ -192,18 +192,10 @@ class AuthManager {
         throw new Error('Invalid user data in response');
       }
 
-      // ✅ NOWA LOGIKA: Użyj sessionStorage, aby przetrwać przeładowanie
-      if (requires_first_login_setup) {
-        sessionStorage.setItem('showFirstLoginModal', 'true');
-        // Przeładuj stronę, aby zapewnić czysty stan i wyzwolić logikę w app.js
-        location.reload();
-        // Zwróć Promise, który nigdy się nie zakończy, aby zatrzymać dalsze wykonywanie
-        return new Promise(() => {});
-      }
-
       State.set('isUserLoggedIn', true);
       State.set('currentUser', userData);
 
+      // Zawsze emituj zdarzenie, przekazując flagę `requires_first_login_setup`
       State.emit('user:login', {
         userData,
         slidesData,
