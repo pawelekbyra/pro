@@ -4528,14 +4528,9 @@ body.keyboard-visible .video-controls {
   z-index: 106 !important; /* Upewnij się, że jest nad wideo */
 }
 
-/* DODATKOWO: Poprawka dla dolnego paska informacyjnego */
+/* DODATKOWO: Poprawka dla dolnego paska informacyjnego - UKRYJ go, gdy klawiatura jest widoczna */
 body.keyboard-visible .tiktok-symulacja .bottombar {
-  bottom: 0 !important;
-  position: fixed !important; /* Zmień na fixed w kontekście widoku */
-  z-index: 10050 !important;
-  height: var(--bottombar-base-height) !important; /* Używamy wysokości bez safe-area, bo safe-area jest już na dole body */
-  padding-bottom: 0 !important; /* Usuń padding-bottom, bo jest już w height */
-  transform: translateY(0) !important;
+  display: none !important; /* Wymuś ukrycie w trybie klawiatury */
 }
 
 /*
