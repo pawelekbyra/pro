@@ -1089,7 +1089,8 @@ body,
   transition:
     transform 0.1s ease-in-out,
     opacity 0.2s;
-  top: 50%;
+  /* ✅ FIX: Center vertically considering safe area */
+  top: calc(var(--safe-area-top) + (var(--topbar-base-height) / 2));
   transform: translateY(-50%);
 }
 .hamburger-icon {
@@ -1277,15 +1278,14 @@ body,
            --- KOMPONENTY UI: MODALE I ALERTY ---
            ========================================================================== */
 #alertBox {
-  position: absolute;
-  bottom: calc(var(--bottombar-height) + 8px);
+  /* ✅ FIX: Zmieniono na position:fixed aby zapewnić widoczność w PWA */
+  position: fixed;
+  /* ✅ FIX: Obniżono pozycję bliżej dolnego paska */
+  bottom: calc(var(--bottombar-height) + 4px);
   left: 50%;
   transform: translateX(-50%);
   transition: bottom 0.3s ease-out;
-}
 
-#app-frame.hide-ui #alertBox {
-  bottom: calc(var(--safe-area-bottom) + 16px);
   background-color: #000000;
   color: white;
   padding: 12px 20px;
@@ -1296,15 +1296,23 @@ body,
   align-items: center;
   justify-content: center;
   gap: 10px;
-  z-index: 2001;
+  z-index: 10001; /* Podniesiony z-index */
   white-space: normal;
-  width: auto;
-  max-width: 90vw;
+
+  /* ✅ FIX: Ustawiono responsywną szerokość, aby tekst się łamał */
+  width: calc(100% - 24px); /* 12px marginesu po obu stronach */
+  max-width: 500px; /* Maksymalna szerokość na większych ekranach */
+
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
   box-sizing: border-box;
   text-align: center;
+}
+
+#app-frame.hide-ui #alertBox {
+  /* ✅ FIX: Dostosowano pozycję w trybie immersyjnym */
+  bottom: calc(var(--safe-area-bottom) + 12px);
 }
 
 #alertBox svg {

@@ -105,10 +105,8 @@ function handleInstallClick() {
 }
 
 function init() {
-  if (installButton) {
-    installButton.disabled = false; // Przycisk instalacji jest zawsze włączony
-    installButton.addEventListener("click", handleInstallClick);
-  }
+  // Listener jest teraz obsługiwany przez globalny Handlers.mainClickHandler,
+  // więc usuwamy bezpośrednie przypisanie tutaj, aby uniknąć konfliktów.
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
