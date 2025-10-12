@@ -414,7 +414,7 @@ Text Domain: tingtongtheme
            --- STYLE GŁÓWNE, RESET I SCROLLING ---
            ========================================================================== */
 :root {
-  --app-height: 100vh;
+  --app-height: 100%;
   --accent-color: #ff0055;
   --progress-bar-color: var(--accent-color);
   --main-ui-bg-color: #696969;
@@ -473,7 +473,6 @@ body,
 }
 .webyx-section {
   width: 100vw;
-  height: 100vh;
   height: var(--app-height); /* Use var, remove 1px patch for scroll-snap */
   overflow: hidden;
   position: relative;
@@ -482,9 +481,6 @@ body,
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
   will-change: transform;
-  contain: layout paint;
-  content-visibility: auto;
-  contain-intrinsic-size: 100vw 100vh; /* Fallback size for when the element is not rendered */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
@@ -1282,9 +1278,14 @@ body,
            ========================================================================== */
 #alertBox {
   position: absolute;
-  bottom: calc(var(--bottombar-height) + 20px);
+  bottom: calc(var(--bottombar-height) + 8px);
   left: 50%;
   transform: translateX(-50%);
+  transition: bottom 0.3s ease-out;
+}
+
+#app-frame.hide-ui #alertBox {
+  bottom: calc(var(--safe-area-bottom) + 16px);
   background-color: #000000;
   color: white;
   padding: 12px 20px;
