@@ -914,6 +914,11 @@ add_action('wp_ajax_tt_complete_profile', function () {
 
     // 3. Aktualizacja danych w bazie
     wp_set_password($new_password, $u->ID);
+
+    // Po zmianie hasła, użytkownik jest automatycznie wylogowywany.
+    // Musimy go ponownie zalogować, aby sesja była kontynuowana.
+    wp_set_auth_cookie($u->ID, true);
+
     update_user_meta($u->ID, 'first_name', $first_name);
     update_user_meta($u->ID, 'last_name', $last_name);
     update_user_meta($u->ID, 'tt_email_consent', $email_consent);
