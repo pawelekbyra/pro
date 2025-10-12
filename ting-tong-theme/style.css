@@ -1287,7 +1287,7 @@ body,
   transform: translateX(-50%);
   background-color: #000000;
   color: white;
-  padding: 12px 24px;
+  padding: 12px 20px;
   border-radius: 24px;
   font-size: 14px;
   font-weight: 500;
@@ -1298,7 +1298,7 @@ body,
   white-space: normal;
   text-align: center;
   width: auto;
-  max-width: calc(100% - 40px); /* Zapobiega dotykaniu krawędzi */
+  max-width: calc(100% - 24px); /* Zapobiega dotykaniu krawędzi */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
