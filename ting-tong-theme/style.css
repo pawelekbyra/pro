@@ -467,6 +467,9 @@ body,
   opacity: 0; /* Hidden initially */
   transition: opacity 0.5s linear;
   overflow: hidden; /* Swiper handles overflow */
+  /* Wymuszenie własnej warstwy GPU na całym kontenerze Swipera */
+  -webkit-transform: translate3d(0, 0, 0); /* Stabilizacja kontenera */
+  transform: translate3d(0, 0, 0);
 }
 #webyx-container.ready {
   opacity: 1;
@@ -476,13 +479,23 @@ body,
   height: var(--app-height); /* Use var, remove 1px patch for scroll-snap */
   overflow: hidden;
   position: relative;
+}
 
-  /* GPU acceleration and rendering optimization for iOS */
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
+/* Wymuszenie własnej warstwy kompozycji dla każdego slajdu */
+.webyx-section,
+.swiper-slide {
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  transform: translate3d(0, 0, 0) !important;
+  /* Dodanie backface-visibility poprawia zachowanie przy transformacjach 3D */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Upewnij się, że wrapper Swipera ma transformację 3D */
+.swiper-wrapper {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 /* ==========================================================================
@@ -759,6 +772,15 @@ body,
   color: inherit;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   transition: border-color 0.3s ease-out;
+}
+
+/* Stabilizacja kluczowych elementów interfejsu (topbar, sidebar, bottombar) */
+.topbar,
+.tiktok-symulacja .sidebar,
+.tiktok-symulacja .bottombar {
+  /* Wymuszenie własnej, stabilnej warstwy GPU dla stałych elementów */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 .topbar.login-panel-active {
   border-bottom-color: transparent;
