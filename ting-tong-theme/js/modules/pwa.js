@@ -64,34 +64,33 @@ function runStandaloneCheck() {
 }
 
 function handleInstallClick() {
-  // Zawsze sprawdzaj w czasie rzeczywistym, czy aplikacja nie jest już zainstalowana
+  // 1. Sprawdź, czy aplikacja nie jest już zainstalowana
   if (isStandalone()) {
     UI.showAlert(Utils.getTranslation("alreadyInstalledToast"));
     return;
   }
 
-  // Jeśli zdarzenie `beforeinstallprompt` zostało przechwycone, pokaż monit
+  // 2. Jeśli zdarzenie `beforeinstallprompt` zostało przechwycone, użyj go (główna ścieżka dla Androida/Chrome)
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    // Logika userChoice została przeniesiona do globalnego listenera, aby uniknąć duplikacji
     return;
   }
 
-  // Logika dla specyficznych platform (iOS, Desktop)
+  // 3. Jeśli nie ma zdarzenia, ale to iOS, pokaż instrukcje dla iOS
   if (isIOS()) {
     showIosInstructions();
     return;
   }
 
+  // 4. Jeśli nie ma zdarzenia, ale to Desktop, pokaż modal dla Desktopu
   if (isDesktop()) {
     showDesktopModal();
     return;
   }
 
-  // Jeśli żaden z powyższych warunków nie jest spełniony, oznacza to,
-  // że przeglądarka nie jest gotowa do instalacji (np. na niezabezpieczonym połączeniu).
-  // Dajemy użytkownikowi jasny komunikat.
-  UI.showAlert(Utils.getTranslation("installNotReadyText"), true);
+  // 5. W skrajnych przypadkach (np. nieobsługiwana przeglądarka na Androidzie),
+  // nie rób nic, aby uniknąć mylących komunikatów.
+  console.warn("handleInstallClick called but no install method available.");
 }
 
 function init() {
