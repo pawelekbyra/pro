@@ -4468,52 +4468,53 @@ body,
 }
 
 /* ============================================================================
-   KEYBOARD VISIBILITY PATCH (v4) - The Freezer - FIXED
+   KEYBOARD VISIBILITY PATCH (v4) - The Freezer - FINAL FIX
    ============================================================================ */
 
 /*
- * KROK 1: Zmodyfikuj body, aby ZAWSZE zajmowało pełną wysokość widoku (100vh)
- * w trybie klawiatury. To wymusza nakładanie się klawiatury na treść.
+ * KROK 1: Ogranicz body do aktualnej wysokości widocznego obszaru (var(--app-height)).
+ * Zapobiega to przepełnieniu treścią (overflow) za klawiaturę.
  */
 body.keyboard-visible {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: 100vh !important; /* FIX: Użyj 100vh, ignorując shrunken var(--app-height) */
+  height: var(--app-height) !important; /* Używa skurczonej wysokości */
   overflow: hidden !important;
 }
 
 /*
- * KROK 2: Wymuś na głównym kontenerze i sekcjach użycie 100vh.
- * Dzięki temu cała zawartość (wideo i sidebar) pozostanie na swojej
- * pozycji na dole ekranu, zamiast przesuwać się w górę.
+ * KROK 2: Wymuś na głównym kontenerze aplikacji (który zawiera suwak)
+ * i jego sekcjach idealne dopasowanie do skurczonego body (100% wysokości).
  */
 body.keyboard-visible #app-frame {
-  position: fixed !important; /* Zmień na FIXED do viewportu */
+  position: absolute !important; /* Zmienione na absolute względem fixed body */
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: 100vh !important; /* FIX: Użyj 100vh zamiast 100% shrunken height */
+  height: 100% !important; /* Wypełnia 100% nowej, skurczonej wysokości body */
 }
 
 body.keyboard-visible .webyx-section,
 body.keyboard-visible .tiktok-symulacja {
-    height: 100vh !important; /* Wymuś pełną wysokość na kontenerze wideo */
+  height: 100% !important; /* Wymuś 100% skurczonej wysokości nadrzędnego kontenera */
 }
 
 /*
- * KROK 3: Napraw pozycjonowanie sidebara (który używa calc z --app-height),
- * zmuszając go do użycia 100vh w obliczeniach.
+ * KROK 3: Napraw pozycjonowanie sidebara i wideo controls.
+ * Poprawiamy pozycjonowanie sidebara, aby prawidłowo centrował się
+ * w nowo skurczonym kontenerze wideo. Używamy prostego centrowania CSS.
  */
 body.keyboard-visible .tiktok-symulacja .sidebar {
-    top: calc(
-      (100vh - var(--topbar-height) - var(--bottombar-base-height)) / 2 +
-      var(--topbar-height)
-    ) !important; /* FIX: Używa 100vh w obliczeniach, co utrzymuje pozycję */
+  /* Nadpisujemy skomplikowane calc prostym centrowaniem w skurczonym wideo */
+  position: absolute !important;
+  top: 50% !important; /* FIX: Pozycjonuje środek sidebara na środku WIDOCZNEGO wideo */
+  transform: translateY(-50%) !important; /* Wymuś centrowanie */
+  /* Nie usuwamy go z widoku, zostanie naturalnie przycięty przez overflow: hidden; */
 }
 
-/* KROK 3.1: UKRYJ paski PWA i bottombar, gdy klawiatura jest widoczna (poprzednie poprawki) */
+/* KROK 3.1: Ukrycie elementów, które nie mogą się nakładać (bottombar, PWA) */
 body.keyboard-visible .pwa-prompt,
 body.keyboard-visible .pwa-prompt-ios {
   display: none !important;
@@ -4524,8 +4525,9 @@ body.keyboard-visible .tiktok-symulacja .bottombar {
   display: none !important;
 }
 
+/* Krok 3.2: Utrzymaj kontrolki wideo na miejscu (lub ukryte pod klawiaturą) */
 body.keyboard-visible .video-controls {
-  position: fixed !important; /* Utrzymaj kontrolki fixed, aby nie znikały za klawiaturą */
+  position: fixed !important;
   bottom: calc(var(--safe-area-bottom) + 8px) !important;
   left: 4px !important;
   transform: none !important;
@@ -4533,11 +4535,10 @@ body.keyboard-visible .video-controls {
 }
 
 /*
- * KROK 4: Zachowaj oryginalną logikę modala komentarzy, która działała
- * (używa zmiennej JS do prawidłowego przeliczania wysokości).
+ * KROK 4: Zachowaj logikę modala komentarzy
  */
 body.keyboard-visible #commentsModal.keyboard-visible .modal-content {
-  height: calc(100% - var(--keyboard-offset, 0px));
-  max-height: calc(100% - var(--keyboard-offset, 0px));
-  transition: height 0.2s ease-out, max-height 0.2s ease-out;
+  height: calc(100% - var(--keyboard-offset, 0px));
+  max-height: calc(100% - var(--keyboard-offset, 0px));
+  transition: height 0.2s ease-out, max-height 0.2s ease-out;
 }
