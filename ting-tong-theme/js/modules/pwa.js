@@ -92,7 +92,7 @@ function handleInstallClick() {
 
 function init() {
   if (installButton) {
-    installButton.disabled = true;
+    installButton.disabled = false; // Always enable the button
     installButton.addEventListener("click", handleInstallClick);
   }
 
@@ -100,7 +100,7 @@ function init() {
     e.preventDefault();
     installPromptEvent = e;
     if (installButton) {
-      installButton.disabled = false;
+      installButton.disabled = false; // Ensure it's enabled when the prompt is ready
     }
   });
 

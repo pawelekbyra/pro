@@ -883,10 +883,12 @@ add_action('wp_ajax_tt_complete_profile', function () {
         wp_send_json_error(['message' => 'Brak autoryzacji. Musisz być zalogowany.'], 401);
     }
 
-    // Używamy `false` jako trzeciego argumentu, by `check_ajax_referer` szukał nonce w `$_REQUEST`
-    // ale `authManager` wysyła go w nagłówku `X-WP-Nonce`. `check_ajax_referer` automatycznie
-    // sprawdzi nagłówek, jeśli nie znajdzie nonce w `$_REQUEST`.
-    check_ajax_referer('tt_ajax_nonce', false);
+    // Ręczna weryfikacja nonce z nagłówka, ponieważ check_ajax_referer nie obsługuje
+    // nagłówków X-WP-Nonce w trybie admin-ajax.
+    $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : '';
+    if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
+        wp_send_json_error(['message' => 'Błąd weryfikacji bezpieczeństwa. Odśwież stronę i spróbuj ponownie.'], 403);
+    }
 
     $data = json_decode(file_get_contents('php://input'), true);
     if (json_last_error() !== JSON_ERROR_NONE) {

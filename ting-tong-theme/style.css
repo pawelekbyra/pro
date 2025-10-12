@@ -1297,8 +1297,8 @@ body,
   z-index: 2001;
   white-space: normal;
   text-align: center;
-  width: auto;
-  max-width: calc(100vw - 40px); /* Użyj niemal pełnej szerokości widoku */
+  width: calc(100% - 40px); /* Użyj niemal pełnej szerokości kontenera */
+  max-width: 500px; /* Maksymalna szerokość na dużych ekranach */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
@@ -2509,7 +2509,8 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(40px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
+  padding-bottom: calc(80px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
+  position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elementów */
 }
 
 .account-content::-webkit-scrollbar {
