@@ -75,38 +75,32 @@ window.addEventListener("beforeinstallprompt", (e) => {
 });
 
 function handleInstallClick() {
-  // 1. Sprawdź, czy aplikacja nie jest już zainstalowana
-  if (isStandalone()) {
-    UI.showAlert(Utils.getTranslation("alreadyInstalledToast"));
-    return;
-  }
+  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
+  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
+  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
 
-  // 2. Jeśli zdarzenie `beforeinstallprompt` zostało przechwycone, użyj go (główna ścieżka dla Androida/Chrome)
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    return;
-  }
-
-  // 3. Jeśli nie ma zdarzenia, ale to iOS, pokaż instrukcje dla iOS
-  if (isIOS()) {
+    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
+  } else if (isIOS()) {
     showIosInstructions();
-    return;
-  }
-
-  // 4. Jeśli nie ma zdarzenia, ale to Desktop, pokaż modal dla Desktopu
-  if (isDesktop()) {
+  } else if (isDesktop()) {
     showDesktopModal();
-    return;
+  } else {
+    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
+    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
+    // To rzadki przypadek, ale warto go odnotować.
+    console.warn("PWA installation not supported on this browser.");
+    UI.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
-
-  // 5. W skrajnych przypadkach (np. nieobsługiwana przeglądarka na Androidzie),
-  // nie rób nic, aby uniknąć mylących komunikatów.
-  console.warn("handleInstallClick called but no install method available.");
 }
 
 function init() {
-  // Listener jest teraz obsługiwany przez globalny Handlers.mainClickHandler,
-  // więc usuwamy bezpośrednie przypisanie tutaj, aby uniknąć konfliktów.
+  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
+  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
+  if (installButton) {
+    installButton.addEventListener('click', handleInstallClick);
+  }
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
