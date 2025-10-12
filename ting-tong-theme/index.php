@@ -549,61 +549,69 @@ get_header();
 </div>
 
 
-<!-- === First Login Modal (Mobile Bottom Sheet, Friendly UX, 3 Steps) === -->
-<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="first-login-modal-content-wrapper">
-    <form id="firstLoginForm" class="first-login-modal-content">
-      <div class="drag-handle-container"><div class="drag-handle"></div></div>
+<!-- === First Login Modal (NEW & IMPROVED) === -->
+<div id="firstLoginModal" class="fl-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="fl-modal-content-wrapper">
+    <form id="firstLoginForm" class="fl-modal-content">
 
-      <div class="first-login-header">
-        <div class="progress-bar-container"><div class="progress-bar-fill" id="firstLoginProgressBar"></div></div>
-        <h2 id="first-login-title" class="first-login-title" data-translate-key="firstLoginTitle"></h2>
+      <!-- Nagłówek z tytułem i paskiem postępu -->
+      <div class="fl-header">
+        <div class="fl-drag-handle-container"><div class="fl-drag-handle"></div></div>
+        <h2 id="flTitle" class="fl-title" data-translate-key="firstLoginTitle">Uzupełnij profil</h2>
+        <div class="fl-progress-bar-container">
+          <div class="fl-progress-bar-fill" id="flProgressBar"></div>
+        </div>
       </div>
 
-      <div class="first-login-body" id="firstLoginBody">
-        <!-- Step 1 -->
-        <div class="first-login-step" data-step="1">
-          <p class="step-description" data-translate-key="firstLoginStep1Desc"></p>
-          <div class="step-fields-container">
-            <label class="preference-row first-login-consent-row">
-              <span class="preference-label" data-translate-key="firstLoginConsentLabel"></span>
-              <input type="checkbox" id="emailConsent" class="first-login-checkbox">
+      <!-- Kontener na dynamiczne kroki -->
+      <div class="fl-body" id="flBody">
+
+        <!-- Krok 1: Zgody i Język -->
+        <div class="fl-step" data-step="0">
+          <p class="fl-step-description" data-translate-key="firstLoginStep1Desc">Zgody i preferencje.</p>
+          <div class="fl-fields-container">
+            <label class="fl-preference-row">
+              <span class="fl-preference-label" data-translate-key="firstLoginConsentLabel">Zgoda na maile</span>
+              <input type="checkbox" id="flEmailConsent" class="fl-checkbox">
             </label>
-            <div id="languageOptions" class="language-selector-compact" style="display:none;">
-              <div class="language-option-compact active" data-lang="pl" data-translate-key="emailLangPolish"></div>
-              <div class="language-option-compact" data-lang="en" data-translate-key="emailLangEnglish"></div>
+            <div id="flLanguageOptions" class="fl-language-selector">
+              <button type="button" class="fl-language-option active" data-lang="pl" data-translate-key="emailLangPolish">Polski</button>
+              <button type="button" class="fl-language-option" data-lang="en" data-translate-key="emailLangEnglish">English</button>
             </div>
           </div>
         </div>
 
-        <!-- Step 2 -->
-        <div class="first-login-step" data-step="2" style="display:none;">
-          <p class="step-description" data-translate-key="firstLoginStep2Desc"></p>
-          <div class="step-fields-container">
-            <input type="text" id="firstName" class="first-login-form-input" data-translate-placeholder="firstNamePlaceholder">
-            <input type="text" id="lastName" class="first-login-form-input" data-translate-placeholder="lastNamePlaceholder">
-            <p class="hint-text" data-translate-key="firstLoginNameHint"></p>
+        <!-- Krok 2: Imię i Nazwisko -->
+        <div class="fl-step" data-step="1">
+          <p class="fl-step-description" data-translate-key="firstLoginStep2Desc">Podaj swoje dane.</p>
+          <div class="fl-fields-container">
+            <input type="text" id="flFirstName" class="fl-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Imię">
+            <input type="text" id="flLastName" class="fl-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Nazwisko">
+            <p class="fl-hint-text" data-translate-key="firstLoginNameHint">Informacje te będą widoczne publicznie.</p>
           </div>
         </div>
 
-        <!-- Step 3 -->
-        <div class="first-login-step" data-step="3" style="display:none;">
-          <p class="step-description" data-translate-key="firstLoginStep3Desc"></p>
-          <span class="login-email-display"></span>
-          <div class="step-fields-container">
-            <input type="password" id="password" class="first-login-form-input" data-translate-placeholder="newPasswordPlaceholder">
-            <input type="password" id="confirmPassword" class="first-login-form-input" data-translate-placeholder="confirmPasswordPlaceholder">
+        <!-- Krok 3: Hasło -->
+        <div class="fl-step" data-step="2">
+          <p class="fl-step-description" data-translate-key="firstLoginStep3Desc">Zabezpiecz swoje konto.</p>
+          <div class="fl-fields-container">
+            <span class="fl-email-display"></span>
+            <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
+            <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
           </div>
+        </div>
+
+      </div>
+
+      <!-- Stopka z przyciskami nawigacyjnymi -->
+      <div class="fl-footer">
+        <div class="fl-footer-buttons">
+          <button type="button" id="flPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="firstLoginPrev">Wstecz</button>
+          <button type="button" id="flNextBtn" class="fl-btn fl-btn-next" data-translate-key="firstLoginNext">Dalej</button>
+          <button type="submit" id="flSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="firstLoginSubmit">Zakończ</button>
         </div>
       </div>
 
-      <div class="first-login-footer">
-        <div class="footer-buttons">
-          <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" data-translate-key="firstLoginPrev"></button>
-          <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn" data-translate-key="firstLoginNext"></button>
-          <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" data-translate-key="firstLoginSubmit"></button>
-        </div>
-      </div>
     </form>
   </div>
 </div>
