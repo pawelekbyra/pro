@@ -127,7 +127,7 @@ function setupEventListeners() {
     if (!dom.modal) return;
     dom.nextBtn?.addEventListener('click', handleNextStep);
     dom.prevBtn?.addEventListener('click', handlePrevStep);
-    dom.form?.addEventListener('submit', handleFormSubmit);
+    dom.submitBtn?.addEventListener('click', handleFormSubmit);
 
     dom.consentCheckbox?.addEventListener('change', e => {
         dom.langOptionsContainer.classList.toggle('visible', e.target.checked);
