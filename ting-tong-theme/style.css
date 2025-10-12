@@ -4471,19 +4471,15 @@ body,
    KEYBOARD VISIBILITY PATCH (v4) - The Freezer
    ============================================================================ */
 
-/*
- * KROK 1: "Zamroź" ciało dokumentu.
- * Gdy klawiatura się pojawia, ustawiamy pozycję body na stałą (fixed).
- * To wyjmuje je z normalnego przepływu i zapobiega zmianie jego rozmiaru
- * przez przeglądarkę. Działa to jak zrobienie "zrzutu ekranu" layoutu.
- * Używamy !important, aby nadpisać wszelkie inne style i zapewnić działanie.
+/* KROK 1: "Zamroź" ciało dokumentu.
+ * ...
  */
 body.keyboard-visible {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: 100% !important;
+  height: var(--app-height) !important; /* FIX: Ogranicza body do widocznego obszaru! */
   overflow: hidden !important;
 }
 
