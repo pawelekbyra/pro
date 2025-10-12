@@ -1321,9 +1321,10 @@ body,
   z-index: 10001; /* Podniesiony z-index */
   white-space: normal;
 
-  /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
-  width: auto;
-  max-width: min(500px, calc(100vw - 24px)); /* Maksymalna szerokość 500px, ale nie więcej niż ekran z marginesami */
+  /* ✅ FIX: Zwiększona szerokość, aby uniknąć niepotrzebnego zawijania */
+  width: max-content; /* Sprawia, że kontener jest tak szeroki jak jego najdłuższa linia */
+  min-width: 280px; /* Minimalna szerokość, żeby nie był zbyt wąski */
+  max-width: min(600px, calc(100vw - 24px)); /* Maksymalna szerokość 600px, ale nie więcej niż ekran z marginesami */
 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;

@@ -908,26 +908,30 @@ add_action('wp_ajax_tt_complete_profile', function () {
         wp_send_json_error(['message' => 'Imię i nazwisko są polami wymaganymi.'], 400);
     }
     // 3. Aktualizacja danych w bazie
+    $user_data_to_update = [
+        'ID'           => $u->ID,
+        'first_name'   => $first_name,
+        'last_name'    => $last_name,
+        'display_name' => trim($first_name . ' ' . $last_name),
+    ];
+
     if (!empty($new_password)) {
         if (strlen($new_password) < 8) {
             wp_send_json_error(['message' => 'Hasło musi zawierać co najmniej 8 znaków.'], 400);
         }
-        wp_set_password($new_password, $u->ID);
+        $user_data_to_update['user_pass'] = $new_password;
     }
 
-    // Po zmianie hasła, użytkownik jest automatycznie wylogowywany.
-    // Musimy go ponownie zalogować, aby sesja była kontynuowana.
-    wp_set_auth_cookie($u->ID, true);
+    $result = wp_update_user($user_data_to_update);
 
-    update_user_meta($u->ID, 'first_name', $first_name);
-    update_user_meta($u->ID, 'last_name', $last_name);
+    if (is_wp_error($result)) {
+        wp_send_json_error(['message' => 'Błąd serwera podczas aktualizacji użytkownika.'], 500);
+    }
+
     update_user_meta($u->ID, 'tt_email_consent', $email_consent);
     update_user_meta($u->ID, 'tt_email_language', $email_language);
 
     $display_name = trim($first_name . ' ' . $last_name);
-    if (!empty($display_name)) {
-        wp_update_user(['ID' => $u->ID, 'display_name' => $display_name]);
-    }
 
     // Flaga `is_profile_complete` nie jest już potrzebna jako meta,
     // ponieważ logika opiera się na istnieniu `first_name` i `last_name`.
