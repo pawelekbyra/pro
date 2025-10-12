@@ -1299,9 +1299,9 @@ body,
   z-index: 10001; /* Podniesiony z-index */
   white-space: normal;
 
-  /* ✅ FIX: Ustawiono responsywną szerokość, aby tekst się łamał */
-  width: calc(100% - 24px); /* 12px marginesu po obu stronach */
-  max-width: 500px; /* Maksymalna szerokość na większych ekranach */
+  /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
+  width: auto;
+  max-width: min(500px, calc(100vw - 24px)); /* Maksymalna szerokość 500px, ale nie więcej niż ekran z marginesami */
 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;

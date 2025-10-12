@@ -635,8 +635,8 @@ export const Handlers = {
       case "toggle-language":
         handleLanguageToggle();
         break;
-      // This is now handled by a dedicated listener in app.js
       case "open-comments-modal":
+        handleCommentButtonClick(e);
         break;
       case "open-info-modal":
         UI.openModal(UI.DOM.infoModal);
@@ -648,7 +648,7 @@ export const Handlers = {
         PWA.openIosModal();
         break;
       case "install-pwa":
-        PWA.handleInstallClick();
+        // This is now handled directly in the PWA module.
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
