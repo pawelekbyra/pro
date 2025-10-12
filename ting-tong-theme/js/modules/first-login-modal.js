@@ -114,7 +114,6 @@ async function handleFormSubmit(e) {
             document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
             UI.showToast(Utils.getTranslation('profileUpdatedToast'), 'success');
             hideModal();
-            setTimeout(() => location.reload(), 500);
         } else {
             throw new Error(result.data?.message || Utils.getTranslation('genericError'));
         }
