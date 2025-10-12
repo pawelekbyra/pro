@@ -82,6 +82,7 @@ const activeModals = new Set();
 function openModal(modal, options = {}) {
     if (!modal) return;
 
+    modal.style.display = ''; // Remove inline style if it exists
     modal.classList.add('visible');
     activeModals.add(modal);
 

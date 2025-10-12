@@ -37,6 +37,13 @@ if ('serviceWorker' in navigator) {
 // The CDN helper code has been removed as it was unused and overly complex.
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ FIX: Force-hide the first login modal on initial load to prevent flickering.
+  // This ensures it's only shown when the logic in _verifyLoginState explicitly calls it.
+  const firstLoginModal = document.getElementById('firstLoginModal');
+  if (firstLoginModal) {
+    firstLoginModal.style.display = 'none';
+  }
+
   UI.initDOMCache();
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
