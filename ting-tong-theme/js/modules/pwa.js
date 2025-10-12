@@ -64,19 +64,20 @@ function runStandaloneCheck() {
 }
 
 function handleInstallClick() {
+  // Zawsze sprawdzaj w czasie rzeczywistym, czy aplikacja nie jest już zainstalowana
   if (isStandalone()) {
-    UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+    UI.showAlert(Utils.getTranslation("alreadyInstalledToast"));
     return;
   }
 
+  // Jeśli zdarzenie `beforeinstallprompt` zostało przechwycone, pokaż monit
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    installPromptEvent.userChoice.then((choiceResult) => {
-      installPromptEvent = null;
-    });
+    // Logika userChoice została przeniesiona do globalnego listenera, aby uniknąć duplikacji
     return;
   }
 
+  // Logika dla specyficznych platform (iOS, Desktop)
   if (isIOS()) {
     showIosInstructions();
     return;
@@ -87,26 +88,29 @@ function handleInstallClick() {
     return;
   }
 
-  UI.showAlert("Instalacja nie jest jeszcze gotowa. Odśwież stronę i spróbuj ponownie.", true);
+  // Jeśli żaden z powyższych warunków nie jest spełniony, oznacza to,
+  // że przeglądarka nie jest gotowa do instalacji (np. na niezabezpieczonym połączeniu).
+  // Dajemy użytkownikowi jasny komunikat.
+  UI.showAlert(Utils.getTranslation("installNotReadyText"), true);
 }
 
 function init() {
   if (installButton) {
-    installButton.disabled = false; // Always enable the button
+    installButton.disabled = false; // Przycisk instalacji jest zawsze włączony
     installButton.addEventListener("click", handleInstallClick);
   }
 
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     installPromptEvent = e;
-    if (installButton) {
-      installButton.disabled = false; // Ensure it's enabled when the prompt is ready
-    }
+    console.log("✅ `beforeinstallprompt` event fired and captured.");
+    // Nie musimy już tutaj włączać przycisku, bo jest zawsze włączony
   });
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    UI.showAlert("Aplikacja została zainstalowana!");
+    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
+    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
   });
 
   if (iosCloseButton) {
