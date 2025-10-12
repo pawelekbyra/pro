@@ -1293,12 +1293,13 @@ body,
   font-weight: 500;
   display: none;
   align-items: center;
+  justify-content: center; /* Wyśrodkowanie zawartości (ikona + tekst) */
   gap: 10px;
   z-index: 2001;
   white-space: normal;
   text-align: center;
   width: auto;
-  max-width: calc(100% - 24px); /* Zapobiega dotykaniu krawędzi */
+  max-width: min(calc(100% - 24px), 500px, 90vw); /* Responsywna maksymalna szerokość */
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
@@ -4335,7 +4336,7 @@ body,
   #alertBox {
     left: 50%;
     transform: translateX(-50%);
-    max-width: calc(100% - 40px); /* Odstępy od krawędzi */
+    /* max-width jest teraz obsługiwany przez główną regułę z funkcją min() */
   }
   /* ✅ FIX 10: Video controls - zapewnienie widoczności */
   .video-controls {
