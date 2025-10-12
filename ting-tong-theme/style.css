@@ -4468,53 +4468,51 @@ body,
 }
 
 /* ============================================================================
-   KEYBOARD VISIBILITY PATCH (v4) - The Freezer - FINAL FIX
+   KEYBOARD VISIBILITY PATCH (v4) - The Freezer - FINAL WORKING VERSION
    ============================================================================ */
 
 /*
- * KROK 1: Ogranicz body do aktualnej wysokości widocznego obszaru (var(--app-height)).
- * Zapobiega to przepełnieniu treścią (overflow) za klawiaturę.
+ * KROK 1: Zmodyfikuj body, aby ZAWSZE zajmowało pełną wysokość widoku (100vh)
+ * w trybie klawiatury. Jest to kluczowe do uniknięcia przesuwania viewportu.
  */
 body.keyboard-visible {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: var(--app-height) !important; /* Używa skurczonej wysokości */
+  height: 100vh !important; /* KLUCZOWY FIX: Używamy 100vh, ignorując skurczenie */
   overflow: hidden !important;
 }
 
 /*
- * KROK 2: Wymuś na głównym kontenerze aplikacji (który zawiera suwak)
- * i jego sekcjach idealne dopasowanie do skurczonego body (100% wysokości).
+ * KROK 2: Wymuś na głównym kontenerze aplikacji (`#app-frame`) i zawartości wideo
+ * użycie 100vh i pozycjonowanie FIXED do górnej krawędzi. Dzięki temu, gdy
+ * klawiatura wejdzie, zostanie ona ZAKRYTA, a nie wypchnięta.
  */
 body.keyboard-visible #app-frame {
-  position: absolute !important; /* Zmienione na absolute względem fixed body */
+  position: fixed !important; /* Musi być FIXED względem viewportu */
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  height: 100% !important; /* Wypełnia 100% nowej, skurczonej wysokości body */
+  height: 100vh !important; /* FIX: Pełna wysokość widoku */
 }
 
 body.keyboard-visible .webyx-section,
 body.keyboard-visible .tiktok-symulacja {
-  height: 100% !important; /* Wymuś 100% skurczonej wysokości nadrzędnego kontenera */
+  height: 100% !important; /* Wypełnia 100% kontenera o wysokości 100vh */
 }
 
 /*
- * KROK 3: Napraw pozycjonowanie sidebara i wideo controls.
- * Poprawiamy pozycjonowanie sidebara, aby prawidłowo centrował się
- * w nowo skurczonym kontenerze wideo. Używamy prostego centrowania CSS.
+ * KROK 3: Napraw pozycjonowanie sidebara.
+ * Sidebar musi być pozycjonowany względem pełnej, NIESKRÓCONEJ wysokości 100vh.
  */
 body.keyboard-visible .tiktok-symulacja .sidebar {
-  /* Nadpisujemy skomplikowane calc prostym centrowaniem w skurczonym wideo */
-  position: absolute !important;
-  top: 50% !important; /* FIX: Pozycjonuje środek sidebara na środku WIDOCZNEGO wideo */
-  transform: translateY(-50%) !important; /* Wymuś centrowanie */
-  /* Nie usuwamy go z widoku, zostanie naturalnie przycięty przez overflow: hidden; */
+  /* Zmień pozycjonowanie na centrowanie względem PEŁNEGO EKRANU */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-/* KROK 3.1: Ukrycie elementów, które nie mogą się nakładać (bottombar, PWA) */
+/* KROK 4: Zachowaj ukrywanie elementów, które MUSZĄ zniknąć (bottombar, PWA) */
 body.keyboard-visible .pwa-prompt,
 body.keyboard-visible .pwa-prompt-ios {
   display: none !important;
@@ -4525,9 +4523,9 @@ body.keyboard-visible .tiktok-symulacja .bottombar {
   display: none !important;
 }
 
-/* Krok 3.2: Utrzymaj kontrolki wideo na miejscu (lub ukryte pod klawiaturą) */
+/* KROK 4.1: Utrzymaj kontrolki wideo na miejscu (lub ukryte pod klawiaturą) */
 body.keyboard-visible .video-controls {
-  position: fixed !important;
+  position: fixed !important; 
   bottom: calc(var(--safe-area-bottom) + 8px) !important;
   left: 4px !important;
   transform: none !important;
@@ -4535,7 +4533,7 @@ body.keyboard-visible .video-controls {
 }
 
 /*
- * KROK 4: Zachowaj logikę modala komentarzy
+ * KROK 5: Zachowaj oryginalną logikę modala komentarzy (która działała)
  */
 body.keyboard-visible #commentsModal.keyboard-visible .modal-content {
   height: calc(100% - var(--keyboard-offset, 0px));
