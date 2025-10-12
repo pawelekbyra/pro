@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
           // ✅ KLUCZOWE: Sprawdź również tutaj, czy profil jest kompletny
-          FirstLoginModal.checkProfileAndShowModal(userData);
+          // FirstLoginModal.checkProfileAndShowModal(userData); // USUNIĘTE: To powodowało ponowne pojawianie się modala przy odświeżaniu
 
         } else {
           console.log('User is not logged in');
