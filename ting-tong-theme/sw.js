@@ -25,11 +25,12 @@ self.addEventListener('install', event => {
 
         // Cache każdy URL osobno z resilient error handling
         const cachePromises = ESSENTIAL_URLS.map(url => {
-          const fullUrl = themeUrl + url;
+          // ✅ FIX: Poprawnie obsługuj ścieżki absolutne (jak '/') i relatywne
+          const fullUrl = url.startsWith('/') ? url : themeUrl + url;
           return cache.add(fullUrl)
-            .then(() => console.log(`[SW] ✅ Cached: ${url}`))
+            .then(() => console.log(`[SW] ✅ Cached: ${fullUrl}`))
             .catch(err => {
-              console.warn(`[SW] ⚠️ Failed to cache ${url}:`, err.message);
+              console.warn(`[SW] ⚠️ Failed to cache ${fullUrl}:`, err.message);
             });
         });
 
