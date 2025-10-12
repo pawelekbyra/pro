@@ -3109,7 +3109,7 @@ body,
   width: 100%;
   background: #333;
   color: white;
-  z-index: 10002;
+  z-index: 1990;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3166,7 +3166,7 @@ body,
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
-  z-index: 10003;
+  z-index: 1991;
   padding: 1rem;
   padding-bottom: calc(1rem + var(--safe-area-bottom));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
