@@ -130,8 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ KLUCZOWE: Sprawdź, czy profil jest kompletny
-        FirstLoginModal.checkProfileAndShowModal(data.userData);
+        // USUNIĘTE: Ta logika została przeniesiona do _verifyLoginState i opiera się na sessionStorage
       });
 
       // Listener dla wylogowania
@@ -171,8 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
             AccountPanel.populateProfileForm(userData);
           }
 
-          // ✅ KLUCZOWE: Sprawdź również tutaj, czy profil jest kompletny
-          // FirstLoginModal.checkProfileAndShowModal(userData); // USUNIĘTE: To powodowało ponowne pojawianie się modala przy odświeżaniu
+          // ✅ NOWA LOGIKA: Sprawdź flagę w sessionStorage, aby pokazać modal
+          if (sessionStorage.getItem('showFirstLoginModal') === 'true') {
+            FirstLoginModal.checkProfileAndShowModal(userData);
+            sessionStorage.removeItem('showFirstLoginModal');
+          }
 
         } else {
           console.log('User is not logged in');
