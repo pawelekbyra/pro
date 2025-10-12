@@ -1293,23 +1293,29 @@ body,
   font-weight: 500;
   display: none;
   align-items: center;
-  justify-content: center; /* Wyśrodkowanie zawartości (ikona + tekst) */
+  justify-content: center;
   gap: 10px;
   z-index: 2001;
   white-space: normal;
-  text-align: center;
   width: auto;
-  max-width: 90vw; /* Zmieniono, aby był szerszy i bardziej elastyczny */
+  max-width: 90vw;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
   box-sizing: border-box;
+  text-align: center;
 }
 
 #alertBox svg {
     width: 22px;
     height: 22px;
     flex-shrink: 0;
+}
+
+#alertText {
+    display: block;
+    min-width: 0;
+    flex-grow: 1;
 }
 
 #alertBox.visible {
@@ -1333,8 +1339,14 @@ body,
     transform: translate(-50%, 10px);
   }
 }
-.modal-overlay {
-  position: fixed;
+.modal-overlay,
+.fl-modal-overlay,
+#commentsModal,
+.account-modal-overlay,
+#tiktok-profile-modal,
+.crop-modal,
+.image-lightbox {
+  position: absolute; /* Changed from fixed */
   top: 0;
   left: 0;
   width: 100%;
@@ -3084,12 +3096,13 @@ body,
 }
 
 #app-frame {
-  position: fixed;
+  position: relative; /* Make this the positioning context */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden; /* Prevent modals from overflowing */
 }
 
 #app-frame.app-frame--pwa-visible {
@@ -4508,6 +4521,16 @@ body.keyboard-visible .video-controls {
   left: 4px !important;
   transform: none !important; /* Reset transform, aby uniknąć konfliktów */
   z-index: 106 !important; /* Upewnij się, że jest nad wideo */
+}
+
+/* DODATKOWO: Poprawka dla dolnego paska informacyjnego */
+body.keyboard-visible .tiktok-symulacja .bottombar {
+  bottom: 0 !important;
+  position: fixed !important; /* Zmień na fixed w kontekście widoku */
+  z-index: 10050 !important;
+  height: var(--bottombar-base-height) !important; /* Używamy wysokości bez safe-area, bo safe-area jest już na dole body */
+  padding-bottom: 0 !important; /* Usuń padding-bottom, bo jest już w height */
+  transform: translateY(0) !important;
 }
 
 /*
