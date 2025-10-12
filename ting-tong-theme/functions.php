@@ -649,15 +649,20 @@ add_action('wp_ajax_tt_profile_get', function () {
         wp_send_json_error(['message' => 'not_logged_in'], 401);
     }
     $u = wp_get_current_user();
+    $first_name = trim(get_user_meta($u->ID, 'first_name', true));
+    $last_name = trim(get_user_meta($u->ID, 'last_name', true));
+    $is_profile_complete = ! empty($first_name) && ! empty($last_name);
+
     wp_send_json_success([
-        'user_id'      => (int) $u->ID,
-        'username'     => $u->user_login,
-        'email'        => $u->user_email,
-        'display_name' => $u->display_name,
-        'first_name'   => (string) get_user_meta($u->ID, 'first_name', true),
-        'last_name'    => (string) get_user_meta($u->ID, 'last_name',  true),
-        'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
-        'new_nonce'    => wp_create_nonce('tt_ajax_nonce'), // ✅ FIX: Zwróć nowy nonce
+        'user_id'             => (int) $u->ID,
+        'username'            => $u->user_login,
+        'email'               => $u->user_email,
+        'display_name'        => $u->display_name,
+        'first_name'          => (string) $first_name,
+        'last_name'           => (string) $last_name,
+        'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
+        'is_profile_complete' => $is_profile_complete,
+        'new_nonce'           => wp_create_nonce('tt_ajax_nonce'),
     ]);
 });
 add_action('wp_ajax_nopriv_tt_profile_get', function () {
