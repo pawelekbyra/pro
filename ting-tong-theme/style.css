@@ -3164,13 +3164,6 @@ body,
   z-index: 2000;
 }
 
-#app-frame.app-frame--pwa-visible {
-  height: calc(100% - var(--bottombar-height));
-}
-
-#app-frame.app-frame--pwa-visible .bottombar {
-    display: none !important;
-}
 
 /* PWA Prompt Styles from Reference */
 @media (prefers-reduced-motion: reduce) {
