@@ -46,7 +46,6 @@ function runStandaloneCheck() {
   const appFrame = document.getElementById("app-frame");
   if (isStandalone()) {
     if (installBar) {
-      installBar.style.display = 'none';
       installBar.classList.remove("visible");
       if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
