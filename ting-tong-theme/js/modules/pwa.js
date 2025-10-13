@@ -60,6 +60,9 @@ function runStandaloneCheck() {
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
     // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane zdarzenie prompt.
+    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarzenia 'beforeinstallprompt'.
+    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zainstalowana,
+    // użytkownik odrzucił monit, lub przeglądarka nie spełnia kryteriów.
     if (isPreloaderHidden && installPromptEvent && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");

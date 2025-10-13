@@ -108,48 +108,6 @@ function handleLanguageToggle() {
 
 
 export const Handlers = {
-  handleCommentButtonClick: (e) => {
-    const actionTarget = e.target.closest('[data-action="open-comments-modal"]');
-    if (!actionTarget) return;
-    const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
-    if (!slideId) {
-      console.error('No slideId found for comments modal');
-      return;
-    }
-    const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
-    if (!modalBody) {
-      console.error('Modal body not found');
-      return;
-    }
-    modalBody.innerHTML = '<div class="loading-spinner"></div>';
-    UI.openModal(UI.DOM.commentsModal);
-    UI.updateCommentFormVisibility();
-    API.fetchComments(slideId)
-      .then((response) => {
-        if (!response || !response.success) {
-          throw new Error(response?.data?.message || 'Failed to load comments');
-        }
-        const comments = response.data || [];
-        const slideData = slidesData.find(s => s.id === slideId);
-        if (slideData) {
-          slideData.comments = comments;
-        }
-        const sortOrder = State.get("commentSortOrder");
-        if (sortOrder === "popular") {
-          comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        } else {
-          comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        }
-        UI.renderComments(comments);
-        setTimeout(() => {
-          if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
-        }, 100);
-      })
-      .catch((error) => {
-        console.error('Failed to load comments:', error);
-        modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
-      });
-  },
   handleNotificationClick: (event) => {
     const item = event.target.closest(".notification-item");
     if (!item) return;
@@ -564,7 +522,7 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile":
+      case "open-public-profile": {
         if (!State.get("isUserLoggedIn")) {
           Utils.vibrateTry();
           UI.showAlert(Utils.getTranslation("profileViewAlert"));
@@ -581,6 +539,7 @@ export const Handlers = {
           }
         }
         break;
+      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
@@ -590,9 +549,47 @@ export const Handlers = {
       case "toggle-language":
         handleLanguageToggle();
         break;
-      case "open-comments-modal":
-        Handlers.handleCommentButtonClick(e);
+      case "open-comments-modal": {
+        const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+        if (!slideId) {
+          console.error('No slideId found for comments modal');
+          return;
+        }
+        const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+        if (!modalBody) {
+          console.error('Modal body not found');
+          return;
+        }
+        modalBody.innerHTML = '<div class="loading-spinner"></div>';
+        UI.openModal(UI.DOM.commentsModal);
+        UI.updateCommentFormVisibility();
+        API.fetchComments(slideId)
+          .then((response) => {
+            if (!response || !response.success) {
+              throw new Error(response?.data?.message || 'Failed to load comments');
+            }
+            const comments = response.data || [];
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData) {
+              slideData.comments = comments;
+            }
+            const sortOrder = State.get("commentSortOrder");
+            if (sortOrder === "popular") {
+              comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            } else {
+              comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+            UI.renderComments(comments);
+            setTimeout(() => {
+              if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
+            }, 100);
+          })
+          .catch((error) => {
+            console.error('Failed to load comments:', error);
+            modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
+          });
         break;
+      }
       case "open-info-modal":
         UI.openModal(UI.DOM.infoModal);
         break;
@@ -793,29 +790,12 @@ export const Handlers = {
       submitButton.innerHTML = '<span class="loading-spinner"></span>';
 
       try {
-        // Zaloguj się
-        const result = await authManager.login(username, password);
+        // Zaloguj się. authManager.login sam wywoła event 'user:login',
+        // który jest obsługiwany w app.js. To centralne miejsce
+        // zajmie się pokazaniem modala lub zaktualizowaniem UI.
+        await authManager.login(username, password);
 
-        if (!result.userData) {
-          throw new Error('Invalid response: missing user data');
-        }
-
-        // Sprawdź, czy wymagana jest konfiguracja
-        if (result.requires_first_login_setup) {
-          const loginPanel = document.querySelector("#app-frame > .login-panel");
-          if (loginPanel) loginPanel.classList.remove("active");
-
-          const topbar = document.querySelector("#app-frame > .topbar");
-          if (topbar) topbar.classList.remove("login-panel-active");
-
-          // Pokaż modal, używając danych z logowania.
-          // LOGIKA ZOSTANIE PRZENIESIONA DO app.js
-        } else {
-          // Standardowe logowanie
-          UI.updateUIForLoginState();
-          UI.showAlert(Utils.getTranslation("loginSuccess"));
-        }
-
+        // Po prostu wyczyść formularz.
         usernameInput.value = '';
         passwordInput.value = '';
 
