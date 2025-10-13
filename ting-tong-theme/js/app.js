@@ -132,10 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ NOWA LOGIKA: Sprawdź, czy pokazać modal pierwszego logowania
-        if (data.requires_first_login_setup) {
-          FirstLoginModal.showProfileCompletionModal();
-        }
+        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
+        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
+        FirstLoginModal.checkProfileAndShowModal(data.userData);
       });
 
       // Listener dla wylogowania
@@ -347,12 +346,16 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           UI.DOM.preloader.classList.add("preloader-hiding");
           UI.DOM.container.classList.add("ready");
+
+          // ✅ FIX: Wywołanie PWA.runStandaloneCheck() powinno być natychmiastowe,
+          // a nie zależne od niestabilnego zdarzenia transitionend.
+          PWA.runStandaloneCheck();
+
           // The PWA install bar logic is now fully handled by the PWA module.
           UI.DOM.preloader.addEventListener(
             "transitionend",
             () => {
               UI.DOM.preloader.style.display = "none";
-              PWA.runStandaloneCheck(); // Explicitly check for PWA bar visibility
               // Sprawdź, czy należy wyświetlić toast o zainstalowanej aplikacji
               if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true') {
                 UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);

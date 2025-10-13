@@ -204,6 +204,9 @@ export const FirstLoginModal = {
     init,
     showProfileCompletionModal,
     checkProfileAndShowModal: (userData) => {
+        // ✅ FIX: Re-cache DOM just in case it wasn't ready during initial init.
+        // This makes the call much more robust.
+        cacheDOM();
         if (userData && !userData.is_profile_complete) {
             showProfileCompletionModal();
         }
