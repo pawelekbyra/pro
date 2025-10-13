@@ -528,15 +528,21 @@ export const Handlers = {
           UI.showAlert(Utils.getTranslation("profileViewAlert"));
           return;
         }
-        const profileSection = actionTarget.closest(".webyx-section");
-        if (profileSection) {
-          const slideData = slidesData.find(
-            (s) => s.id === profileSection.dataset.slideId,
-          );
-          if (slideData) {
+
+        const swiper = State.get('swiper');
+        if (!swiper || !swiper.slides[swiper.activeIndex]) {
+            console.error('Swiper or active slide not found');
+            return;
+        }
+
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        const slideId = activeSlide.dataset.slideId;
+
+        const slideData = slidesData.find(s => s.id === slideId);
+
+        if (slideData) {
             UI.populateProfileModal(slideData);
             UI.openModal(document.getElementById('tiktok-profile-modal'));
-          }
         }
         break;
       }
@@ -554,7 +560,12 @@ export const Handlers = {
             UI.showAlert(Utils.getTranslation('loginToComment'));
             return;
         }
-        const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+        const swiper = State.get('swiper');
+        if (!swiper || !swiper.slides[swiper.activeIndex]) {
+            console.error('Swiper or active slide not found for comments');
+            return;
+        }
+        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
         if (!slideId) {
           console.error('No slideId found for comments modal');
           return;
