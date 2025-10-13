@@ -101,6 +101,9 @@ function collectData(step) {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
+
+    // ZAWSZE zbierz dane z ostatniego kroku (Krok 2: Hasło) PRZED walidacją i wysłaniem.
+    // W tej funkcji walidujemy i zbieramy DANE Z CAŁEGO PROFILU (zebrane w krokach 0 i 1 oraz teraz krok 2).
     if (!validateStep(currentStep)) return;
     collectData(currentStep);
 
@@ -109,12 +112,26 @@ async function handleFormSubmit(e) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
+    // WALIDACJA PO ZBIERANIU DANYCH:
+    if (currentStep === 2) {
+        // Dodatkowa, niezbędna walidacja hasła, której brakuje, gdy pomijany jest krok 1.
+        if (formData.new_password.length < 8) {
+            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            return;
+        }
+    }
+
+    // Dalsza logika formularza jest poprawna:
     try {
-        const result = await authManager.ajax('tt_complete_profile', formData, true);
+        // ZMIANA: Wysyłamy jako standardowy formularz, a nie JSON
+        const result = await authManager.ajax('tt_complete_profile', formData);
         if (result.success) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
-            document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
+            // NOWE: Emitujemy zdarzenie user:login, aby odświeżyć UI i potencjalnie zamknąć login panel
+            State.emit('user:login', { userData: updatedUser });
             UI.showToast(Utils.getTranslation('profileUpdateSuccess'));
             hideModal();
             // Reset form state for next time
@@ -134,6 +151,7 @@ async function handleFormSubmit(e) {
         submitBtn.innerHTML = originalBtnText;
     }
 }
+
 
 function setupEventListeners() {
     if (!dom.modal || !dom.form) return;

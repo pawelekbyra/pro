@@ -93,7 +93,7 @@ class AuthManager {
    * @param {object} data - Dane do wysłania.
    * @param {boolean} sendAsJSON - Jeśli true, wyślij dane jako application/json.
    */
-  async ajax(action, data = {}, sendAsJSON = false) {
+  async ajax(action, data = {}, sendAsJSON = false, _bypassQueue = false) {
     if (State.get('isMock')) {
         console.log(`%c[MOCK] Intercepted AJAX call: ${action}`, 'color: #00aaff;');
         if (action === 'tt_profile_get') {
@@ -108,13 +108,11 @@ class AuthManager {
         let body;
 
         if (sendAsJSON) {
-            // Dla JSON: akcja w URL, nonce w nagłówku, ciało to czysty JSON
             url = `${ajax_object.ajax_url}?action=${action}`;
             headers['Content-Type'] = 'application/json; charset=UTF-8';
             headers['X-WP-Nonce'] = currentNonce;
             body = JSON.stringify(data);
         } else {
-            // Dla standardowych żądań: akcja i nonce w ciele
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
             const bodyData = new URLSearchParams({
                 action,
@@ -145,7 +143,10 @@ class AuthManager {
         if ((error.message.includes('403') || error.message.includes('400')) && action !== 'tt_refresh_nonce') {
           console.warn(`[AUTH] Nonce error detected (${error.message}). Refreshing...`);
 
-          const refreshResponse = await this.ajax('tt_refresh_nonce');
+          // ✅ FIX: Wywołaj odświeżanie z flagą _bypassQueue, aby uniknąć zakleszczenia (deadlock).
+          // To jest kluczowa zmiana, która naprawia "zawieszanie się" przycisków.
+          const refreshResponse = await this.ajax('tt_refresh_nonce', {}, false, true);
+
           if (!refreshResponse.success || !refreshResponse.data?.nonce) {
             console.error('[AUTH] Failed to refresh nonce. Throwing original error.');
             throw error;
@@ -154,6 +155,7 @@ class AuthManager {
           ajax_object.nonce = refreshResponse.data.nonce;
           console.log('[AUTH] Nonce refreshed. Retrying original request...');
 
+          // Ponów oryginalne żądanie z nowym nonce
           const retryValidated = await performFetch(ajax_object.nonce);
           if (retryValidated.data?.new_nonce) {
             ajax_object.nonce = retryValidated.data.new_nonce;
@@ -164,6 +166,12 @@ class AuthManager {
       }
     };
 
+    // Jeśli flaga jest ustawiona, wykonaj żądanie bezpośrednio, omijając kolejkę.
+    if (_bypassQueue) {
+      return requestFn();
+    }
+
+    // W przeciwnym razie, użyj bezpiecznej kolejki.
     return this.safeRequest(requestFn);
   }
 
