@@ -81,8 +81,9 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
-  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
+  // Pokazujemy pasek instalacji, gdy tylko przechwycimy zdarzenie,
+  // pod warunkiem, że preloader jest już ukryty.
+  runStandaloneCheck();
 });
 
 function handleInstallClick() {
