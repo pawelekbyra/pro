@@ -4,267 +4,216 @@ import { State } from './state.js';
 import { authManager } from './auth-manager.js';
 
 let dom = {};
-let currentStep = 1;
+let currentStep = 0;
 const totalSteps = 3;
 let formData = {};
-let stepDefinitions = {};
 
 function cacheDOM() {
-  dom = {
-    modal: document.getElementById('firstLoginModal'),
-    form: document.getElementById('firstLoginForm'),
-    title: document.getElementById('first-login-title'),
-    progressBar: document.getElementById('firstLoginProgressBar'),
-    stepIcon: document.getElementById('firstLoginStepIcon'),
-    stepDescription: document.getElementById('firstLoginStepDescription'),
-    stepFields: document.getElementById('firstLoginStepFields'),
-    prevBtn: document.getElementById('firstLoginPrevBtn'),
-    nextBtn: document.getElementById('firstLoginNextBtn'),
-    submitBtn: document.getElementById('firstLoginSubmitBtn'),
-    errorEl: document.getElementById('firstLoginError'),
-  };
-}
-
-function initializeStepDefinitions() {
-    stepDefinitions = {
-        1: {
-            icon: '🌐',
-            titleKey: 'firstLoginStep1Title',
-            descriptionKey: 'firstLoginStep1Desc',
-            renderFields: () => `
-                <div class="language-selector-compact first-login-lang-selector">
-                    <div class="language-option-compact active" data-lang="pl">Polski</div>
-                    <div class="language-option-compact" data-lang="en">English</div>
-                </div>
-            `,
-            validate: () => true,
-            collectData: () => {
-                formData.email_language = dom.stepFields.querySelector('.language-option-compact.active').dataset.lang;
-            }
-        },
-        2: {
-            icon: '🔔',
-            titleKey: 'firstLoginStep2Title',
-            descriptionKey: 'firstLoginStep2Desc',
-            renderFields: () => `
-                <div class="preference-row first-login-consent-row">
-                    <div class="toggle-switch active" id="fl_email_consent"><div class="toggle-slider"></div></div>
-                    <label for="fl_email_consent" class="preference-label">${Utils.getTranslation('firstLoginConsentLabel')}</label>
-                </div>
-            `,
-            validate: () => true,
-            collectData: () => {
-                formData.email_consent = dom.stepFields.querySelector('#fl_email_consent').classList.contains('active');
-            }
-        },
-        3: {
-            icon: '👤',
-            titleKey: 'firstLoginStep3Title',
-            descriptionKey: 'firstLoginStep3Desc',
-            renderFields: () => `
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_firstname">${Utils.getTranslation('firstNameLabel')}</label>
-                    <input type="text" id="fl_firstname" class="first-login-form-input" required autocomplete="given-name">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_lastname">${Utils.getTranslation('lastNameLabel')}</label>
-                    <input type="text" id="fl_lastname" class="first-login-form-input" required autocomplete="family-name">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_new_password">${Utils.getTranslation('newPasswordLabel')}</label>
-                    <input type="password" id="fl_new_password" class="first-login-form-input" required autocomplete="new-password" minlength="8">
-                </div>
-                <div class="first-login-form-group">
-                    <label class="first-login-form-label" for="fl_confirm_password">${Utils.getTranslation('confirmPasswordLabel')}</label>
-                    <input type="password" id="fl_confirm_password" class="first-login-form-input" required autocomplete="new-password" minlength="8">
-                </div>
-            `,
-            validate: () => {
-                hideError();
-                const firstName = dom.stepFields.querySelector('#fl_firstname').value.trim();
-                const lastName = dom.stepFields.querySelector('#fl_lastname').value.trim();
-                const password = dom.stepFields.querySelector('#fl_new_password').value;
-                const confirmPassword = dom.stepFields.querySelector('#fl_confirm_password').value;
-
-                if (!firstName || !lastName) {
-                    showError(Utils.getTranslation('errorMissingNames'));
-                    return false;
-                }
-                if (password.length < 8) {
-                    showError(Utils.getTranslation('errorMinPasswordLength'));
-                    return false;
-                }
-                if (password !== confirmPassword) {
-                    showError(Utils.getTranslation('errorPasswordsMismatch'));
-                    return false;
-                }
-                return true;
-            },
-            collectData: () => {
-                formData.first_name = dom.stepFields.querySelector('#fl_firstname').value.trim();
-                formData.last_name = dom.stepFields.querySelector('#fl_lastname').value.trim();
-                formData.new_password = dom.stepFields.querySelector('#fl_new_password').value;
-            }
-        }
+    dom = {
+        modal: document.getElementById('firstLoginModal'),
+        form: document.getElementById('firstLoginForm'),
+        title: document.getElementById('flTitle'),
+        progressBar: document.getElementById('flProgressBar'),
+        steps: document.querySelectorAll('.fl-step'),
+        prevBtn: document.getElementById('flPrevBtn'),
+        nextBtn: document.getElementById('flNextBtn'),
+        submitBtn: document.getElementById('flSubmitBtn'),
+        consentCheckbox: document.getElementById('flEmailConsent'),
+        langOptionsContainer: document.getElementById('flLanguageOptions'),
+        langOptions: document.querySelectorAll('.fl-language-option'),
+        firstNameInput: document.getElementById('flFirstName'),
+        lastNameInput: document.getElementById('flLastName'),
+        passwordInput: document.getElementById('flPassword'),
+        confirmPasswordInput: document.getElementById('flConfirmPassword'),
+        emailDisplay: document.querySelector('.fl-email-display'),
     };
 }
 
-function setupEventListeners() {
+function updateStepDisplay() {
     if (!dom.modal) return;
-    dom.nextBtn?.addEventListener('click', handleNextStep);
-    dom.prevBtn?.addEventListener('click', handlePrevStep);
-    dom.form?.addEventListener('submit', handleFormSubmit);
 
-    // Delegacja zdarzeń dla dynamicznie tworzonych pól
-    dom.stepFields?.addEventListener('click', (e) => {
-        const toggle = e.target.closest('.toggle-switch');
-        if (toggle) {
-            toggle.classList.toggle('active');
-        }
-
-        const langOption = e.target.closest('.language-option-compact');
-        if (langOption) {
-            dom.stepFields.querySelector('.language-option-compact.active')?.classList.remove('active');
-            langOption.classList.add('active');
+    dom.steps.forEach((stepEl, i) => {
+        if (i === currentStep) {
+            stepEl.classList.add('active');
+        } else {
+            stepEl.classList.remove('active');
         }
     });
-}
 
+    dom.prevBtn.style.display = currentStep === 0 ? 'none' : 'inline-flex';
+    dom.nextBtn.style.display = currentStep === totalSteps - 1 ? 'none' : 'inline-flex';
+    dom.submitBtn.style.display = currentStep === totalSteps - 1 ? 'inline-flex' : 'none';
 
-function showProfileCompletionModal() {
-    if (!dom.modal) return;
-    resetModal();
-    renderStep(currentStep);
-    UI.openModal(dom.modal, {
-        onOpen: () => document.dispatchEvent(new CustomEvent('tt:pause-video')),
-        onClose: () => document.dispatchEvent(new CustomEvent('tt:play-video'))
-    });
-}
-
-function hideModal() {
-    if (!dom.modal) return;
-    UI.closeModal(dom.modal); // UI.closeModal samo wywoła onClose, więc tt:play-video jest już obsługiwane
-}
-
-function resetModal() {
-    currentStep = 1;
-    formData = {};
-    dom.form?.reset();
-    hideError();
-}
-
-function renderStep(stepNumber) {
-    const step = stepDefinitions[stepNumber];
-    if (!step) return;
-
-    // Animacja wyjścia dla starych treści
-    const elementsToAnimate = [dom.stepIcon, dom.stepDescription, dom.stepFields];
-    elementsToAnimate.forEach(el => el.classList.add('is-exiting'));
-
-    setTimeout(() => {
-        // Aktualizacja treści
-        dom.title.textContent = Utils.getTranslation(step.titleKey);
-        dom.stepIcon.innerHTML = step.icon;
-        dom.stepDescription.innerHTML = Utils.getTranslation(step.descriptionKey);
-        dom.stepFields.innerHTML = step.renderFields();
-
-        // Aktualizacja przycisków
-        dom.prevBtn.textContent = Utils.getTranslation('firstLoginPrev');
-        dom.nextBtn.textContent = Utils.getTranslation('firstLoginNext');
-        dom.submitBtn.textContent = Utils.getTranslation('firstLoginSubmit');
-
-        // Animacja wejścia dla nowych treści
-        elementsToAnimate.forEach(el => {
-            el.classList.remove('is-exiting');
-            void el.offsetWidth; // Trigger reflow
-        });
-
-        // Aktualizacja UI
-        dom.progressBar.style.width = `${(stepNumber / totalSteps) * 100}%`;
-        dom.prevBtn.style.display = stepNumber > 1 ? 'inline-flex' : 'none';
-        dom.nextBtn.style.display = stepNumber < totalSteps ? 'inline-flex' : 'none';
-        dom.submitBtn.style.display = stepNumber === totalSteps ? 'inline-flex' : 'none';
-    }, 250);
+    if (dom.progressBar) {
+        dom.progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
+    }
 }
 
 function handleNextStep() {
-    hideError();
-    const step = stepDefinitions[currentStep];
-    if (step.validate()) {
-        step.collectData();
-        if (currentStep < totalSteps) {
+    if (validateStep(currentStep)) {
+        collectData(currentStep);
+        if (currentStep < totalSteps - 1) {
             currentStep++;
-            renderStep(currentStep);
+            updateStepDisplay();
         }
     }
 }
 
 function handlePrevStep() {
-    hideError();
-    if (currentStep > 1) {
+    if (currentStep > 0) {
         currentStep--;
-        renderStep(currentStep);
+        updateStepDisplay();
+    }
+}
+
+function validateStep(step) {
+    if (step === 1) { // Krok Imię/Nazwisko
+        if (!dom.firstNameInput.value.trim() || !dom.lastNameInput.value.trim()) {
+            UI.showAlert(Utils.getTranslation('errorMissingNames'), true); // POPRAWIONO KLUCZ
+            return false;
+        }
+    }
+    if (step === 2) { // Krok Hasło
+        if (dom.passwordInput.value.length < 8) {
+            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
+            return false;
+        }
+        if (dom.passwordInput.value !== dom.confirmPasswordInput.value) {
+            UI.showAlert(Utils.getTranslation('errorPasswordsMismatch'), true); // POPRAWIONO KLUCZ
+            return false;
+        }
+    }
+    return true;
+}
+
+function collectData(step) {
+    if (step === 0) {
+        formData.email_consent = dom.consentCheckbox.checked;
+        const activeLang = dom.langOptionsContainer.querySelector('.fl-language-option.active');
+        formData.email_language = activeLang ? activeLang.dataset.lang : 'pl';
+    } else if (step === 1) {
+        formData.first_name = dom.firstNameInput.value.trim();
+        formData.last_name = dom.lastNameInput.value.trim();
+    } else if (step === 2) {
+        formData.new_password = dom.passwordInput.value;
     }
 }
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-    const step = stepDefinitions[currentStep];
-    if (!step.validate()) {
-        showError(Utils.getTranslation('errorValidationFailed'));
-        return;
+
+    // ZAWSZE zbierz dane z ostatniego kroku (Krok 2: Hasło) PRZED walidacją i wysłaniem.
+    // W tej funkcji walidujemy i zbieramy DANE Z CAŁEGO PROFILU (zebrane w krokach 0 i 1 oraz teraz krok 2).
+    if (!validateStep(currentStep)) return;
+    collectData(currentStep);
+
+    const submitBtn = dom.submitBtn;
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
+
+    // WALIDACJA PO ZBIERANIU DANYCH:
+    if (currentStep === 2) {
+        // Dodatkowa, niezbędna walidacja hasła, której brakuje, gdy pomijany jest krok 1.
+        if (formData.new_password.length < 8) {
+            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            return;
+        }
     }
 
-    hideError();
-    step.collectData();
-
-    const originalText = dom.submitBtn.innerHTML;
-    dom.submitBtn.disabled = true;
-    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
-
+    // Dalsza logika formularza jest poprawna:
     try {
-        const result = await authManager.ajax('tt_complete_profile', formData, true);
-
+        // ZMIANA: Wysyłamy jako standardowy formularz, a nie JSON
+        const result = await authManager.ajax('tt_complete_profile', formData);
         if (result.success) {
-            // Zaktualizuj dane użytkownika w stanie globalnym
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
-
-            // Wywołaj event, aby inne części aplikacji mogły zareagować
-            document.dispatchEvent(new CustomEvent('user:profile_completed', { detail: { user: updatedUser } }));
-
-            UI.showToast(result.data.message || Utils.getTranslation('profileUpdateSuccess'), 'success');
-
-            setTimeout(() => {
-                hideModal();
-            }, 1500);
+            // NOWE: Emitujemy zdarzenie user:login, aby odświeżyć UI i potencjalnie zamknąć login panel
+            State.emit('user:login', { userData: updatedUser });
+            UI.showToast(Utils.getTranslation('profileUpdateSuccess'));
+            hideModal();
+            // Reset form state for next time
+            currentStep = 0;
+            formData = {};
+            updateStepDisplay();
+            dom.form.reset();
 
         } else {
-            throw new Error(result.data?.message || Utils.getTranslation('errorUnknown'));
+            // FIX: Złap błąd z komunikatu serwera i wyświetl
+            throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError'));
         }
     } catch (error) {
-        showError(error.message);
-        dom.submitBtn.disabled = false;
-        dom.submitBtn.innerHTML = originalText;
+        UI.showAlert(error.message || Utils.getTranslation('genericError'), true);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
     }
 }
 
-function showError(message) {
-    if (!dom.errorEl) return;
-    dom.errorEl.textContent = message;
-    dom.errorEl.style.display = 'block';
+
+function setupEventListeners() {
+    if (!dom.modal || !dom.form) return;
+    dom.nextBtn?.addEventListener('click', handleNextStep);
+    dom.prevBtn?.addEventListener('click', handlePrevStep);
+    dom.form.addEventListener('submit', handleFormSubmit);
+
+    dom.consentCheckbox?.addEventListener('change', e => {
+        dom.langOptionsContainer.classList.toggle('visible', e.target.checked);
+    });
+
+    dom.langOptions?.forEach(opt => {
+        opt.addEventListener('click', () => {
+            dom.langOptions.forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+        });
+    });
 }
 
-function hideError() {
-    if (!dom.errorEl) return;
-    dom.errorEl.style.display = 'none';
-    dom.errorEl.textContent = '';
+function translateUI() {
+    if(!dom.modal) return;
+
+    dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
+        const key = el.dataset.translateKey;
+        const translation = Utils.getTranslation(key);
+        if(translation) el.innerHTML = translation;
+    });
+
+    dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+        const key = el.dataset.translatePlaceholder;
+        const translation = Utils.getTranslation(key);
+        if(translation) el.placeholder = translation;
+    });
+}
+
+function showProfileCompletionModal() {
+    if (!dom.modal) return;
+    translateUI();
+
+    // FIX 2: Ustawienie domyślnego stanu: zgoda zaznaczona, język polski
+    dom.consentCheckbox.checked = true;
+    dom.langOptionsContainer.classList.add('visible'); // Pokaż opcje językowe
+    dom.langOptions.forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.dataset.lang === 'pl') opt.classList.add('active'); // Domyślnie PL
+    });
+
+    const userEmail = State.get('currentUser')?.email || '';
+    if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
+
+    UI.openModal(dom.modal);
+    updateStepDisplay();
+}
+
+function hideModal() {
+    if (!dom.modal) return;
+    UI.closeModal(dom.modal);
 }
 
 function init() {
     cacheDOM();
     if (dom.modal) {
-        initializeStepDefinitions();
         setupEventListeners();
     }
 }
@@ -272,4 +221,12 @@ function init() {
 export const FirstLoginModal = {
     init,
     showProfileCompletionModal,
+    checkProfileAndShowModal: (userData) => {
+        // ✅ FIX: Re-cache DOM just in case it wasn't ready during initial init.
+        // This makes the call much more robust.
+        cacheDOM();
+        if (userData && !userData.is_profile_complete) {
+            showProfileCompletionModal();
+        }
+    }
 };

@@ -25,17 +25,6 @@ function mockToggleLogin() {
   }
 }
 
-function handleNotificationClick(event) {
-  const item = event.target.closest(".notification-item");
-  if (!item) return;
-
-  item.classList.toggle("expanded");
-  item.setAttribute("aria-expanded", item.classList.contains("expanded"));
-
-  if (item.classList.contains("unread")) {
-    item.classList.remove("unread");
-  }
-}
 
 async function handleLikeToggle(button) {
   if (!State.get("isUserLoggedIn")) {
@@ -117,8 +106,17 @@ function handleLanguageToggle() {
   Notifications.render();
 }
 
+
 export const Handlers = {
-  handleNotificationClick,
+  handleNotificationClick: (event) => {
+    const item = event.target.closest(".notification-item");
+    if (!item) return;
+    item.classList.toggle("expanded");
+    item.setAttribute("aria-expanded", item.classList.contains("expanded"));
+    if (item.classList.contains("unread")) {
+      item.classList.remove("unread");
+    }
+  },
   profileModalTabHandler: (e) => {
     const tab = e.target.closest(".tab");
     if (!tab) return;
@@ -524,7 +522,7 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile":
+      case "open-public-profile": {
         if (!State.get("isUserLoggedIn")) {
           Utils.vibrateTry();
           UI.showAlert(Utils.getTranslation("profileViewAlert"));
@@ -537,10 +535,11 @@ export const Handlers = {
           );
           if (slideData) {
             UI.populateProfileModal(slideData);
-            UI.openModal(UI.DOM.tiktokProfileModal);
+            UI.openModal(document.getElementById('tiktok-profile-modal'));
           }
         }
         break;
+      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
@@ -552,90 +551,43 @@ export const Handlers = {
         break;
       case "open-comments-modal": {
         const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
-
         if (!slideId) {
           console.error('No slideId found for comments modal');
           return;
         }
-
-        // Pokaż modal z loading spinner
-        const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+        const commentsModal = document.getElementById('commentsModal');
+        const modalBody = commentsModal.querySelector(".modal-body");
         if (!modalBody) {
           console.error('Modal body not found');
           return;
         }
-
         modalBody.innerHTML = '<div class="loading-spinner"></div>';
-        UI.openModal(UI.DOM.commentsModal);
+        UI.openModal(commentsModal);
         UI.updateCommentFormVisibility();
-
-        // Pobierz komentarze z pełnym error handling
         API.fetchComments(slideId)
           .then((response) => {
-            // Walidacja odpowiedzi
-            if (!response || typeof response.success !== 'boolean') {
-              throw new Error('Invalid response format');
+            if (!response || !response.success) {
+              throw new Error(response?.data?.message || 'Failed to load comments');
             }
-
-            if (!response.success) {
-              throw new Error(response.data?.message || 'Failed to load comments');
-            }
-
-            // Walidacja danych
-            let comments = response.data;
-            if (!Array.isArray(comments)) {
-              console.warn('Comments data is not an array, using empty array');
-              comments = [];
-            }
-
-            // Store comments in local cache
+            const comments = response.data || [];
             const slideData = slidesData.find(s => s.id === slideId);
             if (slideData) {
-                slideData.comments = comments;
+              slideData.comments = comments;
             }
-
-            // Sortowanie
             const sortOrder = State.get("commentSortOrder");
             if (sortOrder === "popular") {
               comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
             } else {
-              comments.sort((a, b) => {
-                const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
-                const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
-                return dateB - dateA;
-              });
+              comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             }
-
-            // Render komentarzy
             UI.renderComments(comments);
-
-            // Scroll do dołu
             setTimeout(() => {
-              if (modalBody && modalBody.scrollHeight) {
-                modalBody.scrollTop = modalBody.scrollHeight;
-              }
+              if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
             }, 100);
           })
           .catch((error) => {
             console.error('Failed to load comments:', error);
-
-            // Usuń loading spinner i pokaż błąd
-            modalBody.innerHTML = `
-              <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p style="font-size: 14px; margin: 0;">
-                  ${Utils.getTranslation('commentLoadError') || 'Nie udało się załadować komentarzy'}
-                </p>
-                <button
-                  onclick="this.closest('.modal-overlay').querySelector('[data-action=open-comments-modal]')?.click()"
-                  style="margin-top: 16px; padding: 8px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; cursor: pointer;"
-                >
-                  ${Utils.getTranslation('retry') || 'Spróbuj ponownie'}
-                </button>
-              </div>
-            `;
+            modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
           });
         break;
       }
@@ -649,7 +601,7 @@ export const Handlers = {
         PWA.openIosModal();
         break;
       case "install-pwa":
-        PWA.handleInstallClick();
+        // This is now handled directly in the PWA module.
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
@@ -680,16 +632,12 @@ export const Handlers = {
           try {
             await authManager.logout();
 
-            slidesData.forEach((slide) => (slide.isLiked = false));
+            // Usunięto ręczną aktualizację stanu. Jest ona teraz
+            // obsługiwana centralnie przez listener 'user:logout' w app.js.
 
             if (loggedInMenu) loggedInMenu.classList.remove("active");
 
             UI.showAlert(Utils.getTranslation("logoutSuccess"));
-
-            // W ostateczności, przeładuj stronę, aby zapewnić czysty stan
-            setTimeout(() => {
-                location.reload();
-            }, 500);
 
           } catch (error) {
             console.error('Logout error:', error);
@@ -844,36 +792,12 @@ export const Handlers = {
       submitButton.innerHTML = '<span class="loading-spinner"></span>';
 
       try {
-        // Zaloguj się
-        const result = await authManager.login(username, password);
+        // Zaloguj się. authManager.login sam wywoła event 'user:login',
+        // który jest obsługiwany w app.js. To centralne miejsce
+        // zajmie się pokazaniem modala lub zaktualizowaniem UI.
+        await authManager.login(username, password);
 
-        if (!result.userData) {
-          throw new Error('Invalid response: missing user data');
-        }
-
-        // Sprawdź, czy wymagana jest konfiguracja
-        if (result.requires_first_login_setup) {
-          const loginPanel = document.querySelector("#app-frame > .login-panel");
-          if (loginPanel) loginPanel.classList.remove("active");
-
-          const topbar = document.querySelector("#app-frame > .topbar");
-          if (topbar) topbar.classList.remove("login-panel-active");
-
-          // Pokaż modal, używając danych z logowania.
-          try {
-            const { FirstLoginModal } = await import('./first-login-modal.js');
-            FirstLoginModal.showProfileCompletionModal();
-          } catch (error) {
-            console.error('Failed to load FirstLoginModal:', error);
-            UI.updateUIForLoginState();
-            UI.showAlert(Utils.getTranslation("loginSuccess"));
-          }
-        } else {
-          // Standardowe logowanie
-          UI.updateUIForLoginState();
-          UI.showAlert(Utils.getTranslation("loginSuccess"));
-        }
-
+        // Po prostu wyczyść formularz.
         usernameInput.value = '';
         passwordInput.value = '';
 
