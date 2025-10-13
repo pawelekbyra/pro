@@ -349,6 +349,7 @@ class AuthManager {
     State.emit('user:login', {
       userData: mockUserData,
       slidesData: mockSlidesData,
+      requires_first_login_setup: !is_profile_complete, // DODANO FLAGĘ SETUPU
     });
 
     return { success: true, userData: mockUserData };
