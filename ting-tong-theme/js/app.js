@@ -37,6 +37,7 @@ if ('serviceWorker' in navigator) {
 // The CDN helper code has been removed as it was unused and overly complex.
 
 document.addEventListener("DOMContentLoaded", () => {
+  UI.initDOMCache();
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
     console.warn(
@@ -203,7 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function _startApp(selectedLang) {
       try {
-        UI.initDOMCache();
         State.set("currentLang", selectedLang);
         localStorage.setItem("tt_lang", selectedLang);
 

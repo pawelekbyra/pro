@@ -535,7 +535,7 @@ export const Handlers = {
           );
           if (slideData) {
             UI.populateProfileModal(slideData);
-            UI.openModal(UI.DOM.tiktokProfileModal);
+            UI.openModal(document.getElementById('tiktok-profile-modal'));
           }
         }
         break;
@@ -555,13 +555,14 @@ export const Handlers = {
           console.error('No slideId found for comments modal');
           return;
         }
-        const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+        const commentsModal = document.getElementById('commentsModal');
+        const modalBody = commentsModal.querySelector(".modal-body");
         if (!modalBody) {
           console.error('Modal body not found');
           return;
         }
         modalBody.innerHTML = '<div class="loading-spinner"></div>';
-        UI.openModal(UI.DOM.commentsModal);
+        UI.openModal(commentsModal);
         UI.updateCommentFormVisibility();
         API.fetchComments(slideId)
           .then((response) => {
