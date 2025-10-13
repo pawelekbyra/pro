@@ -3134,7 +3134,7 @@ body,
   height: 100%;
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden; /* Prevent modals from overflowing */
-  z-index: 2000; /* ✅ FIX: Ustanawia nowy kontekst nakładania, aby progress-bar był nad paskiem PWA */
+  z-index: 2000;
 }
 
 #app-frame.app-frame--pwa-visible {
@@ -4156,7 +4156,10 @@ body,
   .crop-modal,
   .notification-popup,
   .image-lightbox,
-  #bmc-w-modal-container {
+  #bmc-w-modal-container,
+  .account-modal-overlay,   /* DODANE */
+  #tiktok-profile-modal     /* DODANE */
+  {
     width: calc(100vh * 9 / 16) !important;
     max-width: 100% !important;
     left: 0 !important;
@@ -4171,7 +4174,10 @@ body,
   .modal-overlay .modal-content,
   .fl-modal-overlay .fl-modal-content,
   .crop-modal .crop-modal-content,
-  .notification-popup { /* notification-popup jest jednocześnie overlayem i contentem */
+  .notification-popup, /* notification-popup jest jednocześnie overlayem i contentem */
+  .account-modal-content, /* DODANE */
+  .tiktok-profile-content /* DODANE */
+  {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -4183,16 +4189,7 @@ body,
       max-width: 100% !important;
   }
 
-  /* Reset dla modali, które są panelami bocznymi i nie powinny być ograniczane */
-  .account-modal-overlay,
-  #tiktok-profile-modal {
-      width: 100% !important;
-      left: auto !important;
-      right: auto !important;
-      margin: 0 !important;
-      border-left: none !important;
-      border-right: none !important;
-  }
+  /* Reset dla modali, które są panelami bocznymi i nie powinny być ograniczane - USUNIĘTO */
 
   /* Poprawka dla popupu powiadomień, aby nie miał podwójnego obramowania */
   .notification-popup {
