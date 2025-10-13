@@ -883,8 +883,6 @@ add_action('wp_ajax_tt_complete_profile', function () {
         wp_send_json_error(['message' => 'Brak autoryzacji. Musisz być zalogowany.'], 401);
     }
 
-    // Ręczna weryfikacja nonce z nagłówka, ponieważ check_ajax_referer nie obsługuje
-    // nagłówków X-WP-Nonce w trybie admin-ajax.
     $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : '';
     if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
         wp_send_json_error(['message' => 'Błąd weryfikacji bezpieczeństwa. Odśwież stronę i spróbuj ponownie.'], 403);
@@ -907,43 +905,45 @@ add_action('wp_ajax_tt_complete_profile', function () {
     if (empty($first_name) || empty($last_name)) {
         wp_send_json_error(['message' => 'Imię i nazwisko są polami wymaganymi.'], 400);
     }
-    // 3. Aktualizacja danych w bazie
+
+    // 3. Przygotowanie danych do aktualizacji
+    $user_data_to_update = [
+        'ID' => $u->ID,
+        'first_name' => $first_name,
+        'last_name' => $last_name,
+        'display_name' => trim($first_name . ' ' . $last_name),
+    ];
+
     if (!empty($new_password)) {
         if (strlen($new_password) < 8) {
             wp_send_json_error(['message' => 'Hasło musi zawierać co najmniej 8 znaków.'], 400);
         }
-        wp_set_password($new_password, $u->ID);
+        $user_data_to_update['user_pass'] = $new_password;
     }
 
-    // Po zmianie hasła, użytkownik jest automatycznie wylogowywany.
-    // Musimy go ponownie zalogować, aby sesja była kontynuowana.
-    wp_set_auth_cookie($u->ID, true);
+    // 4. Jedna, atomowa operacja aktualizacji
+    $result = wp_update_user($user_data_to_update);
 
-    update_user_meta($u->ID, 'first_name', $first_name);
-    update_user_meta($u->ID, 'last_name', $last_name);
+    if (is_wp_error($result)) {
+        wp_send_json_error(['message' => $result->get_error_message() ?: 'Nie udało się zaktualizować profilu.'], 500);
+    }
+
+    // 5. Aktualizacja metadanych użytkownika
     update_user_meta($u->ID, 'tt_email_consent', $email_consent);
     update_user_meta($u->ID, 'tt_email_language', $email_language);
 
-    $display_name = trim($first_name . ' ' . $last_name);
-    if (!empty($display_name)) {
-        wp_update_user(['ID' => $u->ID, 'display_name' => $display_name]);
-    }
-
-    // Flaga `is_profile_complete` nie jest już potrzebna jako meta,
-    // ponieważ logika opiera się na istnieniu `first_name` i `last_name`.
-
-    // 4. Przygotowanie i wysłanie odpowiedzi
+    // 6. Przygotowanie i wysłanie odpowiedzi
     $updated_user_data = [
         'user_id'             => (int) $u->ID,
         'username'            => $u->user_login,
         'email'               => $u->user_email,
-        'display_name'        => $display_name ?: $u->display_name,
+        'display_name'        => $user_data_to_update['display_name'] ?: $u->display_name,
         'first_name'          => $first_name,
         'last_name'           => $last_name,
         'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
         'email_consent'       => $email_consent,
         'email_language'      => $email_language,
-        'is_profile_complete' => true, // Zawsze true po tej akcji
+        'is_profile_complete' => true,
     ];
 
     wp_send_json_success([
