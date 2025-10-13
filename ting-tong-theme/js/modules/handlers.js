@@ -551,19 +551,29 @@ export const Handlers = {
         break;
       case "open-comments-modal": {
         const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+
         if (!slideId) {
           console.error('No slideId found for comments modal');
           return;
         }
+
+        // ✅ FIX: Get the modal element directly from the DOM to avoid stale cache issues.
         const commentsModal = document.getElementById('commentsModal');
+        if (!commentsModal) {
+            console.error('Comments modal element not found in DOM');
+            return;
+        }
+
         const modalBody = commentsModal.querySelector(".modal-body");
         if (!modalBody) {
           console.error('Modal body not found');
           return;
         }
+
         modalBody.innerHTML = '<div class="loading-spinner"></div>';
         UI.openModal(commentsModal);
         UI.updateCommentFormVisibility();
+
         API.fetchComments(slideId)
           .then((response) => {
             if (!response || !response.success) {

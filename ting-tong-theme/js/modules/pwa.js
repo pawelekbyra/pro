@@ -107,16 +107,22 @@ function handleInstallClick() {
 }
 
 function init() {
-  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
-  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
   if (installButton) {
-    installButton.addEventListener('click', handleInstallClick);
+    installButton.disabled = true;
+    installButton.addEventListener("click", handleInstallClick);
   }
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    installPromptEvent = e;
+    if (installButton) {
+      installButton.disabled = false;
+    }
+  });
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
-    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
+    UI.showAlert("Aplikacja została zainstalowana!");
   });
 
   if (iosCloseButton) {
@@ -131,6 +137,24 @@ function init() {
         runStandaloneCheck();
       }
     });
+
+    const preloader = document.getElementById("preloader");
+    if (preloader) {
+      const observer = new MutationObserver(() => {
+        if (preloader.classList.contains("preloader-hiding")) {
+          setTimeout(() => {
+            if (!isStandalone() && installBar && !installBar.classList.contains("visible")) {
+              installBar.classList.add("visible");
+              const appFrame = document.getElementById("app-frame");
+              if (appFrame) {
+                appFrame.classList.add("app-frame--pwa-visible");
+              }
+            }
+          }, 500);
+        }
+      });
+      observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
+    }
   }
 }
 
