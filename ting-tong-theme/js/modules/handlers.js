@@ -522,15 +522,24 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile":
+      case "open-public-profile": {
         if (!State.get("isUserLoggedIn")) {
           Utils.vibrateTry();
           UI.showAlert(Utils.getTranslation("profileViewAlert"));
           return;
         }
-        // Zmienione: Zamiast otwierać profil publiczny, otwieramy modal konta zalogowanego użytkownika.
-        AccountPanel.openAccountModal();
+        const profileSection = actionTarget.closest(".webyx-section");
+        if (profileSection) {
+          const slideData = slidesData.find(
+            (s) => s.id === profileSection.dataset.slideId,
+          );
+          if (slideData) {
+            UI.populateProfileModal(slideData);
+            UI.openModal(document.getElementById('tiktok-profile-modal'));
+          }
+        }
         break;
+      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
@@ -541,6 +550,10 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal": {
+        if (!State.get('isUserLoggedIn')) {
+            UI.showAlert(Utils.getTranslation('loginToComment'));
+            return;
+        }
         const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
         if (!slideId) {
           console.error('No slideId found for comments modal');
@@ -592,7 +605,7 @@ export const Handlers = {
         PWA.openIosModal();
         break;
       case "install-pwa":
-        PWA.handleInstallClick();
+        // This is now handled directly in the PWA module.
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
