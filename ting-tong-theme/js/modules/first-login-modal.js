@@ -69,7 +69,7 @@ function handlePrevStep() {
 function validateStep(step) {
     if (step === 1) { // Krok Imię/Nazwisko
         if (!dom.firstNameInput.value.trim() || !dom.lastNameInput.value.trim()) {
-            UI.showAlert(Utils.getTranslation('firstLoginNameError'), true);
+            UI.showAlert(Utils.getTranslation('errorMissingNames'), true); // POPRAWIONO KLUCZ
             return false;
         }
     }
@@ -79,7 +79,7 @@ function validateStep(step) {
             return false;
         }
         if (dom.passwordInput.value !== dom.confirmPasswordInput.value) {
-            UI.showAlert(Utils.getTranslation('firstLoginPasswordMismatchError'), true);
+            UI.showAlert(Utils.getTranslation('errorPasswordsMismatch'), true); // POPRAWIONO KLUCZ
             return false;
         }
     }

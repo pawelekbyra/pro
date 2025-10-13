@@ -8,6 +8,68 @@
 get_header();
 ?>
 
+<!-- === First Login Modal (NEW & IMPROVED) === -->
+<div id="firstLoginModal" class="fl-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="fl-modal-content-wrapper">
+    <form id="firstLoginForm" class="fl-modal-content">
+
+      <div class="fl-header">
+        <div class="fl-drag-handle-container"><div class="fl-drag-handle"></div></div>
+        <h2 id="flTitle" class="fl-title" data-translate-key="firstLoginTitle">Uzupełnij profil</h2>
+        <div class="fl-progress-bar-container">
+          <div class="fl-progress-bar-fill" id="flProgressBar"></div>
+        </div>
+      </div>
+
+      <div class="fl-body" id="flBody">
+
+        <div class="fl-step" data-step="0">
+          <p class="fl-step-description" data-translate-key="firstLoginStep1Desc">Zgody i preferencje.</p>
+          <div class="fl-fields-container">
+            <label class="fl-preference-row">
+              <span class="fl-preference-label" data-translate-key="firstLoginConsentLabel">Zgoda na maile</span>
+              <input type="checkbox" id="flEmailConsent" class="fl-checkbox">
+            </label>
+            <div id="flLanguageOptions" class="fl-language-selector">
+              <button type="button" class="fl-language-option active" data-lang="pl" data-translate-key="emailLangPolish">Polski</button>
+              <button type="button" class="fl-language-option" data-lang="en" data-translate-key="emailLangEnglish">English</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fl-step" data-step="1">
+          <p class="fl-step-description" data-translate-key="firstLoginStep2Desc">Podaj swoje dane.</p>
+          <div class="fl-fields-container">
+            <input type="text" id="flFirstName" class="fl-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Imię">
+            <input type="text" id="flLastName" class="fl-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Nazwisko">
+            <p class="fl-hint-text" data-translate-key="firstLoginNameHint">Informacje te będą widoczne publicznie.</p>
+          </div>
+        </div>
+
+        <div class="fl-step" data-step="2">
+          <p class="fl-step-description" data-translate-key="firstLoginStep3Desc">Zabezpiecz swoje konto.</p>
+          <div class="fl-fields-container">
+            <span class="fl-email-display"></span>
+            <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
+            <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
+            <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="fl-footer">
+        <div class="fl-footer-buttons">
+          <button type="button" id="flPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="firstLoginPrev">Wstecz</button>
+          <button type="button" id="flNextBtn" class="fl-btn fl-btn-next" data-translate-key="firstLoginNext">Dalej</button>
+          <button type="submit" id="flSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="firstLoginSubmit">Zakończ</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
 <div id="preloader">
     <div class="preloader-content-container">
         <div class="language-selection">
@@ -540,69 +602,6 @@ get_header();
 <div class="image-lightbox">
     <img src="" alt="Preview">
     <button class="image-lightbox-close">&times;</button>
-</div>
-
-
-<!-- === First Login Modal (NEW & IMPROVED) === -->
-<div id="firstLoginModal" class="fl-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="fl-modal-content-wrapper">
-    <form id="firstLoginForm" class="fl-modal-content">
-
-      <div class="fl-header">
-        <div class="fl-drag-handle-container"><div class="fl-drag-handle"></div></div>
-        <h2 id="flTitle" class="fl-title" data-translate-key="firstLoginTitle">Uzupełnij profil</h2>
-        <div class="fl-progress-bar-container">
-          <div class="fl-progress-bar-fill" id="flProgressBar"></div>
-        </div>
-      </div>
-
-      <div class="fl-body" id="flBody">
-
-        <div class="fl-step" data-step="0">
-          <p class="fl-step-description" data-translate-key="firstLoginStep1Desc">Zgody i preferencje.</p>
-          <div class="fl-fields-container">
-            <label class="fl-preference-row">
-              <span class="fl-preference-label" data-translate-key="firstLoginConsentLabel">Zgoda na maile</span>
-              <input type="checkbox" id="flEmailConsent" class="fl-checkbox">
-            </label>
-            <div id="flLanguageOptions" class="fl-language-selector">
-              <button type="button" class="fl-language-option active" data-lang="pl" data-translate-key="emailLangPolish">Polski</button>
-              <button type="button" class="fl-language-option" data-lang="en" data-translate-key="emailLangEnglish">English</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="fl-step" data-step="1">
-          <p class="fl-step-description" data-translate-key="firstLoginStep2Desc">Podaj swoje dane.</p>
-          <div class="fl-fields-container">
-            <input type="text" id="flFirstName" class="fl-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Imię">
-            <input type="text" id="flLastName" class="fl-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Nazwisko">
-            <p class="fl-hint-text" data-translate-key="firstLoginNameHint">Informacje te będą widoczne publicznie.</p>
-          </div>
-        </div>
-
-        <div class="fl-step" data-step="2">
-          <p class="fl-step-description" data-translate-key="firstLoginStep3Desc">Zabezpiecz swoje konto.</p>
-          <div class="fl-fields-container">
-            <span class="fl-email-display"></span>
-            <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
-            <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
-            <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
-          </div>
-        </div>
-
-      </div>
-
-      <div class="fl-footer">
-        <div class="fl-footer-buttons">
-          <button type="button" id="flPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="firstLoginPrev">Wstecz</button>
-          <button type="button" id="flNextBtn" class="fl-btn fl-btn-next" data-translate-key="firstLoginNext">Dalej</button>
-          <button type="submit" id="flSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="firstLoginSubmit">Zakończ</button>
-        </div>
-      </div>
-
-    </form>
-  </div>
 </div>
 
 <?php get_footer(); ?>
