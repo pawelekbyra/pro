@@ -1,6 +1,5 @@
+import { UI } from './ui.js';
 import { Utils } from './utils.js';
-
-let uiModule = { openModal: () => {}, closeModal: () => {}, showAlert: () => {} }; // Default stub
 
 const installBar = document.getElementById("pwa-install-bar");
 const installButton = document.getElementById("pwa-install-button");
@@ -33,12 +32,12 @@ function hideIosInstructions() {
 }
 
 function showDesktopModal() {
-  if (desktopModal) uiModule.openModal(desktopModal);
+  if (desktopModal) UI.openModal(desktopModal);
 }
 
 function closePwaModals() {
   if (desktopModal && desktopModal.classList.contains("visible"))
-    uiModule.closeModal(desktopModal);
+    UI.closeModal(desktopModal);
   if (iosInstructions && iosInstructions.classList.contains("visible"))
     hideIosInstructions();
 }
@@ -92,7 +91,7 @@ function handleInstallClick() {
     // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
     // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
-    uiModule.showAlert(Utils.getTranslation("pwaNotSupported"));
+    UI.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
@@ -105,7 +104,7 @@ function init() {
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    uiModule.showAlert(Utils.getTranslation("appInstalledSuccessText"));
+    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
     // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
   });
 
@@ -121,31 +120,7 @@ function init() {
         runStandaloneCheck();
       }
     });
-
-    const preloader = document.getElementById("preloader");
-    if (preloader) {
-      const observer = new MutationObserver(() => {
-        if (preloader.classList.contains("preloader-hiding")) {
-          setTimeout(() => {
-            if (!isStandalone() && installBar && !installBar.classList.contains("visible")) {
-              installBar.classList.add("visible");
-              const appFrame = document.getElementById("app-frame");
-              if (appFrame) {
-                appFrame.classList.add("app-frame--pwa-visible");
-              }
-            }
-          }, 500);
-        }
-      });
-      observer.observe(preloader, { attributes: true, attributeFilter: ['class'] });
-    }
   }
 }
 
-export const PWA = {
-  setUiModule: (ui) => { uiModule = ui; },
-  init,
-  handleInstallClick,
-  closePwaModals,
-  isStandalone
-};
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone };
