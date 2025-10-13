@@ -1349,8 +1349,8 @@ body,
   white-space: normal;
 
   /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
-  width: auto;
-  max-width: min(500px, calc(100vw - 24px)); /* Maksymalna szerokość 500px, ale nie więcej niż ekran z marginesami */
+  width: fit-content;
+  max-width: calc(100vw - 40px); /* Maksymalna szerokość z marginesami po 20px */
 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
