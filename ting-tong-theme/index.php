@@ -18,6 +18,9 @@ get_header();
             </div>
         </div>
     </div>
+    <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
+        DEBUG: Pokaż First Login Modal
+    </button>
 </div>
 
 <div id="app-frame">
@@ -67,7 +70,6 @@ get_header();
                     </svg>
                 </div>
 
-                <!-- ✅ NOWE: Replay overlay -->
                 <div class="replay-overlay" aria-hidden="true">
                     <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 2v6h-6"/>
@@ -248,7 +250,6 @@ get_header();
                             <span data-translate-key="patronBadgeText">Patron Miłości</span>
                         </div>
                     </div>
-                    <!-- ✅ PRZENIESIONE: Kontenery na wiadomości o statusie avatara -->
                     <div class="status-message status-success" id="avatarSuccess" style="margin-top: 16px;"></div>
                     <div class="status-message status-error" id="avatarError" style="margin-top: 16px;"></div>
                 </div>
@@ -485,26 +486,22 @@ get_header();
 </div>
 <div id="welcome-modal" class="modal-overlay welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
     <div class="modal-content welcome-modal-content">
-        <!-- Ikona na górze -->
         <div class="welcome-icon-wrapper">
             <svg class="welcome-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
             </svg>
         </div>
 
-        <!-- Tytuł -->
         <h2 id="welcome-modal-title" class="welcome-title">
             <span class="welcome-title-main" data-translate-key="welcomeModalTitle">Witaj w Ting Tong!</span>
             <span class="welcome-title-emoji">✨</span>
         </h2>
 
-        <!-- Treść -->
         <div class="modal-body welcome-body">
             <p class="welcome-text-hero" data-translate-key="welcomeTextHero">
                 Aplikacja napiwkowa<br>do skrolowania treści 🎬
             </p>
 
-            <!-- Separator -->
             <div class="welcome-divider"></div>
 
             <p class="welcome-text-highlight" data-translate-key="welcomeTextHighlight">
@@ -514,7 +511,6 @@ get_header();
                 Wesprzyj moją twórczość i dołącz do ekskluzywnej społeczności!
             </p>
 
-            <!-- Przyciski -->
             <div class="welcome-actions">
                 <button class="welcome-btn welcome-btn-primary" data-action="show-tip-jar">
                     <svg viewBox="0 0 24 24" fill="none">
@@ -531,7 +527,6 @@ get_header();
                 </button>
             </div>
 
-            <!-- Podpis autora -->
             <div class="welcome-signature">
                 <div class="signature-line"></div>
                 <p class="welcome-footer-text">
@@ -542,7 +537,6 @@ get_header();
     </div>
 </div>
 
-<!-- DODAJ na końcu body, przed zamknięciem </body> -->
 <div class="image-lightbox">
     <img src="" alt="Preview">
     <button class="image-lightbox-close">&times;</button>
@@ -554,7 +548,6 @@ get_header();
   <div class="fl-modal-content-wrapper">
     <form id="firstLoginForm" class="fl-modal-content">
 
-      <!-- Nagłówek z tytułem i paskiem postępu -->
       <div class="fl-header">
         <div class="fl-drag-handle-container"><div class="fl-drag-handle"></div></div>
         <h2 id="flTitle" class="fl-title" data-translate-key="firstLoginTitle">Uzupełnij profil</h2>
@@ -563,10 +556,8 @@ get_header();
         </div>
       </div>
 
-      <!-- Kontener na dynamiczne kroki -->
       <div class="fl-body" id="flBody">
 
-        <!-- Krok 1: Zgody i Język -->
         <div class="fl-step" data-step="0">
           <p class="fl-step-description" data-translate-key="firstLoginStep1Desc">Zgody i preferencje.</p>
           <div class="fl-fields-container">
@@ -581,7 +572,6 @@ get_header();
           </div>
         </div>
 
-        <!-- Krok 2: Imię i Nazwisko -->
         <div class="fl-step" data-step="1">
           <p class="fl-step-description" data-translate-key="firstLoginStep2Desc">Podaj swoje dane.</p>
           <div class="fl-fields-container">
@@ -591,12 +581,11 @@ get_header();
           </div>
         </div>
 
-        <!-- Krok 3: Hasło -->
         <div class="fl-step" data-step="2">
           <p class="fl-step-description" data-translate-key="firstLoginStep3Desc">Zabezpiecz swoje konto.</p>
           <div class="fl-fields-container">
-            <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
             <span class="fl-email-display"></span>
+            <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
             <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
             <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
           </div>
@@ -604,7 +593,6 @@ get_header();
 
       </div>
 
-      <!-- Stopka z przyciskami nawigacyjnymi -->
       <div class="fl-footer">
         <div class="fl-footer-buttons">
           <button type="button" id="flPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="firstLoginPrev">Wstecz</button>
