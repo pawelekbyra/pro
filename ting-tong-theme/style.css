@@ -42,13 +42,13 @@ Text Domain: tingtongtheme
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* Wyrównuje zawartość do góry */
   justify-content: center;
   z-index: 10020;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
-  padding-top: 60px;
+  padding-top: var(--topbar-height); /* <--- ZMIANA: Dynamiczna pozycja pod topbarem */
 }
 
 .fl-modal-overlay.visible {
@@ -59,12 +59,14 @@ Text Domain: tingtongtheme
 /* FIX: Container for better keyboard handling and to fill space correctly */
 .fl-modal-content-wrapper {
   width: 100%;
-  height: 100%;
+  height: auto; /* <--- ZMIANA: Karta zajmuje tylko tyle miejsca, ile potrzebuje */
   display: flex;
-  align-items: flex-start; /* <-- ZMIANA: Wyrównanie do góry */
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: 20px; /* Dodatkowy margines wokół karty */
 }
+
+/* ... reszta stylów fl-modal-content i fl-modal-content pozostaje bez zmian ... */
 
 .fl-modal-content {
   transform: scale(0.95) translateY(20px);
