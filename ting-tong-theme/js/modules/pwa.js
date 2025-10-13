@@ -1,5 +1,6 @@
-import { UI } from './ui.js';
 import { Utils } from './utils.js';
+
+let uiModule = { openModal: () => {}, closeModal: () => {}, showAlert: () => {} }; // Default stub
 
 const installBar = document.getElementById("pwa-install-bar");
 const installButton = document.getElementById("pwa-install-button");
@@ -32,12 +33,12 @@ function hideIosInstructions() {
 }
 
 function showDesktopModal() {
-  if (desktopModal) UI.openModal(desktopModal);
+  if (desktopModal) uiModule.openModal(desktopModal);
 }
 
 function closePwaModals() {
   if (desktopModal && desktopModal.classList.contains("visible"))
-    UI.closeModal(desktopModal);
+    uiModule.closeModal(desktopModal);
   if (iosInstructions && iosInstructions.classList.contains("visible"))
     hideIosInstructions();
 }
@@ -91,7 +92,7 @@ function handleInstallClick() {
     // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
     // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
-    UI.showAlert(Utils.getTranslation("pwaNotSupported"));
+    uiModule.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
@@ -104,7 +105,7 @@ function init() {
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
+    uiModule.showAlert(Utils.getTranslation("appInstalledSuccessText"));
     // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
   });
 
@@ -141,4 +142,10 @@ function init() {
   }
 }
 
-export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };
+export const PWA = {
+  setUiModule: (ui) => { uiModule = ui; },
+  init,
+  handleInstallClick,
+  closePwaModals,
+  isStandalone
+};
