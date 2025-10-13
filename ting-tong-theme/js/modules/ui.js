@@ -1,10 +1,10 @@
 import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
-import { PWA } from './pwa.js';
 import { API, slidesData } from './api.js';
 
 let selectedCommentImage = null;
+let pwaModule = { isStandalone: () => false }; // Default stub
 
 const DOM = {};
 let alertTimeout;
@@ -232,7 +232,7 @@ function updateUIForLoginState() {
 
     const isSecret = sim.dataset.access === "secret";
     const isPwaSecret = sim.dataset.access === "pwa-secret";
-    const isStandalone = PWA.isStandalone();
+    const isStandalone = pwaModule.isStandalone();
     const video = section.querySelector("video");
 
     // Determine overlay visibility
@@ -394,7 +394,7 @@ function createSlideElement(slideData, index) {
 
   // Ustawienie początkowej widoczności nakładek.
   // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
-  if (slideData.access === 'pwa-secret' && !PWA.isStandalone()) {
+  if (slideData.access === 'pwa-secret' && !pwaModule.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
@@ -1087,6 +1087,7 @@ function initGlobalPanels() {
 }
 
 export const UI = {
+  setPwaModule: (pwa) => { pwaModule = pwa; },
   initDOMCache,
   DOM,
   showAlert,

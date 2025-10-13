@@ -50,6 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const App = (function () {
+    function _initializeDependencies() {
+      // Break circular dependency by injecting modules into each other
+      if (UI.setPwaModule) UI.setPwaModule(PWA);
+      if (PWA.setUiModule) PWA.setUiModule(UI);
+    }
+
     function _initializeGlobalListeners() {
       Utils.setAppHeightVar();
       window.addEventListener("resize", Utils.setAppHeightVar);
@@ -403,6 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return {
       init: () => {
+        _initializeDependencies();
         _setInitialConfig();
         _initializeGlobalListeners();
         _initializeStateListeners(); // DODANE
