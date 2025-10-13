@@ -43,67 +43,51 @@ function closePwaModals() {
 }
 
 function runStandaloneCheck() {
-    const appFrame = document.getElementById("app-frame");
-
-    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
-    if (isStandalone()) {
-        if (installBar) {
-            installBar.classList.remove("visible");
-            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
-        }
-        return true;
+  const appFrame = document.getElementById("app-frame");
+  if (isStandalone()) {
+    if (installBar) {
+      installBar.style.display = 'none';
+      installBar.classList.remove("visible");
+      if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
-
-    // Jeśli nie jest standalone, decyzja zależy od stanu preloadera i promptu.
+    return true;
+  } else {
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
-
-    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane zdarzenie prompt.
-    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarzenia 'beforeinstallprompt'.
-    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zainstalowana,
-    // użytkownik odrzucił monit, lub przeglądarka nie spełnia kryteriów.
-    if (isPreloaderHidden && installPromptEvent && installBar) {
-        installBar.classList.add("visible");
-        if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-    } else if (installBar) {
-        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
-        installBar.classList.remove("visible");
-        if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+    if (isPreloaderHidden && installBar) {
+      installBar.classList.add("visible");
+      if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
     }
-
-    return false;
+  }
+  return false;
 }
 
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  installPromptEvent = e;
-  console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
-  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
-});
-
 function handleInstallClick() {
-  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
-  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
-  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
+  if (isStandalone()) {
+    UI.showAlert(Utils.getTranslation("alreadyInstalledText"));
+    return;
+  }
 
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
-  } else if (isIOS()) {
-    showIosInstructions();
-  } else if (isDesktop()) {
-    showDesktopModal();
-  } else {
-    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
-    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
-    // To rzadki przypadek, ale warto go odnotować.
-    console.warn("PWA installation not supported on this browser.");
-    UI.showAlert(Utils.getTranslation("pwaNotSupported"));
+    installPromptEvent.userChoice.then((choiceResult) => {
+      installPromptEvent = null;
+    });
+    return;
   }
+
+  if (isIOS()) {
+    showIosInstructions();
+    return;
+  }
+
+  if (isDesktop()) {
+    showDesktopModal();
+    return;
+  }
+
+  UI.showAlert("Instalacja nie jest jeszcze gotowa. Odśwież stronę i spróbuj ponownie.", true);
 }
 
 function init() {
@@ -158,4 +142,4 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone };
+export const PWA = { init, handleInstallClick, closePwaModals, isStandalone };

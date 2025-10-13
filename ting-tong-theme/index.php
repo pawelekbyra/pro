@@ -8,68 +8,6 @@
 get_header();
 ?>
 
-<!-- === First Login Modal (NEW & IMPROVED) === -->
-<div id="firstLoginModal" class="fl-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="fl-modal-content-wrapper">
-    <form id="firstLoginForm" class="fl-modal-content">
-
-      <div class="fl-header">
-        <div class="fl-drag-handle-container"><div class="fl-drag-handle"></div></div>
-        <h2 id="flTitle" class="fl-title" data-translate-key="firstLoginTitle">Uzupełnij profil</h2>
-        <div class="fl-progress-bar-container">
-          <div class="fl-progress-bar-fill" id="flProgressBar"></div>
-        </div>
-      </div>
-
-      <div class="fl-body" id="flBody">
-
-        <div class="fl-step" data-step="0">
-          <p class="fl-step-description" data-translate-key="firstLoginStep1Desc">Zgody i preferencje.</p>
-          <div class="fl-fields-container">
-            <label class="fl-preference-row">
-              <span class="fl-preference-label" data-translate-key="firstLoginConsentLabel">Zgoda na maile</span>
-              <input type="checkbox" id="flEmailConsent" class="fl-checkbox">
-            </label>
-            <div id="flLanguageOptions" class="fl-language-selector">
-              <button type="button" class="fl-language-option active" data-lang="pl" data-translate-key="emailLangPolish">Polski</button>
-              <button type="button" class="fl-language-option" data-lang="en" data-translate-key="emailLangEnglish">English</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="fl-step" data-step="1">
-          <p class="fl-step-description" data-translate-key="firstLoginStep2Desc">Podaj swoje dane.</p>
-          <div class="fl-fields-container">
-            <input type="text" id="flFirstName" class="fl-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Imię">
-            <input type="text" id="flLastName" class="fl-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Nazwisko">
-            <p class="fl-hint-text" data-translate-key="firstLoginNameHint">Informacje te będą widoczne publicznie.</p>
-          </div>
-        </div>
-
-        <div class="fl-step" data-step="2">
-          <p class="fl-step-description" data-translate-key="firstLoginStep3Desc">Zabezpiecz swoje konto.</p>
-          <div class="fl-fields-container">
-            <span class="fl-email-display"></span>
-            <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
-            <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
-            <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
-          </div>
-        </div>
-
-      </div>
-
-      <div class="fl-footer">
-        <div class="fl-footer-buttons">
-          <button type="button" id="flPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="firstLoginPrev">Wstecz</button>
-          <button type="button" id="flNextBtn" class="fl-btn fl-btn-next" data-translate-key="firstLoginNext">Dalej</button>
-          <button type="submit" id="flSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="firstLoginSubmit">Zakończ</button>
-        </div>
-      </div>
-
-    </form>
-  </div>
-</div>
-
 <div id="preloader">
     <div class="preloader-content-container">
         <div class="language-selection">
@@ -80,9 +18,6 @@ get_header();
             </div>
         </div>
     </div>
-    <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
-        DEBUG: Pokaż First Login Modal
-    </button>
 </div>
 
 <div id="app-frame">
@@ -114,22 +49,17 @@ get_header();
             <div class="tiktok-symulacja">
                 <video crossorigin playsinline webkit-playsinline muted autoplay preload="auto" poster="" class="player"></video>
                 <div class="video-controls">
-                    <div class="video-controls-left">
-                        <button class="volume-button" data-action="toggle-volume">
-                            <svg class="volume-on-icon" style="display: none;" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
-                            <svg class="volume-off-icon" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
-                        </button>
-                        <button class="cc-button" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 0 24 24" width="28" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2v-.5H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2v-.5H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
-                        </button>
-                        <button class="fullscreen-button" data-action="toggle-fullscreen">
-                            <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
-                            <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
-                        </button>
-                        <button class="info-button" data-action="show-info">
-                           <svg fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
-                        </button>
-                    </div>
+                    <button class="volume-button" data-action="toggle-volume">
+                        <svg class="volume-on-icon" style="display: none;" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                        <svg class="volume-off-icon" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                    </button>
+                    <button class="cc-button" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 0 24 24" width="28" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2v-.5H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2v-.5H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
+                    </button>
+                    <button class="fullscreen-button" data-action="toggle-fullscreen">
+                        <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+                        <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
+                    </button>
                 </div>
                 <div class="pause-overlay" aria-hidden="true">
                     <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -137,6 +67,7 @@ get_header();
                     </svg>
                 </div>
 
+                <!-- ✅ NOWE: Replay overlay -->
                 <div class="replay-overlay" aria-hidden="true">
                     <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 2v6h-6"/>
@@ -155,7 +86,7 @@ get_header();
                 </div>
                 <div class="pwa-secret-overlay" aria-hidden="true">
                     <svg class="secret-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                    <h2 class="pwa-secret-title" data-translate-key="pwaSecretTitle">Treść Dostępna w Aplikacji</h2>
+                    <h2 class="pwa-secret-title" data-translate-key="pwaSecretTitle">Treść Dostępna w Aplikacji</h2>
                     <p class="pwa-secret-subtitle">
                         <u data-translate-key="pwaSecretSubtitleAction" data-action="install-pwa"></u><span data-translate-key="pwaSecretSubtitleRest"></span>
                     </p>
@@ -204,10 +135,10 @@ get_header();
         <div class="swiper-wrapper">
         </div>
     </div>
-    <div id="alertBox" role="status" aria-live="polite">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
-        <span id="alertText"></span>
-    </div>
+</div>
+<div id="alertBox" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
+    <span id="alertText"></span>
 </div>
 <div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
@@ -317,6 +248,7 @@ get_header();
                             <span data-translate-key="patronBadgeText">Patron Miłości</span>
                         </div>
                     </div>
+                    <!-- ✅ PRZENIESIONE: Kontenery na wiadomości o statusie avatara -->
                     <div class="status-message status-success" id="avatarSuccess" style="margin-top: 16px;"></div>
                     <div class="status-message status-error" id="avatarError" style="margin-top: 16px;"></div>
                 </div>
@@ -526,7 +458,7 @@ get_header();
             <span data-translate-key="installPwaFullDescription">Zainstaluj Ting Tonga na swoim telefonie.</span>
         </p>
     </div>
-    <button id="pwa-install-button" class="pwa-prompt-button" data-action="install-pwa" data-translate-key="installPwaAction">Zainstaluj</button>
+    <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction" disabled>Zainstaluj</button>
 </div>
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">
@@ -553,22 +485,26 @@ get_header();
 </div>
 <div id="welcome-modal" class="modal-overlay welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
     <div class="modal-content welcome-modal-content">
+        <!-- Ikona na górze -->
         <div class="welcome-icon-wrapper">
             <svg class="welcome-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
             </svg>
         </div>
 
+        <!-- Tytuł -->
         <h2 id="welcome-modal-title" class="welcome-title">
             <span class="welcome-title-main" data-translate-key="welcomeModalTitle">Witaj w Ting Tong!</span>
             <span class="welcome-title-emoji">✨</span>
         </h2>
 
+        <!-- Treść -->
         <div class="modal-body welcome-body">
             <p class="welcome-text-hero" data-translate-key="welcomeTextHero">
                 Aplikacja napiwkowa<br>do skrolowania treści 🎬
             </p>
 
+            <!-- Separator -->
             <div class="welcome-divider"></div>
 
             <p class="welcome-text-highlight" data-translate-key="welcomeTextHighlight">
@@ -578,6 +514,7 @@ get_header();
                 Wesprzyj moją twórczość i dołącz do ekskluzywnej społeczności!
             </p>
 
+            <!-- Przyciski -->
             <div class="welcome-actions">
                 <button class="welcome-btn welcome-btn-primary" data-action="show-tip-jar">
                     <svg viewBox="0 0 24 24" fill="none">
@@ -594,6 +531,7 @@ get_header();
                 </button>
             </div>
 
+            <!-- Podpis autora -->
             <div class="welcome-signature">
                 <div class="signature-line"></div>
                 <p class="welcome-footer-text">
@@ -604,9 +542,56 @@ get_header();
     </div>
 </div>
 
+<!-- DODAJ na końcu body, przed zamknięciem </body> -->
 <div class="image-lightbox">
     <img src="" alt="Preview">
     <button class="image-lightbox-close">&times;</button>
+</div>
+
+<!-- NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA "ZAJEBISTA" (Bottom Sheet) -->
+<div id="firstLoginModal" class="first-login-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="first-login-title" aria-hidden="true">
+  <div class="first-login-modal-content-wrapper">
+    <form id="firstLoginForm" class="first-login-modal-content">
+      <!-- Uchwyt do przeciągania -->
+      <div class="drag-handle-container">
+        <div class="drag-handle"></div>
+      </div>
+
+      <!-- Nagłówek ze wskaźnikiem postępu -->
+      <div class="first-login-header">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="firstLoginProgressBar"></div>
+        </div>
+        <h2 id="first-login-title" class="first-login-title"></h2>
+      </div>
+
+      <!-- Kontener na dynamiczną treść kroku -->
+      <div class="first-login-body">
+        <div class="step-icon-container" id="firstLoginStepIcon"></div>
+        <p class="step-description" id="firstLoginStepDescription"></p>
+        <div class="step-fields-container" id="firstLoginStepFields">
+          <!-- Pola formularza będą renderowane tutaj przez JS -->
+        </div>
+      </div>
+
+      <!-- Stopka z przyciskami i komunikatami -->
+      <div class="first-login-footer">
+        <div class="first-login-status-message first-login-status-error" id="firstLoginError"></div>
+        <div class="footer-buttons">
+          <button type="button" class="first-login-nav-btn prev" id="firstLoginPrevBtn" style="display: none;">Wstecz</button>
+          <button type="button" class="first-login-nav-btn next" id="firstLoginNextBtn">Dalej</button>
+          <button type="submit" class="first-login-submit-btn" id="firstLoginSubmitBtn" style="display: none;">Ukończ konfigurację</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Debug Tools -->
+<div id="debug-tools" style="position: fixed; bottom: 10px; right: 10px; z-index: 10000;">
+  <button id="mockLoginBtn" style="background: #ff0055; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; display: none;">
+    MOCK: Pokaż FirstLoginModal
+  </button>
 </div>
 
 <?php get_footer(); ?>

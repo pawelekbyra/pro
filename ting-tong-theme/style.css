@@ -25,306 +25,279 @@ Text Domain: tingtongtheme
   overflow: hidden; /* Prevent layout issues */
 }
 
-/* ============================================================================
-   NOWY MODAL PIERWSZEGO LOGOWANIA - WERSJA "BOTTOM SHEET"
-   ============================================================================
-*/
 
-.first-login-modal-overlay {
+.preloader-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   FIRST LOGIN MODAL - PREMIUM STYLES
+   ============================================================================ */
+.fl-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-  z-index: 10020;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: flex-end; /* Kluczowe dla bottom-sheet */
+  align-items: flex-start; /* Wyrównuje zawartość do góry */
   justify-content: center;
+  z-index: 10020;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+  padding-top: var(--topbar-height); /* <--- ZMIANA: Dynamiczna pozycja pod topbarem */
 }
 
-.first-login-modal-overlay.visible {
+.fl-modal-overlay.visible {
   opacity: 1;
   visibility: visible;
 }
 
-.first-login-modal-content-wrapper {
+/* FIX: Container for better keyboard handling and to fill space correctly */
+.fl-modal-content-wrapper {
   width: 100%;
-  max-width: 600px; /* Ograniczenie na desktopie */
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-.first-login-modal-overlay.visible .first-login-modal-content-wrapper {
-  transform: translateY(0);
+  height: auto; /* <--- ZMIANA: Karta zajmuje tylko tyle miejsca, ile potrzebuje */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px; /* Dodatkowy margines wokół karty */
 }
 
-.first-login-modal-content {
-  background: #1c1c1e;
-  width: 100%;
-  border-radius: 24px 24px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.5);
+/* ... reszta stylów fl-modal-content i fl-modal-content pozostaje bez zmian ... */
+
+.fl-modal-content {
+  transform: scale(0.95) translateY(20px);
+  opacity: 0;
+}
+
+.fl-modal-overlay.visible .fl-modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.fl-modal-content {
+  background: linear-gradient(180deg, #242426 0%, #18181a 100%);
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
-  height: 90vh; /* Wysokość modala */
-  max-height: 700px;
+  height: auto;
+  max-height: calc(100vh - 80px); /* <-- ZMIANA: Więcej miejsca, z marginesami */
+  width: 100%;
+  max-width: 500px;
+  /* ... (pozostałe style) ... */
 }
 
-.drag-handle-container {
-  padding: 12px;
-  display: flex;
-  justify-content: center;
+.fl-header {
+  padding: 12px 24px 16px;
   flex-shrink: 0;
 }
-.drag-handle {
+
+.fl-drag-handle-container {
+  padding-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.fl-drag-handle {
   width: 40px;
   height: 5px;
   background: #48484a;
   border-radius: 2.5px;
 }
 
-.first-login-header {
-  padding: 0 24px 16px;
-  flex-shrink: 0;
-}
-
-.progress-bar-container {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  width: 0%;
-  height: 100%;
-  background: var(--accent-color);
-  border-radius: 2px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.first-login-title {
+.fl-title {
+  color: #fff;
+  text-align: center;
   font-size: 22px;
   font-weight: 700;
-  color: white;
-  text-align: center;
-  transition: opacity 0.3s ease;
+  margin-bottom: 16px;
 }
 
-.first-login-body {
-  padding: 0 24px 24px;
-  text-align: center;
-  overflow-x: hidden;
+.fl-progress-bar-container {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.fl-progress-bar-fill {
+  height: 100%;
+  width: 33.33%;
+  background: linear-gradient(90deg, #34d058, #007aff); /* FIX: Optymistyczny akcent - zieleń i błękit */
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.fl-body {
+  padding: 0 24px 20px;
   overflow-y: auto;
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* Pola na górze */
 }
-.first-login-body::-webkit-scrollbar {
+
+.fl-step {
   display: none;
 }
 
-.step-icon-container {
-  font-size: 40px;
-  margin-bottom: 12px;
-  line-height: 1;
-}
-
-.step-description {
-  font-size: 15px;
-  color: #8e8e93;
-  line-height: 1.5;
-  margin-bottom: 24px;
-  max-width: 320px;
-}
-
-.step-fields-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.first-login-body .is-exiting {
-  animation: fadeOut 0.3s ease forwards !important;
+.fl-step.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes fadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-10px); }
-}
 
-.first-login-form-group {
-  text-align: left;
-}
-
-.first-login-form-label {
-  display: none; /* Ukrywamy etykiety, polegamy na placeholderach */
-}
-
-.first-login-form-input {
-  width: 100%;
-  padding: 16px;
-  background: #2c2c2e;
-  border: 1px solid #3a3a3c;
-  border-radius: 12px;
-  color: white;
+.fl-step-description {
+  color: #b0b3b8;
   font-size: 16px;
-  transition: all 0.2s ease;
-}
-.first-login-form-input::placeholder {
-  color: #8e8e93;
-}
-.first-login-form-input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  background: #3a3a3c;
-  box-shadow: none;
-}
-
-.first-login-footer {
-  padding: 16px 24px;
-  padding-bottom: calc(16px + var(--safe-area-bottom));
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: #1c1c1e;
-  flex-shrink: 0;
-}
-
-.footer-buttons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.first-login-nav-btn, .first-login-submit-btn {
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 17px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  flex-grow: 1;
-}
-
-.first-login-nav-btn.prev {
-  background: #2c2c2e;
-  color: white;
-  flex-grow: 0;
-}
-.first-login-nav-btn.prev:hover {
-  background: #3a3a3c;
-}
-
-.first-login-nav-btn.next, .first-login-submit-btn {
-  background: var(--accent-color);
-  color: white;
-}
-.first-login-nav-btn:disabled, .first-login-submit-btn:disabled {
-  background: #2c2c2e;
-  color: #545458;
-  cursor: not-allowed;
-}
-.first-login-nav-btn:active, .first-login-submit-btn:active {
-  transform: scale(0.98);
-}
-
-.first-login-status-message {
-  padding: 12px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  display: none;
+  line-height: 1.5;
+  margin-bottom: 24px;
   text-align: center;
 }
 
-.first-login-status-error {
-  background: rgba(255, 59, 48, 0.2);
-  color: #ff453a;
+.fl-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* Style dla specyficznych elementów (email, toggles) */
-.first-login-email-display {
-  background: #2c2c2e;
-  border: 1px solid #3a3a3c;
+.fl-input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px 16px;
   border-radius: 12px;
-  padding: 12px 16px;
-  width: 100%;
-  text-align: left;
+  color: #fff;
+  font-size: 16px;
+  transition: all 0.2s ease;
 }
-.first-login-email-label {
-  font-size: 13px;
+
+.fl-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 0, 85, 0.15);
+}
+
+.fl-input::placeholder {
   color: #8e8e93;
 }
-.first-login-email-value {
-  font-size: 16px;
-  font-weight: 500;
-  color: white;
-}
 
-.preference-row {
+.fl-preference-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: #2c2c2e;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid #3a3a3c;
+  cursor: pointer;
 }
-.preference-label {
+
+.fl-preference-label {
+  color: #fff;
   font-size: 16px;
-  color: white;
-}
-.first-login-consent-row {
-  cursor: pointer;
-}
-.language-selector-compact {
-  display: flex;
-  background: #1c1c1e;
-  border-radius: 9px;
-  padding: 2px;
-}
-.language-option-compact {
-  padding: 6px 12px;
-  border-radius: 7px;
-  font-size: 14px;
   font-weight: 500;
+}
+
+.fl-checkbox {
+  transform: scale(1.4);
+  accent-color: var(--accent-color);
+}
+
+.fl-language-selector {
+  display: none; /* Hidden by default, shown by JS */
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.fl-language-selector.visible {
+    display: flex;
+}
+
+.fl-language-option {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #b0b3b8;
+  font-weight: 600;
   cursor: pointer;
-  color: #8e8e93;
+  border: none;
+  background: transparent;
   transition: all 0.2s ease;
 }
-.language-option-compact.active {
+
+.fl-language-option.active {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 0, 85, 0.3);
+}
+
+.fl-hint-text {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.fl-email-display {
+  display: block;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #fff;
+  font-weight: 500;
+  text-align: center;
+}
+
+.fl-footer {
+  padding: 16px 24px;
+  background: #18181a;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: calc(16px + var(--safe-area-bottom));
+}
+
+.fl-footer-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.fl-btn {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fl-btn:active {
+  transform: scale(0.97);
+}
+
+.fl-btn-prev {
   background: #3a3a3c;
-  color: white;
+  color: #fff;
+  display: none; /* Hidden by default */
 }
 
-/* Poprawki dla widocznej klawiatury */
-.first-login-modal-overlay.keyboard-visible .first-login-modal-content {
-  height: 90vh !important;
-  max-height: 90vh !important;
-  border-radius: 24px 24px 0 0 !important;
-  transform: translateY(0) !important;
+.fl-btn-next {
+  background: linear-gradient(90deg, #007aff, #0056b3);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
 }
 
-.preloader-hiding {
-  opacity: 0;
-  pointer-events: none;
+.fl-btn-submit {
+  background: linear-gradient(90deg, #34c759, #28a745);
+  color: #fff;
+  display: none; /* Hidden by default */
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
 }
 .preloader-icon-container {
   position: absolute;
@@ -459,7 +432,7 @@ Text Domain: tingtongtheme
            --- STYLE GŁÓWNE, RESET I SCROLLING ---
            ========================================================================== */
 :root {
-  --app-height: 100vh;
+  --app-height: 100%;
   --accent-color: #ff0055;
   --progress-bar-color: var(--accent-color);
   --main-ui-bg-color: #696969;
@@ -512,26 +485,35 @@ body,
   opacity: 0; /* Hidden initially */
   transition: opacity 0.5s linear;
   overflow: hidden; /* Swiper handles overflow */
+  /* Wymuszenie własnej warstwy GPU na całym kontenerze Swipera */
+  -webkit-transform: translate3d(0, 0, 0); /* Stabilizacja kontenera */
+  transform: translate3d(0, 0, 0);
 }
 #webyx-container.ready {
   opacity: 1;
 }
 .webyx-section {
   width: 100vw;
-  height: 100vh;
   height: var(--app-height); /* Use var, remove 1px patch for scroll-snap */
   overflow: hidden;
   position: relative;
+}
 
-  /* GPU acceleration and rendering optimization for iOS */
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-  contain: layout paint;
-  content-visibility: auto;
-  contain-intrinsic-size: 100vw 100vh; /* Fallback size for when the element is not rendered */
+/* Wymuszenie własnej warstwy kompozycji dla każdego slajdu */
+.webyx-section,
+.swiper-slide {
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  transform: translate3d(0, 0, 0) !important;
+  /* Dodanie backface-visibility poprawia zachowanie przy transformacjach 3D */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Upewnij się, że wrapper Swipera ma transformację 3D */
+.swiper-wrapper {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 /* ==========================================================================
@@ -735,12 +717,21 @@ body,
 .video-controls {
   position: absolute;
   bottom: calc(var(--bottombar-height) + 8px);
-  left: 4px; /* Bliżej lewej krawędzi */
+  left: 4px; /* Odsunięcie od lewej krawędzi */
+  right: 4px; /* Odsunięcie od prawej krawędzi */
+  width: auto; /* Szerokość auto, aby dopasować się do lewej i prawej */
   z-index: 105;
   display: flex;
-  flex-direction: row; /* POPRAWKA: Układ poziomy */
+  flex-direction: row; /* Układ poziomy */
   align-items: center;
-  gap: 4px; /* Mniejszy odstęp dla układu poziomego */
+  justify-content: space-between; /* Kluczowe dla rozmieszczenia */
+}
+
+.video-controls-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px; /* Odstęp między przyciskami po lewej */
 }
 
 .video-controls button {
@@ -809,6 +800,15 @@ body,
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   transition: border-color 0.3s ease-out;
 }
+
+/* Stabilizacja kluczowych elementów interfejsu (topbar, sidebar, bottombar) */
+.topbar,
+.tiktok-symulacja .sidebar,
+.tiktok-symulacja .bottombar {
+  /* Wymuszenie własnej, stabilnej warstwy GPU dla stałych elementów */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
 .topbar.login-panel-active {
   border-bottom-color: transparent;
 }
@@ -849,11 +849,11 @@ body,
   gap: 6px;
   z-index: 105;
   opacity: 0;
-  visibility: hidden;
+  /*visibility: hidden; <--- USUNIĘTO */
   transition:
     top 0.3s ease-out,
     opacity 0.6s ease-out,
-    visibility 0.6s ease-out,
+    /*visibility 0.6s ease-out, <--- USUNIĘTO */
     transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -873,7 +873,7 @@ body,
   justify-content: flex-start;
   padding: 10px 75px 10px 12px;
   color: white;
-  z-index: 10050;
+  z-index: 105;
   padding-bottom: calc(10px + var(--safe-area-bottom));
 
   /* ✅ NOWE: Ukryj bottombar domyślnie */
@@ -900,7 +900,7 @@ body,
   height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  z-index: 10051; /* Wyższe niż bottombar */
+  z-index: 106; /* Wyższe niż bottombar */
   transition: height 0.2s ease-in-out;
   transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
@@ -1138,7 +1138,8 @@ body,
   transition:
     transform 0.1s ease-in-out,
     opacity 0.2s;
-  top: 50%;
+  /* ✅ FIX: Center vertically considering safe area */
+  top: calc(var(--safe-area-top) + (var(--topbar-base-height) / 2));
   transform: translateY(-50%);
 }
 .hamburger-icon {
@@ -1326,33 +1327,53 @@ body,
            --- KOMPONENTY UI: MODALE I ALERTY ---
            ========================================================================== */
 #alertBox {
-  position: absolute;
-  bottom: calc(var(--bottombar-height) + 20px);
+  /* ✅ FIX: Zmieniono na position:fixed aby zapewnić widoczność w PWA */
+  position: fixed;
+  /* ✅ FIX: Obniżono pozycję bliżej dolnego paska */
+  bottom: calc(var(--bottombar-height) + 4px);
   left: 50%;
   transform: translateX(-50%);
+  transition: bottom 0.3s ease-out;
+
   background-color: #000000;
   color: white;
-  padding: 12px 24px;
+  padding: 12px 20px;
   border-radius: 24px;
   font-size: 14px;
   font-weight: 500;
   display: none;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  z-index: 2001;
+  z-index: 10001; /* Podniesiony z-index */
   white-space: normal;
-  text-align: center;
-  max-width: calc(100% - 40px);
+
+  /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
+  width: fit-content;
+  max-width: calc(100vw - 40px); /* Maksymalna szerokość z marginesami po 20px */
+
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
   box-sizing: border-box;
+  text-align: center;
+}
+
+#app-frame.hide-ui #alertBox {
+  /* ✅ FIX: Dostosowano pozycję w trybie immersyjnym */
+  bottom: calc(var(--safe-area-bottom) + 12px);
 }
 
 #alertBox svg {
     width: 22px;
     height: 22px;
     flex-shrink: 0;
+}
+
+#alertText {
+    display: block;
+    min-width: 0;
+    flex-grow: 1;
 }
 
 #alertBox.visible {
@@ -1376,8 +1397,14 @@ body,
     transform: translate(-50%, 10px);
   }
 }
-.modal-overlay {
-  position: fixed;
+.modal-overlay,
+.fl-modal-overlay,
+#commentsModal,
+.account-modal-overlay,
+#tiktok-profile-modal,
+.crop-modal,
+.image-lightbox {
+  position: absolute; /* Changed from fixed */
   top: 0;
   left: 0;
   width: 100%;
@@ -1386,7 +1413,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 10010;
   opacity: 0;
   visibility: hidden;
   transition:
@@ -2228,7 +2255,7 @@ body,
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  z-index: 120;
+  z-index: 10100;
   color: white;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
@@ -2553,6 +2580,8 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(80px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
+  position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elementów */
 }
 
 .account-content::-webkit-scrollbar {
@@ -3125,16 +3154,22 @@ body,
 }
 
 #app-frame {
-  position: fixed;
+  position: relative; /* Make this the positioning context */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden; /* Prevent modals from overflowing */
+  z-index: 2000;
 }
 
 #app-frame.app-frame--pwa-visible {
   height: calc(100% - var(--bottombar-height));
+}
+
+#app-frame.app-frame--pwa-visible .bottombar {
+    display: none !important;
 }
 
 /* PWA Prompt Styles from Reference */
@@ -3154,7 +3189,7 @@ body,
   width: 100%;
   background: #333;
   color: white;
-  z-index: 10002;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3164,13 +3199,11 @@ body,
 
   /* PATCH: Animate from bottom */
   transform: translateY(100%);
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.8s;
   visibility: hidden;
-  display: none; /* DODANE: domyślnie całkowicie ukryty */
   height: var(--bottombar-height);
 }
 .pwa-prompt.visible {
-  display: flex; /* DODANE: musi nadpisać display: none */
   transform: translateY(0);
   visibility: visible;
 }
@@ -3211,7 +3244,7 @@ body,
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
-  z-index: 10003;
+  z-index: 10001;
   padding: 1rem;
   padding-bottom: calc(1rem + var(--safe-area-bottom));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -3624,8 +3657,7 @@ body,
 
 /* ============================================================================
    WELCOME MODAL STYLES - Premium Design
-   ============================================================================
-*/
+   ============================================================================ */
 
 /* Overlay z mocnym blur */
 .welcome-modal {
@@ -4110,8 +4142,7 @@ body,
 
 /* ============================================================================
    DESKTOP - Zwężenie do proporcji 9:16 (jak telefon)
-   ============================================================================
-*/
+   ============================================================================ */
 
 @media (min-width: 600px) {
   /* Główny kontener aplikacji */
@@ -4125,7 +4156,8 @@ body,
     border-left: 1px solid #333;
     border-right: 1px solid #333;
     /* ZMIEŃ: Użyj intensywnego cienia z akcentem kolorystycznym */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 0, 85, 0.15);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 85, 0.25);
+    overflow: hidden;
   }
 
   /* App frame - jeśli używasz */
@@ -4149,17 +4181,89 @@ body,
     border-right: 1px solid #333;
   }
 
+  /* NOWE: Ujednolicony selektor modali i widgetów */
+  #commentsModal,
+  .modal-overlay,
+  .fl-modal-overlay,
+  .crop-modal,
+  .notification-popup,
+  .image-lightbox,
+  #bmc-w-modal-container,
+  .account-modal-overlay,
+  #tiktok-profile-modal,
+  #bmc-w-modal-container iframe,
+  #bmc-w-modal-container > div
+  {
+    width: calc(100vh * 9 / 16) !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 auto !important;
+    top: 0 !important;
+    height: 100% !important;
+    border-left: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* NOWE: Wymuszenie dopasowania wewnętrznej zawartości modali do nowej szerokości */
+  .modal-overlay .modal-content,
+  .fl-modal-overlay .fl-modal-content,
+  .crop-modal .crop-modal-content,
+  .notification-popup,
+  .account-modal-content,
+  .tiktok-profile-content
+  {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    top: 0 !important;
+  }
+
+  /* Poprawka dla popupu powiadomień, aby nie miał podwójnego obramowania */
+  .notification-popup {
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  }
+
   /* ZMIEŃ: Uproszczenie tła body do ciemnej czerni */
   body {
     background: #0a0a0a !important;
     overflow-x: hidden;
   }
+
+  /* NOWA REGULA: Ambient Glow */
+  /* Ambient Glow - duży, rozmyty gradient w kolorze akcentu */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle at center,
+      rgba(255, 0, 85, 0.12) 0%, /* Jaśniejszy punkt w centrum */
+      rgba(255, 0, 85, 0.05) 30%, /* Większy zasięg */
+      transparent 65%
+    );
+    opacity: 0.9;
+    z-index: -1;
+    pointer-events: none;
+    animation: subtleShimmer 8s ease-in-out infinite;
+  }
+
+  @keyframes subtleShimmer {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
 }
 
 /* ============================================================================
    TABLET - Dla tabletów (600px - 1024px)
-   ============================================================================
-*/
+   ============================================================================ */
 
 @media (min-width: 600px) and (max-width: 1024px) {
   #webyx-container {
@@ -4170,8 +4274,7 @@ body,
 
 /* ============================================================================
    DESKTOP - Dla dużych ekranów (>1024px)
-   ============================================================================
-*/
+   ============================================================================ */
 
 @media (min-width: 1024px) {
   #webyx-container {
@@ -4183,8 +4286,7 @@ body,
 
 /* ============================================================================
    OPCJONALNIE - Gradient background za aplikacją
-   ============================================================================
-*/
+   ============================================================================ */
 
 /* NOWA REGULA: Ambient Glow */
 @media (min-width: 600px) {
@@ -4254,8 +4356,7 @@ body,
 }
 /* ============================================================================
    DESKTOP FIX - Zapewnienie poprawnego układu w trybie symulacji telefonu
-   ============================================================================
-*/
+   ============================================================================ */
 @media (min-width: 600px) {
   /* ✅ FIX 1: Sekcje muszą używać 100% zamiast 100vw */
   .webyx-section {
@@ -4313,7 +4414,7 @@ body,
   #alertBox {
     left: 50%;
     transform: translateX(-50%);
-    max-width: calc(100% - 40px); /* Odstępy od krawędzi */
+    /* max-width jest teraz obsługiwany przez główną regułę z funkcją min() */
   }
   /* ✅ FIX 10: Video controls - zapewnienie widoczności */
   .video-controls {
@@ -4334,8 +4435,7 @@ body,
 
 /* ============================================================================
    DODATKOWE ZABEZPIECZENIA - dla wszystkich szerokości ekranu
-   ============================================================================
-*/
+   ============================================================================ */
 /* Video zawsze z object-fit */
 .player,
 .tiktok-symulacja video {
@@ -4358,8 +4458,7 @@ body,
 
 /* ============================================================================
    --- NOWE: TRYB PEŁNEGO EKRANU (IMMERSYJNY) ---
-   ============================================================================
-*/
+   ============================================================================ */
 
 /* Dodajemy płynne przejścia do animowanych elementów */
 .tiktok-symulacja .bottombar,
@@ -4420,134 +4519,3 @@ body,
   display: none;
 }
 
-/* ============================================================================
-   KEYBOARD VISIBILITY PATCH (v4) - The Freezer
-   ============================================================================
-*/
-
-/*
- * KROK 1: "Zamroź" ciało dokumentu.
- * Gdy klawiatura się pojawia, ustawiamy pozycję body na stałą (fixed).
- * To wyjmuje je z normalnego przepływu i zapobiega zmianie jego rozmiaru
- * przez przeglądarkę. Działa to jak zrobienie "zrzutu ekranu" layoutu.
- * Używamy !important, aby nadpisać wszelkie inne style i zapewnić działanie.
- */
-body.keyboard-visible {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-
-/*
- * KROK 2: Dostosuj główne kontenery, aby współpracowały z nowym body.
- * #app-frame, który był `fixed`, teraz może być `absolute`, ponieważ
- * jego rodzic (body) jest `fixed`. To upraszcza kontekst pozycjonowania.
- */
-body.keyboard-visible #app-frame {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100% !important; /* FIX: Zapobiega kurczeniu się głównego kontenera */
-}
-
-/*
- * KROK 3: Napraw pozycjonowanie modali i nakładek.
- * Wszystkie modale, które były `position: fixed`, muszą teraz stać się
- * `position: absolute`, aby pozycjonowały się wewnątrz `body`, a nie
- * kurczącego się okna przeglądarki.
- */
-body.keyboard-visible .modal-overlay,
-body.keyboard-visible .notification-popup,
-body.keyboard-visible .image-lightbox {
-  position: absolute !important;
-}
-
-/*
- * KROK 3.1: Napraw pozycjonowanie paska PWA.
- * Musi stać się `position: absolute` i być przyklejony do dołu.
- */
-body.keyboard-visible .pwa-prompt,
-body.keyboard-visible .pwa-prompt-ios {
-  position: absolute !important;
-  bottom: 0 !important;
-  /* Upewniamy się, że transformacja nie przesuwa go w górę.
-     Pasek powinien być już widoczny (translateY(0)), gdy pojawia się klawiatura. */
-  transform: translateY(0) !important;
-}
-
-/*
- * KROK 4: Wyjątek dla modala komentarzy.
- * Ten modal musi się dostosować, aby pole tekstowe było widoczne
- * nad klawiaturą. Używamy zmiennej --keyboard-offset z JS,
- * aby precyzyjnie ustawić jego wysokość.
- */
-body.keyboard-visible #commentsModal.keyboard-visible .modal-content {
-  height: calc(100% - var(--keyboard-offset, 0px));
-  max-height: calc(100% - var(--keyboard-offset, 0px));
-  transition: height 0.2s ease-out, max-height 0.2s ease-out;
-}
-
-/*
- * Kontener formularza komentarzy pozostaje przyklejony do dołu
- * swojego przewijanego kontenera (modal-body), co jest pożądanym zachowaniem.
- */
-.comment-form-container {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-}
-
-/* ============================================================================
-   PATCH: ZABLOKOWANIE RUCHU ELEMENTÓW PRZEZ KLAWIATURĘ (Wymaganie Użytkownika)
-   Klawiatura ekranowa będzie ZAKRYWAĆ dolne elementy UI (bottombar, paski PWA, footery modali).
-   ============================================================================
-*/
-
-/* 1. Resetuj logikę "zamrażania" body (kluczowe) */
-body.keyboard-visible {
-  position: fixed !important; /* Pozwala klawiaturze zakryć */
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  overflow: auto !important;
-}
-
-/* 2. Resetuj pozycjonowanie głównych kontenerów na Fixed (względem pełnej wysokości ekranu) */
-body.keyboard-visible #app-frame {
-  position: fixed !important;
-  height: 100% !important;
-}
-body.keyboard-visible .modal-overlay,
-body.keyboard-visible .notification-popup,
-body.keyboard-visible .image-lightbox {
-  position: fixed !important;
-}
-
-/* 3. ZABLOKUJ ruch Modala Pierwszego Logowania */
-/* Przywraca oryginalną wysokość i pozycjonowanie. */
-.first-login-modal-overlay.keyboard-visible .first-login-modal-content {
-  height: 90vh !important;
-  max-height: 90vh !important;
-  border-radius: 24px 24px 0 0 !important;
-  transform: translateY(0) !important;
-}
-
-/* 4. ZABLOKUJ ruch Modala Komentarzy */
-/* Przywraca oryginalną wysokość. Formularz jest wewnątrz i zostanie zakryty. */
-#commentsModal.keyboard-visible .modal-content {
-  height: 75vh !important;
-  max-height: 75vh !important;
-  transition: none !important;
-}
-
-/* 5. ZABLOKUJ ruch paska PWA (jest teraz Fixed względem pełnej wysokości) */
-body.keyboard-visible .pwa-prompt,
-body.keyboard-visible .pwa-prompt-ios {
-  position: fixed !important;
-  bottom: 0 !important;
-}
