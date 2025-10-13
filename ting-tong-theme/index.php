@@ -168,7 +168,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-account-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-public-profile" data-translate-aria-label="subscribeAriaLabel" aria-label="Subskrybuj"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -526,7 +526,7 @@ get_header();
             <span data-translate-key="installPwaFullDescription">Zainstaluj Ting Tonga na swoim telefonie.</span>
         </p>
     </div>
-    <button id="pwa-install-button" class="pwa-prompt-button" data-action="install-pwa" data-translate-key="installPwaAction">Zainstaluj</button>
+    <button id="pwa-install-button" class="pwa-prompt-button" data-translate-key="installPwaAction" disabled>Zainstaluj</button>
 </div>
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">
