@@ -473,15 +473,6 @@ get_header();
     </div>
 </div>
 
-<div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-content" tabindex="-1">
-        <button class="modal-close-btn" data-action="close-modal">&times;</button>
-        <h2 data-translate-key="infoModalTitle">Informacje</h2>
-        <div class="modal-body">
-            <p data-translate-key="infoModalBody">To jest przykładowa treść modala informacyjnego.</p>
-        </div>
-    </div>
-</div>
 <div id="pwa-desktop-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
         <button class="modal-close-btn" data-action="close-modal">&times;</button>

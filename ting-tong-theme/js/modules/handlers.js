@@ -25,17 +25,6 @@ function mockToggleLogin() {
   }
 }
 
-function handleNotificationClick(event) {
-  const item = event.target.closest(".notification-item");
-  if (!item) return;
-
-  item.classList.toggle("expanded");
-  item.setAttribute("aria-expanded", item.classList.contains("expanded"));
-
-  if (item.classList.contains("unread")) {
-    item.classList.remove("unread");
-  }
-}
 
 async function handleLikeToggle(button) {
   if (!State.get("isUserLoggedIn")) {
@@ -117,93 +106,59 @@ function handleLanguageToggle() {
   Notifications.render();
 }
 
-const handleCommentButtonClick = (e) => {
-  const actionTarget = e.target.closest('[data-action="open-comments-modal"]');
-  if (!actionTarget) return;
-
-  const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
-
-  if (!slideId) {
-    console.error('No slideId found for comments modal');
-    return;
-  }
-
-  // Pokaż modal z loading spinner
-  const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
-  if (!modalBody) {
-    console.error('Modal body not found');
-    return;
-  }
-
-  modalBody.innerHTML = '<div class="loading-spinner"></div>';
-  UI.openModal(UI.DOM.commentsModal);
-  UI.updateCommentFormVisibility();
-
-  // Pobierz komentarze z pełnym error handling
-  API.fetchComments(slideId)
-    .then((response) => {
-      if (!response || typeof response.success !== 'boolean') {
-        throw new Error('Invalid response format');
-      }
-
-      if (!response.success) {
-        throw new Error(response.data?.message || 'Failed to load comments');
-      }
-
-      let comments = response.data;
-      if (!Array.isArray(comments)) {
-        console.warn('Comments data is not an array, using empty array');
-        comments = [];
-      }
-
-      const slideData = slidesData.find(s => s.id === slideId);
-      if (slideData) {
-          slideData.comments = comments;
-      }
-
-      const sortOrder = State.get("commentSortOrder");
-      if (sortOrder === "popular") {
-        comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      } else {
-        comments.sort((a, b) => {
-          const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
-          const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
-          return dateB - dateA;
-        });
-      }
-
-      UI.renderComments(comments);
-
-      setTimeout(() => {
-        if (modalBody && modalBody.scrollHeight) {
-          modalBody.scrollTop = modalBody.scrollHeight;
-        }
-      }, 100);
-    })
-    .catch((error) => {
-      console.error('Failed to load comments:', error);
-      modalBody.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p style="font-size: 14px; margin: 0;">
-            ${Utils.getTranslation('commentLoadError') || 'Nie udało się załadować komentarzy'}
-          </p>
-          <button
-            onclick="this.closest('.modal-overlay').querySelector('[data-action=open-comments-modal]')?.click()"
-            style="margin-top: 16px; padding: 8px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; cursor: pointer;"
-          >
-            ${Utils.getTranslation('retry') || 'Spróbuj ponownie'}
-          </button>
-        </div>
-      `;
-    });
-};
 
 export const Handlers = {
-  handleCommentButtonClick,
-  handleNotificationClick,
+  handleCommentButtonClick: (e) => {
+    const actionTarget = e.target.closest('[data-action="open-comments-modal"]');
+    if (!actionTarget) return;
+    const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+    if (!slideId) {
+      console.error('No slideId found for comments modal');
+      return;
+    }
+    const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+    if (!modalBody) {
+      console.error('Modal body not found');
+      return;
+    }
+    modalBody.innerHTML = '<div class="loading-spinner"></div>';
+    UI.openModal(UI.DOM.commentsModal);
+    UI.updateCommentFormVisibility();
+    API.fetchComments(slideId)
+      .then((response) => {
+        if (!response || !response.success) {
+          throw new Error(response?.data?.message || 'Failed to load comments');
+        }
+        const comments = response.data || [];
+        const slideData = slidesData.find(s => s.id === slideId);
+        if (slideData) {
+          slideData.comments = comments;
+        }
+        const sortOrder = State.get("commentSortOrder");
+        if (sortOrder === "popular") {
+          comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        } else {
+          comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+        UI.renderComments(comments);
+        setTimeout(() => {
+          if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
+        }, 100);
+      })
+      .catch((error) => {
+        console.error('Failed to load comments:', error);
+        modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
+      });
+  },
+  handleNotificationClick: (event) => {
+    const item = event.target.closest(".notification-item");
+    if (!item) return;
+    item.classList.toggle("expanded");
+    item.setAttribute("aria-expanded", item.classList.contains("expanded"));
+    if (item.classList.contains("unread")) {
+      item.classList.remove("unread");
+    }
+  },
   profileModalTabHandler: (e) => {
     const tab = e.target.closest(".tab");
     if (!tab) return;
@@ -636,7 +591,7 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal":
-        handleCommentButtonClick(e);
+        Handlers.handleCommentButtonClick(e);
         break;
       case "open-info-modal":
         UI.openModal(UI.DOM.infoModal);
