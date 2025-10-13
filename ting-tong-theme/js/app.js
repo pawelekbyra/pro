@@ -141,9 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
       State.on('user:logout', () => {
         console.log('User logged out');
 
-        slidesData.forEach(slide => {
-          slide.isLiked = false;
-        });
+        // ✅ FIX: Zamiast ręcznie resetować stan, pobierz świeże dane z serwera,
+        // tak jak przy logowaniu. To zapewnia spójność stanu.
+        _fetchAndUpdateSlideData();
 
         UI.updateUIForLoginState();
         UI.updateTranslations();
