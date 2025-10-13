@@ -43,23 +43,33 @@ function closePwaModals() {
 }
 
 function runStandaloneCheck() {
-  const appFrame = document.getElementById("app-frame");
-  if (isStandalone()) {
-    if (installBar) {
-      installBar.classList.remove("visible");
-      if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+    const appFrame = document.getElementById("app-frame");
+
+    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
+    if (isStandalone()) {
+        if (installBar) {
+            installBar.classList.remove("visible");
+            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+        }
+        return true;
     }
-    return true;
-  } else {
+
+    // Jeśli nie jest standalone, decyzja zależy od stanu preloadera i promptu.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
-    if (isPreloaderHidden && installBar) {
-      installBar.classList.add("visible");
-      if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+
+    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane zdarzenie prompt.
+    if (isPreloaderHidden && installPromptEvent && installBar) {
+        installBar.classList.add("visible");
+        if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+    } else if (installBar) {
+        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
+        installBar.classList.remove("visible");
+        if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
-  }
-  return false;
+
+    return false;
 }
 
 // ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
