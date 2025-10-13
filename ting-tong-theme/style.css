@@ -874,7 +874,7 @@ body,
   justify-content: flex-start;
   padding: 10px 75px 10px 12px;
   color: white;
-  z-index: 10050;
+  z-index: 105;
   padding-bottom: calc(10px + var(--safe-area-bottom));
 
   /* ✅ NOWE: Ukryj bottombar domyślnie */
@@ -901,7 +901,7 @@ body,
   height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  z-index: 10051; /* Wyższe niż bottombar */
+  z-index: 106; /* Wyższe niż bottombar */
   transition: height 0.2s ease-in-out;
   transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
@@ -3167,6 +3167,10 @@ body,
 
 #app-frame.app-frame--pwa-visible {
   height: calc(100% - var(--bottombar-height));
+}
+
+#app-frame.app-frame--pwa-visible .bottombar {
+    display: none !important;
 }
 
 /* PWA Prompt Styles from Reference */
