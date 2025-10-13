@@ -212,7 +212,7 @@ export const Config = {
       immersiveModePwaOnly: "Działa w apce",
 
       // --- KLUCZE DLA MODALA PIERWSZEGO LOGOWANIA ---
-      firstLoginTitle: "Hej, witaj pierwszy raz! 👋",
+      firstLoginTitle: "Uzupełnij Profil 🚀", // FIX: Optymistyczny akcent
       firstLoginPrev: "Wstecz",
       firstLoginNext: "Dalej",
       firstLoginSubmit: "Zakończ 🎯",
@@ -404,7 +404,7 @@ export const Config = {
       immersiveModePwaOnly: "Works in app",
 
       // --- KEYS FOR FIRST LOGIN MODAL ---
-      firstLoginTitle: "Hey, welcome for the first time! 👋",
+      firstLoginTitle: "Complete Profile 🚀", // FIX: Optymistyczny akcent
       firstLoginPrev: "Back",
       firstLoginNext: "Next",
       firstLoginSubmit: "Finish 🎯",

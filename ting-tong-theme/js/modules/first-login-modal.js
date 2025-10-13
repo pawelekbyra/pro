@@ -75,7 +75,7 @@ function validateStep(step) {
     }
     if (step === 2) { // Krok Hasło
         if (dom.passwordInput.value.length < 8) {
-            UI.showAlert(Utils.getTranslation('firstLoginPasswordLengthError'), true);
+            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
             return false;
         }
         if (dom.passwordInput.value !== dom.confirmPasswordInput.value) {
@@ -124,10 +124,11 @@ async function handleFormSubmit(e) {
             dom.form.reset();
 
         } else {
+            // FIX: Złap błąd z komunikatu serwera i wyświetl
             throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError'));
         }
     } catch (error) {
-        UI.showAlert(error.message, true);
+        UI.showAlert(error.message || Utils.getTranslation('genericError'), true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
@@ -171,10 +172,18 @@ function translateUI() {
 function showProfileCompletionModal() {
     if (!dom.modal) return;
     translateUI();
+
+    // FIX 2: Ustawienie domyślnego stanu: zgoda zaznaczona, język polski
+    dom.consentCheckbox.checked = true;
+    dom.langOptionsContainer.classList.add('visible'); // Pokaż opcje językowe
+    dom.langOptions.forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.dataset.lang === 'pl') opt.classList.add('active'); // Domyślnie PL
+    });
+
     const userEmail = State.get('currentUser')?.email || '';
-    if (dom.emailDisplay) {
-        dom.emailDisplay.textContent = userEmail;
-    }
+    if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
+
     UI.openModal(dom.modal);
     updateStepDisplay();
 }
