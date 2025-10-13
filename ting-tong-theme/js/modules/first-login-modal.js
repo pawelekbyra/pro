@@ -110,7 +110,8 @@ async function handleFormSubmit(e) {
     submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
     try {
-        const result = await authManager.ajax('tt_complete_profile', formData, true);
+        // ZMIANA: Wysyłamy jako standardowy formularz, a nie JSON
+        const result = await authManager.ajax('tt_complete_profile', formData);
         if (result.success) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
