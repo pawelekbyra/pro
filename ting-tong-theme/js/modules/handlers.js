@@ -631,7 +631,8 @@ export const Handlers = {
           try {
             await authManager.logout();
 
-            slidesData.forEach((slide) => (slide.isLiked = false));
+            // Usunięto ręczną aktualizację stanu. Jest ona teraz
+            // obsługiwana centralnie przez listener 'user:logout' w app.js.
 
             if (loggedInMenu) loggedInMenu.classList.remove("active");
 
@@ -790,6 +791,10 @@ export const Handlers = {
       submitButton.innerHTML = '<span class="loading-spinner"></span>';
 
       try {
+        // ✅ FIX: Proaktywnie odśwież nonce PRZED próbą logowania.
+        // To eliminuje błędy związane z wygaśnięciem sesji/nonce i czyni logowanie niezawodnym.
+        await authManager.refreshNonce();
+
         // Zaloguj się. authManager.login sam wywoła event 'user:login',
         // który jest obsługiwany w app.js. To centralne miejsce
         // zajmie się pokazaniem modala lub zaktualizowaniem UI.
