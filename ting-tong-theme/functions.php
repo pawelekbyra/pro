@@ -878,27 +878,21 @@ add_filter('get_avatar_url', function ($url, $id_or_email, $args) {
 }, 10, 3);
 
 add_action('wp_ajax_tt_complete_profile', function () {
-    // 1. Bezpieczeństwo i walidacja wstępna
+    // 1. Bezpieczeństwo i walidacja wstępna - teraz używa standardowego nonce z POST
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Brak autoryzacji. Musisz być zalogowany.'], 401);
     }
 
-    $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : '';
-    if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
-        wp_send_json_error(['message' => 'Błąd weryfikacji bezpieczeństwa. Odśwież stronę i spróbuj ponownie.'], 403);
-    }
-
-    $data = json_decode(file_get_contents('php://input'), true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        wp_send_json_error(['message' => 'Błąd serwera: Nieprawidłowy format danych (JSON).'], 400);
-    }
-
+    // Zmiana: dane pobierane z $_POST zamiast JSON
+    $data = $_POST;
     $u = wp_get_current_user();
 
     // 2. Sanityzacja i walidacja danych
     $first_name = isset($data['first_name']) ? sanitize_text_field(wp_unslash($data['first_name'])) : '';
     $last_name = isset($data['last_name']) ? sanitize_text_field(wp_unslash($data['last_name'])) : '';
     $new_password = isset($data['new_password']) ? wp_unslash($data['new_password']) : '';
+    // Zmiana: 'true'/'false' jako string z FormData
     $email_consent = isset($data['email_consent']) ? filter_var($data['email_consent'], FILTER_VALIDATE_BOOLEAN) : false;
     $email_language = isset($data['email_language']) && in_array($data['email_language'], ['pl', 'en']) ? $data['email_language'] : 'pl';
 

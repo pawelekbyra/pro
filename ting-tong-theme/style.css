@@ -717,12 +717,21 @@ body,
 .video-controls {
   position: absolute;
   bottom: calc(var(--bottombar-height) + 8px);
-  left: 4px; /* Bliżej lewej krawędzi */
+  left: 4px; /* Odsunięcie od lewej krawędzi */
+  right: 4px; /* Odsunięcie od prawej krawędzi */
+  width: auto; /* Szerokość auto, aby dopasować się do lewej i prawej */
   z-index: 105;
   display: flex;
-  flex-direction: row; /* POPRAWKA: Układ poziomy */
+  flex-direction: row; /* Układ poziomy */
   align-items: center;
-  gap: 4px; /* Mniejszy odstęp dla układu poziomego */
+  justify-content: space-between; /* Kluczowe dla rozmieszczenia */
+}
+
+.video-controls-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px; /* Odstęp między przyciskami po lewej */
 }
 
 .video-controls button {
