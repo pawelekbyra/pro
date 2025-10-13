@@ -550,6 +550,10 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal": {
+        if (!State.get('isUserLoggedIn')) {
+            UI.showAlert(Utils.getTranslation('loginToComment'));
+            return;
+        }
         const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
         if (!slideId) {
           console.error('No slideId found for comments modal');

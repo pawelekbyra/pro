@@ -847,7 +847,7 @@ body,
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  z-index: 105;
+  z-index: 106; /* FIX: Higher than bottombar (105) to ensure it's clickable */
   opacity: 0;
   /*visibility: hidden; <--- USUNIĘTO */
   transition:
