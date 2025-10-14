@@ -299,6 +299,67 @@ Text Domain: tingtongtheme
   display: none; /* Hidden by default */
   box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
 }
+
+/* --- Tipping Modal Specific Styles --- */
+
+.tipping-amount-container {
+    display: flex;
+    align-items: center;
+    background-color: #2c2c2e;
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid #4d4d50;
+    transition: border-color 0.2s;
+}
+
+.tipping-amount-container:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(255, 0, 85, 0.15);
+}
+
+#tippingAmount {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 12px 16px;
+    text-align: center;
+    -moz-appearance: textfield; /* Firefox */
+}
+
+#tippingAmount::-webkit-outer-spin-button,
+#tippingAmount::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.tipping-currency {
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.6);
+    padding-right: 20px;
+}
+
+#tippingEmailContainer {
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+#tippingEmailContainer.visible {
+    opacity: 1;
+    max-height: 100px; /* enough for input and hint */
+    margin-top: 16px;
+}
+
+.loading-spinner.large {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+}
 .preloader-icon-container {
   position: absolute;
   top: 50%;

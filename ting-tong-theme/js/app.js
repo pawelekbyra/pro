@@ -9,6 +9,7 @@ import { Notifications } from './modules/notifications.js';
 import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
+import { TippingModal } from './modules/tipping-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -419,6 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         _initializeStateListeners(); // DODANE
         AccountPanel.init();
         FirstLoginModal.init();
+        TippingModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
