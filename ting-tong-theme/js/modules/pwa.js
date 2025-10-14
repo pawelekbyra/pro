@@ -122,6 +122,9 @@ function init() {
       }
     });
   }
+  // OSTATECZNA POPRAWKA: Ustawiamy początkowy stan przycisku na "niedostępny".
+  // Stan zostanie zaktualizowany w `app.js` po załadowaniu wszystkiego.
+  updateInstallButtonAvailability();
 }
 
 export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, updateInstallButtonAvailability };
