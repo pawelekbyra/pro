@@ -6,7 +6,6 @@ let dom = {};
 let currentStep = 0;
 const totalSteps = 3; // 0: options, 1: amount, 2: processing
 let formData = {};
-let listenersAttached = false; // Flag to ensure listeners are attached only once
 
 function cacheDOM() {
     dom = {
@@ -32,7 +31,6 @@ function updateStepDisplay() {
         stepEl.classList.toggle('active', i === currentStep);
     });
 
-    // Explicitly control button visibility for each step
     const isFirstStep = currentStep === 0;
     const isAmountStep = currentStep === 1;
     const isProcessingStep = currentStep === 2;
@@ -70,13 +68,13 @@ function handlePrevStep() {
 }
 
 function validateStep(step) {
-    if (step === 0) { // Step 1: Email
+    if (step === 0) {
         if (dom.createAccountCheckbox.checked && !Utils.isValidEmail(dom.emailInput.value)) {
             UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
             return false;
         }
     }
-    if (step === 1) { // Step 2: Amount
+    if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         if (isNaN(amount) || amount < 1) {
             UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
@@ -95,24 +93,19 @@ function collectData(step) {
     }
 }
 
-async function handleFormSubmit(e) {
-    e.preventDefault();
-
+async function handleFormSubmit() {
     if (!validateStep(currentStep)) return;
     collectData(currentStep);
 
-    // Go to processing step
     currentStep++;
     updateStepDisplay();
 
-    // Mock payment processing
     console.log('Processing payment with data:', formData);
 
     setTimeout(() => {
         UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
         hideModal();
 
-        // Reset form after a short delay
         setTimeout(() => {
             currentStep = 0;
             formData = {};
@@ -122,22 +115,7 @@ async function handleFormSubmit(e) {
             updateStepDisplay();
         }, 300);
 
-    }, 2500); // Simulate network request
-}
-
-
-function setupEventListeners() {
-    if (!dom.modal || listenersAttached) return;
-
-    dom.nextBtn?.addEventListener('click', handleNextStep);
-    dom.prevBtn?.addEventListener('click', handlePrevStep);
-    dom.form?.addEventListener('submit', handleFormSubmit);
-
-    dom.createAccountCheckbox?.addEventListener('change', e => {
-        dom.emailContainer.classList.toggle('visible', e.target.checked);
-    });
-
-    listenersAttached = true;
+    }, 2500);
 }
 
 function translateUI() {
@@ -157,20 +135,22 @@ function translateUI() {
 }
 
 function showModal() {
-    // Cache DOM and setup listeners right before showing, ensuring elements exist.
     cacheDOM();
-    setupEventListeners();
 
     if (!dom.modal) {
         console.error("Tipping modal not found in DOM");
         return;
     }
+
+    // Setup checkbox listener here as it's part of the modal's internal logic
+    dom.createAccountCheckbox?.addEventListener('change', e => {
+        dom.emailContainer.classList.toggle('visible', e.target.checked);
+    });
+
     translateUI();
 
-    // Reset to first step
     currentStep = 0;
 
-    // Pre-fill email if user is logged in
     const currentUser = State.get('currentUser');
     if (currentUser && currentUser.email) {
         dom.emailInput.value = currentUser.email;
@@ -189,11 +169,13 @@ function hideModal() {
 }
 
 function init() {
-    // Defer DOM caching and listener setup until it's actually needed.
-    // This avoids issues if the script runs before the DOM is fully parsed.
+    // No-op, initialization is handled by showModal to be on-demand.
 }
 
 export const TippingModal = {
     init,
     showModal,
+    handleNextStep,
+    handlePrevStep,
+    handleFormSubmit,
 };

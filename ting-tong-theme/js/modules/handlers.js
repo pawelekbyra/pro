@@ -698,6 +698,12 @@ export const Handlers = {
       case "show-tip-jar":
         TippingModal.showModal();
         break;
+      case "tipping-next":
+        TippingModal.handleNextStep();
+        break;
+      case "tipping-prev":
+        TippingModal.handlePrevStep();
+        break;
       case "play-video": {
         const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
         if (video) {
@@ -810,6 +816,13 @@ export const Handlers = {
       }
 
       return;
+    }
+
+    const tippingForm = e.target.closest("form#tippingForm");
+    if (tippingForm) {
+        e.preventDefault();
+        TippingModal.handleFormSubmit();
+        return;
     }
 
     // ========================================================================
