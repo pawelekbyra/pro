@@ -73,10 +73,23 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
+  updateInstallButtonUI();
   // Natychmiast uruchom sprawdzanie, aby zaktualizować interfejs użytkownika,
   // gdy tylko zdarzenie zostanie przechwycone.
   runStandaloneCheck();
 });
+
+function updateInstallButtonUI() {
+  if (!installButton) return;
+
+  if (installPromptEvent) {
+    installButton.classList.remove("unavailable");
+    installButton.querySelector("span").textContent = Utils.getTranslation("installPwa");
+  } else {
+    installButton.classList.add("unavailable");
+    installButton.querySelector("span").textContent = Utils.getTranslation("howToInstallPwa");
+  }
+}
 
 function handleInstallClick() {
   // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
@@ -105,9 +118,12 @@ function init() {
   if (installButton) {
     installButton.addEventListener('click', handleInstallClick);
   }
+  // ✅ Ustaw początkowy stan przycisku
+  updateInstallButtonUI();
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
+    updateInstallButtonUI();
     // Celowo usunięto UI.showAlert, aby uniknąć fałszywych komunikatów.
     // Pasek pozostaje widoczny, a logika `handleInstallClick` poprawnie
     // obsłuży kolejne kliknięcia (np. pokazując instrukcje dla iOS lub
