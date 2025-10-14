@@ -522,7 +522,7 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile":
+      case "open-public-profile": {
         const profileSection = actionTarget.closest(".webyx-section");
         if (profileSection) {
           const slideData = slidesData.find(
@@ -534,6 +534,7 @@ export const Handlers = {
           }
         }
         break;
+      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
