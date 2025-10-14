@@ -6,6 +6,7 @@ let dom = {};
 let currentStep = 0;
 const totalSteps = 3; // 0: options, 1: amount, 2: processing
 let formData = {};
+let listenersAttached = false; // Flag to ensure listeners are attached only once
 
 function cacheDOM() {
     dom = {
@@ -31,13 +32,20 @@ function updateStepDisplay() {
         stepEl.classList.toggle('active', i === currentStep);
     });
 
-    dom.prevBtn.style.display = currentStep === 0 ? 'none' : 'inline-flex';
-
-    // Hide Next button on amount step, Submit button takes over
+    // Explicitly control button visibility for each step
+    const isFirstStep = currentStep === 0;
     const isAmountStep = currentStep === 1;
-    dom.nextBtn.style.display = (currentStep >= totalSteps - 2) ? 'none' : 'inline-flex';
+    const isProcessingStep = currentStep === 2;
 
+    dom.prevBtn.style.display = isAmountStep ? 'inline-flex' : 'none';
+    dom.nextBtn.style.display = isFirstStep ? 'inline-flex' : 'none';
     dom.submitBtn.style.display = isAmountStep ? 'inline-flex' : 'none';
+
+    if (isProcessingStep) {
+        dom.prevBtn.style.display = 'none';
+        dom.nextBtn.style.display = 'none';
+        dom.submitBtn.style.display = 'none';
+    }
 
     if (dom.progressBar) {
         dom.progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
@@ -119,7 +127,8 @@ async function handleFormSubmit(e) {
 
 
 function setupEventListeners() {
-    if (!dom.modal) return;
+    if (!dom.modal || listenersAttached) return;
+
     dom.nextBtn?.addEventListener('click', handleNextStep);
     dom.prevBtn?.addEventListener('click', handlePrevStep);
     dom.form?.addEventListener('submit', handleFormSubmit);
@@ -127,14 +136,31 @@ function setupEventListeners() {
     dom.createAccountCheckbox?.addEventListener('change', e => {
         dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
+
+    listenersAttached = true;
 }
 
 function translateUI() {
     if(!dom.modal) return;
-    // This can be expanded later if needed
+
+    dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
+        const key = el.dataset.translateKey;
+        const translation = Utils.getTranslation(key);
+        if(translation) el.innerHTML = translation;
+    });
+
+    dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+        const key = el.dataset.translatePlaceholder;
+        const translation = Utils.getTranslation(key);
+        if(translation) el.placeholder = translation;
+    });
 }
 
 function showModal() {
+    // Cache DOM and setup listeners right before showing, ensuring elements exist.
+    cacheDOM();
+    setupEventListeners();
+
     if (!dom.modal) {
         console.error("Tipping modal not found in DOM");
         return;
@@ -163,12 +189,8 @@ function hideModal() {
 }
 
 function init() {
-    cacheDOM();
-    if (dom.modal) {
-        setupEventListeners();
-    } else {
-        console.log("Tipping modal not initialized, DOM element not found.");
-    }
+    // Defer DOM caching and listener setup until it's actually needed.
+    // This avoids issues if the script runs before the DOM is fully parsed.
 }
 
 export const TippingModal = {
