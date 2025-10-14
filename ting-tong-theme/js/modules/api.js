@@ -1,20 +1,6 @@
 import { authManager } from './auth-manager.js';
 
-if (typeof window.TingTongData === "undefined") {
-  console.warn(
-    "`TingTongData` is not defined. Using mock data for standalone development.",
-  );
-  window.TingTongData = {
-    isLoggedIn: false,
-    slides: [],
-  };
-}
-
-export const slidesData = window.TingTongData.slides || [];
-
-slidesData.forEach((s) => {
-  s.likeId = String(s.likeId);
-});
+export let slidesData = [];
 
 async function _request(action, data = {}) {
   try {
@@ -27,6 +13,22 @@ async function _request(action, data = {}) {
 }
 
 export const API = {
+  init: () => {
+    if (typeof window.TingTongData !== "undefined" && window.TingTongData.slides) {
+      // Wyczyść tablicę i wstaw nowe dane.
+      slidesData.length = 0;
+      const newSlides = window.TingTongData.slides || [];
+      newSlides.forEach((s) => {
+        s.likeId = String(s.likeId);
+        slidesData.push(s);
+      });
+    } else {
+      console.warn(
+        "`TingTongData` is not defined or has no slides. Using mock data for standalone development.",
+      );
+    }
+  },
+
   uploadCommentImage: async (file) => {
     try {
       // Walidacja pliku
