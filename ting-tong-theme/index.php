@@ -60,8 +60,8 @@ get_header();
 
       <div class="fl-footer">
         <div class="fl-footer-buttons">
-          <button type="button" id="tippingPrevBtn" class="fl-btn fl-btn-prev" data-translate-key="tippingPrev">Wstecz</button>
-          <button type="button" id="tippingNextBtn" class="fl-btn fl-btn-next" data-translate-key="tippingNext">Dalej</button>
+          <button type="button" id="tippingPrevBtn" class="fl-btn fl-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
+          <button type="button" id="tippingNextBtn" class="fl-btn fl-btn-next" data-action="tipping-next" data-translate-key="tippingNext">Dalej</button>
           <button type="submit" id="tippingSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
         </div>
       </div>
