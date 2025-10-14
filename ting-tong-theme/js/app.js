@@ -21,7 +21,8 @@ if ('serviceWorker' in navigator) {
       ? TingTongConfig.serviceWorkerUrl
       : '/wp-content/themes/ting-tong-theme/sw.js';
 
-    // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
+    // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę mot
+ywu
     swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
 
     navigator.serviceWorker.register(swUrl)
@@ -37,11 +38,13 @@ if ('serviceWorker' in navigator) {
 // The CDN helper code has been removed as it was unused and overly complex.
 
 document.addEventListener("DOMContentLoaded", () => {
+  API.init(); // ✅ FIX: Initialize API data after DOM is ready.
   UI.initDOMCache();
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
     console.warn(
-      "`ajax_object` is not defined. Using mock data for standalone development.",
+      "`ajax_object` is not defined. Using mock data for standalone development.
+",
     );
     window.ajax_object = {
       ajax_url: "#", // Prevent actual network requests
@@ -79,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)
+")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
             if (e.target === modal) UI.closeModal(modal);
@@ -143,8 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
-        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
+        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszeg
+o logowania.
+        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na bł
+ędy timingowe.
         FirstLoginModal.checkProfileAndShowModal(data.userData);
       });
 
@@ -221,11 +227,13 @@ document.addEventListener("DOMContentLoaded", () => {
         _verifyLoginState(); // Async verification in background
         UI.renderSlides();
 
-        // ✅ FIX: Fallback - pokaż UI po 2 sekundach nawet jeśli video się nie załadowało
+        // ✅ FIX: Fallback - pokaż UI po 2 sekundach nawet jeśli video się nie z
+aładowało
         setTimeout(() => {
           document.querySelectorAll('.tiktok-symulacja').forEach(sim => {
             if (!sim.classList.contains('video-loaded')) {
-              console.log('Forcing video-loaded class after timeout for slide:', sim.closest('.webyx-section')?.dataset.slideId);
+              console.log('Forcing video-loaded class after timeout for slide:',
+ sim.closest('.webyx-section')?.dataset.slideId);
               sim.classList.add('video-loaded');
             }
           });
@@ -234,7 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.updateTranslations();
 
         const handleMediaChange = (swiper) => {
-          // First, pause every single video element within the swiper container.
+          // First, pause every single video element within the swiper container
+.
           swiper.el.querySelectorAll('video').forEach(video => {
             if (!video.paused) {
               video.pause();
@@ -242,9 +251,11 @@ document.addEventListener("DOMContentLoaded", () => {
           });
 
           // Also unload all iframes to save resources.
-          swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) => {
+          swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) =>
+ {
               if (iframe.src) {
-                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = iframe.src;
+                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = if
+rame.src;
                 iframe.src = "";
               }
           });
@@ -254,29 +265,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Play media for the new active slide.
           if (activeSlide) {
-            // Use realIndex to get data from our original array, which is correct for loop mode.
+            // Use realIndex to get data from our original array, which is corre
+ct for loop mode.
             const slideData = slidesData[swiper.realIndex];
 
             // ✅ FIX 1: Sprawdź stan nakładek PRZED próbą odtworzenia
             const secretOverlay = activeSlide.querySelector('.secret-overlay');
-            const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay');
+            const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-over
+lay');
 
-            const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
-            const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
+            const isSecretVisible = secretOverlay && secretOverlay.classList.con
+tains('visible');
+            const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.clas
+sList.contains('visible');
             const isAnyOverlayVisible = isSecretVisible || isPwaSecretVisible;
 
             if (slideData && slideData.isIframe) {
               const iframe = activeSlide.querySelector("iframe");
-              if (iframe && iframe.dataset.originalSrc && !isAnyOverlayVisible) {
+              if (iframe && iframe.dataset.originalSrc && !isAnyOverlayVisible)
+{
                 iframe.src = iframe.dataset.originalSrc;
               }
             } else {
               const video = activeSlide.querySelector("video");
               if (video) {
                 // Hide overlays
-                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay")
+;
                 if (pauseOverlay) pauseOverlay.classList.remove("visible");
-                const replayOverlay = activeSlide.querySelector(".replay-overlay");
+                const replayOverlay = activeSlide.querySelector(".replay-overlay
+");
                 if (replayOverlay) replayOverlay.classList.remove("visible");
 
                 video.muted = State.get("isSoundMuted");
@@ -284,10 +302,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 // ✅ FIX 1: Odtwórz tylko jeśli NIE MA nakładki
                 if (!isAnyOverlayVisible) {
                   video.play().catch((error) => {
-                      console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
+                      console.log("Autoplay was prevented for slide " + swiper.r
+ealIndex, error);
                   });
                 } else {
-                  console.log("Video paused due to overlay visibility on slide " + swiper.realIndex);
+                  console.log("Video paused due to overlay visibility on slide "
+ + swiper.realIndex);
                   video.pause();
                   video.currentTime = 0; // Reset do początku dla konsystencji
                 }
@@ -318,7 +338,8 @@ document.addEventListener("DOMContentLoaded", () => {
             slideChange: handleMediaChange,
             click: function (swiper, event) {
               // Ignoruj kliknięcia na interaktywnych elementach
-              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay')) {
+              if (event.target.closest('[data-action], .sidebar, .bottombar, .se
+cret-overlay')) {
                 return;
               }
 
@@ -328,7 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
               if (!video) return;
 
               const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-              const replayOverlay = activeSlide.querySelector('.replay-overlay');
+              const replayOverlay = activeSlide.querySelector('.replay-overlay')
+;
 
               // ✅ PRZYPADEK 1: Film się skończył - replay
               if (video.ended) {
@@ -358,7 +380,8 @@ document.addEventListener("DOMContentLoaded", () => {
           UI.DOM.preloader.classList.add("preloader-hiding");
           UI.DOM.container.classList.add("ready");
 
-          // ✅ FIX: Wywołanie PWA.runStandaloneCheck() powinno być natychmiastowe,
+          // ✅ FIX: Wywołanie PWA.runStandaloneCheck() powinno być natychmiastow
+e,
           // a nie zależne od niestabilnego zdarzenia transitionend.
           PWA.runStandaloneCheck();
 
@@ -368,9 +391,12 @@ document.addEventListener("DOMContentLoaded", () => {
             () => {
               UI.DOM.preloader.style.display = "none";
               // Sprawdź, czy należy wyświetlić toast o zainstalowanej aplikacji
-              if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true') {
-                UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);
-                sessionStorage.removeItem('showAlreadyInstalledToast'); // Wyczyść flagę
+              if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true'
+) {
+                UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), fals
+e, 3000);
+                sessionStorage.removeItem('showAlreadyInstalledToast'); // Wyczy
+ść flagę
               }
             },
             { once: true },
@@ -438,17 +464,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const isDebugMode = urlParams.get('debug') === 'true';
 
-  if (isDebugMode || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('local')))) {
+  if (isDebugMode || (typeof window !== 'undefined' && (window.location.hostname
+ === 'localhost' || window.location.hostname.includes('local')))) {
     window.ttAuth = authManager;
     window.ttState = State;
-    console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
+    console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight:
+ bold');
     console.log('Available: window.ttAuth, window.ttState, #mockLoginBtn');
 
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
+        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_fo
+r_test@test.com' });
         UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
       });
     }
