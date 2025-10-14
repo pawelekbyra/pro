@@ -401,7 +401,7 @@ e, 3000);
             },
             { once: true },
           );
-        }, 1000);
+        }, 1500); // Zwiększone opóźnienie, aby uniknąć "czarnego ekranu"
       } catch (error) {
         // alert(
         //   "Application failed to start. Error: " +
