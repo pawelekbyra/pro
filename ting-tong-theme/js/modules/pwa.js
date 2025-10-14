@@ -7,6 +7,8 @@ const iosInstructions = document.getElementById("pwa-ios-instructions");
 const iosCloseButton = document.getElementById("pwa-ios-close-button");
 const desktopModal = document.getElementById("pwa-desktop-modal");
 
+let installPromptEvent = null;
+
 const isIOS = () => {
   if (typeof window === "undefined" || !window.navigator) return false;
   return (
@@ -20,8 +22,6 @@ const isStandalone = () => {
 };
 
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
-
-let installPromptEvent = null;
 
 function showIosInstructions() {
   if (iosInstructions) iosInstructions.classList.add("visible");
@@ -61,29 +61,22 @@ function runStandaloneCheck() {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
     }
-
     return false;
 }
 
-// OSTATECZNA POPRAWKA: Ta funkcja jest teraz w 100% bezpieczna.
-// Zmienia tylko klasę CSS, nie dotykając tekstu.
-function updateInstallButtonAvailability() {
-  if (!installButton) return;
-  if (installPromptEvent) {
-    installButton.classList.remove("unavailable");
-  } else {
-    installButton.classList.add("unavailable");
-  }
-}
+function updateInstallButtonUI() {
+    if (!installButton) return;
+    const span = installButton.querySelector('span');
+    if (!span) return;
 
-// OSTATECZNA POPRAWKA: Listener jest teraz odpowiedzialny TYLKO za przechwycenie zdarzenia.
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  installPromptEvent = e;
-  console.log("✅ `beforeinstallprompt` event fired and captured.");
-  updateInstallButtonAvailability(); // To jest bezpieczne, bo nie zależy od tłumaczeń
-  runStandaloneCheck();
-});
+    if (installPromptEvent) {
+        installButton.classList.remove("unavailable");
+        span.textContent = Utils.getTranslation("installPwa");
+    } else {
+        installButton.classList.add("unavailable");
+        span.textContent = Utils.getTranslation("howToInstallPwa");
+    }
+}
 
 function handleInstallClick() {
   if (installPromptEvent) {
@@ -98,33 +91,48 @@ function handleInstallClick() {
   }
 }
 
-function init() {
-  if (installButton) {
-    installButton.addEventListener('click', handleInstallClick);
-  }
+// Ta funkcja będzie wywołana z app.js w bezpiecznym momencie
+function initializeUI() {
+    if (installButton) {
+        installButton.addEventListener('click', handleInstallClick);
+    }
+    if (iosCloseButton) {
+        iosCloseButton.addEventListener("click", hideIosInstructions);
+    }
+    updateInstallButtonUI();
 
-  window.addEventListener("appinstalled", () => {
-    installPromptEvent = null;
-    updateInstallButtonAvailability(); // To jest bezpieczne
-    console.log("Aplikacja została zainstalowana.");
-  });
-
-  if (iosCloseButton) {
-    iosCloseButton.addEventListener("click", hideIosInstructions);
-  }
-
-  const isConfirmed = runStandaloneCheck();
-
-  if (!isConfirmed) {
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        runStandaloneCheck();
-      }
-    });
-  }
-  // OSTATECZNA POPRAWKA: Ustawiamy początkowy stan przycisku na "niedostępny".
-  // Stan zostanie zaktualizowany w `app.js` po załadowaniu wszystkiego.
-  updateInstallButtonAvailability();
+    const isConfirmed = runStandaloneCheck();
+    if (!isConfirmed) {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                runStandaloneCheck();
+            }
+        });
+    }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, updateInstallButtonAvailability };
+// Pasywne nasłuchiwanie w tle
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPromptEvent = e;
+  console.log("✅ `beforeinstallprompt` event fired and captured in background.");
+  // Po przechwyceniu, jeśli UI jest już zainicjalizowane, zaktualizuj je
+  if (document.body.classList.contains('app-started')) {
+      updateInstallButtonUI();
+  }
+});
+
+window.addEventListener("appinstalled", () => {
+  installPromptEvent = null;
+  console.log("Aplikacja została zainstalowana.");
+  if (document.body.classList.contains('app-started')) {
+      updateInstallButtonUI();
+  }
+});
+
+
+export const PWA = {
+    initializeUI,
+    closePwaModals,
+    isStandalone
+};
