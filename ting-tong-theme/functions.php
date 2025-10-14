@@ -142,6 +142,7 @@ function tt_get_slides_data() {
 	$simulated_posts = [
 		[
 			'post_id'      => 1,
+			'post_title'   => 'Big Buck Bunny',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
 			'access'       => 'public',
 			'comments'     => 10,
@@ -154,6 +155,7 @@ function tt_get_slides_data() {
 		],
 		[
 			'post_id'      => 2,
+			'post_title'   => 'Elephants Dream',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
 			'access'       => 'secret',
 			'comments'     => 20,
@@ -166,6 +168,7 @@ function tt_get_slides_data() {
 		],
 		[
 			'post_id'      => 3,
+			'post_title'   => 'For Bigger Blazes',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
 			'access'       => 'pwa-secret',
 			'comments'     => 30,
@@ -178,6 +181,7 @@ function tt_get_slides_data() {
 		],
 		[
 			'post_id'      => 4,
+			'post_title'   => 'Are You Satisfied (Marina and the Diamonds cover)',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
 			'access'       => 'public',
 			'comments'     => 15,
@@ -186,7 +190,7 @@ function tt_get_slides_data() {
 				'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
 				'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
 			],
-			'post_content' => 'Oto mój pierwszy slajd testowy w aplikacji! Mam nadzieję, że się Wam spodoba.',
+			'post_content' => 'Jedna z moich ulubionych piosenek w moim wykonaniu. Mam nadzieję, że się Wam spodoba!',
 		],
 	];
 
@@ -197,6 +201,7 @@ function tt_get_slides_data() {
 		$slides_data[] = [
 			'id'              => $slide_id,
 			'likeId'          => (string) $post['post_id'],
+			'title'           => $post['post_title'],
 			'author'          => $post['author'],
 			'description'     => $post['post_content'],
 			'mp4Url'          => $post['video_url'],
