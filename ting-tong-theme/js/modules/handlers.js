@@ -525,7 +525,7 @@ export const Handlers = {
       case "open-public-profile": {
         if (!State.get("isUserLoggedIn")) {
           Utils.vibrateTry();
-          UI.showAlert(Utils.getTranslation("profileViewAlert"));
+          UI.showToast(Utils.getTranslation("profileViewAlert"));
           return;
         }
 
@@ -557,7 +557,7 @@ export const Handlers = {
         break;
       case "open-comments-modal": {
         if (!State.get('isUserLoggedIn')) {
-            UI.showAlert(Utils.getTranslation('loginToComment'));
+            UI.showToast(Utils.getTranslation('loginToComment'));
             return;
         }
         const swiper = State.get('swiper');
