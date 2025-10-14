@@ -847,7 +847,7 @@ body,
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  z-index: 106; /* FIX: Higher than bottombar (105) to ensure it's clickable */
+  z-index: 107; /* Zwiększono z-index, aby być ponad paskiem postępu */
   opacity: 0;
   /*visibility: hidden; <--- USUNIĘTO */
   transition:
@@ -1020,6 +1020,7 @@ body,
   transition:
     border-color 0.1s ease-in-out,
     filter 0.2s;
+  background-color: white; /* Dodane białe tło */
 }
 .tiktok-symulacja .profileButton:active img {
   border-color: var(--accent-color);
