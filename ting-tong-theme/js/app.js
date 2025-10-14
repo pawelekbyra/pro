@@ -61,18 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      // Listen for the PWA install prompt globally
-      window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent the mini-infobar from appearing on mobile
-        e.preventDefault();
-        // Stash the event so it can be triggered later.
-        // This is handled inside pwa.js
-        console.log('`beforeinstallprompt` event captured in app.js.');
-        // Run the check to show the bar
-        PWA.runStandaloneCheck();
-      });
-
-
       document.body.addEventListener("click", Handlers.mainClickHandler);
 
 

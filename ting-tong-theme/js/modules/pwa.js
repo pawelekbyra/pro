@@ -54,17 +54,17 @@ function runStandaloneCheck() {
         return true; // Indicate that the app is in standalone mode
     }
 
-    // Jeśli nie jest standalone, decyzja zależy tylko od stanu preloadera.
+    // Jeśli nie jest standalone, decyzja zależy od stanu preloadera ORAZ dostępności monitu.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
-    if (isPreloaderHidden && installBar) {
-        // Pokaż pasek, jeśli preloader jest schowany (niezależnie od installPromptEvent)
+    // ✅ FIX: Pokaż pasek TYLKO, jeśli preloader jest schowany ORAZ mamy dostępne zdarzenie instalacji.
+    if (isPreloaderHidden && installPromptEvent && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
     } else if (installBar) {
-        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
+        // W każdym innym przypadku (np. preloader widoczny lub brak monitu), ukryj pasek.
         installBar.classList.remove("visible");
         if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
@@ -78,8 +78,9 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
-  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
+  // Natychmiast uruchom sprawdzanie, aby zaktualizować interfejs użytkownika,
+  // gdy tylko zdarzenie zostanie przechwycone.
+  runStandaloneCheck();
 });
 
 function handleInstallClick() {
