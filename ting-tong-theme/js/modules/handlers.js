@@ -6,6 +6,7 @@ import { PWA } from './pwa.js';
 import { Notifications } from './notifications.js';
 import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
+import { TippingModal } from './tipping-modal.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -695,7 +696,7 @@ export const Handlers = {
         }
         break;
       case "show-tip-jar":
-        document.querySelector("#bmc-wbtn")?.click();
+        TippingModal.showModal();
         break;
       case "play-video": {
         const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
