@@ -971,31 +971,31 @@ body,
 .tiktok-symulacja .text-info {
   flex: none;
   min-width: 0;
-}
-.tiktok-symulacja .slide-meta-line {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
   flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+}
+.tiktok-symulacja .slide-title,
+.tiktok-symulacja .slide-author-line {
+    margin-bottom: 0;
 }
 
 .tiktok-symulacja .slide-title {
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 4px;
   line-height: 1.2;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
 }
 
 .tiktok-symulacja .slide-author-line {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  margin-bottom: 4px;
+}
+
+.tiktok-symulacja .slide-description {
+    flex-basis: 100%;
 }
 
 .tiktok-symulacja .author-label {
