@@ -1,8 +1,13 @@
 import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
-import { PWA } from './pwa.js';
+// import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
+
+let PWA_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
+function setPwaModule(pwaModule) {
+  PWA_MODULE = pwaModule;
+}
 
 let selectedCommentImage = null;
 
@@ -233,7 +238,7 @@ function updateUIForLoginState() {
 
     const isSecret = sim.dataset.access === "secret";
     const isPwaSecret = sim.dataset.access === "pwa-secret";
-    const isStandalone = PWA.isStandalone();
+    const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
     const video = section.querySelector("video");
 
     // Determine overlay visibility
@@ -395,7 +400,7 @@ function createSlideElement(slideData, index) {
 
   // Ustawienie początkowej widoczności nakładek.
   // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
-  if (slideData.access === 'pwa-secret' && !PWA.isStandalone()) {
+  if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
@@ -1113,4 +1118,5 @@ export const UI = {
   openImageLightbox,
   closeImageLightbox,
   isSlideOverlayActive, // ✅ NOWE
+  setPwaModule, // ✅ NOWE
 };
