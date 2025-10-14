@@ -45,31 +45,26 @@ function closePwaModals() {
 function runStandaloneCheck() {
     const appFrame = document.getElementById("app-frame");
 
-    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
+    // Jeśli aplikacja działa w trybie PWA (standalone), ZAWSZE ukrywaj pasek.
     if (isStandalone()) {
         if (installBar) {
             installBar.classList.remove("visible");
             if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
         }
-        return true; // Indicate that the app is in standalone mode
+        return true; // Wskazuje, że jesteśmy w trybie PWA
     }
 
-    // Jeśli nie jest standalone, decyzja zależy od stanu preloadera ORAZ dostępności monitu.
+    // Jeśli aplikacja jest w przeglądarce, ZAWSZE pokazuj pasek (po zniknięciu preloadera).
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
-    // ✅ FIX: Pokaż pasek TYLKO, jeśli preloader jest schowany ORAZ mamy dostępne zdarzenie instalacji.
-    if (isPreloaderHidden && installPromptEvent && installBar) {
+    if (isPreloaderHidden && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-    } else if (installBar) {
-        // W każdym innym przypadku (np. preloader widoczny lub brak monitu), ukryj pasek.
-        installBar.classList.remove("visible");
-        if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
 
-    return false; // Indicate that the app is not in standalone mode
+    return false; // Wskazuje, że jesteśmy w przeglądarce
 }
 
 // ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
@@ -113,8 +108,11 @@ function init() {
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
-    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
+    // Celowo usunięto UI.showAlert, aby uniknąć fałszywych komunikatów.
+    // Pasek pozostaje widoczny, a logika `handleInstallClick` poprawnie
+    // obsłuży kolejne kliknięcia (np. pokazując instrukcje dla iOS lub
+    // informując o braku wsparcia, gdy `installPromptEvent` jest null).
+    console.log("Aplikacja została zainstalowana.");
   });
 
   if (iosCloseButton) {
