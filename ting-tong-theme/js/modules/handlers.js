@@ -523,15 +523,19 @@ export const Handlers = {
         }
         break;
       case "open-public-profile": {
-        if (!State.get("isUserLoggedIn")) {
-          Utils.vibrateTry();
-          UI.showToast(Utils.getTranslation("profileViewAlert"));
-          return;
-        }
+        // ✅ FIX 1: Usunięto wymóg logowania dla podglądu profilu
+        // if (!State.get("isUserLoggedIn")) {
+        //   Utils.vibrateTry();
+        //   UI.showToast(Utils.getTranslation("profileViewAlert"));
+        //   return;
+        // }
 
         const swiper = State.get('swiper');
         if (!swiper || !swiper.slides[swiper.activeIndex]) {
             console.error('Swiper or active slide not found');
+            // Jeśli nie ma swipera, spróbuj otworzyć modal i wyświetlić komunikat o błędzie
+            UI.openModal(document.getElementById('tiktok-profile-modal'));
+            document.getElementById('tiktok-profile-username').textContent = Utils.getTranslation("genericError");
             return;
         }
 
@@ -556,10 +560,13 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal": {
-        if (!State.get('isUserLoggedIn')) {
-            UI.showToast(Utils.getTranslation('loginToComment'));
-            return;
-        }
+        // ✅ FIX 2: Usunięto wymóg logowania dla podglądu komentarzy.
+        // Logika formularza wewnątrz modala obsłuży nie-zalogowanych.
+        // if (!State.get('isUserLoggedIn')) {
+        //     UI.showToast(Utils.getTranslation('loginToComment'));
+        //     return;
+        // }
+
         const swiper = State.get('swiper');
         if (!swiper || !swiper.slides[swiper.activeIndex]) {
             console.error('Swiper or active slide not found for comments');
@@ -576,19 +583,27 @@ export const Handlers = {
           console.error('Modal body not found');
           return;
         }
+
+        // Zaktualizuj widoczność formularza.
+        // Zalogowani zobaczą formularz, wylogowani zobaczą prompt.
+        UI.updateCommentFormVisibility();
+
         modalBody.innerHTML = '<div class="loading-spinner"></div>';
         UI.openModal(commentsModal);
-        UI.updateCommentFormVisibility();
+
         API.fetchComments(slideId)
           .then((response) => {
             if (!response || !response.success) {
               throw new Error(response?.data?.message || 'Failed to load comments');
             }
             const comments = response.data || [];
+
+            // Zaktualizuj lokalny cache slajdu o pobrane komentarze
             const slideData = slidesData.find(s => s.id === slideId);
             if (slideData) {
               slideData.comments = comments;
             }
+
             const sortOrder = State.get("commentSortOrder");
             if (sortOrder === "popular") {
               comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
@@ -596,6 +611,8 @@ export const Handlers = {
               comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             }
             UI.renderComments(comments);
+
+            // Scroll do dołu po załadowaniu
             setTimeout(() => {
               if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
             }, 100);
@@ -646,9 +663,6 @@ export const Handlers = {
 
           try {
             await authManager.logout();
-
-            // Usunięto ręczną aktualizację stanu. Jest ona teraz
-            // obsługiwana centralnie przez listener 'user:logout' w app.js.
 
             if (loggedInMenu) loggedInMenu.classList.remove("active");
 
