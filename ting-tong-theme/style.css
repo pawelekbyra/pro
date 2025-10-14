@@ -1044,6 +1044,41 @@ body,
     filter 0.2s;
   background-color: white; /* Dodane białe tło */
 }
+
+/* Styl dla obwódki VIP */
+@keyframes spin-gradient {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.vip-avatar-border {
+  position: relative;
+  border: none !important; /* Usuwamy standardową ramkę */
+  padding: 2px; /* Tworzymy przestrzeń na nową "ramkę" */
+  background-clip: content-box !important; /* Tło tylko pod obrazkiem */
+}
+
+.vip-avatar-border::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: conic-gradient(from 0deg, gold, #ffeb3b, #ffc107, #ffeb3b, gold) border-box;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: spin-gradient 2s linear infinite;
+}
 .tiktok-symulacja .profileButton:active img {
   border-color: var(--accent-color);
 }

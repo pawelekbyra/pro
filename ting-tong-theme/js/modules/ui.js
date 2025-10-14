@@ -411,7 +411,12 @@ function createSlideElement(slideData, index) {
 
   section.querySelector(".tiktok-symulacja").dataset.access =
     slideData.access;
-  section.querySelector(".profileButton img").src = slideData.author.avatar;
+  const avatarImg = section.querySelector(".profileButton img");
+  avatarImg.src = slideData.author.avatar;
+  if (slideData.author.is_vip) {
+    avatarImg.classList.add("vip-avatar-border");
+  }
+
   section.querySelector(".slide-title").textContent = slideData.title;
   section.querySelector(".author-name").textContent = slideData.author.name;
   section.querySelector(".slide-description").textContent =
