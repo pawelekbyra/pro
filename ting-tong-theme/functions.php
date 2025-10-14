@@ -142,30 +142,51 @@ function tt_get_slides_data() {
 	$simulated_posts = [
 		[
 			'post_id'      => 1,
-			'post_title'   => 'Big Buck Bunny',
-			'post_content' => 'Królik w akcji!',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
 			'access'       => 'public',
 			'comments'     => 10,
-			'avatar'       => 'https://i.pravatar.cc/100?u=bunny',
+			'author'       => [
+				'name'        => 'Big Buck Bunny',
+				'description' => 'Oficjalny profil Big Buck Bunny. Zobaczcie moje przygody!',
+				'avatar'      => 'https://i.pravatar.cc/100?u=bunny',
+			],
+			'post_content' => 'Królik w akcji!',
 		],
 		[
 			'post_id'      => 2,
-			'post_title'   => 'Elephants Dream',
-			'post_content' => 'Sen słonia, tylko dla zalogowanych.',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
 			'access'       => 'secret',
 			'comments'     => 20,
-			'avatar'       => 'https://i.pravatar.cc/100?u=elephant',
+			'author'       => [
+				'name'        => 'Elephants Dream',
+				'description' => 'Twórcy filmu "Elephants Dream". Dzielimy się kulisami naszej pracy.',
+				'avatar'      => 'https://i.pravatar.cc/100?u=elephant',
+			],
+			'post_content' => 'Sen słonia, tylko dla zalogowanych.',
 		],
 		[
 			'post_id'      => 3,
-			'post_title'   => 'For Bigger Blazes',
-			'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
 			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
 			'access'       => 'pwa-secret',
 			'comments'     => 30,
-			'avatar'       => 'https://i.pravatar.cc/100?u=blaze',
+			'author'       => [
+				'name'        => 'For Bigger Blazes',
+				'description' => 'Profil poświęcony filmom z efektami specjalnymi. Tylko dla fanów PWA!',
+				'avatar'      => 'https://i.pravatar.cc/100?u=blaze',
+			],
+			'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
+		],
+		[
+			'post_id'      => 4,
+			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+			'access'       => 'public',
+			'comments'     => 15,
+			'author'       => [
+				'name'        => 'Paweł Polutek',
+				'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
+				'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
+			],
+			'post_content' => 'Oto mój pierwszy slajd testowy w aplikacji! Mam nadzieję, że się Wam spodoba.',
 		],
 	];
 
@@ -176,10 +197,9 @@ function tt_get_slides_data() {
 		$slides_data[] = [
 			'id'              => $slide_id,
 			'likeId'          => (string) $post['post_id'],
-			'user'            => $post['post_title'],
+			'author'          => $post['author'],
 			'description'     => $post['post_content'],
 			'mp4Url'          => $post['video_url'],
-			'avatar'          => $post['avatar'],
 			'access'          => $post['access'],
 			'initialLikes'    => tt_likes_get_count( $post['post_id'] ),
 			'isLiked'         => tt_likes_user_has( $post['post_id'], $user_id ),
