@@ -22,6 +22,7 @@ function initDOMCache() {
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
   DOM.welcomeModal = document.getElementById("welcome-modal");
+  DOM.infoModal = document.getElementById("infoModal");
 }
 function showToast(message, isError = false) {
     showAlert(message, isError);
