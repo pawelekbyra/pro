@@ -220,7 +220,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2000);
 
         UI.updateTranslations();
-        PWA.updateInstallButtonUI();
+
+        // OSTATECZNA POPRAWKA: Aktualizuj stan i tekst przycisku PWA w bezpiecznym momencie.
+        PWA.updateInstallButtonAvailability();
+        const installButton = document.getElementById("pwa-install-button");
+        if (installButton) {
+            const installButtonSpan = installButton.querySelector("span");
+            if (installButton.classList.contains("unavailable")) {
+                installButtonSpan.textContent = Utils.getTranslation("howToInstallPwa");
+            } else {
+                installButtonSpan.textContent = Utils.getTranslation("installPwa");
+            }
+        }
 
         const handleMediaChange = (swiper) => {
           // First, pause every single video element within the swiper container.

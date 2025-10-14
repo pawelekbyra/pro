@@ -3250,17 +3250,6 @@ body,
   position: relative; /* Create a new stacking context */
   z-index: 1; /* Ensure it's above other content in the same flex container */
   pointer-events: auto !important; /* Force clickability */
-  transition: background-color .2s, transform .2s, opacity .2s;
-}
-
-.pwa-prompt-button.unavailable {
-    background: #555;
-    cursor: help;
-}
-
-.pwa-prompt-button.unavailable:hover {
-    background: #666;
-    transform: none;
 }
 .pwa-prompt-ios {
   position: fixed;

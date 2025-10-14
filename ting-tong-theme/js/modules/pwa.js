@@ -45,16 +45,14 @@ function closePwaModals() {
 function runStandaloneCheck() {
     const appFrame = document.getElementById("app-frame");
 
-    // Jeśli aplikacja działa w trybie PWA (standalone), ZAWSZE ukrywaj pasek.
     if (isStandalone()) {
         if (installBar) {
             installBar.classList.remove("visible");
             if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
         }
-        return true; // Wskazuje, że jesteśmy w trybie PWA
+        return true;
     }
 
-    // Jeśli aplikacja jest w przeglądarce, ZAWSZE pokazuj pasek (po zniknięciu preloadera).
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
@@ -64,67 +62,50 @@ function runStandaloneCheck() {
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
     }
 
-    return false; // Wskazuje, że jesteśmy w przeglądarce
+    return false;
 }
 
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
+// OSTATECZNA POPRAWKA: Ta funkcja jest teraz w 100% bezpieczna.
+// Zmienia tylko klasę CSS, nie dotykając tekstu.
+function updateInstallButtonAvailability() {
+  if (!installButton) return;
+  if (installPromptEvent) {
+    installButton.classList.remove("unavailable");
+  } else {
+    installButton.classList.add("unavailable");
+  }
+}
+
+// OSTATECZNA POPRAWKA: Listener jest teraz odpowiedzialny TYLKO za przechwycenie zdarzenia.
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Celowo NIE wywołujemy tutaj updateInstallButtonUI(), aby uniknąć race condition
-  // podczas inicjalizacji aplikacji. Aktualizacja UI nastąpi w app.js.
+  updateInstallButtonAvailability(); // To jest bezpieczne, bo nie zależy od tłumaczeń
   runStandaloneCheck();
 });
 
-function updateInstallButtonUI() {
-  if (!installButton) return;
-
-  if (installPromptEvent) {
-    installButton.classList.remove("unavailable");
-    installButton.querySelector("span").textContent = Utils.getTranslation("installPwa");
-  } else {
-    installButton.classList.add("unavailable");
-    installButton.querySelector("span").textContent = Utils.getTranslation("howToInstallPwa");
-  }
-}
-
 function handleInstallClick() {
-  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
-  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
-  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
-
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
   } else if (isIOS()) {
     showIosInstructions();
   } else if (isDesktop()) {
     showDesktopModal();
   } else {
-    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
-    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
-    // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
     UI.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
 function init() {
-  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
-  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
   if (installButton) {
     installButton.addEventListener('click', handleInstallClick);
   }
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    updateInstallButtonUI();
-    // Celowo usunięto UI.showAlert, aby uniknąć fałszywych komunikatów.
-    // Pasek pozostaje widoczny, a logika `handleInstallClick` poprawnie
-    // obsłuży kolejne kliknięcia (np. pokazując instrukcje dla iOS lub
-    // informując o braku wsparcia, gdy `installPromptEvent` jest null).
+    updateInstallButtonAvailability(); // To jest bezpieczne
     console.log("Aplikacja została zainstalowana.");
   });
 
@@ -143,4 +124,4 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, updateInstallButtonUI };
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, updateInstallButtonAvailability };
