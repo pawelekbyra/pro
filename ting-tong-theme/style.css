@@ -972,33 +972,35 @@ body,
   flex: none;
   min-width: 0;
 }
-.tiktok-symulacja .slide-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  line-height: 1.2;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-}
-
-.tiktok-symulacja .slide-author-line {
+.tiktok-symulacja .slide-meta-line {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 6px;
   margin-bottom: 4px;
-}
-
-.tiktok-symulacja .author-label {
-  font-size: 10px; /* Znacznie mniejsza czcionka */
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
+  line-height: 1.3;
+  /* Prevent wrapping */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tiktok-symulacja .author-name {
-  font-size: 14px; /* Taka sama jak opis */
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700; /* Pogrubiony autor */
   color: white;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  flex-shrink: 0; /* Autor się nie kurczy */
+}
+
+.tiktok-symulacja .slide-title {
+  font-size: 15px; /* Nieco mniejszy tytuł */
+  font-weight: 400;
+  color: white;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  /* Allow title to shrink and truncate */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tiktok-symulacja .slide-description {
@@ -1060,6 +1062,7 @@ body,
   border: none !important; /* Usuwamy standardową ramkę */
   padding: 2px; /* Tworzymy przestrzeń na nową "ramkę" */
   background-clip: content-box !important; /* Tło tylko pod obrazkiem */
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.7); /* Złota poświata */
 }
 
 .vip-avatar-border::before {
