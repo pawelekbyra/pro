@@ -22,6 +22,7 @@ function initDOMCache() {
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
   DOM.welcomeModal = document.getElementById("welcome-modal");
+  DOM.infoModal = document.getElementById("infoModal");
 }
 function showToast(message, isError = false) {
     showAlert(message, isError);
@@ -49,8 +50,7 @@ function getFocusable(node) {
   if (!node) return [];
   return Array.from(
     node.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-,
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     ),
   );
 }
@@ -104,17 +104,14 @@ function openModal(modal, options = {}) {
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
     const focusable = getFocusable(modal);
-    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content,
-.fl-modal-content, .tiktok-profile-content"))?.focus();
+    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content"))?.focus();
     modal._focusTrapDispose = trapFocus(modal);
 }
 
 function closeModal(modal) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hidin
-g")) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper,
-.modal-content, .tiktok-profile-content, .account-modal-content');
+    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
 
     modal.classList.add("is-hiding");
     modal.setAttribute("aria-hidden", "true");
@@ -147,8 +144,7 @@ g")) return;
             State.set("replyingToComment", null, true);
             const replyContext = document.querySelector(".reply-context");
             if (replyContext) replyContext.style.display = "none";
-            if (typeof UI.removeCommentImage === 'function') UI.removeCommentIma
-ge();
+            if (typeof UI.removeCommentImage === 'function') UI.removeCommentImage();
             const commentInput = document.querySelector("#comment-input");
             if (commentInput) commentInput.value = "";
         }
@@ -196,10 +192,8 @@ function isSlideOverlayActive(slideElement) {
   const secretOverlay = slideElement.querySelector('.secret-overlay');
   const pwaSecretOverlay = slideElement.querySelector('.pwa-secret-overlay');
 
-  const isSecretVisible = secretOverlay && secretOverlay.classList.contains('vis
-ible');
-  const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.cont
-ains('visible');
+  const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
+  const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
 
   return isSecretVisible || isPwaSecretVisible;
 }
@@ -256,18 +250,13 @@ function updateUIForLoginState() {
     if (secretOverlay) {
         secretOverlay.classList.toggle("visible", showSecret);
         if (showSecret) {
-            secretOverlay.querySelector(".secret-title").textContent = Utils.get
-Translation("secretTitle");
-            const subtitleUElement = secretOverlay.querySelector(".secret-subtit
-le u");
-            const subtitleSpanElement = secretOverlay.querySelector(".secret-sub
-title span");
+            secretOverlay.querySelector(".secret-title").textContent = Utils.getTranslation("secretTitle");
+            const subtitleUElement = secretOverlay.querySelector(".secret-subtitle u");
+            const subtitleSpanElement = secretOverlay.querySelector(".secret-subtitle span");
             if (subtitleUElement && subtitleSpanElement) {
                 subtitleUElement.dataset.action = "toggle-login-panel";
-                subtitleUElement.textContent = Utils.getTranslation("secretSubti
-tleAction");
-                subtitleSpanElement.textContent = " " + Utils.getTranslation("se
-cretSubtitleRest");
+                subtitleUElement.textContent = Utils.getTranslation("secretSubtitleAction");
+                subtitleSpanElement.textContent = " " + Utils.getTranslation("secretSubtitleRest");
             }
         }
     }
@@ -277,17 +266,12 @@ cretSubtitleRest");
     if (pwaSecretOverlay) {
         pwaSecretOverlay.classList.toggle("visible", showPwaSecret);
         if (showPwaSecret) {
-            pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Ut
-ils.getTranslation("pwaTitle");
-            const subtitleUElement = pwaSecretOverlay.querySelector(".pwa-secret
--subtitle u");
-            const subtitleSpanElement = pwaSecretOverlay.querySelector(".pwa-sec
-ret-subtitle span");
+            pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Utils.getTranslation("pwaTitle");
+            const subtitleUElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle u");
+            const subtitleSpanElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle span");
             if (subtitleUElement && subtitleSpanElement) {
-                subtitleUElement.textContent = Utils.getTranslation("pwaSecretSu
-btitleAction");
-                subtitleSpanElement.textContent = Utils.getTranslation("pwaSecre
-tSubtitleRest");
+                subtitleUElement.textContent = Utils.getTranslation("pwaSecretSubtitleAction");
+                subtitleSpanElement.textContent = Utils.getTranslation("pwaSecretSubtitleRest");
             }
         }
     }
@@ -295,8 +279,7 @@ tSubtitleRest");
     // Control video playback based on overlay state
     if (video) {
         const isOverlayVisible = showSecret || showPwaSecret;
-        const isCurrentSlide = section.classList.contains('swiper-slide-active')
-;
+        const isCurrentSlide = section.classList.contains('swiper-slide-active');
 
         // First, enforce pausing if any overlay is active.
         // This is the most important rule.
@@ -307,8 +290,7 @@ tSubtitleRest");
         }
         // Only if no overlays are active, consider playing the video.
         else if (isCurrentSlide && video.paused) {
-            video.play().catch(e => console.warn("Autoplay prevented on UI updat
-e:", e));
+            video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
         }
     }
 
@@ -363,16 +345,12 @@ function updateTranslations() {
     const currentSortText = Utils.getTranslation(
       sortOrder === "popular" ? "commentSortBest" : "commentSortNewest",
     );
-    sortTrigger.innerHTML = `${Utils.getTranslation("commentSortTriggerText")}<s
-pan class="current-sort">${currentSortText}</span> ▼`;
+    sortTrigger.innerHTML = `${Utils.getTranslation("commentSortTriggerText")}<span class="current-sort">${currentSortText}</span> ▼`;
   }
 
   const loginPrompt = document.querySelector(".login-to-comment-prompt p");
   if (loginPrompt) {
-    loginPrompt.innerHTML = `<a href="#" data-action="toggle-login-panel" data-t
-ranslate-key="loginToCommentAction">${Utils.getTranslation("loginToCommentAction
-")}</a><span data-translate-key="loginToCommentRest">${Utils.getTranslation("log
-inToCommentRest")}</span>`;
+    loginPrompt.innerHTML = `<a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">${Utils.getTranslation("loginToCommentAction")}</a><span data-translate-key="loginToCommentRest">${Utils.getTranslation("loginToCommentRest")}</span>`;
   }
 
   updateUIForLoginState();
@@ -401,16 +379,14 @@ function createSlideElement(slideData, index) {
     iframe.src = slideData.iframeUrl;
     iframe.frameBorder = "0";
     iframe.allow =
-      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; pic
-ture-in-picture";
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
     iframe.allowFullscreen = true;
     tiktokSymulacja.prepend(iframe);
   } else if (slideData.mp4Url) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
-      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli wa
-runki są spełnione.
+      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli warunki są spełnione.
       if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
         videoEl.pause();
       }
@@ -418,15 +394,13 @@ runki są spełnione.
   }
 
   // Ustawienie początkowej widoczności nakładek.
-  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan
- przed pierwszym renderowaniem.
+  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
   if (slideData.access === 'pwa-secret' && !PWA.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
     }
-    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był w
-idoczny
+    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był widoczny
     section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 
@@ -474,8 +448,7 @@ idoczny
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
-    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarza
-nie
+    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {
@@ -494,8 +467,7 @@ nie
           const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
           const isOverlayVisible =
             (secretOverlay && secretOverlay.classList.contains('visible')) ||
-            (pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible'))
-;
+            (pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible'));
 
           if (!isOverlayVisible && videoEl.paused) {
             videoEl.play().catch(e => {
@@ -638,15 +610,10 @@ function populateProfileModal(slideData) {
     const thumb = document.createElement("div");
     thumb.className = "video-thumbnail";
     thumb.innerHTML = `
-                    <img src="https://picsum.photos/200/280?random=${slideData.i
-d}-${i}" alt="Miniatura filmu">
+                    <img src="https://picsum.photos/200/280?random=${slideData.id}-${i}" alt="Miniatura filmu">
                     <div class="video-views">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.6
-1 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2
-.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3
- 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                        ${Utils.formatCount(Math.floor(Math.random() * 3000000))
-}
+                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                        ${Utils.formatCount(Math.floor(Math.random() * 3000000))}
                     </div>
                 `;
     videoGrid.appendChild(thumb);
@@ -749,8 +716,7 @@ function toggleEmojiPicker() {
     // Dodaj nowy listener po micro-delay
     setTimeout(() => {
       emojiPickerClickListener = (e) => closeEmojiPickerOnClickOutside(e);
-      document.addEventListener('click', emojiPickerClickListener, { once: true
-});
+      document.addEventListener('click', emojiPickerClickListener, { once: true });
     }, 10);
   }
 
@@ -802,8 +768,7 @@ function handleImageAttachment() {
 
   // Sprawdź czy użytkownik jest zalogowany
   if (!State.get('isUserLoggedIn')) {
-    UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać ob
-raz', true);
+    UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać obraz', true);
     return;
   }
 
@@ -820,8 +785,7 @@ function handleImageSelect(e) {
   // Walidacja typu
   if (!file.type.startsWith('image/')) {
     UI.showAlert(
-      Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG,
- PNG, GIF)',
+      Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG, PNG, GIF)',
       true
     );
     e.target.value = '';
@@ -832,8 +796,7 @@ function handleImageSelect(e) {
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
     UI.showAlert(
-      Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymal
-ny rozmiar: 5MB',
+      Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymalny rozmiar: 5MB',
       true
     );
     e.target.value = '';
@@ -874,8 +837,7 @@ function showImagePreview(file) {
     container.innerHTML = `
       <div class="image-preview">
         <img src="${e.target.result}" alt="Preview">
-        <button type="button" class="remove-image-btn" data-action="remove-comme
-nt-image">&times;</button>
+        <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
       </div>
     `;
     container.classList.add('visible');
@@ -944,8 +906,7 @@ function renderComments(comments) {
 
   if (!comments || comments.length === 0) {
     modalBody.innerHTML =
-      '<p class="no-comments-message" data-translate-key="noComments">Brak komen
-tarzy. Bądź pierwszy!</p>';
+      '<p class="no-comments-message" data-translate-key="noComments">Brak komentarzy. Bądź pierwszy!</p>';
     return;
   }
 
@@ -994,10 +955,8 @@ tarzy. Bądź pierwszy!</p>';
     if (comment.image_url) {
       const imageDiv = document.createElement("div");
       imageDiv.className = "comment-image";
-      imageDiv.innerHTML = `<img src="${comment.image_url}" alt="Comment image"
-loading="lazy">`;
-      imageDiv.addEventListener('click', () => openImageLightbox(comment.image_u
-rl));
+      imageDiv.innerHTML = `<img src="${comment.image_url}" alt="Comment image" loading="lazy">`;
+      imageDiv.addEventListener('click', () => openImageLightbox(comment.image_url));
       body.appendChild(imageDiv);
     }
 
@@ -1035,10 +994,7 @@ rl));
     const likeBtn = document.createElement("button");
     likeBtn.className = `comment-like-btn ${comment.isLiked ? "active" : ""}`;
     likeBtn.dataset.action = "toggle-comment-like";
-    likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C
-5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 1
-4.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></sv
-g>`;
+    likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
     const likeCountSpan = document.createElement("span");
     likeCountSpan.className = "comment-like-count";
     likeCountSpan.textContent = Utils.formatCount(comment.likes);

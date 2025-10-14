@@ -7,8 +7,6 @@ const iosInstructions = document.getElementById("pwa-ios-instructions");
 const iosCloseButton = document.getElementById("pwa-ios-close-button");
 const desktopModal = document.getElementById("pwa-desktop-modal");
 
-let installPromptEvent = null;
-
 const isIOS = () => {
   if (typeof window === "undefined" || !window.navigator) return false;
   return (
@@ -18,10 +16,14 @@ const isIOS = () => {
 };
 
 const isStandalone = () => {
-  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.navigator.standalone === true;
+  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").
+matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.n
+avigator.standalone === true;
 };
 
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
+
+let installPromptEvent = null;
 
 function showIosInstructions() {
   if (iosInstructions) iosInstructions.classList.add("visible");
@@ -45,6 +47,7 @@ function closePwaModals() {
 function runStandaloneCheck() {
     const appFrame = document.getElementById("app-frame");
 
+    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
     if (isStandalone()) {
         if (installBar) {
             installBar.classList.remove("visible");
@@ -53,86 +56,91 @@ function runStandaloneCheck() {
         return true;
     }
 
+    // Jeśli nie jest standalone, decyzja zależy od stanu preloadera i promptu.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
-    const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
+    const isPreloaderHidden = (preloader && preloader.classList.contains("preloa
+der-hiding")) || (container && container.classList.contains("ready"));
 
-    if (isPreloaderHidden && installBar) {
+    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane z
+darzenie prompt.
+    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarze
+nia 'beforeinstallprompt'.
+    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zai
+nstalowana,
+    // użytkownik odrzucił monit, lub przeglądarka nie spełnia kryteriów.
+    if (isPreloaderHidden && installPromptEvent && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+    } else if (installBar) {
+        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
+        installBar.classList.remove("visible");
+        if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
+
     return false;
 }
 
-function updateInstallButtonUI() {
-    if (!installButton) return;
-    const span = installButton.querySelector('span');
-    if (!span) return;
-
-    if (installPromptEvent) {
-        installButton.classList.remove("unavailable");
-        span.textContent = Utils.getTranslation("installPwa");
-    } else {
-        installButton.classList.add("unavailable");
-        span.textContent = Utils.getTranslation("howToInstallPwa");
-    }
-}
+// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu m
+odułu.
+// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane ba
+rdzo wcześnie.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPromptEvent = e;
+  console.log("✅ `beforeinstallprompt` event fired and captured.");
+  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
+  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
+});
 
 function handleInstallClick() {
+  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
+  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
+  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
+
   if (installPromptEvent) {
     installPromptEvent.prompt();
+    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
   } else if (isIOS()) {
     showIosInstructions();
   } else if (isDesktop()) {
     showDesktopModal();
   } else {
+    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
+    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
+    // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
     UI.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
-// Ta funkcja będzie wywołana z app.js w bezpiecznym momencie
-function initializeUI() {
-    if (installButton) {
-        installButton.addEventListener('click', handleInstallClick);
-    }
-    if (iosCloseButton) {
-        iosCloseButton.addEventListener("click", hideIosInstructions);
-    }
-    updateInstallButtonUI();
+function init() {
+  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
+  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
+  if (installButton) {
+    installButton.addEventListener('click', handleInstallClick);
+  }
 
-    const isConfirmed = runStandaloneCheck();
-    if (!isConfirmed) {
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                runStandaloneCheck();
-            }
-        });
-    }
+  window.addEventListener("appinstalled", () => {
+    installPromptEvent = null;
+    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
+    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
+  });
+
+  if (iosCloseButton) {
+    iosCloseButton.addEventListener("click", hideIosInstructions);
+  }
+
+  const isConfirmed = runStandaloneCheck();
+
+  if (!isConfirmed) {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        runStandaloneCheck();
+      }
+    });
+  }
 }
 
-// Pasywne nasłuchiwanie w tle
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  installPromptEvent = e;
-  console.log("✅ `beforeinstallprompt` event fired and captured in background.");
-  // Po przechwyceniu, jeśli UI jest już zainicjalizowane, zaktualizuj je
-  if (document.body.classList.contains('app-started')) {
-      updateInstallButtonUI();
-  }
-});
-
-window.addEventListener("appinstalled", () => {
-  installPromptEvent = null;
-  console.log("Aplikacja została zainstalowana.");
-  if (document.body.classList.contains('app-started')) {
-      updateInstallButtonUI();
-  }
-});
-
-
-export const PWA = {
-    initializeUI,
-    closePwaModals,
-    isStandalone
-};
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModal
+s, isStandalone };
