@@ -522,23 +522,18 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile": {
-        const swiper = State.get('swiper');
-        if (!swiper || !swiper.slides[swiper.activeIndex]) {
-            console.error('Swiper or active slide not found for profile');
-            return;
-        }
-        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-        const slideData = slidesData.find(s => s.id === slideId);
-
-        if (slideData) {
+      case "open-public-profile":
+        const profileSection = actionTarget.closest(".webyx-section");
+        if (profileSection) {
+          const slideData = slidesData.find(
+            (s) => s.id === profileSection.dataset.slideId,
+          );
+          if (slideData) {
             UI.populateProfileModal(slideData);
             UI.openModal(document.getElementById('tiktok-profile-modal'));
-        } else {
-            console.error('Slide data not found for profile modal');
+          }
         }
         break;
-      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
@@ -549,18 +544,18 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal": {
-        const swiper = State.get('swiper');
-        if (!swiper || !swiper.slides[swiper.activeIndex]) {
-            console.error('Swiper or active slide not found for comments');
-            return;
+        const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+
+        if (!slideId) {
+          console.error('No slideId found for comments modal');
+          return;
         }
-        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+
         const commentsModal = document.getElementById('commentsModal');
         const modalBody = commentsModal.querySelector(".modal-body");
-
-        if (!slideId || !commentsModal || !modalBody) {
-            console.error('Missing critical elements for opening comments');
-            return;
+        if (!modalBody) {
+          console.error('Modal body not found');
+          return;
         }
 
         UI.updateCommentFormVisibility();
