@@ -51,19 +51,16 @@ function runStandaloneCheck() {
             installBar.classList.remove("visible");
             if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
         }
-        return true;
+        return true; // Indicate that the app is in standalone mode
     }
 
-    // Jeśli nie jest standalone, decyzja zależy od stanu preloadera i promptu.
+    // Jeśli nie jest standalone, decyzja zależy tylko od stanu preloadera.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
-    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane zdarzenie prompt.
-    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarzenia 'beforeinstallprompt'.
-    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zainstalowana,
-    // użytkownik odrzucił monit, lub przeglądarka nie spełnia kryteriów.
-    if (isPreloaderHidden && installPromptEvent && installBar) {
+    if (isPreloaderHidden && installBar) {
+        // Pokaż pasek, jeśli preloader jest schowany (niezależnie od installPromptEvent)
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
     } else if (installBar) {
@@ -72,7 +69,7 @@ function runStandaloneCheck() {
         if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
 
-    return false;
+    return false; // Indicate that the app is not in standalone mode
 }
 
 // ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
