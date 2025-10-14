@@ -73,9 +73,8 @@ window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
-  updateInstallButtonUI();
-  // Natychmiast uruchom sprawdzanie, aby zaktualizować interfejs użytkownika,
-  // gdy tylko zdarzenie zostanie przechwycone.
+  // Celowo NIE wywołujemy tutaj updateInstallButtonUI(), aby uniknąć race condition
+  // podczas inicjalizacji aplikacji. Aktualizacja UI nastąpi w app.js.
   runStandaloneCheck();
 });
 
