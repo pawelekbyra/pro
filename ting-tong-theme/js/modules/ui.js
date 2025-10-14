@@ -411,8 +411,8 @@ function createSlideElement(slideData, index) {
 
   section.querySelector(".tiktok-symulacja").dataset.access =
     slideData.access;
-  section.querySelector(".profileButton img").src = slideData.avatar;
-  section.querySelector(".text-user").textContent = slideData.user;
+  section.querySelector(".profileButton img").src = slideData.author.avatar;
+  section.querySelector(".text-user").textContent = slideData.author.name;
   section.querySelector(".text-description").textContent =
     slideData.description;
 
@@ -576,27 +576,29 @@ function renderSlides() {
 }
 
 function populateProfileModal(slideData) {
-  if (!slideData || !DOM.tiktokProfileModal) return;
+  if (!slideData || !slideData.author || !DOM.tiktokProfileModal) return;
+
+  const { author } = slideData;
 
   // Basic info
-  const atUsername = `@${slideData.user
+  const atUsername = `@${author.name
     .toLowerCase()
     .replace(/\s/g, "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")}`;
   DOM.tiktokProfileModal.querySelector("#tiktok-profile-avatar").src =
-    slideData.avatar;
+    author.avatar;
   DOM.tiktokProfileModal.querySelector(
     "#tiktok-profile-username",
-  ).textContent = atUsername;
+  ).textContent = author.name;
   DOM.tiktokProfileModal.querySelector(
     "#tiktok-profile-nickname",
-  ).textContent = slideData.user;
+  ).textContent = author.name;
   DOM.tiktokProfileModal.querySelector(
     "#tiktok-profile-at-username",
   ).textContent = atUsername;
   DOM.tiktokProfileModal.querySelector("#tiktok-profile-bio").textContent =
-    `To jest bio użytkownika ${slideData.user}.\nOdkryj więcej! ✨`;
+    author.description;
 
   // Stats
   DOM.tiktokProfileModal.querySelector(
