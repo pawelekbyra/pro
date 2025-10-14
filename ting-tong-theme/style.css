@@ -976,7 +976,7 @@ body,
   display: flex;
   align-items: baseline;
   gap: 8px;
-  flex-wrap: wrap; /* Pozwól na zawijanie w razie potrzeby, ale niech flex próbuje zmieścić */
+  flex-wrap: wrap;
 }
 
 .tiktok-symulacja .slide-title {
@@ -988,7 +988,7 @@ body,
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-shrink: 1; /* Pozwól tytułowi się kurczyć */
+  flex-shrink: 1;
 }
 
 .tiktok-symulacja .slide-author-line {
