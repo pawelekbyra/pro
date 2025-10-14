@@ -4512,3 +4512,94 @@ body,
   display: none;
 }
 
+/* ============================================================================
+   --- NOWE: NAKŁADKA INFORMACYJNA ---
+   ============================================================================ */
+
+#info-overlay {
+  position: absolute;
+  top: var(--topbar-height);
+  left: 0;
+  width: calc(100% - 56px); /* Szerokość minus przybliżona szerokość sidebara */
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 104; /* Poniżej sidebara (106) i kontrolek wideo (105) */
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+  pointer-events: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#info-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.info-content {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.info-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.info-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.info-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.info-content h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.info-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #f0f0f0;
+}
+
+.info-content p,
+.info-content li {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #dcdcdc;
+  margin-bottom: 12px;
+}
+
+.info-content ul {
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.info-content li {
+  margin-bottom: 8px;
+}
+
+.info-content strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Dostosowanie do trybu immersyjnego */
+#app-frame.hide-ui #info-overlay {
+  height: calc(100% - var(--topbar-height) - var(--safe-area-bottom));
+}
