@@ -606,8 +606,11 @@ export const Handlers = {
           });
         break;
       }
-      case "open-info-modal":
-        UI.openModal(UI.DOM.infoModal);
+      case "toggle-info-overlay":
+        const infoOverlay = document.getElementById('info-overlay');
+        if (infoOverlay) {
+            infoOverlay.classList.toggle('visible');
+        }
         break;
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
