@@ -4535,16 +4535,3 @@ body,
   display: none;
 }
 
-.pwa-prompt-button {
-  transition: background-color .2s, transform .2s, opacity .2s;
-}
-
-.pwa-prompt-button.unavailable {
-    background-color: #555;
-    cursor: help;
-}
-
-.pwa-prompt-button.unavailable:hover {
-    background-color: #666;
-    transform: none;
-}
