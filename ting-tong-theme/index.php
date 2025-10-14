@@ -126,7 +126,7 @@ get_header();
                             <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
                             <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
                         </button>
-                        <button class="info-button" data-action="toggle-info-overlay">
+                        <button class="info-button" data-action="open-info-modal">
                            <svg fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
                         </button>
                     </div>
@@ -207,32 +207,6 @@ get_header();
     <div id="alertBox" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
         <span id="alertText"></span>
-    </div>
-
-    <div id="info-overlay">
-        <div class="info-content">
-            <h2>O Projekcie Ting Tong</h2>
-            <p>Witaj w Ting Tong – innowacyjnej aplikacji, która rewolucjonizuje sposób, w jaki twórcy i widzowie wchodzą ze sobą w interakcje. Nasza platforma, zaprojektowana na wzór popularnych aplikacji z krótkimi formami wideo, to nie tylko miejsce do oglądania, ale przede wszystkim do realnego wspierania ulubionych autorów.</p>
-
-            <h3>Nasza Misja</h3>
-            <p>Celem Ting Tong jest stworzenie ekosystemu, w którym kreatywność jest bezpośrednio nagradzana. Wierzymy, że twórcy zasługują na transparentne i proste narzędzia do monetyzacji swojej pasji, a widzowie powinni mieć możliwość realnego wpływu na rozwój kanałów, które kochają. Chcemy zlikwidować barierę między twórcą a odbiorcą, budując społeczność opartą na wzajemnym szacunku i wsparciu.</p>
-
-            <h3>Kluczowe Funkcje</h3>
-            <ul>
-                <li><strong>Intuicyjny Interfejs:</strong> Przewijaj wideo w pionie, tak jak lubisz. Nasz interfejs jest szybki, płynny i zaprojektowany z myślą o urządzeniach mobilnych.</li>
-                <li><strong>System Napiwków:</strong> Podoba Ci się treść? Okaż swoje wsparcie jednym kliknięciem! Zintegrowany i bezpieczny system napiwków pozwala na błyskawiczne przekazywanie drobnych kwot bezpośrednio do twórcy.</li>
-                <li><strong>Społeczność:</strong> Komentuj, lajkuj i udostępniaj. Bądź częścią aktywnej społeczności skupionej wokół Twoich ulubionych tematów i twórców.</li>
-                <li><strong>Tryb PWA (Progressive Web App):</strong> Zainstaluj Ting Tong na swoim telefonie, aby uzyskać dostęp do dodatkowych funkcji, płynniejszego działania i powiadomień push – wszystko to bez konieczności pobierania aplikacji ze sklepu.</li>
-                <li><strong>Tryb Immersyjny:</strong> Zanurz się w treściach bez rozpraszaczy. Jedno dotknięcie ukrywa interfejs, pozwalając Ci skupić się na tym, co najważniejsze – wideo.</li>
-            </ul>
-
-            <h3>Dla Twórców</h3>
-            <p>Jesteś twórcą? Ting Tong oferuje Ci proste narzędzia do zarabiania na swojej pasji. Bez skomplikowanych algorytmów i niejasnych zasad. Po prostu twórz, a Twoi fani zajmą się resztą. Skup się na jakości, a my zapewnimy Ci platformę do jej monetyzacji.</p>
-
-            <h3>Dla Widzów</h3>
-            <p>Jako widz, masz realny wpływ. Twoje wsparcie nie tylko motywuje twórców do dalszej pracy, ale także pomaga im inwestować w lepszy sprzęt, rozwijać nowe formaty i poświęcać więcej czasu na to, co robią najlepiej. Każdy napiwek to cegiełka budująca przyszłość niezależnej twórczości w internecie.</p>
-            <p>Dziękujemy, że jesteś z nami. Przewijaj, odkrywaj i wspieraj!</p>
-        </div>
     </div>
 </div>
 <div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
@@ -634,5 +608,35 @@ get_header();
     <img src="" alt="Preview">
     <button class="image-lightbox-close">&times;</button>
 </div>
+
+<div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
+    <div class="modal-content">
+        <button class="modal-close-btn" data-action="close-modal">&times;</button>
+        <div class="modal-body">
+            <h2 id="info-modal-title">O Projekcie Ting Tong</h2>
+            <p>Witaj w Ting Tong – innowacyjnej aplikacji, która rewolucjonizuje sposób, w jaki twórcy i widzowie wchodzą ze sobą w interakcje. Nasza platforma, zaprojektowana na wzór popularnych aplikacji z krótkimi formami wideo, to nie tylko miejsce do oglądania, ale przede wszystkim do realnego wspierania ulubionych autorów.</p>
+
+            <h3>Nasza Misja</h3>
+            <p>Celem Ting Tong jest stworzenie ekosystemu, w którym kreatywność jest bezpośrednio nagradzana. Wierzymy, że twórcy zasługują na transparentne i proste narzędzia do monetyzacji swojej pasji, a widzowie powinni mieć możliwość realnego wpływu na rozwój kanałów, które kochają. Chcemy zlikwidować barierę między twórcą a odbiorcą, budując społeczność opartą na wzajemnym szacunku i wsparciu.</p>
+
+            <h3>Kluczowe Funkcje</h3>
+            <ul>
+                <li><strong>Intuicyjny Interfejs:</strong> Przewijaj wideo w pionie, tak jak lubisz. Nasz interfejs jest szybki, płynny i zaprojektowany z myślą o urządzeniach mobilnych.</li>
+                <li><strong>System Napiwków:</strong> Podoba Ci się treść? Okaż swoje wsparcie jednym kliknięciem! Zintegrowany i bezpieczny system napiwków pozwala na błyskawiczne przekazywanie drobnych kwot bezpośrednio do twórcy.</li>
+                <li><strong>Społeczność:</strong> Komentuj, lajkuj i udostępniaj. Bądź częścią aktywnej społeczności skupionej wokół Twoich ulubionych tematów i twórców.</li>
+                <li><strong>Tryb PWA (Progressive Web App):</strong> Zainstaluj Ting Tong na swoim telefonie, aby uzyskać dostęp do dodatkowych funkcji, płynniejszego działania i powiadomień push – wszystko to bez konieczności pobierania aplikacji ze sklepu.</li>
+                <li><strong>Tryb Immersyjny:</strong> Zanurz się w treściach bez rozpraszaczy. Jedno dotknięcie ukrywa interfejs, pozwalając Ci skupić się na tym, co najważniejsze – wideo.</li>
+            </ul>
+
+            <h3>Dla Twórców</h3>
+            <p>Jesteś twórcą? Ting Tong oferuje Ci proste narzędzia do zarabiania na swojej pasji. Bez skomplikowanych algorytmów i niejasnych zasad. Po prostu twórz, a Twoi fani zajmą się resztą. Skup się na jakości, a my zapewnimy Ci platformę do jej monetyzacji.</p>
+
+            <h3>Dla Widzów</h3>
+            <p>Jako widz, masz realny wpływ. Twoje wsparcie nie tylko motywuje twórców do dalszej pracy, ale także pomaga im inwestować w lepszy sprzęt, rozwijać nowe formaty i poświęcać więcej czasu na to, co robią najlepiej. Każdy napiwek to cegiełka budująca przyszłość niezależnej twórczości w internecie.</p>
+            <p>Dziękujemy, że jesteś z nami. Przewijaj, odkrywaj i wspieraj!</p>
+        </div>
+    </div>
+</div>
+
 
 <?php get_footer(); ?>
