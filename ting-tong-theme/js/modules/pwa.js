@@ -1,5 +1,10 @@
-import { UI } from './ui.js';
+// import { UI } from './ui.js'; // Usunięte, aby przerwać zależność cykliczną
 import { Utils } from './utils.js';
+
+let UI_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
+function setUiModule(uiModule) {
+  UI_MODULE = uiModule;
+}
 
 const installBar = document.getElementById("pwa-install-bar");
 const installButton = document.getElementById("pwa-install-button");
@@ -16,9 +21,7 @@ const isIOS = () => {
 };
 
 const isStandalone = () => {
-  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").
-matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.n
-avigator.standalone === true;
+  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.navigator.standalone === true;
 };
 
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
@@ -34,12 +37,12 @@ function hideIosInstructions() {
 }
 
 function showDesktopModal() {
-  if (desktopModal) UI.openModal(desktopModal);
+  if (desktopModal && UI_MODULE) UI_MODULE.openModal(desktopModal);
 }
 
 function closePwaModals() {
-  if (desktopModal && desktopModal.classList.contains("visible"))
-    UI.closeModal(desktopModal);
+  if (desktopModal && desktopModal.classList.contains("visible") && UI_MODULE)
+    UI_MODULE.closeModal(desktopModal);
   if (iosInstructions && iosInstructions.classList.contains("visible"))
     hideIosInstructions();
 }
@@ -59,15 +62,11 @@ function runStandaloneCheck() {
     // Jeśli nie jest standalone, decyzja zależy od stanu preloadera i promptu.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
-    const isPreloaderHidden = (preloader && preloader.classList.contains("preloa
-der-hiding")) || (container && container.classList.contains("ready"));
+    const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
-    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane z
-darzenie prompt.
-    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarze
-nia 'beforeinstallprompt'.
-    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zai
-nstalowana,
+    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane zdarzenie prompt.
+    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarzenia 'beforeinstallprompt'.
+    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zainstalowana,
     // użytkownik odrzucił monit, lub przeglądarka nie spełnia kryteriów.
     if (isPreloaderHidden && installPromptEvent && installBar) {
         installBar.classList.add("visible");
@@ -81,10 +80,8 @@ nstalowana,
     return false;
 }
 
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu m
-odułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane ba
-rdzo wcześnie.
+// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
+// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
@@ -110,7 +107,7 @@ function handleInstallClick() {
     // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
     // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
-    UI.showAlert(Utils.getTranslation("pwaNotSupported"));
+    if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
@@ -123,7 +120,7 @@ function init() {
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
-    UI.showAlert(Utils.getTranslation("appInstalledSuccessText"));
+    if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("appInstalledSuccessText"));
     // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
   });
 
@@ -142,5 +139,4 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModal
-s, isStandalone };
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule };
