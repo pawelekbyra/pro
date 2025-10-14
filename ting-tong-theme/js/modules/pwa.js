@@ -118,8 +118,6 @@ function init() {
   if (installButton) {
     installButton.addEventListener('click', handleInstallClick);
   }
-  // ✅ Ustaw początkowy stan przycisku
-  updateInstallButtonUI();
 
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
@@ -146,4 +144,4 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone };
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, updateInstallButtonUI };

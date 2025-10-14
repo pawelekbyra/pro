@@ -220,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2000);
 
         UI.updateTranslations();
+        PWA.updateInstallButtonUI();
 
         const handleMediaChange = (swiper) => {
           // First, pause every single video element within the swiper container.
