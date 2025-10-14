@@ -16,7 +16,9 @@ const isIOS = () => {
 };
 
 const isStandalone = () => {
-  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.navigator.standalone === true;
+  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").
+matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.n
+avigator.standalone === true;
 };
 
 const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
@@ -57,11 +59,15 @@ function runStandaloneCheck() {
     // Jeśli nie jest standalone, decyzja zależy od stanu preloadera i promptu.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
-    const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
+    const isPreloaderHidden = (preloader && preloader.classList.contains("preloa
+der-hiding")) || (container && container.classList.contains("ready"));
 
-    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane zdarzenie prompt.
-    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarzenia 'beforeinstallprompt'.
-    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zainstalowana,
+    // ✅ FIX: Pokaż pasek TYLKO jeśli preloader jest ukryty ORAZ mamy zapisane z
+darzenie prompt.
+    // UWAGA: Pojawienie się paska zależy od wywołania przez przeglądarkę zdarze
+nia 'beforeinstallprompt'.
+    // To zdarzenie nie zawsze jest wywoływane, np. jeśli aplikacja jest już zai
+nstalowana,
     // użytkownik odrzucił monit, lub przeglądarka nie spełnia kryteriów.
     if (isPreloaderHidden && installPromptEvent && installBar) {
         installBar.classList.add("visible");
@@ -75,8 +81,10 @@ function runStandaloneCheck() {
     return false;
 }
 
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
+// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu m
+odułu.
+// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane ba
+rdzo wcześnie.
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
@@ -134,4 +142,5 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone };
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModal
+s, isStandalone };

@@ -607,7 +607,7 @@ export const Handlers = {
         break;
       }
       case "open-info-modal":
-        UI.openModal(UI.DOM.infoModal);
+        UI.openModal(document.getElementById('infoModal'));
         break;
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
