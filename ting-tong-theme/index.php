@@ -27,12 +27,12 @@ get_header();
           <p class="fl-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem Miłości i wspieraj rozwój projektu.</p>
           <div class="fl-fields-container">
             <label class="fl-preference-row">
-              <span class="fl-preference-label" data-translate-key="tippingCreateAccountLabel">Utwórz konto patrona</span>
+              <span class="fl-preference-label" data-translate-key="tippingCreateAccountLabel">Czy założyć konto patrona?</span>
               <input type="checkbox" id="tippingCreateAccount" class="fl-checkbox" checked>
             </label>
             <div id="tippingEmailContainer" class="fl-email-container visible">
                 <input type="email" id="tippingEmail" class="fl-input" data-translate-placeholder="emailPlaceholder" placeholder="email@domena.pl">
-                <p class="fl-hint-text" data-translate-key="tippingEmailHint">Na ten adres e-mail wyślemy dane do logowania oraz potwierdzenie wsparcia.</p>
+                <p class="fl-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail otrzymasz dane dostępu do logowania do sekcji dla patronów.</p>
             </div>
           </div>
         </div>

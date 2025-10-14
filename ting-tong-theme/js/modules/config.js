@@ -108,6 +108,66 @@ export const Config = {
       alreadyInstalledToast: "Aplikacja jest już zainstalowana.",
       installNotReadyText: "Instalacja nie jest obecnie możliwa na tej przeglądarce lub urządzeniu.",
       appInstalledSuccessText: "Aplikacja została pomyślnie zainstalowana!",
+      tippingTitle: {
+        pl: "Bramka Napiwkowa",
+        en: "Tipping Gateway",
+      },
+      tippingStep1Desc: {
+          pl: "Zostań Patronem Miłości i wspieraj rozwój projektu.",
+          en: "Become a Love Patron and support the project's development."
+      },
+      tippingCreateAccountLabel: {
+          pl: "Czy założyć konto patrona?",
+          en: "Create a patron account?"
+      },
+      tippingEmailHint: {
+          pl: "Na podany e-mail otrzymasz dane dostępu do logowania do sekcji dla patronów.",
+          en: "You will receive login details for the patron section to the provided email."
+      },
+      tippingStep2Desc: {
+          pl: "Wybierz kwotę, którą chcesz wesprzeć projekt.",
+          en: "Choose the amount you want to support the project with."
+      },
+      tippingAmountPlaceholder: {
+          pl: "Wpisz kwotę",
+          en: "Enter amount"
+      },
+      tippingAmountHint: {
+          pl: "Minimalna kwota to 1 EUR. Dziękujemy za każde wsparcie!",
+          en: "The minimum amount is 1 EUR. Thank you for all your support!"
+      },
+      tippingStep3Desc: {
+          pl: "Przekierowanie do płatności...",
+          en: "Redirecting to payment..."
+      },
+      tippingRedirectHint: {
+          pl: "Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności Stripe.",
+          en: "You will be redirected to the secure Stripe payment gateway shortly."
+      },
+      tippingPrev: {
+          pl: "Wstecz",
+          en: "Back"
+      },
+      tippingNext: {
+          pl: "Dalej",
+          en: "Next"
+      },
+      tippingSubmit: {
+          pl: "Przejdź do płatności",
+          en: "Proceed to Payment"
+      },
+      tippingSuccessMessage: {
+        pl: "Dziękujemy za napiwek w wysokości {amount} EUR!",
+        en: "Thank you for your {amount} EUR tip!",
+      },
+      errorInvalidEmail: {
+        pl: "Proszę podać poprawny adres email.",
+        en: "Please provide a valid email address.",
+      },
+      errorMinTipAmount: {
+        pl: "Minimalna kwota napiwku to 1 EUR.",
+        en: "The minimum tip amount is 1 EUR.",
+      },
       noComments: "Brak komentarzy. Bądź pierwszy!",
       commentSortTriggerText: "Sortuj według: ",
       commentSortNewest: "Fresz",
