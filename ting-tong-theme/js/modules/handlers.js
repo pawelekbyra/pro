@@ -157,9 +157,12 @@ export const Handlers = {
         return;
       }
 
-      // Sprawdź czy użytkownik jest zalogowany (dla akcji wymagających autoryzacji)
-      const requiresAuth = ['edit-comment', 'delete-comment', 'toggle-comment-like'];
-      if (requiresAuth.includes(actionTarget.dataset.action) && !State.get('isUserLoggedIn')) {
+      // Sprawdź czy użytkownik jest zalogowany (dla akcji wymagających autoryz
+acji)
+      const requiresAuth = ['edit-comment', 'delete-comment', 'toggle-comment-li
+ke'];
+      if (requiresAuth.includes(actionTarget.dataset.action) && !State.get('isUs
+erLoggedIn')) {
         UI.showAlert(Utils.getTranslation('likeAlert'), true);
         return;
       }
@@ -173,7 +176,8 @@ export const Handlers = {
             return;
           }
 
-          let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, "")) || 0;
+          let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, "")) |
+| 0;
 
           // Optimistic UI update
           actionTarget.classList.toggle("active");
@@ -198,7 +202,8 @@ export const Handlers = {
                 countEl.textContent = Utils.formatCount(currentLikes);
 
                 throw new Error(
-                  response.data?.message || Utils.getTranslation("failedToUpdateLike")
+                  response.data?.message || Utils.getTranslation("failedToUpdate
+Like")
                 );
               }
 
@@ -209,7 +214,8 @@ export const Handlers = {
             })
             .catch((error) => {
               console.error('Toggle comment like error:', error);
-              UI.showAlert(error.message || Utils.getTranslation("failedToUpdateLike"), true);
+              UI.showAlert(error.message || Utils.getTranslation("failedToUpdate
+Like"), true);
             })
             .finally(() => {
               actionTarget.disabled = false;
@@ -251,7 +257,8 @@ export const Handlers = {
 
               if (!response.success) {
                 throw new Error(
-                  response.data?.message || Utils.getTranslation("commentUpdateError")
+                  response.data?.message || Utils.getTranslation("commentUpdateE
+rror")
                 );
               }
 
@@ -276,7 +283,8 @@ export const Handlers = {
             })
             .catch((error) => {
               console.error('Edit comment error:', error);
-              UI.showAlert(error.message || Utils.getTranslation("commentUpdateError"), true);
+              UI.showAlert(error.message || Utils.getTranslation("commentUpdateE
+rror"), true);
             })
             .finally(() => {
               actionTarget.disabled = false;
@@ -300,13 +308,15 @@ export const Handlers = {
 
               if (!response.success) {
                 throw new Error(
-                  response.data?.message || Utils.getTranslation("commentDeleteError")
+                  response.data?.message || Utils.getTranslation("commentDeleteE
+rror")
                 );
               }
 
               // Sprawdź czy mamy new_count
               if (typeof response.data?.new_count !== 'number') {
-                console.warn('Missing new_count in response, calculating manually');
+                console.warn('Missing new_count in response, calculating manuall
+y');
               }
 
               // Zaktualizuj slidesData
@@ -323,7 +333,8 @@ export const Handlers = {
                 }
 
                 // Zaktualizuj licznik
-                slideData.initialComments = response.data?.new_count ?? slideData.comments.length;
+                slideData.initialComments = response.data?.new_count ?? slideDat
+a.comments.length;
 
                 // Re-render komentarzy
                 UI.renderComments(slideData.comments);
@@ -332,15 +343,19 @@ export const Handlers = {
                 const slideElement = document.querySelector(
                   `.swiper-slide-active[data-slide-id="${slideId}"]`
                 );
-                const mainSlideCount = slideElement?.querySelector(".comment-count");
+                const mainSlideCount = slideElement?.querySelector(".comment-cou
+nt");
                 if (mainSlideCount) {
-                  mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                  mainSlideCount.textContent = Utils.formatCount(slideData.initi
+alComments);
                 }
 
                 // Zaktualizuj tytuł modala
-                const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+                const commentsTitle = UI.DOM.commentsModal.querySelector("#comme
+ntsTitle");
                 if (commentsTitle) {
-                  commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+                  commentsTitle.textContent = `${Utils.getTranslation("commentsM
+odalTitle")} (${slideData.initialComments})`;
                 }
               }
 
@@ -348,7 +363,8 @@ export const Handlers = {
             })
             .catch((error) => {
               console.error('Delete comment error:', error);
-              UI.showAlert(error.message || Utils.getTranslation("commentDeleteError"), true);
+              UI.showAlert(error.message || Utils.getTranslation("commentDeleteE
+rror"), true);
               actionTarget.disabled = false; // Re-enable jeśli błąd
             });
           break;
@@ -377,12 +393,14 @@ export const Handlers = {
       }
 
       State.set("commentSortOrder", newSortOrder);
-      dropdown.querySelectorAll(".sort-option").forEach((opt) => opt.classList.remove("active"));
+      dropdown.querySelectorAll(".sort-option").forEach((opt) => opt.classList.r
+emove("active"));
       sortOption.classList.add("active");
       UI.updateTranslations();
       dropdown.classList.remove("open");
 
-      const slideId = document.querySelector(".swiper-slide-active")?.dataset.slideId;
+      const slideId = document.querySelector(".swiper-slide-active")?.dataset.sl
+ideId;
       if (!slideId) return;
 
       const slideData = slidesData.find(s => s.id === slideId);
@@ -486,11 +504,13 @@ export const Handlers = {
         formContainer.prepend(replyContext);
 
         const cancelAriaLabel = Utils.getTranslation("cancelReplyAriaLabel");
-        const replyingToText = Utils.getTranslation("replyingTo").replace("{user}", user);
+        const replyingToText = Utils.getTranslation("replyingTo").replace("{user
+}", user);
 
         replyContext.innerHTML = `
           <span class="reply-context-text">${replyingToText}</span>
-          <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>
+          <button class="cancel-reply-btn" data-action="cancel-reply" aria-label
+="${cancelAriaLabel}">&times;</button>
         `;
         replyContext.style.display = "flex";
 
@@ -582,7 +602,8 @@ export const Handlers = {
         API.fetchComments(slideId)
           .then((response) => {
             if (!response || !response.success) {
-              throw new Error(response?.data?.message || 'Failed to load comments');
+              throw new Error(response?.data?.message || 'Failed to load comment
+s');
             }
             const comments = response.data || [];
             const slideData = slidesData.find(s => s.id === slideId);
@@ -593,21 +614,25 @@ export const Handlers = {
             if (sortOrder === "popular") {
               comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
             } else {
-              comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+              comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timesta
+mp));
             }
             UI.renderComments(comments);
             setTimeout(() => {
-              if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
+              if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scroll
+Height;
             }, 100);
           })
           .catch((error) => {
             console.error('Failed to load comments:', error);
-            modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
+            modalBody.innerHTML = `<div style="text-align: center; padding: 40px
+ 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadErro
+r')}</p></div>`;
           });
         break;
       }
       case "open-info-modal":
-        UI.openModal(document.getElementById('infoModal'));
+        UI.openModal(UI.DOM.infoModal);
         break;
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
@@ -717,20 +742,24 @@ export const Handlers = {
         document.querySelector("#bmc-wbtn")?.click();
         break;
       case "play-video": {
-        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
+        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("
+video");
         if (video) {
           video.play().catch(err => console.log("Błąd play:", err));
-          const pauseOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".pause-overlay");
+          const pauseOverlay = actionTarget.closest(".tiktok-symulacja")?.queryS
+elector(".pause-overlay");
           if (pauseOverlay) pauseOverlay.classList.remove('visible');
         }
         break;
       }
       case "replay-video": {
-        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
+        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("
+video");
         if (video) {
           video.currentTime = 0;
           video.play().catch(err => console.log("Błąd replay:", err));
-          const replayOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".replay-overlay");
+          const replayOverlay = actionTarget.closest(".tiktok-symulacja")?.query
+Selector(".replay-overlay");
           if (replayOverlay) replayOverlay.classList.remove('visible');
         }
         break;
@@ -738,7 +767,8 @@ export const Handlers = {
       case "toggle-volume":
         const isMuted = !State.get("isSoundMuted");
         State.set("isSoundMuted", isMuted);
-        const activeSlideVideo = document.querySelector(".swiper-slide-active video");
+        const activeSlideVideo = document.querySelector(".swiper-slide-active vi
+deo");
         if (activeSlideVideo) {
           activeSlideVideo.muted = isMuted;
         }
@@ -780,7 +810,8 @@ export const Handlers = {
     const loginForm = e.target.closest("form#tt-login-form");
 
     // ========================================================================
-    // OBSŁUGA FORMULARZA LOGOWANIA - Z AKTUALIZACJĄ O MODAL PIERWSZEGO LOGOWANIA
+    // OBSŁUGA FORMULARZA LOGOWANIA - Z AKTUALIZACJĄ O MODAL PIERWSZEGO LOGOWANI
+A
     // ========================================================================
     if (loginForm) {
       e.preventDefault();
@@ -798,7 +829,8 @@ export const Handlers = {
       const password = passwordInput.value;
 
       if (!username || !password) {
-        UI.showAlert(Utils.getTranslation("allFieldsRequiredError") || "Please enter username and password.", true);
+        UI.showAlert(Utils.getTranslation("allFieldsRequiredError") || "Please e
+nter username and password.", true);
         return;
       }
 
@@ -870,9 +902,11 @@ export const Handlers = {
 
           // Upload obrazu jeśli istnieje
           if (window.selectedCommentImage) {
-            UI.showToast(Utils.getTranslation('uploadingAvatar') || 'Przesyłanie obrazu...');
+            UI.showToast(Utils.getTranslation('uploadingAvatar') || 'Przesyłanie
+ obrazu...');
 
-            const uploadResult = await API.uploadCommentImage(window.selectedCommentImage);
+            const uploadResult = await API.uploadCommentImage(window.selectedCom
+mentImage);
 
             // Walidacja odpowiedzi
             if (!uploadResult || typeof uploadResult.success !== 'boolean') {
@@ -893,7 +927,8 @@ export const Handlers = {
           }
 
           // Wyślij komentarz
-          const postResponse = await API.postComment(slideId, text, parentId, imageUrl);
+          const postResponse = await API.postComment(slideId, text, parentId, im
+ageUrl);
 
           // Walidacja odpowiedzi
           if (!postResponse || typeof postResponse.success !== 'boolean') {
@@ -902,7 +937,8 @@ export const Handlers = {
 
           if (!postResponse.success) {
             throw new Error(
-              postResponse.data?.message || Utils.getTranslation("postCommentError")
+              postResponse.data?.message || Utils.getTranslation("postCommentErr
+or")
             );
           }
 
@@ -931,7 +967,8 @@ export const Handlers = {
             slideData.comments.push(postResponse.data);
 
             // Zaktualizuj licznik
-            slideData.initialComments = postResponse.data.new_comment_count ?? slideData.comments.length;
+            slideData.initialComments = postResponse.data.new_comment_count ?? s
+lideData.comments.length;
 
             // Re-render
             UI.renderComments(slideData.comments);
@@ -939,13 +976,16 @@ export const Handlers = {
             // Zaktualizuj licznik w głównym widoku
             const mainSlideCount = slideElement.querySelector(".comment-count");
             if (mainSlideCount) {
-              mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+              mainSlideCount.textContent = Utils.formatCount(slideData.initialCo
+mments);
             }
 
             // Zaktualizuj tytuł modala
-            const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+            const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsT
+itle");
             if (commentsTitle) {
-              commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+              commentsTitle.textContent = `${Utils.getTranslation("commentsModal
+Title")} (${slideData.initialComments})`;
             }
 
             // Scroll do dołu
@@ -959,7 +999,8 @@ export const Handlers = {
 
         } catch (error) {
           console.error('Post comment error:', error);
-          UI.showAlert(error.message || Utils.getTranslation("postCommentError"), true);
+          UI.showAlert(error.message || Utils.getTranslation("postCommentError")
+, true);
         } finally {
           if (button) button.disabled = false;
           input.focus();

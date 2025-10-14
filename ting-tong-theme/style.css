@@ -3,7 +3,8 @@ Theme Name: Ting Tong Theme
 Theme URI: https://example.com/ting-tong-theme/
 Author: Your Name
 Author URI: https://example.com/
-Description: A custom theme for the Ting Tong application, converted from a static HTML project.
+Description: A custom theme for the Ting Tong application, converted from a stat
+ic HTML project.
 Version: 1.0.0
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,7 +13,8 @@ Text Domain: tingtongtheme
 
 /* ==========================================================================
            --- PRELOADER ---
-           ========================================================================== */
+           =====================================================================
+===== */
 #preloader {
   position: fixed;
   top: 0;
@@ -33,7 +35,8 @@ Text Domain: tingtongtheme
 
 /* ============================================================================
    FIRST LOGIN MODAL - PREMIUM STYLES
-   ============================================================================ */
+   ============================================================================
+*/
 .fl-modal-overlay {
   position: fixed;
   top: 0;
@@ -48,7 +51,8 @@ Text Domain: tingtongtheme
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
-  padding-top: var(--topbar-height); /* <--- ZMIANA: Dynamiczna pozycja pod topbarem */
+  padding-top: var(--topbar-height); /* <--- ZMIANA: Dynamiczna pozycja pod topb
+arem */
 }
 
 .fl-modal-overlay.visible {
@@ -59,14 +63,16 @@ Text Domain: tingtongtheme
 /* FIX: Container for better keyboard handling and to fill space correctly */
 .fl-modal-content-wrapper {
   width: 100%;
-  height: auto; /* <--- ZMIANA: Karta zajmuje tylko tyle miejsca, ile potrzebuje */
+  height: auto; /* <--- ZMIANA: Karta zajmuje tylko tyle miejsca, ile potrzebuje
+ */
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 20px; /* Dodatkowy margines wokół karty */
 }
 
-/* ... reszta stylów fl-modal-content i fl-modal-content pozostaje bez zmian ... */
+/* ... reszta stylów fl-modal-content i fl-modal-content pozostaje bez zmian ...
+ */
 
 .fl-modal-content {
   transform: scale(0.95) translateY(20px);
@@ -84,7 +90,8 @@ Text Domain: tingtongtheme
   display: flex;
   flex-direction: column;
   height: auto;
-  max-height: calc(100vh - 80px); /* <-- ZMIANA: Więcej miejsca, z marginesami */
+  max-height: calc(100vh - 80px); /* <-- ZMIANA: Więcej miejsca, z marginesami *
+/
   width: 100%;
   max-width: 500px;
   /* ... (pozostałe style) ... */
@@ -125,7 +132,8 @@ Text Domain: tingtongtheme
 .fl-progress-bar-fill {
   height: 100%;
   width: 33.33%;
-  background: linear-gradient(90deg, #34d058, #007aff); /* FIX: Optymistyczny akcent - zieleń i błękit */
+  background: linear-gradient(90deg, #34d058, #007aff); /* FIX: Optymistyczny ak
+cent - zieleń i błękit */
   border-radius: 3px;
   transition: width 0.4s ease;
 }
@@ -336,8 +344,10 @@ Text Domain: tingtongtheme
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* FIX: Vertically center content in the available space */
-  overflow-y: auto; /* FIX: Allow scrolling on extremely small screens as a safeguard */
+  justify-content: center; /* FIX: Vertically center content in the available sp
+ace */
+  overflow-y: auto; /* FIX: Allow scrolling on extremely small screens as a safe
+guard */
   padding: 10px 20px calc(15px + var(--safe-area-bottom));
   box-sizing: border-box;
   opacity: 0;
@@ -359,7 +369,8 @@ Text Domain: tingtongtheme
   transform: translateY(0);
 }
 .language-selection {
-  margin-top: 0; /* FIX: Remove margin, as justify-content now handles vertical position */
+  margin-top: 0; /* FIX: Remove margin, as justify-content now handles vertical
+position */
   text-align: center;
   width: 100%;
   max-width: 400px;
@@ -430,7 +441,8 @@ Text Domain: tingtongtheme
 
 /* ==========================================================================
            --- STYLE GŁÓWNE, RESET I SCROLLING ---
-           ========================================================================== */
+           =====================================================================
+===== */
 :root {
   --app-height: 100%;
   --accent-color: #ff0055;
@@ -463,7 +475,8 @@ body {
     sans-serif;
   background-color: #000;
   color: white;
-  overscroll-behavior: none; /* Prevent bounce scroll and pull-to-refresh on iOS */
+  overscroll-behavior: none; /* Prevent bounce scroll and pull-to-refresh on iOS
+ */
   user-select: none;
   -webkit-user-select: none;
 }
@@ -518,7 +531,8 @@ body,
 
 /* ==========================================================================
            --- GŁÓWNY LAYOUT (TIKTOK-LIKE) ---
-           ========================================================================== */
+           =====================================================================
+===== */
 .tiktok-symulacja {
   position: relative;
   width: 100%;
@@ -772,7 +786,8 @@ body,
   background: #000;
 }
 .tiktok-symulacja .bottombar {
-  background: rgba(0, 0, 0, 0.7); /* Półprzezroczyste czarne tło dla lepszej czytelności */
+  background: rgba(0, 0, 0, 0.7); /* Półprzezroczyste czarne tło dla lepszej czy
+telności */
 }
 .login-panel {
   background: rgba(0, 0, 0, 0.6);
@@ -886,10 +901,12 @@ body,
   opacity: 1;
 }
 
-/* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
+/* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalac
+ji PWA */
 .app-frame--pwa-visible .bottombar {
 }
-/* === PATCH: Pasek progressu na górnej krawędzi bottombar (v2 - Pixel Perfect) === */
+/* === PATCH: Pasek progressu na górnej krawędzi bottombar (v2 - Pixel Perfect)
+=== */
 
 /* 1. Zmień pozycjonowanie i wysokość - progress bar ma być częścią bottombar */
 .progress-bar {
@@ -955,7 +972,8 @@ body,
   opacity: 1;
   pointer-events: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  z-index: 1; /* FIX: Zapewnia, że uchwyt jest nad innymi elementami w progress-bar */
+  z-index: 1; /* FIX: Zapewnia, że uchwyt jest nad innymi elementami w progress-
+bar */
 }
 
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
@@ -989,7 +1007,8 @@ body,
 
 /* ==========================================================================
            --- KOMPONENTY UI: PRZYCISKI I IKONY ---
-           ========================================================================== */
+           =====================================================================
+===== */
 .tiktok-symulacja .profile {
   position: relative;
   width: 50px;
@@ -1179,7 +1198,8 @@ body,
 
 /* ==========================================================================
            --- KOMPONENTY UI: PANELE I MENU ---
-           ========================================================================== */
+           =====================================================================
+===== */
 .login-panel {
   position: absolute;
   top: var(--topbar-height);
@@ -1325,7 +1345,8 @@ body,
 
 /* ==========================================================================
            --- KOMPONENTY UI: MODALE I ALERTY ---
-           ========================================================================== */
+           =====================================================================
+===== */
 #alertBox {
   /* ✅ FIX: Zmieniono na position:fixed aby zapewnić widoczność w PWA */
   position: fixed;
@@ -1350,7 +1371,8 @@ body,
 
   /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
   width: fit-content;
-  max-width: calc(100vw - 40px); /* Maksymalna szerokość z marginesami po 20px */
+  max-width: calc(100vw - 40px); /* Maksymalna szerokość z marginesami po 20px *
+/
 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
@@ -1464,71 +1486,48 @@ body,
 
 /* Modal: Info */
 #infoModal .modal-content {
-  background: #1f1f1f;
-  color: #fff;
-  border-radius: 16px;
+  background: white;
+  color: #111;
+  border-radius: 12px;
   max-width: 90%;
-  width: 500px;
-  max-height: 85vh;
-  padding: 0; /* Usunięto padding z kontenera */
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  width: 400px;
+  max-height: 80vh;
+  padding: 20px;
 }
-#infoModal .modal-body {
-  overflow-y: auto;
-  padding: 20px; /* Padding przeniesiony tutaj */
-  -webkit-overflow-scrolling: touch;
-}
-
-#infoModal .modal-body::-webkit-scrollbar {
-    width: 6px;
-}
-#infoModal .modal-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-#infoModal .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-#infoModal .modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
 #infoModal h2 {
   margin-top: 0;
   padding-right: 40px;
-  color: var(--accent-color);
-  border-bottom: 1px solid rgba(255,255,255,0.15);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-#infoModal h3 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    color: #f0f0f0;
-}
-#infoModal p,
-#infoModal li {
-    color: #dcdcdc;
 }
 #infoModal .modal-close-btn {
-  color: #fff;
-  opacity: 0.7;
+  color: #111;
 }
-#infoModal .modal-close-btn:hover {
-  opacity: 1;
-  background-color: transparent;
-  transform: none;
+#infoModal .modal-body {
+  max-height: calc(80vh - 80px);
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-
-#infoModal ul {
-    padding-left: 20px;
+#infoModal .modal-body::-webkit-scrollbar {
+  display: none;
 }
-
-#infoModal li {
-    margin-bottom: 8px;
+#infoModal .tip-cta {
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+#infoModal .tip-cta svg {
+  color: var(--accent-color);
+  width: 40px;
+  height: 40px;
+  margin-bottom: 8px;
+}
+#infoModal .tip-cta p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 /* ==========================================================================
@@ -2267,7 +2266,8 @@ body,
 
 /* ==========================================================================
            --- NOTIFICATION POPUP ---
-           ========================================================================== */
+           =====================================================================
+===== */
 .notification-popup {
   position: fixed;
   top: calc(var(--safe-area-top) + 10px);
@@ -2471,7 +2471,8 @@ body,
 
 /* ==========================================================================
            --- NEW ACCOUNT PANEL STYLES ---
-           ========================================================================== */
+           =====================================================================
+===== */
 .account-modal-overlay {
   position: fixed;
   top: 0;
@@ -2603,8 +2604,10 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(80px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
-  position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elementów */
+  padding-bottom: calc(80px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Z
+apewnia więcej miejsca na dole */
+  position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elemen
+tów */
 }
 
 .account-content::-webkit-scrollbar {
@@ -3150,7 +3153,8 @@ body,
 
 /* ==========================================================================
            --- STYLE POMOCNICZE I DOSTĘPNOŚĆ ---
-           ========================================================================== */
+           =====================================================================
+===== */
 .tiktok-symulacja .hidden-by-js {
   display: none !important;
 }
@@ -3215,7 +3219,8 @@ body,
 
   /* PATCH: Animate from bottom */
   transform: translateY(100%);
-  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.8s;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.
+8s;
   visibility: hidden;
   height: var(--bottombar-height);
 }
@@ -3673,7 +3678,8 @@ body,
 
 /* ============================================================================
    WELCOME MODAL STYLES - Premium Design
-   ============================================================================ */
+   ============================================================================
+*/
 
 /* Overlay z mocnym blur */
 .welcome-modal {
@@ -3851,7 +3857,8 @@ body,
 .welcome-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(90deg, transparent, #ff0055, #ff4081, transparent);
+  background: linear-gradient(90deg, transparent, #ff0055, #ff4081, transparent)
+;
   background-size: 200% 100%;
   margin: 0 auto 28px;
   border-radius: 2px;
@@ -4158,7 +4165,8 @@ body,
 
 /* ============================================================================
    DESKTOP - Zwężenie do proporcji 9:16 (jak telefon)
-   ============================================================================ */
+   ============================================================================
+*/
 
 @media (min-width: 600px) {
   /* Główny kontener aplikacji */
@@ -4222,7 +4230,8 @@ body,
     box-sizing: border-box !important;
   }
 
-  /* NOWE: Wymuszenie dopasowania wewnętrznej zawartości modali do nowej szerokości */
+  /* NOWE: Wymuszenie dopasowania wewnętrznej zawartości modali do nowej szeroko
+ści */
   .modal-overlay .modal-content,
   .fl-modal-overlay .fl-modal-content,
   .crop-modal .crop-modal-content,
@@ -4279,7 +4288,8 @@ body,
 
 /* ============================================================================
    TABLET - Dla tabletów (600px - 1024px)
-   ============================================================================ */
+   ============================================================================
+*/
 
 @media (min-width: 600px) and (max-width: 1024px) {
   #webyx-container {
@@ -4290,7 +4300,8 @@ body,
 
 /* ============================================================================
    DESKTOP - Dla dużych ekranów (>1024px)
-   ============================================================================ */
+   ============================================================================
+*/
 
 @media (min-width: 1024px) {
   #webyx-container {
@@ -4302,7 +4313,8 @@ body,
 
 /* ============================================================================
    OPCJONALNIE - Gradient background za aplikacją
-   ============================================================================ */
+   ============================================================================
+*/
 
 /* NOWA REGULA: Ambient Glow */
 @media (min-width: 600px) {
@@ -4372,7 +4384,8 @@ body,
 }
 /* ============================================================================
    DESKTOP FIX - Zapewnienie poprawnego układu w trybie symulacji telefonu
-   ============================================================================ */
+   ============================================================================
+*/
 @media (min-width: 600px) {
   /* ✅ FIX 1: Sekcje muszą używać 100% zamiast 100vw */
   .webyx-section {
@@ -4451,7 +4464,8 @@ body,
 
 /* ============================================================================
    DODATKOWE ZABEZPIECZENIA - dla wszystkich szerokości ekranu
-   ============================================================================ */
+   ============================================================================
+*/
 /* Video zawsze z object-fit */
 .player,
 .tiktok-symulacja video {
@@ -4474,7 +4488,8 @@ body,
 
 /* ============================================================================
    --- NOWE: TRYB PEŁNEGO EKRANU (IMMERSYJNY) ---
-   ============================================================================ */
+   ============================================================================
+*/
 
 /* Dodajemy płynne przejścia do animowanych elementów */
 .tiktok-symulacja .bottombar,
@@ -4497,7 +4512,8 @@ body,
 
 /* ✅ NOWE: Wyśrodkuj sidebar w pionie, gdy dolny pasek jest ukryty */
 #app-frame.hide-ui .sidebar {
-    top: calc((var(--app-height) - var(--topbar-height)) / 2 + var(--topbar-height));
+    top: calc((var(--app-height) - var(--topbar-height)) / 2 + var(--topbar-heig
+ht));
 }
 
 /* ✅ NOWE: Aktywuj ikonę CC w trybie immersyjnym (bez zmiany tła) */
@@ -4513,7 +4529,8 @@ body,
 
 /* ✅ NOWE: Wyśrodkuj nakładki pauzy i powtórzenia w trybie immersyjnym */
 .pause-overlay, .replay-overlay {
-    transition: top 0.3s ease-out, height 0.3s ease-out, opacity 0.2s ease-in-out;
+    transition: top 0.3s ease-out, height 0.3s ease-out, opacity 0.2s ease-in-ou
+t;
 }
 
 #app-frame.hide-ui .pause-overlay,
@@ -4534,4 +4551,3 @@ body,
 .fullscreen-exit-icon {
   display: none;
 }
-
