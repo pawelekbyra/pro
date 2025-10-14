@@ -224,15 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
         _verifyLoginState(); // Async verification in background
         UI.renderSlides();
 
-        // ✅ FIX: Fallback - pokaż UI po 2 sekundach nawet jeśli video się nie załadowało
-        setTimeout(() => {
-          document.querySelectorAll('.tiktok-symulacja').forEach(sim => {
-            if (!sim.classList.contains('video-loaded')) {
-              console.log('Forcing video-loaded class after timeout for slide:', sim.closest('.webyx-section')?.dataset.slideId);
-              sim.classList.add('video-loaded');
-            }
-          });
-        }, 2000);
+        // REMOVED: 2000ms fallback setTimeout
+        // Logika .video-loaded jest teraz obsługiwana w UI.js na zdarzeniu 'loadedmetadata'.
 
         UI.updateTranslations();
 
@@ -317,6 +310,25 @@ document.addEventListener("DOMContentLoaded", () => {
               UI.updateVolumeButton(State.get("isSoundMuted"));
               // Also handle media for the very first slide on init.
               handleMediaChange(swiper);
+
+              // *** NOWA LOGIKA UKRYWANIA PRELOADERA (PRZYSPIESZENIE) ***
+              UI.DOM.preloader.classList.add("preloader-hiding");
+              UI.DOM.container.classList.add("ready");
+              PWA.runStandaloneCheck();
+
+              // Zabezpieczenie przed brakiem transitionend (na wszelki wypadek)
+              const transitionEndHandler = () => {
+                UI.DOM.preloader.removeEventListener("transitionend", transitionEndHandler);
+                UI.DOM.preloader.style.display = "none";
+                if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true') {
+                  UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);
+                  sessionStorage.removeItem('showAlreadyInstalledToast');
+                }
+              };
+
+              UI.DOM.preloader.addEventListener("transitionend", transitionEndHandler, { once: true });
+              setTimeout(transitionEndHandler, 600); // Fallback po 600ms
+              // *******************************************************
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
@@ -357,28 +369,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         State.set('swiper', swiper);
 
-        setTimeout(() => {
-          UI.DOM.preloader.classList.add("preloader-hiding");
-          UI.DOM.container.classList.add("ready");
-
-          // ✅ FIX: Wywołanie PWA.runStandaloneCheck() powinno być natychmiastowe,
-          // a nie zależne od niestabilnego zdarzenia transitionend.
-          PWA.runStandaloneCheck();
-
-          // The PWA install bar logic is now fully handled by the PWA module.
-          UI.DOM.preloader.addEventListener(
-            "transitionend",
-            () => {
-              UI.DOM.preloader.style.display = "none";
-              // Sprawdź, czy należy wyświetlić toast o zainstalowanej aplikacji
-              if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true') {
-                UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);
-                sessionStorage.removeItem('showAlreadyInstalledToast'); // Wyczyść flagę
-              }
-            },
-            { once: true },
-          );
-        }, 1500); // Zwiększone opóźnienie, aby uniknąć "czarnego ekranu"
       } catch (error) {
         // alert(
         //   "Application failed to start. Error: " +
@@ -391,7 +381,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function _initializePreloader() {
-      setTimeout(() => UI.DOM.preloader.classList.add("content-visible"), 500);
+      // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie, aby przyspieszyć
+      UI.DOM.preloader.classList.add("content-visible");
+
       UI.DOM.preloader
         .querySelectorAll(".language-selection button")
         .forEach((button) => {
@@ -402,7 +394,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 .querySelectorAll(".language-selection button")
                 .forEach((btn) => (btn.disabled = true));
               button.classList.add("is-selected");
-              setTimeout(() => _startApp(button.dataset.lang), 300);
+              // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie
+              _startApp(button.dataset.lang);
             },
             { once: true },
           );
