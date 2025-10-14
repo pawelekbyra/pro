@@ -412,8 +412,9 @@ function createSlideElement(slideData, index) {
   section.querySelector(".tiktok-symulacja").dataset.access =
     slideData.access;
   section.querySelector(".profileButton img").src = slideData.author.avatar;
-  section.querySelector(".text-user").textContent = slideData.author.name;
-  section.querySelector(".text-description").textContent =
+  section.querySelector(".slide-title").textContent = slideData.title;
+  section.querySelector(".author-name").textContent = slideData.author.name;
+  section.querySelector(".slide-description").textContent =
     slideData.description;
 
   const likeBtn = section.querySelector(".like-button");

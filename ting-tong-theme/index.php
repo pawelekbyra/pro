@@ -193,8 +193,12 @@ get_header();
                         <div class="progress-bar-handle"></div>
                     </div>
                     <div class="text-info">
-                        <div class="text-user"></div>
-                        <div class="text-description"></div>
+                        <h3 class="slide-title"></h3>
+                        <div class="slide-author-line">
+                            <span class="author-label">autor:</span>
+                            <span class="author-name"></span>
+                        </div>
+                        <p class="slide-description"></p>
                     </div>
                 </div>
             </div>
