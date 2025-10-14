@@ -8,66 +8,64 @@
 get_header();
 ?>
 
-<!-- === Tipping Modal === -->
-<div id="tippingModal" class="fl-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="fl-modal-content-wrapper">
-    <form id="tippingForm" class="fl-modal-content">
-
-      <div class="fl-header">
-        <div class="fl-drag-handle-container"><div class="fl-drag-handle"></div></div>
-        <h2 id="tippingTitle" class="fl-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
-        <div class="fl-progress-bar-container">
-          <div class="fl-progress-bar-fill" id="tippingProgressBar"></div>
-        </div>
-      </div>
-
-      <div class="fl-body" id="tippingBody">
-
-        <div class="fl-step" data-step="0">
-          <p class="fl-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem Miłości i wspieraj rozwój projektu.</p>
-          <div class="fl-fields-container">
-            <label class="fl-preference-row">
-              <span class="fl-preference-label" data-translate-key="tippingCreateAccountLabel">Czy założyć konto patrona?</span>
-              <input type="checkbox" id="tippingCreateAccount" class="fl-checkbox" checked>
-            </label>
-            <div id="tippingEmailContainer" class="fl-email-container visible">
-                <input type="email" id="tippingEmail" class="fl-input" data-translate-placeholder="emailPlaceholder" placeholder="email@domena.pl">
-                <p class="fl-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail otrzymasz dane dostępu do logowania do sekcji dla patronów.</p>
+<!-- === Tipping Modal (New Elegant Version) === -->
+<div id="tippingModal" class="elegant-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="elegant-modal-content-wrapper">
+        <form id="tippingForm" class="elegant-modal-content">
+            <div class="elegant-modal-header">
+                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
+                <div class="elegant-modal-progress-bar-container">
+                    <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="fl-step" data-step="1">
-          <p class="fl-step-description" data-translate-key="tippingStep2Desc">Wybierz kwotę, którą chcesz wesprzeć projekt.</p>
-          <div class="fl-fields-container">
-             <div class="tipping-amount-container">
-                <input type="number" id="tippingAmount" class="fl-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                <span class="tipping-currency">EUR</span>
-             </div>
-             <p class="fl-hint-text" data-translate-key="tippingAmountHint">Minimalna kwota to 1 EUR. Dziękujemy za każde wsparcie!</p>
-          </div>
-        </div>
+            <div class="elegant-modal-body" id="tippingBody">
+                <!-- Krok 1: E-mail i zgoda -->
+                <div class="elegant-modal-step" data-step="0">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem i wspieraj rozwój tego projektu.</p>
+                    <div class="elegant-modal-fields-container">
+                        <label class="elegant-modal-preference-row">
+                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">Chcę założyć konto patrona</span>
+                            <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox" checked>
+                        </label>
+                        <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
+                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="Twój adres e-mail">
+                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail prześlemy dane do logowania.</p>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="fl-step" data-step="2">
-            <p class="fl-step-description" data-translate-key="tippingStep3Desc">Przekierowanie do płatności...</p>
-            <div class="fl-fields-container" style="text-align: center; padding: 40px 0;">
-                <div class="loading-spinner large"></div>
-                <p class="fl-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności Stripe.</p>
+                <!-- Krok 2: Wybór kwoty -->
+                <div class="elegant-modal-step" data-step="1">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz kwotę, którą chcesz wesprzeć projekt.</p>
+                    <div class="elegant-modal-fields-container">
+                        <div class="tipping-amount-container">
+                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="5.00" min="1" step="any">
+                            <span class="tipping-currency">EUR</span>
+                        </div>
+                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
+                    </div>
+                </div>
+
+                <!-- Krok 3: Przekierowanie do płatności -->
+                <div class="elegant-modal-step" data-step="2">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Przekierowanie do płatności...</p>
+                    <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
+                        <div class="loading-spinner large"></div>
+                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności PayPal.</p>
+                    </div>
+                </div>
             </div>
-        </div>
 
-      </div>
-
-      <div class="fl-footer">
-        <div class="fl-footer-buttons">
-          <button type="button" id="tippingPrevBtn" class="fl-btn fl-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
-          <button type="button" id="tippingNextBtn" class="fl-btn fl-btn-next" data-action="tipping-next" data-translate-key="tippingNext">Dalej</button>
-          <button type="submit" id="tippingSubmitBtn" class="fl-btn fl-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
-        </div>
-      </div>
-
-    </form>
-  </div>
+            <div class="elegant-modal-footer">
+                <div class="elegant-modal-footer-buttons">
+                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
+                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">Dalej</button>
+                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- === First Login Modal (NEW & IMPROVED) === -->

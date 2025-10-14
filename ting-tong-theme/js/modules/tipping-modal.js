@@ -13,7 +13,7 @@ function cacheDOM() {
         form: document.getElementById('tippingForm'),
         title: document.getElementById('tippingTitle'),
         progressBar: document.getElementById('tippingProgressBar'),
-        steps: document.querySelectorAll('#tippingModal .fl-step'),
+        steps: document.querySelectorAll('#tippingModal .elegant-modal-step'), // <-- FIX: Use new class
         prevBtn: document.getElementById('tippingPrevBtn'),
         nextBtn: document.getElementById('tippingNextBtn'),
         submitBtn: document.getElementById('tippingSubmitBtn'),
@@ -25,7 +25,10 @@ function cacheDOM() {
 }
 
 function updateStepDisplay() {
-    if (!dom.modal) return;
+    if (!dom.modal || !dom.steps || dom.steps.length === 0) {
+        console.error("Tipping modal steps not found or cached correctly.");
+        return;
+    }
 
     dom.steps.forEach((stepEl, i) => {
         stepEl.classList.toggle('active', i === currentStep);
@@ -35,9 +38,10 @@ function updateStepDisplay() {
     const isAmountStep = currentStep === 1;
     const isProcessingStep = currentStep === 2;
 
-    dom.prevBtn.style.display = isAmountStep ? 'inline-flex' : 'none';
-    dom.nextBtn.style.display = isFirstStep ? 'inline-flex' : 'none';
-    dom.submitBtn.style.display = isAmountStep ? 'inline-flex' : 'none';
+    // Use flex as the new buttons are in a flex container
+    dom.prevBtn.style.display = isAmountStep ? 'flex' : 'none';
+    dom.nextBtn.style.display = isFirstStep ? 'flex' : 'none';
+    dom.submitBtn.style.display = isAmountStep ? 'flex' : 'none';
 
     if (isProcessingStep) {
         dom.prevBtn.style.display = 'none';
@@ -46,7 +50,9 @@ function updateStepDisplay() {
     }
 
     if (dom.progressBar) {
-        dom.progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
+        // Ensure progress bar never goes to 0% if it's visible
+        const progress = currentStep > -1 ? ((currentStep + 1) / totalSteps) * 100 : 33.33;
+        dom.progressBar.style.width = `${progress}%`;
     }
 }
 
@@ -102,18 +108,20 @@ async function handleFormSubmit() {
 
     console.log('Processing payment with data:', formData);
 
+    // Simulate payment processing
     setTimeout(() => {
         UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
         hideModal();
 
+        // Reset state after a short delay to allow for closing animation
         setTimeout(() => {
             currentStep = 0;
             formData = {};
             if(dom.form) dom.form.reset();
-            dom.createAccountCheckbox.checked = true;
-            dom.emailContainer.classList.add('visible');
+            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = true;
+            if (dom.emailContainer) dom.emailContainer.classList.add('visible');
             updateStepDisplay();
-        }, 300);
+        }, 500);
 
     }, 2500);
 }
@@ -142,13 +150,11 @@ function showModal() {
         return;
     }
 
-    // Setup checkbox listener here as it's part of the modal's internal logic
     dom.createAccountCheckbox?.addEventListener('change', e => {
         dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
     translateUI();
-
     currentStep = 0;
 
     const currentUser = State.get('currentUser');
@@ -159,6 +165,7 @@ function showModal() {
     }
     dom.amountInput.value = '';
 
+    // Use the generic UI.openModal which should handle the .visible class
     UI.openModal(dom.modal);
     updateStepDisplay();
 }
@@ -169,12 +176,13 @@ function hideModal() {
 }
 
 function init() {
-    // No-op, initialization is handled by showModal to be on-demand.
+    // Initialization is handled by showModal to be on-demand.
 }
 
 export const TippingModal = {
     init,
     showModal,
+    hideModal,
     handleNextStep,
     handlePrevStep,
     handleFormSubmit,
