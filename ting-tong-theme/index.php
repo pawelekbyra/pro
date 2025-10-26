@@ -22,7 +22,7 @@ get_header();
             <div class="elegant-modal-body" id="tippingBody">
                 <!-- Krok 1: E-mail i zgoda -->
                 <div class="elegant-modal-step" data-step="0">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem i wspieraj rozwój tego projektu.</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem i wspieraj rozwój projektu. Jeśli chcesz, możesz przy tym założyć darmowe konto.</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
                             <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">Chcę założyć konto patrona</span>
@@ -37,7 +37,7 @@ get_header();
 
                 <!-- Krok 2: Wybór kwoty -->
                 <div class="elegant-modal-step" data-step="1">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz kwotę, którą chcesz wesprzeć projekt.</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
                     <div class="elegant-modal-fields-container">
                         <div class="tipping-amount-container">
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="5.00" min="1" step="any">
@@ -49,7 +49,7 @@ get_header();
 
                 <!-- Krok 3: Przekierowanie do płatności -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Przekierowanie do płatności...</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
                         <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności PayPal.</p>
