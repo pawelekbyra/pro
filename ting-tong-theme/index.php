@@ -39,9 +39,14 @@ get_header();
                 <div class="elegant-modal-step" data-step="1">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
                     <div class="elegant-modal-fields-container">
+                        <div class="tipping-amount-suggestions">
+                            <button type="button" class="amount-suggestion-btn" data-amount="5">5 PLN</button>
+                            <button type="button" class="amount-suggestion-btn active" data-amount="10">10 PLN</button>
+                            <button type="button" class="amount-suggestion-btn" data-amount="20">20 PLN</button>
+                        </div>
                         <div class="tipping-amount-container">
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="5.00" min="1" step="any">
-                            <span class="tipping-currency">EUR</span>
+                            <span class="tipping-currency">PLN</span>
                         </div>
                         <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
                     </div>
