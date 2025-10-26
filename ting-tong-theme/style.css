@@ -928,16 +928,14 @@ body,
   bottom: 0;
   left: 0;
   width: 100%;
-  min-height: 110px;
+  height: var(--bottombar-base-height); /* ✅ Zmieniono na stałą wysokość */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end; /* ✅ Wyrównaj zawartość do dołu */
   padding: 10px 75px 10px 12px;
   color: white;
   z-index: 10050;
   padding-bottom: calc(10px + var(--safe-area-bottom));
-
-  /* ✅ NOWE: Ukryj bottombar domyślnie */
   opacity: 0;
   transition: opacity 0.6s ease-out;
 }
@@ -1029,56 +1027,53 @@ body,
 .progress-bar.dragging .progress-bar-handle {
   transform: translate(-50%, -50%) scale(1.5);
 }
+
 .tiktok-symulacja .text-info {
-  flex: none;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: 8px;
-}
-.tiktok-symulacja .slide-title,
-.tiktok-symulacja .slide-author-line {
-    margin-bottom: 0;
 }
 
-.tiktok-symulacja .slide-title {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.2;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-}
-
-.tiktok-symulacja .slide-author-line {
+.tiktok-symulacja .slide-meta-line {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-}
-
-.tiktok-symulacja .slide-description {
-    flex-basis: 100%;
-}
-
-.tiktok-symulacja .author-label {
-  font-size: 10px; /* Znacznie mniejsza czcionka */
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
+  gap: 8px;
+  width: 100%;
+  overflow: hidden; /* Zapobiegaj przepełnieniu */
 }
 
 .tiktok-symulacja .author-name {
-  font-size: 14px; /* Taka sama jak opis */
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700; /* Używamy <strong>, więc pogrubiamy */
   color: white;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  flex-shrink: 0; /* Nie zmniejszaj nazwy autora */
+}
+
+.tiktok-symulacja .slide-title {
+  font-size: 16px;
+  font-weight: 400; /* Zwykła waga dla kontrastu */
+  line-height: 1.2;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  white-space: nowrap; /* Nie zawijaj tekstu */
+  overflow: hidden; /* Ukryj przepełnienie */
+  text-overflow: ellipsis; /* Dodaj wielokropek */
+  min-width: 0; /* Pozwól na zmniejszenie */
 }
 
 .tiktok-symulacja .slide-description {
   font-size: 14px;
-  line-height: 1.3;
-  white-space: normal;
+  line-height: 1.4;
   color: white;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  margin-top: 4px;
+  /* Ograniczenie do 2 linii z wielokropkiem */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Ogranicz do 2 linii */
+  -webkit-box-orient: vertical;
+  white-space: normal;
 }
 
 /* ==========================================================================
@@ -4748,6 +4743,12 @@ body,
 
 .elegant-modal-step {
   display: none;
+  animation: elegantFadeIn 0.6s ease-out;
+}
+
+@keyframes elegantFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .elegant-modal-step.active {
