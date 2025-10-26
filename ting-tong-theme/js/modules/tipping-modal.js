@@ -13,7 +13,7 @@ function cacheDOM() {
         form: document.getElementById('tippingForm'),
         title: document.getElementById('tippingTitle'),
         progressBar: document.getElementById('tippingProgressBar'),
-        steps: document.querySelectorAll('#tippingModal .elegant-modal-step'), // <-- FIX: Use new class
+        steps: document.querySelectorAll('#tippingModal .elegant-modal-step'),
         prevBtn: document.getElementById('tippingPrevBtn'),
         nextBtn: document.getElementById('tippingNextBtn'),
         submitBtn: document.getElementById('tippingSubmitBtn'),
@@ -21,7 +21,17 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
+        amountSuggestionBtns: document.querySelectorAll('.amount-suggestion-btn'),
     };
+}
+
+function handleAmountSuggestion(e) {
+    const selectedAmount = e.target.dataset.amount;
+    if (dom.amountInput) {
+        dom.amountInput.value = parseFloat(selectedAmount).toFixed(2);
+    }
+    dom.amountSuggestionBtns.forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
 }
 
 function updateStepDisplay() {
@@ -154,6 +164,17 @@ function showModal() {
         dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
+    dom.amountSuggestionBtns?.forEach(btn => {
+        btn.addEventListener('click', handleAmountSuggestion);
+    });
+
+    dom.amountInput?.addEventListener('input', () => {
+        const currentValue = parseFloat(dom.amountInput.value);
+        dom.amountSuggestionBtns.forEach(btn => {
+            btn.classList.toggle('active', parseFloat(btn.dataset.amount) === currentValue);
+        });
+    });
+
     translateUI();
     currentStep = 0;
 
@@ -163,7 +184,14 @@ function showModal() {
     } else {
         dom.emailInput.value = '';
     }
-    dom.amountInput.value = '';
+
+    // Set default amount
+    const defaultAmount = 10.00;
+    dom.amountInput.value = defaultAmount.toFixed(2);
+    dom.amountSuggestionBtns.forEach(btn => {
+        btn.classList.toggle('active', parseFloat(btn.dataset.amount) === defaultAmount);
+    });
+
 
     // Use the generic UI.openModal which should handle the .visible class
     UI.openModal(dom.modal);
