@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .forEach((btn) => (btn.disabled = true));
               button.classList.add("is-selected");
               // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie
-              _startApp(button.dataset.lang);
+              setTimeout(() => _startApp(button.dataset.lang), 300);
             },
             { once: true },
           );
