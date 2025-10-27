@@ -942,6 +942,9 @@ body,
   opacity: 1;
 }
 
+/* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczony jest pasek instalacji PWA */
+.app-frame--pwa-visible .bottombar {
+}
 /* === PATCH: Pasek progressu na górnej krawędzi bottombar (v2 - Pixel Perfect) === */
 
 /* 1. Zmień pozycjonowanie i wysokość - progress bar ma być częścią bottombar */
@@ -962,7 +965,6 @@ body,
 .app-frame--pwa-visible .progress-bar {
   top: unset;
   bottom: 100%;
-  transform: translateY(calc(-1 * var(--bottombar-height))); /* ✅ POPRAWKA: Przesuń tylko pasek progressu w górę */
 }
 
 /* 3. Dla przeglądarki (nie-PWA) - usuń transform - pozostaje bez zmian */
