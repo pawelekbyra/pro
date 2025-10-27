@@ -944,6 +944,7 @@ body,
 
 /* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
 .app-frame--pwa-visible .bottombar {
+  transform: translateY(calc(-1 * var(--bottombar-height)));
 }
 /* === PATCH: Pasek progressu na górnej krawędzi bottombar (v2 - Pixel Perfect) === */
 
@@ -1473,17 +1474,16 @@ body,
   justify-content: center;
   gap: 10px;
   z-index: 10001; /* Podniesiony z-index */
-  white-space: normal;
+  white-space: nowrap; /* Zapobiegaj łamaniu linii między ikoną a tekstem */
 
   /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
-  width: fit-content;
+  width: auto; /* Pozwól flexboxowi decydować o szerokości */
   max-width: calc(100vw - 40px); /* Maksymalna szerokość z marginesami po 20px */
 
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   border: 1px solid #000;
   animation: fadeInOut 4s ease-in-out forwards;
   box-sizing: border-box;
-  text-align: center;
 }
 
 #app-frame.hide-ui #alertBox {
@@ -1501,6 +1501,8 @@ body,
     display: block;
     min-width: 0;
     flex-grow: 1;
+    white-space: normal; /* Pozwól tekstowi wewnątrz się zawijać */
+    text-align: center; /* Wycentruj tekst, gdy się zawija */
 }
 
 #alertBox.visible {
