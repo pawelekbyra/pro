@@ -20,7 +20,7 @@ Text Domain: tingtongtheme
   width: 100%;
   height: 100%;
   background: #000;
-  z-index: 10000;
+  z-index: 100000;
   transition: opacity 0.5s linear;
   overflow: hidden; /* Prevent layout issues */
 }
@@ -931,8 +931,8 @@ body,
   height: var(--bottombar-base-height); /* ✅ Zmieniono na stałą wysokość */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* ✅ Wyrównaj zawartość do dołu */
-  padding: 10px 75px 10px 12px;
+  justify-content: flex-start; /* ✅ Wyrównaj zawartość do góry */
+  padding: 15px 75px 10px 12px; /* ✅ Zwiększony górny padding */
   color: white;
   z-index: 10050;
   padding-bottom: calc(10px + var(--safe-area-bottom));
