@@ -33,7 +33,9 @@ async function handleLikeToggle(button) {
     UI.showAlert(Utils.getTranslation("likeAlert"));
     return;
   }
-  const slideId = button.closest(".webyx-section")?.dataset.slideId;
+  const swiper = State.get('swiper');
+  if (!swiper) return;
+  const slideId = swiper.slides[swiper.activeIndex]?.dataset.slideId;
   const slideData = slidesData.find((s) => s.id === slideId);
   if (!slideData) return;
 
@@ -78,10 +80,10 @@ async function handleLikeToggle(button) {
 }
 
 function handleShare(button) {
-  const section = button.closest(".webyx-section");
-  const slideData = slidesData.find(
-    (s) => s.id === section.dataset.slideId,
-  );
+  const swiper = State.get('swiper');
+  if (!swiper) return;
+  const slideId = swiper.slides[swiper.activeIndex]?.dataset.slideId;
+  const slideData = slidesData.find((s) => s.id === slideId);
   if (navigator.share && slideData) {
     navigator
       .share({
@@ -524,15 +526,13 @@ export const Handlers = {
         }
         break;
       case "open-public-profile": {
-        const profileSection = actionTarget.closest(".webyx-section");
-        if (profileSection) {
-          const slideData = slidesData.find(
-            (s) => s.id === profileSection.dataset.slideId,
-          );
-          if (slideData) {
-            UI.populateProfileModal(slideData);
-            UI.openModal(document.getElementById('tiktok-profile-modal'));
-          }
+        const swiper = State.get('swiper');
+        if (!swiper) break;
+        const slideId = swiper.slides[swiper.activeIndex]?.dataset.slideId;
+        const slideData = slidesData.find((s) => s.id === slideId);
+        if (slideData) {
+          UI.populateProfileModal(slideData);
+          UI.openModal(document.getElementById('tiktok-profile-modal'));
         }
         break;
       }
