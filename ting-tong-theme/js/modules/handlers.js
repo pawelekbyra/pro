@@ -35,7 +35,7 @@ async function handleLikeToggle(button) {
   }
   const swiper = State.get('swiper');
   if (!swiper) return;
-  const slideId = swiper.slides[swiper.activeIndex]?.dataset.slideId;
+  const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
   const slideData = slidesData.find((s) => s.id === slideId);
   if (!slideData) return;
 
@@ -82,8 +82,10 @@ async function handleLikeToggle(button) {
 function handleShare(button) {
   const swiper = State.get('swiper');
   if (!swiper) return;
-  const slideId = swiper.slides[swiper.activeIndex]?.dataset.slideId;
-  const slideData = slidesData.find((s) => s.id === slideId);
+  const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+  const slideData = slidesData.find(
+    (s) => s.id === slideId,
+  );
   if (navigator.share && slideData) {
     navigator
       .share({
@@ -528,8 +530,10 @@ export const Handlers = {
       case "open-public-profile": {
         const swiper = State.get('swiper');
         if (!swiper) break;
-        const slideId = swiper.slides[swiper.activeIndex]?.dataset.slideId;
-        const slideData = slidesData.find((s) => s.id === slideId);
+        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+        const slideData = slidesData.find(
+          (s) => s.id === slideId,
+        );
         if (slideData) {
           UI.populateProfileModal(slideData);
           UI.openModal(document.getElementById('tiktok-profile-modal'));
@@ -854,8 +858,13 @@ export const Handlers = {
       const button = commentForm.querySelector('button[type="submit"]');
       if (button) button.disabled = true;
 
-      const slideElement = document.querySelector(".swiper-slide-active");
-      const slideId = slideElement?.dataset.slideId;
+      const swiper = State.get('swiper');
+      if (!swiper) {
+        console.error('Swiper instance not found');
+        if (button) button.disabled = false;
+        return;
+      }
+      const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
       const parentId = State.get("replyingToComment");
 
       if (!slideId) {
