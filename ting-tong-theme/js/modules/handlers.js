@@ -551,16 +551,8 @@ export const Handlers = {
         break;
       case "open-comments-modal": {
         const swiper = State.get('swiper');
-        if (!swiper) {
-          console.error('Swiper instance not found');
-          return;
-        }
+        if (!swiper) break;
         const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-
-        if (!slideId) {
-          console.error('No slideId found for comments modal');
-          return;
-        }
 
         const commentsModal = document.getElementById('commentsModal');
         const modalBody = commentsModal.querySelector(".modal-body");
