@@ -10,6 +10,7 @@ let formData = {};
 function cacheDOM() {
     dom = {
         modal: document.getElementById('tippingModal'),
+        closeBtn: document.querySelector('#tippingModal [data-action="close-modal"]'),
         form: document.getElementById('tippingForm'),
         title: document.getElementById('tippingTitle'),
         progressBar: document.getElementById('tippingProgressBar'),
@@ -204,7 +205,20 @@ function hideModal() {
 }
 
 function init() {
-    // Initialization is handled by showModal to be on-demand.
+    cacheDOM();
+    if (!dom.modal) return;
+
+    // Listener for the close button
+    if (dom.closeBtn) {
+        dom.closeBtn.addEventListener('click', hideModal);
+    }
+
+    // Listener for the background overlay click
+    dom.modal.addEventListener('click', (e) => {
+        if (e.target === dom.modal) {
+            hideModal();
+        }
+    });
 }
 
 export const TippingModal = {

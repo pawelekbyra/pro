@@ -959,7 +959,7 @@ body,
   height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  z-index: 10051; /* Wyższe niż bottombar */
+  z-index: 10060; /* Podniesiony, aby był nad paskiem PWA */
   transition: height 0.2s ease-in-out;
   transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
@@ -1036,7 +1036,7 @@ body,
 
 .tiktok-symulacja .slide-meta-line {
   display: flex;
-  align-items: baseline;
+  align-items: center; /* Lepsze wyrównanie w pionie */
   gap: 8px;
   width: 100%;
   overflow: hidden; /* Zapobiegaj przepełnieniu */
@@ -1047,7 +1047,11 @@ body,
   font-weight: 700; /* Używamy <strong>, więc pogrubiamy */
   color: white;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-  flex-shrink: 0; /* Nie zmniejszaj nazwy autora */
+  /* NOWE: Pozwól na skracanie i dodaj wielokropek, aby uniknąć przepełnienia */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .tiktok-symulacja .slide-title {
@@ -4712,6 +4716,7 @@ body,
   padding: 20px 24px 16px;
   text-align: center;
   flex-shrink: 0;
+  position: relative; /* Needed for the close button */
 }
 
 .elegant-modal-title {
