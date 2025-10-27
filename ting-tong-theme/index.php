@@ -9,11 +9,12 @@ get_header();
 ?>
 
 <!-- === Tipping Modal (New Elegant Version) === -->
-<div id="tippingModal" class="elegant-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+<div id="tippingModal" class="elegant-modal-overlay modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
                 <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
+                <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
                 </div>
