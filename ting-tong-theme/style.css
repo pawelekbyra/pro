@@ -934,12 +934,14 @@ body,
   z-index: 10050;
   padding-bottom: calc(10px + var(--safe-area-bottom));
   opacity: 0;
-  transition: opacity 0.6s ease-out;
+  transform: translateY(100%);
+  transition: opacity 0.6s ease-out, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ✅ NOWE: Pokaż bottombar dopiero gdy video jest załadowane */
 .tiktok-symulacja.video-loaded .bottombar {
   opacity: 1;
+  transform: translateY(0);
 }
 
 /* Dodaj tę regułę, aby dostosować dolny pasek, gdy widoczny jest pasek instalacji PWA */
@@ -3342,6 +3344,7 @@ body,
   transform: translateY(100%);
   transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   visibility: hidden; /* Start hidden */
+  height: var(--bottombar-height);
 }
 
 .pwa-prompt.visible {
