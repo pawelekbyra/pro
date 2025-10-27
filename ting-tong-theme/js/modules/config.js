@@ -106,6 +106,8 @@ export const Config = {
       videoErrorSubtitle: "Nie można załadować materiału.",
       videoErrorRetry: "Spróbuj ponownie",
       alreadyInstalledToast: "Aplikacja jest już zainstalowana.",
+      pwaAlreadyInstalled: "Przecież już ściągnąłeś.",
+      pwaNotSupported: "Instalacja nie jest wspierana na tej przeglądarce.",
       installNotReadyText: "Instalacja nie jest obecnie możliwa na tej przeglądarce lub urządzeniu.",
       appInstalledSuccessText: "Aplikacja została pomyślnie zainstalowana!",
       tippingTitle: {

@@ -546,7 +546,12 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal": {
-        const slideId = actionTarget.closest(".webyx-section")?.dataset.slideId;
+        const swiper = State.get('swiper');
+        if (!swiper) {
+          console.error('Swiper instance not found');
+          return;
+        }
+        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
 
         if (!slideId) {
           console.error('No slideId found for comments modal');

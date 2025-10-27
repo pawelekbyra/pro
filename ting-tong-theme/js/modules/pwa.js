@@ -87,10 +87,16 @@ window.addEventListener("beforeinstallprompt", (e) => {
 });
 
 function handleInstallClick() {
+  // FIX: Najpierw sprawdzamy, czy aplikacja nie jest już zainstalowana (standalone).
+  // Jeśli tak, wyświetlamy stosowny komunikat i przerywamy.
+  if (isStandalone()) {
+    if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaAlreadyInstalled"));
+    return;
+  }
+
   // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
   // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
   // pokazanie odpowiednich instrukcji dla iOS lub desktop.
-
   if (installPromptEvent) {
     installPromptEvent.prompt();
     // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
