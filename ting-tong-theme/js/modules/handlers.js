@@ -530,14 +530,23 @@ export const Handlers = {
       case "open-public-profile": {
         const swiper = State.get('swiper');
         if (!swiper) break;
-        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-        const slideData = slidesData.find(
-          (s) => s.id === slideId,
-        );
-        if (slideData) {
-          UI.populateProfileModal(slideData);
-          UI.openModal(document.getElementById('tiktok-profile-modal'));
+
+        // Use realIndex to get the correct slide data, which is reliable in loop mode.
+        const slideData = slidesData[swiper.realIndex];
+
+        if (!slideData) {
+            console.error("Could not find slide data for realIndex:", swiper.realIndex);
+            break;
         }
+
+        if (!State.get("isUserLoggedIn")) {
+            Utils.vibrateTry();
+            UI.showAlert(Utils.getTranslation("profileAccessAlert"));
+            return;
+        }
+
+        UI.populateProfileModal(slideData);
+        UI.openModal(document.getElementById('tiktok-profile-modal'));
         break;
       }
       case "toggle-like":
@@ -552,7 +561,8 @@ export const Handlers = {
       case "open-comments-modal": {
         const swiper = State.get('swiper');
         if (!swiper) break;
-        const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+        const slideData = slidesData[swiper.realIndex];
+        const slideId = slideData.id;
 
         const commentsModal = document.getElementById('commentsModal');
         const modalBody = commentsModal.querySelector(".modal-body");
