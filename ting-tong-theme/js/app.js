@@ -334,41 +334,56 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-              // ✅ FIX: Bezpośrednie wywołanie Handlera dla akcji, aby ominąć problemy z propagacją zdarzeń w Swiperze
-              const actionTarget = event.target.closest('[data-action]');
-              if (actionTarget) {
-                Handlers.mainClickHandler(event);
-                return; // Zatrzymaj dalsze przetwarzanie, aby nie pauzować wideo
-              }
+                // 1. Zidentyfikuj element interaktywny (z sidebar'a lub innego miejsca)
+                const actionTarget = event.target.closest('[data-action]');
 
-              // Jeśli kliknięto na inne elementy UI, które nie powinny pauzować wideo, zignoruj
-              if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
-                return;
-              }
+                if (actionTarget) {
+                    // KLUCZOWA ZMIANA: Natychmiast zatrzymaj propagację ZDARZENIA.
+                    // Gwarantuje to, że żaden inny globalny listener (ani dalsza logika Swipera)
+                    // nie przetworzy tego jako kliknięcia "w tle" lub na wideo.
+                    event.stopPropagation();
 
-              // Logika pauzy/odtwarzania wideo, jeśli kliknięto bezpośrednio na wideo
-              const activeSlide = swiper.slides[swiper.activeIndex];
-              const video = activeSlide?.querySelector('video');
+                    // Wywołaj centralny handler, który wie, co zrobić z tą akcją.
+                    Handlers.mainClickHandler(event);
 
-              if (!video) return;
+                    return; // Zakończ działanie handlera Swipera
+                }
 
-              const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-              const replayOverlay = activeSlide.querySelector('.replay-overlay');
+                // 2. Jeśli kliknięto na element wewnątrz sidebara lub bottombara, który
+                // nie ma data-action, nadal zignoruj.
+                if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
+                    return;
+                }
 
-              if (video.ended) {
-                video.currentTime = 0;
-                video.play().catch(err => console.log("Błąd replay:", err));
-                if (replayOverlay) replayOverlay.classList.remove('visible');
-                return;
-              }
+                // 3. Jeśli nie było to kliknięcie na interaktywny element ani pasek UI,
+                // przejdź do oryginalnej logiki play/pause wideo.
 
-              if (video.paused) {
-                video.play().catch(err => console.log("Błąd play:", err));
-                if (pauseOverlay) pauseOverlay.classList.remove('visible');
-              } else {
-                video.pause();
-                if (pauseOverlay) pauseOverlay.classList.add('visible');
-              }
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const video = activeSlide?.querySelector('video');
+
+                if (!video) return;
+
+                const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+                const replayOverlay = activeSlide.querySelector('.replay-overlay');
+
+                // Case 1: Video has ended -> Replay
+                if (video.ended) {
+                    video.currentTime = 0;
+                    video.play().catch(err => console.log("Błąd replay:", err));
+                    if (replayOverlay) replayOverlay.classList.remove('visible');
+                    return;
+                }
+
+                // Case 2: Video is paused -> Play
+                if (video.paused) {
+                    video.play().catch(err => console.log("Błąd play:", err));
+                    if (pauseOverlay) pauseOverlay.classList.remove('visible');
+                }
+                // Case 3: Video is playing -> Pause
+                else {
+                    video.pause();
+                    if (pauseOverlay) pauseOverlay.classList.add('visible');
+                }
             },
           },
         });
