@@ -44,6 +44,18 @@ if ('serviceWorker' in navigator) {
 document.addEventListener("DOMContentLoaded", () => {
   API.init(); // ✅ FIX: Initialize API data after DOM is ready.
   UI.initDOMCache();
+
+  // ==========================================================================
+  // KOD DIAGNOSTYCZNY - Rejestruje wszystkie kliknięcia, aby zidentyfikować,
+  // który element przechwytuje zdarzenia przeznaczone dla sidebara.
+  // Używamy `true`, aby nasłuchiwać w fazie "capture", czyli zanim zdarzenie
+  // dotrze do docelowego elementu.
+  // ==========================================================================
+  document.body.addEventListener('click', (e) => {
+    console.log('%c[DIAGNOSTYKA] Kliknięto w element:', 'color: #ff0055; font-weight: bold;', e.target);
+  }, true);
+  // ==========================================================================
+
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
     console.warn("`ajax_object` is not defined. Using mock data for standalone development.");
