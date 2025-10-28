@@ -333,11 +333,19 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-              // Ignoruj kliknięcia na interaktywnych elementach
-              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay')) {
+              // If a button with a data-action was clicked, manually trigger the global handler.
+              const actionTarget = event.target.closest('[data-action]');
+              if (actionTarget) {
+                Handlers.mainClickHandler(event);
                 return;
               }
 
+              // If the click was on the non-interactive background of the UI, do nothing.
+              if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
+                return;
+              }
+
+              // Otherwise, it was a click on the video content, so run play/pause logic.
               const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector('video');
 
