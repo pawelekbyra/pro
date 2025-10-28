@@ -305,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
           resistanceRatio: 0.85,
           preventInteractionOnTransition: true,
           edgeSwipeDetection: 'prevent',
+          preventClicks: false,
           noSwipingSelector: '.sidebar',
           on: {
             init: function (swiper) {
