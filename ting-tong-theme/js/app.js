@@ -333,19 +333,27 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-              // If a button with a data-action was clicked, manually trigger the global handler.
+              // Priority 1: Check if an interactive element was clicked.
+              // Swiper's listener can stop event propagation, so we must manually
+              // delegate the event to the global handler.
               const actionTarget = event.target.closest('[data-action]');
               if (actionTarget) {
+                // Stop event propagation to prevent any other listeners from
+                // interfering, then handle the click. This ensures our action is final.
+                event.stopPropagation();
                 Handlers.mainClickHandler(event);
-                return;
+                return; // Action handled, stop further processing.
               }
 
-              // If the click was on the non-interactive background of the UI, do nothing.
+              // Priority 2: Check if the click was on a non-interactive UI area.
+              // This prevents the video from pausing if the user clicks the background
+              // of the sidebar or bottom bar.
               if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
-                return;
+                return; // Click ignored, stop further processing.
               }
 
-              // Otherwise, it was a click on the video content, so run play/pause logic.
+              // Priority 3: If neither of the above, the click was on the video.
+              // Proceed with play/pause/replay logic.
               const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector('video');
 
@@ -354,7 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
               const pauseOverlay = activeSlide.querySelector('.pause-overlay');
               const replayOverlay = activeSlide.querySelector('.replay-overlay');
 
-              // ✅ PRZYPADEK 1: Film się skończył - replay
+              // Case 1: Video has ended -> Replay
               if (video.ended) {
                 video.currentTime = 0;
                 video.play().catch(err => console.log("Błąd replay:", err));
@@ -362,12 +370,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
               }
 
-              // ✅ PRZYPADEK 2: Film jest spauzowany - odtwórz
+              // Case 2: Video is paused -> Play
               if (video.paused) {
                 video.play().catch(err => console.log("Błąd play:", err));
                 if (pauseOverlay) pauseOverlay.classList.remove('visible');
               }
-              // ✅ PRZYPADEK 3: Film gra - spauzuj
+              // Case 3: Video is playing -> Pause
               else {
                 video.pause();
                 if (pauseOverlay) pauseOverlay.classList.add('visible');
