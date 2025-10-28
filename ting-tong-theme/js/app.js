@@ -334,15 +334,19 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-              // Priority 1 & 2 Combined: Check if the click was on an interactive or non-pausing UI area.
-              // This prevents the video from pausing when clicking on elements with data-action,
-              // the sidebar, the bottom bar, or overlays. The global click handler will manage the action.
-              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay')) {
-                return; // Ignore click here, let the global handler take care of it.
+              // ✅ FIX: Bezpośrednie wywołanie Handlera dla akcji, aby ominąć problemy z propagacją zdarzeń w Swiperze
+              const actionTarget = event.target.closest('[data-action]');
+              if (actionTarget) {
+                Handlers.mainClickHandler(event);
+                return; // Zatrzymaj dalsze przetwarzanie, aby nie pauzować wideo
               }
 
-              // Priority 3 (now the main logic): If the click was on the video itself.
-              // Proceed with play/pause/replay logic.
+              // Jeśli kliknięto na inne elementy UI, które nie powinny pauzować wideo, zignoruj
+              if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
+                return;
+              }
+
+              // Logika pauzy/odtwarzania wideo, jeśli kliknięto bezpośrednio na wideo
               const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector('video');
 
@@ -351,7 +355,6 @@ document.addEventListener("DOMContentLoaded", () => {
               const pauseOverlay = activeSlide.querySelector('.pause-overlay');
               const replayOverlay = activeSlide.querySelector('.replay-overlay');
 
-              // Case 1: Video has ended -> Replay
               if (video.ended) {
                 video.currentTime = 0;
                 video.play().catch(err => console.log("Błąd replay:", err));
@@ -359,13 +362,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
               }
 
-              // Case 2: Video is paused -> Play
               if (video.paused) {
                 video.play().catch(err => console.log("Błąd play:", err));
                 if (pauseOverlay) pauseOverlay.classList.remove('visible');
-              }
-              // Case 3: Video is playing -> Pause
-              else {
+              } else {
                 video.pause();
                 if (pauseOverlay) pauseOverlay.classList.add('visible');
               }
