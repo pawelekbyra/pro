@@ -305,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
           resistanceRatio: 0.85,
           preventInteractionOnTransition: true,
           edgeSwipeDetection: 'prevent',
+          noSwipingClass: 'swiper-no-swiping',
           on: {
             init: function (swiper) {
               // --- One-time animation on first app load ---
