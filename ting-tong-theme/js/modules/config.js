@@ -146,6 +146,10 @@ export const Config = {
           pl: "Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności Stripe.",
           en: "You will be redirected to the secure Stripe payment gateway shortly."
       },
+    profileAccessAlert: {
+      pl: "Zaloguj się, aby zobaczyć profil.",
+      en: "Log in to view the profile.",
+    },
       tippingPrev: {
           pl: "Wstecz",
           en: "Back"
