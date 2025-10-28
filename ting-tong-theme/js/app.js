@@ -334,26 +334,14 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-              // Priority 1: Check if an interactive element was clicked.
-              // Swiper's listener can stop event propagation, so we must manually
-              // delegate the event to the global handler.
-              const actionTarget = event.target.closest('[data-action]');
-              if (actionTarget) {
-                // Stop event propagation to prevent any other listeners from
-                // interfering, then handle the click. This ensures our action is final.
-                event.stopPropagation();
-                Handlers.mainClickHandler(event);
-                return; // Action handled, stop further processing.
+              // Priority 1 & 2 Combined: Check if the click was on an interactive or non-pausing UI area.
+              // This prevents the video from pausing when clicking on elements with data-action,
+              // the sidebar, the bottom bar, or overlays. The global click handler will manage the action.
+              if (event.target.closest('[data-action], .sidebar, .bottombar, .secret-overlay')) {
+                return; // Ignore click here, let the global handler take care of it.
               }
 
-              // Priority 2: Check if the click was on a non-interactive UI area.
-              // This prevents the video from pausing if the user clicks the background
-              // of the sidebar or bottom bar.
-              if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
-                return; // Click ignored, stop further processing.
-              }
-
-              // Priority 3: If neither of the above, the click was on the video.
+              // Priority 3 (now the main logic): If the click was on the video itself.
               // Proceed with play/pause/replay logic.
               const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector('video');
