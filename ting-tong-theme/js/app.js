@@ -231,11 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.updateTranslations();
 
         const handleMediaChange = (swiper) => {
-          // ✅ FIX: Zawsze usuwaj `aria-hidden` z kontenera podczas zmiany slajdu.
-          // To jest zabezpieczenie przed "zamrożeniem" UI, jeśli modal
-          // lub inna logika nie zamknie się poprawnie.
-          UI.DOM.container.removeAttribute("aria-hidden");
-
           // First, pause every single video element within the swiper container.
           swiper.el.querySelectorAll('video').forEach(video => {
             if (!video.paused) {
