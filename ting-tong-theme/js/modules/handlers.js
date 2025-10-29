@@ -147,14 +147,6 @@ export const Handlers = {
     }
   },
   mainClickHandler: (e) => {
-    // ==========================================================================
-    // KOD DIAGNOSTYCZNY - Sprawdza, czy główny handler kliknięć jest wywoływany.
-    // Jeśli ten log się pojawi, a mimo to nic się nie dzieje, problem jest
-    // w logice `switch` poniżej.
-    // ==========================================================================
-    console.log('%c[DIAGNOSTYKA] Handler `mainClickHandler` został uruchomiony.', 'color: #00aaff; font-weight: bold;');
-    // ==========================================================================
-
     const target = e.target;
     const actionTarget = target.closest("[data-action]");
 
@@ -387,6 +379,9 @@ export const Handlers = {
     );
 
     switch (action) {
+      case "open-comments-modal":
+        CommentsModal.open();
+        break;
       case "toggle-password-visibility":
         const passwordInput = document.getElementById('tt-password');
         const eyeOpen = actionTarget.querySelector('.eye-icon-open');
@@ -518,9 +513,6 @@ export const Handlers = {
         break;
       case "toggle-language":
         handleLanguageToggle();
-        break;
-      case "open-comments-modal":
-        CommentsModal.open();
         break;
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
