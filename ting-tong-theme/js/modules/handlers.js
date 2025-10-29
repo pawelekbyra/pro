@@ -7,6 +7,7 @@ import { Notifications } from './notifications.js';
 import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
+import { CommentsModal } from './comments-modal.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -373,54 +374,6 @@ export const Handlers = {
       }
     }
 
-    const sortTrigger = target.closest(".sort-trigger");
-    if (sortTrigger) {
-      sortTrigger.parentElement.classList.toggle("open");
-      return;
-    }
-
-    const sortOption = target.closest(".sort-option");
-    if (sortOption) {
-      const dropdown = sortOption.closest(".sort-dropdown");
-      const newSortOrder = sortOption.dataset.sort;
-
-      if (State.get("commentSortOrder") === newSortOrder) {
-        dropdown.classList.remove("open");
-        return;
-      }
-
-      State.set("commentSortOrder", newSortOrder);
-      dropdown.querySelectorAll(".sort-option").forEach((opt) => opt.classList.remove("active"));
-      sortOption.classList.add("active");
-      UI.updateTranslations();
-      dropdown.classList.remove("open");
-
-      const slideId = document.querySelector(".swiper-slide-active")?.dataset.slideId;
-      if (!slideId) return;
-
-      const slideData = slidesData.find(s => s.id === slideId);
-      if (!slideData || !Array.isArray(slideData.comments)) {
-        console.error("No local comments to sort for slide:", slideId);
-        UI.showAlert(Utils.getTranslation("commentSortError"), true);
-        return;
-      }
-
-      let comments = [...slideData.comments]; // Create a copy to sort
-
-      if (newSortOrder === "popular") {
-        comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      } else { // 'newest'
-        comments.sort((a, b) => {
-            const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
-            const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
-            return dateB - dateA;
-        });
-      }
-
-      UI.renderComments(comments);
-      return;
-    }
-
     if (!actionTarget) {
       return;
     }
@@ -566,50 +519,9 @@ export const Handlers = {
       case "toggle-language":
         handleLanguageToggle();
         break;
-      case "open-comments-modal": {
-        const swiper = State.get('swiper');
-        if (!swiper) break;
-        const slideData = slidesData[swiper.realIndex];
-        const slideId = slideData.id;
-
-        const commentsModal = document.getElementById('commentsModal');
-        const modalBody = commentsModal.querySelector(".modal-body");
-        if (!modalBody) {
-          console.error('Modal body not found');
-          return;
-        }
-
-        UI.updateCommentFormVisibility();
-        modalBody.innerHTML = '<div class="loading-spinner"></div>';
-        UI.openModal(commentsModal);
-
-        API.fetchComments(slideId)
-          .then((response) => {
-            if (!response || !response.success) {
-              throw new Error(response?.data?.message || 'Failed to load comments');
-            }
-            const comments = response.data || [];
-            const slideData = slidesData.find(s => s.id === slideId);
-            if (slideData) {
-              slideData.comments = comments;
-            }
-            const sortOrder = State.get("commentSortOrder");
-            if (sortOrder === "popular") {
-              comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-            } else {
-              comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            }
-            UI.renderComments(comments);
-            setTimeout(() => {
-              if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
-            }, 100);
-          })
-          .catch((error) => {
-            console.error('Failed to load comments:', error);
-            modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
-          });
+      case "open-comments-modal":
+        CommentsModal.open();
         break;
-      }
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
