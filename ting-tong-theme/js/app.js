@@ -347,19 +347,18 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function (swiper, event) {
-                // 1. Zidentyfikuj element interaktywny (z sidebar'a lub innego miejsca)
                 const actionTarget = event.target.closest('[data-action]');
 
+                // If the click is on the comments button, let our new module handle it.
+                if (actionTarget && actionTarget.dataset.action === 'open-comments-modal') {
+                    return;
+                }
+
+                // If it's any other action button, let the mainClickHandler process it.
                 if (actionTarget) {
-                    // KLUCZOWA ZMIANA: Natychmiast zatrzymaj propagację ZDARZENIA.
-                    // Gwarantuje to, że żaden inny globalny listener (ani dalsza logika Swipera)
-                    // nie przetworzy tego jako kliknięcia "w tle" lub na wideo.
                     event.stopPropagation();
-
-                    // Wywołaj centralny handler, który wie, co zrobić z tą akcją.
                     Handlers.mainClickHandler(event);
-
-                    return; // Zakończ działanie handlera Swipera
+                    return;
                 }
 
                 // 2. Jeśli kliknięto na element wewnątrz sidebara lub bottombara, który
