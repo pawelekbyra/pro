@@ -41,16 +41,37 @@ const CommentsModal = {
     },
 
     open() {
+        console.log('--- DEBUG: CommentsModal.open() START ---');
         const swiper = State.get('swiper');
-        if (!swiper) return;
 
-        const slideData = slidesData[swiper.realIndex];
-        if (!slideData) {
-            console.error('No slide data found for comments modal.');
+        if (!swiper) {
+            console.error('>>> DEBUG ERROR: Swiper instance NOT FOUND! Aborting.');
+            console.log('--- DEBUG: CommentsModal.open() END ---');
             return;
         }
-        const slideId = slideData.id;
+        console.log('1. Swiper instance found:', swiper);
+        console.log(`2. Swiper realIndex: ${swiper.realIndex} (type: ${typeof swiper.realIndex})`);
 
+        if (typeof swiper.realIndex === 'undefined' || swiper.realIndex === null) {
+            console.error('>>> DEBUG ERROR: swiper.realIndex is undefined or null! Aborting.');
+            console.log('--- DEBUG: CommentsModal.open() END ---');
+            return;
+        }
+
+        const slideData = slidesData[swiper.realIndex];
+
+        if (!slideData) {
+            console.error(`>>> DEBUG ERROR: slideData NOT FOUND for index ${swiper.realIndex}! Aborting.`);
+            console.log('Full slidesData array for inspection:', slidesData);
+            console.log('--- DEBUG: CommentsModal.open() END ---');
+            return;
+        }
+        console.log('3. slideData found:', slideData);
+
+        const slideId = slideData.id;
+        console.log(`4. slideId is: ${slideId}`);
+
+        console.log('5. Calling UI.updateCommentFormVisibility()...');
         UI.updateCommentFormVisibility();
         this.modalBody.innerHTML = '<div class="loading-spinner"></div>';
         UI.openModal(this.modal);
