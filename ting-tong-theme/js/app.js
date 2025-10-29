@@ -142,6 +142,35 @@ document.addEventListener("DOMContentLoaded", () => {
         Handlers.profileModalTabHandler,
       );
 
+      // New, safe tap-to-pause/play logic
+      UI.DOM.container.addEventListener('click', (event) => {
+        // Ignore clicks on any interactive elements
+        if (event.target.closest('.sidebar, .bottombar, .secret-overlay, .pwa-secret-overlay, [data-action]')) {
+          return;
+        }
+
+        const swiper = State.get('swiper');
+        if (!swiper) return;
+
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        const video = activeSlide?.querySelector('video');
+        if (!video) return;
+
+        const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+        const replayOverlay = activeSlide.querySelector('.replay-overlay');
+
+        if (video.ended) {
+          video.currentTime = 0;
+          video.play().catch(err => console.log("Replay error:", err));
+          if (replayOverlay) replayOverlay.classList.remove('visible');
+        } else if (video.paused) {
+          video.play().catch(err => console.log("Play error:", err));
+          if (pauseOverlay) pauseOverlay.classList.remove('visible');
+        } else {
+          video.pause();
+          if (pauseOverlay) pauseOverlay.classList.add('visible');
+        }
+      });
     }
 
     function _initializeStateListeners() {
@@ -346,57 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
               // *******************************************************
             },
             slideChange: handleMediaChange,
-            click: function (swiper, event) {
-                const actionTarget = event.target.closest('[data-action]');
-
-                // If the click is on the comments button, let our new module handle it.
-                if (actionTarget && actionTarget.dataset.action === 'open-comments-modal') {
-                    return;
-                }
-
-                // If it's any other action button, let the mainClickHandler process it.
-                if (actionTarget) {
-                    event.stopPropagation();
-                    Handlers.mainClickHandler(event);
-                    return;
-                }
-
-                // 2. Jeśli kliknięto na element wewnątrz sidebara lub bottombara, który
-                // nie ma data-action, nadal zignoruj.
-                if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
-                    return;
-                }
-
-                // 3. Jeśli nie było to kliknięcie na interaktywny element ani pasek UI,
-                // przejdź do oryginalnej logiki play/pause wideo.
-
-                const activeSlide = swiper.slides[swiper.activeIndex];
-                const video = activeSlide?.querySelector('video');
-
-                if (!video) return;
-
-                const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-                const replayOverlay = activeSlide.querySelector('.replay-overlay');
-
-                // Case 1: Video has ended -> Replay
-                if (video.ended) {
-                    video.currentTime = 0;
-                    video.play().catch(err => console.log("Błąd replay:", err));
-                    if (replayOverlay) replayOverlay.classList.remove('visible');
-                    return;
-                }
-
-                // Case 2: Video is paused -> Play
-                if (video.paused) {
-                    video.play().catch(err => console.log("Błąd play:", err));
-                    if (pauseOverlay) pauseOverlay.classList.remove('visible');
-                }
-                // Case 3: Video is playing -> Pause
-                else {
-                    video.pause();
-                    if (pauseOverlay) pauseOverlay.classList.add('visible');
-                }
-            },
           },
         });
 

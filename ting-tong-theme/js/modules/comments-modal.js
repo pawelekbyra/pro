@@ -5,6 +5,7 @@ import { Utils } from './utils.js';
 
 const CommentsModal = {
   init() {
+    // Use event delegation on the body to ensure the button is always clickable
     document.body.addEventListener('click', (e) => {
       const openButton = e.target.closest('[data-action="open-comments-modal"]');
       if (openButton) {
@@ -39,9 +40,9 @@ const CommentsModal = {
           throw new Error(response?.data?.message || 'Failed to load comments');
         }
         const comments = response.data || [];
-        const slideData = slidesData.find(s => s.id === slideId);
-        if (slideData) {
-          slideData.comments = comments;
+        const slideDataForUpdate = slidesData.find(s => s.id === slideId);
+        if (slideDataForUpdate) {
+            slideDataForUpdate.comments = comments;
         }
         const sortOrder = State.get("commentSortOrder");
         if (sortOrder === "popular") {
