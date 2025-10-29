@@ -512,6 +512,7 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case "open-comments-modal":
+        console.log('[Handlers] "open-comments-modal" action caught.');
         CommentsModal.open();
         break;
       case "open-info-modal":
