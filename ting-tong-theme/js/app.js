@@ -353,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // KLUCZOWA ZMIANA: Natychmiast zatrzymaj propagację ZDARZENIA.
                     // Gwarantuje to, że żaden inny globalny listener (ani dalsza logika Swipera)
                     // nie przetworzy tego jako kliknięcia "w tle" lub na wideo.
-                    event.stopPropagation();
+                    event.stopImmediatePropagation();
 
                     // Wywołaj centralny handler, który wie, co zrobić z tą akcją.
                     Handlers.mainClickHandler(event);
