@@ -10,7 +10,6 @@ import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
-import { CommentsModal } from './modules/comments-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -57,6 +56,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }, true);
   // ==========================================================================
 
+  // New central event listener in capture phase
+  document.addEventListener('click', (e) => {
+    const actionTarget = e.target.closest('[data-action]');
+    if (actionTarget) {
+      e.stopImmediatePropagation();
+      Handlers.mainClickHandler(e);
+    }
+  }, true);
+
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
     console.warn("`ajax_object` is not defined. Using mock data for standalone development.");
@@ -88,10 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Run the check to show the bar
         PWA.runStandaloneCheck();
       });
-
-
-      document.body.addEventListener("click", Handlers.mainClickHandler);
-
 
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
@@ -144,31 +148,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // New, safe tap-to-pause/play logic
       UI.DOM.container.addEventListener('click', (event) => {
-        // Ignore clicks on any interactive elements
-        if (event.target.closest('.sidebar, .bottombar, .secret-overlay, .pwa-secret-overlay, [data-action]')) {
-          return;
-        }
-
         const swiper = State.get('swiper');
-        if (!swiper) return;
+        if (!swiper || event.target.closest('[data-action]')) return;
 
         const activeSlide = swiper.slides[swiper.activeIndex];
         const video = activeSlide?.querySelector('video');
         if (!video) return;
 
-        const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-        const replayOverlay = activeSlide.querySelector('.replay-overlay');
-
-        if (video.ended) {
-          video.currentTime = 0;
-          video.play().catch(err => console.log("Replay error:", err));
-          if (replayOverlay) replayOverlay.classList.remove('visible');
-        } else if (video.paused) {
+        if (video.paused) {
           video.play().catch(err => console.log("Play error:", err));
-          if (pauseOverlay) pauseOverlay.classList.remove('visible');
         } else {
           video.pause();
-          if (pauseOverlay) pauseOverlay.classList.add('visible');
         }
       });
     }
@@ -431,7 +421,6 @@ document.addEventListener("DOMContentLoaded", () => {
         AccountPanel.init();
         FirstLoginModal.init();
         TippingModal.init();
-        CommentsModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
