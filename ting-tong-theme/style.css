@@ -1665,7 +1665,7 @@ body,
    ========================================================================== */
 
 #commentsModal.modal-overlay {
-  /* Remove flex properties */
+  display: block; /* Override flex behavior for bottom-sheet animation */
   z-index: 10200;
   transition: visibility 0.4s ease-out;
 }
