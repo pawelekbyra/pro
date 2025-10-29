@@ -1672,10 +1672,20 @@ body,
    ========================================================================== */
 
 #commentsModal.modal-overlay {
-  align-items: center; /* Center vertically */
-  justify-content: center; /* Center horizontally */
-  z-index: 10200;
-  /* Transitions handled by parent .modal-overlay rules */
+  /* --- DIAGNOSTIC OVERRIDE: FORCE VISIBILITY --- */
+  position: relative; /* Remove from overlay flow */
+  display: flex; /* Ensure it's displayed */
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 60vh; /* Give it a fixed height */
+  opacity: 1 !important; /* Force opacity */
+  visibility: visible !important; /* Force visibility */
+  z-index: 5000; /* High z-index but maybe not on top of everything */
+  background: none; /* Remove dark background */
+  border: 4px dashed red; /* Make it VERY obvious */
+  margin-top: 20px; /* Push it down a bit */
+  /* --- END DIAGNOSTIC OVERRIDE --- */
 }
 
 #commentsModal .modal-content {
