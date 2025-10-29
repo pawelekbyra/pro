@@ -957,7 +957,7 @@ body,
   height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  z-index: 10060; /* Podniesiony, aby był nad paskiem PWA */
+  z-index: 10051; /* Niższy niż sidebar (10052), aby nie blokować przycisków */
   transition: height 0.2s ease-in-out;
   transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
