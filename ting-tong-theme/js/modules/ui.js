@@ -432,6 +432,45 @@ function createSlideElement(slideData, index) {
     slideData.initialComments,
   );
 
+  commentsBtn.addEventListener('click', () => {
+    const commentsModal = document.getElementById('commentsModal');
+    const modalBody = commentsModal.querySelector(".modal-body");
+    if (!modalBody) {
+      console.error('Modal body not found');
+      return;
+    }
+
+    UI.updateCommentFormVisibility();
+    modalBody.innerHTML = '<div class="loading-spinner"></div>';
+    UI.openModal(commentsModal);
+
+    API.fetchComments(slideData.id)
+      .then((response) => {
+        if (!response || !response.success) {
+          throw new Error(response?.data?.message || 'Failed to load comments');
+        }
+        const comments = response.data || [];
+        const currentSlideData = slidesData.find(s => s.id === slideData.id);
+        if (currentSlideData) {
+          currentSlideData.comments = comments;
+        }
+        const sortOrder = State.get("commentSortOrder");
+        if (sortOrder === "popular") {
+          comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        } else {
+          comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+        UI.renderComments(comments);
+        setTimeout(() => {
+          if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
+        }, 100);
+      })
+      .catch((error) => {
+        console.error('Failed to load comments:', error);
+        modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
+      });
+  });
+
   const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
   const videoEl = section.querySelector("video");
   const pauseOverlay = section.querySelector(".pause-overlay");
