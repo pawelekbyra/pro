@@ -1695,7 +1695,7 @@ body,
 }
 
 #commentsModal.visible .modal-content {
-  transform: translateY(0);
+  transform: translateY(0) !important;
 }
 
 #commentsModal.is-hiding .modal-content {

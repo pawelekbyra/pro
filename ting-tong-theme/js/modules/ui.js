@@ -86,11 +86,7 @@ function trapFocus(modal) {
 const activeModals = new Set();
 
 function openModal(modal, options = {}) {
-    console.log(`--- DEBUG: UI.openModal() called for modal: #${modal?.id}`);
-    if (!modal) {
-        console.error('>>> DEBUG ERROR: openModal received a null or undefined modal object!');
-        return;
-    }
+    if (!modal) return;
 
     modal.style.display = ''; // Remove inline style if it exists
     modal.classList.add('visible');
@@ -118,11 +114,7 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal) {
-    console.log(`--- DEBUG: UI.closeModal() called for modal: #${modal?.id}`);
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) {
-        console.log('>>> DEBUG INFO: closeModal() aborted. Reason:', { modalExists: !!modal, isActive: modal && activeModals.has(modal), isHiding: modal && modal.classList.contains("is-hiding") });
-        return;
-    }
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
 
     const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
 
