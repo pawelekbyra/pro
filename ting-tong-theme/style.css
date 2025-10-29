@@ -1694,6 +1694,12 @@ body,
   transition: height 0.3s ease-out, max-height 0.3s ease-out;
 }
 
+/* FORCEFUL OVERRIDE FOR DEBUGGING */
+#commentsModal.visible .modal-content {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+}
+
 /* Hiding animation is now handled by the base .modal-overlay and .modal-content rules */
 #commentsModal.is-hiding .modal-content {
   /* This can be removed if the default modal hide works well */
