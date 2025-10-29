@@ -379,9 +379,6 @@ export const Handlers = {
     );
 
     switch (action) {
-      case "open-comments-modal":
-        CommentsModal.open();
-        break;
       case "toggle-password-visibility":
         const passwordInput = document.getElementById('tt-password');
         const eyeOpen = actionTarget.querySelector('.eye-icon-open');
@@ -513,6 +510,9 @@ export const Handlers = {
         break;
       case "toggle-language":
         handleLanguageToggle();
+        break;
+      case "open-comments-modal":
+        CommentsModal.open();
         break;
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
