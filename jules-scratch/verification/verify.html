@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comments Modal Verification</title>
+    <link rel="stylesheet" href="../../style.css">
+    <style>
+        /* Helper styles for verification */
+        body {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="commentsModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Comments</h3>
+                <button class="modal-close-btn" data-action="close-comments-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="no-comments-message">
+                    <p>No comments yet. Be the first to say something!</p>
+                </div>
+            </div>
+            <div class="comment-form-container">
+                <!-- Form content would go here -->
+                <p style="text-align: center; padding: 20px;">Comment form placeholder</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate opening the modal after a short delay
+        setTimeout(() => {
+            const modal = document.getElementById('commentsModal');
+            if (modal) {
+                modal.classList.add('visible');
+            }
+        }, 500);
+    </script>
+
+</body>
+</html>
