@@ -1565,6 +1565,13 @@ body,
     opacity: 1;
     transform: scale(1);
 }
+
+/* INSTANT-OPEN aniamcja dla modala komentarzy */
+#commentsModal.visible .modal-content {
+    transition: none; /* Wyłącz animację */
+    opacity: 1; /* Pokaż od razu */
+    transform: scale(1); /* Ustaw w docelowym rozmiarze */
+}
 .modal-close-btn {
   position: absolute;
   top: 8px;
@@ -1692,12 +1699,6 @@ body,
   height: calc(100vh - var(--keyboard-offset, 0px));
   max-height: calc(100vh - var(--keyboard-offset, 0px));
   transition: height 0.3s ease-out, max-height 0.3s ease-out;
-}
-
-/* FORCEFUL OVERRIDE FOR DEBUGGING */
-#commentsModal.visible .modal-content {
-    transform: scale(1) !important;
-    opacity: 1 !important;
 }
 
 /* Hiding animation is now handled by the base .modal-overlay and .modal-content rules */

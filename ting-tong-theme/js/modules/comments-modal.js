@@ -42,12 +42,8 @@ const CommentsModal = {
     },
 
     open() {
-        console.log('[CommentsModal] open() called');
         const swiper = State.get('swiper');
-        if (!swiper) {
-            console.log('[CommentsModal] Swiper not found, aborting.');
-            return;
-        };
+        if (!swiper) return;
 
         const slideData = slidesData[swiper.realIndex];
         if (!slideData) {

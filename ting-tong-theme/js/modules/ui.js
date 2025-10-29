@@ -86,11 +86,7 @@ function trapFocus(modal) {
 const activeModals = new Set();
 
 function openModal(modal, options = {}) {
-    if (!modal) {
-        console.log('[UI.openModal] Aborting: modal element is null or undefined.');
-        return;
-    }
-    console.log(`[UI.openModal] called for modal: #${modal.id}`);
+    if (!modal) return;
 
     modal.style.display = ''; // Remove inline style if it exists
     modal.classList.add('visible');
