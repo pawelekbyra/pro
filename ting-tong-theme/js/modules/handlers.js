@@ -566,6 +566,50 @@ export const Handlers = {
       case "toggle-language":
         handleLanguageToggle();
         break;
+      case "open-comments-modal": {
+        const swiper = State.get('swiper');
+        if (!swiper) break;
+        const slideData = slidesData[swiper.realIndex];
+        const slideId = slideData.id;
+
+        const commentsModal = document.getElementById('commentsModal');
+        const modalBody = commentsModal.querySelector(".modal-body");
+        if (!modalBody) {
+          console.error('Modal body not found');
+          return;
+        }
+
+        UI.updateCommentFormVisibility();
+        modalBody.innerHTML = '<div class="loading-spinner"></div>';
+        UI.openModal(commentsModal);
+
+        API.fetchComments(slideId)
+          .then((response) => {
+            if (!response || !response.success) {
+              throw new Error(response?.data?.message || 'Failed to load comments');
+            }
+            const comments = response.data || [];
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData) {
+              slideData.comments = comments;
+            }
+            const sortOrder = State.get("commentSortOrder");
+            if (sortOrder === "popular") {
+              comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            } else {
+              comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+            UI.renderComments(comments);
+            setTimeout(() => {
+              if (modalBody.scrollHeight) modalBody.scrollTop = modalBody.scrollHeight;
+            }, 100);
+          })
+          .catch((error) => {
+            console.error('Failed to load comments:', error);
+            modalBody.innerHTML = `<div style="text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.6);"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
+          });
+        break;
+      }
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
