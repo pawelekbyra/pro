@@ -1665,9 +1665,9 @@ body,
    ========================================================================== */
 
 #commentsModal.modal-overlay {
-  align-items: center; /* FIX: Target the center of the screen, not the bottom */
+  /* Remove flex properties */
   z-index: 10200;
-  transition: visibility 0.3s ease-out;
+  transition: visibility 0.4s ease-out;
 }
 
 #commentsModal .modal-content {
@@ -1679,12 +1679,17 @@ body,
   max-height: 75vh;
   border-radius: 16px 16px 0 0;
   padding: 0;
-  transform: translateY(100%);
-  transition: transform 0.3s ease-out;
+
+  /* --- NEW RELIABLE POSITIONING --- */
+  position: absolute;
+  bottom: -75vh; /* Start position: hidden below the screen */
+  left: 0;
+  transition: bottom 0.4s ease-out; /* Animate the 'bottom' property */
+  /* --- END NEW POSITIONING --- */
+
   display: flex;
   flex-direction: column;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  position: relative;
 }
 
 /* Gdy klawiatura jest widoczna */
@@ -1695,11 +1700,11 @@ body,
 }
 
 #commentsModal.visible .modal-content {
-  transform: translateY(0);
+  bottom: 0; /* End position: at the bottom of the screen */
 }
 
 #commentsModal.is-hiding .modal-content {
-  transform: translateY(100%);
+  bottom: -75vh; /* Hiding position: back below the screen */
 }
 
 /* Header */
