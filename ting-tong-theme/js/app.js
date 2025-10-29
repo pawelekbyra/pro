@@ -10,6 +10,7 @@ import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
+import { CommentsModal } from './modules/comments-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -353,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // KLUCZOWA ZMIANA: Natychmiast zatrzymaj propagację ZDARZENIA.
                     // Gwarantuje to, że żaden inny globalny listener (ani dalsza logika Swipera)
                     // nie przetworzy tego jako kliknięcia "w tle" lub na wideo.
-                    event.stopImmediatePropagation();
+                    event.stopPropagation();
 
                     // Wywołaj centralny handler, który wie, co zrobić z tą akcją.
                     Handlers.mainClickHandler(event);
@@ -453,6 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
         AccountPanel.init();
         FirstLoginModal.init();
         TippingModal.init();
+        CommentsModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
