@@ -10,7 +10,6 @@ import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
-import { CommentsModal } from './modules/comments-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -45,6 +44,17 @@ if ('serviceWorker' in navigator) {
 document.addEventListener("DOMContentLoaded", () => {
   API.init(); // ✅ FIX: Initialize API data after DOM is ready.
   UI.initDOMCache();
+
+  // ==========================================================================
+  // KOD DIAGNOSTYCZNY - Rejestruje wszystkie kliknięcia, aby zidentyfikować,
+  // który element przechwytuje zdarzenia przeznaczone dla sidebara.
+  // Używamy `true`, aby nasłuchiwać w fazie "capture", czyli zanim zdarzenie
+  // dotrze do docelowego elementu.
+  // ==========================================================================
+  document.body.addEventListener('click', (e) => {
+    console.log('%c[DIAGNOSTYKA] Kliknięto w element:', 'color: #ff0055; font-weight: bold;', e.target);
+  }, true);
+  // ==========================================================================
 
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
@@ -84,6 +94,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
+      document
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)")
+        .forEach((modal) => {
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) UI.closeModal(modal);
+          });
+          modal
+            .querySelector(".modal-close-btn, .topbar-close-btn")
+            ?.addEventListener("click", () => UI.closeModal(modal));
+        });
+
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           const visibleModal = document.querySelector(
@@ -119,42 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "click",
         Handlers.profileModalTabHandler,
       );
-
-      // Nowy, dedykowany listener dla tap-to-play/pause
-      const container = document.getElementById('webyx-container');
-      if (container) {
-          container.addEventListener('click', (event) => {
-              const swiper = State.get('swiper');
-              if (!swiper) return;
-
-              // Ignoruj kliknięcia na elementach UI
-              if (event.target.closest('.sidebar, .bottombar, .secret-overlay, .pwa-secret-overlay, [data-action]')) {
-                  return;
-              }
-
-              const activeSlide = swiper.slides[swiper.activeIndex];
-              const video = activeSlide?.querySelector('video');
-              if (!video) return;
-
-              const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-              const replayOverlay = activeSlide.querySelector('.replay-overlay');
-
-              if (video.ended) {
-                  video.currentTime = 0;
-                  video.play().catch(err => console.log("Błąd replay:", err));
-                  if (replayOverlay) replayOverlay.classList.remove('visible');
-                  return;
-              }
-
-              if (video.paused) {
-                  video.play().catch(err => console.log("Błąd play:", err));
-                  if (pauseOverlay) pauseOverlay.classList.remove('visible');
-              } else {
-                  video.pause();
-                  if (pauseOverlay) pauseOverlay.classList.add('visible');
-              }
-          });
-      }
 
     }
 
@@ -360,6 +345,58 @@ document.addEventListener("DOMContentLoaded", () => {
               // *******************************************************
             },
             slideChange: handleMediaChange,
+            click: function (swiper, event) {
+                // 1. Zidentyfikuj element interaktywny (z sidebar'a lub innego miejsca)
+                const actionTarget = event.target.closest('[data-action]');
+
+                if (actionTarget) {
+                    // KLUCZOWA ZMIANA: Natychmiast zatrzymaj propagację ZDARZENIA.
+                    // Gwarantuje to, że żaden inny globalny listener (ani dalsza logika Swipera)
+                    // nie przetworzy tego jako kliknięcia "w tle" lub na wideo.
+                    event.stopPropagation();
+
+                    // Wywołaj centralny handler, który wie, co zrobić z tą akcją.
+                    Handlers.mainClickHandler(event);
+
+                    return; // Zakończ działanie handlera Swipera
+                }
+
+                // 2. Jeśli kliknięto na element wewnątrz sidebara lub bottombara, który
+                // nie ma data-action, nadal zignoruj.
+                if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
+                    return;
+                }
+
+                // 3. Jeśli nie było to kliknięcie na interaktywny element ani pasek UI,
+                // przejdź do oryginalnej logiki play/pause wideo.
+
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const video = activeSlide?.querySelector('video');
+
+                if (!video) return;
+
+                const pauseOverlay = activeSlide.querySelector('.pause-overlay');
+                const replayOverlay = activeSlide.querySelector('.replay-overlay');
+
+                // Case 1: Video has ended -> Replay
+                if (video.ended) {
+                    video.currentTime = 0;
+                    video.play().catch(err => console.log("Błąd replay:", err));
+                    if (replayOverlay) replayOverlay.classList.remove('visible');
+                    return;
+                }
+
+                // Case 2: Video is paused -> Play
+                if (video.paused) {
+                    video.play().catch(err => console.log("Błąd play:", err));
+                    if (pauseOverlay) pauseOverlay.classList.remove('visible');
+                }
+                // Case 3: Video is playing -> Pause
+                else {
+                    video.pause();
+                    if (pauseOverlay) pauseOverlay.classList.add('visible');
+                }
+            },
           },
         });
 
@@ -416,7 +453,6 @@ document.addEventListener("DOMContentLoaded", () => {
         AccountPanel.init();
         FirstLoginModal.init();
         TippingModal.init();
-        CommentsModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();

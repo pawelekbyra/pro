@@ -513,7 +513,7 @@ get_header();
     </div>
 </div>
 <div id="tiktok-profile-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tiktok-profile-username" aria-hidden="true">
-    <div class="modal-content tiktok-profile-content">
+    <div class="tiktok-profile-content">
         <header class="tiktok-profile-header">
             <button class="profile-action-btn" data-action="close-modal" aria-label="Close profile" style="font-size: 28px;">&times;</button>
             <h2 id="tiktok-profile-username" class="username"></h2>
