@@ -517,7 +517,14 @@ export const Handlers = {
             modal.classList.add('visible');
         }
         break;
-    }
+      }
+      case "close-comments-modal": {
+        const modal = document.getElementById('comments-modal-container');
+        if (modal) {
+            modal.classList.remove('visible');
+        }
+        break;
+      }
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;

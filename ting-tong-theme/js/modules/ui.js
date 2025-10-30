@@ -20,7 +20,7 @@ function initDOMCache() {
   DOM.preloader = document.getElementById("preloader");
   DOM.alertBox = document.getElementById("alertBox");
   DOM.alertText = document.getElementById("alertText");
-  DOM.commentsModal = document.getElementById("commentsModal");
+  DOM.commentsModal = document.getElementById("comments-modal-container");
   DOM.accountModal = document.getElementById("accountModal");
   DOM.tiktokProfileModal = document.getElementById("tiktok-profile-modal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
