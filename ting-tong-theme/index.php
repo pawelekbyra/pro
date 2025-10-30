@@ -269,6 +269,41 @@ get_header();
             </div>
         </div>
     </template>
+
+    <template id="comment-template">
+        <div class="comment-item" data-comment-id="">
+            <div class="comment-avatar">
+                <img src="" alt="Avatar">
+            </div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-author"></span>
+                    <span class="comment-timestamp"></span>
+                </div>
+                <p class="comment-text"></p>
+                <div class="comment-image-attachment" style="display: none;">
+                    <img src="" class="comment-image" alt="Comment image attachment">
+                </div>
+                <div class="comment-actions">
+                    <button class="comment-like-btn" data-action="toggle-comment-like">
+                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </button>
+                    <span class="comment-like-count">0</span>
+                    <button class="comment-reply-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
+                </div>
+            </div>
+            <div class="comment-options" style="display: none;">
+                <button class="comment-options-trigger" data-action="toggle-comment-options">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                </button>
+                <div class="comment-options-menu">
+                    <button data-action="edit-comment" data-translate-key="commentEdit">Edytuj</button>
+                    <button data-action="delete-comment" data-translate-key="commentDelete">Usuń</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <div id="webyx-container" class="swiper">
         <div class="swiper-wrapper">
         </div>
@@ -580,7 +615,16 @@ get_header();
         <button class="comments-modal-close-btn" data-action="close-comments-modal">&times;</button>
     </div>
     <div class="comments-modal-body">
-        <!-- Comments will be rendered here -->
+        <div class="comments-list">
+            <!-- Dynamic comments will be injected here -->
+        </div>
+        <div class="comments-empty-state" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
+            <p data-translate-key="commentsEmptyState">Brak komentarzy. Bądź pierwszy!</p>
+        </div>
+        <div class="comment-load-error" style="display: none;">
+             <p data-translate-key="commentLoadError">Nie udało się załadować komentarzy. Spróbuj ponownie później.</p>
+        </div>
     </div>
     <div class="comments-modal-footer">
         <div class="login-to-comment-prompt" style="display: none;">

@@ -104,17 +104,24 @@ const CommentsModal = {
         }
 
         this.updateCommentFormVisibility();
-        this.modalBody.innerHTML = '<div class="loading-spinner"></div>';
-        this.modal.classList.add('visible'); // Directly control visibility
+        // UI.renderComments now handles the loading state internally if needed
+        this.modal.classList.add('visible');
 
         this.loadComments(slideData.id);
     },
 
     close() {
         this.modal.classList.remove('visible');
+        // Clear content on close to ensure it's fresh on next open
+        const container = this.modal.querySelector('.comments-list');
+        if (container) container.innerHTML = '';
     },
 
     loadComments(slideId) {
+        // Show a loading state if desired, e.g., by clearing and showing a spinner
+        const container = this.modal.querySelector('.comments-list');
+        container.innerHTML = '<div class="loading-spinner"></div>';
+
         API.fetchComments(slideId)
             .then(response => {
                 if (!response || !response.success) {
@@ -122,17 +129,15 @@ const CommentsModal = {
                 }
                 const comments = response.data || [];
                 const slideData = slidesData.find(s => s.id === slideId);
-                if(slideData) {
+                if (slideData) {
                     slideData.comments = comments;
                 }
                 this.renderSortedComments(comments);
-                setTimeout(() => {
-                    if (this.modalBody.scrollHeight) this.modalBody.scrollTop = this.modalBody.scrollHeight;
-                }, 100);
             })
             .catch(error => {
                 console.error('Failed to load comments:', error);
-                this.modalBody.innerHTML = `<div class="comment-load-error"><p>${Utils.getTranslation('commentLoadError')}</p></div>`;
+                // UI.renderComments will handle displaying the error state
+                UI.renderComments(null);
             });
     },
 
@@ -275,42 +280,67 @@ const CommentsModal = {
             UI.showAlert(Utils.getTranslation('likeAlert'), true);
             return;
         }
+
+        // Prevent multiple clicks while the request is in progress
+        if (button.disabled) return;
+        button.disabled = true;
+
         API.toggleCommentLike(commentId).then(response => {
             if (response.success) {
                 button.classList.toggle('active', response.data.isLiked);
-                const countEl = button.nextElementSibling;
-                if(countEl) countEl.textContent = Utils.formatCount(response.data.likes);
+                const commentItem = button.closest('.comment-item');
+                if (commentItem) {
+                    const countEl = commentItem.querySelector('.comment-like-count');
+                    if (countEl) countEl.textContent = Utils.formatCount(response.data.likes);
+                }
+            } else {
+                UI.showAlert(response.data.message || Utils.getTranslation('failedToUpdateLike'), true);
             }
+        }).finally(() => {
+            button.disabled = false;
         });
     },
 
     editComment(commentId) {
-        const commentTextEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .comment-text`);
+        const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+        if (!commentItem) return;
+
+        const commentTextEl = commentItem.querySelector('.comment-text');
         const currentText = commentTextEl.textContent;
-        const newText = prompt("Edytuj komentarz:", currentText);
+
+        // Replace with a more sophisticated editing UI if needed
+        const newText = prompt(Utils.getTranslation('editCommentPrompt'), currentText);
 
         if (newText !== null && newText.trim() !== '' && newText !== currentText) {
             API.editComment(commentId, newText).then(response => {
                 if (response.success) {
                     commentTextEl.textContent = response.data.text;
-                    UI.showAlert('Komentarz zaktualizowany.');
+                    UI.showAlert(Utils.getTranslation('commentUpdateSuccess'));
                 } else {
-                    UI.showAlert(response.data.message || 'Błąd edycji.', true);
+                    UI.showAlert(response.data.message || Utils.getTranslation('commentUpdateError'), true);
                 }
             });
         }
     },
 
     deleteComment(commentId) {
-        if (confirm("Czy na pewno chcesz usunąć ten komentarz?")) {
+        if (confirm(Utils.getTranslation('deleteCommentConfirm'))) {
             API.deleteComment(commentId).then(response => {
                 if (response.success) {
-                    document.querySelector(`.comment-item[data-comment-id="${commentId}"]`).remove();
-                    const commentCountEl = document.querySelector(`.swiper-slide-active .comment-count`);
-                    if(commentCountEl) commentCountEl.textContent = Utils.formatCount(response.data.new_count);
-                    UI.showAlert('Komentarz usunięty.');
+                    const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+                    if (commentItem) {
+                        commentItem.remove();
+                    }
+                    const swiper = State.get('swiper');
+                    if (swiper && swiper.slides[swiper.activeIndex]) {
+                         const commentCountEl = swiper.slides[swiper.activeIndex].querySelector('.comment-count');
+                        if (commentCountEl) {
+                            commentCountEl.textContent = Utils.formatCount(response.data.new_count);
+                        }
+                    }
+                    UI.showAlert(Utils.getTranslation('commentDeleteSuccess'));
                 } else {
-                     UI.showAlert(response.data.message || 'Błąd usuwania.', true);
+                     UI.showAlert(response.data.message || Utils.getTranslation('commentDeleteError'), true);
                 }
             });
         }
