@@ -1,144 +1,147 @@
-// import { UI } from './ui.js'; // Usunięte, aby przerwać zależność cykliczną
-import { Utils } from './utils.js';
+import { Config } from "./config.js";
+import { State } from "./state.js";
+import { Utils } from "./utils.js";
 
-let UI_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
-function setUiModule(uiModule) {
-  UI_MODULE = uiModule;
-}
+// Zmienna do przechowywania referencji do modułu UI
+// Zostanie ustawiona przez app.js, aby przerwać cykliczną zależność
+let UI;
 
-const installBar = document.getElementById("pwa-install-bar");
-const installButton = document.getElementById("pwa-install-button");
-const iosInstructions = document.getElementById("pwa-ios-instructions");
-const iosCloseButton = document.getElementById("pwa-ios-close-button");
-const desktopModal = document.getElementById("pwa-desktop-modal");
+export const PWA = {
+    // Funkcja do wstrzykiwania zależności
+    setUiModule: (uiModule) => {
+        UI = uiModule;
+    },
 
-const isIOS = () => {
-  if (typeof window === "undefined" || !window.navigator) return false;
-  return (
-    /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-};
+    deferredPrompt: null,
 
-const isStandalone = () => {
-  return (window.matchMedia && (window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches)) || window.navigator.standalone === true;
-};
+    init: () => {
+        // Ta funkcja jest teraz pusta, ponieważ cała logika UI jest
+        // przeniesiona do `initializeUI` i wywoływana z app.js
+        // w odpowiednim momencie (po załadowaniu tłumaczeń).
+        PWA.addVisibilityChangeListener();
+    },
 
-const isDesktop = () => !isIOS() && !/Android/i.test(navigator.userAgent);
-
-let installPromptEvent = null;
-
-function showIosInstructions() {
-  if (iosInstructions) iosInstructions.classList.add("visible");
-}
-
-function hideIosInstructions() {
-  if (iosInstructions) iosInstructions.classList.remove("visible");
-}
-
-function showDesktopModal() {
-  if (desktopModal && UI_MODULE) UI_MODULE.openModal(desktopModal);
-}
-
-function closePwaModals() {
-  if (desktopModal && desktopModal.classList.contains("visible") && UI_MODULE)
-    UI_MODULE.closeModal(desktopModal);
-  if (iosInstructions && iosInstructions.classList.contains("visible"))
-    hideIosInstructions();
-}
-
-function runStandaloneCheck() {
-    const appFrame = document.getElementById("app-frame");
-
-    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
-    if (isStandalone()) {
-        if (installBar) {
-            installBar.classList.remove("visible");
-            if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
+    initializeUI: () => {
+        // Ten kod był wcześniej w `init`, ale teraz jest wywoływany,
+        // gdy mamy pewność, że wszystko inne jest gotowe.
+        if (UI.DOM.pwaInstallButton) {
+            UI.DOM.pwaInstallButton.addEventListener('click', PWA.handleInstallClick);
         }
-        return true;
+        if (UI.DOM.pwaDismissButton) {
+            UI.DOM.pwaDismissButton.addEventListener('click', PWA.handleDismissClick);
+        }
+        PWA.updateDynamicTexts();
+    },
+
+    isStandalone: () => {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    },
+
+    runStandaloneCheck: () => {
+        console.log("Running PWA standalone check...");
+        const appFrame = document.querySelector('#app-frame');
+
+        if (PWA.isStandalone()) {
+            console.log("App is in standalone mode.");
+            // Ukryj pasek PWA, jeśli jest w trybie standalone
+            if (UI.DOM.pwaPrompt) UI.DOM.pwaPrompt.classList.remove('visible');
+            if (UI.DOM.pwaIosInstructions) UI.DOM.pwaIosInstructions.classList.remove('visible');
+            appFrame?.classList.remove('app-frame--pwa-visible');
+
+        } else {
+            console.log("App is in browser mode.");
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isPwaDismissed = localStorage.getItem('pwa_prompt_dismissed') === 'true';
+
+            if (isPwaDismissed) {
+                console.log("PWA prompt was dismissed by user.");
+                return;
+            }
+
+            // Użyj `setTimeout` z zerowym opóźnieniem, aby dać przeglądarce czas na załadowanie
+            // eventu `beforeinstallprompt`, który może nie być dostępny natychmiast.
+            setTimeout(() => {
+                if (isIOS) {
+                    if (UI.DOM.pwaIosInstructions) UI.DOM.pwaIosInstructions.classList.add('visible');
+                    appFrame?.classList.add('app-frame--pwa-visible');
+                } else if (PWA.deferredPrompt) {
+                    console.log("Deferred prompt is available. Showing install bar.");
+                    if (UI.DOM.pwaPrompt) UI.DOM.pwaPrompt.classList.add('visible');
+                    appFrame?.classList.add('app-frame--pwa-visible');
+                } else {
+                    console.log("Deferred prompt not available yet.");
+                }
+            }, 0);
+        }
+    },
+
+
+    handleInstallClick: async () => {
+        // Jeśli apka jest już zainstalowana, nie rób nic poza pokazaniem komunikatu.
+        if (PWA.isStandalone()) {
+            UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);
+            // Zapisz flagę do sessionStorage, aby pokazać toast po odświeżeniu
+            // w trybie PWA (np. po instalacji).
+            sessionStorage.setItem('showAlreadyInstalledToast', 'true');
+            return;
+        }
+
+        if (PWA.deferredPrompt) {
+            PWA.deferredPrompt.prompt();
+            const {
+                outcome
+            } = await PWA.deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+
+            if (outcome === 'accepted') {
+                UI.showAlert(Utils.getTranslation('installSuccess'), false, 5000);
+            } else {
+                UI.showAlert(Utils.getTranslation('installDismissed'), true, 3000);
+            }
+            PWA.deferredPrompt = null;
+            if (UI.DOM.pwaPrompt) UI.DOM.pwaPrompt.classList.remove('visible');
+            document.querySelector('#app-frame')?.classList.remove('app-frame--pwa-visible');
+        } else {
+            // To się może zdarzyć, jeśli użytkownik kliknie przycisk, zanim `beforeinstallprompt` się załaduje.
+            UI.showAlert(Utils.getTranslation('installNotReady'), true, 4000);
+        }
+    },
+
+    handleDismissClick: () => {
+        if (UI.DOM.pwaPrompt) UI.DOM.pwaPrompt.classList.remove('visible');
+        if (UI.DOM.pwaIosInstructions) UI.DOM.pwaIosInstructions.classList.remove('visible');
+        document.querySelector('#app-frame')?.classList.remove('app-frame--pwa-visible');
+        localStorage.setItem('pwa_prompt_dismissed', 'true');
+    },
+
+    addVisibilityChangeListener: () => {
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') {
+                console.log("Page is visible again, re-running PWA check.");
+                PWA.runStandaloneCheck();
+            }
+        });
+    },
+
+    updateDynamicTexts: () => {
+        // Ta funkcja jest teraz wywoływana przez `UI.updateTranslations`,
+        // więc mamy pewność, że tłumaczenia są załadowane.
+        const installButtonSpan = UI.DOM.pwaInstallButton?.querySelector('span');
+        if (installButtonSpan) {
+            installButtonSpan.textContent = Utils.getTranslation('pwaInstall');
+        }
+
+        const iosTitle = UI.DOM.pwaIosInstructions?.querySelector('.pwa-prompt-title');
+        if (iosTitle) {
+            iosTitle.textContent = Utils.getTranslation('pwaIosTitle');
+        }
     }
+};
 
-    // Jeśli nie jest standalone, pokaż pasek po zniknięciu preloadera.
-    const preloader = document.getElementById("preloader");
-    const container = document.getElementById("webyx-container");
-    const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
-
-    if (isPreloaderHidden && installBar) {
-        installBar.classList.add("visible");
-        if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
-    } else if (installBar) {
-        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
-        installBar.classList.remove("visible");
-        if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
-    }
-
-    return false;
-}
-
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  installPromptEvent = e;
-  console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
-  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
+window.addEventListener('appinstalled', () => {
+    console.log('PWA was installed');
+    // Usuń pasek i flagę localStorage, ponieważ nie są już potrzebne.
+    if (UI.DOM.pwaPrompt) UI.DOM.pwaPrompt.classList.remove('visible');
+    document.querySelector('#app-frame')?.classList.remove('app-frame--pwa-visible');
+    localStorage.removeItem('pwa_prompt_dismissed');
 });
-
-function handleInstallClick() {
-  // FIX: Najpierw sprawdzamy, czy aplikacja nie jest już zainstalowana (standalone).
-  // Jeśli tak, wyświetlamy stosowny komunikat i przerywamy.
-  if (isStandalone()) {
-    if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaAlreadyInstalled"));
-    return;
-  }
-
-  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
-  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
-  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
-  if (installPromptEvent) {
-    installPromptEvent.prompt();
-    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
-  } else if (isIOS()) {
-    showIosInstructions();
-  } else if (isDesktop()) {
-    showDesktopModal();
-  } else {
-    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
-    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
-    // To rzadki przypadek, ale warto go odnotować.
-    console.warn("PWA installation not supported on this browser.");
-    if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaNotSupported"));
-  }
-}
-
-function init() {
-  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
-  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
-  if (installButton) {
-    installButton.addEventListener('click', handleInstallClick);
-  }
-
-  window.addEventListener("appinstalled", () => {
-    installPromptEvent = null;
-    if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("appInstalledSuccessText"));
-    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
-  });
-
-  if (iosCloseButton) {
-    iosCloseButton.addEventListener("click", hideIosInstructions);
-  }
-
-  const isConfirmed = runStandaloneCheck();
-
-  if (!isConfirmed) {
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        runStandaloneCheck();
-      }
-    });
-  }
-}
-
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule };

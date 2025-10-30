@@ -1,904 +1,168 @@
 import { State } from './state.js';
-import { UI } from './ui.js';
 import { Utils } from './utils.js';
-import { API, slidesData } from './api.js';
-import { PWA } from './pwa.js';
-import { Notifications } from './notifications.js';
-import { AccountPanel } from './account-panel.js';
+import { UI } from './ui.js';
+import { API } from './api.js';
 import { authManager } from './auth-manager.js';
-import { TippingModal } from './tipping-modal.js';
 import { CommentsModal } from './comments-modal.js';
-
-function mockToggleLogin() {
-  const isLoggedIn = State.get("isUserLoggedIn");
-  State.set("isUserLoggedIn", !isLoggedIn);
-  UI.updateUIForLoginState();
-  const message = !isLoggedIn
-    ? Utils.getTranslation("loginSuccess")
-    : Utils.getTranslation("logoutSuccess");
-  UI.showAlert(message);
-
-  // If we are logging in, close the panel
-  if (!isLoggedIn) {
-    const loginPanel = document.querySelector("#app-frame > .login-panel");
-    if (loginPanel) loginPanel.classList.remove("active");
-    const topbar = document.querySelector("#app-frame > .topbar");
-    if (topbar) topbar.classList.remove("login-panel-active");
-  }
-}
-
-
-async function handleLikeToggle(button) {
-  if (!State.get("isUserLoggedIn")) {
-    Utils.vibrateTry();
-    UI.showAlert(Utils.getTranslation("likeAlert"));
-    return;
-  }
-  const swiper = State.get('swiper');
-  if (!swiper) return;
-  const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-  const slideData = slidesData.find((s) => s.id === slideId);
-  if (!slideData) return;
-
-  const isCurrentlyLiked = !!slideData.isLiked;
-  const newLikedState = !isCurrentlyLiked;
-  const currentCount = slideData.initialLikes;
-  const newCount = newLikedState
-    ? currentCount + 1
-    : Math.max(0, currentCount - 1);
-
-  // Optimistic UI update
-  slideData.isLiked = newLikedState;
-  slideData.initialLikes = newCount;
-  UI.applyLikeStateToDom(slideData.likeId, newLikedState, newCount);
-  button.disabled = true;
-
-  const json = await API.toggleLike(slideData.likeId);
-
-  if (json.success) {
-    slideData.isLiked = json.data.status === "liked";
-    slideData.initialLikes = json.data.count;
-    UI.applyLikeStateToDom(
-      slideData.likeId,
-      slideData.isLiked,
-      slideData.initialLikes,
-    );
-  } else {
-    // Revert
-    slideData.isLiked = isCurrentlyLiked;
-    slideData.initialLikes = currentCount;
-    UI.applyLikeStateToDom(
-      slideData.likeId,
-      isCurrentlyLiked,
-      currentCount,
-    );
-    UI.showAlert(
-      json.data?.message || Utils.getTranslation("likeError"),
-      true,
-    );
-  }
-  button.disabled = false;
-}
-
-function handleShare(button) {
-  const swiper = State.get('swiper');
-  if (!swiper) return;
-  const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-  const slideData = slidesData.find(
-    (s) => s.id === slideId,
-  );
-  if (navigator.share && slideData) {
-    navigator
-      .share({
-        title: Utils.getTranslation("shareTitle"),
-        text: slideData.description,
-        url: window.location.href,
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") console.error("Share error:", err);
-      });
-  } else {
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => UI.showAlert(Utils.getTranslation("linkCopied")));
-  }
-}
-
-function handleLanguageToggle() {
-  const newLang = State.get("currentLang") === "pl" ? "en" : "pl";
-  State.set("currentLang", newLang);
-  localStorage.setItem("tt_lang", newLang);
-  UI.updateTranslations();
-  Notifications.render();
-}
-
+import { AccountPanel } from './account-panel.js';
+import { PWA } from './pwa.js';
 
 export const Handlers = {
-  handleNotificationClick: (event) => {
-    const item = event.target.closest(".notification-item");
-    if (!item) return;
-    item.classList.toggle("expanded");
-    item.setAttribute("aria-expanded", item.classList.contains("expanded"));
-    if (item.classList.contains("unread")) {
-      item.classList.remove("unread");
-    }
-  },
-  profileModalTabHandler: (e) => {
-    const tab = e.target.closest(".tab");
-    if (!tab) return;
 
-    const modal = tab.closest("#tiktok-profile-modal");
-    if (!modal) return;
+  mainClickHandler: (event) => {
+    const target = event.target;
+    const actionTarget = target.closest('[data-action]');
 
-    // Deactivate all tabs and galleries
-    modal
-      .querySelectorAll(".tab")
-      .forEach((t) => t.classList.remove("active"));
-    modal
-      .querySelectorAll(".video-gallery")
-      .forEach((g) => g.classList.remove("active"));
+    if (!actionTarget) return;
 
-    // Activate clicked tab and corresponding gallery
-    tab.classList.add("active");
-    const contentId = tab.dataset.tabContent;
-    const gallery = modal.querySelector(`#${contentId}`);
-    if (gallery) {
-      gallery.classList.add("active");
-    }
-  },
-  mainClickHandler: (e) => {
-    const target = e.target;
-    const actionTarget = target.closest("[data-action]");
+    // Pobierz swiper z State
+    const swiper = State.get('swiper');
 
-    // Handle comment-related actions first
-    if (actionTarget && actionTarget.closest(".comment-item")) {
-      const commentItem = actionTarget.closest(".comment-item");
-      const commentId = commentItem.dataset.commentId;
-      const slideId = document.querySelector(".swiper-slide-active")
-        ?.dataset.slideId;
+    // Pobierz aktywny slajd i jego wideo
+    const activeSlide = swiper?.slides[swiper.activeIndex];
+    const video = activeSlide?.querySelector('video');
 
-      // Walidacja przed wykonaniem akcji
-      if (!slideId || !commentId) {
-        console.error('Missing slideId or commentId');
-        return;
-      }
-
-      // Sprawdź czy użytkownik jest zalogowany (dla akcji wymagających autoryzacji)
-      const requiresAuth = ['edit-comment', 'delete-comment', 'toggle-comment-like'];
-      if (requiresAuth.includes(actionTarget.dataset.action) && !State.get('isUserLoggedIn')) {
-        UI.showAlert(Utils.getTranslation('likeAlert'), true);
-        return;
-      }
-
-      switch (actionTarget.dataset.action) {
-        case "toggle-comment-like": {
-          const countEl = commentItem.querySelector(".comment-like-count");
-
-          if (!countEl) {
-            console.error('Like count element not found');
-            return;
-          }
-
-          let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, "")) || 0;
-
-          // Optimistic UI update
-          actionTarget.classList.toggle("active");
-          const isLiked = actionTarget.classList.contains("active");
-          currentLikes += isLiked ? 1 : -1;
-          countEl.textContent = Utils.formatCount(currentLikes);
-
-          // Disable button podczas requestu
-          actionTarget.disabled = true;
-
-          API.toggleCommentLike(slideId, commentId)
-            .then((response) => {
-              // Walidacja odpowiedzi
-              if (!response || typeof response.success !== 'boolean') {
-                throw new Error('Invalid response format');
-              }
-
-              if (!response.success) {
-                // Revert on failure
-                actionTarget.classList.toggle("active");
-                currentLikes += isLiked ? -1 : 1;
-                countEl.textContent = Utils.formatCount(currentLikes);
-
-                throw new Error(
-                  response.data?.message || Utils.getTranslation("failedToUpdateLike")
-                );
-              }
-
-              // Zaktualizuj z prawdziwą wartością z serwera
-              if (response.data?.likes !== undefined) {
-                countEl.textContent = Utils.formatCount(response.data.likes);
-              }
-            })
-            .catch((error) => {
-              console.error('Toggle comment like error:', error);
-              UI.showAlert(error.message || Utils.getTranslation("failedToUpdateLike"), true);
-            })
-            .finally(() => {
-              actionTarget.disabled = false;
-            });
-          break;
-        }
-        case "edit-comment": {
-          const textElement = commentItem.querySelector(".comment-text");
-
-          if (!textElement) {
-            console.error('Comment text element not found');
-            return;
-          }
-
-          const currentText = textElement.textContent;
-          const newText = prompt(
-            Utils.getTranslation("editCommentPrompt"),
-            currentText,
-          );
-
-          // Walidacja input
-          if (!newText || !newText.trim()) {
-            return;
-          }
-
-          if (newText.trim() === currentText) {
-            return; // Brak zmian
-          }
-
-          // Disable edit button podczas requestu
-          actionTarget.disabled = true;
-
-          API.editComment(slideId, commentId, newText.trim())
-            .then((response) => {
-              // Walidacja odpowiedzi
-              if (!response || typeof response.success !== 'boolean') {
-                throw new Error('Invalid response format');
-              }
-
-              if (!response.success) {
-                throw new Error(
-                  response.data?.message || Utils.getTranslation("commentUpdateError")
-                );
-              }
-
-              // Sprawdź czy mamy dane komentarza
-              if (!response.data || !response.data.id) {
-                throw new Error('Invalid comment data in response');
-              }
-
-              // Zaktualizuj w slidesData
-              const slideData = slidesData.find((s) => s.id === slideId);
-              if (slideData && Array.isArray(slideData.comments)) {
-                const commentIndex = slideData.comments.findIndex(
-                  c => String(c.id) === String(commentId)
-                );
-                if (commentIndex > -1) {
-                  slideData.comments[commentIndex] = response.data;
-                }
-                UI.renderComments(slideData.comments);
-              }
-
-              UI.showToast(Utils.getTranslation("commentUpdateSuccess"));
-            })
-            .catch((error) => {
-              console.error('Edit comment error:', error);
-              UI.showAlert(error.message || Utils.getTranslation("commentUpdateError"), true);
-            })
-            .finally(() => {
-              actionTarget.disabled = false;
-            });
-          break;
-        }
-        case "delete-comment": {
-          if (!confirm(Utils.getTranslation("deleteCommentConfirm"))) {
-            return;
-          }
-
-          // Disable delete button podczas requestu
-          actionTarget.disabled = true;
-
-          API.deleteComment(slideId, commentId)
-            .then((response) => {
-              // Walidacja odpowiedzi
-              if (!response || typeof response.success !== 'boolean') {
-                throw new Error('Invalid response format');
-              }
-
-              if (!response.success) {
-                throw new Error(
-                  response.data?.message || Utils.getTranslation("commentDeleteError")
-                );
-              }
-
-              // Sprawdź czy mamy new_count
-              if (typeof response.data?.new_count !== 'number') {
-                console.warn('Missing new_count in response, calculating manually');
-              }
-
-              // Zaktualizuj slidesData
-              const slideData = slidesData.find((s) => s.id === slideId);
-              if (slideData) {
-                // Usuń komentarz z lokalnych danych
-                if (Array.isArray(slideData.comments)) {
-                  const commentIndex = slideData.comments.findIndex(
-                    c => String(c.id) === String(commentId)
-                  );
-                  if (commentIndex > -1) {
-                    slideData.comments.splice(commentIndex, 1);
-                  }
-                }
-
-                // Zaktualizuj licznik
-                slideData.initialComments = response.data?.new_count ?? slideData.comments.length;
-
-                // Re-render komentarzy
-                UI.renderComments(slideData.comments);
-
-                // Zaktualizuj licznik w głównym widoku
-                const slideElement = document.querySelector(
-                  `.swiper-slide-active[data-slide-id="${slideId}"]`
-                );
-                const mainSlideCount = slideElement?.querySelector(".comment-count");
-                if (mainSlideCount) {
-                  mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
-                }
-
-                // Zaktualizuj tytuł modala
-                const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
-                if (commentsTitle) {
-                  commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
-                }
-              }
-
-              UI.showToast(Utils.getTranslation("commentDeleteSuccess"));
-            })
-            .catch((error) => {
-              console.error('Delete comment error:', error);
-              UI.showAlert(error.message || Utils.getTranslation("commentDeleteError"), true);
-              actionTarget.disabled = false; // Re-enable jeśli błąd
-            });
-          break;
-        }
-      }
-      // Return to avoid double-handling reply-to-comment
-      if (actionTarget.dataset.action !== 'reply-to-comment') {
-          return;
-      }
-    }
-
-    if (!actionTarget) {
-      return;
-    }
+    // Pobierz ID slajdu i jego dane
+    const slideContainer = actionTarget.closest('.tiktok-symulacja');
+    const likeId = slideContainer?.dataset.likeId;
 
     const action = actionTarget.dataset.action;
 
-    const topbar = document.querySelector("#app-frame > .topbar");
-    const loginPanel = document.querySelector("#app-frame > .login-panel");
-    const loggedInMenu = document.querySelector(
-      "#app-frame > .logged-in-menu",
-    );
-
     switch (action) {
-      case "toggle-password-visibility":
-        const passwordInput = document.getElementById('tt-password');
-        const eyeOpen = actionTarget.querySelector('.eye-icon-open');
-        const eyeClosed = actionTarget.querySelector('.eye-icon-closed');
-
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeOpen.style.display = 'block';
-            eyeClosed.style.display = 'none';
-        } else {
-            passwordInput.type = 'password';
-            eyeOpen.style.display = 'none';
-            eyeClosed.style.display = 'block';
-        }
+      // --- Logowanie / Wylogowanie / Konto ---
+      case 'open-login-modal':
+        UI.openModal(UI.DOM.loginModal);
         break;
-      case "toggle-emoji-picker":
-        UI.toggleEmojiPicker();
+      case 'logout':
+        authManager.logout();
         break;
-      case "attach-image":
-        UI.handleImageAttachment();
-        break;
-      case "remove-comment-image":
-        UI.removeCommentImage();
-        break;
-      case "reply-to-comment": {
-        const commentItem = actionTarget.closest(".comment-item");
-        const commentId = commentItem?.dataset.commentId;
-        const userElement = commentItem?.querySelector(".comment-user");
-
-        // Walidacja
-        if (!commentId || !userElement) {
-          console.error('Invalid reply target');
-          return;
-        }
-
-        const user = userElement.textContent;
-
-        // Sprawdź czy już nie odpowiadamy na ten komentarz
-        const currentReplyId = State.get("replyingToComment");
-        if (currentReplyId === commentId) {
-          // Już odpowiadamy na ten komentarz - tylko focus input
-          UI.focusCommentInput();
-          return;
-        }
-
-        State.set("replyingToComment", commentId);
-
-        const formContainer = document.querySelector(".comment-form-container");
-        if (!formContainer) {
-          console.error('Comment form container not found');
-          return;
-        }
-
-        // Usuń stary reply context jeśli istnieje (zapobieganie duplikatom)
-        const oldReplyContext = formContainer.querySelector(".reply-context");
-        if (oldReplyContext) {
-          oldReplyContext.remove();
-        }
-
-        // Utwórz nowy reply context
-        const replyContext = document.createElement("div");
-        replyContext.className = "reply-context";
-        formContainer.prepend(replyContext);
-
-        const cancelAriaLabel = Utils.getTranslation("cancelReplyAriaLabel");
-        const replyingToText = Utils.getTranslation("replyingTo").replace("{user}", user);
-
-        replyContext.innerHTML = `
-          <span class="reply-context-text">${replyingToText}</span>
-          <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>
-        `;
-        replyContext.style.display = "flex";
-
-        // Animacja wejścia
-        requestAnimationFrame(() => {
-          replyContext.style.opacity = '0';
-          replyContext.style.transform = 'translateY(-10px)';
-          replyContext.style.transition = 'opacity 0.2s, transform 0.2s';
-
-          requestAnimationFrame(() => {
-            replyContext.style.opacity = '1';
-            replyContext.style.transform = 'translateY(0)';
-          });
-        });
-
-        UI.focusCommentInput();
-        break;
-      }
-      case "cancel-reply": {
-        State.set("replyingToComment", null);
-        const replyContext = document.querySelector(".reply-context");
-        if (replyContext) replyContext.style.display = "none";
-        UI.removeCommentImage();
-        break;
-      }
-      case "go-back":
-        const modalToClose = actionTarget.closest(".modal-overlay");
-        if (modalToClose) {
-          UI.closeModal(modalToClose);
-        }
-        break;
-      case "open-public-profile": {
-        const swiper = State.get('swiper');
-        if (!swiper) break;
-
-        // Use realIndex to get the correct slide data, which is reliable in loop mode.
-        const slideData = slidesData[swiper.realIndex];
-
-        if (!slideData) {
-            console.error("Could not find slide data for realIndex:", swiper.realIndex);
-            break;
-        }
-
-        if (!State.get("isUserLoggedIn")) {
-            Utils.vibrateTry();
-            UI.showAlert(Utils.getTranslation("profileAccessAlert"));
-            return;
-        }
-
-        UI.populateProfileModal(slideData);
-        UI.openModal(document.getElementById('tiktok-profile-modal'));
-        break;
-      }
-      case "toggle-like":
-        handleLikeToggle(actionTarget);
-        break;
-      case "share":
-        handleShare(actionTarget);
-        break;
-      case "toggle-language":
-        handleLanguageToggle();
-        break;
-      case "open-comments-modal": {
-        const modal = document.getElementById('comments-modal-container');
-        if (modal) {
-            modal.classList.add('visible');
-        }
-        break;
-      }
-      case "close-comments-modal": {
-        const modal = document.getElementById('comments-modal-container');
-        if (modal) {
-            modal.classList.remove('visible');
-        }
-        break;
-      }
-      case "open-info-modal":
-        UI.openModal(document.getElementById('infoModal'));
-        break;
-      case "open-desktop-pwa-modal":
-        PWA.openDesktopModal();
-        break;
-      case "open-ios-pwa-modal":
-        PWA.openIosModal();
-        break;
-      case "install-pwa":
-        // This is now handled directly in the PWA module.
-        break;
-      case "open-account-modal":
-        if (loggedInMenu) loggedInMenu.classList.remove("active");
+      case 'open-account-modal':
         AccountPanel.openAccountModal();
         break;
-      case "close-modal":
-        const modal = actionTarget.closest(".modal-overlay");
-        if (modal) {
-          UI.closeModal(modal);
+      case 'open-info-modal':
+        UI.openModal(UI.DOM.infoModal);
+        break;
+
+      // --- Głośność / Pełny Ekran ---
+      case 'toggle-main-volume':
+        {
+          const isMuted = !State.get('isSoundMuted');
+          State.set('isSoundMuted', isMuted);
+          if (video) video.muted = isMuted;
+          UI.updateVolumeButton(isMuted);
+          break;
+        }
+      case 'toggle-fullscreen':
+        if (PWA.isStandalone()) {
+            Utils.toggleFullScreen();
         } else {
-          PWA.closePwaModals();
+            UI.showAlert(Utils.getTranslation('fullscreenOnlyPWA'));
         }
         break;
-      case "close-welcome-modal":
-        UI.closeModal(UI.DOM.welcomeModal);
-        break;
-      case "close-account-modal":
-        UI.closeModal(UI.DOM.accountModal);
-        break;
-      case "logout":
-        e.preventDefault();
-        (async () => {
-          if (actionTarget.disabled) return;
 
-          actionTarget.disabled = true;
-          const originalText = actionTarget.textContent;
-
-          try {
-            await authManager.logout();
-
-            if (loggedInMenu) loggedInMenu.classList.remove("active");
-
-            UI.showAlert(Utils.getTranslation("logoutSuccess"));
-
-          } catch (error) {
-            console.error('Logout error:', error);
-            UI.showAlert(error.message || 'Logout failed', true);
-          } finally {
-            actionTarget.disabled = false;
-            actionTarget.textContent = originalText;
-          }
-        })();
-        break;
-      case "toggle-main-menu":
-        if (State.get("isUserLoggedIn")) {
-          if (loggedInMenu) loggedInMenu.classList.toggle("active");
-        } else {
-          Utils.vibrateTry();
-          UI.showAlert(Utils.getTranslation("menuAccessAlert"));
-        }
-        break;
-      case "toggle-login-panel":
-        if (!State.get("isUserLoggedIn")) {
-          const swiper = State.get('swiper');
-          if (swiper) {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            const video = activeSlide?.querySelector('video');
-            if (video) {
-              State.set('videoPlaybackState', {
-                slideId: activeSlide.dataset.slideId,
-                currentTime: video.currentTime,
-              });
-            }
-          }
-
-          if (UI.DOM.commentsModal.classList.contains("visible")) {
-            UI.closeModal(UI.DOM.commentsModal);
-          }
-          if (loginPanel) loginPanel.classList.toggle("active");
-          if (topbar) topbar.classList.toggle("login-panel-active");
-        }
-        break;
-      case "subscribe":
-        if (!State.get("isUserLoggedIn")) {
-          Utils.vibrateTry();
-          UI.showAlert(Utils.getTranslation("subscribeAlert"));
-        }
-        break;
-      case "toggle-notifications":
-        if (State.get("isUserLoggedIn")) {
-          const popup = UI.DOM.notificationPopup;
-          popup.classList.toggle("visible");
-          if (popup.classList.contains("visible")) Notifications.render();
-        } else {
-          Utils.vibrateTry();
-          UI.showAlert(Utils.getTranslation("notificationAlert"));
-        }
-        break;
-      case "close-notifications":
-        if (UI.DOM.notificationPopup) {
-          UI.DOM.notificationPopup.classList.remove("visible");
-        }
-        break;
-      case "show-tip-jar":
-        TippingModal.showModal();
-        break;
-      case "tipping-next":
-        TippingModal.handleNextStep();
-        break;
-      case "tipping-prev":
-        TippingModal.handlePrevStep();
-        break;
-      case "play-video": {
-        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
-        if (video) {
-          video.play().catch(err => console.log("Błąd play:", err));
-          const pauseOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".pause-overlay");
-          if (pauseOverlay) pauseOverlay.classList.remove('visible');
-        }
-        break;
-      }
-      case "replay-video": {
-        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
-        if (video) {
-          video.currentTime = 0;
-          video.play().catch(err => console.log("Błąd replay:", err));
-          const replayOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".replay-overlay");
-          if (replayOverlay) replayOverlay.classList.remove('visible');
-        }
-        break;
-      }
-      case "toggle-volume":
-        const isMuted = !State.get("isSoundMuted");
-        State.set("isSoundMuted", isMuted);
-        const activeSlideVideo = document.querySelector(".swiper-slide-active video");
-        if (activeSlideVideo) {
-          activeSlideVideo.muted = isMuted;
-        }
-        UI.updateVolumeButton(isMuted);
-        break;
-      case "toggle-fullscreen": {
-        // This action should only work in PWA mode.
-        if (!PWA.isStandalone()) {
-          UI.showToast(Utils.getTranslation("immersiveModePwaOnly"));
+      // --- Interakcje ze slajdem (Like, Komentarze, Share) ---
+      case 'like':
+        if (!State.get('isUserLoggedIn')) {
+          UI.showAlert(Utils.getTranslation('loginToLike'), true);
           return;
         }
-
-        const appFrame = document.getElementById("app-frame");
-        if (appFrame) {
-            const isHiding = appFrame.classList.toggle("hide-ui");
-
-            // Find the button in the active slide to update its icon
-            const activeSlide = document.querySelector('.swiper-slide-active');
-            const btn = activeSlide?.querySelector('.fullscreen-button');
-
-            if (btn) {
-                const enterIcon = btn.querySelector('.fullscreen-enter-icon');
-                const exitIcon = btn.querySelector('.fullscreen-exit-icon');
-
-                if (isHiding) {
-                    enterIcon.style.display = 'none';
-                    exitIcon.style.display = 'block';
-                } else {
-                    enterIcon.style.display = 'block';
-                    exitIcon.style.display = 'none';
-                }
-            }
-        }
+        API.toggleLike(likeId);
         break;
-      }
-    }
-  },
-  formSubmitHandler: async (e) => {
-    const loginForm = e.target.closest("form#tt-login-form");
-
-    // ========================================================================
-    // OBSŁUGA FORMULARZA LOGOWANIA - Z AKTUALIZACJĄ O MODAL PIERWSZEGO LOGOWANIA
-    // ========================================================================
-    if (loginForm) {
-      e.preventDefault();
-
-      const usernameInput = loginForm.querySelector("#tt-username");
-      const passwordInput = loginForm.querySelector("#tt-password");
-      const submitButton = loginForm.querySelector("#tt-login-submit");
-
-      if (!usernameInput || !passwordInput) {
-        UI.showAlert("Form elements not found", true);
-        return;
-      }
-
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
-
-      if (!username || !password) {
-        UI.showAlert(Utils.getTranslation("allFieldsRequiredError") || "Please enter username and password.", true);
-        return;
-      }
-
-      submitButton.disabled = true;
-      const originalText = submitButton.textContent;
-      submitButton.innerHTML = '<span class="loading-spinner"></span>';
-
-      try {
-        // Zaloguj się. authManager.login sam wywoła event 'user:login',
-        // który jest obsługiwany w app.js. To centralne miejsce
-        // zajmie się pokazaniem modala lub zaktualizowaniem UI.
-        await authManager.login(username, password);
-
-        // Po prostu wyczyść formularz.
-        usernameInput.value = '';
-        passwordInput.value = '';
-
-      } catch (error) {
-        console.error('Login error:', error);
-        UI.showAlert(
-          error.message || Utils.getTranslation("loginFailed"),
-          true
-        );
-      } finally {
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalText;
-      }
-
-      return;
-    }
-
-    const tippingForm = e.target.closest("form#tippingForm");
-    if (tippingForm) {
-        e.preventDefault();
-        TippingModal.handleFormSubmit();
-        return;
-    }
-
-    // ========================================================================
-    // OBSŁUGA FORMULARZA KOMENTARZY (pozostaje bez zmian)
-    // ========================================================================
-    const commentForm = e.target.closest("form#comment-form");
-    if (commentForm) {
-      e.preventDefault();
-
-      const input = commentForm.querySelector("#comment-input");
-      if (!input) {
-        console.error('Comment input not found');
-        return;
-      }
-
-      const text = input.value.trim();
-      const hasImage = window.selectedCommentImage !== null;
-
-      // Walidacja - musi być tekst lub obraz
-      if (!text && !hasImage) {
-        return;
-      }
-
-      const button = commentForm.querySelector('button[type="submit"]');
-      if (button) button.disabled = true;
-
-      const swiper = State.get('swiper');
-      if (!swiper) {
-        console.error('Swiper instance not found');
-        if (button) button.disabled = false;
-        return;
-      }
-      const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-      const parentId = State.get("replyingToComment");
-
-      if (!slideId) {
-        console.error('No active slide found');
-        if (button) button.disabled = false;
-        return;
-      }
-
-      (async () => {
-        try {
-          let imageUrl = null;
-
-          // Upload obrazu jeśli istnieje
-          if (window.selectedCommentImage) {
-            UI.showToast(Utils.getTranslation('uploadingAvatar') || 'Przesyłanie obrazu...');
-
-            const uploadResult = await API.uploadCommentImage(window.selectedCommentImage);
-
-            // Walidacja odpowiedzi
-            if (!uploadResult || typeof uploadResult.success !== 'boolean') {
-              throw new Error('Invalid upload response');
-            }
-
-            if (!uploadResult.success) {
-              throw new Error(
-                uploadResult.data?.message || 'Nie udało się przesłać obrazu'
-              );
-            }
-
-            if (!uploadResult.data?.url) {
-              throw new Error('Missing image URL in response');
-            }
-
-            imageUrl = uploadResult.data.url;
+      case 'open-comments':
+        CommentsModal.open(likeId);
+        break;
+      case 'share':
+        {
+          const slideIndex = swiper.realIndex;
+          const slideData = slidesData[slideIndex];
+          if (navigator.share) {
+            navigator.share({
+              title: slideData.title,
+              text: slideData.description,
+              url: window.location.href,
+            }).catch(console.error);
+          } else {
+            UI.showAlert(Utils.getTranslation('shareNotSupported'), true);
           }
-
-          // Wyślij komentarz
-          const postResponse = await API.postComment(slideId, text, parentId, imageUrl);
-
-          // Walidacja odpowiedzi
-          if (!postResponse || typeof postResponse.success !== 'boolean') {
-            throw new Error('Invalid comment response');
-          }
-
-          if (!postResponse.success) {
-            throw new Error(
-              postResponse.data?.message || Utils.getTranslation("postCommentError")
-            );
-          }
-
-          if (!postResponse.data || !postResponse.data.id) {
-            throw new Error('Invalid comment data in response');
-          }
-
-          // Sukces - wyczyść formularz
-          input.value = "";
-          State.set("replyingToComment", null);
-
-          const replyContext = document.querySelector(".reply-context");
-          if (replyContext) replyContext.style.display = "none";
-
-          UI.removeCommentImage();
-
-          UI.showToast(Utils.getTranslation("postCommentSuccess"));
-
-          // Zaktualizuj lokalne dane
-          const slideData = slidesData.find((s) => s.id === slideId);
-          if (slideData) {
-            // Dodaj nowy komentarz
-            if (!Array.isArray(slideData.comments)) {
-              slideData.comments = [];
-            }
-            slideData.comments.push(postResponse.data);
-
-            // Zaktualizuj licznik
-            slideData.initialComments = postResponse.data.new_comment_count ?? slideData.comments.length;
-
-            // Re-render
-            UI.renderComments(slideData.comments);
-
-            // Zaktualizuj licznik w głównym widoku
-            const mainSlideCount = slideElement.querySelector(".comment-count");
-            if (mainSlideCount) {
-              mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
-            }
-
-            // Zaktualizuj tytuł modala
-            const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
-            if (commentsTitle) {
-              commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
-            }
-
-            // Scroll do dołu
-            const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
-            if (modalBody) {
-              setTimeout(() => {
-                modalBody.scrollTop = modalBody.scrollHeight;
-              }, 100);
-            }
-          }
-
-        } catch (error) {
-          console.error('Post comment error:', error);
-          UI.showAlert(error.message || Utils.getTranslation("postCommentError"), true);
-        } finally {
-          if (button) button.disabled = false;
-          input.focus();
+          break;
         }
-      })();
+
+      // --- Nawigacja / UI ---
+      case 'toggle-notifications':
+        UI.DOM.notificationPopup.classList.toggle('visible');
+        break;
+
+      case 'select-language':
+        {
+          const lang = actionTarget.dataset.lang;
+          if (lang) {
+            actionTarget.classList.add('is-selected');
+            setTimeout(() => {
+                State.set('currentLang', lang);
+                localStorage.setItem('tt_lang', lang);
+                // Usuń klasę po zmianie, aby animacja była gotowa na następny raz
+                document.querySelectorAll('[data-action="select-language"]').forEach(btn => btn.classList.remove('is-selected'));
+            }, 300); // Daj czas na feedback wizualny
+          }
+          break;
+        }
+
+      // --- PWA ---
+      case 'pwa-install':
+        PWA.handleInstallClick();
+        break;
+      case 'pwa-dismiss':
+        PWA.handleDismissClick();
+        break;
+
+      // --- Immersive mode ---
+      case 'toggle-immersive-mode':
+        UI.DOM.container.classList.toggle('hide-ui');
+        break;
     }
   },
+
+  formSubmitHandler: async (event) => {
+    event.preventDefault();
+    const form = event.target;
+
+    switch (form.id) {
+      case 'loginForm':
+        const loginEmail = form.querySelector('#login-email').value;
+        const loginPassword = form.querySelector('#login-password').value;
+        await authManager.login(loginEmail, loginPassword);
+        break;
+
+      case 'signupForm':
+        // Logika rejestracji (jeśli istnieje)
+        break;
+
+      case 'commentForm':
+        // Ta logika została przeniesiona do CommentsModal.js
+        break;
+    }
+  },
+
+  handleNotificationClick: (event) => {
+    const target = event.target.closest('.notification-item');
+    if (!target) return;
+
+    const notificationId = target.dataset.id;
+    // Zaimplementuj logikę, np. oznacz jako przeczytane, przejdź do posta itp.
+    console.log(`Notification ${notificationId} clicked.`);
+    target.classList.add('read');
+  },
+
+  profileModalTabHandler: (event) => {
+    const tab = event.target.closest('.tab-item');
+    if (tab) {
+      const tabName = tab.dataset.tab;
+      const modal = tab.closest('.modal-content');
+      modal.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      modal.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      modal.querySelector(`.tab-pane[data-tab-content="${tabName}"]`).classList.add('active');
+    }
+  }
+
 };
