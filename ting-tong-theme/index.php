@@ -562,7 +562,18 @@ get_header();
 </div>
 
 <!-- COMMENTS MODAL -->
-<div id="comments-modal-container" style="display: none;">
+<div id="comments-modal-container">
+    <div class="comments-modal-header">
+        <h2>Komentarze</h2>
+        <button class="comments-modal-close-btn" data-action="close-comments-modal">&times;</button>
+    </div>
+    <div class="comments-modal-body">
+        <!-- Komentarze będą tutaj -->
+        <p>Brak komentarzy.</p>
+    </div>
+    <div class="comments-modal-footer">
+        <input type="text" placeholder="Dodaj komentarz..." />
+    </div>
 </div>
 
 <div id="welcome-modal" class="modal-overlay welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
