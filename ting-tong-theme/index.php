@@ -278,7 +278,7 @@ get_header();
         <span id="alertText"></span>
     </div>
 </div>
-<div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
+<div id="commentsModal" class="modal-overlay visible" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
         <div class="modal-header">
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>

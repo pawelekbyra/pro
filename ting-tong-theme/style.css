@@ -1665,7 +1665,7 @@ body,
    ========================================================================== */
 
 #commentsModal.modal-overlay {
-  display: block; /* Override flex behavior for bottom-sheet animation */
+  display: flex; /* Override flex behavior for bottom-sheet animation */
   z-index: 10200;
   transition: visibility 0.4s ease-out;
 }
@@ -1682,7 +1682,7 @@ body,
 
   /* --- NEW RELIABLE POSITIONING --- */
   position: absolute;
-  bottom: -75vh; /* Start position: hidden below the screen */
+  bottom: 0; /* Start position: hidden below the screen */
   left: 0;
   transition: bottom 0.4s ease-out; /* Animate the 'bottom' property */
   /* --- END NEW POSITIONING --- */
