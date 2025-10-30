@@ -272,29 +272,29 @@ get_header();
 
     <template id="comment-template">
         <div class="comment-item" data-comment-id="">
-            <div class="comment-avatar">
-                <img src="" alt="Avatar">
-            </div>
-            <div class="comment-content">
-                <div class="comment-header">
-                    <span class="comment-author"></span>
-                    <span class="comment-timestamp"></span>
+            <img src="" alt="Avatar" class="comment-avatar">
+            <div class="comment-main">
+                <div class="comment-body">
+                    <span class="comment-user"></span>
+                    <p class="comment-text"></p>
                 </div>
-                <p class="comment-text"></p>
                 <div class="comment-image-attachment" style="display: none;">
-                    <img src="" class="comment-image" alt="Comment image attachment">
+                    <img src="" class="comment-image" alt="Comment image attachment" loading="lazy">
                 </div>
-                <div class="comment-actions">
-                    <button class="comment-like-btn" data-action="toggle-comment-like">
-                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    </button>
-                    <span class="comment-like-count">0</span>
-                    <button class="comment-reply-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
+                <div class="comment-footer">
+                    <span class="comment-timestamp"></span>
+                    <button class="comment-action-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
+                    <div class="comment-likes">
+                         <button class="comment-like-btn" data-action="toggle-comment-like">
+                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </button>
+                        <span class="comment-like-count">0</span>
+                    </div>
                 </div>
             </div>
-            <div class="comment-options" style="display: none;">
+             <div class="comment-options">
                 <button class="comment-options-trigger" data-action="toggle-comment-options">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
                 </button>
                 <div class="comment-options-menu">
                     <button data-action="edit-comment" data-translate-key="commentEdit">Edytuj</button>
