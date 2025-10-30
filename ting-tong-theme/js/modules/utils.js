@@ -65,4 +65,29 @@ export const Utils = {
       `${window.innerHeight}px`,
     );
   },
+
+  /**
+   * Formats a timestamp into a relative time string (e.g., "5m ago", "yesterday").
+   * @param {string | Date} timestamp - The timestamp to format.
+   * @returns {string} The formatted relative time string.
+   */
+  formatTimeAgo: (timestamp) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const seconds = Math.floor((now - date) / 1000);
+
+    const lang = State.get("currentLang") || 'pl';
+    const translations = Config.TRANSLATIONS[lang];
+
+    if (seconds < 60) return translations.timeJustNow || 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}${translations.timeMinute || 'm'}`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}${translations.timeHour || 'h'}`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}${translations.timeDay || 'd'}`;
+
+    // For older dates, return a simple date format
+    return date.toLocaleDateString(lang, { month: 'short', day: 'numeric' });
+  },
 };

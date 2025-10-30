@@ -912,167 +912,62 @@ function closeImageLightbox() {
 }
 
 function renderComments(comments) {
-  const modalBody = DOM.commentsModal.querySelector(".modal-body");
-  if (!modalBody) return;
+    const container = DOM.commentsModal.querySelector('.comments-list');
+    const emptyState = DOM.commentsModal.querySelector('.comments-empty-state');
+    const errorState = DOM.commentsModal.querySelector('.comment-load-error');
+    const template = document.getElementById('comment-template');
 
-  modalBody.innerHTML = "";
-
-  if (!comments || comments.length === 0) {
-    modalBody.innerHTML =
-      '<p class="no-comments-message" data-translate-key="noComments">Brak komentarzy. Bądź pierwszy!</p>';
-    return;
-  }
-
-  const commentList = document.createElement("div");
-  commentList.className = "comments-list";
-
-  const repliesMap = new Map();
-  comments.forEach((comment) => {
-    if (comment.parentId) {
-      if (!repliesMap.has(comment.parentId)) {
-        repliesMap.set(comment.parentId, []);
-      }
-      repliesMap.get(comment.parentId).push(comment);
-    }
-  });
-
-  const createCommentElement = (comment) => {
-    const commentEl = document.createElement("div");
-    commentEl.className = "comment-item";
-    commentEl.dataset.commentId = comment.id;
-
-    const avatarWrapper = document.createElement("div");
-    avatarWrapper.className = "comment-avatar-wrapper";
-    const avatarImg = document.createElement("img");
-    avatarImg.src = comment.avatar;
-    avatarImg.alt = "Avatar";
-    avatarImg.className = "comment-avatar";
-    avatarImg.loading = "lazy";
-    avatarWrapper.appendChild(avatarImg);
-
-    const main = document.createElement("div");
-    main.className = "comment-main";
-
-    const body = document.createElement("div");
-    body.className = "comment-body";
-    const userSpan = document.createElement("span");
-    userSpan.className = "comment-user";
-    userSpan.textContent = comment.user;
-    const textP = document.createElement("p");
-    textP.className = "comment-text";
-    textP.textContent = comment.text;
-    body.appendChild(userSpan);
-    body.appendChild(textP);
-
-    // DODAJ: Obsługa obrazu w komentarzu
-    if (comment.image_url) {
-      const imageDiv = document.createElement("div");
-      imageDiv.className = "comment-image";
-      imageDiv.innerHTML = `<img src="${comment.image_url}" alt="Comment image" loading="lazy">`;
-      imageDiv.addEventListener('click', () => openImageLightbox(comment.image_url));
-      body.appendChild(imageDiv);
+    if (!container || !emptyState || !errorState || !template) {
+        console.error('Required comment elements not found in DOM.');
+        if(errorState) errorState.style.display = 'block';
+        return;
     }
 
-    const footer = document.createElement("div");
-    footer.className = "comment-footer";
-    const timestampSpan = document.createElement("span");
-    timestampSpan.className = "comment-timestamp";
-    timestampSpan.textContent = new Date(comment.timestamp).toLocaleString();
-    const replyBtn = document.createElement("button");
-    replyBtn.className = "comment-action-btn comment-reply-btn";
-    replyBtn.dataset.action = "reply-to-comment";
-    replyBtn.textContent = Utils.getTranslation("commentReplyAction");
+    container.innerHTML = '';
+    errorState.style.display = 'none';
 
-    const actionsWrapper = document.createElement("div");
-    actionsWrapper.className = "comment-actions-wrapper";
-    actionsWrapper.appendChild(replyBtn);
-
-    if (comment.canEdit) {
-      const editBtn = document.createElement("button");
-      editBtn.className = "comment-action-btn comment-edit-btn";
-      editBtn.dataset.action = "edit-comment";
-      editBtn.textContent = Utils.getTranslation("commentEditAction");
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "comment-action-btn comment-delete-btn";
-      deleteBtn.dataset.action = "delete-comment";
-      deleteBtn.textContent = Utils.getTranslation("commentDeleteAction");
-
-      actionsWrapper.appendChild(editBtn);
-      actionsWrapper.appendChild(deleteBtn);
+    if (!comments || comments.length === 0) {
+        emptyState.style.display = 'flex';
+        return;
     }
+    emptyState.style.display = 'none';
 
-    const likesDiv = document.createElement("div");
-    likesDiv.className = "comment-likes";
-    const likeBtn = document.createElement("button");
-    likeBtn.className = `comment-like-btn ${comment.isLiked ? "active" : ""}`;
-    likeBtn.dataset.action = "toggle-comment-like";
-    likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
-    const likeCountSpan = document.createElement("span");
-    likeCountSpan.className = "comment-like-count";
-    likeCountSpan.textContent = Utils.formatCount(comment.likes);
-    likesDiv.appendChild(likeBtn);
-    likesDiv.appendChild(likeCountSpan);
+    const fragment = document.createDocumentFragment();
 
-    footer.appendChild(timestampSpan);
-    footer.appendChild(actionsWrapper);
-    footer.appendChild(likesDiv);
+    comments.forEach(comment => {
+        const commentNode = template.content.cloneNode(true);
+        const commentItem = commentNode.querySelector('.comment-item');
 
-    main.appendChild(body);
-    main.appendChild(footer);
+        commentItem.dataset.commentId = comment.id;
+        commentItem.querySelector('.comment-avatar img').src = comment.avatar || 'path/to/default-avatar.png';
+        commentItem.querySelector('.comment-author').textContent = comment.user;
+        commentItem.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
+        commentItem.querySelector('.comment-text').textContent = comment.text;
 
-    commentEl.appendChild(avatarWrapper);
-    commentEl.appendChild(main);
+        const imageAttachment = commentItem.querySelector('.comment-image-attachment');
+        if (comment.image_url) {
+            imageAttachment.style.display = 'block';
+            imageAttachment.querySelector('img').src = comment.image_url;
+            imageAttachment.querySelector('img').addEventListener('click', () => openImageLightbox(comment.image_url));
+        } else {
+            imageAttachment.style.display = 'none';
+        }
 
-    return commentEl;
-  };
+        const likeBtn = commentItem.querySelector('.comment-like-btn');
+        likeBtn.classList.toggle('active', comment.isLiked);
+        commentItem.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
 
-  const topLevelComments = comments.filter((c) => !c.parentId);
+        const optionsContainer = commentItem.querySelector('.comment-options');
+        if (comment.canEdit) {
+            optionsContainer.style.display = 'block';
+        } else {
+            optionsContainer.style.display = 'none';
+        }
 
-  topLevelComments.forEach((comment) => {
-    const threadWrapper = document.createElement("div");
-    threadWrapper.className = "comment-thread";
+        fragment.appendChild(commentNode);
+    });
 
-    const parentEl = createCommentElement(comment);
-    threadWrapper.appendChild(parentEl);
-
-    const commentReplies = repliesMap.get(comment.id);
-    if (commentReplies && commentReplies.length > 0) {
-      const repliesContainer = document.createElement("div");
-      repliesContainer.className = "comment-replies";
-
-      commentReplies.forEach((reply) => {
-        const replyEl = createCommentElement(reply);
-        repliesContainer.appendChild(replyEl);
-      });
-
-      const toggleBtn = document.createElement("button");
-      toggleBtn.className = "toggle-replies-btn";
-      const updateToggleText = () => {
-        const isVisible = repliesContainer.classList.contains("visible");
-        const key = isVisible ? "toggleRepliesHide" : "toggleRepliesShow";
-        const text = Utils.getTranslation(key).replace(
-          "{count}",
-          commentReplies.length,
-        );
-        toggleBtn.innerHTML = `<span class="arrow"></span> ${text}`;
-      };
-
-      toggleBtn.addEventListener("click", () => {
-        repliesContainer.classList.toggle("visible");
-        toggleBtn.classList.toggle("expanded");
-        updateToggleText();
-      });
-
-      updateToggleText();
-
-      parentEl.querySelector(".comment-main").appendChild(toggleBtn);
-      threadWrapper.appendChild(repliesContainer);
-    }
-    commentList.appendChild(threadWrapper);
-  });
-
-  modalBody.appendChild(commentList);
+    container.appendChild(fragment);
 }
 
 function initGlobalPanels() {

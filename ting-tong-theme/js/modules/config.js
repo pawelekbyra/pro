@@ -299,6 +299,10 @@ export const Config = {
       newPasswordPlaceholder: "Nowe hasło",
       confirmPasswordPlaceholder: "Powtórz hasło",
       genericError: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+      timeJustNow: 'teraz',
+      timeMinute: 'm',
+      timeHour: 'h',
+      timeDay: 'd',
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -491,6 +495,10 @@ export const Config = {
       newPasswordPlaceholder: "New Password",
       confirmPasswordPlaceholder: "Confirm Password",
       genericError: "An unexpected error occurred. Please try again.",
+      timeJustNow: 'now',
+      timeMinute: 'm',
+      timeHour: 'h',
+      timeDay: 'd',
     }, // KONIEC 'en'
   },
 };
