@@ -487,8 +487,8 @@ export const Handlers = {
         // Use realIndex to get the correct slide data, which is reliable in loop mode.
         const slideData = slidesData[swiper.realIndex];
 
-        if (!slideData) {
-            console.error("Could not find slide data for realIndex:", swiper.realIndex);
+        if (!slideData || !slideData.author) {
+            console.error("Could not find slide data or author for realIndex:", swiper.realIndex);
             break;
         }
 
@@ -498,7 +498,7 @@ export const Handlers = {
             return;
         }
 
-        UI.populateProfileModal(slideData);
+        UI.populateProfileModal(slideData.author);
         UI.openModal(document.getElementById('tiktok-profile-modal'));
         break;
       }
