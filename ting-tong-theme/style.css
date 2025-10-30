@@ -2799,6 +2799,10 @@ body,
    --- TIKTOK PUBLIC PROFILE MODAL ---
    ========================================================================== */
 
+#tiktok-profile-modal {
+  position: fixed;
+}
+
 #tiktok-profile-modal .tiktok-profile-content {
   background-color: #2d2d2d;
   color: #fff;
@@ -3602,6 +3606,7 @@ body,
   #bmc-w-modal-container iframe,
   #bmc-w-modal-container > div
   {
+    position: absolute !important;
     width: calc(100vh * 9 / 16) !important;
     max-width: 100% !important;
     left: 0 !important;
