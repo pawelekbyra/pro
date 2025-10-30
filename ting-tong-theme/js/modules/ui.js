@@ -939,8 +939,8 @@ function renderComments(comments) {
         const commentItem = commentNode.querySelector('.comment-item');
 
         commentItem.dataset.commentId = comment.id;
-        commentItem.querySelector('.comment-avatar img').src = comment.avatar || 'path/to/default-avatar.png';
-        commentItem.querySelector('.comment-author').textContent = comment.user;
+        commentItem.querySelector('.comment-avatar').src = comment.avatar || 'path/to/default-avatar.png';
+        commentItem.querySelector('.comment-user').textContent = comment.user;
         commentItem.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
         commentItem.querySelector('.comment-text').textContent = comment.text;
 
