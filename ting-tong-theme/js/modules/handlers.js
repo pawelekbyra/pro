@@ -511,9 +511,13 @@ export const Handlers = {
       case "toggle-language":
         handleLanguageToggle();
         break;
-      case "open-comments-modal":
-        CommentsModal.open();
+      case "open-comments-modal": {
+        const modal = document.getElementById('comments-modal-container');
+        if (modal) {
+            modal.classList.add('visible');
+        }
         break;
+    }
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
