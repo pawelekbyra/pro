@@ -133,13 +133,12 @@ function tt_comment_likes_user_has( $comment_id, $user_id ) {
 // =========================================================================
 
 /**
- * Pobiera dane slajdów, które zostaną przekazane do frontendu.
+ * Zwraca tablicę symulowanych postów.
+ *
+ * @return array
  */
-function tt_get_slides_data() {
-	$user_id = get_current_user_id();
-
-	// Symulujemy pobieranie postów z bazy danych
-	$simulated_posts = [
+function tt_get_simulated_posts() {
+	return [
 		[
 			'post_id'      => 1,
 			'post_title'   => 'Big Buck Bunny',
@@ -197,8 +196,16 @@ function tt_get_slides_data() {
 			'post_content' => 'Jedna z moich ulubionych piosenek w moim wykonaniu. Mam nadzieję, że się Wam spodoba!',
 		],
 	];
+}
 
-	$slides_data = [];
+/**
+ * Pobiera dane slajdów, które zostaną przekazane do frontendu.
+ */
+function tt_get_slides_data() {
+	$user_id         = get_current_user_id();
+	$simulated_posts = tt_get_simulated_posts();
+	$slides_data     = [];
+
 	foreach ( $simulated_posts as $post ) {
 		$slide_id = 'slide-' . str_pad( $post['post_id'], 3, '0', STR_PAD_LEFT );
 
@@ -212,7 +219,7 @@ function tt_get_slides_data() {
 			'access'          => $post['access'],
 			'initialLikes'    => tt_likes_get_count( $post['post_id'] ),
 			'isLiked'         => tt_likes_user_has( $post['post_id'], $user_id ),
-			'initialComments' => tt_comments_get_count( $slide_id ),
+			'initialComments' => $post['comments'],
 		];
 	}
 	return $slides_data;
@@ -410,6 +417,41 @@ add_action( 'wp_ajax_toggle_like', function () {
 } );
 
 // --- Komentarze ---
+/**
+ * Generuje mockowe komentarze.
+ *
+ * @param int $count Liczba komentarzy do wygenerowania.
+ * @return array
+ */
+function tt_generate_mock_comments($count) {
+    $comments = [];
+    $users = ['Anna', 'Piotr', 'Kasia', 'Tomek', 'Ewa'];
+    $texts = [
+        'To jest super!',
+        'Świetny filmik, dzięki!',
+        'Nie mogę się doczekać kolejnych.',
+        'Bardzo inspirujące :)',
+        'Haha, dobre!',
+    ];
+
+    for ($i = 1; $i <= $count; $i++) {
+        $user = $users[array_rand($users)];
+        $comments[] = [
+            'id'        => $i,
+            'parentId'  => null,
+            'user'      => $user,
+            'avatar'    => 'https://i.pravatar.cc/100?u=' . urlencode($user),
+            'text'      => $texts[array_rand($texts)],
+            'image_url' => null,
+            'timestamp' => (new DateTime("-{$i} minutes"))->format(DateTime::ATOM),
+            'likes'     => rand(0, 50),
+            'isLiked'   => (bool) rand(0, 1),
+            'canEdit'   => false,
+        ];
+    }
+    return $comments;
+}
+
 function tt_ajax_get_comments_callback() {
     if (is_user_logged_in()) {
         check_ajax_referer('tt_ajax_nonce', 'nonce');
@@ -421,12 +463,29 @@ function tt_ajax_get_comments_callback() {
         wp_send_json_error(['message' => 'Brak ID slajdu.'], 400);
     }
 
+	// Sprawdzenie, czy dla danego slajdu są prawdziwe komentarze
     $user_id = get_current_user_id();
     $comments_table = $wpdb->prefix . 'tt_comments';
     $results = $wpdb->get_results($wpdb->prepare(
         "SELECT * FROM {$comments_table} WHERE slide_id = %s ORDER BY created_at ASC",
         $slide_id
     ));
+
+    if (empty($results)) {
+        // Jeśli nie ma prawdziwych komentarzy, wygeneruj mockowe
+        $post_id = (int) filter_var($slide_id, FILTER_SANITIZE_NUMBER_INT);
+        $simulated_posts = tt_get_simulated_posts();
+        $post_data = null;
+        foreach ($simulated_posts as $post) {
+            if ($post['post_id'] === $post_id) {
+                $post_data = $post;
+                break;
+            }
+        }
+        $comment_count = $post_data ? $post_data['comments'] : 0;
+        wp_send_json_success(tt_generate_mock_comments($comment_count));
+        return;
+    }
 
     $comments = [];
     foreach ($results as $c) {

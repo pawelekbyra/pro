@@ -994,6 +994,15 @@ function initGlobalPanels() {
     });
   }
 }
+function openAuthorModal(authorData) {
+  if (!authorData) {
+    console.error("Author data is missing.");
+    return;
+  }
+  populateProfileModal({ author: authorData });
+  openModal(DOM.tiktokProfileModal);
+}
+
 
 export const UI = {
   initDOMCache,
@@ -1010,6 +1019,7 @@ export const UI = {
   populateProfileModal,
   renderComments,
   updateCommentFormVisibility,
+  openAuthorModal,
   showToast,
   updateVolumeButton,
   toggleEmojiPicker,
