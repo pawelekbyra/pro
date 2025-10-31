@@ -137,15 +137,12 @@ get_header();
 </div>
 
 <div id="preloader">
-    <div class="preloader-icon-container">
-        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/splash-icon-transparent.png" alt="Ting Tong App" class="splash-icon">
-    </div>
     <div class="preloader-content-container">
         <div class="language-selection">
             <h2>Wybierz Język / Select Language</h2>
             <div class="lang-buttons-container">
-                <button data-lang="pl" data-action="select-language">Polski</button>
-                <button data-lang="en" data-action="select-language">English</button>
+                <button data-lang="pl"><span>Polski</span></button>
+                <button data-lang="en"><span>English</span></button>
             </div>
         </div>
     </div>
@@ -181,22 +178,24 @@ get_header();
     <template id="slide-template">
         <div class="webyx-section swiper-slide">
             <div class="tiktok-symulacja">
-                <div class="media-container"></div>
+                <video crossorigin playsinline webkit-playsinline muted autoplay preload="auto" poster="" class="player"></video>
                 <div class="video-controls">
-                    <button class="icon-button volume-btn" data-action="toggle-main-volume" aria-label="Toggle Volume">
-                        <svg class="icon-volume-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
-                        <svg class="icon-volume-off" style="display: none;" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
-                    </button>
-                    <button class="icon-button cc-btn" data-action="toggle-cc" aria-label="Subtitles/CC" disabled>
-                        <svg viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2v-.5H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2v-.5H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
-                    </button>
-                    <button class="icon-button fullscreen-btn" data-action="toggle-fullscreen" aria-label="Toggle Fullscreen">
-                        <svg class="icon-fullscreen-enter" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
-                        <svg class="icon-fullscreen-exit" style="display: none;" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
-                    </button>
-                    <button class="icon-button info-btn" data-action="open-info-modal" aria-label="More Info">
-                        <svg viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
-                    </button>
+                    <div class="video-controls-left">
+                        <button class="volume-button" data-action="toggle-volume">
+                            <svg class="volume-on-icon" style="display: none;" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                            <svg class="volume-off-icon" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                        </button>
+                        <button class="cc-button" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 0 24 24" width="28" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2v-.5H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2v-.5H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>
+                        </button>
+                        <button class="fullscreen-button" data-action="toggle-fullscreen">
+                            <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+                            <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
+                        </button>
+                        <button class="info-button" data-action="open-info-modal">
+                           <svg fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
+                        </button>
+                    </div>
                 </div>
                 <div class="pause-overlay" aria-hidden="true">
                     <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -233,22 +232,25 @@ get_header();
                     <p class="error-subtitle" data-translate-key="videoErrorSubtitle">Nie można załadować materiału.</p>
                     <button class="error-retry-button" data-action="retry-video" data-translate-key="videoErrorRetry">Spróbuj ponownie</button>
                 </div>
-                <div class="sidebar">
-                    <button class="icon-button profile-btn" data-action="open-profile-modal">
-                        <img src="" alt="Avatar" class="avatar">
-                        <div class="plus-icon">+</div>
+                <div class="sidebar visible">
+                    <div class="profile">
+                        <button class="profileButton" data-action="open-public-profile" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <div class="plus" aria-hidden="true">+</div>
+                    </div>
+                    <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <div class="like-count icon-label">0</div>
                     </button>
-                    <button class="icon-button like-btn" data-action="like">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                        <span class="count">0</span>
+                    <button class="icon-button commentsButton" data-action="open-comments-modal" aria-controls="commentsModal" data-translate-aria-label="commentsAriaLabel" aria-label="Komentarze">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                        </svg>
+                        <div class="icon-label comment-count">0</div>
                     </button>
-                    <button class="icon-button comments-btn" data-action="open-comments">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
-                        <span class="count">0</span>
-                    </button>
-                    <button class="icon-button share-btn" data-action="share">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-                        <span class="count" data-translate-key="shareAction">Share</span>
+                    <button class="icon-button shareButton" data-action="share" data-translate-title="shareTitle" data-translate-aria-label="shareAriaLabel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l6 6-6 6M21 11H9a6 6 0 0 0-6 6" /></svg><div class="icon-label" data-translate-key="shareText">Szeruj</div></button>
+                    <button class="icon-button tipButton" data-action="show-tip-jar" data-translate-title="tipTitle" data-translate-aria-label="tipAriaLabel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
+                        <div class="icon-label" data-translate-key="tipText">Napiwek</div>
                     </button>
                 </div>
                 <div class="bottombar">
@@ -270,29 +272,29 @@ get_header();
 
     <template id="comment-template">
         <div class="comment-item" data-comment-id="">
-            <img src="" alt="Avatar" class="comment-avatar">
-            <div class="comment-main">
-                <div class="comment-body">
-                    <span class="comment-user"></span>
-                    <p class="comment-text"></p>
-                </div>
-                <div class="comment-image-attachment" style="display: none;">
-                    <img src="" class="comment-image" alt="Comment image attachment" loading="lazy">
-                </div>
-                <div class="comment-footer">
+            <div class="comment-avatar">
+                <img src="" alt="Avatar">
+            </div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-author"></span>
                     <span class="comment-timestamp"></span>
-                    <button class="comment-action-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
-                    <div class="comment-likes">
-                         <button class="comment-like-btn" data-action="toggle-comment-like">
-                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                        </button>
-                        <span class="comment-like-count">0</span>
-                    </div>
+                </div>
+                <p class="comment-text"></p>
+                <div class="comment-image-attachment" style="display: none;">
+                    <img src="" class="comment-image" alt="Comment image attachment">
+                </div>
+                <div class="comment-actions">
+                    <button class="comment-like-btn" data-action="toggle-comment-like">
+                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </button>
+                    <span class="comment-like-count">0</span>
+                    <button class="comment-reply-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
                 </div>
             </div>
-             <div class="comment-options">
+            <div class="comment-options" style="display: none;">
                 <button class="comment-options-trigger" data-action="toggle-comment-options">
-                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
                 </button>
                 <div class="comment-options-menu">
                     <button data-action="edit-comment" data-translate-key="commentEdit">Edytuj</button>
