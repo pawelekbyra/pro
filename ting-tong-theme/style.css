@@ -2804,6 +2804,10 @@ body,
 /* ==========================================================================
    --- TIKTOK PUBLIC PROFILE MODAL ---
    ========================================================================== */
+/* FIX: Change position to fixed to prevent animation issues with overflow:hidden parent */
+.modal-overlay#tiktok-profile-modal {
+    position: fixed;
+}
 
 #tiktok-profile-modal .tiktok-profile-content {
   background-color: #2d2d2d;
