@@ -1,28 +1,132 @@
 import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
-import { API } from './api.js';
-import { UI as ui } from './ui.js'
+import { API, slidesData } from './api.js';
 
 let selectedCommentImage = null;
 const DOM = {};
 
 function cacheDOM() {
     DOM.commentsModal = document.getElementById("comments-modal-container");
+    if (!DOM.commentsModal) {
+        console.error("Comments modal container not found in cacheDOM!");
+        return;
+    }
+    DOM.modalBody = DOM.commentsModal.querySelector(".modal-body");
     DOM.emojiPicker = DOM.commentsModal.querySelector('.emoji-picker');
     DOM.commentInput = DOM.commentsModal.querySelector('#comment-input');
     DOM.fileInput = DOM.commentsModal.querySelector('.comment-image-input');
     DOM.imagePreviewContainer = DOM.commentsModal.querySelector('.image-preview-container');
-    DOM.lightbox = document.querySelector('.image-lightbox');
-    DOM.lightboxClose = document.querySelector('.image-lightbox-close');
     DOM.form = DOM.commentsModal.querySelector('#comment-form');
     DOM.prompt = DOM.commentsModal.querySelector('.login-to-comment-prompt');
+    DOM.lightbox = document.querySelector('.image-lightbox');
+    DOM.lightboxClose = document.querySelector('.image-lightbox-close');
 }
 
-function initEmojiPicker() {
-    const emojiPicker = DOM.emojiPicker;
-    if (!emojiPicker || emojiPicker.children.length > 0) return;
+async function handleCommentAction(e) {
+    const actionTarget = e.target.closest('[data-action]');
+    if (!actionTarget) return;
 
+    const action = actionTarget.dataset.action;
+    const commentItem = actionTarget.closest('.comment-item');
+    if (!commentItem) return;
+
+    const commentId = commentItem.dataset.commentId;
+    const swiper = State.get('swiper');
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+
+    switch (action) {
+        case 'toggle-comment-like':
+            // Basic optimistic update
+            actionTarget.classList.toggle('active');
+            const result = await API.toggleCommentLike(slideId, commentId);
+            if (!result.success) {
+                actionTarget.classList.toggle('active'); // Revert on failure
+            }
+            // Full re-render would be better, but this is a quick fix
+            const countEl = commentItem.querySelector('.comment-like-count');
+            if (countEl && result.data?.likes !== undefined) {
+                countEl.textContent = Utils.formatCount(result.data.likes);
+            }
+            break;
+        case 'edit-comment':
+             const currentText = commentItem.querySelector('.comment-text').textContent;
+             const newText = prompt("Edit your comment:", currentText);
+             if (newText && newText.trim() !== currentText) {
+                 const result = await API.editComment(slideId, commentId, newText.trim());
+                 if (result.success) {
+                     commentItem.querySelector('.comment-text').textContent = newText.trim();
+                 }
+             }
+            break;
+        case 'delete-comment':
+             if (confirm("Are you sure you want to delete this comment?")) {
+                 const result = await API.deleteComment(slideId, commentId);
+                 if (result.success) {
+                     commentItem.remove();
+                 }
+             }
+            break;
+    }
+}
+
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const text = DOM.commentInput.value.trim();
+    if (!text && !selectedCommentImage) return;
+
+    const swiper = State.get('swiper');
+    if (!swiper) return;
+
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+    const button = DOM.form.querySelector('button[type="submit"]');
+    button.disabled = true;
+
+    try {
+        let imageUrl = null;
+        if (selectedCommentImage) {
+            const uploadResult = await API.uploadCommentImage(selectedCommentImage);
+            if (uploadResult.success) {
+                imageUrl = uploadResult.data.url;
+            } else {
+                throw new Error(uploadResult.data.message || 'Image upload failed');
+            }
+        }
+
+        const postResult = await API.postComment(slideId, text, null, imageUrl);
+        if (postResult.success) {
+            DOM.commentInput.value = '';
+            removeCommentImage();
+
+            const commentsResult = await API.getComments(slideId);
+            if (commentsResult.success) {
+                renderComments(commentsResult.data);
+
+                const slideData = slidesData.find(s => s.id === slideId);
+                if(slideData) {
+                    slideData.initialComments = commentsResult.data.length;
+                    const countElement = document.querySelector(`.swiper-slide-active .comment-count`);
+                    if(countElement) {
+                        countElement.textContent = Utils.formatCount(slideData.initialComments);
+                    }
+                }
+            }
+
+        } else {
+            throw new Error(postResult.data.message || 'Failed to post comment');
+        }
+
+    } catch (error) {
+        console.error("Comment post error:", error);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+
+function initEmojiPicker() {
+    if (!DOM.emojiPicker || DOM.emojiPicker.children.length > 0) return;
     const fragment = document.createDocumentFragment();
     Config.EMOJI_LIST.forEach(emoji => {
         const btn = document.createElement('button');
@@ -33,418 +137,164 @@ function initEmojiPicker() {
         btn.addEventListener('click', () => insertEmoji(emoji));
         fragment.appendChild(btn);
     });
-    emojiPicker.appendChild(fragment);
+    DOM.emojiPicker.appendChild(fragment);
 }
 
 function insertEmoji(emoji) {
-    const input = DOM.commentInput;
-    if (!input) return;
-
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-    const text = input.value;
-
-    input.value = text.substring(0, start) + emoji + text.substring(end);
-    input.selectionStart = input.selectionEnd = start + emoji.length;
-    input.focus();
-
+    if (!DOM.commentInput) return;
+    const { selectionStart, selectionEnd, value } = DOM.commentInput;
+    DOM.commentInput.value = value.substring(0, selectionStart) + emoji + value.substring(selectionEnd);
+    DOM.commentInput.selectionStart = DOM.commentInput.selectionEnd = selectionStart + emoji.length;
+    DOM.commentInput.focus();
     hideEmojiPicker();
 }
 
-// Dodaj zmienną dla debounce na początku pliku (przed funkcją)
-let emojiPickerTimeout = null;
-let emojiPickerClickListener = null;
-
 function toggleEmojiPicker() {
-    const picker = DOM.emojiPicker;
-    if (!picker) {
-        console.warn('Emoji picker element not found');
-        return;
-    }
-
-    // Debounce - zapobiegaj podwójnym kliknięciom
-    if (emojiPickerTimeout) {
-        return;
-    }
-
-    const isVisible = picker.classList.contains('visible');
-
-    if (isVisible) {
-        hideEmojiPicker();
-    } else {
-        picker.classList.add('visible');
-
-        // Usuń stary listener jeśli istnieje
-        if (emojiPickerClickListener) {
-            document.removeEventListener('click', emojiPickerClickListener);
-            emojiPickerClickListener = null;
-        }
-
-        // Dodaj nowy listener po micro-delay
-        setTimeout(() => {
-            emojiPickerClickListener = (e) => closeEmojiPickerOnClickOutside(e);
-            document.addEventListener('click', emojiPickerClickListener, { once: true });
-        }, 10);
-    }
-
-    // Debounce timer
-    emojiPickerTimeout = setTimeout(() => {
-        emojiPickerTimeout = null;
-    }, 300);
+    if (!DOM.emojiPicker) return;
+    DOM.emojiPicker.classList.toggle('visible');
 }
 
 function hideEmojiPicker() {
-    const picker = DOM.emojiPicker;
-    if (picker) {
-        picker.classList.remove('visible');
-    }
-
-    // Usuń pending listener
-    if (emojiPickerClickListener) {
-        document.removeEventListener('click', emojiPickerClickListener);
-        emojiPickerClickListener = null;
-    }
-}
-
-function closeEmojiPickerOnClickOutside(e) {
-    const picker = DOM.emojiPicker;
-    const emojiBtn = DOM.commentsModal.querySelector('.emoji-btn');
-
-    // Walidacja elementów
-    if (!picker || !emojiBtn) {
-        return;
-    }
-
-    // Sprawdź czy kliknięcie było poza pickerem i przyciskiem
-    if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
-        hideEmojiPicker();
-    }
+    if (!DOM.emojiPicker) return;
+    DOM.emojiPicker.classList.remove('visible');
 }
 
 function handleImageAttachment() {
-    const fileInput = DOM.fileInput;
-
-    if (!fileInput) {
-        console.error('Comment image input not found');
-        ui.showAlert(
-            Utils.getTranslation('imageInputError') || 'Nie można załączyć obrazu',
-            true
-        );
-        return;
-    }
-
-    // Sprawdź czy użytkownik jest zalogowany
+    if (!DOM.fileInput) return;
     if (!State.get('isUserLoggedIn')) {
-        ui.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać obraz', true);
+        console.warn("User not logged in, cannot attach image.");
         return;
     }
-
-    fileInput.click();
+    DOM.fileInput.click();
 }
 
 function handleImageSelect(e) {
     const file = e.target.files[0];
+    if (!file) return;
 
-    if (!file) {
-        return;
-    }
-
-    // Walidacja typu
     if (!file.type.startsWith('image/')) {
-        ui.showAlert(
-            Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG, PNG, GIF)',
-            true
-        );
-        e.target.value = '';
+        console.warn("Invalid file type");
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+        console.warn("File is too large");
         return;
     }
 
-    // Walidacja rozmiaru
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-        ui.showAlert(
-            Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymalny rozmiar: 5MB',
-            true
-        );
-        e.target.value = '';
-        return;
-    }
-
-    // Sprawdź czy można odczytać plik
-    const reader = new FileReader();
-
-    reader.onerror = () => {
-        console.error('Failed to read file');
-        ui.showAlert(
-            Utils.getTranslation('fileReadError') || 'Nie można odczytać pliku',
-            true
-        );
-        e.target.value = '';
-    };
-
-    reader.onload = () => {
-        // Plik jest OK - zapisz go
-        selectedCommentImage = file;
-        showImagePreview(file);
-    };
-
-    // Rozpocznij odczyt (tylko dla walidacji)
-    reader.readAsDataURL(file);
-
-    // Wyczyść input żeby można było wybrać ten sam plik ponownie
+    selectedCommentImage = file;
+    showImagePreview(file);
     e.target.value = '';
 }
 
 function showImagePreview(file) {
-    const container = DOM.imagePreviewContainer;
-    if (!container) return;
-
+    if (!DOM.imagePreviewContainer) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-        container.innerHTML = `
+        DOM.imagePreviewContainer.innerHTML = `
       <div class="image-preview">
         <img src="${e.target.result}" alt="Preview">
         <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
       </div>
     `;
-        container.classList.add('visible');
+        DOM.imagePreviewContainer.classList.add('visible');
     };
     reader.readAsDataURL(file);
 }
 
 function removeCommentImage() {
     selectedCommentImage = null;
-    const container = DOM.imagePreviewContainer;
-    if (container) {
-        container.classList.remove('visible');
-        container.innerHTML = '';
-    }
-}
-function updateCommentFormVisibility() {
-    const isLoggedIn = State.get("isUserLoggedIn");
-    const form = DOM.form;
-    const prompt = DOM.prompt;
-
-    if (form && prompt) {
-        if (isLoggedIn) {
-            form.style.display = "flex";
-            prompt.style.display = "none";
-        } else {
-            form.style.display = "none";
-            prompt.style.display = "block";
-        }
-    }
-}
-function focusCommentInput() {
-    const input = DOM.commentInput;
-    if (input) {
-        setTimeout(() => {
-            input.focus();
-
-            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 100);
-    }
-}
-
-function scrollToComment(commentId) {
-    const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
-    if (commentEl) {
-        commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        commentEl.style.background = 'rgba(255, 0, 85, 0.1)';
-        setTimeout(() => {
-            commentEl.style.background = '';
-        }, 1000);
+    if (DOM.imagePreviewContainer) {
+        DOM.imagePreviewContainer.classList.remove('visible');
+        DOM.imagePreviewContainer.innerHTML = '';
     }
 }
 
 function openImageLightbox(imageUrl) {
-    const lightbox = DOM.lightbox;
-    if (!lightbox) return;
-
-    const img = lightbox.querySelector('img');
-    img.src = imageUrl;
-    lightbox.classList.add('visible');
-
-    document.body.style.overflow = 'hidden';
+    if (!DOM.lightbox) return;
+    DOM.lightbox.querySelector('img').src = imageUrl;
+    DOM.lightbox.classList.add('visible');
 }
 
 function closeImageLightbox() {
-    const lightbox = DOM.lightbox;
-    if (!lightbox) return;
-
-    lightbox.classList.remove('visible');
-    document.body.style.overflow = '';
+    if (!DOM.lightbox) return;
+    DOM.lightbox.classList.remove('visible');
 }
-function renderComments(comments) {
-    const modalBody = DOM.commentsModal.querySelector(".modal-body");
-    if (!modalBody) return;
 
-    modalBody.innerHTML = "";
+function renderComments(comments) {
+    if (!DOM.modalBody) {
+        console.error("Cannot render comments: modal body is not cached.");
+        return;
+    }
+
+    DOM.modalBody.innerHTML = "";
 
     if (!comments || comments.length === 0) {
-        modalBody.innerHTML =
-            '<p class="no-comments-message" data-translate-key="noComments">Brak komentarzy. Bądź pierwszy!</p>';
+        DOM.modalBody.innerHTML = `<p class="no-comments-message" data-translate-key="noComments">${Utils.getTranslation('noComments')}</p>`;
         return;
     }
 
     const commentList = document.createElement("div");
     commentList.className = "comments-list";
 
-    const repliesMap = new Map();
-    comments.forEach((comment) => {
-        if (comment.parentId) {
-            if (!repliesMap.has(comment.parentId)) {
-                repliesMap.set(comment.parentId, []);
-            }
-            repliesMap.get(comment.parentId).push(comment);
+    const commentTemplate = document.getElementById('comment-template');
+
+    if (!commentTemplate) {
+        console.error("Comment template not found!");
+        DOM.modalBody.innerHTML = `<p class="no-comments-message">Error: Comment template is missing.</p>`;
+        return;
+    }
+
+    comments.forEach(comment => {
+        const templateClone = commentTemplate.content.cloneNode(true);
+        const commentItem = templateClone.querySelector('.comment-item');
+
+        commentItem.dataset.commentId = comment.id;
+
+        templateClone.querySelector('.comment-author').textContent = comment.user;
+        templateClone.querySelector('.comment-avatar img').src = comment.avatar;
+        templateClone.querySelector('.comment-text').textContent = comment.text;
+        templateClone.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
+        templateClone.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
+
+        const likeBtn = templateClone.querySelector('.comment-like-btn');
+        if (comment.isLiked) {
+            likeBtn.classList.add('active');
         }
-    });
 
-    const createCommentElement = (comment) => {
-        const commentEl = document.createElement("div");
-        commentEl.className = "comment-item";
-        commentEl.dataset.commentId = comment.id;
-
-        const avatarWrapper = document.createElement("div");
-        avatarWrapper.className = "comment-avatar-wrapper";
-        const avatarImg = document.createElement("img");
-        avatarImg.src = comment.avatar;
-        avatarImg.alt = "Avatar";
-        avatarImg.className = "comment-avatar";
-        avatarImg.loading = "lazy";
-        avatarWrapper.appendChild(avatarImg);
-
-        const main = document.createElement("div");
-        main.className = "comment-main";
-
-        const body = document.createElement("div");
-        body.className = "comment-body";
-        const userSpan = document.createElement("span");
-        userSpan.className = "comment-user";
-        userSpan.textContent = comment.user;
-        const textP = document.createElement("p");
-        textP.className = "comment-text";
-        textP.textContent = comment.text;
-        body.appendChild(userSpan);
-        body.appendChild(textP);
-
-        // DODAJ: Obsługa obrazu w komentarzu
+        const commentImageAttachment = templateClone.querySelector('.comment-image-attachment');
         if (comment.image_url) {
-            const imageDiv = document.createElement("div");
-            imageDiv.className = "comment-image";
-            imageDiv.innerHTML = `<img src="${comment.image_url}" alt="Comment image"
-loading="lazy">`;
-            imageDiv.addEventListener('click', () => openImageLightbox(comment.image_url));
-            body.appendChild(imageDiv);
+            commentImageAttachment.style.display = 'block';
+            templateClone.querySelector('.comment-image').src = comment.image_url;
+            templateClone.querySelector('.comment-image').addEventListener('click', () => openImageLightbox(comment.image_url));
         }
-
-        const footer = document.createElement("div");
-        footer.className = "comment-footer";
-        const timestampSpan = document.createElement("span");
-        timestampSpan.className = "comment-timestamp";
-        timestampSpan.textContent = new Date(comment.timestamp).toLocaleString();
-        const replyBtn = document.createElement("button");
-        replyBtn.className = "comment-action-btn comment-reply-btn";
-        replyBtn.dataset.action = "reply-to-comment";
-        replyBtn.textContent = Utils.getTranslation("commentReplyAction");
-
-        const actionsWrapper = document.createElement("div");
-        actionsWrapper.className = "comment-actions-wrapper";
-        actionsWrapper.appendChild(replyBtn);
 
         if (comment.canEdit) {
-            const editBtn = document.createElement("button");
-            editBtn.className = "comment-action-btn comment-edit-btn";
-            editBtn.dataset.action = "edit-comment";
-            editBtn.textContent = Utils.getTranslation("commentEditAction");
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.className = "comment-action-btn comment-delete-btn";
-            deleteBtn.dataset.action = "delete-comment";
-            deleteBtn.textContent = Utils.getTranslation("commentDeleteAction");
-
-            actionsWrapper.appendChild(editBtn);
-            actionsWrapper.appendChild(deleteBtn);
+             templateClone.querySelector('.comment-options').style.display = 'block';
         }
 
-        const likesDiv = document.createElement("div");
-        likesDiv.className = "comment-likes";
-        const likeBtn = document.createElement("button");
-        likeBtn.className = `comment-like-btn ${comment.isLiked ? "active" : ""}`;
-        likeBtn.dataset.action = "toggle-comment-like";
-        likeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
-        const likeCountSpan = document.createElement("span");
-        likeCountSpan.className = "comment-like-count";
-        likeCountSpan.textContent = Utils.formatCount(comment.likes);
-        likesDiv.appendChild(likeBtn);
-        likesDiv.appendChild(likeCountSpan);
-
-        footer.appendChild(timestampSpan);
-        footer.appendChild(actionsWrapper);
-        footer.appendChild(likesDiv);
-
-        main.appendChild(body);
-        main.appendChild(footer);
-
-        commentEl.appendChild(avatarWrapper);
-        commentEl.appendChild(main);
-
-        return commentEl;
-    };
-
-    const topLevelComments = comments.filter((c) => !c.parentId);
-
-    topLevelComments.forEach((comment) => {
-        const threadWrapper = document.createElement("div");
-        threadWrapper.className = "comment-thread";
-
-        const parentEl = createCommentElement(comment);
-        threadWrapper.appendChild(parentEl);
-
-        const commentReplies = repliesMap.get(comment.id);
-        if (commentReplies && commentReplies.length > 0) {
-            const repliesContainer = document.createElement("div");
-            repliesContainer.className = "comment-replies";
-
-            commentReplies.forEach((reply) => {
-                const replyEl = createCommentElement(reply);
-                repliesContainer.appendChild(replyEl);
-            });
-
-            const toggleBtn = document.createElement("button");
-            toggleBtn.className = "toggle-replies-btn";
-            const updateToggleText = () => {
-                const isVisible = repliesContainer.classList.contains("visible");
-                const key = isVisible ? "toggleRepliesHide" : "toggleRepliesShow";
-                const text = Utils.getTranslation(key).replace(
-                    "{count}",
-                    commentReplies.length,
-                );
-                toggleBtn.innerHTML = `<span class="arrow"></span> ${text}`;
-            };
-
-            toggleBtn.addEventListener("click", () => {
-                repliesContainer.classList.toggle("visible");
-                toggleBtn.classList.toggle("expanded");
-                updateToggleText();
-            });
-
-            updateToggleText();
-
-            parentEl.querySelector(".comment-main").appendChild(toggleBtn);
-            threadWrapper.appendChild(repliesContainer);
-        }
-        commentList.appendChild(threadWrapper);
+        commentList.appendChild(templateClone);
     });
 
-    modalBody.appendChild(commentList);
+    DOM.modalBody.appendChild(commentList);
 }
+
+function updateCommentFormVisibility() {
+    const isLoggedIn = State.get("isUserLoggedIn");
+    if (DOM.form && DOM.prompt) {
+        DOM.form.style.display = isLoggedIn ? "flex" : "none";
+        DOM.prompt.style.display = isLoggedIn ? "none" : "block";
+    }
+}
+
 export const CommentsModal = {
     init() {
         cacheDOM();
+
+        if (!DOM.commentsModal) {
+            console.error("CommentsModal.init() failed: Modal container not found.");
+            return;
+        }
+
         initEmojiPicker();
 
         if (DOM.fileInput) {
@@ -462,13 +312,19 @@ export const CommentsModal = {
                 }
             });
         }
+
+        if (DOM.form) {
+            DOM.form.addEventListener('submit', handleFormSubmit);
+        }
+
+        if (DOM.modalBody) {
+            DOM.modalBody.addEventListener('click', handleCommentAction);
+        }
+
+        console.log("CommentsModal initialized successfully.");
     },
     renderComments,
     updateCommentFormVisibility,
-    focusCommentInput,
-    scrollToComment,
-    openImageLightbox,
-    closeImageLightbox,
     toggleEmojiPicker,
     hideEmojiPicker,
     handleImageAttachment,
