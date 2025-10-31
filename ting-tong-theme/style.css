@@ -1556,15 +1556,21 @@ body,
 .modal-content {
   z-index: 2001;
   position: relative;
+  /* Generic transition for modals that fade/scale */
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* Default state for modals that just fade/scale */
+.modal-overlay:not(#comments-modal-container) .modal-content {
   opacity: 0;
   transform: scale(0.95);
 }
 
-.modal-overlay.visible .modal-content {
+.modal-overlay.visible:not(#comments-modal-container) .modal-content {
     opacity: 1;
     transform: scale(1);
 }
+
 .modal-close-btn {
   position: absolute;
   top: 8px;
@@ -3892,22 +3898,22 @@ body,
 }
 
 /* Gdy klawiatura jest widoczna */
-#commentsModal.keyboard-visible .modal-content {
+#comments-modal-container.keyboard-visible .modal-content {
   height: calc(100vh - var(--keyboard-offset, 0px));
   max-height: calc(100vh - var(--keyboard-offset, 0px));
   transition: height 0.3s ease-out, max-height 0.3s ease-out;
 }
 
-#commentsModal.visible .modal-content {
+#comments-modal-container.visible .modal-content {
   transform: translateY(0);
 }
 
-#commentsModal.is-hiding .modal-content {
+#comments-modal-container.is-hiding .modal-content {
   transform: translateY(100%);
 }
 
 /* Header */
-#commentsModal .modal-header {
+#comments-modal-container .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -3918,7 +3924,7 @@ body,
   border-bottom: 1px solid #333;
 }
 
-#commentsModal .modal-close-btn {
+#comments-modal-container .modal-close-btn {
   color: #b0b3b8;
   opacity: 1;
   position: static;
@@ -3928,12 +3934,12 @@ body,
   font-size: 24px;
 }
 
-#commentsModal .modal-close-btn:hover {
+#comments-modal-container .modal-close-btn:hover {
   opacity: 1;
 }
 
 /* Body - scrollowalna lista */
-#commentsModal .modal-body {
+#comments-modal-container .modal-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -3941,6 +3947,10 @@ body,
   padding: 8px;
   -webkit-overflow-scrolling: touch;
   transition: padding-bottom 0.3s ease-out;
+}
+
+#comments-modal-container.keyboard-visible .comment-form-container {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Comment Form Container - ZAWSZE NA DOLE */
@@ -3956,7 +3966,7 @@ body,
   z-index: 10;
 }
 
-#commentsModal.keyboard-visible .comment-form-container {
+#comments-modal-container.keyboard-visible .comment-form-container {
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -4527,7 +4537,7 @@ body,
 }
 
 /* Loading Spinner */
-#commentsModal .modal-body .loading-spinner {
+#comments-modal-container .modal-body .loading-spinner {
   display: block;
   margin: 60px auto;
   border-color: rgba(0, 0, 0, 0.2);
