@@ -6,7 +6,7 @@ import { UI as ui } from './ui.js'
 
 let selectedCommentImage = null;
 const DOM = {
-    commentsModal: document.getElementById("commentsModal"),
+    commentsModal: document.getElementById("comments-modal-container"),
 };
 function initEmojiPicker() {
     const emojiPicker = document.querySelector('.emoji-picker');
