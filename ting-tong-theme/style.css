@@ -1556,15 +1556,21 @@ body,
 .modal-content {
   z-index: 2001;
   position: relative;
+  /* Generic transition for modals that fade/scale */
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* Default state for modals that just fade/scale */
+.modal-overlay:not(#comments-modal-container) .modal-content {
   opacity: 0;
   transform: scale(0.95);
 }
 
-.modal-overlay.visible .modal-content {
+.modal-overlay.visible:not(#comments-modal-container) .modal-content {
     opacity: 1;
     transform: scale(1);
 }
+
 .modal-close-btn {
   position: absolute;
   top: 8px;
