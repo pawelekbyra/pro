@@ -144,8 +144,8 @@ get_header();
         <div class="language-selection">
             <h2>Wybierz Język / Select Language</h2>
             <div class="lang-buttons-container">
-                <button data-lang="pl" data-action="select-language">Polski</button>
-                <button data-lang="en" data-action="select-language">English</button>
+                <button data-lang="pl">Polski</button>
+                <button data-lang="en">English</button>
             </div>
         </div>
     </div>
