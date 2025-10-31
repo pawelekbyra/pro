@@ -410,8 +410,11 @@ add_action( 'wp_ajax_toggle_like', function () {
 } );
 
 // --- Komentarze ---
-add_action('wp_ajax_tt_get_comments', function() {
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
+function tt_ajax_get_comments_callback() {
+    if (is_user_logged_in()) {
+        check_ajax_referer('tt_ajax_nonce', 'nonce');
+    }
+
     global $wpdb;
     $slide_id = isset($_POST['slide_id']) ? sanitize_text_field($_POST['slide_id']) : '';
     if (empty($slide_id)) {
@@ -442,7 +445,9 @@ add_action('wp_ajax_tt_get_comments', function() {
         ];
     }
     wp_send_json_success($comments);
-});
+}
+add_action('wp_ajax_tt_get_comments', 'tt_ajax_get_comments_callback');
+add_action('wp_ajax_nopriv_tt_get_comments', 'tt_ajax_get_comments_callback');
 
 add_action('wp_ajax_tt_post_comment', function() {
     check_ajax_referer('tt_ajax_nonce', 'nonce');

@@ -3868,13 +3868,13 @@ body,
    --- COMMENTS MODAL - COMPLETE REWRITE ---
    ========================================================================== */
 
-#commentsModal.modal-overlay {
+#comments-modal-container.modal-overlay {
   align-items: flex-end;
   z-index: 10005;
   transition: visibility 0.3s ease-out;
 }
 
-#commentsModal .modal-content {
+#comments-modal-container .modal-content {
   background: #18191a;
   color: #e4e6eb;
   width: 100%;
