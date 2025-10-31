@@ -5,11 +5,22 @@ import { API } from './api.js';
 import { UI as ui } from './ui.js'
 
 let selectedCommentImage = null;
-const DOM = {
-    commentsModal: document.getElementById("comments-modal-container"),
-};
+const DOM = {};
+
+function cacheDOM() {
+    DOM.commentsModal = document.getElementById("comments-modal-container");
+    DOM.emojiPicker = DOM.commentsModal.querySelector('.emoji-picker');
+    DOM.commentInput = DOM.commentsModal.querySelector('#comment-input');
+    DOM.fileInput = DOM.commentsModal.querySelector('.comment-image-input');
+    DOM.imagePreviewContainer = DOM.commentsModal.querySelector('.image-preview-container');
+    DOM.lightbox = document.querySelector('.image-lightbox');
+    DOM.lightboxClose = document.querySelector('.image-lightbox-close');
+    DOM.form = DOM.commentsModal.querySelector('#comment-form');
+    DOM.prompt = DOM.commentsModal.querySelector('.login-to-comment-prompt');
+}
+
 function initEmojiPicker() {
-    const emojiPicker = document.querySelector('.emoji-picker');
+    const emojiPicker = DOM.emojiPicker;
     if (!emojiPicker || emojiPicker.children.length > 0) return;
 
     const fragment = document.createDocumentFragment();
@@ -26,7 +37,7 @@ function initEmojiPicker() {
 }
 
 function insertEmoji(emoji) {
-    const input = document.querySelector('#comment-input');
+    const input = DOM.commentInput;
     if (!input) return;
 
     const start = input.selectionStart;
@@ -45,7 +56,7 @@ let emojiPickerTimeout = null;
 let emojiPickerClickListener = null;
 
 function toggleEmojiPicker() {
-    const picker = document.querySelector('.emoji-picker');
+    const picker = DOM.emojiPicker;
     if (!picker) {
         console.warn('Emoji picker element not found');
         return;
@@ -83,7 +94,7 @@ function toggleEmojiPicker() {
 }
 
 function hideEmojiPicker() {
-    const picker = document.querySelector('.emoji-picker');
+    const picker = DOM.emojiPicker;
     if (picker) {
         picker.classList.remove('visible');
     }
@@ -96,8 +107,8 @@ function hideEmojiPicker() {
 }
 
 function closeEmojiPickerOnClickOutside(e) {
-    const picker = document.querySelector('.emoji-picker');
-    const emojiBtn = document.querySelector('.emoji-btn');
+    const picker = DOM.emojiPicker;
+    const emojiBtn = DOM.commentsModal.querySelector('.emoji-btn');
 
     // Walidacja elementów
     if (!picker || !emojiBtn) {
@@ -111,7 +122,7 @@ function closeEmojiPickerOnClickOutside(e) {
 }
 
 function handleImageAttachment() {
-    const fileInput = document.querySelector('.comment-image-input');
+    const fileInput = DOM.fileInput;
 
     if (!fileInput) {
         console.error('Comment image input not found');
@@ -185,7 +196,7 @@ function handleImageSelect(e) {
 }
 
 function showImagePreview(file) {
-    const container = document.querySelector('.image-preview-container');
+    const container = DOM.imagePreviewContainer;
     if (!container) return;
 
     const reader = new FileReader();
@@ -203,7 +214,7 @@ function showImagePreview(file) {
 
 function removeCommentImage() {
     selectedCommentImage = null;
-    const container = document.querySelector('.image-preview-container');
+    const container = DOM.imagePreviewContainer;
     if (container) {
         container.classList.remove('visible');
         container.innerHTML = '';
@@ -211,8 +222,8 @@ function removeCommentImage() {
 }
 function updateCommentFormVisibility() {
     const isLoggedIn = State.get("isUserLoggedIn");
-    const form = document.getElementById("comment-form");
-    const prompt = document.querySelector(".login-to-comment-prompt");
+    const form = DOM.form;
+    const prompt = DOM.prompt;
 
     if (form && prompt) {
         if (isLoggedIn) {
@@ -225,7 +236,7 @@ function updateCommentFormVisibility() {
     }
 }
 function focusCommentInput() {
-    const input = document.querySelector('#comment-input');
+    const input = DOM.commentInput;
     if (input) {
         setTimeout(() => {
             input.focus();
@@ -250,7 +261,7 @@ function scrollToComment(commentId) {
 }
 
 function openImageLightbox(imageUrl) {
-    const lightbox = document.querySelector('.image-lightbox');
+    const lightbox = DOM.lightbox;
     if (!lightbox) return;
 
     const img = lightbox.querySelector('img');
@@ -261,7 +272,7 @@ function openImageLightbox(imageUrl) {
 }
 
 function closeImageLightbox() {
-    const lightbox = document.querySelector('.image-lightbox');
+    const lightbox = DOM.lightbox;
     if (!lightbox) return;
 
     lightbox.classList.remove('visible');
@@ -433,24 +444,20 @@ loading="lazy">`;
 }
 export const CommentsModal = {
     init() {
+        cacheDOM();
         initEmojiPicker();
 
-        // Setup file input handler
-        const fileInput = document.querySelector('.comment-image-input');
-        if (fileInput) {
-            fileInput.addEventListener('change', handleImageSelect);
+        if (DOM.fileInput) {
+            DOM.fileInput.addEventListener('change', handleImageSelect);
         }
 
-        // Setup lightbox close
-        const lightboxClose = document.querySelector('.image-lightbox-close');
-        if (lightboxClose) {
-            lightboxClose.addEventListener('click', closeImageLightbox);
+        if (DOM.lightboxClose) {
+            DOM.lightboxClose.addEventListener('click', closeImageLightbox);
         }
 
-        const lightbox = document.querySelector('.image-lightbox');
-        if (lightbox) {
-            lightbox.addEventListener('click', (e) => {
-                if (e.target === lightbox) {
+        if (DOM.lightbox) {
+            DOM.lightbox.addEventListener('click', (e) => {
+                if (e.target === DOM.lightbox) {
                     closeImageLightbox();
                 }
             });
