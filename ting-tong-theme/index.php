@@ -9,7 +9,7 @@ get_header();
 ?>
 
 <!-- === Tipping Modal (New Elegant Version) === -->
-<div id="tippingModal" class="elegant-modal-overlay modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+<div id="tippingModal" class="elegant-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
