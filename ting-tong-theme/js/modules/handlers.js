@@ -480,26 +480,18 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile": {
+      case "open-author-modal": {
         const swiper = State.get('swiper');
         if (!swiper) break;
 
-        // Use realIndex to get the correct slide data, which is reliable in loop mode.
         const slideData = slidesData[swiper.realIndex];
 
-        if (!slideData) {
-            console.error("Could not find slide data for realIndex:", swiper.realIndex);
-            break;
+        if (!slideData || !slideData.author) {
+          console.error("Could not find author data for the current slide.");
+          break;
         }
 
-        if (!State.get("isUserLoggedIn")) {
-            Utils.vibrateTry();
-            UI.showAlert(Utils.getTranslation("profileAccessAlert"));
-            return;
-        }
-
-        UI.populateProfileModal(slideData);
-        UI.openModal(document.getElementById('tiktok-profile-modal'));
+        UI.openAuthorModal(slideData.author);
         break;
       }
       case "toggle-like":
