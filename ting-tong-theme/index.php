@@ -313,6 +313,66 @@ get_header();
         <span id="alertText"></span>
     </div>
 </div>
+<div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
+    <div class="modal-content" tabindex="-1">
+        <div class="modal-header">
+            <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
+            <div class="comment-sort-options">
+                <div class="sort-dropdown">
+                    <button class="sort-trigger">
+                        <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
+                        <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
+                    </button>
+                    <div class="sort-options">
+                        <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
+                        <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
+                    </div>
+                </div>
+            </div>
+            <button class="modal-close-btn" data-action="close-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Comments will be rendered here -->
+        </div>
+        <div class="comment-form-container">
+            <div class="login-to-comment-prompt" style="display: none;">
+                <p>
+                    <a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">Zaloguj się</a><span data-translate-key="loginToCommentRest">, aby dodać komentarz.</span>
+                </p>
+            </div>
+            <form id="comment-form">
+                <div class="image-preview-container"></div>
+                <div class="comment-input-wrapper">
+                    <div class="emoji-picker"></div>
+                    <input type="text" id="comment-input" data-translate-placeholder="addCommentPlaceholder" placeholder="Dodaj komentarz..." autocomplete="off" data-translate-aria-label="addCommentPlaceholder" aria-label="Dodaj komentarz">
+                    <div class="comment-attachments">
+                        <button type="button" class="attachment-btn emoji-btn" data-action="toggle-emoji-picker" aria-label="Dodaj emoji">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                <line x1="9" y1="9" x2="9.01" y2="9"/>
+                                <line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="attachment-btn image-btn" data-action="attach-image" aria-label="Dodaj zdjęcie">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" data-translate-aria-label="sendCommentAriaLabel" aria-label="Wyślij komentarz">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                    </svg>
+                </button>
+            </form>
+            <input type="file" class="comment-image-input" accept="image/*">
+        </div>
+    </div>
+</div>
 
 <div class="notification-popup" id="notificationPopup" role="dialog" aria-modal="true" aria-labelledby="notification-title">
     <div class="notification-header">
@@ -593,75 +653,6 @@ get_header();
             <p data-translate-key="pwaModalBody">Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.</p>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://example.com" alt="QR Code" style="margin-top: 16px; border-radius: 8px;">
         </div>
-    </div>
-</div>
-
-<!-- COMMENTS MODAL -->
-<div id="comments-modal-container">
-    <div class="comments-modal-header">
-        <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
-        <div class="comment-sort-options">
-            <div class="sort-dropdown">
-                <button class="sort-trigger">
-                    <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
-                    <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
-                </button>
-                <div class="sort-options">
-                    <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
-                    <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
-                </div>
-            </div>
-        </div>
-        <button class="comments-modal-close-btn" data-action="close-comments-modal">&times;</button>
-    </div>
-    <div class="comments-modal-body">
-        <div class="comments-list">
-            <!-- Dynamic comments will be injected here -->
-        </div>
-        <div class="comments-empty-state" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
-            <p data-translate-key="commentsEmptyState">Brak komentarzy. Bądź pierwszy!</p>
-        </div>
-        <div class="comment-load-error" style="display: none;">
-             <p data-translate-key="commentLoadError">Nie udało się załadować komentarzy. Spróbuj ponownie później.</p>
-        </div>
-    </div>
-    <div class="comments-modal-footer">
-        <div class="login-to-comment-prompt" style="display: none;">
-            <p>
-                <a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">Zaloguj się</a><span data-translate-key="loginToCommentRest">, aby dodać komentarz.</span>
-            </p>
-        </div>
-        <form id="comment-form">
-            <div class="image-preview-container"></div>
-            <div class="comment-input-wrapper">
-                <div class="emoji-picker"></div>
-                <input type="text" id="comment-input" data-translate-placeholder="addCommentPlaceholder" placeholder="Dodaj komentarz..." autocomplete="off" data-translate-aria-label="addCommentPlaceholder" aria-label="Dodaj komentarz">
-                <div class="comment-attachments">
-                    <button type="button" class="attachment-btn emoji-btn" data-action="toggle-emoji-picker" aria-label="Dodaj emoji">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                            <line x1="9" y1="9" x2="9.01" y2="9"/>
-                            <line x1="15" y1="9" x2="15.01" y2="9"/>
-                        </svg>
-                    </button>
-                    <button type="button" class="attachment-btn image-btn" data-action="attach-image" aria-label="Dodaj zdjęcie">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            <button type="submit" class="submit-btn" data-translate-aria-label="sendCommentAriaLabel" aria-label="Wyślij komentarz">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-                </svg>
-            </button>
-        </form>
-        <input type="file" class="comment-image-input" accept="image/*">
     </div>
 </div>
 
