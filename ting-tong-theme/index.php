@@ -137,15 +137,12 @@ get_header();
 </div>
 
 <div id="preloader">
-    <div class="preloader-icon-container">
-        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/splash-icon-transparent.png" alt="Ting Tong App" class="splash-icon">
-    </div>
     <div class="preloader-content-container">
         <div class="language-selection">
             <h2>Wybierz Język / Select Language</h2>
             <div class="lang-buttons-container">
-                <button data-lang="pl">Polski</button>
-                <button data-lang="en">English</button>
+                <button data-lang="pl"><span>Polski</span></button>
+                <button data-lang="en"><span>English</span></button>
             </div>
         </div>
     </div>
