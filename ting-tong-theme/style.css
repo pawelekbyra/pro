@@ -23,6 +23,9 @@ Text Domain: tingtongtheme
   z-index: 10000;
   transition: opacity 0.5s linear;
   overflow: hidden; /* Prevent layout issues */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
