@@ -170,6 +170,10 @@ export const Config = {
           pl: "Przejdź do płatności",
           en: "Proceed to Payment"
       },
+      tippingPay: {
+        pl: "Zapłać",
+        en: "Pay"
+      },
       tippingSuccessMessage: {
         pl: "Dziękujemy za napiwek w wysokości {amount} EUR!",
         en: "Thank you for your {amount} EUR tip!",

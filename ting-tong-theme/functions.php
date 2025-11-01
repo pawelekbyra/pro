@@ -4,6 +4,9 @@
  *
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
+
+// Load the Stripe PHP library
+require_once __DIR__ . '/vendor/init.php';
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
     function wp_new_user_notification( $user_id, $deprecated = '', $notify = '' ) {
@@ -391,6 +394,75 @@ add_action( 'wp_ajax_tt_refresh_nonce', function() {
 add_action( 'wp_ajax_nopriv_tt_refresh_nonce', function() {
 	wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
 });
+
+// --- Stripe Checkout ---
+function tt_create_stripe_checkout_callback() {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+    // Pobierz dane z requestu
+    $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
+    $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : '';
+    $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : null;
+
+    if ($amount < 1) {
+        wp_send_json_error(['message' => 'Kwota musi być większa niż 1 PLN.'], 400);
+    }
+    if (empty($payment_method)) {
+        wp_send_json_error(['message' => 'Metoda płatności jest wymagana.'], 400);
+    }
+
+    // Pobierz klucz API Stripe z sekretów
+    $stripe_secret_key = getenv('Secret_key');
+    if (empty($stripe_secret_key)) {
+        wp_send_json_error(['message' => 'Błąd konfiguracji serwera: brak klucza Stripe.'], 500);
+    }
+
+    \Stripe\Stripe::setApiKey($stripe_secret_key);
+
+    $payment_method_types_map = [
+        'card' => 'card',
+        'blik' => 'blik',
+        'paypal' => 'p24' // Przelewy24 is the closest for Polish bank transfers
+    ];
+
+    if (!isset($payment_method_types_map[$payment_method])) {
+        wp_send_json_error(['message' => 'Nieobsługiwana metoda płatności.'], 400);
+    }
+
+    try {
+        $session_params = [
+            'payment_method_types' => [$payment_method_types_map[$payment_method]],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'pln',
+                    'product_data' => [
+                        'name' => 'Napiwek dla Twórcy (Ting Tong)',
+                    ],
+                    'unit_amount' => $amount * 100, // Kwota w groszach
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => home_url('/?payment=success'),
+            'cancel_url' => home_url('/?payment=cancel'),
+        ];
+
+        if ($email) {
+            $session_params['customer_email'] = $email;
+        }
+
+        $checkout_session = \Stripe\Checkout\Session::create($session_params);
+
+        wp_send_json_success(['checkout_url' => $checkout_session->url]);
+
+    } catch (\Stripe\Exception\ApiErrorException $e) {
+        wp_send_json_error(['message' => 'Błąd Stripe: ' . $e->getMessage()], 500);
+    } catch (Exception $e) {
+        wp_send_json_error(['message' => 'Wystąpił nieoczekiwany błąd: ' . $e->getMessage()], 500);
+    }
+}
+add_action('wp_ajax_tt_create_stripe_checkout', 'tt_create_stripe_checkout_callback');
+add_action('wp_ajax_nopriv_tt_create_stripe_checkout', 'tt_create_stripe_checkout_callback');
 
 
 // --- Polubienia slajdów ---
