@@ -13,7 +13,7 @@ get_header();
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
+                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa 🤑</h2>
                 <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
@@ -23,14 +23,14 @@ get_header();
             <div class="elegant-modal-body" id="tippingBody">
                 <!-- Krok 1: E-mail i zgoda -->
                 <div class="elegant-modal-step" data-step="0">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zalozyc konto Patrona?</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Założyć konto Patrona? 🏆</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
                             <span class="elegant-modal-preference-label">No raczej!</span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
-                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="Twój adres e-mail">
+                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na który otrzymasz klucze logowania)">
                             <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail prześlemy dane do logowania.</p>
                         </div>
                     </div>
@@ -66,7 +66,7 @@ get_header();
             <div class="elegant-modal-footer">
                 <div class="elegant-modal-footer-buttons">
                     <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
-                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">Dalej</button>
+                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
                     <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
                 </div>
             </div>
