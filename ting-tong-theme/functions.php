@@ -312,10 +312,6 @@ add_action(
 
 function tt_process_ajax_request() {
     $is_logged_in = is_user_logged_in();
-    if ($is_logged_in) {
-        check_ajax_referer('tt_ajax_nonce', 'nonce');
-    }
-
     $data = [];
     $content_type = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
 
@@ -328,6 +324,19 @@ function tt_process_ajax_request() {
 
     if (empty($data)) {
         return ['success' => false, 'message' => 'Brak danych.'];
+    }
+
+    if ($is_logged_in) {
+        $nonce = '';
+        if (isset($data['nonce'])) {
+            $nonce = $data['nonce'];
+        } elseif (isset($_REQUEST['nonce'])) {
+            $nonce = $_REQUEST['nonce'];
+        }
+
+        if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
+            return ['success' => false, 'message' => 'Błąd weryfikacji (nonce). Odśwież stronę.'];
+        }
     }
 
     // Zwracamy dane, aby mogły być użyte dalej
@@ -783,6 +792,7 @@ function tt_create_stripe_payment_intent_callback() {
     $amount_pln = isset($data['amount']) ? floatval($data['amount']) : 0;
     $amount_cents = round($amount_pln * 100);
     $email = isset($data['email']) ? sanitize_email($data['email']) : '';
+    $currency = isset($data['currency']) ? strtolower(sanitize_text_field($data['currency'])) : 'pln';
 
     if (!class_exists('\Stripe\Stripe')) {
         wp_send_json_error(['message' => 'Błąd integracji płatności. Skontaktuj się z administratorem.']);
@@ -797,7 +807,7 @@ function tt_create_stripe_payment_intent_callback() {
         \Stripe\Stripe::setApiKey(TT_STRIPE_SECRET_KEY);
         $intent = \Stripe\PaymentIntent::create([
             'amount' => $amount_cents,
-            'currency' => 'pln',
+            'currency' => $currency,
             'payment_method_types' => ['card', 'p24', 'blik'],
             'receipt_email' => $email,
             'description' => 'Napiwek dla twórcy',
