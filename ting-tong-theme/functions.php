@@ -746,6 +746,8 @@ add_action('wp_ajax_tt_profile_get', function () {
         'last_name'           => (string) $last_name,
         'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
         'is_profile_complete' => $is_profile_complete,
+        'email_consent'       => (bool) get_user_meta($u->ID, 'tt_email_consent', true),
+        'email_language'      => (string) get_user_meta($u->ID, 'tt_email_language', true) ?: 'pl',
         'new_nonce'           => wp_create_nonce('tt_ajax_nonce'),
     ]);
 });
@@ -761,6 +763,8 @@ add_action('wp_ajax_tt_profile_update', function () {
     $first = isset($_POST['first_name']) ? sanitize_text_field( wp_unslash($_POST['first_name']) ) : '';
     $last  = isset($_POST['last_name'])  ? sanitize_text_field( wp_unslash($_POST['last_name']) )  : '';
     $email = isset($_POST['email'])      ? sanitize_email( wp_unslash($_POST['email']) ) : '';
+    $email_consent = isset($_POST['email_consent']) ? filter_var($_POST['email_consent'], FILTER_VALIDATE_BOOLEAN) : false;
+    $email_language = isset($_POST['email_language']) && in_array($_POST['email_language'], ['pl', 'en']) ? $_POST['email_language'] : 'pl';
 
     if (empty($first) || empty($last) || empty($email)) {
         wp_send_json_error(['message' => 'Wszystkie pola są wymagane.'], 400);
@@ -785,12 +789,22 @@ add_action('wp_ajax_tt_profile_update', function () {
     if (is_wp_error($res)) {
         wp_send_json_error(['message' => $res->get_error_message() ?: 'Błąd aktualizacji.'], 500);
     }
+
+    update_user_meta($u->ID, 'tt_email_consent', $email_consent);
+    if ($email_consent) {
+        update_user_meta($u->ID, 'tt_email_language', $email_language);
+    } else {
+        delete_user_meta($u->ID, 'tt_email_language');
+    }
+
     wp_send_json_success([
         'display_name' => $display_name ?: $u->display_name,
         'first_name'   => $first,
         'last_name'    => $last,
         'email'        => $email,
         'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
+        'email_consent' => $email_consent,
+        'email_language' => $email_consent ? $email_language : 'pl',
     ]);
 });
 add_action('wp_ajax_tt_avatar_upload', function () {

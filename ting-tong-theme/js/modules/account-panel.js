@@ -76,6 +76,14 @@ function updateSettingsUI() {
       option.classList.add("active");
     }
   });
+  toggleEmailLangVisibility(userSettings.emailConsent);
+}
+
+function toggleEmailLangVisibility(isConsentGiven) {
+    const langContainer = document.getElementById('emailLanguageContainer');
+    if (langContainer) {
+        langContainer.classList.toggle('disabled', !isConsentGiven);
+    }
 }
 
 // Settings handlers
@@ -85,27 +93,9 @@ function toggleEmailConsent() {
 }
 
 function selectLanguage(lang) {
-  userSettings.emailLanguage = lang;
-  updateSettingsUI();
-}
-
-async function saveSettings() {
-  const button = document.getElementById("saveSettingsBtn");
-  const originalText = button.textContent;
-  try {
-    button.disabled = true;
-    button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation("savingButtonText")}`;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    showSuccess(
-      "settingsSuccess",
-      Utils.getTranslation("settingsUpdateSuccess"),
-    );
-  } catch (error) {
-    showError("settingsError", error.message);
-  } finally {
-    button.disabled = false;
-    button.textContent = originalText;
-  }
+    if (!userSettings.emailConsent) return;
+    userSettings.emailLanguage = lang;
+    updateSettingsUI();
 }
 
 // Profile data functions
@@ -155,9 +145,12 @@ function populateProfileForm(data) {
 
   if (userAvatar && data.avatar) {
     userAvatar.src = data.avatar;
-    // Usunięcie sekcji .onerror gwarantuje, że nie będzie używany losowy awatar z i.pravatar.cc.
-    // Wszelkie błędy ładowania będą wyświetlać pusty obraz, aż do załadowania tego z functions.php.
   }
+
+  // Populate settings
+  userSettings.emailConsent = !!data.email_consent;
+  userSettings.emailLanguage = data.email_language || 'pl';
+  updateSettingsUI();
 }
 
 // Modal visibility functions
@@ -254,9 +247,6 @@ function setupEventListeners() {
     .forEach((el) =>
       el.addEventListener("click", () => selectLanguage(el.dataset.lang)),
     );
-  document
-    .getElementById("saveSettingsBtn")
-    .addEventListener("click", saveSettings);
 
   const deleteInput = document.getElementById("deleteConfirmation");
   const deleteBtn = document.getElementById("deleteAccountBtn");
@@ -600,47 +590,41 @@ async function loadUserProfile() {
 }
 
 async function handleProfileSubmit(event) {
-  event.preventDefault();
-  const button = document.getElementById("saveProfileBtn");
-  const originalText = button.textContent;
-  button.disabled = true;
-  button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation("savingButtonText")}`;
-  try {
-    const data = {
-      first_name: document.getElementById("firstName").value.trim(),
-      last_name: document.getElementById("lastName").value.trim(),
-      email: document.getElementById("email").value.trim(),
-    };
-    if (!data.first_name || !data.last_name || !data.email)
-      throw new Error(Utils.getTranslation("allFieldsRequiredError"));
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
-      throw new Error(Utils.getTranslation("invalidEmailError"));
-    const result = await updateProfile(data);
-    if (result.success) {
-      showSuccess(
-        "profileSuccess",
-        Utils.getTranslation("profileUpdateSuccess"),
-      );
-      // Zaktualizuj cache w State
-      const currentUser = State.get('currentUser') || {};
-      const updatedUser = {
-        ...currentUser,
-        ...result.data
-      };
-      State.set('currentUser', updatedUser);
-      populateProfileForm(result.data);
-    } else {
-      throw new Error(
-        result.data?.message ||
-          Utils.getTranslation("profileUpdateFailedError"),
-      );
+    event.preventDefault();
+    const button = document.getElementById("saveProfileAndSettingsBtn");
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation("savingButtonText")}`;
+    try {
+        const data = {
+            first_name: document.getElementById("firstName").value.trim(),
+            last_name: document.getElementById("lastName").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            email_consent: userSettings.emailConsent,
+            email_language: userSettings.emailLanguage,
+        };
+        if (!data.first_name || !data.last_name || !data.email)
+            throw new Error(Utils.getTranslation("allFieldsRequiredError"));
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+            throw new Error(Utils.getTranslation("invalidEmailError"));
+
+        const result = await updateProfile(data);
+
+        if (result.success) {
+            showSuccess("profileSuccess", Utils.getTranslation("profileUpdateSuccess"));
+            const currentUser = State.get('currentUser') || {};
+            const updatedUser = { ...currentUser, ...result.data };
+            State.set('currentUser', updatedUser);
+            populateProfileForm(updatedUser); // Użyj zaktualizowanych danych
+        } else {
+            throw new Error(result.data?.message || Utils.getTranslation("profileUpdateFailedError"));
+        }
+    } catch (error) {
+        showError("profileError", error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = originalText;
     }
-  } catch (error) {
-    showError("profileError", error.message);
-  } finally {
-    button.disabled = false;
-    button.textContent = originalText;
-  }
 }
 
 async function handlePasswordSubmit(event) {

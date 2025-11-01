@@ -356,7 +356,17 @@ get_header();
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
             <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
-
+        <div class="comment-sort-container">
+            <div class="comment-sort-options">
+                <div class="sort-dropdown">
+                    <button class="sort-trigger">
+                        <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
+                        <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
+                    </button>
+                    <div class="sort-options">
+                        <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
+                        <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -474,7 +484,7 @@ get_header();
                             <input type="email" class="form-input" data-translate-placeholder="emailPlaceholder" placeholder="email@domena.pl" id="email" value="">
                         </div>
 
-                        <button type="submit" class="btn-primary" id="saveProfileBtn" data-translate-key="saveProfileBtn">
+                        <button type="submit" class="btn-primary" id="saveProfileAndSettingsBtn" data-translate-key="saveProfileBtn">
                             Zapisz zmiany
                         </button>
                         <div class="status-message status-success" id="profileSuccess"></div>
@@ -492,7 +502,7 @@ get_header();
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="emailLanguageContainer">
                         <label class="form-label" data-translate-key="emailLanguageLabel">Język maili</label>
                         <div class="language-selector">
                             <div class="language-option active" data-lang="pl" data-translate-key="emailLangPolish">
@@ -503,10 +513,6 @@ get_header();
                             </div>
                         </div>
                     </div>
-
-                    <button type="button" class="btn-primary" id="saveSettingsBtn" data-translate-key="saveSettingsBtn">
-                        Zapisz ustawienia
-                    </button>
 
                     <div class="status-message status-success" id="settingsSuccess"></div>
                     <div class="status-message status-error" id="settingsError"></div>

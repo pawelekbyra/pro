@@ -1018,7 +1018,7 @@ body,
   opacity: 1;
   pointer-events: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-
+  z-index: 10001; /* FIX: Zapewnia, że uchwyt jest nad innymi elementami w progress-bar */
 }
 
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
@@ -2206,6 +2206,13 @@ body,
 .language-selector {
   display: flex;
   gap: 8px;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+#emailLanguageContainer.disabled .language-selector {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(80%);
 }
 
 .language-option {
@@ -3901,8 +3908,8 @@ body,
   color: #e4e6eb;
   width: 100%;
   max-width: 100%;
-  height: 60vh;
-  max-height: 60vh;
+  height: 75vh;
+  max-height: 75vh;
   border-radius: 16px 16px 0 0;
   padding: 0;
   transform: translateY(100%);
@@ -3949,13 +3956,6 @@ body,
     font-size: 16px;
     font-weight: 600;
     color: #e4e6eb;
-}
-
-#comments-modal-container .modal-header .modal-title {
-  grid-column: 2;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
 }
 
 #comments-modal-container .modal-close-btn {
@@ -4488,10 +4488,6 @@ body,
   transform: none;
   z-index: 10;
   flex-shrink: 0;
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px 16px;
-  border-bottom: 1px solid #3a3b3c;
 }
 
 .sort-dropdown {
