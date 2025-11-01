@@ -26,11 +26,11 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Założyć konto Patrona? 🏆</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
+                            <span class="elegant-modal-preference-label">No raczej</span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
-                            <span class="elegant-modal-preference-label">No raczej!</span>
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
-                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na ktory otrzymasz klucze logowania logowania)">
+                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na ktory otrzymasz klucze logowania)">
                             <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail prześlemy dane do logowania.</p>
                         </div>
                     </div>
