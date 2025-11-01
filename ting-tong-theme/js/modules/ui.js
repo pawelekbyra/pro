@@ -87,20 +87,35 @@ const activeModals = new Set();
 
 function openModal(modal, options = {}) {
     if (!modal) {
-        console.error("Attempted to open a null modal element."); // Dodany log dla pewności
+        console.error("Attempted to open a null modal element.");
         return;
     }
 
-    // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
-    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
-    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
-
-    modal.classList.add('visible');
-    activeModals.add(modal);
-
-    if (activeModals.size === 1) {
-        document.body.style.overflow = 'hidden';
+    if (modal.id === 'comments-modal-container') {
+        const swiper = State.get('swiper');
+        if (swiper) {
+            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData) {
+                const commentsTitle = modal.querySelector("#commentsTitle");
+                if (commentsTitle) {
+                    commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+                }
+            }
+        }
     }
+
+    modal.style.display = 'block';
+    modal.classList.remove("is-hiding");
+
+    requestAnimationFrame(() => {
+        modal.classList.add('visible');
+        activeModals.add(modal);
+
+        if (activeModals.size === 1) {
+            document.body.style.overflow = 'hidden';
+        }
+    });
 
     // ... reszta kodu bez zmian ...
 
@@ -124,10 +139,16 @@ function openModal(modal, options = {}) {
 function closeModal(modal) {
     if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
+    if (modal.id === 'comments-modal-container') {
+        modal.classList.add('is-hiding');
+        modal.classList.remove('visible');
+    } else {
+        modal.classList.remove('visible');
+    }
 
-    modal.classList.add("is-hiding");
     modal.setAttribute("aria-hidden", "true");
+
+    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
 
     const cleanup = () => {
         modal.removeEventListener("transitionend", cleanup);
@@ -467,7 +488,6 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
-    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {

@@ -99,11 +99,23 @@ document.addEventListener("DOMContentLoaded", () => {
         .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
-            if (e.target === modal) UI.closeModal(modal);
+            if (e.target === modal) {
+              if (modal.id === 'comments-modal-container') {
+                UI.closeCommentsModal();
+              } else {
+                UI.closeModal(modal);
+              }
+            }
           });
           modal
             .querySelector(".modal-close-btn, .topbar-close-btn")
-            ?.addEventListener("click", () => UI.closeModal(modal));
+            ?.addEventListener("click", () => {
+              if (modal.id === 'comments-modal-container') {
+                UI.closeCommentsModal();
+              } else {
+                UI.closeModal(modal);
+              }
+            });
         });
 
       document.addEventListener("keydown", (e) => {
