@@ -1018,7 +1018,7 @@ body,
   opacity: 1;
   pointer-events: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-  z-index: 10; /* FIX: Zapewnia, że uchwyt jest nad innymi elementami w progress-bar */
+  z-index: 10001; /* FIX: Zapewnia, że uchwyt jest nad innymi elementami w progress-bar */
 }
 
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
@@ -3910,7 +3910,8 @@ body,
   display: flex;
   flex-direction: column;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  position: relative;
+  position: absolute;
+  bottom: 0;
 }
 
 /* Gdy klawiatura jest widoczna */
@@ -3934,23 +3935,39 @@ body,
 
 /* Header */
 #comments-modal-container .modal-header {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    padding: 4px 8px;
-    flex-shrink: 0;
-    height: 40px;
-    border-bottom: 1px solid #3a3b3c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  height: 40px;
+  border-bottom: 1px solid #3a3b3c;
+  position: relative;
+}
+
+#comments-modal-container .modal-header .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e4e6eb;
 }
 
 #comments-modal-container .modal-close-btn {
   color: #b0b3b8;
   opacity: 1;
-  position: static;
-  transform: none;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 30px;
   height: 30px;
   font-size: 24px;
+}
+
+.comment-sort-container {
+    padding: 8px 12px;
+    display: flex;
+    justify-content: flex-end;
+    border-bottom: 1px solid #3a3b3c;
 }
 
 #comments-modal-container .modal-close-btn:hover {
@@ -5101,6 +5118,40 @@ body,
 
 
 
+
+.currency-selector {
+    position: relative;
+    cursor: pointer;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-left: 10px;
+}
+
+.currency-list {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: #222;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 5px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+}
+
+.currency-list li {
+    padding: 10px 15px;
+    transition: background 0.2s;
+}
+
+.currency-list li:hover {
+    background: var(--accent-color);
+}
+
 /* Tipping Modal - New Styles for 4-Step Flow */
 .elegant-modal-preference-row.reverse {
   display: flex;
@@ -5165,37 +5216,4 @@ body,
 
 #tippingSubmitBtn.elegant-modal-btn-submit:hover {
     background: linear-gradient(to right, #218838, #1e7e34);
-}
-
-.currency-selector {
-    position: relative;
-    cursor: pointer;
-    padding: 10px 15px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    margin-left: 10px;
-}
-
-.currency-list {
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    background: #222;
-    list-style: none;
-    padding: 0;
-    margin: 0 0 5px 0;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
-}
-
-.currency-list li {
-    padding: 10px 15px;
-    transition: background 0.2s;
-}
-
-.currency-list li:hover {
-    background: var(--accent-color);
 }
