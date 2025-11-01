@@ -364,7 +364,8 @@ document.addEventListener("DOMContentLoaded", () => {
             slideChange: handleMediaChange,
             click: function(swiper, event) {
               // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
-              // Jeśli tak, zatrzymaj propagację, aby nasz główny handler mógł zadziałać.
+              // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
+              // Główny handler na `document.body` zajmie się resztą.
               if (event.target.closest('[data-action]')) {
                 return;
               }

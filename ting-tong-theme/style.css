@@ -3910,7 +3910,8 @@ body,
   display: flex;
   flex-direction: column;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  position: relative;
+  position: absolute;
+  bottom: -75vh;
 }
 
 /* Gdy klawiatura jest widoczna */
@@ -3921,7 +3922,7 @@ body,
 }
 
 #comments-modal-container.visible .modal-content {
-  transform: translateY(0);
+  bottom: 0;
 }
 
 #comments-modal-container.is-hiding .modal-content {
@@ -4833,6 +4834,7 @@ body,
   border: 1px solid transparent;
   transition: background-color 0.2s, border-color 0.2s;
   flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 .elegant-modal-preference-row:hover {
