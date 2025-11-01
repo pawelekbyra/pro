@@ -92,7 +92,6 @@ function openModal(modal, options = {}) {
     }
 
     if (modal.id === 'comments-modal-container') {
-        modal.classList.remove('is-hiding');
         const swiper = State.get('swiper');
         if (swiper) {
             const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
@@ -107,15 +106,16 @@ function openModal(modal, options = {}) {
     }
 
     modal.style.display = 'block';
+    modal.classList.remove("is-hiding");
+
     requestAnimationFrame(() => {
         modal.classList.add('visible');
-        document.body.setAttribute('aria-hidden', 'true');
-    });
+        activeModals.add(modal);
 
-    if (typeof options.onOpen === 'function') {
-        options.onOpen();
-    }
-}
+        if (activeModals.size === 1) {
+            document.body.style.overflow = 'hidden';
+        }
+    });
 
     // ... reszta kodu bez zmian ...
 
@@ -515,7 +515,6 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
-    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {

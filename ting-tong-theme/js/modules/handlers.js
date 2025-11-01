@@ -584,6 +584,9 @@ export const Handlers = {
         break;
       case "toggle-main-menu":
         if (State.get("isUserLoggedIn")) {
+          if (UI.DOM.commentsModal.classList.contains("visible")) {
+            UI.closeCommentsModal();
+          }
           if (loggedInMenu) loggedInMenu.classList.toggle("active");
         } else {
           Utils.vibrateTry();
