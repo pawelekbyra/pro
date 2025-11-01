@@ -49,26 +49,18 @@ get_header();
 
                 <!-- Krok 3: Wybór metody płatności -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Title">Wybierz metodę płatności</p>
                     <div class="payment-methods-container">
-                        <div class="payment-method-tile" data-method="card">
-                            <img src="<?php echo get_template_directory_uri(); ?>/assets/card-logo.svg" alt="Card">
-                            <span>Karta</span>
-                        </div>
-                        <div class="payment-method-tile" data-method="blik">
-                            <img src="<?php echo get_template_directory_uri(); ?>/assets/blik-logo.svg" alt="BLIK">
-                            <span>BLIK</span>
-                        </div>
-                        <div class="payment-method-tile" data-method="p24">
-                             <img src="<?php echo get_template_directory_uri(); ?>/assets/p24-logo.svg" alt="Przelew">
-                            <span>Przelew</span>
+                        <div id="stripe-payment-element">
+                            <!-- Stripe Payment Element will be inserted here -->
                         </div>
                     </div>
-                    <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
-                        <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
-                        <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
-                            Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
-                        </label>
+                    <div class="elegant-modal-terms">
+                        <div class="elegant-modal-preference-row" id="termsAcceptRow">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                            <label for="termsAccept" class="elegant-modal-preference-label">
+                                Akceptuję <a href="#" data-action="show-terms">Regulamin</a>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
