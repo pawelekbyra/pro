@@ -135,6 +135,13 @@ function handleNextStep() {
     }
 }
 
+function handlePrevStep() {
+    if (currentStep > 0) {
+        currentStep--;
+        updateStepDisplay();
+    }
+}
+
 async function initializePaymentElement() {
     if (stripe && paymentElement) {
         return;
