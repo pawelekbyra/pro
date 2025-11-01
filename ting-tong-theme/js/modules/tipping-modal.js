@@ -22,17 +22,7 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
-        amountSuggestionBtns: document.querySelectorAll('.amount-suggestion-btn'),
     };
-}
-
-function handleAmountSuggestion(e) {
-    const selectedAmount = e.target.dataset.amount;
-    if (dom.amountInput) {
-        dom.amountInput.value = parseFloat(selectedAmount).toFixed(2);
-    }
-    dom.amountSuggestionBtns.forEach(btn => btn.classList.remove('active'));
-    e.target.classList.add('active');
 }
 
 function updateStepDisplay() {
@@ -177,17 +167,6 @@ function showModal() {
         dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
-    dom.amountSuggestionBtns?.forEach(btn => {
-        btn.addEventListener('click', handleAmountSuggestion);
-    });
-
-    dom.amountInput?.addEventListener('input', () => {
-        const currentValue = parseFloat(dom.amountInput.value);
-        dom.amountSuggestionBtns.forEach(btn => {
-            btn.classList.toggle('active', parseFloat(btn.dataset.amount) === currentValue);
-        });
-    });
-
     translateUI();
     currentStep = 0;
 
@@ -199,11 +178,7 @@ function showModal() {
     }
 
     // Set default amount
-    const defaultAmount = 10.00;
-    dom.amountInput.value = defaultAmount.toFixed(2);
-    dom.amountSuggestionBtns.forEach(btn => {
-        btn.classList.toggle('active', parseFloat(btn.dataset.amount) === defaultAmount);
-    });
+    dom.amountInput.value = '';
 
 
     // Ensure checkbox is unchecked by default
