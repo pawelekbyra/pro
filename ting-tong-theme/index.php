@@ -44,12 +44,6 @@ get_header();
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
                             <span class="tipping-currency">PLN</span>
                         </div>
-                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
-                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
-                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
-                                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
-                            </label>
-                        </div>
                     </div>
                 </div>
 
@@ -65,10 +59,16 @@ get_header();
                             <img src="<?php echo get_template_directory_uri(); ?>/assets/blik-logo.svg" alt="BLIK">
                             <span>BLIK</span>
                         </div>
-                        <div class="payment-method-tile" data-method="paypal">
-                             <img src="<?php echo get_template_directory_uri(); ?>/assets/paypal-logo.svg" alt="Przelew">
+                        <div class="payment-method-tile" data-method="p24">
+                             <img src="<?php echo get_template_directory_uri(); ?>/assets/p24-logo.svg" alt="Przelew">
                             <span>Przelew</span>
                         </div>
+                    </div>
+                    <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
+                        <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
+                        <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
+                            Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
+                        </label>
                     </div>
                 </div>
 

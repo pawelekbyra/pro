@@ -4713,9 +4713,9 @@ body,
 }
 
 #tippingModal, #infoModal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .elegant-modal-overlay.visible {
@@ -5155,3 +5155,17 @@ body,
     color: rgba(255, 255, 255, 0.9);
 }
 
+#termsAcceptRow {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 15px;
+    justify-content: center;
+    gap: 8px;
+    flex-direction: row-reverse;
+}
+
+#termsAcceptRow .elegant-modal-preference-label {
+    font-size: 12px;
+    font-weight: 400;
+}
