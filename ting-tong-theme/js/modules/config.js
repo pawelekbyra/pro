@@ -142,17 +142,17 @@ export const Config = {
           pl: "Minimalna kwota to 1 EUR. Dziękujemy za każde wsparcie!",
           en: "The minimum amount is 1 EUR. Thank you for all your support!"
       },
-      tippingStep3Title: {
-          pl: "Wybierz metodę płatności",
-          en: "Choose payment method"
-      },
-      tippingStep4Desc: {
+      tippingStep3Desc: {
           pl: "Przekierowanie do płatności...",
           en: "Redirecting to payment..."
       },
       tippingRedirectHint: {
           pl: "Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności Stripe.",
           en: "You will be redirected to the secure Stripe payment gateway shortly."
+      },
+      tippingStep3Title: {
+        pl: "Krok 3: Wybierz metodę płatności",
+        en: "Step 3: Choose Payment Method"
       },
     profileAccessAlert: {
       pl: "Zaloguj się, aby zobaczyć profil.",

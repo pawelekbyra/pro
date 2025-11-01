@@ -5,8 +5,11 @@ import { State } from './state.js';
 let dom = {};
 let currentStep = 0;
 const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
-let formData = {};
-let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
+let formData = {
+    payment_method: 'blik', // Default payment method
+    currency: 'PLN' // Default currency
+};
+let previousStep = 0; // Remembers the previous step before showing terms
 
 function cacheDOM() {
     dom = {
@@ -18,51 +21,45 @@ function cacheDOM() {
         steps: document.querySelectorAll('#tippingModal .elegant-modal-step'),
         prevBtn: document.getElementById('tippingPrevBtn'),
         nextBtn: document.getElementById('tippingNextBtn'),
+        submitBtn: document.getElementById('tippingSubmitBtn'),
         createAccountCheckbox: document.getElementById('tippingCreateAccount'),
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
         termsStep: document.getElementById('terms-step'),
+        paymentMethodsContainer: document.querySelector('.payment-methods-container'),
+        currencySelector: document.querySelector('.currency-selector'),
+        selectedCurrency: document.querySelector('.selected-currency'),
+        currencyList: document.querySelector('.currency-list'),
     };
 }
 
 function updateStepDisplay(isShowingTerms = false) {
-    if (!dom.modal || !dom.steps || dom.steps.length === 0) {
-        console.error("Tipping modal steps not found or cached correctly.");
-        return;
-    }
+    if (!dom.modal || !dom.steps || dom.steps.length === 0) return;
 
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
-        // Step 3 is now the processing step, terms is step 4 in the DOM
-        stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
+        const isActive = isShowingTerms ?
+            stepEl.id === 'terms-step' :
+            step === currentStep && stepEl.id !== 'terms-step';
+        stepEl.classList.toggle('active', isActive);
     });
 
-    const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
     const footer = dom.form.querySelector('.elegant-modal-footer');
     if (footer) {
-        footer.style.display = isTermsVisible ? 'none' : 'block';
+        footer.style.display = isShowingTerms ? 'none' : 'block';
     }
 
     const isProcessingStep = currentStep === 3;
     const isPaymentStep = currentStep === 2;
 
-    if (dom.prevBtn) {
-        dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
-    }
-    if (dom.nextBtn) {
-        dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
-    }
-
-    // Hide footer entirely on processing step
-    if (footer && isProcessingStep) {
-        footer.style.display = 'none';
-    }
-
+    if (dom.prevBtn) dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
+    if (dom.nextBtn) dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
+    if (dom.submitBtn) dom.submitBtn.style.display = isPaymentStep ? 'flex' : 'none';
+    if (footer && isProcessingStep) footer.style.display = 'none';
 
     if (dom.progressBar) {
-        const progress = ((currentStep + 1) / totalSteps) * 100;
-        dom.progressBar.style.width = `${progress}%`;
+        dom.progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
     }
 }
 
@@ -84,28 +81,23 @@ function handlePrevStep() {
 }
 
 function validateStep(step) {
-    if (step === 0) {
-        // Jeśli checkbox "Załóż konto" jest zaznaczony, waliduj e-mail
-        if (dom.createAccountCheckbox.checked) {
-            const email = dom.emailInput.value.trim();
-            if (email === '') {
-                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
-                UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
-                return false;
-            }
-            if (!Utils.isValidEmail(email)) {
-                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
-                UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
-                return false;
-            }
+    if (step === 0 && dom.createAccountCheckbox.checked) {
+        const email = dom.emailInput.value.trim();
+        if (email === '') {
+            UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
+            return false;
         }
-    }
-    if (step === 1) {
+        if (!Utils.isValidEmail(email)) {
+            UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
+            return false;
+        }
+    } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         if (isNaN(amount) || amount < 1) {
             UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
             return false;
         }
+    } else if (step === 2) {
         if (!document.getElementById('termsAccept').checked) {
             UI.showAlert('Proszę zaakceptować regulamin.', true);
             return false;
@@ -124,128 +116,130 @@ function hideTerms() {
     updateStepDisplay(false);
 }
 
-
 function collectData(step) {
     if (step === 0) {
         formData.create_account = dom.createAccountCheckbox.checked;
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-    } else if (step === 2) {
-        // This will be set in handlePaymentMethodClick
-        formData.payment_method = 'not-set';
     }
+    // Payment method and currency are collected via dedicated event listeners
 }
 
-// New mock function for the final step
-function handlePaymentMethodClick(method) {
-    formData.payment_method = method;
-    console.log('Final form data submitted:', formData);
+function setupListeners() {
+    if (!dom.modal) return;
 
-    // Advance to the processing step
-    currentStep = 3;
+    dom.paymentMethodsContainer?.addEventListener('click', (e) => {
+        const button = e.target.closest('.payment-method-btn');
+        if (button) {
+            dom.paymentMethodsContainer.querySelectorAll('.payment-method-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            formData.payment_method = button.dataset.method;
+        }
+    });
+
+    dom.currencySelector?.addEventListener('click', () => {
+        if(dom.currencyList) dom.currencyList.style.display = dom.currencyList.style.display === 'block' ? 'none' : 'block';
+    });
+
+    dom.currencyList?.addEventListener('click', (e) => {
+        if (e.target.tagName === 'LI') {
+            const newCurrency = e.target.dataset.currency;
+            dom.selectedCurrency.textContent = newCurrency;
+            formData.currency = newCurrency;
+            dom.currencyList.style.display = 'none';
+        }
+    });
+
+    dom.modal.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="show-terms"]')) {
+            e.preventDefault();
+            showTerms();
+        }
+        if (e.target.closest('[data-action="hide-terms"]')) {
+            hideTerms();
+        }
+    });
+}
+
+async function handleFormSubmit(e) {
+    if (e) e.preventDefault();
+    if (!validateStep(currentStep)) return;
+
+    collectData(currentStep);
+    currentStep++; // Move to processing step
     updateStepDisplay();
 
-    // Simulate payment processing
+    console.log('Processing payment with data:', formData);
+
     setTimeout(() => {
-        UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
+        UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', `${formData.amount.toFixed(2)} ${formData.currency}`));
         hideModal();
 
-        // Reset state after a short delay
         setTimeout(() => {
+            // Reset to initial state
             currentStep = 0;
-            formData = {};
-            if (dom.form) dom.form.reset();
+            formData = { payment_method: 'blik', currency: 'PLN' };
+            if(dom.form) dom.form.reset();
+
+            const defaultMethod = dom.paymentMethodsContainer?.querySelector('[data-method="blik"]');
+            if (defaultMethod) {
+                 dom.paymentMethodsContainer.querySelectorAll('.payment-method-btn').forEach(btn => btn.classList.remove('active'));
+                 defaultMethod.classList.add('active');
+            }
             if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
-            if (dom.emailContainer) dom.emailContainer.classList.add('visible');
-            if (document.getElementById('termsAccept')) document.getElementById('termsAccept').checked = false;
+            if (dom.emailContainer) dom.emailContainer.classList.remove('visible');
+            if(dom.selectedCurrency) dom.selectedCurrency.textContent = 'PLN';
             updateStepDisplay();
         }, 500);
     }, 2500);
 }
 
-function setupPaymentMethodListeners() {
-    if (!dom.modal) return;
-    const paymentMethodsContainer = dom.modal.querySelector('.payment-methods-container');
-    if (paymentMethodsContainer) {
-        paymentMethodsContainer.addEventListener('click', (e) => {
-            const button = e.target.closest('.payment-method-btn');
-            if (button) {
-                const method = button.dataset.method;
-                handlePaymentMethodClick(method);
-            }
-        });
-    }
-}
-
-
 function translateUI() {
     if (!dom.modal) return;
-
     const currentLang = State.get('currentLang') || 'pl';
-
     dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
         const key = el.dataset.translateKey;
         let translation = Utils.getTranslation(key);
         if (typeof translation === 'object' && translation !== null) {
             translation = translation[currentLang] || translation['pl'] || '';
         }
-        if (translation) {
-            el.innerHTML = translation;
-        }
+        if (translation) el.innerHTML = translation;
     });
-
     dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
         const key = el.dataset.translatePlaceholder;
         let translation = Utils.getTranslation(key);
         if (typeof translation === 'object' && translation !== null) {
             translation = translation[currentLang] || translation['pl'] || '';
         }
-        if (translation) {
-            el.placeholder = translation;
-        }
+        if (translation) el.placeholder = translation;
     });
 }
 
 function showModal() {
     cacheDOM();
-
-    if (!dom.modal) {
-        console.error("Tipping modal not found in DOM");
-        return;
-    }
-
-    dom.createAccountCheckbox?.addEventListener('change', e => {
-        dom.emailContainer.classList.toggle('visible', e.target.checked);
-    });
+    if (!dom.modal) return;
 
     translateUI();
     currentStep = 0;
 
     const currentUser = State.get('currentUser');
-    if (currentUser && currentUser.email) {
-        dom.emailInput.value = currentUser.email;
-    } else {
-        dom.emailInput.value = '';
-    }
-
-    // Set default amount
+    dom.emailInput.value = (currentUser && currentUser.email) ? currentUser.email : '';
     dom.amountInput.value = '';
 
+    if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
+    if (document.getElementById('termsAccept')) document.getElementById('termsAccept').checked = false;
+    if (dom.emailContainer) dom.emailContainer.classList.remove('visible');
 
-    // Ensure checkbox is unchecked by default
-    if (dom.createAccountCheckbox) {
-        dom.createAccountCheckbox.checked = false;
-    }
-     if (document.getElementById('termsAccept')) {
-        document.getElementById('termsAccept').checked = false;
-    }
-    // Hide email input by default
-    if (dom.emailContainer) {
-        dom.emailContainer.classList.remove('visible');
+    // Reset to defaults
+    formData = { payment_method: 'blik', currency: 'PLN' };
+    if(dom.selectedCurrency) dom.selectedCurrency.textContent = 'PLN';
+    const defaultMethod = dom.paymentMethodsContainer?.querySelector('[data-method="blik"]');
+    if (defaultMethod) {
+        dom.paymentMethodsContainer.querySelectorAll('.payment-method-btn').forEach(btn => btn.classList.remove('active'));
+        defaultMethod.classList.add('active');
     }
 
-    // Use the generic UI.openModal which should handle the .visible class
     UI.openModal(dom.modal);
     updateStepDisplay();
 }
@@ -259,26 +253,17 @@ function init() {
     cacheDOM();
     if (!dom.modal) return;
 
-    // Listener for the close button
-    if (dom.closeBtn) {
-        dom.closeBtn.addEventListener('click', hideModal);
-    }
-
-    // Listener for the background overlay click
-    dom.modal.addEventListener('click', (e) => {
-        if (e.target === dom.modal) {
-            hideModal();
-        }
-        if (e.target.closest('[data-action="show-terms"]')) {
-            e.preventDefault();
-            showTerms();
-        }
-        if (e.target.closest('[data-action="hide-terms"]')) {
-            hideTerms();
-        }
+    if (dom.closeBtn) dom.closeBtn.addEventListener('click', hideModal);
+    if (dom.form) dom.form.addEventListener('submit', handleFormSubmit);
+    dom.createAccountCheckbox?.addEventListener('change', e => {
+        dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
-    setupPaymentMethodListeners();
+    dom.modal.addEventListener('click', (e) => {
+        if (e.target === dom.modal) hideModal();
+    });
+
+    setupListeners();
 }
 
 export const TippingModal = {

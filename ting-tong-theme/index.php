@@ -42,13 +42,14 @@ get_header();
                     <div class="elegant-modal-fields-container">
                         <div class="tipping-amount-container">
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
-                        </div>
-                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
-                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
-                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
-                                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
-                            </label>
+                            <div class="currency-selector">
+                                <span class="selected-currency">PLN</span> ▼
+                                <ul class="currency-list">
+                                    <li data-currency="PLN">PLN</li>
+                                    <li data-currency="EUR">EUR</li>
+                                    <li data-currency="USD">USD</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -57,19 +58,22 @@ get_header();
                 <div class="elegant-modal-step" data-step="2">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep3Title">Wybierz metodę płatności</p>
                     <div class="payment-methods-container">
-                        <button type="button" class="payment-method-btn" data-method="blik">
+                        <button type="button" class="payment-method-btn active" data-method="blik">
                             <img src="<?php echo get_template_directory_uri(); ?>/assets/blik-logo.svg" alt="BLIK">
-                            <span>Płatność BLIK</span>
                         </button>
                         <button type="button" class="payment-method-btn" data-method="card">
                              <img src="<?php echo get_template_directory_uri(); ?>/assets/card-logo.svg" alt="Card">
-                            <span>Karta Płatnicza</span>
                         </button>
                          <button type="button" class="payment-method-btn" data-method="paypal">
                              <img src="<?php echo get_template_directory_uri(); ?>/assets/paypal-logo.svg" alt="PayPal">
-                            <span>PayPal</span>
                         </button>
                     </div>
+                    <label class="elegant-modal-preference-row reverse">
+                        <span class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
+                           Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
+                        </span>
+                        <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                    </label>
                 </div>
 
                 <!-- Krok 4: Przekierowanie do płatności -->
@@ -81,8 +85,8 @@ get_header();
                     </div>
                 </div>
 
-                <!-- Krok 4: Regulamin -->
-                <div class="elegant-modal-step" data-step="3" id="terms-step">
+                <!-- Regulamin (usunięto data-step, aby nie kolidował z logiką kroków) -->
+                <div class="elegant-modal-step" id="terms-step">
                     <h3 style="text-align: center; margin-bottom: 15px;">Regulamin i Polityka Prywatności</h3>
                     <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;">
                         <p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p>
@@ -98,6 +102,7 @@ get_header();
                 <div class="elegant-modal-footer-buttons">
                     <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
                     <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
+                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Napiwkuj</button>
                 </div>
             </div>
         </form>
