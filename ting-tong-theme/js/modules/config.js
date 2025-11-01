@@ -155,8 +155,8 @@ export const Config = {
           en: "Back"
       },
       tippingNext: {
-          pl: "Dalej",
-          en: "Next"
+          pl: "ENTER",
+          en: "ENTER"
       },
       tippingSubmit: {
           pl: "Przejdź do płatności",
