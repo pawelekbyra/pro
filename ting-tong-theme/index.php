@@ -44,19 +44,37 @@ get_header();
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
                             <span class="tipping-currency">PLN</span>
                         </div>
-                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
-                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
-                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;">
+                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
+                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
                                 Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
                             </label>
                         </div>
-                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
                     </div>
                 </div>
 
-                <!-- Krok 3: Przekierowanie do płatności -->
+                <!-- Krok 3: Wybór metody płatności -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Title">Wybierz metodę płatności</p>
+                    <div class="payment-methods-container">
+                        <button type="button" class="payment-method-btn" data-method="blik">
+                            <img src="<?php echo get_template_directory_uri(); ?>/assets/blik-logo.svg" alt="BLIK">
+                            <span>Płatność BLIK</span>
+                        </button>
+                        <button type="button" class="payment-method-btn" data-method="card">
+                             <img src="<?php echo get_template_directory_uri(); ?>/assets/card-logo.svg" alt="Card">
+                            <span>Karta Płatnicza</span>
+                        </button>
+                         <button type="button" class="payment-method-btn" data-method="paypal">
+                             <img src="<?php echo get_template_directory_uri(); ?>/assets/paypal-logo.svg" alt="PayPal">
+                            <span>PayPal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Krok 4: Przekierowanie do płatności -->
+                <div class="elegant-modal-step" data-step="3">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
                         <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
@@ -80,7 +98,6 @@ get_header();
                 <div class="elegant-modal-footer-buttons">
                     <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
                     <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
                 </div>
             </div>
         </form>
