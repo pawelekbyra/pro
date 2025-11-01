@@ -994,12 +994,13 @@ function initGlobalPanels() {
     });
   }
 }
-function openAuthorModal(authorData) {
-  if (!authorData) {
-    console.error("Author data is missing.");
+function openAuthorModal(slideData) {
+  if (!slideData || !slideData.author) {
+    // Lepszy komunikat błędu
+    console.error("Slide data or Author object is missing/incomplete.");
     return;
   }
-  populateProfileModal({ author: authorData });
+  populateProfileModal(slideData); // Przekazanie całego obiektu slajdu
   openModal(DOM.tiktokProfileModal);
 }
 
