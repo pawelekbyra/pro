@@ -343,6 +343,17 @@ document.addEventListener("DOMContentLoaded", () => {
               UI.DOM.container.classList.add("ready");
               PWA.runStandaloneCheck();
 
+              // Opóźnienie dla animacji kontrolek wideo
+              setTimeout(() => {
+                  const activeSlide = swiper.slides[swiper.activeIndex];
+                  if (activeSlide) {
+                      const tiktokSymulacja = activeSlide.querySelector('.tiktok-symulacja');
+                      if (tiktokSymulacja) {
+                          tiktokSymulacja.classList.add('video-loaded');
+                      }
+                  }
+              }, 800);
+
               // Zabezpieczenie przed brakiem transitionend (na wszelki wypadek)
               const transitionEndHandler = () => {
                 UI.DOM.preloader.removeEventListener("transitionend", transitionEndHandler);

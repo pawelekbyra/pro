@@ -92,6 +92,7 @@ function openModal(modal, options = {}) {
     }
 
     if (modal.id === 'comments-modal-container') {
+        modal.classList.remove('is-hiding');
         const swiper = State.get('swiper');
         if (swiper) {
             const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
@@ -106,16 +107,15 @@ function openModal(modal, options = {}) {
     }
 
     modal.style.display = 'block';
-    modal.classList.remove("is-hiding");
-
     requestAnimationFrame(() => {
         modal.classList.add('visible');
-        activeModals.add(modal);
-
-        if (activeModals.size === 1) {
-            document.body.style.overflow = 'hidden';
-        }
+        document.body.setAttribute('aria-hidden', 'true');
     });
+
+    if (typeof options.onOpen === 'function') {
+        options.onOpen();
+    }
+}
 
     // ... reszta kodu bez zmian ...
 
@@ -137,18 +137,45 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+    if (!modal || !modal.classList.contains('visible')) return;
 
     if (modal.id === 'comments-modal-container') {
-        modal.classList.add('is-hiding');
-        modal.classList.remove('visible');
-    } else {
-        modal.classList.remove('visible');
+        return closeCommentsModal();
     }
 
-    modal.setAttribute("aria-hidden", "true");
+    modal.classList.remove('visible');
+    const transitionDuration = parseFloat(getComputedStyle(modal).transitionDuration) * 1000 || 300;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
+    setTimeout(() => {
+        if (!modal.classList.contains('visible')) {
+            modal.style.display = 'none';
+        }
+    }, transitionDuration);
+
+    if (document.querySelectorAll('.modal-overlay.visible').length === 1) {
+        document.body.removeAttribute('aria-hidden');
+    }
+}
+
+function closeCommentsModal() {
+    const modal = DOM.commentsModal;
+    if (!modal || !modal.classList.contains('visible')) return;
+
+    modal.classList.add('is-hiding');
+    modal.classList.remove('visible');
+
+    const content = modal.querySelector('.modal-content');
+    const transitionDuration = content ? parseFloat(getComputedStyle(content).transitionDuration) * 1000 : 300;
+
+    setTimeout(() => {
+        modal.classList.remove('is-hiding');
+        modal.style.display = 'none';
+
+        if (document.querySelectorAll('.modal-overlay.visible').length === 0) {
+            document.body.removeAttribute('aria-hidden');
+        }
+    }, transitionDuration);
+}
 
     const cleanup = () => {
         modal.removeEventListener("transitionend", cleanup);
@@ -488,6 +515,7 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
+    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {
