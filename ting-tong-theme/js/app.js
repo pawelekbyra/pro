@@ -347,9 +347,17 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function(swiper, event) {
+              // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
+              // Jeśli tak, zatrzymaj propagację, aby nasz główny handler mógł zadziałać.
+              if (event.target.closest('[data-action]')) {
+                event.stopPropagation();
+                return;
+              }
+
               const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector("video");
               if (!video) return;
+
               if (video.paused) {
                 video.play().catch((err) => console.log("Błąd play:", err));
                 const pauseOverlay = activeSlide.querySelector(".pause-overlay");

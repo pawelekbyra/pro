@@ -2804,9 +2804,11 @@ body,
 /* ==========================================================================
    --- TIKTOK PUBLIC PROFILE MODAL ---
    ========================================================================== */
-/* FIX: Change position to fixed to prevent animation issues with overflow:hidden parent */
-.modal-overlay#tiktok-profile-modal {
-    position: fixed;
+#tiktok-profile-modal {
+  /* This modal requires a special override. It must be `fixed` to slide over
+     the #app-frame, which has `overflow: hidden`. On desktop, we revert this
+     to `absolute` to keep it constrained. */
+  position: fixed;
 }
 
 #tiktok-profile-modal .tiktok-profile-content {
@@ -3625,6 +3627,9 @@ body,
   }
 
   /* NOWE: Wymuszenie dopasowania wewnętrznej zawartości modali do nowej szerokości */
+  .modal-overlay#tiktok-profile-modal {
+    position: absolute !important;
+  }
   .modal-overlay .modal-content,
   .fl-modal-overlay .fl-modal-content,
   .crop-modal .crop-modal-content,
