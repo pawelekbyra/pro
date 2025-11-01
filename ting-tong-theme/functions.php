@@ -789,17 +789,32 @@ function tt_create_stripe_payment_intent_callback() {
         wp_send_json_error($data);
         return;
     }
+
     $amount_pln = isset($data['amount']) ? floatval($data['amount']) : 0;
-    $amount_cents = round($amount_pln * 100);
     $email = isset($data['email']) ? sanitize_email($data['email']) : '';
     $currency = isset($data['currency']) ? strtolower(sanitize_text_field($data['currency'])) : 'pln';
+
+    // FIX: Sprawdzenie minimalnej kwoty (1 jednostka waluty)
+    if ($amount_pln < 1) {
+        $currency_display = strtoupper($currency);
+        wp_send_json_error(['message' => "Kwota napiwku musi wynosić co najmniej 1 {$currency_display}."], 400);
+        return;
+    }
+
+    if (!empty($email) && !is_email($email)) {
+        wp_send_json_error(['message' => 'Nieprawidłowy adres e-mail.'], 400);
+        return;
+    }
+
+    // Kwota musi być przekazana w najmniejszej jednostce waluty (centach/groszach)
+    $amount_cents = round($amount_pln * 100);
 
     if (!class_exists('\Stripe\Stripe')) {
         wp_send_json_error(['message' => 'Błąd integracji płatności. Skontaktuj się z administratorem.']);
         return;
     }
     if (empty(TT_STRIPE_SECRET_KEY)) {
-        wp_send_json_error(['message' => 'Brak konfiguracji płatności po stronie serwera.']);
+        wp_send_json_error(['message' => 'Brak konfiguracji płatności po stronie serwera. Sprawdź TT_STRIPE_SECRET_KEY.'], 500);
         return;
     }
 
@@ -808,13 +823,16 @@ function tt_create_stripe_payment_intent_callback() {
         $intent = \Stripe\PaymentIntent::create([
             'amount' => $amount_cents,
             'currency' => $currency,
+            // Lista dostępnych metod płatności dla PL: karta, P24, BLIK.
             'payment_method_types' => ['card', 'p24', 'blik'],
             'receipt_email' => $email,
             'description' => 'Napiwek dla twórcy',
         ]);
+        // Zwracamy clientSecret potrzebny do zamontowania Elementu
         wp_send_json_success(['clientSecret' => $intent->client_secret]);
     } catch (\Exception $e) {
-        wp_send_json_error(['message' => 'Błąd Stripe: ' . $e->getMessage()]);
+        // Bardziej szczegółowy błąd, który pomoże w diagnozie.
+        wp_send_json_error(['message' => 'Błąd Stripe API: ' . $e->getMessage() . ' Kod: ' . $e->getStripeCode()], 500);
     }
 }
 

@@ -107,8 +107,16 @@ function validateStep(step) {
         }
     } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
-        if (isNaN(amount) || amount < 1) {
-            UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
+        const currency = document.getElementById('tippingCurrency').value;
+        const minAmount = 1; // Używamy 1 jako uniwersalny min. limit
+
+        if (isNaN(amount) || amount < minAmount) {
+            UI.showAlert(
+                Utils.getTranslation('errorMinTipAmount')
+                    .replace('{minAmount}', minAmount)
+                    .replace('{currency}', currency),
+                true
+            );
             return false;
         }
     } else if (step === 2) {
@@ -143,8 +151,19 @@ function handlePrevStep() {
 }
 
 async function initializePaymentElement() {
-    if (stripe && paymentElement) {
+    // Sprawdź, czy Stripe.js jest załadowany. Jeśli nie, nie kontynuuj.
+    if (typeof window.Stripe === 'undefined') {
+        console.error("Stripe.js is not loaded.");
+        UI.showAlert('Błąd: Nie udało się załadować biblioteki płatności.', true);
+        currentStep = 1;
+        updateStepDisplay();
         return;
+    }
+
+    // Wyczyść poprzednie elementy płatności przed ponowną inicjalizacją
+    const paymentElementContainer = document.getElementById('stripe-payment-element');
+    if (paymentElementContainer) {
+        paymentElementContainer.innerHTML = '';
     }
 
     try {
@@ -152,10 +171,15 @@ async function initializePaymentElement() {
 
         if (response.success && response.data.clientSecret) {
             const clientSecret = response.data.clientSecret;
+            const currency = formData.currency || 'pln';
+            console.log(`[Stripe] Inicjalizacja Payment Element dla ${currency.toUpperCase()}`);
 
-            stripe = Stripe(TingTongConfig.stripePublicKey, {
-                locale: 'pl'
-            });
+            // FIX 1: Upewnij się, że instancja Stripe jest tworzona raz (jeśli nie jest mockiem)
+            if (!stripe) {
+                stripe = Stripe(TingTongConfig.stripePublicKey, {
+                    locale: 'pl'
+                });
+            }
 
             elements = stripe.elements({ clientSecret });
 
@@ -166,17 +190,33 @@ async function initializePaymentElement() {
                 }
             });
 
-            paymentElement.mount('#stripe-payment-element');
+            if (paymentElementContainer) {
+                paymentElement.mount('#stripe-payment-element');
+
+                // FIX 2: Dodajemy event listenery dla lepszej diagnostyki
+                paymentElement.on('ready', function() {
+                    console.log('Stripe Payment Element jest gotowy i załadował metody płatności.');
+                    // Opcjonalnie można tutaj pokazać toasta o sukcesie
+                });
+
+                paymentElement.on('error', function(event) {
+                    console.error('Błąd ładowania Stripe Payment Element:', event);
+                    UI.showAlert(`Błąd ładowania płatności: ${event.error.message || 'Nieznany błąd.'}`, true);
+                    currentStep = 1; // Powrót do kroku z kwotą, aby użytkownik mógł zmienić kwotę/walutę
+                    updateStepDisplay();
+                });
+            }
+
 
         } else {
-            const errorMessage = response.data?.message || 'Błąd: Nie udało się przygotować płatności.';
+            const errorMessage = response.data?.message || 'Błąd: Nie udało się przygotować płatności (serwer).';
             UI.showAlert(errorMessage, true);
             currentStep = 1;
             updateStepDisplay();
         }
 
     } catch (error) {
-        console.error('Błąd inicjalizacji Stripe:', error);
+        console.error('Krytyczny błąd inicjalizacji Stripe:', error);
         UI.showAlert('Wystąpił błąd komunikacji z serwerem płatności.', true);
         currentStep = 1;
         updateStepDisplay();
@@ -219,7 +259,8 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        formData.currency = document.getElementById('tippingCurrency').value;
+        const currencySelect = document.getElementById('tippingCurrency');
+        formData.currency = currencySelect ? currencySelect.value : 'pln';
     }
 }
 
