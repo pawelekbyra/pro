@@ -115,11 +115,11 @@ export const Config = {
         en: "Tipping Gateway",
       },
       tippingStep1Desc: {
-          pl: "Zostań Patronem Miłości i wspieraj rozwój projektu.",
+          pl: "Zalozyc konto Patrona?",
           en: "Become a Love Patron and support the project's development."
       },
       tippingCreateAccountLabel: {
-          pl: "Czy założyć konto patrona?",
+          pl: "No raczej!",
           en: "Create a patron account?"
       },
       tippingEmailHint: {
