@@ -1,12 +1,13 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
+import { API } from './api.js';
 
 let dom = {};
 let currentStep = 0;
-const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
+const totalSteps = 4;
 let formData = {};
-let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
+let previousStep = 0;
 
 function cacheDOM() {
     dom = {
@@ -23,6 +24,7 @@ function cacheDOM() {
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
         termsStep: document.getElementById('terms-step'),
+        paymentMethodsContainer: document.querySelector('.payment-methods-container'),
     };
 }
 
@@ -34,7 +36,6 @@ function updateStepDisplay(isShowingTerms = false) {
 
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
-        // Step 3 is now the processing step, terms is step 4 in the DOM
         stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
     });
 
@@ -45,7 +46,6 @@ function updateStepDisplay(isShowingTerms = false) {
     }
 
     const isProcessingStep = currentStep === 3;
-    const isPaymentStep = currentStep === 2;
 
     if (dom.prevBtn) {
         dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
@@ -54,11 +54,9 @@ function updateStepDisplay(isShowingTerms = false) {
         dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
     }
 
-    // Hide footer entirely on processing step
     if (footer && isProcessingStep) {
         footer.style.display = 'none';
     }
-
 
     if (dom.progressBar) {
         const progress = ((currentStep + 1) / totalSteps) * 100;
@@ -85,16 +83,13 @@ function handlePrevStep() {
 
 function validateStep(step) {
     if (step === 0) {
-        // Jeśli checkbox "Załóż konto" jest zaznaczony, waliduj e-mail
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (email === '') {
-                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
                 UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
-                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
                 UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
                 return false;
             }
@@ -124,54 +119,46 @@ function hideTerms() {
     updateStepDisplay(false);
 }
 
-
 function collectData(step) {
     if (step === 0) {
         formData.create_account = dom.createAccountCheckbox.checked;
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-    } else if (step === 2) {
-        // This will be set in handlePaymentMethodClick
-        formData.payment_method = 'not-set';
     }
 }
 
-// New mock function for the final step
-function handlePaymentMethodClick(method) {
+async function handlePaymentMethodClick(method) {
     formData.payment_method = method;
     console.log('Final form data submitted:', formData);
 
-    // Advance to the processing step
     currentStep = 3;
     updateStepDisplay();
 
-    // Simulate payment processing
-    setTimeout(() => {
-        UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
-        hideModal();
-
-        // Reset state after a short delay
-        setTimeout(() => {
-            currentStep = 0;
-            formData = {};
-            if (dom.form) dom.form.reset();
-            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
-            if (dom.emailContainer) dom.emailContainer.classList.add('visible');
-            if (document.getElementById('termsAccept')) document.getElementById('termsAccept').checked = false;
+    try {
+        const response = await API.createStripeCheckout(formData);
+        if (response.success && response.data.checkout_url) {
+            window.location.href = response.data.checkout_url;
+        } else {
+            const errorMessage = response.data?.message || 'Nie udało się utworzyć sesji płatności.';
+            UI.showAlert(errorMessage, true);
+            currentStep = 2; // Wróć do kroku wyboru płatności
             updateStepDisplay();
-        }, 500);
-    }, 2500);
+        }
+    } catch (error) {
+        console.error('Stripe Checkout Error:', error);
+        UI.showAlert('Wystąpił błąd. Spróbuj ponownie.', true);
+        currentStep = 2;
+        updateStepDisplay();
+    }
 }
 
 function setupPaymentMethodListeners() {
-    if (!dom.modal) return;
-    const paymentMethodsContainer = dom.modal.querySelector('.payment-methods-container');
-    if (paymentMethodsContainer) {
-        paymentMethodsContainer.addEventListener('click', (e) => {
-            const button = e.target.closest('.payment-method-btn');
-            if (button) {
-                const method = button.dataset.method;
+    if (dom.paymentMethodsContainer) {
+        dom.paymentMethodsContainer.addEventListener('click', (e) => {
+            const tile = e.target.closest('.payment-method-tile');
+            if (tile) {
+                const method = tile.dataset.method;
                 handlePaymentMethodClick(method);
             }
         });

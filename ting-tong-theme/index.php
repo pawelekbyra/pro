@@ -57,18 +57,18 @@ get_header();
                 <div class="elegant-modal-step" data-step="2">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep3Title">Wybierz metodę płatności</p>
                     <div class="payment-methods-container">
-                        <button type="button" class="payment-method-btn" data-method="blik">
+                        <div class="payment-method-tile" data-method="card">
+                            <img src="<?php echo get_template_directory_uri(); ?>/assets/card-logo.svg" alt="Card">
+                            <span>Karta</span>
+                        </div>
+                        <div class="payment-method-tile" data-method="blik">
                             <img src="<?php echo get_template_directory_uri(); ?>/assets/blik-logo.svg" alt="BLIK">
-                            <span>Płatność BLIK</span>
-                        </button>
-                        <button type="button" class="payment-method-btn" data-method="card">
-                             <img src="<?php echo get_template_directory_uri(); ?>/assets/card-logo.svg" alt="Card">
-                            <span>Karta Płatnicza</span>
-                        </button>
-                         <button type="button" class="payment-method-btn" data-method="paypal">
-                             <img src="<?php echo get_template_directory_uri(); ?>/assets/paypal-logo.svg" alt="PayPal">
-                            <span>PayPal</span>
-                        </button>
+                            <span>BLIK</span>
+                        </div>
+                        <div class="payment-method-tile" data-method="paypal">
+                             <img src="<?php echo get_template_directory_uri(); ?>/assets/paypal-logo.svg" alt="Przelew">
+                            <span>Przelew</span>
+                        </div>
                     </div>
                 </div>
 
@@ -81,8 +81,8 @@ get_header();
                     </div>
                 </div>
 
-                <!-- Krok 4: Regulamin -->
-                <div class="elegant-modal-step" data-step="3" id="terms-step">
+                <!-- Krok 5 (były 4): Regulamin -->
+                <div class="elegant-modal-step" data-step="4" id="terms-step">
                     <h3 style="text-align: center; margin-bottom: 15px;">Regulamin i Polityka Prywatności</h3>
                     <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;">
                         <p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p>
