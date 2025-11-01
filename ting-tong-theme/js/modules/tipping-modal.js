@@ -138,18 +138,30 @@ async function handleFormSubmit() {
 }
 
 function translateUI() {
-    if(!dom.modal) return;
+    if (!dom.modal) return;
+
+    const currentLang = State.get('currentLang') || 'pl';
 
     dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
         const key = el.dataset.translateKey;
-        const translation = Utils.getTranslation(key);
-        if(translation) el.innerHTML = translation;
+        let translation = Utils.getTranslation(key);
+        if (typeof translation === 'object' && translation !== null) {
+            translation = translation[currentLang] || translation['pl'] || '';
+        }
+        if (translation) {
+            el.innerHTML = translation;
+        }
     });
 
     dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
         const key = el.dataset.translatePlaceholder;
-        const translation = Utils.getTranslation(key);
-        if(translation) el.placeholder = translation;
+        let translation = Utils.getTranslation(key);
+        if (typeof translation === 'object' && translation !== null) {
+            translation = translation[currentLang] || translation['pl'] || '';
+        }
+        if (translation) {
+            el.placeholder = translation;
+        }
     });
 }
 

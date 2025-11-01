@@ -111,16 +111,20 @@ export const Config = {
       installNotReadyText: "Instalacja nie jest obecnie możliwa na tej przeglądarce lub urządzeniu.",
       appInstalledSuccessText: "Aplikacja została pomyślnie zainstalowana!",
       tippingTitle: {
-        pl: "Bramka Napiwkowa",
-        en: "Tipping Gateway",
+        pl: "Bramka Napiwkowa 🤑",
+        en: "Tipping Gateway 🤑",
       },
       tippingStep1Desc: {
-          pl: "Zalozyc konto Patrona?",
-          en: "Become a Love Patron and support the project's development."
+          pl: "Założyć konto Patrona? 🏆",
+          en: "Become a Love Patron and support the project's development. 🏆"
       },
       tippingCreateAccountLabel: {
           pl: "No raczej!",
           en: "Create a patron account?"
+      },
+      emailPlaceholder: {
+        pl: "(podaj mail na ktory otrzymasz klucze logowania)",
+        en: "(enter the email where you will receive your login credentials)"
       },
       tippingEmailHint: {
           pl: "Na podany e-mail otrzymasz dane dostępu do logowania do sekcji dla patronów.",
