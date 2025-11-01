@@ -86,15 +86,23 @@ function trapFocus(modal) {
 const activeModals = new Set();
 
 function openModal(modal, options = {}) {
-    if (!modal) return;
+    if (!modal) {
+        console.error("Attempted to open a null modal element."); // Dodany log dla pewności
+        return;
+    }
 
-    modal.style.display = ''; // Remove inline style if it exists
+    // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
+    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
+    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
+
     modal.classList.add('visible');
     activeModals.add(modal);
 
     if (activeModals.size === 1) {
         document.body.style.overflow = 'hidden';
     }
+
+    // ... reszta kodu bez zmian ...
 
     if (options.onOpen) {
         options.onOpen();
