@@ -129,7 +129,7 @@ async function handleFormSubmit() {
             currentStep = 0;
             formData = {};
             if(dom.form) dom.form.reset();
-            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = true;
+            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
             if (dom.emailContainer) dom.emailContainer.classList.add('visible');
             updateStepDisplay();
         }, 500);
