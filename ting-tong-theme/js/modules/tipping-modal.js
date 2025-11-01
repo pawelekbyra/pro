@@ -34,6 +34,7 @@ function updateStepDisplay(isShowingTerms = false) {
         return;
     }
 
+    // Pokaż/ukryj kroki
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
         stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
@@ -47,27 +48,60 @@ function updateStepDisplay(isShowingTerms = false) {
 
     const isProcessingStep = currentStep === 3;
 
+    // Pokaż/ukryj przyciski
     if (dom.prevBtn) {
         dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
     }
     if (dom.nextBtn) {
-        dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
+        dom.nextBtn.style.display = (currentStep < 3 && !isProcessingStep) ? 'flex' : 'none';
+        // Zmień tekst przycisku na ostatnim kroku przed płatnością
+        const nextBtnText = (currentStep === 2) ? Utils.getTranslation('tippingPay') : Utils.getTranslation('tippingNext');
+        dom.nextBtn.textContent = nextBtnText;
     }
 
+    // Ukryj stopkę na kroku przetwarzania
     if (footer && isProcessingStep) {
         footer.style.display = 'none';
     }
 
+    // Aktualizuj pasek postępu
     if (dom.progressBar) {
         const progress = ((currentStep + 1) / totalSteps) * 100;
         dom.progressBar.style.width = `${progress}%`;
     }
 }
 
+
+async function processPayment() {
+    // Przejdź do kroku ładowania
+    currentStep = 3;
+    updateStepDisplay();
+
+    try {
+        const response = await API.createStripeCheckout(formData);
+        if (response.success && response.data.url) {
+            window.location.href = response.data.url;
+        } else {
+            const errorMessage = response.data?.message || 'Nie udało się utworzyć sesji płatności.';
+            UI.showAlert(errorMessage, true);
+            currentStep = 2; // Wróć do kroku wyboru płatności
+            updateStepDisplay();
+        }
+    } catch (error) {
+        console.error('Stripe Checkout Error:', error);
+        UI.showAlert('Wystąpił błąd krytyczny. Spróbuj ponownie.', true);
+        currentStep = 2; // Wróć do kroku wyboru płatności
+        updateStepDisplay();
+    }
+}
+
+
 function handleNextStep() {
+    collectData(currentStep);
     if (validateStep(currentStep)) {
-        collectData(currentStep);
-        if (currentStep < totalSteps - 1) {
+        if (currentStep === 2) {
+            processPayment();
+        } else if (currentStep < totalSteps -1) {
             currentStep++;
             updateStepDisplay();
         }
@@ -94,11 +128,15 @@ function validateStep(step) {
                 return false;
             }
         }
-    }
-    if (step === 1) {
+    } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         if (isNaN(amount) || amount < 1) {
             UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
+            return false;
+        }
+    } else if (step === 2) {
+        if (!formData.payment_method) {
+            UI.showAlert('Proszę wybrać metodę płatności.', true);
             return false;
         }
         if (!document.getElementById('termsAccept').checked) {
@@ -126,43 +164,16 @@ function collectData(step) {
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
     }
+    // Metoda płatności jest zbierana w handlePaymentMethodSelection
 }
 
-async function handlePaymentMethodClick(method) {
-    formData.payment_method = method;
-    console.log('Final form data submitted:', formData);
-
-    currentStep = 3;
-    updateStepDisplay();
-
-    try {
-        const response = await API.createStripeCheckout(formData);
-        if (response.success && response.data.checkout_url) {
-            window.location.href = response.data.checkout_url;
-        } else {
-            const errorMessage = response.data?.message || 'Nie udało się utworzyć sesji płatności.';
-            UI.showAlert(errorMessage, true);
-            currentStep = 2; // Wróć do kroku wyboru płatności
-            updateStepDisplay();
-        }
-    } catch (error) {
-        console.error('Stripe Checkout Error:', error);
-        UI.showAlert('Wystąpił błąd. Spróbuj ponownie.', true);
-        currentStep = 2;
-        updateStepDisplay();
-    }
-}
-
-function setupPaymentMethodListeners() {
-    if (dom.paymentMethodsContainer) {
-        dom.paymentMethodsContainer.addEventListener('click', (e) => {
-            const tile = e.target.closest('.payment-method-tile');
-            if (tile) {
-                const method = tile.dataset.method;
-                handlePaymentMethodClick(method);
-            }
-        });
-    }
+function handlePaymentMethodSelection(tile) {
+    // Usuń zaznaczenie ze wszystkich
+    dom.paymentMethodsContainer.querySelectorAll('.payment-method-tile').forEach(t => t.classList.remove('selected'));
+    // Dodaj zaznaczenie do klikniętego
+    tile.classList.add('selected');
+    // Zapisz wybraną metodę
+    formData.payment_method = tile.dataset.method;
 }
 
 
@@ -263,9 +274,13 @@ function init() {
         if (e.target.closest('[data-action="hide-terms"]')) {
             hideTerms();
         }
-    });
 
-    setupPaymentMethodListeners();
+        // Listener for payment method tiles
+        const tile = e.target.closest('.payment-method-tile');
+        if (tile && dom.paymentMethodsContainer.contains(tile)) {
+            handlePaymentMethodSelection(tile);
+        }
+    });
 }
 
 export const TippingModal = {
