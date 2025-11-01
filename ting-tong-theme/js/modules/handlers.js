@@ -482,12 +482,23 @@ export const Handlers = {
         break;
       case "open-author-modal": {
         const swiper = State.get('swiper');
-        if (!swiper) break;
+        if (!swiper || !swiper.slides[swiper.activeIndex]) {
+            console.error("Swiper or active slide not available.");
+            break;
+        }
 
-        const slideData = slidesData[swiper.realIndex];
+        const activeSlideElement = swiper.slides[swiper.activeIndex];
+        const slideId = activeSlideElement.dataset.slideId;
+
+        if (!slideId) {
+            console.error("Could not find slideId on the active slide element.");
+            break;
+        }
+
+        const slideData = slidesData.find(s => String(s.id) === String(slideId));
 
         if (!slideData || !slideData.author) {
-          console.error("Could not find author data for the current slide.");
+          console.error(`Could not find author data for slideId: ${slideId}.`);
           break;
         }
 
