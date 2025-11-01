@@ -6,6 +6,7 @@ let dom = {};
 let currentStep = 0;
 const totalSteps = 3; // 0: options, 1: amount, 2: processing
 let formData = {};
+let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
 
 function cacheDOM() {
     dom = {
@@ -22,22 +23,30 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
+        termsStep: document.getElementById('terms-step'),
     };
 }
 
-function updateStepDisplay() {
+function updateStepDisplay(isShowingTerms = false) {
     if (!dom.modal || !dom.steps || dom.steps.length === 0) {
         console.error("Tipping modal steps not found or cached correctly.");
         return;
     }
 
-    dom.steps.forEach((stepEl, i) => {
-        stepEl.classList.toggle('active', i === currentStep);
+    dom.steps.forEach(stepEl => {
+        const step = parseInt(stepEl.dataset.step, 10);
+        stepEl.classList.toggle('active', isShowingTerms ? step === 3 : step === currentStep);
     });
+
+    const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
 
     const isFirstStep = currentStep === 0;
     const isAmountStep = currentStep === 1;
     const isProcessingStep = currentStep === 2;
+
+    // Pokaż/ukryj stopkę z przyciskami nawigacyjnymi
+    dom.form.querySelector('.elegant-modal-footer').style.display = isTermsVisible ? 'none' : 'block';
+
 
     // Use flex as the new buttons are in a flex container
     dom.prevBtn.style.display = isAmountStep ? 'flex' : 'none';
@@ -76,9 +85,19 @@ function handlePrevStep() {
 
 function validateStep(step) {
     if (step === 0) {
-        if (dom.createAccountCheckbox.checked && !Utils.isValidEmail(dom.emailInput.value)) {
-            UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
-            return false;
+        // Jeśli checkbox "Załóż konto" jest zaznaczony, waliduj e-mail
+        if (dom.createAccountCheckbox.checked) {
+            const email = dom.emailInput.value.trim();
+            if (email === '') {
+                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
+                UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
+                return false;
+            }
+            if (!Utils.isValidEmail(email)) {
+                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
+                UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
+                return false;
+            }
         }
     }
     if (step === 1) {
@@ -87,9 +106,24 @@ function validateStep(step) {
             UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
             return false;
         }
+        if (!document.getElementById('termsAccept').checked) {
+            UI.showAlert('Proszę zaakceptować regulamin.', true);
+            return false;
+        }
     }
     return true;
 }
+
+function showTerms() {
+    previousStep = currentStep;
+    updateStepDisplay(true);
+}
+
+function hideTerms() {
+    currentStep = previousStep;
+    updateStepDisplay(false);
+}
+
 
 function collectData(step) {
     if (step === 0) {
@@ -121,6 +155,7 @@ async function handleFormSubmit() {
             if(dom.form) dom.form.reset();
             if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
             if (dom.emailContainer) dom.emailContainer.classList.add('visible');
+            document.getElementById('termsAccept').checked = false;
             updateStepDisplay();
         }, 500);
 
@@ -185,6 +220,9 @@ function showModal() {
     if (dom.createAccountCheckbox) {
         dom.createAccountCheckbox.checked = false;
     }
+     if (document.getElementById('termsAccept')) {
+        document.getElementById('termsAccept').checked = false;
+    }
     // Hide email input by default
     if (dom.emailContainer) {
         dom.emailContainer.classList.remove('visible');
@@ -213,6 +251,13 @@ function init() {
     dom.modal.addEventListener('click', (e) => {
         if (e.target === dom.modal) {
             hideModal();
+        }
+        if (e.target.closest('[data-action="show-terms"]')) {
+            e.preventDefault();
+            showTerms();
+        }
+        if (e.target.closest('[data-action="hide-terms"]')) {
+            hideTerms();
         }
     });
 }
