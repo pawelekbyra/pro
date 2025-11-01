@@ -87,35 +87,33 @@ const activeModals = new Set();
 
 function openModal(modal, options = {}) {
     if (!modal) {
-        console.error("Attempted to open a null modal element.");
+        console.error("Attempted to open a null modal element."); // Dodany log dla pewności
         return;
     }
+
+    // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
+    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
+    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
         if (swiper) {
             const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
             const slideData = slidesData.find(s => s.id === slideId);
-            if (slideData) {
-                const commentsTitle = modal.querySelector("#commentsTitle");
-                if (commentsTitle) {
-                    commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
-                }
+            const count = slideData ? slideData.initialComments : 0;
+            const titleEl = modal.querySelector('#commentsTitle');
+            if (titleEl) {
+                titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
             }
         }
     }
 
-    modal.style.display = 'block';
-    modal.classList.remove("is-hiding");
+    modal.classList.add('visible');
+    activeModals.add(modal);
 
-    requestAnimationFrame(() => {
-        modal.classList.add('visible');
-        activeModals.add(modal);
-
-        if (activeModals.size === 1) {
-            document.body.style.overflow = 'hidden';
-        }
-    });
+    if (activeModals.size === 1) {
+        document.body.style.overflow = 'hidden';
+    }
 
     // ... reszta kodu bez zmian ...
 
@@ -137,45 +135,12 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal) {
-    if (!modal || !modal.classList.contains('visible')) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
 
-    if (modal.id === 'comments-modal-container') {
-        return closeCommentsModal();
-    }
+    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
 
-    modal.classList.remove('visible');
-    const transitionDuration = parseFloat(getComputedStyle(modal).transitionDuration) * 1000 || 300;
-
-    setTimeout(() => {
-        if (!modal.classList.contains('visible')) {
-            modal.style.display = 'none';
-        }
-    }, transitionDuration);
-
-    if (document.querySelectorAll('.modal-overlay.visible').length === 1) {
-        document.body.removeAttribute('aria-hidden');
-    }
-}
-
-function closeCommentsModal() {
-    const modal = DOM.commentsModal;
-    if (!modal || !modal.classList.contains('visible')) return;
-
-    modal.classList.add('is-hiding');
-    modal.classList.remove('visible');
-
-    const content = modal.querySelector('.modal-content');
-    const transitionDuration = content ? parseFloat(getComputedStyle(content).transitionDuration) * 1000 : 300;
-
-    setTimeout(() => {
-        modal.classList.remove('is-hiding');
-        modal.style.display = 'none';
-
-        if (document.querySelectorAll('.modal-overlay.visible').length === 0) {
-            document.body.removeAttribute('aria-hidden');
-        }
-    }, transitionDuration);
-}
+    modal.classList.add("is-hiding");
+    modal.setAttribute("aria-hidden", "true");
 
     const cleanup = () => {
         modal.removeEventListener("transitionend", cleanup);
@@ -515,6 +480,7 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
+    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {
@@ -1088,4 +1054,30 @@ export const UI = {
   closeImageLightbox,
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
+  closeCommentsModal,
 };
+
+function closeCommentsModal() {
+    const modal = DOM.commentsModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const cleanup = () => {
+        modal.removeEventListener('transitionend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            State.get('lastFocusedElement')?.focus();
+        }
+    };
+
+    modal.addEventListener('transitionend', cleanup, { once: true });
+    // Fallback w razie gdyby event się nie odpalił
+    setTimeout(cleanup, 400);
+}

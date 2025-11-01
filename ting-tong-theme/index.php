@@ -13,7 +13,7 @@ get_header();
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title">Bramka Napiwkowa</h2>
+                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
                 <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
