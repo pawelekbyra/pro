@@ -3608,9 +3608,15 @@ body,
   }
 
   /* NOWE: Ujednolicony selektor modali i widgetów */
-  #infoModal,
+  /* FIX: Ensure infoModal and tippingModal take full width and are centered */
+  #infoModal.modal-overlay,
   .elegant-modal-overlay {
-    width: 100% !important;
+      width: 100% !important;
+      border: none !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
   }
   #commentsModal,
   .modal-overlay,

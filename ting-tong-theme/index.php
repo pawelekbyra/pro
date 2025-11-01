@@ -27,7 +27,7 @@ get_header();
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
                             <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">Konto patrona?</span>
-                            <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox" checked>
+                            <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
                             <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="Twój adres e-mail">
