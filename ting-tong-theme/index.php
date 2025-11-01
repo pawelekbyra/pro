@@ -13,7 +13,7 @@ get_header();
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
+                <h2 id="tippingTitle" class="elegant-modal-title">Bramka Napiwkowa</h2>
                 <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
@@ -26,7 +26,7 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem i wspieraj rozwój projektu. Jeśli chcesz, możesz przy tym założyć darmowe konto.</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
-                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">Chcę założyć konto patrona</span>
+                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">Konto patrona?</span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox" checked>
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
@@ -46,7 +46,7 @@ get_header();
                             <button type="button" class="amount-suggestion-btn" data-amount="20">20 PLN</button>
                         </div>
                         <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="5.00" min="1" step="any">
+                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
                             <span class="tipping-currency">PLN</span>
                         </div>
                         <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
@@ -58,7 +58,7 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
-                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności PayPal.</p>
+                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
                     </div>
                 </div>
             </div>

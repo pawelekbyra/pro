@@ -592,20 +592,8 @@ export const Handlers = {
         break;
       case "toggle-login-panel":
         if (!State.get("isUserLoggedIn")) {
-          const swiper = State.get('swiper');
-          if (swiper) {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            const video = activeSlide?.querySelector('video');
-            if (video) {
-              State.set('videoPlaybackState', {
-                slideId: activeSlide.dataset.slideId,
-                currentTime: video.currentTime,
-              });
-            }
-          }
-
           if (UI.DOM.commentsModal.classList.contains("visible")) {
-            UI.closeModal(UI.DOM.commentsModal);
+            UI.closeCommentsModal();
           }
           if (loginPanel) loginPanel.classList.toggle("active");
           if (topbar) topbar.classList.toggle("login-panel-active");
@@ -661,6 +649,7 @@ export const Handlers = {
         break;
       }
       case "toggle-volume":
+        e.stopPropagation(); // Zapobiegaj pauzowaniu wideo
         const isMuted = !State.get("isSoundMuted");
         State.set("isSoundMuted", isMuted);
         const activeSlideVideo = document.querySelector(".swiper-slide-active video");

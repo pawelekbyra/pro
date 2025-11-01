@@ -286,6 +286,23 @@ function updateCommentFormVisibility() {
     }
 }
 
+function sortAndRerenderComments() {
+    const swiper = State.get('swiper');
+    if (!swiper) return;
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+    const slideData = slidesData.find(s => s.id === slideId);
+    if (!slideData || !slideData.comments) return;
+
+    const sortOrder = State.get('commentSortOrder');
+    const sortedComments = [...slideData.comments].sort((a, b) => {
+        if (sortOrder === 'popular') {
+            return b.likes - a.likes;
+        }
+        return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+    renderComments(sortedComments);
+}
+
 export const CommentsModal = {
     init() {
         cacheDOM();
@@ -296,6 +313,19 @@ export const CommentsModal = {
         }
 
         initEmojiPicker();
+
+        DOM.commentsModal.querySelector('.sort-trigger')?.addEventListener('click', (e) => {
+            e.currentTarget.closest('.sort-dropdown').classList.toggle('open');
+        });
+
+        DOM.commentsModal.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const sortOrder = e.currentTarget.dataset.sort;
+                State.set('commentSortOrder', sortOrder);
+                sortAndRerenderComments();
+                e.currentTarget.closest('.sort-dropdown').classList.remove('open');
+            });
+        });
 
         if (DOM.fileInput) {
             DOM.fileInput.addEventListener('change', handleImageSelect);
