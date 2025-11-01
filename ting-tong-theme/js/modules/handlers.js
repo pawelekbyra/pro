@@ -502,7 +502,7 @@ export const Handlers = {
           break;
         }
 
-        UI.openAuthorModal(slideData.author);
+        UI.openAuthorModal(slideData);
         break;
       }
       case "toggle-like":
