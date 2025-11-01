@@ -163,16 +163,12 @@ export const Config = {
           en: "Back"
       },
       tippingNext: {
-          pl: "ENTER",
-          en: "ENTER"
+          pl: "Dalej",
+          en: "Next"
       },
       tippingSubmit: {
           pl: "Przejdź do płatności",
           en: "Proceed to Payment"
-      },
-      tippingPay: {
-        pl: "Zapłać",
-        en: "Pay"
       },
       tippingSuccessMessage: {
         pl: "Dziękujemy za napiwek w wysokości {amount} EUR!",

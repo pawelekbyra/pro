@@ -34,43 +34,45 @@ function updateStepDisplay(isShowingTerms = false) {
         return;
     }
 
-    // Pokaż/ukryj kroki
+    // Nowa logika aktywnego kroku (4 to krok regulaminu)
+    const activeStepIndex = isShowingTerms ? 4 : currentStep;
+
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
-        stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
+        stepEl.classList.toggle('active', step === activeStepIndex);
     });
 
     const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
     const footer = dom.form.querySelector('.elegant-modal-footer');
     if (footer) {
-        footer.style.display = isTermsVisible ? 'none' : 'block';
+        // Stopka ukryta na kroku 3 (przetwarzanie/redirect) i kroku 4 (regulamin)
+        footer.style.display = (isTermsVisible || currentStep === 3) ? 'none' : 'block';
     }
-
-    const isProcessingStep = currentStep === 3;
 
     // Pokaż/ukryj przyciski
     if (dom.prevBtn) {
-        dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
-    }
-    if (dom.nextBtn) {
-        dom.nextBtn.style.display = (currentStep < 3 && !isProcessingStep) ? 'flex' : 'none';
-        // Zmień tekst przycisku na ostatnim kroku przed płatnością
-        const nextBtnText = (currentStep === 2) ? Utils.getTranslation('tippingPay') : Utils.getTranslation('tippingNext');
-        dom.nextBtn.textContent = nextBtnText;
+        // Przycisk "Wstecz" ukryty na kroku 0 i kroku 3
+        dom.prevBtn.style.display = (currentStep > 0 && currentStep < 3) ? 'flex' : 'none';
     }
 
-    // Ukryj stopkę na kroku przetwarzania
-    if (footer && isProcessingStep) {
-        footer.style.display = 'none';
+    if (dom.nextBtn) {
+        // Przycisk "Dalej/Płać" ukryty na kroku 3
+        dom.nextBtn.style.display = (currentStep < 3) ? 'flex' : 'none';
+
+        // Zmień tekst przycisku na kroku 2 (ostatni krok przed przekierowaniem)
+        const isFinalStepBeforePayment = currentStep === 2;
+        // Użyj klucza 'tippingSubmit' dla przycisku końcowego
+        const nextBtnText = isFinalStepBeforePayment ? Utils.getTranslation('tippingSubmit') : Utils.getTranslation('tippingNext');
+        dom.nextBtn.textContent = nextBtnText;
     }
 
     // Aktualizuj pasek postępu
     if (dom.progressBar) {
+        // totalSteps = 4 (0, 1, 2, 3)
         const progress = ((currentStep + 1) / totalSteps) * 100;
         dom.progressBar.style.width = `${progress}%`;
     }
 }
-
 
 async function processPayment() {
     // Przejdź do kroku ładowania
@@ -95,28 +97,22 @@ async function processPayment() {
     }
 }
 
-
 function handleNextStep() {
-    collectData(currentStep);
+    collectData(currentStep); // Najpierw zbierz dane
     if (validateStep(currentStep)) {
         if (currentStep === 2) {
+            // Krok 2 to teraz wybór metody płatności. Po walidacji uruchom płatność.
             processPayment();
-        } else if (currentStep < totalSteps -1) {
+        } else if (currentStep < totalSteps - 1) {
+            // Przejdź do następnego kroku modal'a
             currentStep++;
             updateStepDisplay();
         }
     }
 }
 
-function handlePrevStep() {
-    if (currentStep > 0) {
-        currentStep--;
-        updateStepDisplay();
-    }
-}
-
 function validateStep(step) {
-    if (step === 0) {
+    if (step === 0) { // Krok: E-mail i zgoda
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (email === '') {
@@ -128,13 +124,13 @@ function validateStep(step) {
                 return false;
             }
         }
-    } else if (step === 1) {
+    } else if (step === 1) { // Krok: Kwota
         const amount = parseFloat(dom.amountInput.value);
         if (isNaN(amount) || amount < 1) {
             UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
             return false;
         }
-    } else if (step === 2) {
+    } else if (step === 2) { // Krok: Metoda płatności i Regulamin
         if (!formData.payment_method) {
             UI.showAlert('Proszę wybrać metodę płatności.', true);
             return false;
@@ -147,16 +143,6 @@ function validateStep(step) {
     return true;
 }
 
-function showTerms() {
-    previousStep = currentStep;
-    updateStepDisplay(true);
-}
-
-function hideTerms() {
-    currentStep = previousStep;
-    updateStepDisplay(false);
-}
-
 function collectData(step) {
     if (step === 0) {
         formData.create_account = dom.createAccountCheckbox.checked;
@@ -164,7 +150,7 @@ function collectData(step) {
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
     }
-    // Metoda płatności jest zbierana w handlePaymentMethodSelection
+    // Metoda płatności jest zbierana na bieżąco w handlePaymentMethodSelection
 }
 
 function handlePaymentMethodSelection(tile) {
