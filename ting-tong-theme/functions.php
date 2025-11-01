@@ -5,8 +5,18 @@
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
 
-// Load the Stripe PHP library
-require_once __DIR__ . '/vendor/init.php';
+// Load the Stripe PHP library only if it exists
+$stripe_autoloader = __DIR__ . '/vendor/init.php';
+if (file_exists($stripe_autoloader)) {
+    require_once $stripe_autoloader;
+} else {
+    // Optionally, disable Stripe features or log an error if the library is missing.
+    // For now, we'll just prevent the fatal error.
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Stripe PHP library not found. Please run "composer install".');
+    }
+}
+
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
     function wp_new_user_notification( $user_id, $deprecated = '', $notify = '' ) {
@@ -737,6 +747,12 @@ add_action('wp_ajax_tt_upload_comment_image', function() {
  * tworzy sesję i zwraca jej URL do przekierowania.
  */
 function tt_create_stripe_checkout_callback() {
+    // Check if Stripe class exists before proceeding
+    if (!class_exists('\Stripe\Stripe')) {
+        wp_send_json_error(['message' => 'Błąd integracji płatności. Skontaktuj się z administratorem.'], 500);
+        return;
+    }
+
     // 1. Sprawdź nonce i czy użytkownik jest zalogowany
     check_ajax_referer('tt_ajax_nonce', 'nonce');
     if (!is_user_logged_in()) {
