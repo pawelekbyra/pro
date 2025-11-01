@@ -349,19 +349,19 @@ get_header();
     <div class="modal-content" tabindex="-1">
         <div class="modal-header">
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
-            <div class="comment-sort-options">
-                <div class="sort-dropdown">
-                    <button class="sort-trigger">
-                        <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
-                        <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
-                    </button>
-                    <div class="sort-options">
-                        <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
-                        <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
-                    </div>
+            <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
+        </div>
+        <div class="comment-sort-options">
+            <div class="sort-dropdown">
+                <button class="sort-trigger">
+                    <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
+                    <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
+                </button>
+                <div class="sort-options">
+                    <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
+                    <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
                 </div>
             </div>
-            <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
         <div class="modal-body">
             <!-- Comments will be rendered here -->
