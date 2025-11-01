@@ -23,11 +23,11 @@ get_header();
             <div class="elegant-modal-body" id="tippingBody">
                 <!-- Krok 1: E-mail i zgoda -->
                 <div class="elegant-modal-step" data-step="0">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zostań Patronem i wspieraj rozwój projektu. Jeśli chcesz, możesz przy tym założyć darmowe konto.</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zalozyc konto Patrona?</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
-                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">Konto patrona?</span>
-                            <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox" checked>
+                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">No raczej!</span>
+                            <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
                             <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="Twój adres e-mail">
