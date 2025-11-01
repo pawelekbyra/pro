@@ -118,25 +118,15 @@ export const API = {
       comment_id: commentId,
     }),
 
-  createStripeCheckout: async (data) => {
-    // Użyj FormData, aby zapewnić kompatybilność z `check_ajax_referer`
-    const formData = new FormData();
-    formData.append('action', 'tt_create_stripe_checkout');
-    formData.append('nonce', ajax_object.nonce);
-    formData.append('amount', data.amount);
-    formData.append('payment_method', data.payment_method);
-    if (data.email) {
-      formData.append('email', data.email);
-    }
-
+  createStripePaymentIntent: async (data) => {
     try {
-      const response = await fetch(ajax_object.ajax_url, {
-        method: 'POST',
-        body: formData,
-      });
-      return await response.json();
+      const response = await authManager.ajax('tt_create_stripe_payment_intent', {
+        amount: data.amount,
+        email: data.email,
+      }, true); // `true` to send as JSON
+      return response;
     } catch (error) {
-      console.error('API Client Error for Stripe Checkout:', error);
+      console.error('API Client Error for Stripe Payment Intent:', error);
       return { success: false, data: { message: error.message } };
     }
   },

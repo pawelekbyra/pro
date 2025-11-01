@@ -5,13 +5,19 @@
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
 
+// Define Stripe API keys from environment variables
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    define('TT_STRIPE_SECRET_KEY', getenv('Secret_key'));
+}
+if (!defined('TT_STRIPE_PUBLIC_KEY')) {
+    define('TT_STRIPE_PUBLIC_KEY', getenv('Publishable_key'));
+}
+
 // Load the Stripe PHP library only if it exists
 $stripe_autoloader = __DIR__ . '/vendor/init.php';
 if (file_exists($stripe_autoloader)) {
     require_once $stripe_autoloader;
 } else {
-    // Optionally, disable Stripe features or log an error if the library is missing.
-    // For now, we'll just prevent the fatal error.
     if (defined('WP_DEBUG') && WP_DEBUG) {
         error_log('Stripe PHP library not found. Please run "composer install".');
     }
@@ -246,7 +252,8 @@ function tt_enqueue_and_localize_scripts() {
 	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
 	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
-	wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js' ], null, true );
+	wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, true );
+	wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js', 'stripe-js' ], null, true );
 
 	wp_localize_script(
 		'tingtong-app-script',
@@ -272,6 +279,7 @@ function tt_enqueue_and_localize_scripts() {
 		[
 			'serviceWorkerUrl' => home_url('/sw.js'),
 			'themeUrl'         => get_template_directory_uri(),
+			'stripePublicKey' => TT_STRIPE_PUBLIC_KEY,
 		]
 	);
 }
@@ -301,6 +309,30 @@ add_action(
 // =========================================================================
 // 4. HANDLERY AJAX
 // =========================================================================
+
+function tt_process_ajax_request() {
+    $is_logged_in = is_user_logged_in();
+    if ($is_logged_in) {
+        check_ajax_referer('tt_ajax_nonce', 'nonce');
+    }
+
+    $data = [];
+    $content_type = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+
+    if ($content_type === "application/json") {
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+    } else {
+        $data = $_POST;
+    }
+
+    if (empty($data)) {
+        return ['success' => false, 'message' => 'Brak danych.'];
+    }
+
+    // Zwracamy dane, aby mogły być użyte dalej
+    return $data;
+}
 
 // --- Logowanie, wylogowanie, odświeżanie danych ---
 add_action( 'wp_ajax_tt_get_slides_data_ajax', function() {
@@ -404,7 +436,6 @@ add_action( 'wp_ajax_tt_refresh_nonce', function() {
 add_action( 'wp_ajax_nopriv_tt_refresh_nonce', function() {
 	wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
 });
-
 
 
 // --- Polubienia slajdów ---
@@ -740,86 +771,42 @@ add_action('wp_ajax_tt_upload_comment_image', function() {
 });
 
 
-// --- Stripe Checkout ---
-/**
- * Tworzy sesję Stripe Checkout.
- * Pobiera kwotę i metodę płatności z żądania POST,
- * tworzy sesję i zwraca jej URL do przekierowania.
- */
-function tt_create_stripe_checkout_callback() {
-    // Check if Stripe class exists before proceeding
+// --- Stripe Payment Intent ---
+add_action('wp_ajax_tt_create_stripe_payment_intent', 'tt_create_stripe_payment_intent_callback');
+add_action('wp_ajax_nopriv_tt_create_stripe_payment_intent', 'tt_create_stripe_payment_intent_callback');
+function tt_create_stripe_payment_intent_callback() {
+    $data = tt_process_ajax_request();
+    if (isset($data['success']) && $data['success'] === false) {
+        wp_send_json_error($data);
+        return;
+    }
+    $amount_pln = isset($data['amount']) ? floatval($data['amount']) : 0;
+    $amount_cents = round($amount_pln * 100);
+    $email = isset($data['email']) ? sanitize_email($data['email']) : '';
+
     if (!class_exists('\Stripe\Stripe')) {
-        wp_send_json_error(['message' => 'Błąd integracji płatności. Skontaktuj się z administratorem.'], 500);
+        wp_send_json_error(['message' => 'Błąd integracji płatności. Skontaktuj się z administratorem.']);
+        return;
+    }
+    if (empty(TT_STRIPE_SECRET_KEY)) {
+        wp_send_json_error(['message' => 'Brak konfiguracji płatności po stronie serwera.']);
         return;
     }
 
-    // 1. Sprawdź nonce i czy użytkownik jest zalogowany
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Musisz być zalogowany, aby dokonać płatności.'], 401);
-    }
-
-    // 2. Pobierz i zwaliduj dane wejściowe
-    $amount = isset($_POST['amount']) ? intval($_POST['amount']) : 0;
-    $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : '';
-    $valid_methods = ['card', 'p24', 'blik'];
-
-    if ($amount <= 0 || !in_array($payment_method, $valid_methods)) {
-        wp_send_json_error(['message' => 'Nieprawidłowa kwota lub metoda płatności.'], 400);
-    }
-
-    // 3. Inicjalizuj Stripe
     try {
-        $stripe_secret_key = getenv('Secret_key');
-        if (!$stripe_secret_key) {
-            throw new Exception("Brak klucza API Stripe. Skonfiguruj zmienną środowiskową 'Secret_key'.");
-        }
-        \Stripe\Stripe::setApiKey($stripe_secret_key);
-        \Stripe\Stripe::setApiVersion('2023-10-16');
-
-        $user = wp_get_current_user();
-        $payment_method_types = ['card'];
-        if (in_array($payment_method, ['p24', 'blik'])) {
-            $payment_method_types[] = $payment_method;
-        }
-
-        // 4. Utwórz sesję Checkout
-        $checkout_session = \Stripe\Checkout\Session::create([
-            'payment_method_types' => $payment_method_types,
-            'customer_email' => $user->user_email,
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'pln',
-                    'product_data' => [
-                        'name' => 'Wsparcie dla twórcy',
-                        'description' => 'Dziękujemy za Twoje wsparcie!',
-                    ],
-                    'unit_amount' => $amount * 100, // Kwota w groszach
-                ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-            'success_url' => home_url('/?payment=success'),
-            'cancel_url' => home_url('/?payment=cancel'),
-            'locale' => 'pl',
-            'payment_method_options' => [
-                'blik' => [
-                    'code' => isset($_POST['blik_code']) ? $_POST['blik_code'] : null,
-                ],
-            ],
+        \Stripe\Stripe::setApiKey(TT_STRIPE_SECRET_KEY);
+        $intent = \Stripe\PaymentIntent::create([
+            'amount' => $amount_cents,
+            'currency' => 'pln',
+            'payment_method_types' => ['card', 'p24', 'blik'],
+            'receipt_email' => $email,
+            'description' => 'Napiwek dla twórcy',
         ]);
-
-
-        // 5. Zwróć URL sesji
-        wp_send_json_success(['url' => $checkout_session->url]);
-
-    } catch (Exception $e) {
-        // Złap błędy API Stripe lub inne wyjątki
-        wp_send_json_error(['message' => 'Błąd Stripe: ' . $e->getMessage()], 500);
+        wp_send_json_success(['clientSecret' => $intent->client_secret]);
+    } catch (\Exception $e) {
+        wp_send_json_error(['message' => 'Błąd Stripe: ' . $e->getMessage()]);
     }
 }
-add_action('wp_ajax_tt_create_stripe_checkout', 'tt_create_stripe_checkout_callback');
-
 
 // --- Zarządzanie profilem użytkownika ---
 add_action('wp_ajax_tt_profile_get', function () {

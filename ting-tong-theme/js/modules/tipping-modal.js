@@ -8,6 +8,9 @@ let currentStep = 0;
 const totalSteps = 4;
 let formData = {};
 let previousStep = 0;
+let stripe = null;
+let elements = null;
+let paymentElement = null;
 
 function cacheDOM() {
     dom = {
@@ -74,45 +77,9 @@ function updateStepDisplay(isShowingTerms = false) {
     }
 }
 
-async function processPayment() {
-    // Przejdź do kroku ładowania
-    currentStep = 3;
-    updateStepDisplay();
-
-    try {
-        const response = await API.createStripeCheckout(formData);
-        if (response.success && response.data.url) {
-            window.location.href = response.data.url;
-        } else {
-            const errorMessage = response.data?.message || 'Nie udało się utworzyć sesji płatności.';
-            UI.showAlert(errorMessage, true);
-            currentStep = 2; // Wróć do kroku wyboru płatności
-            updateStepDisplay();
-        }
-    } catch (error) {
-        console.error('Stripe Checkout Error:', error);
-        UI.showAlert('Wystąpił błąd krytyczny. Spróbuj ponownie.', true);
-        currentStep = 2; // Wróć do kroku wyboru płatności
-        updateStepDisplay();
-    }
-}
-
-function handleNextStep() {
-    collectData(currentStep); // Najpierw zbierz dane
-    if (validateStep(currentStep)) {
-        if (currentStep === 2) {
-            // Krok 2 to teraz wybór metody płatności. Po walidacji uruchom płatność.
-            processPayment();
-        } else if (currentStep < totalSteps - 1) {
-            // Przejdź do następnego kroku modal'a
-            currentStep++;
-            updateStepDisplay();
-        }
-    }
-}
 
 function validateStep(step) {
-    if (step === 0) { // Krok: E-mail i zgoda
+    if (step === 0) {
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (email === '') {
@@ -124,23 +91,105 @@ function validateStep(step) {
                 return false;
             }
         }
-    } else if (step === 1) { // Krok: Kwota
+    } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         if (isNaN(amount) || amount < 1) {
             UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
             return false;
         }
-    } else if (step === 2) { // Krok: Metoda płatności i Regulamin
-        if (!formData.payment_method) {
-            UI.showAlert('Proszę wybrać metodę płatności.', true);
-            return false;
-        }
+    } else if (step === 2) {
         if (!document.getElementById('termsAccept').checked) {
             UI.showAlert('Proszę zaakceptować regulamin.', true);
             return false;
         }
     }
     return true;
+}
+
+function handleNextStep() {
+    collectData(currentStep);
+    if (validateStep(currentStep)) {
+        if (currentStep === 2) {
+            confirmPayment();
+        } else if (currentStep < totalSteps - 1) {
+            currentStep++;
+            updateStepDisplay();
+            if (currentStep === 2) {
+                initializePaymentElement();
+            }
+        }
+    }
+}
+
+async function initializePaymentElement() {
+    if (stripe && paymentElement) {
+        return;
+    }
+
+    try {
+        const response = await API.createStripePaymentIntent(formData);
+
+        if (response.success && response.data.clientSecret) {
+            const clientSecret = response.data.clientSecret;
+
+            stripe = Stripe(TingTongConfig.stripePublicKey, {
+                locale: 'pl'
+            });
+
+            elements = stripe.elements({ clientSecret });
+
+            paymentElement = elements.create('payment', {
+                layout: {
+                    type: 'tabs',
+                    defaultCollapsed: false
+                }
+            });
+
+            paymentElement.mount('#stripe-payment-element');
+
+        } else {
+            const errorMessage = response.data?.message || 'Błąd: Nie udało się przygotować płatności.';
+            UI.showAlert(errorMessage, true);
+            currentStep = 1;
+            updateStepDisplay();
+        }
+
+    } catch (error) {
+        console.error('Błąd inicjalizacji Stripe:', error);
+        UI.showAlert('Wystąpił błąd komunikacji z serwerem płatności.', true);
+        currentStep = 1;
+        updateStepDisplay();
+    }
+}
+
+async function confirmPayment() {
+    if (!stripe || !elements) {
+        UI.showAlert('Brak inicjalizacji płatności. Odśwież modal.', true);
+        return;
+    }
+
+    currentStep = 3;
+    updateStepDisplay();
+
+    const payerEmail = formData.email || null;
+
+    const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: window.location.href,
+            payment_method_data: {
+                billing_details: {
+                    email: payerEmail,
+                }
+            }
+        }
+    });
+
+    if (error) {
+        UI.showAlert(error.message, true);
+        currentStep = 2;
+        updateStepDisplay();
+    }
 }
 
 function collectData(step) {
@@ -150,18 +199,7 @@ function collectData(step) {
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
     }
-    // Metoda płatności jest zbierana na bieżąco w handlePaymentMethodSelection
 }
-
-function handlePaymentMethodSelection(tile) {
-    // Usuń zaznaczenie ze wszystkich
-    dom.paymentMethodsContainer.querySelectorAll('.payment-method-tile').forEach(t => t.classList.remove('selected'));
-    // Dodaj zaznaczenie do klikniętego
-    tile.classList.add('selected');
-    // Zapisz wybraną metodę
-    formData.payment_method = tile.dataset.method;
-}
-
 
 function translateUI() {
     if (!dom.modal) return;
@@ -261,11 +299,6 @@ function init() {
             hideTerms();
         }
 
-        // Listener for payment method tiles
-        const tile = e.target.closest('.payment-method-tile');
-        if (tile && dom.paymentMethodsContainer.contains(tile)) {
-            handlePaymentMethodSelection(tile);
-        }
     });
 }
 
