@@ -26,7 +26,7 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Zalozyc konto Patrona?</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
-
+                            <span class="elegant-modal-preference-label">No raczej!</span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
