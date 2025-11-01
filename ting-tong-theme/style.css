@@ -3614,7 +3614,6 @@ body,
   #commentsModal,
   .modal-overlay,
   .fl-modal-overlay,
-  .elegant-modal-overlay,
   .crop-modal,
   .notification-popup,
   .image-lightbox,
@@ -3642,7 +3641,6 @@ body,
   }
   .modal-overlay .modal-content,
   .fl-modal-overlay .fl-modal-content,
-  .elegant-modal-overlay .elegant-modal-content,
   .crop-modal .crop-modal-content,
   .notification-popup,
   .account-modal-content,
@@ -4707,7 +4705,7 @@ body,
 
 .elegant-modal-overlay,
 #infoModal.modal-overlay {
-  align-items: center;
+    align-items: center;
 }
 
 .elegant-modal-overlay.visible {
