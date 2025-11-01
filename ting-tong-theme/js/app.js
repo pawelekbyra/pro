@@ -96,27 +96,25 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
-            if (e.target === modal) {
-              if (modal.id === 'comments-modal-container') {
-                UI.closeCommentsModal();
-              } else {
-                UI.closeModal(modal);
-              }
-            }
+            if (e.target === modal) UI.closeModal(modal);
           });
           modal
             .querySelector(".modal-close-btn, .topbar-close-btn")
-            ?.addEventListener("click", () => {
-              if (modal.id === 'comments-modal-container') {
-                UI.closeCommentsModal();
-              } else {
-                UI.closeModal(modal);
-              }
-            });
+            ?.addEventListener("click", () => UI.closeModal(modal));
         });
+
+      // Dedicated handler for comments modal background click
+      const commentsModal = UI.DOM.commentsModal;
+      if (commentsModal) {
+        commentsModal.addEventListener('click', (e) => {
+          if (e.target === commentsModal) {
+            UI.closeCommentsModal();
+          }
+        });
+      }
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
@@ -339,20 +337,15 @@ document.addEventListener("DOMContentLoaded", () => {
               handleMediaChange(swiper);
 
               // *** NOWA LOGIKA UKRYWANIA PRELOADERA (PRZYSPIESZENIE) ***
+              setTimeout(() => {
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                if (activeSlide) {
+                    activeSlide.querySelector('.tiktok-symulacja').classList.add('video-loaded');
+                }
+              }, 400);
               UI.DOM.preloader.classList.add("preloader-hiding");
               UI.DOM.container.classList.add("ready");
               PWA.runStandaloneCheck();
-
-              // Opóźnienie dla animacji kontrolek wideo
-              setTimeout(() => {
-                  const activeSlide = swiper.slides[swiper.activeIndex];
-                  if (activeSlide) {
-                      const tiktokSymulacja = activeSlide.querySelector('.tiktok-symulacja');
-                      if (tiktokSymulacja) {
-                          tiktokSymulacja.classList.add('video-loaded');
-                      }
-                  }
-              }, 800);
 
               // Zabezpieczenie przed brakiem transitionend (na wszelki wypadek)
               const transitionEndHandler = () => {

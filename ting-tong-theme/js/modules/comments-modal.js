@@ -5,6 +5,26 @@ import { API, slidesData } from './api.js';
 
 let selectedCommentImage = null;
 const DOM = {};
+let currentSort = 'newest';
+
+function sortAndRerenderComments() {
+    const swiper = State.get('swiper');
+    if (!swiper) return;
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+    const slideData = slidesData.find(s => s.id === slideId);
+
+    if (slideData && slideData.comments) {
+        const sortedComments = [...slideData.comments].sort((a, b) => {
+            if (currentSort === 'popular') {
+                return b.likes - a.likes;
+            }
+            // Default to newest
+            return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+        renderComments(sortedComments);
+    }
+}
+
 
 function cacheDOM() {
     DOM.commentsModal = document.getElementById("comments-modal-container");
@@ -286,23 +306,6 @@ function updateCommentFormVisibility() {
     }
 }
 
-function sortAndRerenderComments() {
-    const swiper = State.get('swiper');
-    if (!swiper) return;
-    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-    const slideData = slidesData.find(s => s.id === slideId);
-    if (!slideData || !slideData.comments) return;
-
-    const sortOrder = State.get('commentSortOrder');
-    const sortedComments = [...slideData.comments].sort((a, b) => {
-        if (sortOrder === 'popular') {
-            return b.likes - a.likes;
-        }
-        return new Date(b.timestamp) - new Date(a.timestamp);
-    });
-    renderComments(sortedComments);
-}
-
 export const CommentsModal = {
     init() {
         cacheDOM();
@@ -313,19 +316,6 @@ export const CommentsModal = {
         }
 
         initEmojiPicker();
-
-        DOM.commentsModal.querySelector('.sort-trigger')?.addEventListener('click', (e) => {
-            e.currentTarget.closest('.sort-dropdown').classList.toggle('open');
-        });
-
-        DOM.commentsModal.querySelectorAll('.sort-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                const sortOrder = e.currentTarget.dataset.sort;
-                State.set('commentSortOrder', sortOrder);
-                sortAndRerenderComments();
-                e.currentTarget.closest('.sort-dropdown').classList.remove('open');
-            });
-        });
 
         if (DOM.fileInput) {
             DOM.fileInput.addEventListener('change', handleImageSelect);
@@ -349,6 +339,36 @@ export const CommentsModal = {
 
         if (DOM.modalBody) {
             DOM.modalBody.addEventListener('click', handleCommentAction);
+        }
+
+        const sortDropdown = DOM.commentsModal.querySelector('.sort-dropdown');
+        if (sortDropdown) {
+            const trigger = sortDropdown.querySelector('.sort-trigger');
+            const options = sortDropdown.querySelectorAll('.sort-option');
+
+            trigger.addEventListener('click', () => sortDropdown.classList.toggle('open'));
+
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const newSort = option.dataset.sort;
+                    if (newSort !== currentSort) {
+                        currentSort = newSort;
+                        sortAndRerenderComments();
+
+                        // Update UI
+                        sortDropdown.querySelector('.current-sort').textContent = option.textContent;
+                        options.forEach(opt => opt.classList.remove('active'));
+                        option.classList.add('active');
+                    }
+                    sortDropdown.classList.remove('open');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!sortDropdown.contains(e.target)) {
+                    sortDropdown.classList.remove('open');
+                }
+            });
         }
 
         console.log("CommentsModal initialized successfully.");

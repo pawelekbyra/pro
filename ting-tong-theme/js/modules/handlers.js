@@ -521,13 +521,9 @@ export const Handlers = {
         }
         break;
       }
-      case "close-comments-modal": {
-        const modal = document.getElementById('comments-modal-container');
-        if (modal) {
-            modal.classList.remove('visible');
-        }
+      case "close-comments-modal":
+        UI.closeCommentsModal();
         break;
-      }
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
@@ -584,9 +580,6 @@ export const Handlers = {
         break;
       case "toggle-main-menu":
         if (State.get("isUserLoggedIn")) {
-          if (UI.DOM.commentsModal.classList.contains("visible")) {
-            UI.closeCommentsModal();
-          }
           if (loggedInMenu) loggedInMenu.classList.toggle("active");
         } else {
           Utils.vibrateTry();
@@ -595,6 +588,18 @@ export const Handlers = {
         break;
       case "toggle-login-panel":
         if (!State.get("isUserLoggedIn")) {
+          const swiper = State.get('swiper');
+          if (swiper) {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            const video = activeSlide?.querySelector('video');
+            if (video) {
+              State.set('videoPlaybackState', {
+                slideId: activeSlide.dataset.slideId,
+                currentTime: video.currentTime,
+              });
+            }
+          }
+
           if (UI.DOM.commentsModal.classList.contains("visible")) {
             UI.closeCommentsModal();
           }
@@ -652,7 +657,7 @@ export const Handlers = {
         break;
       }
       case "toggle-volume":
-        e.stopPropagation(); // Zapobiegaj pauzowaniu wideo
+        e.stopPropagation();
         const isMuted = !State.get("isSoundMuted");
         State.set("isSoundMuted", isMuted);
         const activeSlideVideo = document.querySelector(".swiper-slide-active video");
