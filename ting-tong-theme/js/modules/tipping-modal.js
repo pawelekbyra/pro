@@ -219,6 +219,7 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
+        formData.currency = document.getElementById('tippingCurrency').value;
     }
 }
 

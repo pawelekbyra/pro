@@ -40,9 +40,19 @@ get_header();
                 <div class="elegant-modal-step" data-step="1">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
                     <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
+                        <div class="tipping-amount-container" style="display: flex; align-items: center; gap: 10px; position: relative;">
+                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any" style="flex-grow: 1;">
+                             <div class="currency-selector" style="position: relative;">
+                                <select id="tippingCurrency" class="tipping-currency" style="padding: 0 10px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background: transparent; border: none; color: white; font-size: 1em; cursor: pointer; height: 100%;">
+                                    <option value="PLN" selected>PLN</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="USD">USD</option>
+                                    <option value="GBP">GBP</option>
+                                </select>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16" style="position: absolute; right: -5px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                 </div>
