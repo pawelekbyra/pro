@@ -367,6 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
               // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
               // Główny handler na `document.body` zajmie się resztą.
               if (event.target.closest('[data-action]')) {
+                event.stopPropagation();
                 return;
               }
 

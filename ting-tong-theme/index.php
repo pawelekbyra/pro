@@ -44,6 +44,12 @@ get_header();
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
                             <span class="tipping-currency">PLN</span>
                         </div>
+                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;">
+                                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
+                            </label>
+                        </div>
                         <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
                     </div>
                 </div>
@@ -55,6 +61,18 @@ get_header();
                         <div class="loading-spinner large"></div>
                         <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
                     </div>
+                </div>
+
+                <!-- Krok 4: Regulamin -->
+                <div class="elegant-modal-step" data-step="3" id="terms-step">
+                    <h3 style="text-align: center; margin-bottom: 15px;">Regulamin i Polityka Prywatności</h3>
+                    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;">
+                        <p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p>
+                        <p><strong>2. Charakter Napiwków</strong><br>Użytkownik przyjmuje do wiadomości i akceptuje, że wszystkie przekazywane napiwki są dobrowolne i nie podlegają zwrotowi. Przekazanie napiwku nie rodzi żadnego zobowiązania po stronie Twórcy i nie stanowi podstawy do roszczeń o dostęp do ekskluzywnych treści, usług czy produktów.</p>
+                        <p><strong>3. Polityka Prywatności</strong><br>W przypadku podania adresu e-mail, jest on wykorzystywany wyłącznie w celu założenia konta w serwisie, co umożliwia śledzenie historii wsparcia. Nie udostępniamy Twojego adresu e-mail stronom trzecim w celach marketingowych.</p>
+                        <p><strong>4. Postanowienia końcowe</strong><br>Korzystając z funkcji napiwków, potwierdzasz, że przeczytałeś, zrozumiałeś i w pełni akceptujesz powyższy regulamin.</p>
+                    </div>
+                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;">Powrót</button>
                 </div>
             </div>
 
