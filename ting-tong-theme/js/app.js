@@ -366,7 +366,6 @@ document.addEventListener("DOMContentLoaded", () => {
               // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
               // Jeśli tak, zatrzymaj propagację, aby nasz główny handler mógł zadziałać.
               if (event.target.closest('[data-action]')) {
-                event.stopPropagation();
                 return;
               }
 
