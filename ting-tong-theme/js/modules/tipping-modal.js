@@ -12,6 +12,20 @@ let stripe = null;
 let elements = null;
 let paymentElement = null;
 
+const loadStripeScript = () => {
+    return new Promise((resolve, reject) => {
+        if (window.Stripe) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://js.stripe.com/v3/';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Stripe.js failed to load.'));
+        document.head.appendChild(script);
+    });
+};
+
 function cacheDOM() {
     dom = {
         modal: document.getElementById('tippingModal'),
@@ -229,11 +243,19 @@ function translateUI() {
     });
 }
 
-function showModal() {
+async function showModal() {
     cacheDOM();
 
     if (!dom.modal) {
         console.error("Tipping modal not found in DOM");
+        return;
+    }
+
+    try {
+        await loadStripeScript();
+    } catch (error) {
+        console.error(error);
+        UI.showAlert('Błąd ładowania komponentu płatności. Spróbuj ponownie później.', true);
         return;
     }
 
