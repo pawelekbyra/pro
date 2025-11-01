@@ -1539,13 +1539,13 @@ body,
 #tiktok-profile-modal,
 .crop-modal,
 .image-lightbox {
-  position: absolute; /* Changed from fixed */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   z-index: 10200;
@@ -4701,7 +4701,7 @@ body,
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   z-index: 10020;
