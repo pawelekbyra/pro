@@ -111,8 +111,8 @@ export const Config = {
       installNotReadyText: "Instalacja nie jest obecnie możliwa na tej przeglądarce lub urządzeniu.",
       appInstalledSuccessText: "Aplikacja została pomyślnie zainstalowana!",
       tippingTitle: {
-        pl: "Bramka Napiwkowa 🤑",
-        en: "Tipping Gateway 🤑",
+        pl: "Bramka Napiwkowa",
+        en: "Tipping Gateway",
       },
       tippingStep1Desc: {
           pl: "Założyć konto Patrona? 🏆",
