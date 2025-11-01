@@ -4824,8 +4824,8 @@ body,
 
 .elegant-modal-preference-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.05);
   padding: 14px 16px;
   border-radius: 10px;
@@ -4920,6 +4920,9 @@ body,
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .elegant-modal-btn:active {
@@ -5072,29 +5075,14 @@ body,
 @media (min-width: 600px) {
   #infoModal.modal-overlay,
   #tippingModal.elegant-modal-overlay {
-    width: 100% !important;
-    max-width: 100% !important;
+    /* This rule ensures that on desktop, the modal overlay takes up the full viewport
+       width, allowing the content within to be properly centered horizontally,
+       rather than being constrained to the simulated phone's width. */
+    width: 100vw !important;
     left: 0 !important;
     right: 0 !important;
     margin: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-  }
-}
-
-/* ============================================================================
-   MODAL CENTERING FIX
-   ============================================================================ */
-@media (min-width: 600px) {
-  #infoModal.modal-overlay,
-  #tippingModal.elegant-modal-overlay {
-    width: 100% !important;
-    max-width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
+    border: none !important;
   }
 }
 

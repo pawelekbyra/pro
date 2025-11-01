@@ -206,6 +206,15 @@ function showModal() {
     });
 
 
+    // Ensure checkbox is unchecked by default
+    if (dom.createAccountCheckbox) {
+        dom.createAccountCheckbox.checked = false;
+    }
+    // Hide email input by default
+    if (dom.emailContainer) {
+        dom.emailContainer.classList.remove('visible');
+    }
+
     // Use the generic UI.openModal which should handle the .visible class
     UI.openModal(dom.modal);
     updateStepDisplay();
