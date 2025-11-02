@@ -78,8 +78,15 @@ function updateStepDisplay(isShowingTerms = false) {
 
         // Zmień tekst przycisku na kroku 2 (ostatni krok przed przekierowaniem)
         const isFinalStepBeforePayment = currentStep === 2;
-        // Użyj klucza 'tippingSubmit' dla przycisku końcowego
-        const nextBtnText = isFinalStepBeforePayment ? Utils.getTranslation('tippingSubmit') : Utils.getTranslation('tippingNext');
+
+        let nextBtnText;
+        if (isFinalStepBeforePayment) {
+            const translation = Utils.getTranslation('tippingSubmit');
+            nextBtnText = (typeof translation === 'object' && translation !== null) ? translation[State.get('currentLang') || 'pl'] : translation;
+        } else {
+            nextBtnText = 'ENTER'; // Hardcoded as per user request
+        }
+
         dom.nextBtn.textContent = nextBtnText;
     }
 
@@ -94,14 +101,23 @@ function updateStepDisplay(isShowingTerms = false) {
 
 function validateStep(step) {
     if (step === 0) {
-        if (dom.createAccountCheckbox.checked) {
-            const email = dom.emailInput.value.trim();
+        const isAccountCreation = dom.createAccountCheckbox.checked;
+        const email = dom.emailInput.value.trim();
+
+        if (isAccountCreation) {
+            // Jeśli tworzy konto, email jest wymagany i musi być poprawny
             if (email === '') {
-                UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
+                UI.showAlert(Utils.getTranslation('errorEmailRequired'), true);
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
-                UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
+                UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
+                return false;
+            }
+        } else {
+            // Jeśli nie tworzy konta, email nie jest wymagany, ale jeśli jest podany, musi być poprawny
+            if (email !== '' && !Utils.isValidEmail(email)) {
+                UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
                 return false;
             }
         }
