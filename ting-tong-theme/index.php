@@ -40,31 +40,54 @@ get_header();
                 <div class="elegant-modal-step" data-step="1">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
                     <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
+                        <div class="tipping-amount-container" style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any" style="flex-grow: 1;">
+                                <div class="currency-selector" style="position: relative;">
+                                    <select id="tippingCurrency" name="currency" class="tipping-currency" style="padding: 0 15px 0 10px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background: transparent; border: none; color: white; font-size: 1em; cursor: pointer; height: 100%;">
+                                        <option value="PLN" selected>PLN</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="USD">USD</option>
+                                    <option value="GBP">GBP</option>
+                                </select>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
-                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
-                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;">
-                                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
-                            </label>
-                        </div>
-                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
+                        <div id="tippingAmountError" class="elegant-modal-error-text" style="display: none;"></div>
                     </div>
                 </div>
 
-                <!-- Krok 3: Przekierowanie do płatności -->
+                <!-- Krok 3: Wybór metody płatności -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
+                    <div class="payment-methods-container">
+                        <div id="payment-element">
+                            <!-- Stripe Payment Element will be inserted here -->
+                        </div>
+                        <div id="tippingPaymentError" class="elegant-modal-error-text" style="display: none;"></div>
+                    </div>
+                    <div class="elegant-modal-terms">
+                        <div class="elegant-modal-preference-row" id="termsAcceptRow">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                            <label for="termsAccept" class="elegant-modal-preference-label">
+                                Akceptuję <a href="#" data-action="show-terms">Regulamin</a>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Krok 4: Przekierowanie do płatności -->
+                <div class="elegant-modal-step" data-step="3">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
                         <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
                     </div>
                 </div>
 
-                <!-- Krok 4: Regulamin -->
-                <div class="elegant-modal-step" data-step="3" id="terms-step">
+                <!-- Krok 5 (były 4): Regulamin -->
+                <div class="elegant-modal-step" data-step="4" id="terms-step">
                     <h3 style="text-align: center; margin-bottom: 15px;">Regulamin i Polityka Prywatności</h3>
                     <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;">
                         <p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p>
@@ -79,8 +102,7 @@ get_header();
             <div class="elegant-modal-footer">
                 <div class="elegant-modal-footer-buttons">
                     <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
-                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
+                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">Dalej</button>
                 </div>
             </div>
         </form>
@@ -160,7 +182,7 @@ get_header();
         </div>
     </div>
     <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
-        DEBUG: Pokaż First Login Modal
+        DEBUG: Toggle Incomplete Profile
     </button>
 </div>
 
@@ -332,19 +354,19 @@ get_header();
     <div class="modal-content" tabindex="-1">
         <div class="modal-header">
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
-            <div class="comment-sort-options">
-                <div class="sort-dropdown">
-                    <button class="sort-trigger">
-                        <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
-                        <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
-                    </button>
-                    <div class="sort-options">
-                        <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
-                        <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
-                    </div>
+            <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
+        </div>
+        <div class="comment-sort-options">
+            <div class="sort-dropdown">
+                <button class="sort-trigger">
+                    <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
+                    <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
+                </button>
+                <div class="sort-options">
+                    <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
+                    <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
                 </div>
             </div>
-            <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
         <div class="modal-body">
             <!-- Comments will be rendered here -->
