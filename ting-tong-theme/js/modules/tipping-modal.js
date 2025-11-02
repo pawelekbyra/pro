@@ -40,7 +40,7 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
-        amountError: document.getElementById('tippingAmountError'),
+        tippingAmountError: document.getElementById('tippingAmountError'),
         termsStep: document.getElementById('terms-step'),
         paymentMethodsContainer: document.querySelector('.payment-methods-container'),
     };
@@ -100,19 +100,13 @@ function updateStepDisplay(isShowingTerms = false) {
 }
 
 
-function showAmountError(message) {
-    if (dom.amountError) {
-        dom.amountError.textContent = message;
-        dom.amountError.style.display = message ? 'block' : 'none';
-    }
-}
-
 function validateStep(step) {
     if (step === 0) {
         const isAccountCreation = dom.createAccountCheckbox.checked;
         const email = dom.emailInput.value.trim();
 
         if (isAccountCreation) {
+            // Jeśli tworzy konto, email jest wymagany i musi być poprawny
             if (email === '') {
                 UI.showAlert(Utils.getTranslation('errorEmailRequired'), true);
                 return false;
@@ -122,21 +116,37 @@ function validateStep(step) {
                 return false;
             }
         } else {
+            // Jeśli nie tworzy konta, email nie jest wymagany, ale jeśli jest podany, musi być poprawny
             if (email !== '' && !Utils.isValidEmail(email)) {
                 UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
                 return false;
             }
         }
     } else if (step === 1) {
+        // Zawsze ukrywaj błąd przy ponownej walidacji
+        if (dom.tippingAmountError) {
+            dom.tippingAmountError.style.display = 'none';
+            dom.tippingAmountError.textContent = '';
+        }
+
         const amount = parseFloat(dom.amountInput.value);
         const currency = document.getElementById('tippingCurrency').value;
-        const minAmount = 5;
+        const minAmount = 5; // Zmieniono z 1 na 5 zgodnie z wymaganiem
 
         if (isNaN(amount) || amount < minAmount) {
             const errorMessage = Utils.getTranslation('errorMinTipAmount')
                 .replace('{minAmount}', minAmount)
-                .replace('{currency}', currency.toUpperCase());
-            showAmountError(errorMessage);
+                .replace('{currency}', currency);
+
+            // Pokaż błąd w dedykowanym kontenerze
+            if (dom.tippingAmountError) {
+                dom.tippingAmountError.textContent = errorMessage;
+                dom.tippingAmountError.style.display = 'block';
+            } else {
+                // Fallback do alertu, jeśli element nie został znaleziony
+                UI.showAlert(errorMessage, true);
+            }
+
             return false;
         }
     } else if (step === 2) {
@@ -149,7 +159,6 @@ function validateStep(step) {
 }
 
 function handleNextStep() {
-    showAmountError('');
     collectData(currentStep);
     if (validateStep(currentStep)) {
         if (currentStep === 2) {
