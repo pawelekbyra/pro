@@ -40,11 +40,12 @@ get_header();
                 <div class="elegant-modal-step" data-step="1">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
                     <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-container" style="display: flex; align-items: center; gap: 10px; position: relative;">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any" style="flex-grow: 1;">
-                             <div class="currency-selector" style="position: relative;">
-                                <select id="tippingCurrency" name="currency" class="tipping-currency" style="padding: 0 15px 0 10px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background: transparent; border: none; color: white; font-size: 1em; cursor: pointer; height: 100%;">
-                                    <option value="PLN" selected>PLN</option>
+                        <div class="tipping-amount-container" style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any" style="flex-grow: 1;">
+                                <div class="currency-selector" style="position: relative;">
+                                    <select id="tippingCurrency" name="currency" class="tipping-currency" style="padding: 0 15px 0 10px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background: transparent; border: none; color: white; font-size: 1em; cursor: pointer; height: 100%;">
+                                        <option value="PLN" selected>PLN</option>
                                     <option value="EUR">EUR</option>
                                     <option value="USD">USD</option>
                                     <option value="GBP">GBP</option>
@@ -54,6 +55,7 @@ get_header();
                                 </svg>
                             </div>
                         </div>
+                        <div id="tippingAmountError" class="elegant-modal-error-text" style="display: none;"></div>
                     </div>
                 </div>
 
@@ -179,7 +181,7 @@ get_header();
         </div>
     </div>
     <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
-        DEBUG: Pokaż First Login Modal
+        DEBUG: Toggle Incomplete Profile
     </button>
 </div>
 

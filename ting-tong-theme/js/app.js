@@ -467,8 +467,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mockBtn) {
       mockBtn.style.display = 'block';
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
-        UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+        if (State.get('isUserLoggedIn')) {
+          authManager.logout();
+          UI.showAlert('Wylogowano.');
+        } else {
+          authManager.mockLogin({ is_profile_complete: false });
+          UI.showAlert('Zalogowano jako mock user z niekompletnym profilem.');
+        }
       });
     }
     // Koniec LOGIKA MOCK BUTTON
