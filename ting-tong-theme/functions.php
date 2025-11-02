@@ -4,6 +4,44 @@
  *
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
+
+// Load .env file if it exists
+$dotenv_path = __DIR__ . '/.env';
+if (file_exists($dotenv_path)) {
+    $lines = file($dotenv_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+            putenv(sprintf('%s=%s', $name, $value));
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
+        }
+    }
+}
+
+// Define Stripe API keys from environment variables
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    define('TT_STRIPE_SECRET_KEY', getenv('Secret_key'));
+}
+if (!defined('TT_STRIPE_PUBLIC_KEY')) {
+    define('TT_STRIPE_PUBLIC_KEY', getenv('Publishable_key'));
+}
+
+// Load the Stripe PHP library only if it exists
+$stripe_autoloader = __DIR__ . '/vendor/init.php';
+if (file_exists($stripe_autoloader)) {
+    require_once $stripe_autoloader;
+} else {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Stripe PHP library not found. Please run "composer install".');
+    }
+}
+
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
     function wp_new_user_notification( $user_id, $deprecated = '', $notify = '' ) {
@@ -233,6 +271,7 @@ function tt_enqueue_and_localize_scripts() {
 	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
 	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
+	wp_register_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, true );
 	wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js' ], null, true );
 
 	wp_localize_script(
@@ -259,6 +298,7 @@ function tt_enqueue_and_localize_scripts() {
 		[
 			'serviceWorkerUrl' => home_url('/sw.js'),
 			'themeUrl'         => get_template_directory_uri(),
+			'stripePublicKey' => TT_STRIPE_PUBLIC_KEY,
 		]
 	);
 }
@@ -288,6 +328,46 @@ add_action(
 // =========================================================================
 // 4. HANDLERY AJAX
 // =========================================================================
+
+function tt_process_ajax_request() {
+    $is_logged_in = is_user_logged_in();
+    $data = [];
+    $content_type = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+    $is_json_request = $content_type === "application/json";
+
+    if ($is_json_request) {
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+    } else {
+        $data = array_merge($_GET, $_POST);
+    }
+
+    if (empty($data)) {
+        return ['success' => false, 'message' => 'Brak danych.'];
+    }
+
+    if ($is_logged_in) {
+        $nonce = '';
+        if ($is_json_request) {
+            // Dla JSON, sprawdzamy nagłówek X-WP-Nonce
+            if (isset($_SERVER['HTTP_X_WP_NONCE'])) {
+                $nonce = $_SERVER['HTTP_X_WP_NONCE'];
+            }
+        } else {
+            // Dla tradycyjnych requestów, sprawdzamy ciało
+            if (isset($data['nonce'])) {
+                $nonce = $data['nonce'];
+            }
+        }
+
+        if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
+            return ['success' => false, 'message' => 'Błąd weryfikacji (nonce). Odśwież stronę.'];
+        }
+    }
+
+    // Zwracamy dane, aby mogły być użyte dalej
+    return $data;
+}
 
 // --- Logowanie, wylogowanie, odświeżanie danych ---
 add_action( 'wp_ajax_tt_get_slides_data_ajax', function() {
@@ -725,6 +805,62 @@ add_action('wp_ajax_tt_upload_comment_image', function() {
     ]);
 });
 
+
+// --- Stripe Payment Intent ---
+add_action('wp_ajax_tt_create_stripe_payment_intent', 'tt_create_stripe_payment_intent_callback');
+add_action('wp_ajax_nopriv_tt_create_stripe_payment_intent', 'tt_create_stripe_payment_intent_callback');
+function tt_create_stripe_payment_intent_callback() {
+    $data = tt_process_ajax_request();
+    if (isset($data['success']) && $data['success'] === false) {
+        wp_send_json_error($data);
+        return;
+    }
+
+    $amount_pln = isset($data['amount']) ? floatval($data['amount']) : 0;
+    $email = isset($data['email']) ? sanitize_email($data['email']) : '';
+    $currency = isset($data['currency']) ? strtolower(sanitize_text_field($data['currency'])) : 'pln';
+
+    // FIX: Sprawdzenie minimalnej kwoty (5 jednostek waluty)
+    if ($amount_pln < 5) {
+        $currency_display = strtoupper($currency);
+        wp_send_json_error(['message' => "Kwota napiwku musi wynosić co najmniej 5 {$currency_display}."], 400);
+        return;
+    }
+
+    if (!empty($email) && !is_email($email)) {
+        wp_send_json_error(['message' => 'Nieprawidłowy adres e-mail.'], 400);
+        return;
+    }
+
+    // Kwota musi być przekazana w najmniejszej jednostce waluty (centach/groszach)
+    $amount_cents = round($amount_pln * 100);
+
+    if (!class_exists('\Stripe\Stripe')) {
+        wp_send_json_error(['message' => 'Błąd integracji płatności. Skontaktuj się z administratorem.']);
+        return;
+    }
+    if (empty(TT_STRIPE_SECRET_KEY)) {
+        wp_send_json_error(['message' => 'Brak konfiguracji płatności po stronie serwera. Sprawdź TT_STRIPE_SECRET_KEY.'], 500);
+        return;
+    }
+
+    try {
+        \Stripe\Stripe::setApiKey(TT_STRIPE_SECRET_KEY);
+        $intent = \Stripe\PaymentIntent::create([
+            'amount' => $amount_cents,
+            'currency' => $currency,
+            // Lista dostępnych metod płatności dla PL: karta, P24, BLIK.
+            'payment_method_types' => ['card', 'p24', 'blik'],
+            'receipt_email' => $email,
+            'description' => 'Napiwek dla twórcy',
+        ]);
+        // Zwracamy clientSecret potrzebny do zamontowania Elementu
+        wp_send_json_success(['clientSecret' => $intent->client_secret]);
+    } catch (\Exception $e) {
+        // Bardziej szczegółowy błąd, który pomoże w diagnozie.
+        wp_send_json_error(['message' => 'Błąd Stripe API: ' . $e->getMessage() . ' Kod: ' . $e->getStripeCode()], 500);
+    }
+}
 
 // --- Zarządzanie profilem użytkownika ---
 add_action('wp_ajax_tt_profile_get', function () {
