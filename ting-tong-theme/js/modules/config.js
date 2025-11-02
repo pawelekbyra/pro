@@ -311,8 +311,10 @@ export const Config = {
       timeMinute: 'm',
       timeHour: 'h',
       timeDay: 'd',
+      tippingPatronMessage: "Witaj z powrotem, Patronie! Przejdź dalej, aby kontynuować wsparcie. Twój e-mail: {email}",
     }, // KONIEC 'pl'
     en: {
+      tippingPatronMessage: "Welcome back, Patron! Proceed to continue your support. Your email: {email}",
       loggedOutText: "You don't have the guts to log in",
       loggedInText: "You are logged in",
       loginSuccess: "Logged in successfully!",
