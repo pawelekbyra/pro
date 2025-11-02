@@ -269,6 +269,8 @@ function tt_enqueue_and_localize_scripts() {
 		[
 			'serviceWorkerUrl' => home_url('/sw.js'),
 			'themeUrl'         => get_template_directory_uri(),
+            // DODANY KLUCZ PUBLICZNY, KTÓRY JEST WYMAGANY PRZEZ STRIPE.JS
+			'stripePublicKey'  => TT_STRIPE_PUBLIC_KEY,
 		]
 	);
 }
