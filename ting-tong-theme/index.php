@@ -34,6 +34,7 @@ get_header();
                             <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
                         </div>
                     </div>
+                    <div class="status-message status-error elegant-modal-error" id="tippingStep0Error"></div>
                 </div>
 
                 <!-- Krok 2: Wybór kwoty -->
@@ -42,7 +43,12 @@ get_header();
                     <div class="elegant-modal-fields-container">
                         <div class="tipping-amount-container">
                             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
+                            <select id="tippingCurrency" class="tipping-currency-selector">
+                                <option value="PLN">PLN</option>
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                            </select>
                         </div>
                         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
                             <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
@@ -52,14 +58,15 @@ get_header();
                         </div>
                         <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
                     </div>
+                    <div class="status-message status-error elegant-modal-error" id="tippingStep1Error"></div>
                 </div>
 
                 <!-- Krok 3: Przekierowanie do płatności -->
                 <div class="elegant-modal-step" data-step="2">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
-                    <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
-                        <div class="loading-spinner large"></div>
-                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
+                    <div class="elegant-modal-fields-container">
+                        <div id="payment-element"></div>
+                        <div id="payment-message" class="hidden"></div>
                     </div>
                 </div>
 
