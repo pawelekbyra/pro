@@ -5,6 +5,16 @@
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
 
+// Load environment variables from .env file if it exists
+if (file_exists(get_template_directory() . '/.env')) {
+    $env_vars = parse_ini_file(get_template_directory() . '/.env');
+    foreach ($env_vars as $key => $value) {
+        if (!getenv($key)) {
+            putenv("{$key}={$value}");
+        }
+    }
+}
+
 // Define Stripe API keys from environment variables
 if (!defined('TT_STRIPE_SECRET_KEY')) {
     define('TT_STRIPE_SECRET_KEY', getenv('Secret_key'));
