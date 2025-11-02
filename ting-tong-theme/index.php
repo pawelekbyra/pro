@@ -54,12 +54,6 @@ get_header();
                 </svg>
             </div>
         </div>
-                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
-                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
-                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
-                                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
-                            </label>
-                        </div>
                     </div>
                 </div>
 

@@ -1,7 +1,8 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
-import { API } from './api.js';
+import * as Modules from './api.js';
+const API = Modules.API;
 
 let stripe = null;
 let elements = null;
