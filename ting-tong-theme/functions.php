@@ -1,13 +1,22 @@
 <?php
-// Fallback do ręcznego wczytywania zmiennych środowiskowych z pliku .env
-if (file_exists(get_template_directory() . '/.env')) {
-    $env_vars = parse_ini_file(get_template_directory() . '/.env');
-    foreach ($env_vars as $key => $value) {
-        if (!getenv($key)) {
-            // Ustawienie zmiennych środowiskowych, aby były dostępne przez getenv()
-            putenv("{$key}={$value}");
-        }
+// Load Stripe API keys from .env file securely.
+$env_path = get_template_directory() . '/.env';
+if (file_exists($env_path)) {
+    $env_vars = parse_ini_file($env_path);
+    if (isset($env_vars['Secret_key']) && !defined('TT_STRIPE_SECRET_KEY')) {
+        define('TT_STRIPE_SECRET_KEY', $env_vars['Secret_key']);
     }
+    if (isset($env_vars['Publishable_key']) && !defined('TT_STRIPE_PUBLIC_KEY')) {
+        define('TT_STRIPE_PUBLIC_KEY', $env_vars['Publishable_key']);
+    }
+}
+
+// Fallback definitions to prevent fatal errors if keys are not set.
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    define('TT_STRIPE_SECRET_KEY', '');
+}
+if (!defined('TT_STRIPE_PUBLIC_KEY')) {
+    define('TT_STRIPE_PUBLIC_KEY', '');
 }
 /**
  * Plik functions.php dla motywu Ting Tong.
