@@ -1026,6 +1026,31 @@ function openAuthorModal(slideData) {
 }
 
 
+function closeCommentsModal() {
+    const modal = DOM.commentsModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const cleanup = () => {
+        modal.removeEventListener('transitionend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            State.get('lastFocusedElement')?.focus();
+        }
+    };
+
+    modal.addEventListener('transitionend', cleanup, { once: true });
+    // Fallback w razie gdyby event się nie odpalił
+    setTimeout(cleanup, 400);
+}
+
 export const UI = {
   initDOMCache,
   DOM,
@@ -1056,28 +1081,3 @@ export const UI = {
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
 };
-
-function closeCommentsModal() {
-    const modal = DOM.commentsModal;
-    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
-        return;
-    }
-
-    modal.classList.add('is-hiding');
-    modal.setAttribute('aria-hidden', 'true');
-
-    const cleanup = () => {
-        modal.removeEventListener('transitionend', cleanup);
-        modal.classList.remove('visible', 'is-hiding');
-        activeModals.delete(modal);
-
-        if (activeModals.size === 0) {
-            DOM.container.removeAttribute('aria-hidden');
-            State.get('lastFocusedElement')?.focus();
-        }
-    };
-
-    modal.addEventListener('transitionend', cleanup, { once: true });
-    // Fallback w razie gdyby event się nie odpalił
-    setTimeout(cleanup, 400);
-}
