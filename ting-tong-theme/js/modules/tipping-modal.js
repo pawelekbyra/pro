@@ -9,20 +9,6 @@ let stripe = null;
 let elements = null;
 let paymentElement = null;
 
-const loadStripeScript = () => {
-    return new Promise((resolve, reject) => {
-        if (window.Stripe) {
-            resolve();
-            return;
-        }
-        const script = document.createElement('script');
-        script.src = 'https://js.stripe.com/v3/';
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Stripe.js failed to load.'));
-        document.head.appendChild(script);
-    });
-};
-
 let dom = {};
 let currentStep = 0;
 const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
@@ -156,7 +142,8 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        formData.currency = 'PLN';
+        const currencySelector = document.getElementById('tippingCurrency');
+        formData.currency = currencySelector ? currencySelector.value : 'PLN';
     }
 }
 
@@ -235,12 +222,15 @@ function showModal() {
         return;
     }
 
-    loadStripeScript()
-        .then(() => {
-            const currentUser = State.get('currentUser');
-            const isPatron = State.get('isUserLoggedIn'); // Pobieramy status logowania
+    try {
+        if (!window.Stripe) {
+            throw new Error('Stripe.js is not loaded.');
+        }
 
-            dom.createAccountCheckbox?.addEventListener('change', e => {
+        const currentUser = State.get('currentUser');
+        const isPatron = State.get('isUserLoggedIn'); // Pobieramy status logowania
+
+        dom.createAccountCheckbox?.addEventListener('change', e => {
                 dom.emailContainer.classList.toggle('visible', e.target.checked);
             });
 
@@ -277,11 +267,10 @@ function showModal() {
 
             UI.openModal(dom.modal);
             updateStepDisplay();
-        })
-        .catch(error => {
-            console.error(error);
-            UI.showAlert('Błąd ładowania komponentu płatności. Spróbuj ponownie później.', true);
-        });
+    } catch (error) {
+        console.error(error);
+        UI.showAlert('Błąd ładowania komponentu płatności. Spróbuj ponownie później.', true);
+    }
 }
 
 function hideModal() {
