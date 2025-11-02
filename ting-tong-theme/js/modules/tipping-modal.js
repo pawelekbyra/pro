@@ -40,7 +40,7 @@ function cacheDOM() {
 async function initializePaymentElement() {
     if (!dom.paymentElementContainer) return;
     dom.paymentElementContainer.innerHTML = '<div class="loading-spinner"></div>'; // Show loader
-    dom.paymentSubmitBtn.style.display = 'none';
+    if(dom.paymentSubmitBtn) dom.paymentSubmitBtn.style.display = 'none';
 
     try {
         const data = {
@@ -68,7 +68,7 @@ async function initializePaymentElement() {
 
             dom.paymentElementContainer.innerHTML = ''; // Clear loader
             paymentElement.mount(dom.paymentElementContainer);
-            dom.paymentSubmitBtn.style.display = 'flex'; // Show pay button
+            if(dom.paymentSubmitBtn) dom.paymentSubmitBtn.style.display = 'flex'; // Show pay button
         } else {
             throw new Error(response.data.message || 'Failed to initialize payment.');
         }
@@ -124,22 +124,22 @@ function updateStepDisplay(isShowingTerms = false) {
     const isProcessingStep = currentStep === 3;
     const isPaymentStep = currentStep === 2;
 
-    dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
-    dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
-    dom.paymentSubmitBtn.style.display = (isPaymentStep && paymentElement) ? 'flex' : 'none';
+    if(dom.prevBtn) dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
+    if(dom.nextBtn) dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
+    if(dom.paymentSubmitBtn) dom.paymentSubmitBtn.style.display = (isPaymentStep && paymentElement) ? 'flex' : 'none';
 
     if (footer && (isProcessingStep || isPaymentStep)) {
         footer.style.display = 'none';
     }
 
     const progress = ((currentStep + 1) / totalSteps) * 100;
-    dom.progressBar.style.width = `${progress}%`;
+    if(dom.progressBar) dom.progressBar.style.width = `${progress}%`;
 
     // Handle button text change
     if (currentStep === 1) {
-        dom.nextBtn.querySelector('span').textContent = Utils.getTranslation('tippingProceedToPayment');
+        if(dom.nextBtn) dom.nextBtn.querySelector('span').textContent = Utils.getTranslation('tippingProceedToPayment');
     } else {
-        dom.nextBtn.querySelector('span').textContent = Utils.getTranslation('tippingNext');
+        if(dom.nextBtn) dom.nextBtn.querySelector('span').textContent = Utils.getTranslation('tippingNext');
     }
 }
 
@@ -253,9 +253,9 @@ function showModal() {
         script.src = 'https://js.stripe.com/v3/';
         document.head.appendChild(script);
         script.onload = () => {
-            stripe = Stripe(TingTongConfig.stripePublicKey);
+            if(TingTongConfig.stripePublicKey) stripe = Stripe(TingTongConfig.stripePublicKey);
         };
-    } else if (!stripe) {
+    } else if (!stripe && TingTongConfig.stripePublicKey) {
         stripe = Stripe(TingTongConfig.stripePublicKey);
     }
 
@@ -263,8 +263,8 @@ function showModal() {
     translateUI();
 
     const currentUser = State.get('currentUser');
-    dom.emailInput.value = (currentUser && currentUser.email) ? currentUser.email : '';
-    dom.amountInput.value = '';
+    if(dom.emailInput) dom.emailInput.value = (currentUser && currentUser.email) ? currentUser.email : '';
+    if(dom.amountInput) dom.amountInput.value = '';
 
     UI.openModal(dom.modal);
 }
@@ -290,10 +290,10 @@ function init() {
     });
 
     dom.createAccountCheckbox?.addEventListener('change', e => {
-        dom.emailContainer.classList.toggle('visible', e.target.checked);
+        if(dom.emailContainer) dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
-    dom.paymentSubmitBtn?.addEventListener('click', handlePaymentSubmit);
+    if(dom.paymentSubmitBtn) dom.paymentSubmitBtn.addEventListener('click', handlePaymentSubmit);
 }
 
 export const TippingModal = {

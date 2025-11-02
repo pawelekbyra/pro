@@ -44,6 +44,7 @@ ywu
 // The CDN helper code has been removed as it was unused and overly complex.
 
 document.addEventListener("DOMContentLoaded", () => {
+  State.init(); // ✅ FIX: Initialize State after DOM is ready.
   API.init(); // ✅ FIX: Initialize API data after DOM is ready.
   UI.initDOMCache();
 

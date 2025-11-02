@@ -3,9 +3,7 @@
 // ============================================================================
 
 const _state = {
-  isUserLoggedIn:
-    (typeof TingTongData !== "undefined" && TingTongData.isLoggedIn) ||
-    false,
+  isUserLoggedIn: false,
   currentUser: null,
   currentLang: "pl",
   currentSlideIndex: 0,
@@ -126,7 +124,12 @@ on('state:change:isSoundMuted', ({ newValue }) => {
 
 restore(['currentLang', 'isSoundMuted']);
 
+function init() {
+  set('isUserLoggedIn', (typeof TingTongData !== "undefined" && TingTongData.isLoggedIn) || false, true);
+}
+
 export const State = {
+  init,
   get,
   set,
   getState,
