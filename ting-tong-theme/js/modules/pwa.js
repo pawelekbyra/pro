@@ -2,19 +2,15 @@
 import { Utils } from './utils.js';
 
 let UI_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
-let installBar, installButton, iosInstructions, iosCloseButton, desktopModal;
-
 function setUiModule(uiModule) {
   UI_MODULE = uiModule;
 }
 
-function cacheDOMElements() {
-    installBar = document.getElementById("pwa-install-bar");
-    installButton = document.getElementById("pwa-install-button");
-    iosInstructions = document.getElementById("pwa-ios-instructions");
-    iosCloseButton = document.getElementById("pwa-ios-close-button");
-    desktopModal = document.getElementById("pwa-desktop-modal");
-}
+const installBar = document.getElementById("pwa-install-bar");
+const installButton = document.getElementById("pwa-install-button");
+const iosInstructions = document.getElementById("pwa-ios-instructions");
+const iosCloseButton = document.getElementById("pwa-ios-close-button");
+const desktopModal = document.getElementById("pwa-desktop-modal");
 
 const isIOS = () => {
   if (typeof window === "undefined" || !window.navigator) return false;
@@ -118,7 +114,6 @@ function handleInstallClick() {
 }
 
 function init() {
-  cacheDOMElements();
   // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
   // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
   if (installButton) {

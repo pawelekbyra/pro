@@ -1071,8 +1071,8 @@ add_action('template_redirect', function() {
  * Rejestracja endpoint dla manifestu PWA
  */
 add_action('init', function() {
-    add_rewrite_rule('^manifest\\.json$', 'index.php?tt_manifest=1', 'top');
-    add_rewrite_rule('^tt-manifest\\.json$', 'index.php?tt_manifest=1', 'top');
+    add_rewrite_rule('^manifest\.json$', 'index.php?tt_manifest=1', 'top');
+    add_rewrite_rule('^tt-manifest\.json$', 'index.php?tt_manifest=1', 'top');
 });
 
 /**
