@@ -7,64 +7,6 @@ let selectedCommentImage = null;
 const DOM = {};
 let currentSort = 'newest';
 
-function renderComments(comments) {
-    if (!DOM.modalBody) {
-        console.error("Cannot render comments: modal body is not cached.");
-        return;
-    }
-
-    DOM.modalBody.innerHTML = "";
-
-    if (!comments || comments.length === 0) {
-        DOM.modalBody.innerHTML = `<p class="no-comments-message" data-translate-key="noComments">${Utils.getTranslation('noComments')}</p>`;
-        return;
-    }
-
-    const commentList = document.createElement("div");
-    commentList.className = "comments-list";
-
-    const commentTemplate = document.getElementById('comment-template');
-
-    if (!commentTemplate) {
-        console.error("Comment template not found!");
-        DOM.modalBody.innerHTML = `<p class="no-comments-message">Error: Comment template is missing.</p>`;
-        return;
-    }
-
-    comments.forEach(comment => {
-        const templateClone = commentTemplate.content.cloneNode(true);
-        const commentItem = templateClone.querySelector('.comment-item');
-
-        commentItem.dataset.commentId = comment.id;
-
-        templateClone.querySelector('.comment-author').textContent = comment.user;
-        templateClone.querySelector('.comment-avatar img').src = comment.avatar;
-        templateClone.querySelector('.comment-text').textContent = comment.text;
-        templateClone.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
-        templateClone.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
-
-        const likeBtn = templateClone.querySelector('.comment-like-btn');
-        if (comment.isLiked) {
-            likeBtn.classList.add('active');
-        }
-
-        const commentImageAttachment = templateClone.querySelector('.comment-image-attachment');
-        if (comment.image_url) {
-            commentImageAttachment.style.display = 'block';
-            templateClone.querySelector('.comment-image').src = comment.image_url;
-            templateClone.querySelector('.comment-image').addEventListener('click', () => openImageLightbox(comment.image_url));
-        }
-
-        if (comment.canEdit) {
-             templateClone.querySelector('.comment-options').style.display = 'block';
-        }
-
-        commentList.appendChild(templateClone);
-    });
-
-    DOM.modalBody.appendChild(commentList);
-}
-
 function sortAndRerenderComments() {
     const swiper = State.get('swiper');
     if (!swiper) return;
@@ -296,6 +238,64 @@ function openImageLightbox(imageUrl) {
 function closeImageLightbox() {
     if (!DOM.lightbox) return;
     DOM.lightbox.classList.remove('visible');
+}
+
+function renderComments(comments) {
+    if (!DOM.modalBody) {
+        console.error("Cannot render comments: modal body is not cached.");
+        return;
+    }
+
+    DOM.modalBody.innerHTML = "";
+
+    if (!comments || comments.length === 0) {
+        DOM.modalBody.innerHTML = `<p class="no-comments-message" data-translate-key="noComments">${Utils.getTranslation('noComments')}</p>`;
+        return;
+    }
+
+    const commentList = document.createElement("div");
+    commentList.className = "comments-list";
+
+    const commentTemplate = document.getElementById('comment-template');
+
+    if (!commentTemplate) {
+        console.error("Comment template not found!");
+        DOM.modalBody.innerHTML = `<p class="no-comments-message">Error: Comment template is missing.</p>`;
+        return;
+    }
+
+    comments.forEach(comment => {
+        const templateClone = commentTemplate.content.cloneNode(true);
+        const commentItem = templateClone.querySelector('.comment-item');
+
+        commentItem.dataset.commentId = comment.id;
+
+        templateClone.querySelector('.comment-author').textContent = comment.user;
+        templateClone.querySelector('.comment-avatar img').src = comment.avatar;
+        templateClone.querySelector('.comment-text').textContent = comment.text;
+        templateClone.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
+        templateClone.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
+
+        const likeBtn = templateClone.querySelector('.comment-like-btn');
+        if (comment.isLiked) {
+            likeBtn.classList.add('active');
+        }
+
+        const commentImageAttachment = templateClone.querySelector('.comment-image-attachment');
+        if (comment.image_url) {
+            commentImageAttachment.style.display = 'block';
+            templateClone.querySelector('.comment-image').src = comment.image_url;
+            templateClone.querySelector('.comment-image').addEventListener('click', () => openImageLightbox(comment.image_url));
+        }
+
+        if (comment.canEdit) {
+             templateClone.querySelector('.comment-options').style.display = 'block';
+        }
+
+        commentList.appendChild(templateClone);
+    });
+
+    DOM.modalBody.appendChild(commentList);
 }
 
 function updateCommentFormVisibility() {
