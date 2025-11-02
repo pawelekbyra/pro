@@ -334,6 +334,10 @@ get_header();
     </div>
 </div>
 
+<button id="toggleMockModalBtn" style="position: fixed; top: 10px; right: 10px; z-index: 99999; background: #00bcd4; color: white; padding: 5px 10px; border-radius: 5px; display: none;">
+    TOGGLE MOCK MODAL
+</button>
+
 <!-- Comments Modal -->
 <div id="comments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title" aria-hidden="true">
     <div class="modal-content" tabindex="-1">

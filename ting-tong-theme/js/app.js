@@ -458,11 +458,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const isDebugMode = urlParams.get('debug') === 'true';
 
   if (isDebugMode || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('local')))) {
-    window.ttAuth = authManager;
-    window.ttState = State;
-    console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
+    // ... istniejący kod debug ...
     console.log('Available: window.ttAuth, window.ttState, #mockLoginBtn');
 
+    // MOCK LOGIN BTN (już istniał)
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
@@ -471,6 +470,15 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
       });
     }
-    // Koniec LOGIKA MOCK BUTTON
+
+    // NOWY TOGGLE BUTTON
+    const toggleBtn = document.getElementById('toggleMockModalBtn');
+    if (toggleBtn) {
+        toggleBtn.style.display = 'block';
+        toggleBtn.addEventListener('click', () => {
+            const userData = { user_id: 999, email: 'mock_debug@test.com', is_profile_complete: false };
+            FirstLoginModal.checkProfileAndShowModal(userData);
+        });
+    }
   }
 });
