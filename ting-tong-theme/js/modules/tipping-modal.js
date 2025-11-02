@@ -40,6 +40,7 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
+        amountError: document.getElementById('tippingAmountError'),
         termsStep: document.getElementById('terms-step'),
         paymentMethodsContainer: document.querySelector('.payment-methods-container'),
     };
@@ -99,13 +100,19 @@ function updateStepDisplay(isShowingTerms = false) {
 }
 
 
+function showAmountError(message) {
+    if (dom.amountError) {
+        dom.amountError.textContent = message;
+        dom.amountError.style.display = message ? 'block' : 'none';
+    }
+}
+
 function validateStep(step) {
     if (step === 0) {
         const isAccountCreation = dom.createAccountCheckbox.checked;
         const email = dom.emailInput.value.trim();
 
         if (isAccountCreation) {
-            // Jeśli tworzy konto, email jest wymagany i musi być poprawny
             if (email === '') {
                 UI.showAlert(Utils.getTranslation('errorEmailRequired'), true);
                 return false;
@@ -115,7 +122,6 @@ function validateStep(step) {
                 return false;
             }
         } else {
-            // Jeśli nie tworzy konta, email nie jest wymagany, ale jeśli jest podany, musi być poprawny
             if (email !== '' && !Utils.isValidEmail(email)) {
                 UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
                 return false;
@@ -124,15 +130,13 @@ function validateStep(step) {
     } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         const currency = document.getElementById('tippingCurrency').value;
-        const minAmount = 1; // Używamy 1 jako uniwersalny min. limit
+        const minAmount = 5;
 
         if (isNaN(amount) || amount < minAmount) {
-            UI.showAlert(
-                Utils.getTranslation('errorMinTipAmount')
-                    .replace('{minAmount}', minAmount)
-                    .replace('{currency}', currency),
-                true
-            );
+            const errorMessage = Utils.getTranslation('errorMinTipAmount')
+                .replace('{minAmount}', minAmount)
+                .replace('{currency}', currency.toUpperCase());
+            showAmountError(errorMessage);
             return false;
         }
     } else if (step === 2) {
@@ -145,6 +149,7 @@ function validateStep(step) {
 }
 
 function handleNextStep() {
+    showAmountError('');
     collectData(currentStep);
     if (validateStep(currentStep)) {
         if (currentStep === 2) {

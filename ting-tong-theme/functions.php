@@ -314,12 +314,13 @@ function tt_process_ajax_request() {
     $is_logged_in = is_user_logged_in();
     $data = [];
     $content_type = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+    $is_json_request = $content_type === "application/json";
 
-    if ($content_type === "application/json") {
+    if ($is_json_request) {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
     } else {
-        $data = $_POST;
+        $data = array_merge($_GET, $_POST);
     }
 
     if (empty($data)) {
@@ -328,10 +329,16 @@ function tt_process_ajax_request() {
 
     if ($is_logged_in) {
         $nonce = '';
-        if (isset($data['nonce'])) {
-            $nonce = $data['nonce'];
-        } elseif (isset($_REQUEST['nonce'])) {
-            $nonce = $_REQUEST['nonce'];
+        if ($is_json_request) {
+            // Dla JSON, sprawdzamy nagłówek X-WP-Nonce
+            if (isset($_SERVER['HTTP_X_WP_NONCE'])) {
+                $nonce = $_SERVER['HTTP_X_WP_NONCE'];
+            }
+        } else {
+            // Dla tradycyjnych requestów, sprawdzamy ciało
+            if (isset($data['nonce'])) {
+                $nonce = $data['nonce'];
+            }
         }
 
         if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
@@ -794,10 +801,10 @@ function tt_create_stripe_payment_intent_callback() {
     $email = isset($data['email']) ? sanitize_email($data['email']) : '';
     $currency = isset($data['currency']) ? strtolower(sanitize_text_field($data['currency'])) : 'pln';
 
-    // FIX: Sprawdzenie minimalnej kwoty (1 jednostka waluty)
-    if ($amount_pln < 1) {
+    // FIX: Sprawdzenie minimalnej kwoty (5 jednostek waluty)
+    if ($amount_pln < 5) {
         $currency_display = strtoupper($currency);
-        wp_send_json_error(['message' => "Kwota napiwku musi wynosić co najmniej 1 {$currency_display}."], 400);
+        wp_send_json_error(['message' => "Kwota napiwku musi wynosić co najmniej 5 {$currency_display}."], 400);
         return;
     }
 
