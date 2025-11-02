@@ -142,11 +142,7 @@ export const Config = {
           pl: "Minimalna kwota to 1 EUR. Dziękujemy za każde wsparcie!",
           en: "The minimum amount is 1 EUR. Thank you for all your support!"
       },
-      tippingStep3Title: {
-          pl: "Wybierz metodę płatności",
-          en: "Choose payment method"
-      },
-      tippingStep4Desc: {
+      tippingStep3Desc: {
           pl: "Przekierowanie do płatności...",
           en: "Redirecting to payment..."
       },
@@ -311,10 +307,8 @@ export const Config = {
       timeMinute: 'm',
       timeHour: 'h',
       timeDay: 'd',
-      tippingPatronMessage: "Witaj z powrotem, Patronie! Przejdź dalej, aby kontynuować wsparcie. Twój e-mail: {email}",
     }, // KONIEC 'pl'
     en: {
-      tippingPatronMessage: "Welcome back, Patron! Proceed to continue your support. Your email: {email}",
       loggedOutText: "You don't have the guts to log in",
       loggedInText: "You are logged in",
       loginSuccess: "Logged in successfully!",
