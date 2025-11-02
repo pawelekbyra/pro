@@ -1,20 +1,20 @@
-// import { Config } from './modules/config.js';
+import { Config } from './modules/config.js';
 import { State } from './modules/state.js';
-// import { Utils } from './modules/utils.js';
-// import { API, slidesData } from './modules/api.js';
+import { Utils } from './modules/utils.js';
+import { API, slidesData } from './modules/api.js';
 import { UI } from './modules/ui.js';
-// import { PWA } from './modules/pwa.js';
-// import { Handlers } from './modules/handlers.js';
-// import { Notifications } from './modules/notifications.js';
-// import { AccountPanel } from './modules/account-panel.js';
-// import { authManager } from './modules/auth-manager.js';
-// import { FirstLoginModal } from './modules/first-login-modal.js';
-// import { TippingModal } from './modules/tipping-modal.js';
-// import { CommentsModal } from './modules/comments-modal.js';
+import { PWA } from './modules/pwa.js';
+import { Handlers } from './modules/handlers.js';
+import { Notifications } from './modules/notifications.js';
+import { AccountPanel } from './modules/account-panel.js';
+import { authManager } from './modules/auth-manager.js';
+import { FirstLoginModal } from './modules/first-login-modal.js';
+import { TippingModal } from './modules/tipping-modal.js';
+import { CommentsModal } from './modules/comments-modal.js';
 
-// // Wstrzyknięcie zależności, aby przerwać cykl
-// UI.setPwaModule(PWA);
-// PWA.setUiModule(UI);
+// Wstrzyknięcie zależności, aby przerwać cykl
+UI.setPwaModule(PWA);
+PWA.setUiModule(UI);
 
 // Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
@@ -435,19 +435,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return {
       init: () => {
-        // _setInitialConfig();
-        // _initializeGlobalListeners();
-        // _initializeStateListeners(); // DODANE
-        // AccountPanel.init();
-        // FirstLoginModal.init();
-        // TippingModal.init();
-        // CommentsModal.init();
-        // UI.initGlobalPanels();
-        // PWA.init();
+        _setInitialConfig();
+        _initializeGlobalListeners();
+        _initializeStateListeners(); // DODANE
+        AccountPanel.init();
+        FirstLoginModal.init();
+        TippingModal.init();
+        CommentsModal.init();
+        UI.initGlobalPanels();
+        PWA.init();
         _initializePreloader();
         document.body.classList.add("loaded");
       },
-      // fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
+      fetchAndUpdateSlideData: _fetchAndUpdateSlideData,
     };
   })();
 

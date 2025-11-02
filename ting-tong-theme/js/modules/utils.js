@@ -96,4 +96,3 @@ isValidEmail: (email) => {
     return re.test(String(email).toLowerCase());
 },
 };
-};
