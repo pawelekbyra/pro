@@ -117,18 +117,4 @@ export const API = {
       slide_id: slideId,
       comment_id: commentId,
     }),
-
-  createStripePaymentIntent: async (data) => {
-    try {
-      const response = await authManager.ajax('tt_create_stripe_payment_intent', {
-        amount: data.amount,
-        email: data.email,
-        currency: data.currency,
-      }, true); // `true` to send as JSON
-      return response;
-    } catch (error) {
-      console.error('API Client Error for Stripe Payment Intent:', error);
-      return { success: false, data: { message: error.message } };
-    }
-  },
 };

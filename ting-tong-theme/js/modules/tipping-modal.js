@@ -4,7 +4,7 @@ import { State } from './state.js';
 
 let dom = {};
 let currentStep = 0;
-const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
+const totalSteps = 3; // 0: options, 1: amount, 2: processing
 let formData = {};
 let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
 
@@ -18,6 +18,7 @@ function cacheDOM() {
         steps: document.querySelectorAll('#tippingModal .elegant-modal-step'),
         prevBtn: document.getElementById('tippingPrevBtn'),
         nextBtn: document.getElementById('tippingNextBtn'),
+        submitBtn: document.getElementById('tippingSubmitBtn'),
         createAccountCheckbox: document.getElementById('tippingCreateAccount'),
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
@@ -34,34 +35,33 @@ function updateStepDisplay(isShowingTerms = false) {
 
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
-        // Step 3 is now the processing step, terms is step 4 in the DOM
-        stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
+        stepEl.classList.toggle('active', isShowingTerms ? step === 3 : step === currentStep);
     });
 
     const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
-    const footer = dom.form.querySelector('.elegant-modal-footer');
-    if (footer) {
-        footer.style.display = isTermsVisible ? 'none' : 'block';
-    }
 
-    const isProcessingStep = currentStep === 3;
-    const isPaymentStep = currentStep === 2;
+    const isFirstStep = currentStep === 0;
+    const isAmountStep = currentStep === 1;
+    const isProcessingStep = currentStep === 2;
 
-    if (dom.prevBtn) {
-        dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
-    }
-    if (dom.nextBtn) {
-        dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
-    }
+    // Pokaż/ukryj stopkę z przyciskami nawigacyjnymi
+    dom.form.querySelector('.elegant-modal-footer').style.display = isTermsVisible ? 'none' : 'block';
 
-    // Hide footer entirely on processing step
-    if (footer && isProcessingStep) {
-        footer.style.display = 'none';
-    }
 
+    // Use flex as the new buttons are in a flex container
+    dom.prevBtn.style.display = isAmountStep ? 'flex' : 'none';
+    dom.nextBtn.style.display = isFirstStep ? 'flex' : 'none';
+    dom.submitBtn.style.display = isAmountStep ? 'flex' : 'none';
+
+    if (isProcessingStep) {
+        dom.prevBtn.style.display = 'none';
+        dom.nextBtn.style.display = 'none';
+        dom.submitBtn.style.display = 'none';
+    }
 
     if (dom.progressBar) {
-        const progress = ((currentStep + 1) / totalSteps) * 100;
+        // Ensure progress bar never goes to 0% if it's visible
+        const progress = currentStep > -1 ? ((currentStep + 1) / totalSteps) * 100 : 33.33;
         dom.progressBar.style.width = `${progress}%`;
     }
 }
@@ -131,53 +131,36 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-    } else if (step === 2) {
-        // This will be set in handlePaymentMethodClick
-        formData.payment_method = 'not-set';
     }
 }
 
-// New mock function for the final step
-function handlePaymentMethodClick(method) {
-    formData.payment_method = method;
-    console.log('Final form data submitted:', formData);
+async function handleFormSubmit() {
+    if (!validateStep(currentStep)) return;
+    collectData(currentStep);
 
-    // Advance to the processing step
-    currentStep = 3;
+    currentStep++;
     updateStepDisplay();
+
+    console.log('Processing payment with data:', formData);
 
     // Simulate payment processing
     setTimeout(() => {
         UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
         hideModal();
 
-        // Reset state after a short delay
+        // Reset state after a short delay to allow for closing animation
         setTimeout(() => {
             currentStep = 0;
             formData = {};
-            if (dom.form) dom.form.reset();
+            if(dom.form) dom.form.reset();
             if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
             if (dom.emailContainer) dom.emailContainer.classList.add('visible');
-            if (document.getElementById('termsAccept')) document.getElementById('termsAccept').checked = false;
+            document.getElementById('termsAccept').checked = false;
             updateStepDisplay();
         }, 500);
+
     }, 2500);
 }
-
-function setupPaymentMethodListeners() {
-    if (!dom.modal) return;
-    const paymentMethodsContainer = dom.modal.querySelector('.payment-methods-container');
-    if (paymentMethodsContainer) {
-        paymentMethodsContainer.addEventListener('click', (e) => {
-            const button = e.target.closest('.payment-method-btn');
-            if (button) {
-                const method = button.dataset.method;
-                handlePaymentMethodClick(method);
-            }
-        });
-    }
-}
-
 
 function translateUI() {
     if (!dom.modal) return;
@@ -277,8 +260,6 @@ function init() {
             hideTerms();
         }
     });
-
-    setupPaymentMethodListeners();
 }
 
 export const TippingModal = {
@@ -287,4 +268,5 @@ export const TippingModal = {
     hideModal,
     handleNextStep,
     handlePrevStep,
+    handleFormSubmit,
 };
