@@ -1,7 +1,8 @@
 import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
-// import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
+// import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczn
+ą
 import { API, slidesData } from './api.js';
 
 let PWA_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
@@ -55,7 +56,8 @@ function getFocusable(node) {
   if (!node) return [];
   return Array.from(
     node.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+,
     ),
   );
 }
@@ -87,13 +89,16 @@ const activeModals = new Set();
 
 function openModal(modal, options = {}) {
     if (!modal) {
-        console.error("Attempted to open a null modal element."); // Dodany log dla pewności
+        console.error("Attempted to open a null modal element."); // Dodany log
+dla pewności
         return;
     }
 
     // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
-    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
-    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
+    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nad
+pisując CSS**
+    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej anima
+cji zamykania
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
@@ -103,7 +108,8 @@ function openModal(modal, options = {}) {
             const count = slideData ? slideData.initialComments : 0;
             const titleEl = modal.querySelector('#commentsTitle');
             if (titleEl) {
-                titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
+                titleEl.textContent = `${Utils.getTranslation('commentsModalTitl
+e')} (${count})`;
             }
         }
     }
@@ -130,14 +136,17 @@ function openModal(modal, options = {}) {
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
     const focusable = getFocusable(modal);
-    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content"))?.focus();
+    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content,
+.fl-modal-content, .tiktok-profile-content"))?.focus();
     modal._focusTrapDispose = trapFocus(modal);
 }
 
 function closeModal(modal) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hidin
+g")) return;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
+    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper,
+.modal-content, .tiktok-profile-content, .account-modal-content');
 
     modal.classList.add("is-hiding");
     modal.setAttribute("aria-hidden", "true");
@@ -170,7 +179,8 @@ function closeModal(modal) {
             State.set("replyingToComment", null, true);
             const replyContext = document.querySelector(".reply-context");
             if (replyContext) replyContext.style.display = "none";
-            if (typeof UI.removeCommentImage === 'function') UI.removeCommentImage();
+            if (typeof UI.removeCommentImage === 'function') UI.removeCommentIma
+ge();
             const commentInput = document.querySelector("#comment-input");
             if (commentInput) commentInput.value = "";
         }
@@ -218,8 +228,10 @@ function isSlideOverlayActive(slideElement) {
   const secretOverlay = slideElement.querySelector('.secret-overlay');
   const pwaSecretOverlay = slideElement.querySelector('.pwa-secret-overlay');
 
-  const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
-  const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
+  const isSecretVisible = secretOverlay && secretOverlay.classList.contains('vis
+ible');
+  const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.cont
+ains('visible');
 
   return isSecretVisible || isPwaSecretVisible;
 }
@@ -276,13 +288,18 @@ function updateUIForLoginState() {
     if (secretOverlay) {
         secretOverlay.classList.toggle("visible", showSecret);
         if (showSecret) {
-            secretOverlay.querySelector(".secret-title").textContent = Utils.getTranslation("secretTitle");
-            const subtitleUElement = secretOverlay.querySelector(".secret-subtitle u");
-            const subtitleSpanElement = secretOverlay.querySelector(".secret-subtitle span");
+            secretOverlay.querySelector(".secret-title").textContent = Utils.get
+Translation("secretTitle");
+            const subtitleUElement = secretOverlay.querySelector(".secret-subtit
+le u");
+            const subtitleSpanElement = secretOverlay.querySelector(".secret-sub
+title span");
             if (subtitleUElement && subtitleSpanElement) {
                 subtitleUElement.dataset.action = "toggle-login-panel";
-                subtitleUElement.textContent = Utils.getTranslation("secretSubtitleAction");
-                subtitleSpanElement.textContent = " " + Utils.getTranslation("secretSubtitleRest");
+                subtitleUElement.textContent = Utils.getTranslation("secretSubti
+tleAction");
+                subtitleSpanElement.textContent = " " + Utils.getTranslation("se
+cretSubtitleRest");
             }
         }
     }
@@ -292,12 +309,17 @@ function updateUIForLoginState() {
     if (pwaSecretOverlay) {
         pwaSecretOverlay.classList.toggle("visible", showPwaSecret);
         if (showPwaSecret) {
-            pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Utils.getTranslation("pwaTitle");
-            const subtitleUElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle u");
-            const subtitleSpanElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle span");
+            pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Ut
+ils.getTranslation("pwaTitle");
+            const subtitleUElement = pwaSecretOverlay.querySelector(".pwa-secret
+-subtitle u");
+            const subtitleSpanElement = pwaSecretOverlay.querySelector(".pwa-sec
+ret-subtitle span");
             if (subtitleUElement && subtitleSpanElement) {
-                subtitleUElement.textContent = Utils.getTranslation("pwaSecretSubtitleAction");
-                subtitleSpanElement.textContent = Utils.getTranslation("pwaSecretSubtitleRest");
+                subtitleUElement.textContent = Utils.getTranslation("pwaSecretSu
+btitleAction");
+                subtitleSpanElement.textContent = Utils.getTranslation("pwaSecre
+tSubtitleRest");
             }
         }
     }
@@ -305,7 +327,8 @@ function updateUIForLoginState() {
     // Control video playback based on overlay state
     if (video) {
         const isOverlayVisible = showSecret || showPwaSecret;
-        const isCurrentSlide = section.classList.contains('swiper-slide-active');
+        const isCurrentSlide = section.classList.contains('swiper-slide-active')
+;
 
         // First, enforce pausing if any overlay is active.
         // This is the most important rule.
@@ -316,7 +339,8 @@ function updateUIForLoginState() {
         }
         // Only if no overlays are active, consider playing the video.
         else if (isCurrentSlide && video.paused) {
-            video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
+            video.play().catch(e => console.warn("Autoplay prevented on UI updat
+e:", e));
         }
     }
 
@@ -371,12 +395,16 @@ function updateTranslations() {
     const currentSortText = Utils.getTranslation(
       sortOrder === "popular" ? "commentSortBest" : "commentSortNewest",
     );
-    sortTrigger.innerHTML = `${Utils.getTranslation("commentSortTriggerText")}<span class="current-sort">${currentSortText}</span> ▼`;
+    sortTrigger.innerHTML = `${Utils.getTranslation("commentSortTriggerText")}<s
+pan class="current-sort">${currentSortText}</span> ▼`;
   }
 
   const loginPrompt = document.querySelector(".login-to-comment-prompt p");
   if (loginPrompt) {
-    loginPrompt.innerHTML = `<a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">${Utils.getTranslation("loginToCommentAction")}</a><span data-translate-key="loginToCommentRest">${Utils.getTranslation("loginToCommentRest")}</span>`;
+    loginPrompt.innerHTML = `<a href="#" data-action="toggle-login-panel" data-t
+ranslate-key="loginToCommentAction">${Utils.getTranslation("loginToCommentAction
+")}</a><span data-translate-key="loginToCommentRest">${Utils.getTranslation("log
+inToCommentRest")}</span>`;
   }
 
   updateUIForLoginState();
@@ -405,14 +433,16 @@ function createSlideElement(slideData, index) {
     iframe.src = slideData.iframeUrl;
     iframe.frameBorder = "0";
     iframe.allow =
-      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; pic
+ture-in-picture";
     iframe.allowFullscreen = true;
     tiktokSymulacja.prepend(iframe);
   } else if (slideData.mp4Url) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
-      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli warunki są spełnione.
+      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli wa
+runki są spełnione.
       if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
         videoEl.pause();
       }
@@ -420,13 +450,16 @@ function createSlideElement(slideData, index) {
   }
 
   // Ustawienie początkowej widoczności nakładek.
-  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
-  if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalone()) {
+  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan
+ przed pierwszym renderowaniem.
+  if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalon
+e()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
     }
-    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był widoczny
+    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był w
+idoczny
     section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 
@@ -480,7 +513,8 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
-    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
+    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarza
+nie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {
@@ -499,7 +533,8 @@ function createSlideElement(slideData, index) {
           const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
           const isOverlayVisible =
             (secretOverlay && secretOverlay.classList.contains('visible')) ||
-            (pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible'));
+            (pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible'))
+;
 
           if (!isOverlayVisible && videoEl.paused) {
             videoEl.play().catch(e => {
@@ -644,10 +679,15 @@ function populateProfileModal(slideData) {
     const thumb = document.createElement("div");
     thumb.className = "video-thumbnail";
     thumb.innerHTML = `
-                    <img src="https://picsum.photos/200/280?random=${slideData.id}-${i}" alt="Miniatura filmu">
+                    <img src="https://picsum.photos/200/280?random=${slideData.i
+d}-${i}" alt="Miniatura filmu">
                     <div class="video-views">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                        ${Utils.formatCount(Math.floor(Math.random() * 3000000))}
+                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.6
+1 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2
+.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3
+ 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                        ${Utils.formatCount(Math.floor(Math.random() * 3000000))
+}
                     </div>
                 `;
     videoGrid.appendChild(thumb);
@@ -750,7 +790,8 @@ function toggleEmojiPicker() {
     // Dodaj nowy listener po micro-delay
     setTimeout(() => {
       emojiPickerClickListener = (e) => closeEmojiPickerOnClickOutside(e);
-      document.addEventListener('click', emojiPickerClickListener, { once: true });
+      document.addEventListener('click', emojiPickerClickListener, { once: true
+});
     }, 10);
   }
 
@@ -802,7 +843,8 @@ function handleImageAttachment() {
 
   // Sprawdź czy użytkownik jest zalogowany
   if (!State.get('isUserLoggedIn')) {
-    UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać obraz', true);
+    UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać ob
+raz', true);
     return;
   }
 
@@ -819,7 +861,8 @@ function handleImageSelect(e) {
   // Walidacja typu
   if (!file.type.startsWith('image/')) {
     UI.showAlert(
-      Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG, PNG, GIF)',
+      Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG,
+ PNG, GIF)',
       true
     );
     e.target.value = '';
@@ -830,7 +873,8 @@ function handleImageSelect(e) {
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
     UI.showAlert(
-      Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymalny rozmiar: 5MB',
+      Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymal
+ny rozmiar: 5MB',
       true
     );
     e.target.value = '';
@@ -871,7 +915,8 @@ function showImagePreview(file) {
     container.innerHTML = `
       <div class="image-preview">
         <img src="${e.target.result}" alt="Preview">
-        <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
+        <button type="button" class="remove-image-btn" data-action="remove-comme
+nt-image">&times;</button>
       </div>
     `;
     container.classList.add('visible');
@@ -960,23 +1005,28 @@ function renderComments(comments) {
         const commentItem = commentNode.querySelector('.comment-item');
 
         commentItem.dataset.commentId = comment.id;
-        commentItem.querySelector('.comment-avatar img').src = comment.avatar || 'path/to/default-avatar.png';
+        commentItem.querySelector('.comment-avatar img').src = comment.avatar ||
+ 'path/to/default-avatar.png';
         commentItem.querySelector('.comment-author').textContent = comment.user;
-        commentItem.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
+        commentItem.querySelector('.comment-timestamp').textContent = Utils.form
+atTimeAgo(comment.timestamp);
         commentItem.querySelector('.comment-text').textContent = comment.text;
 
-        const imageAttachment = commentItem.querySelector('.comment-image-attachment');
+        const imageAttachment = commentItem.querySelector('.comment-image-attach
+ment');
         if (comment.image_url) {
             imageAttachment.style.display = 'block';
             imageAttachment.querySelector('img').src = comment.image_url;
-            imageAttachment.querySelector('img').addEventListener('click', () => openImageLightbox(comment.image_url));
+            imageAttachment.querySelector('img').addEventListener('click', () =>
+ openImageLightbox(comment.image_url));
         } else {
             imageAttachment.style.display = 'none';
         }
 
         const likeBtn = commentItem.querySelector('.comment-like-btn');
         likeBtn.classList.toggle('active', comment.isLiked);
-        commentItem.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
+        commentItem.querySelector('.comment-like-count').textContent = Utils.for
+matCount(comment.likes);
 
         const optionsContainer = commentItem.querySelector('.comment-options');
         if (comment.canEdit) {
@@ -1059,7 +1109,8 @@ export const UI = {
 
 function closeCommentsModal() {
     const modal = DOM.commentsModal;
-    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contai
+ns('is-hiding')) {
         return;
     }
 
