@@ -1,30 +1,12 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
-import { API } from './api.js';
 
 let dom = {};
 let currentStep = 0;
-const totalSteps = 4;
+const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
 let formData = {};
-let previousStep = 0;
-let stripe = null;
-let elements = null;
-let paymentElement = null;
-
-const loadStripeScript = () => {
-    return new Promise((resolve, reject) => {
-        if (window.Stripe) {
-            resolve();
-            return;
-        }
-        const script = document.createElement('script');
-        script.src = 'https://js.stripe.com/v3/';
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Stripe.js failed to load.'));
-        document.head.appendChild(script);
-    });
-};
+let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
 
 function cacheDOM() {
     dom = {
@@ -40,9 +22,7 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
-        tippingAmountError: document.getElementById('tippingAmountError'),
         termsStep: document.getElementById('terms-step'),
-        paymentMethodsContainer: document.querySelector('.payment-methods-container'),
     };
 }
 
@@ -52,123 +32,46 @@ function updateStepDisplay(isShowingTerms = false) {
         return;
     }
 
-    // Nowa logika aktywnego kroku (4 to krok regulaminu)
-    const activeStepIndex = isShowingTerms ? 4 : currentStep;
-
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
-        stepEl.classList.toggle('active', step === activeStepIndex);
+        // Step 3 is now the processing step, terms is step 4 in the DOM
+        stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
     });
 
     const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
     const footer = dom.form.querySelector('.elegant-modal-footer');
     if (footer) {
-        // Stopka ukryta na kroku 3 (przetwarzanie/redirect) i kroku 4 (regulamin)
-        footer.style.display = (isTermsVisible || currentStep === 3) ? 'none' : 'block';
+        footer.style.display = isTermsVisible ? 'none' : 'block';
     }
 
-    // Pokaż/ukryj przyciski
+    const isProcessingStep = currentStep === 3;
+    const isPaymentStep = currentStep === 2;
+
     if (dom.prevBtn) {
-        // Przycisk "Wstecz" ukryty na kroku 0 i kroku 3
-        dom.prevBtn.style.display = (currentStep > 0 && currentStep < 3) ? 'flex' : 'none';
+        dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
     }
-
     if (dom.nextBtn) {
-        // Przycisk "Dalej/Płać" ukryty na kroku 3
-        dom.nextBtn.style.display = (currentStep < 3) ? 'flex' : 'none';
-
-        // Zmień tekst przycisku na kroku 2 (ostatni krok przed przekierowaniem)
-        const isFinalStepBeforePayment = currentStep === 2;
-
-        let nextBtnText;
-        if (isFinalStepBeforePayment) {
-            const translation = Utils.getTranslation('tippingSubmit');
-            nextBtnText = (typeof translation === 'object' && translation !== null) ? translation[State.get('currentLang') || 'pl'] : translation;
-        } else {
-            nextBtnText = 'ENTER'; // Hardcoded as per user request
-        }
-
-        dom.nextBtn.textContent = nextBtnText;
+        dom.nextBtn.style.display = (currentStep < 2) ? 'flex' : 'none';
     }
 
-    // Aktualizuj pasek postępu
+    // Hide footer entirely on processing step
+    if (footer && isProcessingStep) {
+        footer.style.display = 'none';
+    }
+
+
     if (dom.progressBar) {
-        // totalSteps = 4 (0, 1, 2, 3)
         const progress = ((currentStep + 1) / totalSteps) * 100;
         dom.progressBar.style.width = `${progress}%`;
     }
 }
 
-
-function validateStep(step) {
-    if (step === 0) {
-        const isAccountCreation = dom.createAccountCheckbox.checked;
-        const email = dom.emailInput.value.trim();
-
-        if (isAccountCreation) {
-            // Jeśli tworzy konto, email jest wymagany i musi być poprawny
-            if (email === '') {
-                UI.showAlert(Utils.getTranslation('errorEmailRequired'), true);
-                return false;
-            }
-            if (!Utils.isValidEmail(email)) {
-                UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
-                return false;
-            }
-        } else {
-            // Jeśli nie tworzy konta, email nie jest wymagany, ale jeśli jest podany, musi być poprawny
-            if (email !== '' && !Utils.isValidEmail(email)) {
-                UI.showAlert(Utils.getTranslation('errorInvalidEmail'), true);
-                return false;
-            }
-        }
-    } else if (step === 1) {
-        // Zawsze ukrywaj błąd przy ponownej walidacji
-        if (dom.tippingAmountError) {
-            dom.tippingAmountError.style.display = 'none';
-            dom.tippingAmountError.textContent = '';
-        }
-
-        const amount = parseFloat(dom.amountInput.value);
-        const currency = document.getElementById('tippingCurrency').value;
-        const minAmount = 5; // Zmieniono z 1 na 5 zgodnie z wymaganiem
-
-        if (isNaN(amount) || amount < minAmount) {
-            const errorMessage = Utils.getTranslation('errorMinTipAmount')
-                .replace('{minAmount}', minAmount)
-                .replace('{currency}', currency);
-
-            // Pokaż błąd w dedykowanym kontenerze
-            if (dom.tippingAmountError) {
-                dom.tippingAmountError.textContent = errorMessage;
-                dom.tippingAmountError.style.display = 'block';
-            } else {
-                // Fallback do alertu, jeśli element nie został znaleziony
-                UI.showAlert(errorMessage, true);
-            }
-
-            return false;
-        }
-    } else if (step === 2) {
-        if (!document.getElementById('termsAccept').checked) {
-            UI.showAlert('Proszę zaakceptować regulamin.', true);
-            return false;
-        }
-    }
-    return true;
-}
-
 function handleNextStep() {
-    collectData(currentStep);
     if (validateStep(currentStep)) {
-        if (currentStep === 2) {
-            confirmPayment();
-        } else if (currentStep < totalSteps - 1) {
+        collectData(currentStep);
+        if (currentStep < totalSteps - 1) {
             currentStep++;
             updateStepDisplay();
-            if (currentStep === 2) {
-                initializePaymentElement();
-            }
         }
     }
 }
@@ -180,108 +83,47 @@ function handlePrevStep() {
     }
 }
 
-async function initializePaymentElement() {
-    // Sprawdź, czy Stripe.js jest załadowany. Jeśli nie, nie kontynuuj.
-    if (typeof window.Stripe === 'undefined') {
-        console.error("Stripe.js is not loaded.");
-        UI.showAlert('Błąd: Nie udało się załadować biblioteki płatności.', true);
-        currentStep = 1;
-        updateStepDisplay();
-        return;
-    }
-
-    // Wyczyść poprzednie elementy płatności przed ponowną inicjalizacją
-    const paymentElementContainer = document.getElementById('stripe-payment-element');
-    if (paymentElementContainer) {
-        paymentElementContainer.innerHTML = '';
-    }
-
-    try {
-        const response = await API.createStripePaymentIntent(formData);
-
-        if (response.success && response.data.clientSecret) {
-            const clientSecret = response.data.clientSecret;
-            const currency = formData.currency || 'pln';
-            console.log(`[Stripe] Inicjalizacja Payment Element dla ${currency.toUpperCase()}`);
-
-            // FIX 1: Upewnij się, że instancja Stripe jest tworzona raz (jeśli nie jest mockiem)
-            if (!stripe) {
-                stripe = Stripe(TingTongConfig.stripePublicKey, {
-                    locale: 'pl'
-                });
+function validateStep(step) {
+    if (step === 0) {
+        // Jeśli checkbox "Załóż konto" jest zaznaczony, waliduj e-mail
+        if (dom.createAccountCheckbox.checked) {
+            const email = dom.emailInput.value.trim();
+            if (email === '') {
+                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
+                UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
+                return false;
             }
-
-            elements = stripe.elements({ clientSecret });
-
-            paymentElement = elements.create('payment', {
-                layout: {
-                    type: 'tabs',
-                    defaultCollapsed: false
-                }
-            });
-
-            if (paymentElementContainer) {
-                paymentElement.mount('#stripe-payment-element');
-
-                // FIX 2: Dodajemy event listenery dla lepszej diagnostyki
-                paymentElement.on('ready', function() {
-                    console.log('Stripe Payment Element jest gotowy i załadował metody płatności.');
-                    // Opcjonalnie można tutaj pokazać toasta o sukcesie
-                });
-
-                paymentElement.on('error', function(event) {
-                    console.error('Błąd ładowania Stripe Payment Element:', event);
-                    UI.showAlert(`Błąd ładowania płatności: ${event.error.message || 'Nieznany błąd.'}`, true);
-                    currentStep = 1; // Powrót do kroku z kwotą, aby użytkownik mógł zmienić kwotę/walutę
-                    updateStepDisplay();
-                });
-            }
-
-
-        } else {
-            const errorMessage = response.data?.message || 'Błąd: Nie udało się przygotować płatności (serwer).';
-            UI.showAlert(errorMessage, true);
-            currentStep = 1;
-            updateStepDisplay();
-        }
-
-    } catch (error) {
-        console.error('Krytyczny błąd inicjalizacji Stripe:', error);
-        UI.showAlert('Wystąpił błąd komunikacji z serwerem płatności.', true);
-        currentStep = 1;
-        updateStepDisplay();
-    }
-}
-
-async function confirmPayment() {
-    if (!stripe || !elements) {
-        UI.showAlert('Brak inicjalizacji płatności. Odśwież modal.', true);
-        return;
-    }
-
-    currentStep = 3;
-    updateStepDisplay();
-
-    const payerEmail = formData.email || null;
-
-    const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-            return_url: window.location.href,
-            payment_method_data: {
-                billing_details: {
-                    email: payerEmail,
-                }
+            if (!Utils.isValidEmail(email)) {
+                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
+                UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
+                return false;
             }
         }
-    });
-
-    if (error) {
-        UI.showAlert(error.message, true);
-        currentStep = 2;
-        updateStepDisplay();
     }
+    if (step === 1) {
+        const amount = parseFloat(dom.amountInput.value);
+        if (isNaN(amount) || amount < 1) {
+            UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
+            return false;
+        }
+        if (!document.getElementById('termsAccept').checked) {
+            UI.showAlert('Proszę zaakceptować regulamin.', true);
+            return false;
+        }
+    }
+    return true;
 }
+
+function showTerms() {
+    previousStep = currentStep;
+    updateStepDisplay(true);
+}
+
+function hideTerms() {
+    currentStep = previousStep;
+    updateStepDisplay(false);
+}
+
 
 function collectData(step) {
     if (step === 0) {
@@ -289,10 +131,53 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        const currencySelect = document.getElementById('tippingCurrency');
-        formData.currency = currencySelect ? currencySelect.value : 'pln';
+    } else if (step === 2) {
+        // This will be set in handlePaymentMethodClick
+        formData.payment_method = 'not-set';
     }
 }
+
+// New mock function for the final step
+function handlePaymentMethodClick(method) {
+    formData.payment_method = method;
+    console.log('Final form data submitted:', formData);
+
+    // Advance to the processing step
+    currentStep = 3;
+    updateStepDisplay();
+
+    // Simulate payment processing
+    setTimeout(() => {
+        UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
+        hideModal();
+
+        // Reset state after a short delay
+        setTimeout(() => {
+            currentStep = 0;
+            formData = {};
+            if (dom.form) dom.form.reset();
+            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
+            if (dom.emailContainer) dom.emailContainer.classList.add('visible');
+            if (document.getElementById('termsAccept')) document.getElementById('termsAccept').checked = false;
+            updateStepDisplay();
+        }, 500);
+    }, 2500);
+}
+
+function setupPaymentMethodListeners() {
+    if (!dom.modal) return;
+    const paymentMethodsContainer = dom.modal.querySelector('.payment-methods-container');
+    if (paymentMethodsContainer) {
+        paymentMethodsContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('.payment-method-btn');
+            if (button) {
+                const method = button.dataset.method;
+                handlePaymentMethodClick(method);
+            }
+        });
+    }
+}
+
 
 function translateUI() {
     if (!dom.modal) return;
@@ -322,19 +207,11 @@ function translateUI() {
     });
 }
 
-async function showModal() {
+function showModal() {
     cacheDOM();
 
     if (!dom.modal) {
         console.error("Tipping modal not found in DOM");
-        return;
-    }
-
-    try {
-        await loadStripeScript();
-    } catch (error) {
-        console.error(error);
-        UI.showAlert('Błąd ładowania komponentu płatności. Spróbuj ponownie później.', true);
         return;
     }
 
@@ -399,8 +276,9 @@ function init() {
         if (e.target.closest('[data-action="hide-terms"]')) {
             hideTerms();
         }
-
     });
+
+    setupPaymentMethodListeners();
 }
 
 export const TippingModal = {
