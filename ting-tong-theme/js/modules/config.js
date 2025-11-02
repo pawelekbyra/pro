@@ -174,10 +174,8 @@ export const Config = {
         pl: "Proszę podać poprawny adres email.",
         en: "Please provide a valid email address.",
       },
-      errorMinTipAmount: {
-        pl: "Minimalna kwota napiwku to 1 EUR.",
-        en: "The minimum tip amount is 1 EUR.",
-      },
+      errorMinTipAmount: "Minimalna kwota napiwku to {minAmount} {currency}.",
+      errorEmailRequired: "Adres e-mail jest wymagany dla Patrona.",
       noComments: "Brak komentarzy. Bądź pierwszy!",
       commentSortTriggerText: "Sortuj według: ",
       commentSortNewest: "Fresz",
