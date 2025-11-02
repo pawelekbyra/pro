@@ -391,13 +391,13 @@ document.addEventListener("DOMContentLoaded", () => {
         State.set('swiper', swiper);
 
       } catch (error) {
-        // Usunięto alert(error);
+        alert(
+          "Application failed to start. Error: " +
+            error.message +
+            "\\n\\nStack: " +
+            error.stack,
+        );
         console.error("TingTong App Start Error:", error);
-        // Można dodać bardziej subtelne powiadomienie dla użytkownika
-        const userFacingError = document.createElement('div');
-        userFacingError.className = 'critical-error-notice';
-        userFacingError.textContent = 'Aplikacja nie mogła się uruchomić. Proszę odświeżyć stronę.';
-        document.body.appendChild(userFacingError);
       }
     }
 
@@ -466,17 +466,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
-      // Zaktualizowana logika do przełączania stanu logowania
-      let isMockLoggedIn = false;
       mockBtn.addEventListener('click', () => {
-        isMockLoggedIn = !isMockLoggedIn;
-        if (isMockLoggedIn) {
-          authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
-          UI.showAlert('Mock: Zalogowano z niekompletnym profilem.');
-        } else {
-          authManager.logout(); // Używamy prawdziwej funkcji wylogowania
-          UI.showAlert('Mock: Wylogowano.');
-        }
+        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
+        UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
       });
     }
     // Koniec LOGIKA MOCK BUTTON
