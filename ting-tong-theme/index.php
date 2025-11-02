@@ -38,12 +38,22 @@ get_header();
 
                 <!-- Krok 2: Wybór kwoty -->
                 <div class="elegant-modal-step" data-step="1">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
-                    <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
-                        </div>
+<p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
+    <div class="elegant-modal-fields-container">
+        <div class="tipping-amount-container" style="display: flex; align-items: center; gap: 10px; position: relative;">
+            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any" style="flex-grow: 1;">
+            <div class="currency-selector" style="position: relative;">
+                <select id="tippingCurrency" name="currency" class="tipping-currency" style="padding: 0 15px 0 10px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background: transparent; border: none; color: white; font-size: 1em; cursor: pointer; height: 100%;">
+                    <option value="PLN" selected>PLN</option>
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                    <option value="GBP">GBP</option>
+                </select>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </div>
+        </div>
                         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
                             <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
                             <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
@@ -57,18 +67,16 @@ get_header();
                 <div class="elegant-modal-step" data-step="2">
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep3Title">Wybierz metodę płatności</p>
                     <div class="payment-methods-container">
-                        <button type="button" class="payment-method-btn" data-method="blik">
-                            <img src="<?php echo get_template_directory_uri(); ?>/assets/blik-logo.svg" alt="BLIK">
-                            <span>Płatność BLIK</span>
-                        </button>
-                        <button type="button" class="payment-method-btn" data-method="card">
-                             <img src="<?php echo get_template_directory_uri(); ?>/assets/card-logo.svg" alt="Card">
-                            <span>Karta Płatnicza</span>
-                        </button>
-                         <button type="button" class="payment-method-btn" data-method="paypal">
-                             <img src="<?php echo get_template_directory_uri(); ?>/assets/paypal-logo.svg" alt="PayPal">
-                            <span>PayPal</span>
-                        </button>
+                        <div id="stripe-payment-element">
+                            </div>
+                    </div>
+                    <div class="elegant-modal-terms">
+                        <div class="elegant-modal-preference-row" id="termsAcceptRow" style="justify-content: center; gap: 8px; border: none; padding: 0; margin-top: 15px;">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox" style="width: 16px; height: 16px;">
+                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 12px; font-weight: 400;">
+                                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

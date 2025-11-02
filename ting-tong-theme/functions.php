@@ -1,4 +1,14 @@
 <?php
+// Fallback do ręcznego wczytywania zmiennych środowiskowych z pliku .env
+if (file_exists(get_template_directory() . '/.env')) {
+    $env_vars = parse_ini_file(get_template_directory() . '/.env');
+    foreach ($env_vars as $key => $value) {
+        if (!getenv($key)) {
+            // Ustawienie zmiennych środowiskowych, aby były dostępne przez getenv()
+            putenv("{$key}={$value}");
+        }
+    }
+}
 /**
  * Plik functions.php dla motywu Ting Tong.
  *

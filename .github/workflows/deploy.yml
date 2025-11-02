@@ -12,7 +12,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Create .env file
+    # KRYTYCZNY KROK: Tworzy plik .env z kluczami Stripe w katalogu motywu
+    - name: Create .env file for Stripe keys
       run: |
         echo "Secret_key=${{ secrets.SECRET_KEY }}" > ting-tong-theme/.env
         echo "Publishable_key=${{ secrets.PUBLISHABLE_KEY }}" >> ting-tong-theme/.env
