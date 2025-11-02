@@ -252,7 +252,17 @@ function tt_enqueue_and_localize_scripts() {
 	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
 	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
-	wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js' ], null, true );
+    // Rejestrujemy i kolejkowujemy skrypt Stripe.js
+    wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], '3.0', true );
+
+    // ZMIEŃ kolejkowanie app.js, aby używało dynamicznej wersji
+    wp_enqueue_script(
+        'tingtong-app-script',
+        get_template_directory_uri() . '/js/app.js',
+        [ 'swiper-js', 'stripe-js' ], // UPEWNIJ SIĘ, ŻE stripe-js jest w zależnościach
+        time(), // Użycie time() jako numeru wersji, aby wymusić przeładowanie
+        true
+    );
 
 	wp_localize_script(
 		'tingtong-app-script',
