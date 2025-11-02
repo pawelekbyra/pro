@@ -1,0 +1,1464 @@
+/*
+Theme Name: Ting Tong Theme
+*/
+
+/*
+Table of Contents:
+- A. GLOBAL STYLES
+  - A1. Reset & Variables
+  - A2. Base Typography & Layout
+  - A3. Animations
+  - A4. Utility Classes
+- B. COMPONENTS
+  - B1. Preloader
+  - B2. Main App Frame (#app-frame)
+  - B3. Top Bar
+  - B4. Bottom Bar
+  - B5. Side Bar
+  - B6. Video Player & Overlays
+  - B7. Progress Bar
+  - B8. Login Panel
+  - B9. Logged In Menu
+  - B10. Buttons (Generic)
+  - B11. Form Elements (Generic)
+  - B12. PWA Installation Prompts
+- C. MODALS
+  - C1. Generic Modal Styles
+  - C2. Comments Modal
+  - C3. Account Modal (Profile Settings)
+  - C4. Author Profile Modal (TikTok Style)
+  - C5. First Login Modal
+  - C6. Tipping Modal (Elegant)
+  - C7. Info Modal
+  - C8. Welcome Modal
+  - C9. PWA Modals (Desktop/iOS)
+  - C10. Image Lightbox
+- D. MISCELLANEOUS
+  - D1. Notification Popup
+  - D2. Scrollbars
+- E. RESPONSIVE & DESKTOP STYLES
+  - E1. Desktop Layout (min-width: 600px)
+  - E2. PWA Standalone Mode
+*/
+
+/* ==========================================================================
+   A. GLOBAL STYLES
+   ========================================================================== */
+
+/* A1. Reset & Variables
+   ========================================================================== */
+:root {
+  /* Dynamic Heights */
+  --app-height: 100%; /* Fallback for browsers without JS */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Layout Sizing */
+  --topbar-base-height: 52px;
+  --bottombar-base-height: 70px;
+  --topbar-height: calc(var(--topbar-base-height) + var(--safe-area-top));
+  --bottombar-height: calc(var(--bottombar-base-height) + var(--safe-area-bottom));
+  --sidebar-width: 68px;
+
+  /* Colors */
+  --accent-color: rgb(255, 0, 85);
+  --accent-color-rgb: 255, 0, 85;
+  --accent-color-darker: rgb(220, 0, 75);
+  --background-color: #000;
+  --text-color: #fff;
+  --text-color-secondary: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(255, 255, 255, 0.15);
+  --border-color-hover: rgba(255, 255, 255, 0.3);
+  --success-color: #4caf50;
+  --vip-gold: #ffd700;
+
+  /* Fonts */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent body scroll */
+}
+
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed; /* Fix for mobile viewport issues */
+  top: 0;
+  left: 0;
+}
+
+/* A2. Base Typography & Layout
+   ========================================================================== */
+h1, h2, h3, h4, p { margin-bottom: 0.5em; }
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 600; }
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+/* A3. Animations
+   ========================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideOutDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ambientGlow {
+  0% { transform: rotate(0deg) scale(1.5); opacity: 0.2; }
+  50% { transform: rotate(180deg) scale(1.6); opacity: 0.3; }
+  100% { transform: rotate(360deg) scale(1.5); opacity: 0.2; }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+/* A4. Utility Classes
+   ========================================================================== */
+.hidden { display: none !important; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.disabled, [disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+  filter: grayscale(50%);
+}
+
+/* ==========================================================================
+   B. COMPONENTS
+   ========================================================================== */
+
+/* B1. Preloader
+   ========================================================================== */
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background-color);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+#preloader.preloader-hiding {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Make sure it goes behind everything while fading */
+  z-index: -1;
+}
+
+.preloader-content {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease 0.1s, transform 0.5s ease 0.1s;
+}
+
+#preloader.content-visible .preloader-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#preloader h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -1px;
+}
+
+.language-selection button {
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  margin: 0 10px;
+  border: 2px solid var(--border-color);
+  border-radius: 25px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.language-selection button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.language-selection button.is-selected {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+  pointer-events: none;
+}
+.language-selection button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* B2. Main App Frame (#app-frame)
+   ========================================================================== */
+#app-frame {
+  width: 100%;
+  height: var(--app-height);
+  position: relative;
+  overflow: hidden;
+  background: #111;
+  z-index: 2000;
+}
+
+#webyx-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.webyx-section, .tiktok-symulacja {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.tiktok-symulacja {
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* B3. Top Bar
+   ========================================================================== */
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--safe-area-top) 15px 0;
+  z-index: 10050;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.topbar-icon-btn {
+  position: absolute;
+  top: calc(var(--safe-area-top) + (var(--topbar-base-height) / 2));
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.topbar-icon-btn.left { left: 10px; }
+.topbar-icon-btn.right { right: 10px; }
+.topbar-icon-btn svg { width: 24px; height: 24px; }
+
+.central-text-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.central-text-wrapper.with-arrow::after {
+  content: "▼";
+  font-size: 12px;
+  opacity: 0.8;
+  transition: transform 0.3s;
+}
+.topbar.login-panel-active .central-text-wrapper.with-arrow::after {
+  transform: rotate(180deg);
+}
+
+/* B4. Bottom Bar
+   ========================================================================== */
+.bottombar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--bottombar-height);
+  padding: 0 15px var(--safe-area-bottom) 15px;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: all;
+}
+
+.text-info {
+  flex-grow: 1;
+  overflow: hidden;
+  padding-right: 15px;
+}
+.slide-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.author-name { font-weight: 700; font-size: 1.1em; }
+.slide-title {
+  font-size: 1em;
+  opacity: 0.9;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.slide-description {
+  font-size: 0.9em;
+  opacity: 0.8;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* B5. Side Bar
+   ========================================================================== */
+.sidebar {
+  position: absolute;
+  bottom: var(--bottombar-height);
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10052;
+  gap: 15px;
+  padding-bottom: 10px;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: all;
+}
+
+.sidebar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.sidebar-button.profileButton {
+  position: relative;
+  margin-bottom: -15px; /* Pull icon down */
+}
+.sidebar-button img, .sidebar-button svg {
+  width: 38px;
+  height: 38px;
+}
+.profileButton img {
+  border-radius: 50%;
+  border: 2px solid white;
+}
+.vip-avatar-border {
+  border-color: var(--vip-gold) !important;
+  box-shadow: 0 0 10px var(--vip-gold), 0 0 5px var(--vip-gold) inset;
+}
+
+.sidebar-button span {
+  font-size: 0.8em;
+  font-weight: 600;
+}
+.sidebar-button .plus-icon {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  border: 2px solid #000;
+}
+
+.like-button svg path {
+  transition: fill 0.2s ease;
+}
+.like-button.active svg path {
+  fill: var(--accent-color);
+}
+
+
+/* B6. Video Player & Overlays
+   ========================================================================== */
+.tiktok-symulacja video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.tiktok-symulacja .profile img {
+  background-color: white; /* Ensure transparent PNGs have a solid bg */
+}
+
+/* Initial state for UI elements before video loads */
+.tiktok-symulacja .sidebar,
+.tiktok-symulacja .bottombar,
+.tiktok-symulacja .topbar,
+.tiktok-symulacja .progress-bar-container {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+/* Visible state after video is ready */
+.tiktok-symulacja.video-loaded .sidebar,
+.tiktok-symulacja.video-loaded .bottombar,
+.tiktok-symulacja.video-loaded .topbar,
+.tiktok-symulacja.video-loaded .progress-bar-container {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- Overlays --- */
+.video-overlay {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s, visibility 0.3s;
+  z-index: 10010;
+  /* Position relative to top/bottom bars */
+  top: var(--topbar-height);
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
+}
+.video-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.video-overlay-icon {
+  width: 80px;
+  height: 80px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.secret-overlay-content, .pwa-secret-overlay-content {
+  text-align: center;
+  padding: 20px;
+}
+.secret-icon, .pwa-secret-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+}
+.secret-title, .pwa-secret-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.secret-subtitle, .pwa-secret-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+.secret-subtitle u, .pwa-secret-subtitle u {
+  text-decoration: none;
+  border-bottom: 2px solid white;
+  cursor: pointer;
+}
+
+/* --- Video Controls (left side) --- */
+.video-controls {
+  position: absolute;
+  bottom: var(--bottombar-height);
+  left: 4px; /* Move closer to edge */
+  display: flex;
+  flex-direction: row; /* Changed to row */
+  align-items: center; /* Center items vertically */
+  z-index: 10051;
+  gap: 4px; /* Space between buttons */
+}
+.video-controls-button {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.video-controls-button svg {
+  width: 24px;
+  height: 24px;
+}
+.fullscreen-exit-icon, .volume-off-icon { display: none; }
+
+/* --- Immersive Mode (hide UI) --- */
+#app-frame.hide-ui .topbar,
+#app-frame.hide-ui .bottombar,
+#app-frame.hide-ui .sidebar,
+#app-frame.hide-ui .video-controls,
+#app-frame.hide-ui .progress-bar-container {
+  opacity: 0;
+  pointer-events: none;
+}
+#app-frame.hide-ui .cc-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* B7. Progress Bar
+   ========================================================================== */
+.progress-bar-container {
+  width: calc(100% - 30px); /* 15px padding on each side */
+  position: absolute;
+  bottom: calc(var(--bottombar-height) - 10px);
+  left: 15px;
+  z-index: 10051;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+/* Move progress bar up when PWA prompt is visible */
+.app-frame--pwa-visible .progress-bar-container {
+    transform: translateY(calc(-1 * var(--bottombar-height)));
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  position: relative;
+  border-radius: 2px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--accent-color);
+  width: 0%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 2px;
+}
+.progress-bar-handle {
+  width: 14px;
+  height: 14px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  left: 0%;
+  transition: transform 0.2s;
+  z-index: 10001; /* High z-index to be on top of PWA bar */
+}
+.progress-bar:hover .progress-bar-handle,
+.progress-bar.dragging .progress-bar-handle {
+  transform: translateY(-50%) scale(1);
+}
+
+/* B8. Login Panel
+   ========================================================================== */
+.login-panel {
+  position: absolute;
+  top: var(--topbar-height);
+  left: 0;
+  width: 100%;
+  background: #1a1a1a;
+  padding: 20px;
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 10040;
+}
+.login-panel.active {
+  transform: translateY(0);
+}
+
+/* B9. Logged In Menu
+   ========================================================================== */
+.logged-in-menu {
+  position: absolute;
+  top: var(--topbar-height);
+  right: 10px;
+  width: 200px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.2s ease-out;
+  z-index: 10040;
+}
+.logged-in-menu.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.logged-in-menu ul {
+  list-style: none;
+}
+.logged-in-menu li a {
+  display: block;
+  padding: 10px;
+  border-radius: 4px;
+  color: white;
+  text-decoration: none;
+}
+.logged-in-menu li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* B10. Buttons (Generic)
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.2s, transform 0.1s;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary {
+  background-color: var(--accent-color);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--accent-color-darker);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+.btn-secondary {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+.btn-full-width {
+  width: 100%;
+}
+
+/* B11. Form Elements (Generic)
+   ========================================================================== */
+.form-group {
+  margin-bottom: 15px;
+  position: relative;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+}
+.form-group input {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.3);
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1.0; /* Fully opaque */
+}
+
+.password-toggle-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: #000; /* Solid black fill */
+}
+
+/* Hide the open eye icon by default */
+.eye-icon-open {
+  display: none;
+}
+/* B12. PWA Installation Prompts
+   ========================================================================== */
+.pwa-prompt, .pwa-prompt-ios {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #222;
+  height: var(--bottombar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px var(--safe-area-bottom);
+  z-index: 10000;
+  visibility: hidden;
+  transform: translateY(100%);
+  /* Include visibility in the transition */
+  transition: transform 0.8s, visibility 0.8s;
+}
+
+.pwa-prompt.visible, .pwa-prompt-ios.visible {
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.pwa-prompt-text { flex-grow: 1; margin-right: 15px; }
+.pwa-prompt-text strong { display: block; }
+.pwa-prompt-text span { font-size: 0.9em; opacity: 0.8; }
+
+#pwa-install-button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   C. MODALS
+   ========================================================================== */
+
+/* C1. Generic Modal Styles
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10200;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: #1c1c1c;
+  padding: 25px;
+  border-radius: 12px;
+  position: relative;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: transform 0.3s;
+}
+
+.modal-overlay.visible .modal-content {
+  transform: scale(1);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-color-secondary);
+}
+
+/* C2. Comments Modal (Bottom Sheet Style)
+   ========================================================================== */
+#comments-modal-container {
+  align-items: flex-end; /* Dock to bottom */
+  background: none; /* Overlay is handled by ::before */
+}
+
+#comments-modal-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#comments-modal-container.visible::before {
+  opacity: 1;
+}
+
+.comments-modal-content {
+  background-color: #181818;
+  width: 100%;
+  max-height: 85vh;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#comments-modal-container.visible .comments-modal-content {
+  transform: translateY(0);
+}
+
+#comments-modal-container.is-hiding .comments-modal-content {
+  transform: translateY(100%);
+}
+
+.comments-modal-header {
+  padding: 10px 15px;
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.comments-modal-header::before { /* Drag handle */
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2.5px;
+}
+
+.comments-modal-header .topbar-close-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#commentsTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 20px; /* Space for drag handle */
+}
+
+.comments-modal-body {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.comments-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-trigger {
+  color: var(--text-color-secondary);
+  font-size: 0.9em;
+}
+
+.sort-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 5px;
+  display: none;
+  z-index: 10;
+}
+
+.sort-dropdown.open .sort-options {
+  display: block;
+}
+
+.sort-options button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.sort-options button.active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.comments-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-color-secondary);
+}
+
+/* Comment Item Styling */
+.comment-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.comment-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.comment-main {
+  flex-grow: 1;
+}
+.comment-body {
+  background: #252525;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+.comment-author {
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+.comment-text {
+  font-size: 1em;
+  line-height: 1.4;
+  white-space: pre-wrap; /* Preserve line breaks */
+  word-wrap: break-word;
+}
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 8px;
+  font-size: 0.8em;
+  color: var(--text-color-secondary);
+}
+
+.comment-like-btn.active {
+    color: var(--accent-color);
+}
+.comment-like-btn.active svg path {
+    fill: var(--accent-color);
+}
+
+/* Comment Form */
+.comment-form-container {
+  padding: 10px 15px calc(10px + var(--safe-area-bottom));
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+#comment-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #2a2a2a;
+  border-radius: 25px;
+  padding: 5px 10px;
+}
+#comment-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  font-size: 1rem;
+}
+#comment-input:focus { outline: none; }
+#comment-form button {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#comment-form svg { width: 22px; height: 22px; }
+
+/* C3. Account Modal (Profile Settings)
+   ========================================================================== */
+.account-modal-overlay {
+  background: #000;
+  transition: opacity 0.4s, visibility 0.4s;
+}
+.account-modal-content {
+  background: #000;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.account-modal-overlay.visible .account-modal-content {
+  transform: translateX(0);
+}
+.account-modal-overlay.is-hiding .account-modal-content {
+  transform: translateX(100%);
+}
+
+.account-header {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: var(--safe-area-top);
+  position: relative;
+  flex-shrink: 0;
+}
+.account-header .topbar-close-btn {
+  position: absolute;
+  left: 10px;
+  top: calc(var(--safe-area-top) + (var(--topbar-base-height) / 2));
+  transform: translateY(-50%);
+}
+.account-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  padding-bottom: 80px; /* Ensure space for last button */
+}
+
+/* C4. Author Profile Modal (TikTok Style)
+   ========================================================================== */
+#tiktok-profile-modal {
+  background: #000;
+  position: fixed; /* For mobile slide-in */
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+#tiktok-profile-modal.visible {
+  transform: translateX(0);
+}
+#tiktok-profile-modal.is-hiding {
+  transform: translateX(100%);
+}
+/* C5. First Login Modal
+   ========================================================================== */
+#firstLoginModal {
+  align-items: flex-end; /* Bottom sheet */
+}
+
+.first-login-modal-content-wrapper {
+  background-color: #181818;
+  width: 100%;
+  max-height: 90vh;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden; /* Important for step transitions */
+}
+#firstLoginModal.visible .first-login-modal-content-wrapper {
+  transform: translateY(0);
+}
+
+/* C6. Tipping Modal (Elegant)
+   ========================================================================== */
+#tippingModal.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+    /* ✅ FIX: Add important to win specificity war */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.elegant-modal-content {
+  background: #1A1A1A;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 420px;
+  padding: 30px;
+  position: relative;
+}
+.elegant-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: var(--text-color-secondary);
+}
+.elegant-modal-step {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+.elegant-modal-step.active {
+  display: block;
+}
+.elegant-modal-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 25px;
+}
+.elegant-modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  margin-top: 10px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.elegant-modal-btn:active {
+  transform: scale(0.98);
+}
+.elegant-modal-btn-primary {
+  background-color: var(--accent-color);
+  color: white;
+}
+.elegant-modal-btn-secondary {
+  background: none;
+  border: 2px solid var(--border-color);
+  color: white;
+}
+
+/* C7. Info Modal
+   ========================================================================== */
+#infoModal .modal-content {
+  background: #111;
+  border: 1px solid var(--border-color);
+}
+#infoModal p {
+  text-align: center;
+  font-size: 1.1em;
+  line-height: 1.6;
+}
+
+/* C8. Welcome Modal
+   ========================================================================== */
+/* Styles for the new welcome modal, if any, go here */
+
+/* C9. PWA Modals (Desktop/iOS)
+   ========================================================================== */
+#pwa-desktop-modal .modal-content, #pwa-ios-instructions .modal-content {
+    background-color: #2a2a2a;
+}
+
+/* C10. Image Lightbox
+   ========================================================================== */
+.image-lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10300;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.image-lightbox.visible {
+  opacity: 1;
+  visibility: visible;
+}
+.image-lightbox img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+}
+.image-lightbox-close {
+  position: absolute;
+  top: calc(var(--safe-area-top) + 15px);
+  right: 15px;
+  font-size: 30px;
+  color: white;
+}
+/* ==========================================================================
+   D. MISCELLANEOUS
+   ========================================================================== */
+
+/* D1. Notification Popup
+   ========================================================================== */
+#notificationPopup {
+  position: absolute;
+  top: var(--topbar-height);
+  right: 10px;
+  width: 300px;
+  max-height: 400px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 10100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+#notificationPopup.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* D2. Scrollbars
+   ========================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) rgba(255, 255, 255, 0.1);
+}
+*::-webkit-scrollbar {
+  width: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   E. RESPONSIVE & DESKTOP STYLES
+   ========================================================================== */
+
+/* E1. Desktop Layout (min-width: 600px)
+   ========================================================================== */
+@media (min-width: 600px) {
+  body {
+    background: #0a0a0a;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vmax;
+    height: 100vmax;
+    background-image: radial-gradient(circle at center,
+        rgba(var(--accent-color-rgb), 0.2) 0%,
+        rgba(var(--accent-color-rgb), 0) 50%);
+    animation: ambientGlow 20s linear infinite;
+    z-index: 0;
+  }
+
+  #app-frame {
+    height: 90vh;
+    max-height: 900px;
+    width: calc(90vh * 9 / 16);
+    max-width: 506px;
+    border-radius: 30px;
+    border: 8px solid #222;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.7),
+                0 0 20px rgba(var(--accent-color-rgb), 0.3);
+  }
+
+  /* Constrain PWA prompts to the app frame on desktop */
+  .pwa-prompt, .pwa-prompt-ios {
+    width: calc(100vh * 9 / 16);
+    max-width: 506px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+  }
+  .pwa-prompt.visible, .pwa-prompt-ios.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Center some modals in the viewport, not the app frame */
+  #infoModal.modal-overlay, #tippingModal.modal-overlay {
+    width: 100vw;
+  }
+
+  /* Keep other modals constrained */
+  #tiktok-profile-modal {
+      position: absolute; /* Revert from fixed for desktop */
+  }
+  .account-modal-overlay {
+      width: 100%;
+      height: 100%;
+  }
+}
+
+/* E2. PWA Standalone Mode
+   ========================================================================== */
+@media (display-mode: standalone) {
+  /* Fix black screen issue in PWA */
+  #app-frame {
+    height: 100% !important;
+  }
+  /* Hide install prompts when already installed */
+  .pwa-prompt, .pwa-prompt-ios {
+    display: none;
+  }
+  /* Remove fullscreen button border in PWA */
+  .fullscreen-button { border: none; }
+}
+
+/* --- Toast Notification --- */
+#alertBox {
+  position: absolute;
+  bottom: calc(var(--bottombar-height) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: white;
+  border-radius: 25px;
+  z-index: 11000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  /* Text wrapping control */
+  width: fit-content;
+  max-width: 90%;
+  text-align: center;
+  white-space: nowrap;
+}
+#alertText {
+  white-space: normal; /* Allow text inside to wrap */
+}
+
+#alertBox.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-20px);
+}
+#alertBox.error {
+    background-color: var(--accent-color) !important;
+}
+
+#mockLoginBtn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 99999;
+  padding: 5px;
+  background: rgba(255, 0, 85, 0.5);
+  border: 1px solid white;
+  color: white;
+  display: none;
+}
