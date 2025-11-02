@@ -99,6 +99,13 @@ function handleNextStep() {
 }
 
 function handlePrevStep() {
+    const isPatron = State.get('isUserLoggedIn');
+
+    // KROK C: Zablokuj cofanie do Kroku 0, jeśli użytkownik jest Patronem
+    if (isPatron && currentStep === 1) {
+        return;
+    }
+
     if (currentStep > 0) {
         currentStep--;
         updateStepDisplay();
@@ -230,6 +237,9 @@ function showModal() {
 
     loadStripeScript()
         .then(() => {
+            const currentUser = State.get('currentUser');
+            const isPatron = State.get('isUserLoggedIn'); // Pobieramy status logowania
+
             dom.createAccountCheckbox?.addEventListener('change', e => {
                 dom.emailContainer.classList.toggle('visible', e.target.checked);
             });
@@ -237,22 +247,32 @@ function showModal() {
             translateUI();
             currentStep = 0;
 
-            const currentUser = State.get('currentUser');
-            if (currentUser && currentUser.email) {
-                dom.emailInput.value = currentUser.email;
-            } else {
-                dom.emailInput.value = '';
-            }
+            if (isPatron) {
+                // KROK A: Pomijanie Kroku 0 i wstępne zapisanie danych Patrona
+                currentStep = 1;
 
-            dom.amountInput.value = '';
-            if (dom.createAccountCheckbox) {
-                dom.createAccountCheckbox.checked = false;
-            }
-            if (document.getElementById('termsAccept')) {
-                document.getElementById('termsAccept').checked = false;
-            }
-            if (dom.emailContainer) {
-                dom.emailContainer.classList.remove('visible');
+                // Zapisz dane Patrona do formData (dla Stripe i przyszłych maili)
+                formData.create_account = true;
+                formData.email = currentUser.email;
+
+                // UX: Pokaż wiadomość powitalną i ustaw wartość input (dla spójności)
+                UI.showToast(Utils.getTranslation('tippingPatronMessage').replace('{email}', currentUser.email));
+                if (dom.emailInput) {
+                    dom.emailInput.value = currentUser.email;
+                }
+
+            } else {
+                // KROK B: Logika dla gościa (zaczyna od Kroku 0)
+                dom.emailInput.value = '';
+                if (dom.createAccountCheckbox) {
+                    dom.createAccountCheckbox.checked = false;
+                }
+                if (document.getElementById('termsAccept')) {
+                    document.getElementById('termsAccept').checked = false;
+                }
+                if (dom.emailContainer) {
+                    dom.emailContainer.classList.remove('visible');
+                }
             }
 
             UI.openModal(dom.modal);
