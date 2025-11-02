@@ -1,19 +1,12 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
-import * as ApiModule from './api.js';
-
-const API = ApiModule.API;
-
-let stripe = null;
-let elements = null;
-let paymentElement = null;
 
 let dom = {};
 let currentStep = 0;
-const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
+const totalSteps = 3; // 0: options, 1: amount, 2: processing
 let formData = {};
-let previousStep = 0;
+let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
 
 function cacheDOM() {
     dom = {
@@ -25,6 +18,7 @@ function cacheDOM() {
         steps: document.querySelectorAll('#tippingModal .elegant-modal-step'),
         prevBtn: document.getElementById('tippingPrevBtn'),
         nextBtn: document.getElementById('tippingNextBtn'),
+        submitBtn: document.getElementById('tippingSubmitBtn'),
         createAccountCheckbox: document.getElementById('tippingCreateAccount'),
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
@@ -39,33 +33,35 @@ function updateStepDisplay(isShowingTerms = false) {
         return;
     }
 
-    const activeStepInDOM = isShowingTerms ? 4 : currentStep;
-
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
-        stepEl.classList.toggle('active', step === activeStepInDOM);
+        stepEl.classList.toggle('active', isShowingTerms ? step === 3 : step === currentStep);
     });
 
     const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
-    const footer = dom.form.querySelector('.elegant-modal-footer');
-    const isProcessingStep = currentStep === 3;
 
-    if (footer) {
-        footer.style.display = (isTermsVisible || isProcessingStep) ? 'none' : 'block';
-    }
+    const isFirstStep = currentStep === 0;
+    const isAmountStep = currentStep === 1;
+    const isProcessingStep = currentStep === 2;
 
-    if (dom.prevBtn) {
-        dom.prevBtn.style.display = (currentStep > 0 && !isProcessingStep) ? 'flex' : 'none';
-    }
-    if (dom.nextBtn) {
-        dom.nextBtn.style.display = (currentStep < 2 && !isProcessingStep) ? 'flex' : 'none';
-        if (currentStep === 2) {
-            dom.nextBtn.style.display = 'none';
-        }
+    // Pokaż/ukryj stopkę z przyciskami nawigacyjnymi
+    dom.form.querySelector('.elegant-modal-footer').style.display = isTermsVisible ? 'none' : 'block';
+
+
+    // Use flex as the new buttons are in a flex container
+    dom.prevBtn.style.display = isAmountStep ? 'flex' : 'none';
+    dom.nextBtn.style.display = isFirstStep ? 'flex' : 'none';
+    dom.submitBtn.style.display = isAmountStep ? 'flex' : 'none';
+
+    if (isProcessingStep) {
+        dom.prevBtn.style.display = 'none';
+        dom.nextBtn.style.display = 'none';
+        dom.submitBtn.style.display = 'none';
     }
 
     if (dom.progressBar) {
-        const progress = ((currentStep + 1) / totalSteps) * 100;
+        // Ensure progress bar never goes to 0% if it's visible
+        const progress = currentStep > -1 ? ((currentStep + 1) / totalSteps) * 100 : 33.33;
         dom.progressBar.style.width = `${progress}%`;
     }
 }
@@ -73,11 +69,7 @@ function updateStepDisplay(isShowingTerms = false) {
 function handleNextStep() {
     if (validateStep(currentStep)) {
         collectData(currentStep);
-        if (currentStep === 1) {
-            currentStep++;
-            updateStepDisplay();
-            initializePaymentElement();
-        } else if (currentStep < totalSteps - 1) {
+        if (currentStep < totalSteps - 1) {
             currentStep++;
             updateStepDisplay();
         }
@@ -85,13 +77,6 @@ function handleNextStep() {
 }
 
 function handlePrevStep() {
-    const isPatron = State.get('isUserLoggedIn');
-
-    // KROK C: Zablokuj cofanie do Kroku 0, jeśli użytkownik jest Patronem
-    if (isPatron && currentStep === 1) {
-        return;
-    }
-
     if (currentStep > 0) {
         currentStep--;
         updateStepDisplay();
@@ -100,13 +85,16 @@ function handlePrevStep() {
 
 function validateStep(step) {
     if (step === 0) {
+        // Jeśli checkbox "Załóż konto" jest zaznaczony, waliduj e-mail
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (email === '') {
+                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
                 UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
+                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
                 UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
                 return false;
             }
@@ -136,63 +124,49 @@ function hideTerms() {
     updateStepDisplay(false);
 }
 
+
 function collectData(step) {
     if (step === 0) {
         formData.create_account = dom.createAccountCheckbox.checked;
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        const currencySelector = document.getElementById('tippingCurrency');
-        formData.currency = currencySelector ? currencySelector.value : 'PLN';
     }
 }
 
-async function initializePaymentElement() {
-    const paymentElementContainer = document.getElementById('stripe-payment-element');
-    if (paymentElementContainer) {
-        paymentElementContainer.innerHTML = '';
-    }
+async function handleFormSubmit() {
+    if (!validateStep(currentStep)) return;
+    collectData(currentStep);
 
-    try {
-        const response = await API.createStripePaymentIntent(formData);
+    currentStep++;
+    updateStepDisplay();
 
-        if (response.success && response.data.clientSecret) {
-            const clientSecret = response.data.clientSecret;
+    console.log('Processing payment with data:', formData);
 
-            if (!stripe) {
-                stripe = Stripe(TingTongConfig.stripePublicKey, { locale: 'pl' });
-            }
+    // Simulate payment processing
+    setTimeout(() => {
+        UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
+        hideModal();
 
-            elements = stripe.elements({ clientSecret });
-
-            paymentElement = elements.create('payment', {
-                layout: {
-                    type: 'accordion',
-                    defaultCollapsed: true
-                }
-            });
-
-            if (paymentElementContainer) {
-                paymentElement.mount('#stripe-payment-element');
-            }
-        } else {
-            const errorMessage = response.data?.message || 'Błąd: Nie udało się przygotować płatności (serwer).';
-            UI.showAlert(errorMessage, true);
-            currentStep = 1;
+        // Reset state after a short delay to allow for closing animation
+        setTimeout(() => {
+            currentStep = 0;
+            formData = {};
+            if(dom.form) dom.form.reset();
+            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
+            if (dom.emailContainer) dom.emailContainer.classList.add('visible');
+            document.getElementById('termsAccept').checked = false;
             updateStepDisplay();
-        }
+        }, 500);
 
-    } catch (error) {
-        console.error('Krytyczny błąd inicjalizacji Stripe:', error);
-        UI.showAlert('Wystąpił błąd komunikacji z serwerem płatności.', true);
-        currentStep = 1;
-        updateStepDisplay();
-    }
+    }, 2500);
 }
 
 function translateUI() {
     if (!dom.modal) return;
+
     const currentLang = State.get('currentLang') || 'pl';
+
     dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
         const key = el.dataset.translateKey;
         let translation = Utils.getTranslation(key);
@@ -203,6 +177,7 @@ function translateUI() {
             el.innerHTML = translation;
         }
     });
+
     dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
         const key = el.dataset.translatePlaceholder;
         let translation = Utils.getTranslation(key);
@@ -217,60 +192,45 @@ function translateUI() {
 
 function showModal() {
     cacheDOM();
+
     if (!dom.modal) {
         console.error("Tipping modal not found in DOM");
         return;
     }
 
-    try {
-        if (!window.Stripe) {
-            throw new Error('Stripe.js is not loaded.');
-        }
+    dom.createAccountCheckbox?.addEventListener('change', e => {
+        dom.emailContainer.classList.toggle('visible', e.target.checked);
+    });
 
-        const currentUser = State.get('currentUser');
-        const isPatron = State.get('isUserLoggedIn'); // Pobieramy status logowania
+    translateUI();
+    currentStep = 0;
 
-        dom.createAccountCheckbox?.addEventListener('change', e => {
-                dom.emailContainer.classList.toggle('visible', e.target.checked);
-            });
-
-            translateUI();
-            currentStep = 0;
-
-            if (isPatron) {
-                // KROK A: Pomijanie Kroku 0 i wstępne zapisanie danych Patrona
-                currentStep = 1;
-
-                // Zapisz dane Patrona do formData (dla Stripe i przyszłych maili)
-                formData.create_account = true;
-                formData.email = currentUser.email;
-
-                // UX: Pokaż wiadomość powitalną i ustaw wartość input (dla spójności)
-                UI.showToast(Utils.getTranslation('tippingPatronMessage').replace('{email}', currentUser.email));
-                if (dom.emailInput) {
-                    dom.emailInput.value = currentUser.email;
-                }
-
-            } else {
-                // KROK B: Logika dla gościa (zaczyna od Kroku 0)
-                dom.emailInput.value = '';
-                if (dom.createAccountCheckbox) {
-                    dom.createAccountCheckbox.checked = false;
-                }
-                if (document.getElementById('termsAccept')) {
-                    document.getElementById('termsAccept').checked = false;
-                }
-                if (dom.emailContainer) {
-                    dom.emailContainer.classList.remove('visible');
-                }
-            }
-
-            UI.openModal(dom.modal);
-            updateStepDisplay();
-    } catch (error) {
-        console.error(error);
-        UI.showAlert('Błąd ładowania komponentu płatności. Spróbuj ponownie później.', true);
+    const currentUser = State.get('currentUser');
+    if (currentUser && currentUser.email) {
+        dom.emailInput.value = currentUser.email;
+    } else {
+        dom.emailInput.value = '';
     }
+
+    // Set default amount
+    dom.amountInput.value = '';
+
+
+    // Ensure checkbox is unchecked by default
+    if (dom.createAccountCheckbox) {
+        dom.createAccountCheckbox.checked = false;
+    }
+     if (document.getElementById('termsAccept')) {
+        document.getElementById('termsAccept').checked = false;
+    }
+    // Hide email input by default
+    if (dom.emailContainer) {
+        dom.emailContainer.classList.remove('visible');
+    }
+
+    // Use the generic UI.openModal which should handle the .visible class
+    UI.openModal(dom.modal);
+    updateStepDisplay();
 }
 
 function hideModal() {
@@ -282,10 +242,12 @@ function init() {
     cacheDOM();
     if (!dom.modal) return;
 
+    // Listener for the close button
     if (dom.closeBtn) {
         dom.closeBtn.addEventListener('click', hideModal);
     }
 
+    // Listener for the background overlay click
     dom.modal.addEventListener('click', (e) => {
         if (e.target === dom.modal) {
             hideModal();
@@ -306,4 +268,5 @@ export const TippingModal = {
     hideModal,
     handleNextStep,
     handlePrevStep,
+    handleFormSubmit,
 };
