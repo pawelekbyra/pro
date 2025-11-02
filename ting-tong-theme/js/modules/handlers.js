@@ -871,8 +871,7 @@ export const Handlers = {
             UI.renderComments(slideData.comments);
 
             // Zaktualizuj licznik w głównym widoku
-            const slideElement = document.querySelector(`.swiper-slide-active[data-slide-id="${slideId}"]`);
-            const mainSlideCount = slideElement?.querySelector(".comment-count");
+            const mainSlideCount = slideElement.querySelector(".comment-count");
             if (mainSlideCount) {
               mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
             }
