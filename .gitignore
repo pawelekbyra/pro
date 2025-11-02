@@ -15,6 +15,3 @@ lerna-debug.log*
 
 # Caches
 .eslintcache
-
-# Test results
-/test-results
