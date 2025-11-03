@@ -166,9 +166,33 @@ export const Config = {
           pl: "Przejdź do płatności",
           en: "Proceed to Payment"
       },
+      tippingPay: {
+        pl: "Płacę!",
+        en: "Pay!"
+      },
       tippingSuccessMessage: {
         pl: "Dziękujemy za napiwek w wysokości {amount} EUR!",
         en: "Thank you for your {amount} EUR tip!",
+      },
+      errorEmailRequired: {
+        pl: "Adres e-mail jest wymagany.",
+        en: "Email address is required."
+      },
+      errorTermsNotAccepted: {
+        pl: "Musisz zaakceptować regulamin.",
+        en: "You must accept the terms and conditions."
+      },
+      errorInvalidAmount: {
+        pl: "Proszę podać prawidłową kwotę (minimum 1).",
+        en: "Please enter a valid amount (minimum 1)."
+      },
+      tippingStep4Desc: {
+        pl: "Dziękujemy! Trwa weryfikacja Twojej płatności.",
+        en: "Thank you! Your payment is being verified."
+      },
+      tippingProcessingHint: {
+        pl: "To może potrwać chwilę...",
+        en: "This may take a moment..."
       },
       errorInvalidEmail: {
         pl: "Proszę podać poprawny adres email.",

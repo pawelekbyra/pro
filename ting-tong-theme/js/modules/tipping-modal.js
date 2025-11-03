@@ -1,12 +1,18 @@
 import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { State } from './state.js';
+import { API } from './api.js';
 
 let dom = {};
 let currentStep = 0;
-const totalSteps = 3; // 0: options, 1: amount, 2: processing
+const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
 let formData = {};
-let previousStep = 0; // Zapamiętuje poprzedni krok przed pokazaniem regulaminu
+let previousStep = 0;
+
+// Stripe variables
+let stripe;
+let elements;
+let paymentElement;
 
 function cacheDOM() {
     dom = {
@@ -23,60 +29,85 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
+        currencyDisplay: document.getElementById('tippingCurrency'),
+        termsCheckbox: document.getElementById('termsAccept'),
         termsStep: document.getElementById('terms-step'),
+        paymentElementContainer: document.getElementById('payment-element'),
+        paymentMessage: document.getElementById('payment-message'),
+        // Error containers
+        step0Error: document.getElementById('tippingStep0Error'),
+        step1Error: document.getElementById('tippingStep1Error'),
     };
 }
 
-function updateStepDisplay(isShowingTerms = false) {
-    if (!dom.modal || !dom.steps || dom.steps.length === 0) {
-        console.error("Tipping modal steps not found or cached correctly.");
-        return;
-    }
-
-    dom.steps.forEach(stepEl => {
-        const step = parseInt(stepEl.dataset.step, 10);
-        stepEl.classList.toggle('active', isShowingTerms ? step === 3 : step === currentStep);
-    });
-
-    const isTermsVisible = dom.termsStep && dom.termsStep.classList.contains('active');
-
-    const isFirstStep = currentStep === 0;
-    const isAmountStep = currentStep === 1;
-    const isProcessingStep = currentStep === 2;
-
-    // Pokaż/ukryj stopkę z przyciskami nawigacyjnymi
-    dom.form.querySelector('.elegant-modal-footer').style.display = isTermsVisible ? 'none' : 'block';
-
-
-    // Use flex as the new buttons are in a flex container
-    dom.prevBtn.style.display = isAmountStep ? 'flex' : 'none';
-    dom.nextBtn.style.display = isFirstStep ? 'flex' : 'none';
-    dom.submitBtn.style.display = isAmountStep ? 'flex' : 'none';
-
-    if (isProcessingStep) {
-        dom.prevBtn.style.display = 'none';
-        dom.nextBtn.style.display = 'none';
-        dom.submitBtn.style.display = 'none';
-    }
-
-    if (dom.progressBar) {
-        // Ensure progress bar never goes to 0% if it's visible
-        const progress = currentStep > -1 ? ((currentStep + 1) / totalSteps) * 100 : 33.33;
-        dom.progressBar.style.width = `${progress}%`;
+function showLocalError(step, messageKey) {
+    hideLocalErrors();
+    const errorContainer = dom[`step${step}Error`];
+    if (errorContainer) {
+        errorContainer.textContent = Utils.getTranslation(messageKey);
+        errorContainer.style.display = 'block';
     }
 }
 
-function handleNextStep() {
-    if (validateStep(currentStep)) {
-        collectData(currentStep);
-        if (currentStep < totalSteps - 1) {
-            currentStep++;
-            updateStepDisplay();
-        }
+function hideLocalErrors() {
+    if (dom.step0Error) dom.step0Error.style.display = 'none';
+    if (dom.step1Error) dom.step1Error.style.display = 'none';
+}
+
+function updateStepDisplay(isShowingTerms = false) {
+    dom.steps.forEach(stepEl => {
+        const step = parseInt(stepEl.dataset.step, 10);
+        stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
+    });
+
+    const isTermsVisible = dom.termsStep?.classList.contains('active');
+    dom.form.querySelector('.elegant-modal-footer').style.display = isTermsVisible ? 'none' : 'block';
+
+    const isEmailStep = currentStep === 0;
+    const isAmountStep = currentStep === 1;
+    const isPaymentStep = currentStep === 2;
+    const isProcessingStep = currentStep === 3;
+
+    dom.prevBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
+    dom.nextBtn.style.display = (isEmailStep || isAmountStep) ? 'flex' : 'none';
+
+    // Zmiana tekstu przycisku na kroku płatności
+    if (isPaymentStep) {
+        dom.nextBtn.textContent = Utils.getTranslation('tippingPay');
+    } else {
+        dom.nextBtn.textContent = Utils.getTranslation('tippingNext');
+    }
+
+    // Ukryj wszystkie przyciski w kroku przetwarzania
+    if (isProcessingStep || isTermsVisible) {
+        dom.prevBtn.style.display = 'none';
+        dom.nextBtn.style.display = 'none';
+    }
+
+    dom.progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
+}
+
+async function handleNextStep() {
+    hideLocalErrors();
+    if (!validateStep(currentStep)) return;
+
+    collectData(currentStep);
+
+    if (currentStep === 1) { // Po kroku kwoty, przed krokiem płatności
+        await initializePaymentElement();
+    } else if (currentStep === 2) { // Na kroku płatności, kliknięcie "Płacę!"
+        await handleFormSubmit();
+        return; // handleFormSubmit zarządza dalszymi krokami
+    }
+
+    if (currentStep < totalSteps - 1) {
+        currentStep++;
+        updateStepDisplay();
     }
 }
 
 function handlePrevStep() {
+    hideLocalErrors();
     if (currentStep > 0) {
         currentStep--;
         updateStepDisplay();
@@ -85,29 +116,25 @@ function handlePrevStep() {
 
 function validateStep(step) {
     if (step === 0) {
-        // Jeśli checkbox "Załóż konto" jest zaznaczony, waliduj e-mail
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
-            if (email === '') {
-                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
-                UI.showAlert(Utils.getTranslation('errorEmailRequired') || 'Adres e-mail jest wymagany.', true);
+            if (!email) {
+                showLocalError(0, 'errorEmailRequired');
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
-                // Użyj klucza tłumaczenia, jeśli istnieje, w przeciwnym razie użyj tekstu domyślnego
-                UI.showAlert(Utils.getTranslation('errorInvalidEmail') || 'Proszę podać poprawny adres e-mail.', true);
+                showLocalError(0, 'errorInvalidEmail');
                 return false;
             }
         }
-    }
-    if (step === 1) {
+    } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         if (isNaN(amount) || amount < 1) {
-            UI.showAlert(Utils.getTranslation('errorMinTipAmount'), true);
+            showLocalError(1, 'errorInvalidAmount');
             return false;
         }
-        if (!document.getElementById('termsAccept').checked) {
-            UI.showAlert('Proszę zaakceptować regulamin.', true);
+        if (!dom.termsCheckbox.checked) {
+            showLocalError(1, 'errorTermsNotAccepted');
             return false;
         }
     }
@@ -124,147 +151,145 @@ function hideTerms() {
     updateStepDisplay(false);
 }
 
-
 function collectData(step) {
     if (step === 0) {
         formData.create_account = dom.createAccountCheckbox.checked;
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
+        formData.currency = dom.currencyDisplay.textContent.toLowerCase();
     }
 }
 
-async function handleFormSubmit() {
-    if (!validateStep(currentStep)) return;
-    collectData(currentStep);
+async function initializePaymentElement() {
+    try {
+        const clientSecret = await API.createStripePaymentIntent(formData.amount, formData.currency);
 
-    currentStep++;
-    updateStepDisplay();
+        const appearance = { theme: 'night', labels: 'floating' };
+        elements = stripe.elements({ appearance, clientSecret });
 
-    console.log('Processing payment with data:', formData);
+        const paymentElementOptions = {
+            layout: {
+                type: 'accordion',
+                defaultCollapsed: true,
+            }
+        };
 
-    // Simulate payment processing
-    setTimeout(() => {
-        UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
-        hideModal();
+        paymentElement = elements.create("payment", paymentElementOptions);
+        paymentElement.mount(dom.paymentElementContainer);
 
-        // Reset state after a short delay to allow for closing animation
-        setTimeout(() => {
-            currentStep = 0;
-            formData = {};
-            if(dom.form) dom.form.reset();
-            if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
-            if (dom.emailContainer) dom.emailContainer.classList.add('visible');
-            document.getElementById('termsAccept').checked = false;
-            updateStepDisplay();
-        }, 500);
-
-    }, 2500);
+    } catch (error) {
+        console.error("Error initializing Payment Element:", error);
+        UI.showToast("Błąd inicjalizacji płatności.", true);
+        // Cofnij do poprzedniego kroku, jeśli inicjalizacja się nie powiedzie
+        handlePrevStep();
+    }
 }
 
-function translateUI() {
-    if (!dom.modal) return;
 
-    const currentLang = State.get('currentLang') || 'pl';
+async function handleFormSubmit() {
+    // Ustawienie stanu przetwarzania
+    currentStep = 3;
+    updateStepDisplay();
 
-    dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
-        const key = el.dataset.translateKey;
-        let translation = Utils.getTranslation(key);
-        if (typeof translation === 'object' && translation !== null) {
-            translation = translation[currentLang] || translation['pl'] || '';
-        }
-        if (translation) {
-            el.innerHTML = translation;
-        }
+    const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: window.location.href.split('#')[0],
+        },
+        redirect: 'if_required'
     });
 
-    dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
-        const key = el.dataset.translatePlaceholder;
-        let translation = Utils.getTranslation(key);
-        if (typeof translation === 'object' && translation !== null) {
-            translation = translation[currentLang] || translation['pl'] || '';
+    if (error) {
+        if (error.type === "card_error" || error.type === "validation_error") {
+            UI.showToast(error.message, true);
+        } else {
+            UI.showToast("Wystąpił nieoczekiwany błąd płatności.", true);
         }
-        if (translation) {
-            el.placeholder = translation;
+        currentStep = 2;
+        updateStepDisplay();
+        return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+        try {
+            await API.handleTipSuccess(paymentIntent.id);
+            UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)));
+        } catch (apiError) {
+            console.error("Error confirming tip on backend:", apiError);
+            UI.showToast("Płatność się udała, ale wystąpił błąd po stronie serwera.", true);
         }
-    });
+    }
+
+    hideModal();
+}
+
+function resetModalState() {
+    currentStep = 0;
+    formData = {};
+    if(dom.form) dom.form.reset();
+    dom.createAccountCheckbox.checked = false;
+    dom.emailContainer.classList.remove('visible');
+    dom.termsCheckbox.checked = false;
+    if (dom.paymentElementContainer) {
+        dom.paymentElementContainer.innerHTML = '';
+    }
+    hideLocalErrors();
+    updateStepDisplay();
 }
 
 function showModal() {
     cacheDOM();
-
-    if (!dom.modal) {
-        console.error("Tipping modal not found in DOM");
-        return;
+    if (!stripe) {
+        stripe = Stripe(window.StripeData.publicKey);
     }
 
-    dom.createAccountCheckbox?.addEventListener('change', e => {
+    resetModalState();
+    translateUI();
+
+    dom.createAccountCheckbox.addEventListener('change', e => {
         dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
-    translateUI();
-    currentStep = 0;
-
     const currentUser = State.get('currentUser');
-    if (currentUser && currentUser.email) {
-        dom.emailInput.value = currentUser.email;
-    } else {
-        dom.emailInput.value = '';
-    }
-
-    // Set default amount
+    dom.emailInput.value = currentUser?.email || '';
     dom.amountInput.value = '';
 
-
-    // Ensure checkbox is unchecked by default
-    if (dom.createAccountCheckbox) {
-        dom.createAccountCheckbox.checked = false;
-    }
-     if (document.getElementById('termsAccept')) {
-        document.getElementById('termsAccept').checked = false;
-    }
-    // Hide email input by default
-    if (dom.emailContainer) {
-        dom.emailContainer.classList.remove('visible');
-    }
-
-    // Use the generic UI.openModal which should handle the .visible class
     UI.openModal(dom.modal);
     updateStepDisplay();
 }
 
 function hideModal() {
-    if (!dom.modal) return;
     UI.closeModal(dom.modal);
+    setTimeout(resetModalState, 300); // Reset po animacji zamknięcia
 }
 
 function init() {
     cacheDOM();
     if (!dom.modal) return;
 
-    // Listener for the close button
-    if (dom.closeBtn) {
-        dom.closeBtn.addEventListener('click', hideModal);
-    }
+    dom.closeBtn.addEventListener('click', hideModal);
+    dom.modal.addEventListener('click', e => {
+        if (e.target === dom.modal) hideModal();
+        if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
+        if (e.target.closest('[data-action="hide-terms"]')) hideTerms();
+    });
+}
 
-    if (dom.form) {
-        dom.form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            handleFormSubmit();
-        });
-    }
-
-    // Listener for the background overlay click
-    dom.modal.addEventListener('click', (e) => {
-        if (e.target === dom.modal) {
-            hideModal();
+function translateUI() {
+    if (!dom.modal) return;
+    dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
+        const key = el.dataset.translateKey;
+        const translation = Utils.getTranslation(key);
+        if (translation) {
+            el.innerHTML = typeof translation === 'object' ? translation[State.get('currentLang')] : translation;
         }
-        if (e.target.closest('[data-action="show-terms"]')) {
-            e.preventDefault();
-            showTerms();
-        }
-        if (e.target.closest('[data-action="hide-terms"]')) {
-            hideTerms();
+    });
+    dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+        const key = el.dataset.translatePlaceholder;
+        const translation = Utils.getTranslation(key);
+        if (translation) {
+            el.placeholder = typeof translation === 'object' ? translation[State.get('currentLang')] : translation;
         }
     });
 }
@@ -275,5 +300,4 @@ export const TippingModal = {
     hideModal,
     handleNextStep,
     handlePrevStep,
-    handleFormSubmit,
 };
