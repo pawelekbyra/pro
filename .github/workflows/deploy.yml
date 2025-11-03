@@ -12,6 +12,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Create .env file
+      run: |
+        echo "Secret_key=${{ secrets.SECRET_KEY }}" > ting-tong-theme/.env
+        echo "Publishable_key=${{ secrets.PUBLISHABLE_KEY }}" >> ting-tong-theme/.env
+
     - name: FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:

@@ -142,11 +142,7 @@ export const Config = {
           pl: "Minimalna kwota to 1 EUR. Dziękujemy za każde wsparcie!",
           en: "The minimum amount is 1 EUR. Thank you for all your support!"
       },
-      tippingStep3Title: {
-          pl: "Wybierz metodę płatności",
-          en: "Choose payment method"
-      },
-      tippingStep4Desc: {
+      tippingStep3Desc: {
           pl: "Przekierowanie do płatności...",
           en: "Redirecting to payment..."
       },
@@ -163,8 +159,8 @@ export const Config = {
           en: "Back"
       },
       tippingNext: {
-          pl: "Dalej",
-          en: "Next"
+          pl: "ENTER",
+          en: "ENTER"
       },
       tippingSubmit: {
           pl: "Przejdź do płatności",
