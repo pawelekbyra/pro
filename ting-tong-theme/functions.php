@@ -6,16 +6,27 @@
  */
 
 // =========================================================================
+// WERYFIKACJA I ŁADOWANIE COMPOSER (MUSI BYĆ NA POCZĄTKU PLIKU)
+// =========================================================================
+$composer_autoload = __DIR__ . '/vendor/autoload.php';
+
+if (file_exists($composer_autoload)) {
+    require_once $composer_autoload;
+} else {
+    // UWAGA: Ta wiadomość nie zostanie wyświetlona w przeglądarce przy błędzie 500,
+    // ale zostanie zapisana w logach błędów PHP (error_log).
+    error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php w katalogu motywu.');
+}
+
+/**
+ * Plik functions.php dla motywu Ting Tong.
+ *
+ * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
+ */
+
+// =========================================================================
 // 0. Ładowanie Bibliotek i Klucze Bezpieczeństwa
 // =========================================================================
-
-// Wymagaj autoloader'a Composera
-// UWAGA: ŚCIEŻKA DO TEGO PLIKU MOŻE WYMAGAĆ KOREKTY W ZALEŻNOŚCI OD MIEJSCA INSTALACJI COMPOSER'A
-// Jeśli Composer został zainstalowany w głównym katalogu motywu, ścieżka powinna być taka:
-if (file_exists(get_template_directory() . '/vendor/autoload.php')) {
-    require_once get_template_directory() . '/vendor/autoload.php';
-}
-// Jeśli w katalogu głównym WordPressa, ścieżka będzie inna.
 
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
