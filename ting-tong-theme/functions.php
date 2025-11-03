@@ -6,27 +6,17 @@
  */
 
 // =========================================================================
-// WERYFIKACJA I ŁADOWANIE COMPOSER (MUSI BYĆ NA POCZĄTKU PLIKU)
+// 0. ŁADOWANIE COMPOSER I KLUCZE (MUSI BYĆ NA POCZĄTKU PLIKU)
 // =========================================================================
-$composer_autoload = __DIR__ . '/vendor/autoload.php';
 
+// Wymagaj autoloader'a Composera, z najbardziej uniwersalną ścieżką
+$composer_autoload = __DIR__ . '/vendor/autoload.php';
 if (file_exists($composer_autoload)) {
     require_once $composer_autoload;
 } else {
-    // UWAGA: Ta wiadomość nie zostanie wyświetlona w przeglądarce przy błędzie 500,
-    // ale zostanie zapisana w logach błędów PHP (error_log).
-    error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php w katalogu motywu.');
+    // Jeśli nie znaleziono Composera, błąd krytyczny zostanie zalogowany.
+    error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php. Wgraj katalog vendor/ na serwer.');
 }
-
-/**
- * Plik functions.php dla motywu Ting Tong.
- *
- * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
- */
-
-// =========================================================================
-// 0. Ładowanie Bibliotek i Klucze Bezpieczeństwa
-// =========================================================================
 
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
@@ -41,8 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // 1. Define Stripe API Keys
-// UWAGA: TE KLUCZE POWINNY BYĆ ZDEFINIOWANE W wp-config.php (lub innej bezpiecznej lokalizacji)
-// W PRZYPADKU ICH BRAKU UŻYJ MOCKOWYCH WARTOŚCI.
+// Klucze powinny być definiowane w wp-config.php, ale używamy placeholderów dla bezpieczeństwa
 if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
     define('TT_STRIPE_PUBLISHABLE_KEY', 'pk_test_YOUR_PUBLISHABLE_KEY');
 }
@@ -281,7 +270,8 @@ function tt_enqueue_and_localize_scripts() {
         [
             'isLoggedIn' => is_user_logged_in(),
             'slides'     => tt_get_slides_data(),
-            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : 'pk_test_PLACEHOLDER_KEY', // DODANY KLUCZ
+            // W tym miejscu używamy stałej PHP, która musi być zdefiniowana w wp-config.php
+            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY',
         ]
     );
 
@@ -1071,13 +1061,124 @@ add_action('wp_ajax_tt_complete_profile', function () {
         'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
     ]);
 });
-// Dodaj do functions.php
-add_filter('rest_authentication_errors', function($result) {
-    if (!empty($result)) {
-        return $result;
+add_action('wp_ajax_tt_avatar_upload', function () {
+    try {
+        check_ajax_referer('tt_ajax_nonce', 'nonce');
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error(['message' => 'Brak uprawnień: Musisz być zalogowany.'], 401);
+        }
+
+        $dataUrl = isset($_POST['image']) ? trim( wp_unslash($_POST['image']) ) : '';
+        if (empty($dataUrl) || strpos($dataUrl, 'data:image') !== 0) {
+            wp_send_json_error(['message' => 'Błąd danych: Nieprawidłowy format data URL.'], 400);
+        }
+
+        if ( ! preg_match('#^data:(image/(?:png|jpeg|gif));base64,(.+)$#', $dataUrl, $matches) ) {
+            wp_send_json_error(['message' => 'Błąd formatu: Oczekiwano obrazu PNG, JPEG lub GIF.'], 400);
+        }
+
+        $mime = strtolower($matches[1]);
+        $bin = base64_decode($matches[2]);
+        if ( ! $bin || strlen($bin) > 5 * 1024 * 1024) { // Zwiększony limit do 5MB
+            wp_send_json_error(['message' => 'Błąd pliku: Obraz jest uszkodzony lub za duży (limit 5MB).'], 400);
+        }
+
+        if ( ! function_exists('wp_handle_sideload') ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+        }
+
+        $u = wp_get_current_user();
+        $ext = ($mime === 'image/png') ? 'png' : 'jpg'; // Uproszczenie dla najczęstszych typów
+        $filename = 'tt-avatar-' . (int) $u->ID . '-' . time() . '.' . $ext;
+
+        $upload_dir = wp_upload_dir();
+        $tmp_path = trailingslashit($upload_dir['path']) . $filename;
+
+        $write_result = file_put_contents($tmp_path, $bin);
+        if ($write_result === false) {
+            wp_send_json_error(['message' => 'Błąd zapisu: Nie można zapisać pliku tymczasowego.'], 500);
+        }
+
+        $file_array = ['name' => $filename, 'type' => $mime, 'tmp_name' => $tmp_path, 'error' => 0, 'size' => filesize($tmp_path)];
+        $file = wp_handle_sideload($file_array, ['test_form' => false]);
+
+        if (isset($file['error'])) {
+            @unlink($tmp_path);
+            wp_send_json_error(['message' => 'Błąd WordPress: ' . $file['error']], 500);
+        }
+
+        $attach_id = wp_insert_attachment(['post_mime_type' => $mime, 'post_title' => $filename, 'post_content' => '', 'post_status' => 'inherit'], $file['file']);
+        if (is_wp_error($attach_id)) {
+            @unlink($file['file']);
+            wp_send_json_error(['message' => 'Błąd bazy danych: Nie można utworzyć załącznika.'], 500);
+        }
+
+        $attach_data = wp_generate_attachment_metadata($attach_id, $file['file']);
+        wp_update_attachment_metadata($attach_id, $attach_data);
+
+        // Usuń stary avatar, jeśli istnieje
+        $old_avatar_id = get_user_meta($u->ID, 'tt_avatar_id', true);
+        if ($old_avatar_id && (int) $old_avatar_id !== (int) $attach_id) {
+            wp_delete_attachment((int) $old_avatar_id, true);
+        }
+
+        update_user_meta($u->ID, 'tt_avatar_id', $attach_id);
+        $url = wp_get_attachment_url($attach_id);
+        update_user_meta($u->ID, 'tt_avatar_url', esc_url_raw($url));
+
+        wp_send_json_success(['url' => $url, 'attachment_id' => $attach_id]);
+
+    } catch (Throwable $e) {
+        // Złap wszystkie błędy krytyczne (w tym błędy parsowania, itp.)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            wp_send_json_error(['message' => 'Krytyczny błąd serwera: ' . $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
+        } else {
+            wp_send_json_error(['message' => 'Wystąpił nieoczekiwany błąd serwera.'], 500);
+        }
     }
-    return true;
 });
+add_action('wp_ajax_tt_password_change', function () {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message'=>'not_logged_in'], 401);
+    }
+    $u = wp_get_current_user();
+    $cur = isset($_POST['current_password']) ? (string) wp_unslash($_POST['current_password']) : '';
+    $n1  = isset($_POST['new_password_1'])   ? (string) wp_unslash($_POST['new_password_1'])   : '';
+    $n2  = isset($_POST['new_password_2'])   ? (string) wp_unslash($_POST['new_password_2'])   : '';
+    if (empty($cur) || empty($n1) || empty($n2) || $n1 !== $n2 || strlen($n1) < 8) {
+        wp_send_json_error(['message' => 'Sprawdź pola hasła (min. 8 znaków, muszą być identyczne).'], 400);
+    }
+    require_once ABSPATH . 'wp-includes/pluggable.php';
+    if (!wp_check_password($cur, $u->user_pass, $u->ID)) {
+        wp_send_json_error(['message' => 'Aktualne hasło jest nieprawidłowe.'], 403);
+    }
+    wp_set_password($n1, $u->ID);
+    wp_send_json_success(['message' => 'Hasło zmienione. Zaloguj się ponownie.']);
+});
+add_action('wp_ajax_tt_account_delete', function () {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message'=>'not_logged_in'], 401);
+    }
+    $u = wp_get_current_user();
+    $confirm = isset($_POST['confirm_text']) ? trim((string) wp_unslash($_POST['confirm_text'])) : '';
+    if ($confirm !== 'USUWAM KONTO') {
+        wp_send_json_error(['message' => 'Aby potwierdzić, wpisz dokładnie: USUWAM KONTO'], 400);
+    }
+    if (user_can($u, 'administrator')) {
+        wp_send_json_error(['message' => 'Konto administratora nie może być usunięte.'], 403);
+    }
+    require_once ABSPATH . 'wp-admin/includes/user.php';
+    if (!wp_delete_user($u->ID)) {
+        wp_send_json_error(['message' => 'Nie udało się usunąć konta.'], 500);
+    }
+    wp_logout();
+    wp_send_json_success(['message' => 'Konto usunięte.']);
+});
+
 
 // ============================================================================
 // STRIPE PAYMENT INTEGRATION
@@ -1087,30 +1188,26 @@ add_filter('rest_authentication_errors', function($result) {
 function tt_create_payment_intent() {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
 
-    // It's crucial to have Stripe's PHP library loaded.
-    // Ensure you have `require_once 'vendor/autoload.php';` if you're using Composer.
+    // Weryfikacja: jeśli Composer nie załadował Stripe, to będzie błąd 500.
     if (!class_exists('\\Stripe\\Stripe')) {
-        // Zwraca błąd 500 - brak biblioteki
         wp_send_json_error(['message' => 'Stripe PHP library not found. Ensure Composer is installed and autoloader is included in functions.php.'], 500);
         return;
     }
 
     try {
+        // Używamy klucza SECRET, który musi być zdefiniowany w wp-config.php
         \Stripe\Stripe::setApiKey(TT_STRIPE_SECRET_KEY);
 
         $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $currency = isset($_POST['currency']) ? strtolower($_POST['currency']) : 'pln';
 
-        // ** KOREKTA BŁĘDU 400 **
-        // Ustal minimalną kwotę
+        // Walidacja kwoty zgodnie z regułą minimalną
         $min_amount = ($currency === 'pln') ? 5.00 : 1.00;
 
-        // Walidacja kwoty zgodnie z regułą minimalną
         if ($amount < $min_amount) {
             wp_send_json_error(['message' => 'Minimalna kwota dla tej waluty to ' . number_format($min_amount, 2) . ' ' . strtoupper($currency)], 400);
             return;
         }
-        // ** KONIEC KOREKTY BŁĘDU 400 **
 
         // Stripe expects amount in the smallest currency unit (e.g., cents, groszy)
         $amount_in_cents = round($amount * 100);
@@ -1124,7 +1221,7 @@ function tt_create_payment_intent() {
         wp_send_json_success(['clientSecret' => $payment_intent->client_secret]);
 
     } catch (Exception $e) {
-        // Błąd API Stripe'a (np. zły klucz)
+        // Błąd API Stripe'a (np. zły klucz lub nieprawidłowy format danych)
         wp_send_json_error(['message' => 'Stripe API Error: ' . $e->getMessage()], 500);
     }
 }
