@@ -296,7 +296,7 @@ function tt_enqueue_and_localize_scripts() {
 		'tingtong-app-script',
 		'TingTongConfig',
 		[
-			'serviceWorkerUrl' => home_url('/sw.js'),
+			'serviceWorkerUrl' => site_url('/sw.js'),
 			'themeUrl'         => get_template_directory_uri(),
 			'stripePublicKey' => TT_STRIPE_PUBLIC_KEY,
 		]
