@@ -1,4 +1,24 @@
 <?php
+// Load Stripe API keys from .env file securely.
+$env_path = get_template_directory() . '/.env';
+if (file_exists($env_path)) {
+    $env_vars = parse_ini_file($env_path);
+    if (isset($env_vars['Secret_key']) && !defined('TT_STRIPE_SECRET_KEY')) {
+        define('TT_STRIPE_SECRET_KEY', $env_vars['Secret_key']);
+    }
+    if (isset($env_vars['Publishable_key']) && !defined('TT_STRIPE_PUBLIC_KEY'))
+ {
+        define('TT_STRIPE_PUBLIC_KEY', $env_vars['Publishable_key']);
+    }
+}
+
+// Fallback definitions to prevent fatal errors if keys are not set.
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    define('TT_STRIPE_SECRET_KEY', '');
+}
+if (!defined('TT_STRIPE_PUBLIC_KEY')) {
+    define('TT_STRIPE_PUBLIC_KEY', '');
+}
 /**
  * Plik functions.php dla motywu Ting Tong.
  *
@@ -265,8 +285,19 @@ function tt_enqueue_and_localize_scripts() {
 
         wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.
 0.2/swiper-bundle.min.js', [], null, true );
-        wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() .
- '/js/app.js', [ 'swiper-js' ], null, true );
+    // Rejestrujemy i kolejkowujemy skrypt Stripe.js
+    wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], '3.0', true
+ );
+
+    // ZMIEŃ kolejkowanie app.js, aby używało dynamicznej wersji
+    wp_enqueue_script(
+        'tingtong-app-script',
+        get_template_directory_uri() . '/js/app.js',
+        [ 'swiper-js', 'stripe-js' ], // UPEWNIJ SIĘ, ŻE stripe-js jest w zależn
+ościach
+        time(), // Użycie time() jako numeru wersji, aby wymusić przeładowanie
+        true
+    );
 
         wp_localize_script(
                 'tingtong-app-script',
@@ -292,6 +323,8 @@ function tt_enqueue_and_localize_scripts() {
                 [
                         'serviceWorkerUrl' => home_url('/sw.js'),
                         'themeUrl'         => get_template_directory_uri(),
+            // DODANY KLUCZ PUBLICZNY, KTÓRY JEST WYMAGANY PRZEZ STRIPE.JS
+                        'stripePublicKey'  => TT_STRIPE_PUBLIC_KEY,
                 ]
         );
 }
