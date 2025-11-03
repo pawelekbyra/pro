@@ -6,7 +6,7 @@
  */
 
 // =========================================================================
-// 0. ŁADOWANIE COMPOSER I KLUCZE (NOWA LOGIKA: POBIERANIE Z WP-CONFIG)
+// 0. ŁADOWANIE COMPOSER I KLUCZE (NAPRAWIONA LOGIKA POBIERANIA Z WP-CONFIG)
 // =========================================================================
 
 // Wymagaj autoloader'a Composera (nadal potrzebny dla klasy Stripe)
@@ -30,20 +30,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
 
-// =========================================================================
-// 1. Define Stripe API Keys (WZMACNIANA LOGIKA POBIERANIA Z WP-CONFIG)
-// =========================================================================
-
-// Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
+// 1. Define Stripe API Keys (WZMACNIANA LOGIKA POBIERANIA KLUCZY)
+// Używamy bezpiecznej metody, która pobiera wartość z globalnych stałych,
+// jeśli istnieją, w przeciwnym razie używa placeholdera.
 if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-    $pk = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
-    define('TT_STRIPE_PUBLISHABLE_KEY', $pk);
+    $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
+    define('TT_STRIPE_PUBLISHABLE_KEY', $pk_value);
 }
 
-// Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
 if (!defined('TT_STRIPE_SECRET_KEY')) {
-    $sk = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
-    define('TT_STRIPE_SECRET_KEY', $sk);
+    $sk_value = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
+    define('TT_STRIPE_SECRET_KEY', $sk_value);
 }
 
 
