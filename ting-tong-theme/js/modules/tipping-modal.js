@@ -247,6 +247,13 @@ function init() {
         dom.closeBtn.addEventListener('click', hideModal);
     }
 
+    if (dom.form) {
+        dom.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleFormSubmit();
+        });
+    }
+
     // Listener for the background overlay click
     dom.modal.addEventListener('click', (e) => {
         if (e.target === dom.modal) {
