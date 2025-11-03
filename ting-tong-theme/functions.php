@@ -18,6 +18,12 @@ if (file_exists($composer_autoload)) {
     error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php w katalogu motywu.');
 }
 
+/**
+ * Plik functions.php dla motywu Ting Tong.
+ *
+ * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
+ */
+
 // =========================================================================
 // 0. Ładowanie Bibliotek i Klucze Bezpieczeństwa
 // =========================================================================
@@ -1070,7 +1076,7 @@ add_filter('rest_authentication_errors', function($result) {
     if (!empty($result)) {
         return $result;
     }
-    return null;
+    return true;
 });
 
 // ============================================================================
