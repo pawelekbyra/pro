@@ -31,16 +31,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // =========================================================================
-// 1. Define Stripe API Keys (NAPRAWIONA LOGIKA POBIERANIA KLUCZY)
+// 1. Define Stripe API Keys (WZMACNIANA LOGIKA POBIERANIA Z WP-CONFIG)
 // =========================================================================
 
-// Klucz publiczny
+// Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
 if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
     $pk = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
     define('TT_STRIPE_PUBLISHABLE_KEY', $pk);
 }
 
-// Klucz prywatny
+// Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
 if (!defined('TT_STRIPE_SECRET_KEY')) {
     $sk = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
     define('TT_STRIPE_SECRET_KEY', $sk);
