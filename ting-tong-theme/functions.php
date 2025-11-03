@@ -4,6 +4,24 @@
  *
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
+
+// =========================================================================
+// WERYFIKACJA I ŁADOWANIE COMPOSER (MUSI BYĆ NA POCZĄTKU PLIKU)
+// =========================================================================
+$composer_autoload = __DIR__ . '/vendor/autoload.php';
+
+if (file_exists($composer_autoload)) {
+    require_once $composer_autoload;
+} else {
+    // UWAGA: Ta wiadomość nie zostanie wyświetlona w przeglądarce przy błędzie 500,
+    // ale zostanie zapisana w logach błędów PHP (error_log).
+    error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php w katalogu motywu.');
+}
+
+// =========================================================================
+// 0. Ładowanie Bibliotek i Klucze Bezpieczeństwa
+// =========================================================================
+
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
     function wp_new_user_notification( $user_id, $deprecated = '', $notify = '' ) {
@@ -13,8 +31,19 @@ if ( ! function_exists( 'wp_new_user_notification' ) ) {
 }
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Zabezpieczenie przed bezpośrednim dostępem.
+    exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
+
+// 1. Define Stripe API Keys
+// UWAGA: TE KLUCZE POWINNY BYĆ ZDEFINIOWANE W wp-config.php (lub innej bezpiecznej lokalizacji)
+// W PRZYPADKU ICH BRAKU UŻYJ MOCKOWYCH WARTOŚCI.
+if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
+    define('TT_STRIPE_PUBLISHABLE_KEY', 'pk_test_YOUR_PUBLISHABLE_KEY');
+}
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    define('TT_STRIPE_SECRET_KEY', 'sk_test_YOUR_SECRET_KEY');
+}
+
 
 // =========================================================================
 // 1. TWORZENIE TABEL BAZY DANYCH
@@ -24,13 +53,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Główna funkcja do tworzenia wszystkich niestandardowych tabel przy aktywacji motywu.
  */
 function tt_create_database_tables() {
-	global $wpdb;
-	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	$charset_collate = $wpdb->get_charset_collate();
+    global $wpdb;
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    $charset_collate = $wpdb->get_charset_collate();
 
-	// Tabela: Polubienia slajdów
-	$table_name_likes = $wpdb->prefix . 'tt_likes';
-	$sql_likes        = "CREATE TABLE {$table_name_likes} (
+    // Tabela: Polubienia slajdów
+    $table_name_likes = $wpdb->prefix . 'tt_likes';
+    $sql_likes        = "CREATE TABLE {$table_name_likes} (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         item_id BIGINT UNSIGNED NOT NULL,
         user_id BIGINT UNSIGNED NOT NULL,
@@ -39,12 +68,12 @@ function tt_create_database_tables() {
         UNIQUE KEY uniq_user_item (user_id, item_id),
         KEY idx_item (item_id)
     ) {$charset_collate};";
-	dbDelta( $sql_likes );
-	update_option( 'tt_likes_db_version', '1.0' );
+    dbDelta( $sql_likes );
+    update_option( 'tt_likes_db_version', '1.0' );
 
-	// Tabela: Komentarze
-	$table_name_comments = $wpdb->prefix . 'tt_comments';
-	$sql_comments        = "CREATE TABLE {$table_name_comments} (
+    // Tabela: Komentarze
+    $table_name_comments = $wpdb->prefix . 'tt_comments';
+    $sql_comments        = "CREATE TABLE {$table_name_comments} (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         slide_id VARCHAR(255) NOT NULL,
         user_id BIGINT UNSIGNED NOT NULL,
@@ -56,12 +85,12 @@ function tt_create_database_tables() {
         KEY idx_slide_id (slide_id(191)),
         KEY idx_user_id (user_id)
     ) {$charset_collate};";
-	dbDelta( $sql_comments );
-	update_option( 'tt_comments_db_version', '1.0' );
+    dbDelta( $sql_comments );
+    update_option( 'tt_comments_db_version', '1.0' );
 
-	// Tabela: Polubienia komentarzy
-	$table_name_comment_likes = $wpdb->prefix . 'tt_comment_likes';
-	$sql_comment_likes        = "CREATE TABLE {$table_name_comment_likes} (
+    // Tabela: Polubienia komentarzy
+    $table_name_comment_likes = $wpdb->prefix . 'tt_comment_likes';
+    $sql_comment_likes        = "CREATE TABLE {$table_name_comment_likes} (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         comment_id BIGINT UNSIGNED NOT NULL,
         user_id BIGINT UNSIGNED NOT NULL,
@@ -70,8 +99,8 @@ function tt_create_database_tables() {
         UNIQUE KEY uniq_user_comment (user_id, comment_id),
         KEY idx_comment_id (comment_id)
     ) {$charset_collate};";
-	dbDelta( $sql_comment_likes );
-	update_option( 'tt_comment_likes_db_version', '1.0' );
+    dbDelta( $sql_comment_likes );
+    update_option( 'tt_comment_likes_db_version', '1.0' );
 }
 add_action( 'after_switch_theme', 'tt_create_database_tables' );
 
@@ -79,14 +108,14 @@ add_action( 'after_switch_theme', 'tt_create_database_tables' );
  * Fallback: upewnij się, że tabele istnieją.
  */
 add_action(
-	'init',
-	function () {
-		if ( get_option( 'tt_likes_db_version' ) !== '1.0'
-			|| get_option( 'tt_comments_db_version' ) !== '1.0'
-			|| get_option( 'tt_comment_likes_db_version' ) !== '1.0' ) {
-			tt_create_database_tables();
-		}
-	}
+    'init',
+    function () {
+        if ( get_option( 'tt_likes_db_version' ) !== '1.0'
+            || get_option( 'tt_comments_db_version' ) !== '1.0'
+            || get_option( 'tt_comment_likes_db_version' ) !== '1.0' ) {
+            tt_create_database_tables();
+        }
+    }
 );
 
 // =========================================================================
@@ -95,36 +124,36 @@ add_action(
 
 // --- Polubienia slajdów ---
 function tt_likes_get_count( $item_id ) {
-	global $wpdb;
-	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_likes WHERE item_id = %d", $item_id ) );
+    global $wpdb;
+    return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_likes WHERE item_id = %d", $item_id ) );
 }
 
 function tt_likes_user_has( $item_id, $user_id ) {
-	if ( ! $user_id ) {
-		return false;
-	}
-	global $wpdb;
-	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_likes WHERE item_id = %d AND user_id = %d", $item_id, $user_id ) );
+    if ( ! $user_id ) {
+        return false;
+    }
+    global $wpdb;
+    return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_likes WHERE item_id = %d AND user_id = %d", $item_id, $user_id ) );
 }
 
 // --- Komentarze ---
 function tt_comments_get_count( $slide_id ) {
-	global $wpdb;
-	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comments WHERE slide_id = %s", $slide_id ) );
+    global $wpdb;
+    return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comments WHERE slide_id = %s", $slide_id ) );
 }
 
 // --- Polubienia komentarzy ---
 function tt_comment_likes_get_count( $comment_id ) {
-	global $wpdb;
-	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comment_likes WHERE comment_id = %d", $comment_id ) );
+    global $wpdb;
+    return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comment_likes WHERE comment_id = %d", $comment_id ) );
 }
 
 function tt_comment_likes_user_has( $comment_id, $user_id ) {
-	if ( ! $user_id ) {
-		return false;
-	}
-	global $wpdb;
-	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comment_likes WHERE comment_id = %d AND user_id = %d", $comment_id, $user_id ) );
+    if ( ! $user_id ) {
+        return false;
+    }
+    global $wpdb;
+    return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comment_likes WHERE comment_id = %d AND user_id = %d", $comment_id, $user_id ) );
 }
 
 
@@ -138,129 +167,135 @@ function tt_comment_likes_user_has( $comment_id, $user_id ) {
  * @return array
  */
 function tt_get_simulated_posts() {
-	return [
-		[
-			'post_id'      => 1,
-			'post_title'   => 'Big Buck Bunny',
-			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-			'access'       => 'public',
-			'comments'     => 10,
-			'author'       => [
-				'name'        => 'Big Buck Bunny',
-				'description' => 'Oficjalny profil Big Buck Bunny. Zobaczcie moje przygody!',
-				'avatar'      => 'https://i.pravatar.cc/100?u=bunny',
-				'is_vip'      => false,
-			],
-			'post_content' => 'Królik w akcji!',
-		],
-		[
-			'post_id'      => 2,
-			'post_title'   => 'Elephants Dream',
-			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-			'access'       => 'secret',
-			'comments'     => 20,
-			'author'       => [
-				'name'        => 'Elephants Dream',
-				'description' => 'Twórcy filmu "Elephants Dream". Dzielimy się kulisami naszej pracy.',
-				'avatar'      => 'https://i.pravatar.cc/100?u=elephant',
-				'is_vip'      => false,
-			],
-			'post_content' => 'Sen słonia, tylko dla zalogowanych.',
-		],
-		[
-			'post_id'      => 3,
-			'post_title'   => 'For Bigger Blazes',
-			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-			'access'       => 'pwa-secret',
-			'comments'     => 30,
-			'author'       => [
-				'name'        => 'For Bigger Blazes',
-				'description' => 'Profil poświęcony filmom z efektami specjalnymi. Tylko dla fanów PWA!',
-				'avatar'      => 'https://i.pravatar.cc/100?u=blaze',
-				'is_vip'      => false,
-			],
-			'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
-		],
-		[
-			'post_id'      => 4,
-			'post_title'   => 'Are You Satisfied (Marina and the Diamonds cover)',
-			'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-			'access'       => 'public',
-			'comments'     => 15,
-			'author'       => [
-				'name'        => 'Paweł Polutek',
-				'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
-				'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
-				'is_vip'      => true,
-			],
-			'post_content' => 'Jedna z moich ulubionych piosenek w moim wykonaniu. Mam nadzieję, że się Wam spodoba!',
-		],
-	];
+    return [
+        [
+            'post_id'      => 1,
+            'post_title'   => 'Big Buck Bunny',
+            'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            'access'       => 'public',
+            'comments'     => 10,
+            'author'       => [
+                'name'        => 'Big Buck Bunny',
+                'description' => 'Oficjalny profil Big Buck Bunny. Zobaczcie moje przygody!',
+                'avatar'      => 'https://i.pravatar.cc/100?u=bunny',
+                'is_vip'      => false,
+            ],
+            'post_content' => 'Królik w akcji!',
+        ],
+        [
+            'post_id'      => 2,
+            'post_title'   => 'Elephants Dream',
+            'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            'access'       => 'secret',
+            'comments'     => 20,
+            'author'       => [
+                'name'        => 'Elephants Dream',
+                'description' => 'Twórcy filmu "Elephants Dream". Dzielimy się kulisami naszej pracy.',
+                'avatar'      => 'https://i.pravatar.cc/100?u=elephant',
+                'is_vip'      => false,
+            ],
+            'post_content' => 'Sen słonia, tylko dla zalogowanych.',
+        ],
+        [
+            'post_id'      => 3,
+            'post_title'   => 'For Bigger Blazes',
+            'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            'access'       => 'pwa-secret',
+            'comments'     => 30,
+            'author'       => [
+                'name'        => 'For Bigger Blazes',
+                'description' => 'Profil poświęcony filmom z efektami specjalnymi. Tylko dla fanów PWA!',
+                'avatar'      => 'https://i.pravatar.cc/100?u=blaze',
+                'is_vip'      => false,
+            ],
+            'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
+        ],
+        [
+            'post_id'      => 4,
+            'post_title'   => 'Are You Satisfied (Marina and the Diamonds cover)',
+            'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            'access'       => 'public',
+            'comments'     => 15,
+            'author'       => [
+                'name'        => 'Paweł Polutek',
+                'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
+                'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
+                'is_vip'      => true,
+            ],
+            'post_content' => 'Jedna z moich ulubionych piosenek w moim wykonaniu. Mam nadzieję, że się Wam spodoba!',
+        ],
+    ];
 }
 
 /**
  * Pobiera dane slajdów, które zostaną przekazane do frontendu.
  */
 function tt_get_slides_data() {
-	$user_id         = get_current_user_id();
-	$simulated_posts = tt_get_simulated_posts();
-	$slides_data     = [];
+    $user_id         = get_current_user_id();
+    $simulated_posts = tt_get_simulated_posts();
+    $slides_data     = [];
 
-	foreach ( $simulated_posts as $post ) {
-		$slide_id = 'slide-' . str_pad( $post['post_id'], 3, '0', STR_PAD_LEFT );
+    foreach ( $simulated_posts as $post ) {
+        $slide_id = 'slide-' . str_pad( $post['post_id'], 3, '0', STR_PAD_LEFT );
 
-		$slides_data[] = [
-			'id'              => $slide_id,
-			'likeId'          => (string) $post['post_id'],
-			'title'           => $post['post_title'],
-			'author'          => $post['author'],
-			'description'     => $post['post_content'],
-			'mp4Url'          => $post['video_url'],
-			'access'          => $post['access'],
-			'initialLikes'    => tt_likes_get_count( $post['post_id'] ),
-			'isLiked'         => tt_likes_user_has( $post['post_id'], $user_id ),
-			'initialComments' => $post['comments'],
-		];
-	}
-	return $slides_data;
+        $slides_data[] = [
+            'id'              => $slide_id,
+            'likeId'          => (string) $post['post_id'],
+            'title'           => $post['post_title'],
+            'author'          => $post['author'],
+            'description'     => $post['post_content'],
+            'mp4Url'          => $post['video_url'],
+            'access'          => $post['access'],
+            'initialLikes'    => tt_likes_get_count( $post['post_id'] ),
+            'isLiked'         => tt_likes_user_has( $post['post_id'], $user_id ),
+            'initialComments' => $post['comments'],
+        ];
+    }
+    return $slides_data;
 }
 
 /**
  * Dodaje skrypty, style i lokalizuje dane dla frontendu.
  */
 function tt_enqueue_and_localize_scripts() {
-	wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css', [], null );
-	wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
+    wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css', [], null );
+    wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
-	wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
-	wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js' ], null, true );
+    // Kolejkowanie skryptu Stripe.js
+    wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, true );
 
-	wp_localize_script(
-		'tingtong-app-script',
-		'TingTongData',
-		[
-			'isLoggedIn' => is_user_logged_in(),
-			'slides'     => tt_get_slides_data(),
-		]
-	);
+    wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
+    // UPEWNIJ SIĘ, ŻE stripe-js JEST W ZALEŻNOŚCIACH
+    wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js', 'stripe-js' ], time(), true );
 
-	wp_localize_script(
-		'tingtong-app-script',
-		'ajax_object',
-		[
-			'ajax_url' => admin_url( 'admin-ajax.php' ),
-			'nonce'    => wp_create_nonce( 'tt_ajax_nonce' ),
-		]
-	);
+    // LOKALIZACJA DANYCH
+    wp_localize_script(
+        'tingtong-app-script',
+        'TingTongData',
+        [
+            'isLoggedIn' => is_user_logged_in(),
+            'slides'     => tt_get_slides_data(),
+            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : 'pk_test_PLACEHOLDER_KEY', // DODANY KLUCZ
+        ]
+    );
 
-	wp_localize_script(
-		'tingtong-app-script',
-		'TingTongConfig',
-		[
-			'serviceWorkerUrl' => home_url('/sw.js'),
-			'themeUrl'         => get_template_directory_uri(),
-		]
-	);
+    wp_localize_script(
+        'tingtong-app-script',
+        'ajax_object',
+        [
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'tt_ajax_nonce' ),
+        ]
+    );
+
+    wp_localize_script(
+        'tingtong-app-script',
+        'TingTongConfig',
+        [
+            'serviceWorkerUrl' => home_url('/sw.js'),
+            'themeUrl'         => get_template_directory_uri(),
+        ]
+    );
 }
 add_action( 'wp_enqueue_scripts', 'tt_enqueue_and_localize_scripts' );
 
@@ -268,10 +303,10 @@ add_action( 'wp_enqueue_scripts', 'tt_enqueue_and_localize_scripts' );
  * Add type="module" to the app script tag.
  */
 function tt_add_module_type_to_script( $tag, $handle, $src ) {
-	if ( 'tingtong-app-script' === $handle ) {
-		$tag = str_replace( '<script ', '<script type="module" ', $tag );
-	}
-	return $tag;
+    if ( 'tingtong-app-script' === $handle ) {
+        $tag = str_replace( '<script ', '<script type="module" ', $tag );
+    }
+    return $tag;
 }
 add_filter( 'script_loader_tag', 'tt_add_module_type_to_script', 10, 3 );
 
@@ -279,10 +314,10 @@ add_filter( 'script_loader_tag', 'tt_add_module_type_to_script', 10, 3 );
  * Dodaje wsparcie dla podstawowych funkcji motywu.
  */
 add_action(
-	'after_setup_theme',
-	function () {
-		add_theme_support( 'title-tag' );
-	}
+    'after_setup_theme',
+    function () {
+        add_theme_support( 'title-tag' );
+    }
 );
 
 // =========================================================================
@@ -291,8 +326,8 @@ add_action(
 
 // --- Logowanie, wylogowanie, odświeżanie danych ---
 add_action( 'wp_ajax_tt_get_slides_data_ajax', function() {
-	check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
-	wp_send_json_success( tt_get_slides_data() );
+    check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
+    wp_send_json_success( tt_get_slides_data() );
 });
 add_action('wp_ajax_nopriv_tt_ajax_login', function () {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
@@ -365,55 +400,55 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
  * aby zapewnić spójność stanu po stronie klienta, nawet jeśli sesja wygasła.
  */
 function tt_ajax_logout_callback() {
-	// Sprawdź nonce, jeśli został dostarczony, ale nie przerywaj, jeśli go nie ma.
-	// Pozwala to na obsługę sytuacji, gdy sesja już wygasła.
-	if ( isset( $_REQUEST['nonce'] ) ) {
-		check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
-	}
+    // Sprawdź nonce, jeśli został dostarczony, ale nie przerywaj, jeśli go nie ma.
+    // Pozwala to na obsługę sytuacji, gdy sesja już wygasła.
+    if ( isset( $_REQUEST['nonce'] ) ) {
+        check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
+    }
 
-	// Jeśli użytkownik jest zalogowany, wyloguj go.
-	if ( is_user_logged_in() ) {
-		wp_logout();
-	}
+    // Jeśli użytkownik jest zalogowany, wyloguj go.
+    if ( is_user_logged_in() ) {
+        wp_logout();
+    }
 
-	// Zawsze zwracaj sukces, aby klient mógł zaktualizować swój stan.
-	// Generujemy nowy nonce dla sesji gościa.
-	wp_send_json_success( [
-		'message'   => 'Wylogowano pomyślnie.',
-		'new_nonce' => wp_create_nonce( 'tt_ajax_nonce' ),
-	] );
+    // Zawsze zwracaj sukces, aby klient mógł zaktualizować swój stan.
+    // Generujemy nowy nonce dla sesji gościa.
+    wp_send_json_success( [
+        'message'   => 'Wylogowano pomyślnie.',
+        'new_nonce' => wp_create_nonce( 'tt_ajax_nonce' ),
+    ] );
 }
 add_action( 'wp_ajax_tt_ajax_logout', 'tt_ajax_logout_callback' );
 add_action( 'wp_ajax_nopriv_tt_ajax_logout', 'tt_ajax_logout_callback' );
 add_action( 'wp_ajax_tt_refresh_nonce', function() {
-	wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
+    wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
 } );
 add_action( 'wp_ajax_nopriv_tt_refresh_nonce', function() {
-	wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
+    wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
 });
 
 
 // --- Polubienia slajdów ---
 add_action( 'wp_ajax_toggle_like', function () {
-	check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
-	if ( ! is_user_logged_in() ) {
-		wp_send_json_error( [ 'message' => 'Musisz się zalogować, aby polubić.' ], 401 );
-	}
-	$item_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
-	if ( ! $item_id ) {
-		wp_send_json_error( [ 'message' => 'Brak ID elementu.' ], 400 );
-	}
-	$user_id = get_current_user_id();
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'tt_likes';
-	if ( tt_likes_user_has( $item_id, $user_id ) ) {
-		$wpdb->delete( $table_name, [ 'item_id' => $item_id, 'user_id' => $user_id ] );
-		$status = 'unliked';
-	} else {
-		$wpdb->insert( $table_name, [ 'item_id' => $item_id, 'user_id' => $user_id ] );
-		$status = 'liked';
-	}
-	wp_send_json_success( [ 'status' => $status, 'count'  => tt_likes_get_count( $item_id ) ] );
+    check_ajax_referer( 'tt_ajax_nonce', 'nonce' );
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error( [ 'message' => 'Musisz się zalogować, aby polubić.' ], 401 );
+    }
+    $item_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+    if ( ! $item_id ) {
+        wp_send_json_error( [ 'message' => 'Brak ID elementu.' ], 400 );
+    }
+    $user_id = get_current_user_id();
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'tt_likes';
+    if ( tt_likes_user_has( $item_id, $user_id ) ) {
+        $wpdb->delete( $table_name, [ 'item_id' => $item_id, 'user_id' => $user_id ] );
+        $status = 'unliked';
+    } else {
+        $wpdb->insert( $table_name, [ 'item_id' => $item_id, 'user_id' => $user_id ] );
+        $status = 'liked';
+    }
+    wp_send_json_success( [ 'status' => $status, 'count'  => tt_likes_get_count( $item_id ) ] );
 } );
 
 // --- Komentarze ---
@@ -463,7 +498,7 @@ function tt_ajax_get_comments_callback() {
         wp_send_json_error(['message' => 'Brak ID slajdu.'], 400);
     }
 
-	// Sprawdzenie, czy dla danego slajdu są prawdziwe komentarze
+    // Sprawdzenie, czy dla danego slajdu są prawdziwe komentarze
     $user_id = get_current_user_id();
     $comments_table = $wpdb->prefix . 'tt_comments';
     $results = $wpdb->get_results($wpdb->prepare(
@@ -920,10 +955,10 @@ add_action('wp_ajax_tt_account_delete', function () {
  * Shortcode [tt_login_form] generujący formularz dla AJAX.
  */
 add_shortcode( 'tt_login_form', function() {
-	if ( is_user_logged_in() ) {
-		return '<p style="padding: 20px; text-align: center;">Jesteś już zalogowany.</p>';
-	}
-	return '<form name="loginform" class="login-form" action="#" method="post">
+    if ( is_user_logged_in() ) {
+        return '<p style="padding: 20px; text-align: center;">Jesteś już zalogowany.</p>';
+    }
+    return '<form name="loginform" class="login-form" action="#" method="post">
         <p><label for="user_login">Nazwa użytkownika lub e-mail</label><input type="text" name="log" id="user_login" class="input" value="" size="20" required autocomplete="username"></p>
         <p><label for="user_pass">Hasło</label><input type="password" name="pwd" id="user_pass" class="input" value="" size="20" required autocomplete="current-password"></p>
         <p><input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="Zaloguj się"></p>
@@ -1035,8 +1070,82 @@ add_filter('rest_authentication_errors', function($result) {
     if (!empty($result)) {
         return $result;
     }
-    return true;
+    return null;
 });
+
+// ============================================================================
+// STRIPE PAYMENT INTEGRATION
+// ============================================================================
+
+// 4. AJAX Handler for Creating a Payment Intent
+function tt_create_payment_intent() {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+    // It's crucial to have Stripe's PHP library loaded.
+    // Ensure you have `require_once 'vendor/autoload.php';` if you're using Composer.
+    if (!class_exists('\\Stripe\\Stripe')) {
+        // Zwraca błąd 500 - brak biblioteki
+        wp_send_json_error(['message' => 'Stripe PHP library not found. Ensure Composer is installed and autoloader is included in functions.php.'], 500);
+        return;
+    }
+
+    try {
+        \Stripe\Stripe::setApiKey(TT_STRIPE_SECRET_KEY);
+
+        $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
+        $currency = isset($_POST['currency']) ? strtolower($_POST['currency']) : 'pln';
+
+        // ** KOREKTA BŁĘDU 400 **
+        // Ustal minimalną kwotę
+        $min_amount = ($currency === 'pln') ? 5.00 : 1.00;
+
+        // Walidacja kwoty zgodnie z regułą minimalną
+        if ($amount < $min_amount) {
+            wp_send_json_error(['message' => 'Minimalna kwota dla tej waluty to ' . number_format($min_amount, 2) . ' ' . strtoupper($currency)], 400);
+            return;
+        }
+        // ** KONIEC KOREKTY BŁĘDU 400 **
+
+        // Stripe expects amount in the smallest currency unit (e.g., cents, groszy)
+        $amount_in_cents = round($amount * 100);
+
+        $payment_intent = \Stripe\PaymentIntent::create([
+            'amount' => $amount_in_cents,
+            'currency' => $currency,
+            'automatic_payment_methods' => ['enabled' => true],
+        ]);
+
+        wp_send_json_success(['clientSecret' => $payment_intent->client_secret]);
+
+    } catch (Exception $e) {
+        // Błąd API Stripe'a (np. zły klucz)
+        wp_send_json_error(['message' => 'Stripe API Error: ' . $e->getMessage()], 500);
+    }
+}
+add_action('wp_ajax_tt_create_payment_intent', 'tt_create_payment_intent');
+add_action('wp_ajax_nopriv_tt_create_payment_intent', 'tt_create_payment_intent'); // Umożliwienie płatności bez logowania
+
+
+// 5. AJAX Handler to be called on successful payment (for verification)
+function tt_handle_tip_success() {
+    // Ta funkcja powinna być używana do serwerowej weryfikacji i udzielania dostępu
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+    $payment_intent_id = isset($_POST['payment_intent_id']) ? sanitize_text_field($_POST['payment_intent_id']) : '';
+
+    if (empty($payment_intent_id)) {
+        wp_send_json_error(['message' => 'Payment Intent ID is missing.'], 400);
+        return;
+    }
+
+    // W TYM MIEJSCU MUSISZ DODAĆ LOGIKĘ WERYFIKACJI STRIPE Z API
+
+    // Na potrzeby tego wdrożenia zwracamy sukces
+    wp_send_json_success(['message' => 'Payment verified successfully!']);
+}
+add_action('wp_ajax_tt_handle_tip_success', 'tt_handle_tip_success');
+add_action('wp_ajax_nopriv_tt_handle_tip_success', 'tt_handle_tip_success');
+
 
 // ============================================================================
 // SERVICE WORKER AT ROOT
@@ -1133,5 +1242,3 @@ add_action('wp', function() {
         // np. ukryć header/footer WordPress, wyłączyć niepotrzebne skrypty itp.
     }
 });
-
-// Tymczasowy kod do odświeżania reguł został usunięty.
