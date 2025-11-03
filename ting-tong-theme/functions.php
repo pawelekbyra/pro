@@ -30,18 +30,30 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
 
-// 1. Define Stripe API Keys (WZMACNIANA LOGIKA POBIERANIA KLUCZY)
-// Używamy bezpiecznej metody, która pobiera wartość z globalnych stałych,
-// jeśli istnieją, w przeciwnym razie używa placeholdera.
-if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-    $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
-    define('TT_STRIPE_PUBLISHABLE_KEY', $pk_value);
-}
+// =========================================================================
+// 1. Define Stripe API Keys (NAPRAWA TIMINGU Z UŻYCIEM HOOKA)
+// =========================================================================
 
-if (!defined('TT_STRIPE_SECRET_KEY')) {
-    $sk_value = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
-    define('TT_STRIPE_SECRET_KEY', $sk_value);
+/**
+ * Definiuje klucze Stripe dla motywu, używając stałych z wp-config.php.
+ * Funkcja jest uruchamiana za pomocą 'after_setup_theme', co gwarantuje,
+ * że stałe zdefiniowane w wp-config.php są już w pełni dostępne.
+ */
+function tt_define_stripe_constants_safely() {
+    // Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
+    if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
+        $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
+        define('TT_STRIPE_PUBLISHABLE_KEY', $pk_value);
+    }
+
+    // Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
+    if (!defined('TT_STRIPE_SECRET_KEY')) {
+        $sk_value = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
+        define('TT_STRIPE_SECRET_KEY', $sk_value);
+    }
 }
+// Kluczowy hak: Wymusza definicję po wczytaniu wp-config.php, ale przed rejestracją skryptów.
+add_action('after_setup_theme', 'tt_define_stripe_constants_safely', 1);
 
 
 // =========================================================================
@@ -826,243 +838,6 @@ add_action('wp_ajax_tt_profile_update', function () {
         'last_name'    => $last,
         'email'        => $email,
         'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
-    ]);
-});
-add_action('wp_ajax_tt_avatar_upload', function () {
-    try {
-        check_ajax_referer('tt_ajax_nonce', 'nonce');
-        if ( ! is_user_logged_in() ) {
-            wp_send_json_error(['message' => 'Brak uprawnień: Musisz być zalogowany.'], 401);
-        }
-
-        $dataUrl = isset($_POST['image']) ? trim( wp_unslash($_POST['image']) ) : '';
-        if (empty($dataUrl) || strpos($dataUrl, 'data:image') !== 0) {
-            wp_send_json_error(['message' => 'Błąd danych: Nieprawidłowy format data URL.'], 400);
-        }
-
-        if ( ! preg_match('#^data:(image/(?:png|jpeg|gif));base64,(.+)$#', $dataUrl, $matches) ) {
-            wp_send_json_error(['message' => 'Błąd formatu: Oczekiwano obrazu PNG, JPEG lub GIF.'], 400);
-        }
-
-        $mime = strtolower($matches[1]);
-        $bin = base64_decode($matches[2]);
-        if ( ! $bin || strlen($bin) > 5 * 1024 * 1024) { // Zwiększony limit do 5MB
-            wp_send_json_error(['message' => 'Błąd pliku: Obraz jest uszkodzony lub za duży (limit 5MB).'], 400);
-        }
-
-        if ( ! function_exists('wp_handle_sideload') ) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-            require_once ABSPATH . 'wp-admin/includes/media.php';
-            require_once ABSPATH . 'wp-admin/includes/image.php';
-        }
-
-        $u = wp_get_current_user();
-        $ext = ($mime === 'image/png') ? 'png' : 'jpg'; // Uproszczenie dla najczęstszych typów
-        $filename = 'tt-avatar-' . (int) $u->ID . '-' . time() . '.' . $ext;
-
-        $upload_dir = wp_upload_dir();
-        $tmp_path = trailingslashit($upload_dir['path']) . $filename;
-
-        $write_result = file_put_contents($tmp_path, $bin);
-        if ($write_result === false) {
-            wp_send_json_error(['message' => 'Błąd zapisu: Nie można zapisać pliku tymczasowego.'], 500);
-        }
-
-        $file_array = ['name' => $filename, 'type' => $mime, 'tmp_name' => $tmp_path, 'error' => 0, 'size' => filesize($tmp_path)];
-        $file = wp_handle_sideload($file_array, ['test_form' => false]);
-
-        if (isset($file['error'])) {
-            @unlink($tmp_path);
-            wp_send_json_error(['message' => 'Błąd WordPress: ' . $file['error']], 500);
-        }
-
-        $attach_id = wp_insert_attachment(['post_mime_type' => $mime, 'post_title' => $filename, 'post_content' => '', 'post_status' => 'inherit'], $file['file']);
-        if (is_wp_error($attach_id)) {
-            @unlink($file['file']);
-            wp_send_json_error(['message' => 'Błąd bazy danych: Nie można utworzyć załącznika.'], 500);
-        }
-
-        $attach_data = wp_generate_attachment_metadata($attach_id, $file['file']);
-        wp_update_attachment_metadata($attach_id, $attach_data);
-
-        // Usuń stary avatar, jeśli istnieje
-        $old_avatar_id = get_user_meta($u->ID, 'tt_avatar_id', true);
-        if ($old_avatar_id && (int) $old_avatar_id !== (int) $attach_id) {
-            wp_delete_attachment((int) $old_avatar_id, true);
-        }
-
-        update_user_meta($u->ID, 'tt_avatar_id', $attach_id);
-        $url = wp_get_attachment_url($attach_id);
-        update_user_meta($u->ID, 'tt_avatar_url', esc_url_raw($url));
-
-        wp_send_json_success(['url' => $url, 'attachment_id' => $attach_id]);
-
-    } catch (Throwable $e) {
-        // Złap wszystkie błędy krytyczne (w tym błędy parsowania, itp.)
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            wp_send_json_error(['message' => 'Krytyczny błąd serwera: ' . $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
-        } else {
-            wp_send_json_error(['message' => 'Wystąpił nieoczekiwany błąd serwera.'], 500);
-        }
-    }
-});
-add_action('wp_ajax_tt_password_change', function () {
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message'=>'not_logged_in'], 401);
-    }
-    $u = wp_get_current_user();
-    $cur = isset($_POST['current_password']) ? (string) wp_unslash($_POST['current_password']) : '';
-    $n1  = isset($_POST['new_password_1'])   ? (string) wp_unslash($_POST['new_password_1'])   : '';
-    $n2  = isset($_POST['new_password_2'])   ? (string) wp_unslash($_POST['new_password_2'])   : '';
-    if (empty($cur) || empty($n1) || empty($n2) || $n1 !== $n2 || strlen($n1) < 8) {
-        wp_send_json_error(['message' => 'Sprawdź pola hasła (min. 8 znaków, muszą być identyczne).'], 400);
-    }
-    require_once ABSPATH . 'wp-includes/pluggable.php';
-    if (!wp_check_password($cur, $u->user_pass, $u->ID)) {
-        wp_send_json_error(['message' => 'Aktualne hasło jest nieprawidłowe.'], 403);
-    }
-    wp_set_password($n1, $u->ID);
-    wp_send_json_success(['message' => 'Hasło zmienione. Zaloguj się ponownie.']);
-});
-add_action('wp_ajax_tt_account_delete', function () {
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message'=>'not_logged_in'], 401);
-    }
-    $u = wp_get_current_user();
-    $confirm = isset($_POST['confirm_text']) ? trim((string) wp_unslash($_POST['confirm_text'])) : '';
-    if ($confirm !== 'USUWAM KONTO') {
-        wp_send_json_error(['message' => 'Aby potwierdzić, wpisz dokładnie: USUWAM KONTO'], 400);
-    }
-    if (user_can($u, 'administrator')) {
-        wp_send_json_error(['message' => 'Konto administratora nie może być usunięte.'], 403);
-    }
-    require_once ABSPATH . 'wp-admin/includes/user.php';
-    if (!wp_delete_user($u->ID)) {
-        wp_send_json_error(['message' => 'Nie udało się usunąć konta.'], 500);
-    }
-    wp_logout();
-    wp_send_json_success(['message' => 'Konto usunięte.']);
-});
-
-
-// =========================================================================
-// 5. SHORTCODES I FILTRY
-// =========================================================================
-
-/**
- * Shortcode [tt_login_form] generujący formularz dla AJAX.
- */
-add_shortcode( 'tt_login_form', function() {
-    if ( is_user_logged_in() ) {
-        return '<p style="padding: 20px; text-align: center;">Jesteś już zalogowany.</p>';
-    }
-    return '<form name="loginform" class="login-form" action="#" method="post">
-        <p><label for="user_login">Nazwa użytkownika lub e-mail</label><input type="text" name="log" id="user_login" class="input" value="" size="20" required autocomplete="username"></p>
-        <p><label for="user_pass">Hasło</label><input type="password" name="pwd" id="user_pass" class="input" value="" size="20" required autocomplete="current-password"></p>
-        <p><input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="Zaloguj się"></p>
-    </form>';
-});
-
-/**
- * Filtr get_avatar_url, aby preferować niestandardowy avatar.
- */
-add_filter('get_avatar_url', function ($url, $id_or_email, $args) {
-    $user_id = 0;
-    if (is_numeric($id_or_email)) $user_id = (int) $id_or_email;
-    elseif (is_object($id_or_email) && isset($id_or_email->user_id)) $user_id = (int) $id_or_email->user_id;
-    elseif (is_string($id_or_email) && ($user = get_user_by('email', $id_or_email))) $user_id = (int) $user->ID;
-
-    // Definicja Twojego domyślnego pliku
-    $default_avatar_url = get_template_directory_uri() . '/assets/img/default-user.png';
-
-    if ($user_id > 0) {
-        // KROK 1: Sprawdź niestandardowy awatar motywu
-        $custom = get_user_meta($user_id, 'tt_avatar_url', true);
-        if ($custom) {
-            return esc_url($custom); // Użyj awatara użytkownika, jeśli istnieje
-        }
-
-        // KROK 2: Jeśli brak awatara niestandardowego, zwróć Twój domyślny plik
-        return $default_avatar_url;
-    }
-
-    // KROK 3: Dla wszystkich innych scenariuszy, gdzie WordPress normalnie użyłby Gravatara/domyślnego WP
-    if (strpos($url, 'gravatar.com') !== false || strpos($url, 's.w.org') !== false) {
-        return $default_avatar_url;
-    }
-
-    return $url;
-}, 10, 3);
-
-add_action('wp_ajax_tt_complete_profile', function () {
-    // 1. Bezpieczeństwo i walidacja wstępna - teraz używa standardowego nonce z POST
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Brak autoryzacji. Musisz być zalogowany.'], 401);
-    }
-
-    // Zmiana: dane pobierane z $_POST zamiast JSON
-    $data = $_POST;
-    $u = wp_get_current_user();
-
-    // 2. Sanityzacja i walidacja danych
-    $first_name = isset($data['first_name']) ? sanitize_text_field(wp_unslash($data['first_name'])) : '';
-    $last_name = isset($data['last_name']) ? sanitize_text_field(wp_unslash($data['last_name'])) : '';
-    $new_password = isset($data['new_password']) ? wp_unslash($data['new_password']) : '';
-    // Zmiana: 'true'/'false' jako string z FormData
-    $email_consent = isset($data['email_consent']) ? filter_var($data['email_consent'], FILTER_VALIDATE_BOOLEAN) : false;
-    $email_language = isset($data['email_language']) && in_array($data['email_language'], ['pl', 'en']) ? $data['email_language'] : 'pl';
-
-    if (empty($first_name) || empty($last_name)) {
-        wp_send_json_error(['message' => 'Imię i nazwisko są polami wymaganymi.'], 400);
-    }
-
-    // 3. Przygotowanie danych do aktualizacji
-    $user_data_to_update = [
-        'ID' => $u->ID,
-        'first_name' => $first_name,
-        'last_name' => $last_name,
-        'display_name' => trim($first_name . ' ' . $last_name),
-    ];
-
-    if (!empty($new_password)) {
-        if (strlen($new_password) < 8) {
-            wp_send_json_error(['message' => 'Hasło musi zawierać co najmniej 8 znaków.'], 400);
-        }
-        $user_data_to_update['user_pass'] = $new_password;
-    }
-
-    // 4. Jedna, atomowa operacja aktualizacji
-    $result = wp_update_user($user_data_to_update);
-
-    if (is_wp_error($result)) {
-        wp_send_json_error(['message' => $result->get_error_message() ?: 'Nie udało się zaktualizować profilu.'], 500);
-    }
-
-    // 5. Aktualizacja metadanych użytkownika
-    update_user_meta($u->ID, 'tt_email_consent', $email_consent);
-    update_user_meta($u->ID, 'tt_email_language', $email_language);
-
-    // 6. Przygotowanie i wysłanie odpowiedzi
-    $updated_user_data = [
-        'user_id'             => (int) $u->ID,
-        'username'            => $u->user_login,
-        'email'               => $u->user_email,
-        'display_name'        => $user_data_to_update['display_name'] ?: $u->display_name,
-        'first_name'          => $first_name,
-        'last_name'           => $last_name,
-        'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
-        'email_consent'       => $email_consent,
-        'email_language'      => $email_language,
-        'is_profile_complete' => true,
-    ];
-
-    wp_send_json_success([
-        'message'   => 'Profil został pomyślnie skonfigurowany!',
-        'userData'  => $updated_user_data,
-        'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
     ]);
 });
 add_action('wp_ajax_tt_avatar_upload', function () {
