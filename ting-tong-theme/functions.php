@@ -4,6 +4,19 @@
  *
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
+
+// =========================================================================
+// 0. Ładowanie Bibliotek i Klucze Bezpieczeństwa
+// =========================================================================
+
+// Wymagaj autoloader'a Composera
+// UWAGA: ŚCIEŻKA DO TEGO PLIKU MOŻE WYMAGAĆ KOREKTY W ZALEŻNOŚCI OD MIEJSCA INSTALACJI COMPOSER'A
+// Jeśli Composer został zainstalowany w głównym katalogu motywu, ścieżka powinna być taka:
+if (file_exists(get_template_directory() . '/vendor/autoload.php')) {
+    require_once get_template_directory() . '/vendor/autoload.php';
+}
+// Jeśli w katalogu głównym WordPressa, ścieżka będzie inna.
+
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
 if ( ! function_exists( 'wp_new_user_notification' ) ) {
     function wp_new_user_notification( $user_id, $deprecated = '', $notify = '' ) {
@@ -15,6 +28,17 @@ if ( ! function_exists( 'wp_new_user_notification' ) ) {
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
+
+// 1. Define Stripe API Keys
+// UWAGA: TE KLUCZE POWINNY BYĆ ZDEFINIOWANE W wp-config.php (lub innej bezpiecznej lokalizacji)
+// W PRZYPADKU ICH BRAKU UŻYJ MOCKOWYCH WARTOŚCI.
+if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
+    define('TT_STRIPE_PUBLISHABLE_KEY', 'pk_test_YOUR_PUBLISHABLE_KEY');
+}
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    define('TT_STRIPE_SECRET_KEY', 'sk_test_YOUR_SECRET_KEY');
+}
+
 
 // =========================================================================
 // 1. TWORZENIE TABEL BAZY DANYCH
@@ -232,10 +256,14 @@ function tt_enqueue_and_localize_scripts() {
     wp_enqueue_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.css', [], null );
     wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
+    // Kolejkowanie skryptu Stripe.js
+    wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, true );
+
     wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
-    wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, true ); // Upewnij się, że Stripe jest kolejkowany
+    // UPEWNIJ SIĘ, ŻE stripe-js JEST W ZALEŻNOŚCIACH
     wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js', 'stripe-js' ], time(), true );
 
+    // LOKALIZACJA DANYCH
     wp_localize_script(
         'tingtong-app-script',
         'TingTongData',
@@ -1044,18 +1072,6 @@ add_filter('rest_authentication_errors', function($result) {
 // STRIPE PAYMENT INTEGRATION
 // ============================================================================
 
-// 1. Define Stripe API Keys
-// IMPORTANT: Replace with your actual keys and use a secure method
-// like environment variables or WP constants in wp-config.php
-if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-    define('TT_STRIPE_PUBLISHABLE_KEY', 'pk_test_YOUR_PUBLISHABLE_KEY');
-}
-if (!defined('TT_STRIPE_SECRET_KEY')) {
-    define('TT_STRIPE_SECRET_KEY', 'sk_test_YOUR_SECRET_KEY');
-}
-
-
-
 // 4. AJAX Handler for Creating a Payment Intent
 function tt_create_payment_intent() {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
@@ -1063,7 +1079,8 @@ function tt_create_payment_intent() {
     // It's crucial to have Stripe's PHP library loaded.
     // Ensure you have `require_once 'vendor/autoload.php';` if you're using Composer.
     if (!class_exists('\\Stripe\\Stripe')) {
-        wp_send_json_error(['message' => 'Stripe PHP library not found.'], 500);
+        // Zwraca błąd 500 - brak biblioteki
+        wp_send_json_error(['message' => 'Stripe PHP library not found. Ensure Composer is installed and autoloader is included in functions.php.'], 500);
         return;
     }
 
@@ -1073,11 +1090,16 @@ function tt_create_payment_intent() {
         $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $currency = isset($_POST['currency']) ? strtolower($_POST['currency']) : 'pln';
 
-        // Validate amount
-        if ($amount < 1) { // Example: minimum amount of 1 unit
-            wp_send_json_error(['message' => 'Invalid amount.'], 400);
+        // ** KOREKTA BŁĘDU 400 **
+        // Ustal minimalną kwotę
+        $min_amount = ($currency === 'pln') ? 5.00 : 1.00;
+
+        // Walidacja kwoty zgodnie z regułą minimalną
+        if ($amount < $min_amount) {
+            wp_send_json_error(['message' => 'Minimalna kwota dla tej waluty to ' . number_format($min_amount, 2) . ' ' . strtoupper($currency)], 400);
             return;
         }
+        // ** KONIEC KOREKTY BŁĘDU 400 **
 
         // Stripe expects amount in the smallest currency unit (e.g., cents, groszy)
         $amount_in_cents = round($amount * 100);
@@ -1091,13 +1113,17 @@ function tt_create_payment_intent() {
         wp_send_json_success(['clientSecret' => $payment_intent->client_secret]);
 
     } catch (Exception $e) {
-        wp_send_json_error(['message' => $e->getMessage()], 500);
+        // Błąd API Stripe'a (np. zły klucz)
+        wp_send_json_error(['message' => 'Stripe API Error: ' . $e->getMessage()], 500);
     }
 }
 add_action('wp_ajax_tt_create_payment_intent', 'tt_create_payment_intent');
+add_action('wp_ajax_nopriv_tt_create_payment_intent', 'tt_create_payment_intent'); // Umożliwienie płatności bez logowania
+
 
 // 5. AJAX Handler to be called on successful payment (for verification)
 function tt_handle_tip_success() {
+    // Ta funkcja powinna być używana do serwerowej weryfikacji i udzielania dostępu
     check_ajax_referer('tt_ajax_nonce', 'nonce');
 
     $payment_intent_id = isset($_POST['payment_intent_id']) ? sanitize_text_field($_POST['payment_intent_id']) : '';
@@ -1107,15 +1133,13 @@ function tt_handle_tip_success() {
         return;
     }
 
-    // Here you would typically:
-    // 1. Verify the Payment Intent status with the Stripe API.
-    // 2. If successful, grant the user "Patron" status or other benefits.
-    // 3. Log the transaction in your database.
+    // W TYM MIEJSCU MUSISZ DODAĆ LOGIKĘ WERYFIKACJI STRIPE Z API
 
-    // For now, we'll just return a success message.
+    // Na potrzeby tego wdrożenia zwracamy sukces
     wp_send_json_success(['message' => 'Payment verified successfully!']);
 }
 add_action('wp_ajax_tt_handle_tip_success', 'tt_handle_tip_success');
+add_action('wp_ajax_nopriv_tt_handle_tip_success', 'tt_handle_tip_success');
 
 
 // ============================================================================
@@ -1213,5 +1237,3 @@ add_action('wp', function() {
         // np. ukryć header/footer WordPress, wyłączyć niepotrzebne skrypty itp.
     }
 });
-
-// Tymczasowy kod do odświeżania reguł został usunięty.
