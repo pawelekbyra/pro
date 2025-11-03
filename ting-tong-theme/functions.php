@@ -30,17 +30,20 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
 
-// 1. Define Stripe API Keys (ZDEFINIOWANE Z WP-CONFIG.PHP LUB PLACEHOLDEREM)
-if (defined('PUBLISHABLE_KEY') && !defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-    define('TT_STRIPE_PUBLISHABLE_KEY', PUBLISHABLE_KEY);
-} else if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-    define('TT_STRIPE_PUBLISHABLE_KEY', 'pk_test_YOUR_PUBLISHABLE_KEY');
+// =========================================================================
+// 1. Define Stripe API Keys (NAPRAWIONA LOGIKA POBIERANIA KLUCZY)
+// =========================================================================
+
+// Klucz publiczny
+if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
+    $pk = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
+    define('TT_STRIPE_PUBLISHABLE_KEY', $pk);
 }
 
-if (defined('SECRET_KEY') && !defined('TT_STRIPE_SECRET_KEY')) {
-    define('TT_STRIPE_SECRET_KEY', SECRET_KEY);
-} else if (!defined('TT_STRIPE_SECRET_KEY')) {
-    define('TT_STRIPE_SECRET_KEY', 'sk_test_YOUR_SECRET_KEY');
+// Klucz prywatny
+if (!defined('TT_STRIPE_SECRET_KEY')) {
+    $sk = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
+    define('TT_STRIPE_SECRET_KEY', $sk);
 }
 
 
