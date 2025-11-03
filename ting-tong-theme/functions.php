@@ -13,6 +13,22 @@
 $composer_autoload = __DIR__ . '/vendor/autoload.php';
 if (file_exists($composer_autoload)) {
     require_once $composer_autoload;
+
+    // Ładowanie zmiennych środowiskowych z pliku .env
+    if (class_exists('Dotenv\Dotenv')) {
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+        $dotenv->safeLoad();
+
+        // Definicja stałych PHP na podstawie zmiennych środowiskowych z .env
+        if (getenv('STRIPE_SECRET_KEY') && !defined('TT_STRIPE_SECRET_KEY')) {
+            define('TT_STRIPE_SECRET_KEY', getenv('STRIPE_SECRET_KEY'));
+        }
+        if (getenv('PUBLISHABLE_KEY') && !defined('TT_STRIPE_PUBLISHABLE_KEY')) {
+            define('TT_STRIPE_PUBLISHABLE_KEY', getenv('PUBLISHABLE_KEY'));
+        }
+    } else {
+        error_log('Błąd: Nie załadowano klasy Dotenv. Sprawdź instalację Composera.');
+    }
 } else {
     // Jeśli nie znaleziono Composera, błąd krytyczny zostanie zalogowany.
     error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php. Wgraj katalog vendor/ na serwer.');
