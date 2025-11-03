@@ -1171,7 +1171,7 @@ add_filter('rest_authentication_errors', function($result) {
     if (!empty($result)) {
         return $result;
     }
-    return true;
+    return $result;
 });
 
 // ============================================================================
@@ -1233,8 +1233,8 @@ add_action('template_redirect', function() {
             'name' => get_bloginfo('name') . ' - Ting Tong',
             'short_name' => 'TingTong',
             'description' => 'Aplikacja wideo w stylu TikTok',
-            'start_url' => home_url('/?pwa=1'),
-            'scope' => home_url('/'),
+            'start_url' => site_url('/?pwa=1'),
+            'scope' => site_url('/'),
             'display' => 'standalone',
             'orientation' => 'portrait',
             'background_color' => '#000000',
