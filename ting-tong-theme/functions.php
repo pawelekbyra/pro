@@ -233,7 +233,8 @@ function tt_enqueue_and_localize_scripts() {
     wp_enqueue_style( 'tingtong-style', get_stylesheet_uri(), [ 'swiper-css' ], null );
 
     wp_enqueue_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@12.0.2/swiper-bundle.min.js', [], null, true );
-    wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js', 'stripe-js' ], null, true );
+    wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, true ); // Upewnij się, że Stripe jest kolejkowany
+    wp_enqueue_script( 'tingtong-app-script', get_template_directory_uri() . '/js/app.js', [ 'swiper-js', 'stripe-js' ], time(), true );
 
     wp_localize_script(
         'tingtong-app-script',
@@ -241,6 +242,7 @@ function tt_enqueue_and_localize_scripts() {
         [
             'isLoggedIn' => is_user_logged_in(),
             'slides'     => tt_get_slides_data(),
+            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : 'pk_test_PLACEHOLDER_KEY', // DODANY KLUCZ
         ]
     );
 
@@ -1052,28 +1054,6 @@ if (!defined('TT_STRIPE_SECRET_KEY')) {
     define('TT_STRIPE_SECRET_KEY', 'sk_test_YOUR_SECRET_KEY');
 }
 
-// 2. Enqueue Stripe.js and Localize Public Key
-function tt_enqueue_stripe_scripts() {
-    // Enqueue Stripe.js library
-    wp_enqueue_script(
-        'stripe-js',
-        'https://js.stripe.com/v3/',
-        [],
-        null,
-        true
-    );
-
-    // Make the Stripe public key available to our app script
-    wp_localize_script(
-        'tingtong-app-script',
-        'TingTongData',
-        [
-            'stripePk' => TT_STRIPE_PUBLISHABLE_KEY,
-        ]
-    );
-}
-// Hook into the main script enqueueing action
-add_action('wp_enqueue_scripts', 'tt_enqueue_stripe_scripts');
 
 
 // 4. AJAX Handler for Creating a Payment Intent
