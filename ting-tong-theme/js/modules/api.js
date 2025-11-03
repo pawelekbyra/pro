@@ -29,38 +29,9 @@ export const API = {
     }
   },
 
-  // === NOWE METODY STRIPE (NAPRAWIONY EKSPORT) ===
-
-  /**
-   * Tworzy Payment Intent na serwerze i zwraca client_secret.
-   * Wyrzuca błąd w przypadku niepowodzenia.
-   */
-  createStripePaymentIntent: async (amount, currency) => {
-    const result = await _request("tt_create_payment_intent", {
-      amount,
-      currency,
-    });
-
-    if (result.success && result.data?.clientSecret) {
-        return result.data.clientSecret;
-    }
-
-    // Wyrzuć błąd, aby mógł być obsłużony w initializePaymentElement
-    throw new Error(result.data?.message || 'Failed to create Payment Intent.');
-  },
-
-  /**
-   * Wywołuje weryfikację płatności po stronie serwera po udanej transakcji.
-   */
-  handleTipSuccess: async (paymentIntentId) => {
-    return _request("tt_handle_tip_success", { payment_intent_id: paymentIntentId });
-  },
-
-  // === ISTNIEJĄCE METODY ===
-
   uploadCommentImage: async (file) => {
     try {
-      // ... (pozostała logika bez zmian)
+      // Walidacja pliku
       if (!file || !(file instanceof File)) {
         throw new Error('Invalid file');
       }
@@ -90,6 +61,7 @@ export const API = {
 
       const json = await response.json();
 
+      // Walidacja odpowiedzi
       if (!json || typeof json !== 'object') {
         throw new Error('Invalid response format');
       }
@@ -98,6 +70,7 @@ export const API = {
         ajax_object.nonce = json.new_nonce;
       }
 
+      // Sprawdź czy sukces i czy mamy URL
       if (json.success && !json.data?.url) {
         throw new Error('Missing image URL in response');
       }
@@ -111,7 +84,6 @@ export const API = {
       };
     }
   },
-
   login: (data) => _request("tt_ajax_login", data),
   logout: () => _request("tt_ajax_logout"),
   toggleLike: (postId) => _request("toggle_like", { post_id: postId }),
@@ -145,4 +117,18 @@ export const API = {
       slide_id: slideId,
       comment_id: commentId,
     }),
+
+  createStripePaymentIntent: async (data) => {
+    try {
+      const response = await authManager.ajax('tt_create_stripe_payment_intent', {
+        amount: data.amount,
+        email: data.email,
+        currency: data.currency,
+      }, true); // `true` to send as JSON
+      return response;
+    } catch (error) {
+      console.error('API Client Error for Stripe Payment Intent:', error);
+      return { success: false, data: { message: error.message } };
+    }
+  },
 };
