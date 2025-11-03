@@ -27,8 +27,7 @@ if ('serviceWorker' in navigator) {
       ? TingTongConfig.serviceWorkerUrl
       : '/wp-content/themes/ting-tong-theme/sw.js';
 
-    // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę mot
-ywu
+    // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
     swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
 
     navigator.serviceWorker.register(swUrl)
@@ -54,15 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // dotrze do docelowego elementu.
   // ==========================================================================
   document.body.addEventListener('click', (e) => {
-    console.log('%c[DIAGNOSTYKA] Kliknięto w element:', 'color: #ff0055; font-we
-ight: bold;', e.target);
+    console.log('%c[DIAGNOSTYKA] Kliknięto w element:', 'color: #ff0055; font-weight: bold;', e.target);
   }, true);
   // ==========================================================================
 
   // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
-    console.warn("`ajax_object` is not defined. Using mock data for standalone d
-evelopment.");
+    console.warn("`ajax_object` is not defined. Using mock data for standalone development.");
     window.ajax_object = {
       ajax_url: "#", // Prevent actual network requests
       nonce: "0a1b2c3d4e",
@@ -99,8 +96,7 @@ evelopment.");
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)
-:not(#comments-modal-container)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
             if (e.target === modal) UI.closeModal(modal);
@@ -174,10 +170,8 @@ evelopment.");
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszeg
-o logowania.
-        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na bł
-ędy timingowe.
+        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
+        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
         FirstLoginModal.checkProfileAndShowModal(data.userData);
       });
 
@@ -255,14 +249,12 @@ o logowania.
         UI.renderSlides();
 
         // REMOVED: 2000ms fallback setTimeout
-        // Logika .video-loaded jest teraz obsługiwana w UI.js na zdarzeniu 'loa
-dedmetadata'.
+        // Logika .video-loaded jest teraz obsługiwana w UI.js na zdarzeniu 'loadedmetadata'.
 
         UI.updateTranslations();
 
         const handleMediaChange = (swiper) => {
-          // First, pause every single video element within the swiper container
-.
+          // First, pause every single video element within the swiper container.
           swiper.el.querySelectorAll('video').forEach(video => {
             if (!video.paused) {
               video.pause();
@@ -270,11 +262,9 @@ dedmetadata'.
           });
 
           // Also unload all iframes to save resources.
-          swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) =>
- {
+          swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) => {
               if (iframe.src) {
-                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = if
-rame.src;
+                if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = iframe.src;
                 iframe.src = "";
               }
           });
@@ -284,19 +274,15 @@ rame.src;
 
           // Play media for the new active slide.
           if (activeSlide) {
-            // Use realIndex to get data from our original array, which is corre
-ct for loop mode.
+            // Use realIndex to get data from our original array, which is correct for loop mode.
             const slideData = slidesData[swiper.realIndex];
 
             // ✅ FIX 1: Sprawdź stan nakładek PRZED próbą odtworzenia
             const secretOverlay = activeSlide.querySelector('.secret-overlay');
-            const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-over
-lay');
+            const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay');
 
-            const isSecretVisible = secretOverlay && secretOverlay.classList.con
-tains('visible');
-            const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.clas
-sList.contains('visible');
+            const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
+            const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
             const isAnyOverlayVisible = isSecretVisible || isPwaSecretVisible;
 
             if (slideData && slideData.isIframe) {
@@ -308,11 +294,9 @@ sList.contains('visible');
               const video = activeSlide.querySelector("video");
               if (video) {
                 // Hide overlays
-                const pauseOverlay = activeSlide.querySelector(".pause-overlay")
-;
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
                 if (pauseOverlay) pauseOverlay.classList.remove("visible");
-                const replayOverlay = activeSlide.querySelector(".replay-overlay
-");
+                const replayOverlay = activeSlide.querySelector(".replay-overlay");
                 if (replayOverlay) replayOverlay.classList.remove("visible");
 
                 video.muted = State.get("isSoundMuted");
@@ -320,12 +304,10 @@ sList.contains('visible');
                 // ✅ FIX 1: Odtwórz tylko jeśli NIE MA nakładki
                 if (!isAnyOverlayVisible) {
                   video.play().catch((error) => {
-                      console.log("Autoplay was prevented for slide " + swiper.r
-ealIndex, error);
+                      console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
                   });
                 } else {
-                  console.log("Video paused due to overlay visibility on slide "
- + swiper.realIndex);
+                  console.log("Video paused due to overlay visibility on slide " + swiper.realIndex);
                   video.pause();
                   video.currentTime = 0; // Reset do początku dla konsystencji
                 }
@@ -358,8 +340,7 @@ ealIndex, error);
               setTimeout(() => {
                 const activeSlide = swiper.slides[swiper.activeIndex];
                 if (activeSlide) {
-                    activeSlide.querySelector('.tiktok-symulacja').classList.add
-('video-loaded');
+                    activeSlide.querySelector('.tiktok-symulacja').classList.add('video-loaded');
                 }
               }, 400);
               UI.DOM.preloader.classList.add("preloader-hiding");
@@ -368,26 +349,21 @@ ealIndex, error);
 
               // Zabezpieczenie przed brakiem transitionend (na wszelki wypadek)
               const transitionEndHandler = () => {
-                UI.DOM.preloader.removeEventListener("transitionend", transition
-EndHandler);
+                UI.DOM.preloader.removeEventListener("transitionend", transitionEndHandler);
                 UI.DOM.preloader.style.display = "none";
-                if (sessionStorage.getItem('showAlreadyInstalledToast') === 'tru
-e') {
-                  UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), fa
-lse, 3000);
+                if (sessionStorage.getItem('showAlreadyInstalledToast') === 'true') {
+                  UI.showAlert(Utils.getTranslation("alreadyInstalledToast"), false, 3000);
                   sessionStorage.removeItem('showAlreadyInstalledToast');
                 }
               };
 
-              UI.DOM.preloader.addEventListener("transitionend", transitionEndHa
-ndler, { once: true });
+              UI.DOM.preloader.addEventListener("transitionend", transitionEndHandler, { once: true });
               setTimeout(transitionEndHandler, 600); // Fallback po 600ms
               // *******************************************************
             },
             slideChange: handleMediaChange,
             click: function(swiper, event) {
-              // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data
--action'.
+              // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
               // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
               // Główny handler na `document.body` zajmie się resztą.
               if (event.target.closest('[data-action]')) {
@@ -401,13 +377,11 @@ ndler, { once: true });
 
               if (video.paused) {
                 video.play().catch((err) => console.log("Błąd play:", err));
-                const pauseOverlay = activeSlide.querySelector(".pause-overlay")
-;
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
                 if (pauseOverlay) pauseOverlay.classList.remove("visible");
               } else {
                 video.pause();
-                const pauseOverlay = activeSlide.querySelector(".pause-overlay")
-;
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
                 if (pauseOverlay) pauseOverlay.classList.add("visible");
               }
             },
@@ -428,8 +402,7 @@ ndler, { once: true });
     }
 
     function _initializePreloader() {
-      // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie, aby przyspiesz
-yć
+      // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie, aby przyspieszyć
       UI.DOM.preloader.classList.add("content-visible");
 
       UI.DOM.preloader
@@ -484,21 +457,24 @@ yć
   const urlParams = new URLSearchParams(window.location.search);
   const isDebugMode = urlParams.get('debug') === 'true';
 
-  if (isDebugMode || (typeof window !== 'undefined' && (window.location.hostname
- === 'localhost' || window.location.hostname.includes('local')))) {
+  if (isDebugMode || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname.includes('local')))) {
     window.ttAuth = authManager;
     window.ttState = State;
-    console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight:
- bold');
+    console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
     console.log('Available: window.ttAuth, window.ttState, #mockLoginBtn');
 
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
+      // ZMIEŃ logikę mockBtn na otwieranie TippingModal
+      mockBtn.textContent = 'DEBUG: Pokaż Tipping Modal';
+      mockBtn.removeEventListener('click', (e) => {}); // Usuń stary listener jeśli istnieje
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_fo
-r_test@test.com' });
-        UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+        // Mockowe dane na potrzeby testu
+        State.set('isUserLoggedIn', true, true);
+        State.set('currentUser', { email: 'debug@test.com' }, true);
+        TippingModal.showModal();
+        UI.showAlert('Mock logowanie i otwarcie modala napiwków.', false);
       });
     }
     // Koniec LOGIKA MOCK BUTTON

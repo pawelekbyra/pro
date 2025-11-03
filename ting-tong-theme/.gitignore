@@ -1,6 +1,2 @@
-# Dependencies
-/vendor/
-v18.1.0.zip
-
-# Environment variables
+node_modules
 .env
