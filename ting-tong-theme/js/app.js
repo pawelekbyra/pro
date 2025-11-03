@@ -391,12 +391,6 @@ document.addEventListener("DOMContentLoaded", () => {
         State.set('swiper', swiper);
 
       } catch (error) {
-        alert(
-          "Application failed to start. Error: " +
-            error.message +
-            "\\n\\nStack: " +
-            error.stack,
-        );
         console.error("TingTong App Start Error:", error);
       }
     }
