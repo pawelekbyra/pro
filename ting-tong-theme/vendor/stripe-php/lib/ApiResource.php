@@ -4,14 +4,13 @@ namespace Stripe;
 
 /**
  * Class ApiResource.
- *
- * */
+ */
 abstract class ApiResource extends StripeObject
 {
     use ApiOperations\Request;
 
     /**
-     * @return Util\Set A list of fields that can be their own type of
+     * @return \Stripe\Util\Set A list of fields that can be their own type of
      * API resource (say a nested card under an account for example), and if
      * that resource is set, it should be transmitted to the API on a create or
      * update. Doing so is not the default behavior because API resources
@@ -40,16 +39,16 @@ abstract class ApiResource extends StripeObject
     {
         parent::__set($k, $v);
         $v = $this->{$k};
-        if (static::getSavedNestedResources()->includes($k)
+        if ((static::getSavedNestedResources()->includes($k))
             && ($v instanceof ApiResource)) {
             $v->saveWithParent = true;
         }
     }
 
     /**
-     * @return ApiResource the refreshed resource
-     *
      * @throws Exception\ApiErrorException
+     *
+     * @return ApiResource the refreshed resource
      */
     public function refresh()
     {
@@ -83,8 +82,6 @@ abstract class ApiResource extends StripeObject
     {
         // Replace dots with slashes for namespaced resources, e.g. if the object's name is
         // "foo.bar", then its URL will be "/v1/foo/bars".
-
-        /** @phpstan-ignore-next-line */
         $base = \str_replace('.', '/', static::OBJECT_NAME);
 
         return "/v1/{$base}s";
@@ -93,9 +90,9 @@ abstract class ApiResource extends StripeObject
     /**
      * @param null|string $id the ID of the resource
      *
-     * @return string the instance endpoint URL for the given class
-     *
      * @throws Exception\UnexpectedValueException if $id is null
+     *
+     * @return string the instance endpoint URL for the given class
      */
     public static function resourceUrl($id)
     {

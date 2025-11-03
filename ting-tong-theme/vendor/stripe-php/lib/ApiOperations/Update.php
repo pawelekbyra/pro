@@ -15,9 +15,9 @@ trait Update
      * @param null|array $params
      * @param null|array|string $opts
      *
-     * @return static the updated resource
-     *
      * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return static the updated resource
      */
     public static function update($id, $params = null, $opts = null)
     {
@@ -34,20 +34,16 @@ trait Update
     /**
      * @param null|array|string $opts
      *
-     * @return static the saved resource
-     *
      * @throws \Stripe\Exception\ApiErrorException if the request fails
      *
-     * @deprecated The `save` method is deprecated and will be removed in a
-     *     future major version of the library. Use the static method `update`
-     *     on the resource instead.
+     * @return static the saved resource
      */
     public function save($opts = null)
     {
         $params = $this->serializeParameters();
         if (\count($params) > 0) {
             $url = $this->instanceUrl();
-            list($response, $opts) = $this->_request('post', $url, $params, $opts, ['save']);
+            list($response, $opts) = $this->_request('post', $url, $params, $opts);
             $this->refreshFrom($response, $opts);
         }
 
