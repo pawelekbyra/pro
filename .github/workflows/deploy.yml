@@ -15,11 +15,6 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-dev --working-dir=./ting-tong-theme/
 
-    - name: Create .env file
-      run: |
-        echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" > ./ting-tong-theme/.env
-        echo "PUBLISHABLE_KEY=${{ secrets.PUBLISHABLE_KEY }}" >> ./ting-tong-theme/.env
-
     - name: FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:
