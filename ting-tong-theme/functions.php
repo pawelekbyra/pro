@@ -1066,9 +1066,9 @@ function tt_enqueue_stripe_scripts() {
     // Make the Stripe public key available to our app script
     wp_localize_script(
         'tingtong-app-script',
-        'StripeData',
+        'TingTongData',
         [
-            'publicKey' => TT_STRIPE_PUBLISHABLE_KEY,
+            'stripePk' => TT_STRIPE_PUBLISHABLE_KEY,
         ]
     );
 }
