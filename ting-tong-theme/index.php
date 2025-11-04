@@ -31,9 +31,9 @@ get_header();
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
                             <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="">
-                            <div id="tippingStep0Error" class="elegant-modal-error"></div>
                             <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
                         </div>
+                        <div id="tippingStep0Error" class="elegant-modal-error"></div>
                     </div>
                 </div>
 
@@ -43,12 +43,7 @@ get_header();
     <div class="elegant-modal-fields-container">
         <div class="tipping-amount-container">
             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-            <select id="tippingCurrency" class="tipping-currency-select">
-                <option value="pln">PLN</option>
-                <option value="eur">EUR</option>
-                <option value="usd">USD</option>
-                <option value="gbp">GBP</option>
-            </select>
+            <span id="tippingCurrency" class="tipping-currency">PLN</span>
         </div>
         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
             <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
@@ -57,6 +52,7 @@ get_header();
             </label>
         </div>
         <div id="tippingStep1Error" class="elegant-modal-error"></div>
+        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
     </div>
 </div>
 
@@ -66,6 +62,7 @@ get_header();
     <div id="payment-element">
         <!-- Stripe Payment Element will be inserted here -->
     </div>
+    <div id="tippingStep2Error" class="elegant-modal-error"></div>
     <div id="payment-message" class="hidden"></div>
 </div>
 
@@ -80,15 +77,15 @@ get_header();
 
 <!-- Step 5 (was 4): Regulamin -->
 <div class="elegant-modal-step" data-step="4" id="terms-step">
-    <h3 style="display: none;">Regulamin i Polityka Prywatności</h3>
-    <div class="terms-content" style="font-size: 13px; line-height: 1.6; height: 300px; overflow-y: auto; padding-right: 10px;">
+    <h3 style="text-align: center; margin-bottom: 15px;">Regulamin i Polityka Prywatności</h3>
+    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;">
         <p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p>
-        <p><strong>2. Charakter Napiwków</strong><br>Użytkownik przyjmuje do wiadomości i akceptuje, że wszystkie przekazywane napiwki są dobrowolne i nie podlegają zwrotowi. Przekazanie napiwku nie rodzi żadnego zobowiązania po stronie Twórcy i nie stanowi podstawy do roszczeń o dostęp do ekskluzywnych treści, usług czy produktów.</p>
-        <p><strong>3. Polityka Prywatności</strong><br>W przypadku podania adresu e-mail, jest on wykorzystywany wyłącznie w celu założenia konta w serwisie, co umożliwia śledzenie historii wsparcia. Nie udostępniamy Twojego adresu e-mail stronom trzecim w celach marketingowych.</p>
-        <p><strong>4. Postanowienia końcowe</strong><br>Korzystając z funkcji napiwków, potwierdzasz, że przeczytałeś, zrozumiałeś i w pełni akceptujesz powyższy regulamin.</p>
-    </div>
-    <button type="button" class="elegant-modal-btn-subtle" data-action="hide-terms" style="margin-top: 15px;">Powrót</button>
-</div>
+                        <p><strong>2. Charakter Napiwków</strong><br>Użytkownik przyjmuje do wiadomości i akceptuje, że wszystkie przekazywane napiwki są dobrowolne i nie podlegają zwrotowi. Przekazanie napiwku nie rodzi żadnego zobowiązania po stronie Twórcy i nie stanowi podstawy do roszczeń o dostęp do ekskluzywnych treści, usług czy produktów.</p>
+                        <p><strong>3. Polityka Prywatności</strong><br>W przypadku podania adresu e-mail, jest on wykorzystywany wyłącznie w celu założenia konta w serwisie, co umożliwia śledzenie historii wsparcia. Nie udostępniamy Twojego adresu e-mail stronom trzecim w celach marketingowych.</p>
+                        <p><strong>4. Postanowienia końcowe</strong><br>Korzystając z funkcji napiwków, potwierdzasz, że przeczytałeś, zrozumiałeś i w pełni akceptujesz powyższy regulamin.</p>
+                    </div>
+                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;">Powrót</button>
+                </div>
             </div>
 
             <div class="elegant-modal-footer">
