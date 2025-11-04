@@ -223,11 +223,8 @@ async function initializePaymentElement(originalText) {
         elements = stripe.elements({ appearance, clientSecret });
 
         const paymentElementOptions = {
-            layout: {
-                type: 'accordion',
-                defaultCollapsed: true, // Zwinięty domyślnie
-            },
-            wallets: { applePay: 'auto', googlePay: 'auto' },
+            layout: 'tabs',
+            wallets: 'never',
             // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
             fields: {
                  billingDetails: { email: formData.email ? 'never' : 'auto' }
