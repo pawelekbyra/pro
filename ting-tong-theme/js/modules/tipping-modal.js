@@ -38,7 +38,7 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
-        currencyDisplay: document.getElementById('tippingCurrency'),
+        currencySelect: document.getElementById('tippingCurrency'),
         termsCheckbox: document.getElementById('termsAccept'),
         termsStep: document.getElementById('terms-step'),
         paymentElementContainer: document.getElementById('payment-element'),
@@ -84,11 +84,11 @@ function updateStepDisplay(isShowingTerms = false) {
     dom.nextBtn.style.display = (isEmailStep) ? 'flex' : 'none';
     dom.submitBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
 
-    // Zmiana tekstu przycisku w kroku 2 na "Płacę!"
+    // Change button text in the payment step
     if (isPaymentStep) {
-        dom.submitBtn.textContent = getTranslatedText('tippingPay', 'Płacę!');
+        dom.submitBtn.textContent = getTranslatedText('tippingPay', 'Pay!');
     } else {
-        dom.submitBtn.textContent = getTranslatedText('tippingSubmit', 'ENTER');
+        dom.submitBtn.textContent = getTranslatedText('tippingSubmit', 'Proceed to Payment');
     }
 
     // Ukryj wszystkie przyciski w kroku przetwarzania
@@ -148,7 +148,7 @@ function handlePrevStep() {
 }
 
 function validateStep(step) {
-    // Krok 0: Walidacja emaila
+    // Step 0: Email validation
     if (step === 0) {
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
@@ -162,16 +162,16 @@ function validateStep(step) {
             }
         }
     }
-    // Krok 1: Walidacja kwoty i regulaminu
+    // Step 1: Amount and terms validation
     else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
-        const currency = dom.currencyDisplay.textContent;
-        const minAmount = (currency === 'PLN') ? 5 : 1;
+        const currency = dom.currencySelect.value.toLowerCase();
+        const minAmount = (currency === 'pln') ? 5 : 1;
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
-            const message = (Utils.getTranslation('errorMinTipAmount') || "Minimalna kwota napiwku to {minAmount} {currency}.")
-                .replace('{minAmount}', minAmount.toFixed(2))
+            const message = (Utils.getTranslation('errorMinTipAmount') || "The minimum tip amount is {minAmount} {currency}.")
+                .replace('{minAmount}', minAmount)
                 .replace('{currency}', currencyDisplay);
 
             showLocalError(1, message);
@@ -179,7 +179,7 @@ function validateStep(step) {
         }
 
         if (!dom.termsCheckbox.checked) {
-            showLocalError(1, 'Proszę zaakceptować Regulamin, aby przejść do płatności.');
+            showLocalError(1, Utils.getTranslation('errorTermsNotAccepted'));
             return false;
         }
     }
@@ -202,7 +202,7 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        formData.currency = dom.currencyDisplay.textContent.toLowerCase();
+        formData.currency = dom.currencySelect.value.toLowerCase();
     }
 }
 
@@ -314,12 +314,14 @@ async function handleFormSubmit() {
     if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')) {
         try {
             await API.handleTipSuccess(paymentIntent.id);
-
-            UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)) || "Płatność pomyślna. Dziękujemy!");
+            const successMessage = Utils.getTranslation('tippingSuccessMessage')
+                .replace('{amount}', formData.amount.toFixed(2))
+                .replace('{currency}', formData.currency.toUpperCase());
+            UI.showToast(successMessage || `Thank you for your ${formData.amount.toFixed(2)} ${formData.currency.toUpperCase()} tip!`);
 
         } catch (apiError) {
             console.error("Error confirming tip on backend:", apiError);
-            UI.showToast(apiError.message || "Płatność się udała, ale wystąpił błąd po stronie serwera.", true);
+            UI.showToast(apiError.message || "Payment succeeded, but there was a server-side error.", true);
         }
     }
 

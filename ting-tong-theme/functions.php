@@ -1036,11 +1036,16 @@ function tt_create_payment_intent() {
         $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $currency = isset($_POST['currency']) ? strtolower($_POST['currency']) : 'pln';
 
-        // Walidacja kwoty zgodnie z regułą minimalną
+        // Validate amount according to the minimum rule
         $min_amount = ($currency === 'pln') ? 5.00 : 1.00;
 
         if ($amount < $min_amount) {
-            wp_send_json_error(['message' => 'Minimalna kwota dla tej waluty to ' . number_format($min_amount, 2) . ' ' . strtoupper($currency)], 400);
+            $error_message = sprintf(
+                'The minimum amount for this currency is %s %s.',
+                number_format($min_amount, 2),
+                strtoupper($currency)
+            );
+            wp_send_json_error(['message' => $error_message], 400);
             return;
         }
 
