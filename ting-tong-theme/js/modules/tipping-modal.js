@@ -14,6 +14,15 @@ let stripe;
 let elements;
 let paymentElement;
 
+// Helper to safely get translated string
+function getTranslatedText(key, fallbackText) {
+    const translation = Utils.getTranslation(key);
+    if (typeof translation === 'object' && translation !== null && State.get('currentLang')) {
+        return translation[State.get('currentLang')] || fallbackText;
+    }
+    return translation || fallbackText;
+}
+
 function cacheDOM() {
     dom = {
         modal: document.getElementById('tippingModal'),
@@ -29,12 +38,11 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
-        currencyDisplay: document.getElementById('tippingCurrency'),
+        currencySelect: document.getElementById('tippingCurrency'), // Updated selector
         termsCheckbox: document.getElementById('termsAccept'),
         termsStep: document.getElementById('terms-step'),
         paymentElementContainer: document.getElementById('payment-element'),
         paymentMessage: document.getElementById('payment-message'),
-        // Error containers
         step0Error: document.getElementById('tippingStep0Error'),
         step1Error: document.getElementById('tippingStep1Error'),
     };
@@ -70,71 +78,55 @@ function updateStepDisplay(isShowingTerms = false) {
     const isProcessingStep = currentStep === 3;
 
     dom.prevBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
-
-    // Obsługa przycisków
-    dom.nextBtn.style.display = (isEmailStep) ? 'flex' : 'none';
+    dom.nextBtn.style.display = isEmailStep ? 'flex' : 'none';
     dom.submitBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
+    dom.nextBtn.textContent = 'ENTER';
+    dom.submitBtn.textContent = 'ENTER';
 
-    // Zmiana tekstu przycisku w kroku 2 na "Płacę!"
-    if (isPaymentStep) {
-        dom.submitBtn.textContent = Utils.getTranslation('tippingPay') || 'Płacę!';
-    } else {
-        dom.submitBtn.textContent = Utils.getTranslation('tippingSubmit') || 'Przejdź do płatności';
-    }
-
-    // Ukryj wszystkie przyciski w kroku przetwarzania
     if (isProcessingStep || isTermsVisible) {
         dom.prevBtn.style.display = 'none';
         dom.nextBtn.style.display = 'none';
         dom.submitBtn.style.display = 'none';
     }
 
-    // Korekta progresu - totalSteps to 4 (0-3), ale kroki są 0, 1, 2, 3
     dom.progressBar.style.width = `${(currentStep / (totalSteps - 1)) * 100}%`;
 }
+
 
 async function handleNextStep() {
     hideLocalErrors();
     if (!validateStep(currentStep)) return;
-
     collectData(currentStep);
-
-    // Ta funkcja obsługuje tylko przejście z Kroku 0 na 1
     if (currentStep === 0) {
         currentStep++;
         updateStepDisplay();
-        return;
     }
 }
 
-// Nowa funkcja do obsługi przejścia z Kroku 1 (Kwota)
 async function handleTippingSubmit() {
     hideLocalErrors();
-    if (!validateStep(1)) return; // Walidacja Kroku 1
-
+    if (!validateStep(1)) return;
     collectData(1);
-
-    // Przejście do kroku 2: inicjalizacja płatności
-    currentStep = 2;
+    currentStep = 3;
     updateStepDisplay();
 
-    // Dodaj spinner do przycisku na czas inicjalizacji
-    dom.submitBtn.disabled = true;
-    const originalText = dom.submitBtn.textContent;
-    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText') || 'Ładowanie...'}`;
-
-    await initializePaymentElement(originalText);
+    try {
+        await initializePaymentElement();
+        currentStep = 2;
+        updateStepDisplay();
+    } catch (error) {
+        console.error("Error initializing Payment Element:", error);
+        UI.showToast(error.message || getTranslatedText('tippingErrorInit', 'Payment initialization error.'), true);
+        currentStep = 1;
+        updateStepDisplay();
+    }
 }
-
 
 function handlePrevStep() {
     hideLocalErrors();
     if (currentStep > 0) {
         if (currentStep === 2 && paymentElement) {
-            // Demontaż Payment Element
-             try {
-                paymentElement.unmount();
-             } catch(e) { /* ignore */ }
+            try { paymentElement.unmount(); } catch (e) { /* ignore */ }
         }
         currentStep--;
         updateStepDisplay();
@@ -142,38 +134,34 @@ function handlePrevStep() {
 }
 
 function validateStep(step) {
-    // Krok 0: Walidacja emaila
     if (step === 0) {
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (!email) {
-                showLocalError(0, Utils.getTranslation('errorEmailRequired'));
+                showLocalError(0, getTranslatedText('errorEmailRequired', 'Email is required.'));
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
-                showLocalError(0, Utils.getTranslation('errorInvalidEmail'));
+                showLocalError(0, getTranslatedText('errorInvalidEmail', 'Invalid email format.'));
                 return false;
             }
         }
-    }
-    // Krok 1: Walidacja kwoty i regulaminu
-    else if (step === 1) {
+    } else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
-        const currency = dom.currencyDisplay.textContent;
-        const minAmount = (currency === 'PLN') ? 5 : 1;
+        const currency = dom.currencySelect.value.toLowerCase(); // Read from select
+        const minAmount = (currency === 'pln') ? 5 : 1;
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
-            const message = (Utils.getTranslation('errorMinTipAmount') || "Minimalna kwota napiwku to {minAmount} {currency}.")
+            const message = (getTranslatedText('errorMinTipAmount', "Minimum tip amount is {minAmount} {currency}."))
                 .replace('{minAmount}', minAmount.toFixed(2))
                 .replace('{currency}', currencyDisplay);
-
             showLocalError(1, message);
             return false;
         }
 
         if (!dom.termsCheckbox.checked) {
-            showLocalError(1, 'Proszę zaakceptować Regulamin, aby przejść do płatności.');
+            showLocalError(1, getTranslatedText('errorTermsRequired', 'Please accept the Terms to proceed.'));
             return false;
         }
     }
@@ -196,122 +184,75 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        formData.currency = dom.currencyDisplay.textContent.toLowerCase();
+        formData.currency = dom.currencySelect.value; // Read from select
     }
 }
 
-async function initializePaymentElement(originalText) {
-    // Demontaż starego elementu na wszelki wypadek
-    if (paymentElement) {
+function initializePaymentElement() {
+    return new Promise(async (resolve, reject) => {
+        if (paymentElement) {
+            try { paymentElement.unmount(); } catch (e) { /* ignore */ }
+        }
+
         try {
-            paymentElement.unmount();
-        } catch(e) { /* ignore */ }
-    }
+            const clientSecret = await API.createStripePaymentIntent(formData.amount, formData.currency);
+            const appearance = { theme: 'night', labels: 'floating', variables: { colorPrimary: '#ff0055', colorBackground: '#1c1c1e' } };
+            elements = stripe.elements({ appearance, clientSecret });
+            paymentElement = elements.create("payment", {
+                layout: 'tabs',
+                wallets: 'never',
+                fields: { billingDetails: { email: formData.email ? 'never' : 'auto' } }
+            });
 
-    try {
-        const clientSecret = await API.createStripePaymentIntent(formData.amount, formData.currency);
+            paymentElement.on('ready', () => {
+                console.log('Stripe Payment Element is ready.');
+                resolve();
+            });
 
-        const appearance = {
-            theme: 'night',
-            labels: 'floating',
-            variables: {
-                colorPrimary: '#ff0055',
-                colorBackground: '#1c1c1e',
-            }
-        };
+            paymentElement.on('error', (event) => {
+                console.error('Stripe Payment Element error:', event.error);
+                reject(new Error(event.error.message));
+            });
 
-        elements = stripe.elements({ appearance, clientSecret });
+            paymentElement.mount(dom.paymentElementContainer);
 
-        const paymentElementOptions = {
-            layout: 'tabs',
-            wallets: 'never',
-            // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
-            fields: {
-                 billingDetails: { email: formData.email ? 'never' : 'auto' }
-            }
-        };
-
-        paymentElement = elements.create("payment", paymentElementOptions);
-
-        paymentElement.on('ready', () => {
-            console.log('Stripe Payment Element is ready.');
-            // Usuń spinner i aktywuj przycisk dopiero, gdy element jest gotowy
-            dom.submitBtn.disabled = false;
-            dom.submitBtn.innerHTML = Utils.getTranslation('tippingPay') || 'Płacę!';
-        });
-
-        paymentElement.on('error', (event) => {
-            console.error('Stripe Payment Element error:', event.error);
-            UI.showToast(`Błąd płatności: ${event.error.message}`, true);
-            // W razie błędu, przywróć przycisk i cofnij do kroku 1
-            dom.submitBtn.disabled = false;
-            dom.submitBtn.innerHTML = originalText;
-            currentStep = 1;
-            updateStepDisplay();
-        });
-
-        paymentElement.mount(dom.paymentElementContainer);
-
-
-    } catch (error) {
-        console.error("Error initializing Payment Element:", error);
-        UI.showToast(error.message || "Błąd inicjalizacji płatności. Sprawdź, czy klucze Stripe są poprawne.", true);
-
-        // Przywróć przycisk i cofnij do Kroku 1
-        dom.submitBtn.disabled = false;
-        dom.submitBtn.innerHTML = originalText;
-        currentStep = 1;
-        updateStepDisplay();
-    }
+        } catch (error) {
+            console.error("API Error during Payment Element initialization:", error);
+            reject(error);
+        }
+    });
 }
-
 
 async function handleFormSubmit() {
-    // Sprawdź, czy na pewno jesteśmy w kroku płatności
     if (currentStep !== 2) return;
-
     dom.submitBtn.disabled = true;
-    const originalText = dom.submitBtn.textContent;
-    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('changingButtonText') || 'Przetwarzam...'}`;
-
-    // Ustawienie stanu przetwarzania
     currentStep = 3;
     updateStepDisplay();
 
-    // Domyślny return_url
     const returnUrl = window.location.href.split('#')[0];
-
     const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
-        confirmParams: {
-            return_url: returnUrl,
-            receipt_email: formData.email || undefined
-        },
+        confirmParams: { return_url: returnUrl, receipt_email: formData.email || undefined },
         redirect: 'if_required'
     });
 
     if (error) {
-        const errorMsg = error.message || "Wystąpił nieoczekiwany błąd płatności.";
+        const errorMsg = error.message || getTranslatedText('tippingErrorUnexpected', "An unexpected payment error occurred.");
         UI.showToast(errorMsg, true);
-
-        // Wróć do Kroku 2
         currentStep = 2;
         updateStepDisplay();
         dom.submitBtn.disabled = false;
-        dom.submitBtn.textContent = originalText;
-
         return;
     }
 
     if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')) {
         try {
             await API.handleTipSuccess(paymentIntent.id);
-
-            UI.showToast(Utils.getTranslation('tippingSuccessMessage').replace('{amount}', formData.amount.toFixed(2)) || "Płatność pomyślna. Dziękujemy!");
-
+            const successMsg = getTranslatedText('tippingSuccessMessage', "Payment successful. Thank you!").replace('{amount}', formData.amount.toFixed(2));
+            UI.showToast(successMsg);
         } catch (apiError) {
             console.error("Error confirming tip on backend:", apiError);
-            UI.showToast(apiError.message || "Płatność się udała, ale wystąpił błąd po stronie serwera.", true);
+            UI.showToast(apiError.message || getTranslatedText('tippingErrorServer', "Payment succeeded, but a server-side error occurred."), true);
         }
     }
 
@@ -321,13 +262,11 @@ async function handleFormSubmit() {
 function resetModalState() {
     currentStep = 0;
     formData = {};
-    if(dom.form) dom.form.reset();
-    if(dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
-    if(dom.emailContainer) dom.emailContainer.classList.remove('visible');
-    if(dom.termsCheckbox) dom.termsCheckbox.checked = false;
-    if (dom.paymentElementContainer) {
-        dom.paymentElementContainer.innerHTML = '';
-    }
+    if (dom.form) dom.form.reset();
+    if (dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
+    if (dom.emailContainer) dom.emailContainer.classList.remove('visible');
+    if (dom.termsCheckbox) dom.termsCheckbox.checked = false;
+    if (dom.paymentElementContainer) dom.paymentElementContainer.innerHTML = '';
     hideLocalErrors();
     updateStepDisplay();
 }
@@ -335,29 +274,28 @@ function resetModalState() {
 function showModal() {
     cacheDOM();
 
-    // FIX: Poprawna inicjalizacja obiektu Stripe
     if (!stripe && window.Stripe) {
         const stripePk = (typeof window.TingTongData !== 'undefined' && window.TingTongData.stripePk) || null;
         if (!stripePk) {
-             UI.showAlert("Błąd krytyczny: Brak klucza publicznego Stripe (TingTongData.stripePk). Sprawdź functions.php.", true);
-             return;
+            UI.showAlert(getTranslatedText('tippingErrorNoStripeKey', "Critical Error: Stripe public key is missing."), true);
+            return;
         }
         stripe = window.Stripe(stripePk);
     } else if (!window.Stripe) {
-         UI.showAlert("Błąd krytyczny: Biblioteka Stripe.js nie jest załadowana. Sprawdź functions.php.", true);
-         return;
+        UI.showAlert(getTranslatedText('tippingErrorNoStripeLib', "Critical Error: Stripe.js library is not loaded."), true);
+        return;
     }
 
     resetModalState();
     translateUI();
 
-    if(dom.createAccountCheckbox) dom.createAccountCheckbox.addEventListener('change', e => {
+    if (dom.createAccountCheckbox) dom.createAccountCheckbox.addEventListener('change', e => {
         dom.emailContainer.classList.toggle('visible', e.target.checked);
     });
 
     const currentUser = State.get('currentUser');
-    if(dom.emailInput) dom.emailInput.value = currentUser?.email || '';
-    if(dom.amountInput) dom.amountInput.value = '';
+    if (dom.emailInput) dom.emailInput.value = currentUser?.email || '';
+    if (dom.amountInput) dom.amountInput.value = '';
 
     UI.openModal(dom.modal);
     updateStepDisplay();
@@ -371,24 +309,14 @@ function hideModal() {
 function init() {
     cacheDOM();
     if (!dom.modal) return;
-
-    if(dom.closeBtn) dom.closeBtn.addEventListener('click', hideModal);
-
-    // PRZYCISK DALEJ (Krok 0 -> Krok 1)
-    if(dom.nextBtn) dom.nextBtn.addEventListener('click', handleNextStep);
-
-    // PRZYCISK PRZEJDŹ DO PŁATNOŚCI/PŁACĘ (Krok 1 -> Krok 2)
-    if(dom.submitBtn) dom.submitBtn.addEventListener('click', async (e) => {
+    if (dom.closeBtn) dom.closeBtn.addEventListener('click', hideModal);
+    if (dom.nextBtn) dom.nextBtn.addEventListener('click', handleNextStep);
+    if (dom.submitBtn) dom.submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        if (currentStep === 1) {
-            await handleTippingSubmit(); // Inicjalizuje Payment Intent i przechodzi do Kroku 2
-        } else if (currentStep === 2) {
-            await handleFormSubmit(); // Potwierdza Payment Intent
-        }
+        if (currentStep === 1) await handleTippingSubmit();
+        else if (currentStep === 2) await handleFormSubmit();
     });
-
-    if(dom.prevBtn) dom.prevBtn.addEventListener('click', handlePrevStep);
-
+    if (dom.prevBtn) dom.prevBtn.addEventListener('click', handlePrevStep);
     dom.modal.addEventListener('click', e => {
         if (e.target === dom.modal) hideModal();
         if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
@@ -401,16 +329,12 @@ function translateUI() {
     dom.modal.querySelectorAll('[data-translate-key]').forEach(el => {
         const key = el.dataset.translateKey;
         const translation = Utils.getTranslation(key);
-        if (translation) {
-            el.innerHTML = typeof translation === 'object' ? translation[State.get('currentLang')] : translation;
-        }
+        if (translation) el.innerHTML = typeof translation === 'object' ? translation[State.get('currentLang')] : translation;
     });
     dom.modal.querySelectorAll('[data-translate-placeholder]').forEach(el => {
         const key = el.dataset.translatePlaceholder;
         const translation = Utils.getTranslation(key);
-        if (translation) {
-            el.placeholder = typeof translation === 'object' ? translation[State.get('currentLang')] : translation;
-        }
+        if (translation) el.placeholder = typeof translation === 'object' ? translation[State.get('currentLang')] : translation;
     });
 }
 
