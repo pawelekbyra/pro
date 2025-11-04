@@ -75,11 +75,15 @@ function updateStepDisplay(isShowingTerms = false) {
     dom.nextBtn.style.display = (isEmailStep) ? 'flex' : 'none';
     dom.submitBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
 
-    // Zmiana tekstu przycisku w kroku 2 na "Płacę!"
-    if (isPaymentStep) {
+    // Zmiana tekstu i STYLU przycisku w zależności od kroku
+    if (isAmountStep) {
+        dom.submitBtn.textContent = Utils.getTranslation('tippingNext') || 'ENTER';
+        dom.submitBtn.classList.remove('elegant-modal-btn-submit');
+        dom.submitBtn.classList.add('elegant-modal-btn-next');
+    } else if (isPaymentStep) {
         dom.submitBtn.textContent = Utils.getTranslation('tippingPay') || 'Płacę!';
-    } else {
-        dom.submitBtn.textContent = Utils.getTranslation('tippingSubmit') || 'Przejdź do płatności';
+        dom.submitBtn.classList.remove('elegant-modal-btn-next');
+        dom.submitBtn.classList.add('elegant-modal-btn-submit');
     }
 
     // Ukryj wszystkie przyciski w kroku przetwarzania
@@ -159,13 +163,13 @@ function validateStep(step) {
     // Krok 1: Walidacja kwoty i regulaminu
     else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
-        const currency = dom.currencyDisplay.textContent;
+        const currency = dom.currencyDisplay.textContent; // ZMIANA: Pobieramy walutę z DOM
         const minAmount = (currency === 'PLN') ? 5 : 1;
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
-            const message = (Utils.getTranslation('errorMinTipAmount') || "Minimalna kwota napiwku to {minAmount} {currency}.")
-                .replace('{minAmount}', minAmount.toFixed(2))
+            const message = (Utils.getTranslation('errorMinTipAmount') || "Minimalna kwota to {minAmount} {currency}.")
+                .replace('{minAmount}', minAmount.toFixed(0)) // Usunięto toFixed(2) dla ładniejszego wyświetlania
                 .replace('{currency}', currencyDisplay);
 
             showLocalError(1, message);
@@ -173,7 +177,7 @@ function validateStep(step) {
         }
 
         if (!dom.termsCheckbox.checked) {
-            showLocalError(1, 'Proszę zaakceptować Regulamin, aby przejść do płatności.');
+            showLocalError(1, Utils.getTranslation('errorAcceptTerms') || 'Proszę zaakceptować Regulamin, aby przejść do płatności.');
             return false;
         }
     }
@@ -182,11 +186,15 @@ function validateStep(step) {
 
 function showTerms() {
     previousStep = currentStep;
+    dom.title.textContent = dom.termsStep.querySelector('h3').textContent; // Zmień główny tytuł
+    dom.progressBar.style.visibility = 'hidden'; // Ukryj pasek postępu
     updateStepDisplay(true);
 }
 
 function hideTerms() {
     currentStep = previousStep;
+    dom.title.textContent = Utils.getTranslation('tippingTitle'); // Przywróć oryginalny tytuł
+    dom.progressBar.style.visibility = 'visible'; // Pokaż pasek postępu
     updateStepDisplay(false);
 }
 
@@ -223,10 +231,7 @@ async function initializePaymentElement(originalText) {
         elements = stripe.elements({ appearance, clientSecret });
 
         const paymentElementOptions = {
-            layout: {
-                type: 'accordion',
-                defaultCollapsed: true, // Zwinięty domyślnie
-            },
+            layout: 'tabs', // ZMIANA: Użycie 'tabs' dla lepszej kompatybilności mobilnej
             wallets: { applePay: 'auto', googlePay: 'auto' },
             // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
             fields: {
@@ -307,8 +312,8 @@ async function handleFormSubmit() {
     hideModal();
 }
 
-function resetModalState() {
-    currentStep = 0;
+function resetModalState(isLoggedIn = false) {
+    currentStep = isLoggedIn ? 1 : 0; // Pomiń krok 0 dla zalogowanych
     formData = {};
     if(dom.form) dom.form.reset();
     if(dom.createAccountCheckbox) dom.createAccountCheckbox.checked = false;
@@ -318,38 +323,60 @@ function resetModalState() {
         dom.paymentElementContainer.innerHTML = '';
     }
     hideLocalErrors();
-    updateStepDisplay();
 }
 
 function showModal() {
     cacheDOM();
+    const currentUser = State.get('currentUser');
+    const isLoggedIn = currentUser && currentUser.isLoggedIn;
 
     // FIX: Poprawna inicjalizacja obiektu Stripe
     if (!stripe && window.Stripe) {
         const stripePk = (typeof window.TingTongData !== 'undefined' && window.TingTongData.stripePk) || null;
         if (!stripePk) {
-             UI.showAlert("Błąd krytyczny: Brak klucza publicznego Stripe (TingTongData.stripePk). Sprawdź functions.php.", true);
+             UI.showAlert("Błąd krytyczny: Brak klucza publicznego Stripe.", true);
              return;
         }
         stripe = window.Stripe(stripePk);
     } else if (!window.Stripe) {
-         UI.showAlert("Błąd krytyczny: Biblioteka Stripe.js nie jest załadowana. Sprawdź functions.php.", true);
+         UI.showAlert("Błąd krytyczny: Biblioteka Stripe.js nie jest załadowana.", true);
          return;
     }
 
-    resetModalState();
+    resetModalState(isLoggedIn);
     translateUI();
 
-    if(dom.createAccountCheckbox) dom.createAccountCheckbox.addEventListener('change', e => {
-        dom.emailContainer.classList.toggle('visible', e.target.checked);
-    });
+    if (isLoggedIn) {
+        formData.email = currentUser.email;
+        dom.steps.forEach(step => {
+            if (parseInt(step.dataset.step, 10) === 0) {
+                step.style.display = 'none'; // Ukryj krok 0
+            }
+        });
+        dom.prevBtn.style.display = 'none'; // Ukryj "wstecz" na kroku 1
+    } else {
+        dom.steps.forEach(step => {
+            if (parseInt(step.dataset.step, 10) === 0) {
+                step.style.display = ''; // Pokaż krok 0
+            }
+        });
+        if(dom.createAccountCheckbox) {
+            dom.createAccountCheckbox.addEventListener('change', e => {
+                dom.emailContainer.classList.toggle('visible', e.target.checked);
+            });
+        }
+    }
 
-    const currentUser = State.get('currentUser');
     if(dom.emailInput) dom.emailInput.value = currentUser?.email || '';
     if(dom.amountInput) dom.amountInput.value = '';
 
     UI.openModal(dom.modal);
     updateStepDisplay();
+
+    // Ponownie ukryj przycisk wstecz, jeśli zalogowany
+    if (isLoggedIn && currentStep === 1) {
+        dom.prevBtn.style.display = 'none';
+    }
 }
 
 function hideModal() {
