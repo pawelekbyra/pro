@@ -57,7 +57,6 @@ get_header();
                             </label>
                         </div>
                         <div id="tippingStep1Error" class="elegant-modal-error"></div>
-                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint"></p>
                     </div>
                 </div>
 
@@ -81,10 +80,9 @@ get_header();
 
                 <!-- Step 5 (was 4): Regulamin -->
                 <div class="elegant-modal-step" data-step="4" id="terms-step">
-                    <h3 style="text-align: center; margin-bottom: 15px;" data-translate-key="tippingTermsTitle"></h3>
-                    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
+                    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 300px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
                     </div>
-                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton"></button>
+                    <button type="button" class="elegant-modal-btn-subtle" data-action="hide-terms" style="margin-top: 15px;" data-translate-key="tippingTermsBackButton"></button>
                 </div>
             </div>
 

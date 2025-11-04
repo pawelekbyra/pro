@@ -131,16 +131,12 @@ export const Config = {
           en: "You will receive login details for the patron section to the provided email."
       },
       tippingStep2Desc: {
-          pl: "Wybierz kwotę, którą chcesz wesprzeć projekt.",
+          pl: "Wybierz kwotę napiwku",
           en: "Choose the amount you want to support the project with."
       },
       tippingAmountPlaceholder: {
           pl: "Wpisz kwotę",
           en: "Enter amount"
-      },
-      tippingAmountHint: {
-          pl: "Dziękujemy za każde wsparcie!",
-          en: "Thank you for every donation!"
       },
       tippingStep3Desc: {
           pl: "Wybierz metodę napiwkowania",
