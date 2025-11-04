@@ -5164,6 +5164,11 @@ body,
     margin-bottom: 10px;
 }
 
+/* Fix for Stripe Payment Element not rendering on mobile due to zero height */
+#payment-element {
+    min-height: 250px;
+}
+
 @media (min-width: 600px) {
   #infoModal.modal-overlay,
   div#tippingModal.elegant-modal-overlay {

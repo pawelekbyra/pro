@@ -148,11 +148,11 @@ function validateStep(step) {
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (!email) {
-                showLocalError(0, Utils.getTranslation('errorEmailRequired'));
+                showLocalError(0, getTranslatedText('errorEmailRequired', 'Email address is required.'));
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
-                showLocalError(0, Utils.getTranslation('errorInvalidEmail'));
+                showLocalError(0, getTranslatedText('errorInvalidEmail', 'Please provide a valid email address.'));
                 return false;
             }
         }
@@ -165,7 +165,7 @@ function validateStep(step) {
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
-            const message = (Utils.getTranslation('errorMinTipAmount') || "The minimum tip amount is {minAmount} {currency}.")
+            const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
                 .replace('{minAmount}', minAmount)
                 .replace('{currency}', currencyDisplay);
 
@@ -174,7 +174,7 @@ function validateStep(step) {
         }
 
         if (!dom.termsCheckbox.checked) {
-            showLocalError(1, Utils.getTranslation('errorTermsNotAccepted'));
+            showLocalError(1, getTranslatedText('errorTermsNotAccepted', 'You must accept the terms and conditions.'));
             return false;
         }
         return true; // FIX: Ensure true is returned on successful validation
