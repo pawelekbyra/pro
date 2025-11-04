@@ -55,6 +55,58 @@ function tt_define_stripe_constants_safely() {
 // Kluczowy hak: Wymusza definicję po wczytaniu wp-config.php, ale przed rejestracją skryptów.
 add_action('after_setup_theme', 'tt_define_stripe_constants_safely', 1);
 
+/**
+* Tworzy нового uzytkownika WordPress, jeśli nie istnieje, lub zwraca istniejącego.
+* Ustawia flagę tt_first_login_completed na 0, aby wymusić uzupełnienie profilu.
+*
+* @param string $email Adres email uzytkownika.
+* @return WP_User|WP_Error Obiekt uzytkownika lub błąd.
+*/
+function tt_create_user_from_email_if_not_exists($email) {
+if (empty($email) || !is_email($email)) {
+return new WP_Error('invalid_email', 'Nieprawidłowy adres email.');
+}
+
+// 1. Sprawdź, czy uzytkownik juz istnieje
+$user = get_user_by('email', $email);
+
+if ($user) {
+return $user; // Uzytkownik istnieje, zwróć go
+}
+
+// 2. Generuj unikalną nazwę uzytkownika
+$username_base = sanitize_user(explode('@', $email)[0], true);
+$username = $username_base;
+$i = 1;
+while (username_exists($username)) {
+$username = $username_base . $i;
+$i++;
+}
+
+// 3. Generuj hasło (tymczasowe, które zostanie zmienione w FirstLoginModal)
+$password = wp_generate_password(12, false);
+
+// 4. Utwórz uzytkownika (domyślnie rola 'subscriber')
+$user_id = wp_create_user($username, $password, $email);
+
+if (is_wp_error($user_id)) {
+return $user_id;
+}
+
+$new_user = get_user_by('id', $user_id);
+
+// 5. Ustaw flagę profilu jako NIEKOMPLETNĄ (0), aby wymusić modal pierwszego logowania.
+// ZGODNIE Z LOGIKĄ FRONTENDU, to jest kluczowe.
+update_user_meta($user_id, 'tt_first_login_completed', 0);
+
+// 6. Ustaw display_name
+wp_update_user(['ID' => $user_id, 'display_name' => $username]);
+
+// 7. W tym miejscu nalezy DODAĆ WYSYŁKĘ EMAILA z loginem i tymczasowym hasłem.
+// (Na potrzeby instrukcji, funkcja ta jest pominięta).
+
+return $new_user;
+}
 
 // =========================================================================
 // 1. TWORZENIE TABEL BAZY DANYCH
@@ -1008,27 +1060,6 @@ add_action('wp_ajax_tt_create_payment_intent', 'tt_create_payment_intent');
 add_action('wp_ajax_nopriv_tt_create_payment_intent', 'tt_create_payment_intent'); // Umożliwienie płatności bez logowania
 
 
-// 5. AJAX Handler to be called on successful payment (for verification)
-function tt_handle_tip_success() {
-    // Ta funkcja powinna być używana do serwerowej weryfikacji i udzielania dostępu
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
-
-    $payment_intent_id = isset($_POST['payment_intent_id']) ? sanitize_text_field($_POST['payment_intent_id']) : '';
-
-    if (empty($payment_intent_id)) {
-        wp_send_json_error(['message' => 'Payment Intent ID is missing.'], 400);
-        return;
-    }
-
-    // W TYM MIEJSCU MUSISZ DODAĆ LOGIKĘ WERYFIKACJI STRIPE Z API
-
-    // Na potrzeby tego wdrożenia zwracamy sukces
-    wp_send_json_success(['message' => 'Payment verified successfully!']);
-}
-add_action('wp_ajax_tt_handle_tip_success', 'tt_handle_tip_success');
-add_action('wp_ajax_nopriv_tt_handle_tip_success', 'tt_handle_tip_success');
-
-
 // ============================================================================
 // SERVICE WORKER AT ROOT
 // ============================================================================
@@ -1124,3 +1155,122 @@ add_action('wp', function() {
         // np. ukryć header/footer WordPress, wyłączyć niepotrzebne skrypty itp.
     }
 });
+
+// ============================================================================
+// STRIPE WEBHOOK HANDLER
+// ============================================================================
+
+/**
+* Rejestracja dedykowanego endpointu dla webhooków Stripe.
+* Endpoint: /?tt-webhook=stripe
+*/
+add_action('init', function() {
+// Uzywamy add_rewrite_rule zamiast add_rewrite_endpoint, dla większej kompatybilności i prostoty URL.
+add_rewrite_rule('^tt-webhook/stripe$', 'index.php?tt-webhook-type=stripe', 'top');
+flush_rewrite_rules(); // W środowisku produkcyjnym powinno być wywołane raz po aktywacji motywu
+});
+
+add_filter('query_vars', function($vars) {
+$vars[] = 'tt-webhook-type';
+return $vars;
+});
+
+add_action('template_redirect', function() {
+$webhook_type = get_query_var('tt-webhook-type');
+
+if ($webhook_type === 'stripe') {
+tt_handle_stripe_webhook_logic();
+exit;
+}
+});
+
+/**
+* Główna funkcja do przetwarzania webhooków.
+* Uruchamiana na serwerze po potwierdzeniu płatności przez Stripe.
+*/
+function tt_handle_stripe_webhook_logic() {
+// Wymagaj autoloader'a Composera i Stripe
+$composer_autoload = get_template_directory() . '/vendor/autoload.php';
+if (!file_exists($composer_autoload)) {
+header('HTTP/1.1 500 Stripe library not loaded', true, 500);
+error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php.');
+exit();
+}
+require_once $composer_autoload;
+
+// ⚠️ KRYTYCZNE: ZMIEŃ NA SWÓJ TAJNY KLUCZ WEBHOOKA
+// Ten klucz znajdziesz w Panelu Stripe -> Developers -> Webhooks -> [Twój endpoint] -> Signing secret.
+$webhook_secret = defined('STRIPE_WEBHOOK_SECRET') ? STRIPE_WEBHOOK_SECRET : 'whsec_YOUR_STRIPE_WEBHOOK_SECRET';
+
+$payload = @file_get_contents('php://input');
+$sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
+$event = null;
+
+if ($webhook_secret === 'whsec_YOUR_STRIPE_WEBHOOK_SECRET') {
+error_log('BŁĄD KONFIGURACJI: STRIPE_WEBHOOK_SECRET nie jest ustawiony w functions.php.');
+}
+
+// KROK 1: Weryfikacja sygnatury (kluczowa dla bezpieczeństwa)
+try {
+$event = \Stripe\Webhook::constructEvent(
+$payload, $sig_header, $webhook_secret
+);
+} catch (\UnexpectedValueException $e) {
+header('HTTP/1.1 400 Invalid payload', true, 400);
+error_log('Stripe Webhook Error (Payload): ' . $e->getMessage());
+exit();
+} catch (\Stripe\Exception\SignatureVerificationException $e) {
+header('HTTP/1.1 403 Invalid signature', true, 403);
+error_log('Stripe Webhook Error (Signature): ' . $e->getMessage());
+exit();
+} catch (Exception $e) {
+header('HTTP/1.1 500 Server Error', true, 500);
+error_log('Stripe Webhook Error (General): ' . $e->getMessage());
+exit();
+}
+
+// KROK 2: Obsługa zdarzenia
+switch ($event->type) {
+case 'payment_intent.succeeded':
+$intent = $event->data->object;
+$email = $intent->receipt_email;
+
+if (empty($email)) {
+// Jeśli brakuje emaila (co jest rzadkie po stronie Stripe), zwracamy błąd, aby Stripe ponowił próbę
+header('HTTP/1.1 500 Email is missing from Payment Intent', true, 500);
+error_log('STRIPE WEBHOOK: payment_intent.succeeded - Email is missing for PI: ' . $intent->id);
+exit();
+}
+
+// Utwórz/pobierz uzytkownika WP
+$user_or_error = tt_create_user_from_email_if_not_exists($email);
+
+if (is_wp_error($user_or_error)) {
+// Płatność jest OK, więc zwracamy 200, ale logujemy błąd WP
+error_log('STRIPE WEBHOOK: WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
+} else {
+error_log('STRIPE WEBHOOK: Patron User ' . $email . ' created or retrieved successfully.');
+}
+
+break;
+case 'checkout.session.completed':
+// Alternatywny scenariusz dla Checkout Session
+$session = $event->data->object;
+$email = $session->customer_details->email ?? null;
+
+if ($email) {
+$user_or_error = tt_create_user_from_email_if_not_exists($email);
+if (is_wp_error($user_or_error)) {
+error_log('STRIPE WEBHOOK: Checkout Session - WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
+}
+}
+break;
+default:
+// Zdarzenia, które ignorujemy
+break;
+}
+
+// KROK 3: Zawsze zwracaj 200 OK, jeśli przetwarzanie było pomyślne.
+header('HTTP/1.1 200 OK');
+exit();
+}
