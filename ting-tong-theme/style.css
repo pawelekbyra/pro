@@ -4804,6 +4804,16 @@ body,
   opacity: 1;
 }
 
+.elegant-modal-content-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
 .elegant-modal-header {
   padding: 20px 24px 16px;
   text-align: center;
@@ -5143,6 +5153,23 @@ body,
 .elegant-modal-btn:hover {
     filter: brightness(1.15);
     transform: translateY(-2px);
+}
+
+.elegant-modal-btn-subtle {
+    background: none;
+    border: none;
+    color: #8e8e93;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.elegant-modal-btn-subtle:hover {
+    color: #f0f0f0;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 #terms-step .terms-content {

@@ -165,12 +165,13 @@ function validateStep(step) {
                 return false;
             }
         }
+        return true; // Zawsze zwracaj true, jeśli walidacja przejdzie
     }
     // Step 1: Amount and terms validation
     else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         const currency = dom.currencySelect.value.toLowerCase();
-        const minAmount = (currency === 'pln') ? 5 : 1;
+        const minAmount = (currency === 'pln') ? 1 : 1; // Zmieniono na 1 PLN
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
@@ -186,17 +187,20 @@ function validateStep(step) {
             showLocalError(1, Utils.getTranslation('errorTermsNotAccepted'));
             return false;
         }
+        return true; // Zwróć true, jeśli walidacja kwoty i regulaminu przejdzie
     }
-    return true;
+    return true; // Domyślnie true dla kroków bez walidacji
 }
 
 function showTerms() {
     previousStep = currentStep;
+    dom.title.textContent = getTranslatedText('tippingTermsTitle', 'Terms and Privacy Policy');
     updateStepDisplay(true);
 }
 
 function hideTerms() {
     currentStep = previousStep;
+    dom.title.textContent = getTranslatedText('tippingTitle', 'Tipping Gateway');
     updateStepDisplay(false);
 }
 
