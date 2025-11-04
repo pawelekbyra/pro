@@ -5131,9 +5131,29 @@ body,
     min-height: 250px;
 }
 
-.payment-element-loader {
-    display: flex;
-    justify-content: center;
+.elegant-modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: none;
+    flex-direction: column;
     align-items: center;
-    min-height: 250px; /* Match the payment element's min-height */
+    justify-content: center;
+    z-index: 10;
+    border-radius: 0 0 20px 20px;
+    transition: opacity 0.3s ease;
+}
+
+.elegant-modal-loading-overlay.visible {
+    display: flex;
+}
+
+.elegant-modal-btn-red {
+    background: #e53935 !important; /* Red color */
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.25) !important;
 }
