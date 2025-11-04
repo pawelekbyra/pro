@@ -3336,7 +3336,7 @@ body,
     background-color: transparent;
     border: none;
     color: white;
-    padding: 10px 30px 10px 15px;
+    padding: 10px 10px 10px 15px;
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
@@ -3344,14 +3344,8 @@ body,
 }
 
 .tipping-currency-wrapper::after {
-    content: '▼';
-    font-size: 12px;
-    color: #999;
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
+    content: ''; /* Remove the default arrow */
+    display: none;
 }
 
 .tipping-currency-wrapper {
@@ -5013,15 +5007,19 @@ body,
 }
 
 .elegant-modal-btn-prev {
-  background: #3a3a3c;
-  color: #f0f0f0;
-  display: none; /* Hidden by default */
+    background: transparent;
+    color: #a0a0a0;
+    flex: 0 1 30%; /* Take up less space */
+    font-size: 14px;
+    box-shadow: none;
+    border: 1px solid #4a4a4c;
 }
 
 .elegant-modal-btn-next,
 .elegant-modal-btn-submit {
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(255, 0, 85, 0.25);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 0, 85, 0.25);
+    flex: 1; /* Make the main action button take more space */
 }
 
 .elegant-modal-btn-next {
@@ -5155,23 +5153,6 @@ body,
     transform: translateY(-2px);
 }
 
-.elegant-modal-btn-subtle {
-    background: none;
-    border: none;
-    color: #8e8e93;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding: 8px 16px;
-    border-radius: 8px;
-}
-
-.elegant-modal-btn-subtle:hover {
-    color: #f0f0f0;
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
 #terms-step .terms-content {
     background: rgba(0,0,0,0.2);
     border-radius: 8px;
@@ -5185,7 +5166,7 @@ body,
 
 @media (min-width: 600px) {
   #infoModal.modal-overlay,
-  #tippingModal.elegant-modal-overlay {
+  div#tippingModal.elegant-modal-overlay {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
