@@ -164,6 +164,10 @@ function tt_create_database_tables() {
     ) {$charset_collate};";
     dbDelta( $sql_comment_likes );
     update_option( 'tt_comment_likes_db_version', '1.0' );
+
+    // Rejestracja reguły dla webhooka i odświeżenie reguł
+    add_rewrite_rule('^tt-webhook/stripe$', 'index.php?tt-webhook-type=stripe', 'top');
+    flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'tt_create_database_tables' );
 
@@ -1167,7 +1171,6 @@ add_action('wp', function() {
 add_action('init', function() {
 // Uzywamy add_rewrite_rule zamiast add_rewrite_endpoint, dla większej kompatybilności i prostoty URL.
 add_rewrite_rule('^tt-webhook/stripe$', 'index.php?tt-webhook-type=stripe', 'top');
-flush_rewrite_rules(); // W środowisku produkcyjnym powinno być wywołane raz po aktywacji motywu
 });
 
 add_filter('query_vars', function($vars) {
