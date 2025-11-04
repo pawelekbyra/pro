@@ -209,7 +209,7 @@ export const Config = {
       tippingTermsBackButton: {
         pl: "Powrót",
         en: "Back"
-      }
+      },
       noComments: "Brak komentarzy. Bądź pierwszy!",
       commentSortTriggerText: "Sortuj według: ",
       commentSortNewest: "Fresz",
