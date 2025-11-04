@@ -42,7 +42,12 @@ get_header();
     <div class="elegant-modal-fields-container">
         <div class="tipping-amount-container">
             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-            <span id="tippingCurrency" class="tipping-currency">PLN</span>
+            <select id="tippingCurrency" class="tipping-currency-select">
+                <option value="pln">PLN</option>
+                <option value="eur">EUR</option>
+                <option value="usd">USD</option>
+                <option value="gbp">GBP</option>
+            </select>
         </div>
         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
             <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
