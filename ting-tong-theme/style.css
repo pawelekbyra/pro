@@ -336,21 +336,11 @@ Text Domain: tingtongtheme
     margin: 0;
 }
 
-.tipping-currency-select {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
+.tipping-currency {
     font-size: 24px;
     font-weight: bold;
+    color: rgba(255, 255, 255, 0.6);
     padding-right: 20px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    cursor: pointer;
-}
-
-.tipping-currency-select:focus {
-    outline: none;
 }
 
 #tippingEmailContainer {
@@ -5093,42 +5083,6 @@ body,
 .elegant-modal-btn:hover {
     filter: brightness(1.15);
     transform: translateY(-2px);
-}
-
-.elegant-modal-error {
-    color: #ff8a80;
-    background-color: rgba(255, 138, 128, 0.1);
-    border: 1px solid rgba(255, 138, 128, 0.3);
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-top: 15px;
-    font-size: 14px;
-    text-align: center;
-    display: none;
-}
-
-.elegant-modal-error.show {
-    display: block;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.elegant-modal-btn-subtle {
-    background: none;
-    border: none;
-    color: #8e8e93;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    width: auto;
-    display: inline-block;
-}
-
-.elegant-modal-btn-subtle:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #f0f0f0;
 }
 
 #terms-step .terms-content {
