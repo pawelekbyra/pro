@@ -88,6 +88,8 @@ Text Domain: tingtongtheme
   max-height: calc(100vh - 80px); /* <-- ZMIANA: Więcej miejsca, z marginesami */
   width: 100%;
   max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
   /* ... (pozostałe style) ... */
 }
 
