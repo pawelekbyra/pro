@@ -197,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.on('state:change:currentLang', ({ newValue }) => {
         console.log(`Language changed to: ${newValue}`);
         UI.updateTranslations();
+        TippingModal.updateLanguage();
       });
     }
 
