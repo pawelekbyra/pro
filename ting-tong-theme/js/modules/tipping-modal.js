@@ -29,7 +29,7 @@ function cacheDOM() {
         emailContainer: document.getElementById('tippingEmailContainer'),
         emailInput: document.getElementById('tippingEmail'),
         amountInput: document.getElementById('tippingAmount'),
-        currencyDisplay: document.getElementById('tippingCurrency'),
+        currencySelect: document.getElementById('tippingCurrency'),
         termsCheckbox: document.getElementById('termsAccept'),
         termsStep: document.getElementById('terms-step'),
         paymentElementContainer: document.getElementById('payment-element'),
@@ -163,7 +163,7 @@ function validateStep(step) {
     // Krok 1: Walidacja kwoty i regulaminu
     else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
-        const currency = dom.currencyDisplay.textContent; // ZMIANA: Pobieramy walutę z DOM
+        const currency = dom.currencySelect.value.toUpperCase();
         const minAmount = (currency === 'PLN') ? 5 : 1;
 
         if (isNaN(amount) || amount < minAmount) {
@@ -204,7 +204,7 @@ function collectData(step) {
         formData.email = dom.emailInput.value.trim();
     } else if (step === 1) {
         formData.amount = parseFloat(dom.amountInput.value);
-        formData.currency = dom.currencyDisplay.textContent.toLowerCase();
+        formData.currency = dom.currencySelect.value;
     }
 }
 

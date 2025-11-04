@@ -31,6 +31,7 @@ get_header();
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
                             <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="">
+                            <div id="tippingStep0Error" class="elegant-modal-error"></div>
                             <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
                         </div>
                     </div>
@@ -42,7 +43,12 @@ get_header();
     <div class="elegant-modal-fields-container">
         <div class="tipping-amount-container">
             <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-            <span id="tippingCurrency" class="tipping-currency">PLN</span>
+            <select id="tippingCurrency" class="tipping-currency-select">
+                <option value="pln">PLN</option>
+                <option value="eur">EUR</option>
+                <option value="usd">USD</option>
+                <option value="gbp">GBP</option>
+            </select>
         </div>
         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
             <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
