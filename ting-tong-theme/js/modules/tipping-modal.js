@@ -226,7 +226,8 @@ async function initializePaymentElement(originalText) {
             }
         };
 
-        elements = stripe.elements({ appearance, clientSecret });
+        const localeCode = State.get('currentLang') || 'auto';
+        elements = stripe.elements({ appearance, clientSecret, locale: localeCode });
 
         const paymentElementOptions = {
             layout: 'tabs',
