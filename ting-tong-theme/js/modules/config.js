@@ -131,20 +131,20 @@ export const Config = {
           en: "You will receive login details for the patron section to the provided email."
       },
       tippingStep2Desc: {
-          pl: "Wybierz kwotę napiwku",
-          en: "Choose the tip amount"
+          pl: "Wybierz kwotę, którą chcesz wesprzeć projekt.",
+          en: "Choose the amount you want to support the project with."
       },
       tippingAmountPlaceholder: {
           pl: "Wpisz kwotę",
           en: "Enter amount"
       },
       tippingAmountHint: {
-          pl: "",
-          en: ""
+          pl: "Dziękujemy za każde wsparcie!",
+          en: "Thank you for every donation!"
       },
       tippingStep3Desc: {
           pl: "Wybierz metodę napiwkowania",
-          en: "Choose your tipping method"
+          en: "Enter your payment details. We use the secure Stripe processor."
       },
       profileAccessAlert: {
         pl: "Zaloguj się, aby zobaczyć profil.",
@@ -159,7 +159,7 @@ export const Config = {
           en: "ENTER"
       },
       tippingSubmit: {
-          pl: "Przejdź do płatności",
+          pl: "ENTER",
           en: "Proceed to Payment"
       },
       tippingPay: {

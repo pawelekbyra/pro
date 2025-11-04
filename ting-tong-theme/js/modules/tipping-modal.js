@@ -81,16 +81,14 @@ function updateStepDisplay(isShowingTerms = false) {
     dom.prevBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
 
     // Obsługa przycisków
-    dom.nextBtn.style.display = (isEmailStep || isAmountStep) ? 'flex' : 'none';
-    dom.submitBtn.style.display = isPaymentStep ? 'flex' : 'none';
+    dom.nextBtn.style.display = (isEmailStep) ? 'flex' : 'none';
+    dom.submitBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
 
     // Change button text in the payment step
     if (isPaymentStep) {
         dom.submitBtn.textContent = getTranslatedText('tippingPay', 'Pay!');
     } else {
-        // The text for nextBtn ("ENTER") is set via HTML attribute and the `translateUI` function,
-        // but we set it here again to be sure.
-        dom.nextBtn.textContent = getTranslatedText('tippingNext', 'ENTER');
+        dom.submitBtn.textContent = getTranslatedText('tippingSubmit', 'Proceed to Payment');
     }
 
     // Ukryj wszystkie przyciski w kroku przetwarzania
@@ -110,21 +108,28 @@ async function handleNextStep() {
 
     collectData(currentStep);
 
+    // Ta funkcja obsługuje tylko przejście z Kroku 0 na 1
     if (currentStep === 0) {
         currentStep++;
         updateStepDisplay();
-    } else if (currentStep === 1) {
-        // Re-validate specifically for step 1 before proceeding
-        if (!validateStep(1)) return;
-
-        // Logic from former handleTippingSubmit
-        dom.nextBtn.disabled = true;
-        const originalText = dom.nextBtn.textContent;
-        dom.nextBtn.innerHTML = `<span class="loading-spinner"></span>`;
-
-        // Initialize payment in the background
-        await initializePaymentElement(originalText);
+        return;
     }
+}
+
+// Nowa funkcja do obsługi przejścia z Kroku 1 (Kwota)
+async function handleTippingSubmit() {
+    hideLocalErrors();
+    if (!validateStep(1)) return; // Walidacja Kroku 1
+
+    collectData(1);
+
+    // Zablokuj przycisk i pokaż spinner, ale NIE zmieniaj jeszcze kroku
+    dom.submitBtn.disabled = true;
+    const originalText = dom.submitBtn.textContent;
+    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
+
+    // Inicjalizuj płatność w tle
+    await initializePaymentElement(originalText);
 }
 
 
@@ -148,11 +153,11 @@ function validateStep(step) {
         if (dom.createAccountCheckbox.checked) {
             const email = dom.emailInput.value.trim();
             if (!email) {
-                showLocalError(0, getTranslatedText('errorEmailRequired', 'Email address is required.'));
+                showLocalError(0, Utils.getTranslation('errorEmailRequired'));
                 return false;
             }
             if (!Utils.isValidEmail(email)) {
-                showLocalError(0, getTranslatedText('errorInvalidEmail', 'Please provide a valid email address.'));
+                showLocalError(0, Utils.getTranslation('errorInvalidEmail'));
                 return false;
             }
         }
@@ -165,7 +170,7 @@ function validateStep(step) {
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
-            const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
+            const message = (Utils.getTranslation('errorMinTipAmount') || "The minimum tip amount is {minAmount} {currency}.")
                 .replace('{minAmount}', minAmount)
                 .replace('{currency}', currencyDisplay);
 
@@ -174,23 +179,20 @@ function validateStep(step) {
         }
 
         if (!dom.termsCheckbox.checked) {
-            showLocalError(1, getTranslatedText('errorTermsNotAccepted', 'You must accept the terms and conditions.'));
+            showLocalError(1, Utils.getTranslation('errorTermsNotAccepted'));
             return false;
         }
-        return true; // FIX: Ensure true is returned on successful validation
     }
     return true;
 }
 
 function showTerms() {
     previousStep = currentStep;
-    dom.title.textContent = getTranslatedText('tippingTermsTitle', 'Terms and Conditions');
     updateStepDisplay(true);
 }
 
 function hideTerms() {
     currentStep = previousStep;
-    dom.title.textContent = getTranslatedText('tippingTitle', 'Tipping Gateway');
     updateStepDisplay(false);
 }
 
@@ -251,9 +253,9 @@ async function initializePaymentElement(originalText) {
         paymentElement.on('error', (event) => {
             console.error('Payment Element error:', event.error);
             UI.showToast(event.error.message, true);
-             // Przywróć przycisk `next` i cofnij do Kroku 1
-            dom.nextBtn.disabled = false;
-            dom.nextBtn.innerHTML = originalText;
+             // Przywróć przycisk i cofnij do Kroku 1
+            dom.submitBtn.disabled = false;
+            dom.submitBtn.innerHTML = originalText;
             currentStep = 1;
             updateStepDisplay();
         });
@@ -263,9 +265,9 @@ async function initializePaymentElement(originalText) {
         console.error("Error initializing Payment Element:", error);
         UI.showToast(error.message || "Błąd inicjalizacji płatności. Sprawdź, czy klucze Stripe są poprawne.", true);
 
-        // Przywróć przycisk `next` i cofnij do Kroku 1
-        dom.nextBtn.disabled = false;
-        dom.nextBtn.innerHTML = originalText;
+        // Przywróć przycisk i cofnij do Kroku 1
+        dom.submitBtn.disabled = false;
+        dom.submitBtn.innerHTML = originalText;
         currentStep = 1;
         updateStepDisplay();
     }
@@ -382,16 +384,17 @@ function init() {
 
     if(dom.closeBtn) dom.closeBtn.addEventListener('click', hideModal);
 
-    // PRZYCISK "ENTER" (Krok 0 -> 1 i Krok 1 -> 2)
-    if(dom.nextBtn) dom.nextBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        await handleNextStep();
-    });
+    // PRZYCISK DALEJ (Krok 0 -> Krok 1)
+    if(dom.nextBtn) dom.nextBtn.addEventListener('click', handleNextStep);
 
-    // PRZYCISK "PŁACĘ" (Krok 2 -> 3)
+    // PRZYCISK PRZEJDŹ DO PŁATNOŚCI/PŁACĘ (Krok 1 -> Krok 2)
     if(dom.submitBtn) dom.submitBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        await handleFormSubmit(); // Potwierdza Payment Intent
+        if (currentStep === 1) {
+            await handleTippingSubmit(); // Inicjalizuje Payment Intent i przechodzi do Kroku 2
+        } else if (currentStep === 2) {
+            await handleFormSubmit(); // Potwierdza Payment Intent
+        }
     });
 
     if(dom.prevBtn) dom.prevBtn.addEventListener('click', handlePrevStep);

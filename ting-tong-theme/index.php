@@ -33,7 +33,6 @@ get_header();
                             <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="">
                             <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
                         </div>
-                        <div id="tippingStep0Error" class="elegant-modal-error"></div>
                     </div>
                 </div>
 
