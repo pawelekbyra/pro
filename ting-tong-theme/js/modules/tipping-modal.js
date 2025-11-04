@@ -226,6 +226,7 @@ async function initializePaymentElement(originalText) {
             layout: {
                 type: 'accordion',
                 defaultCollapsed: true, // Zwinięty domyślnie
+                visibleAccordionItemsCount: 3,
             },
             wallets: { applePay: 'auto', googlePay: 'auto' },
             // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
