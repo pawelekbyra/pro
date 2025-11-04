@@ -5130,3 +5130,10 @@ body,
 #payment-element {
     min-height: 250px;
 }
+
+.payment-element-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px; /* Match the payment element's min-height */
+}

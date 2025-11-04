@@ -63,8 +63,13 @@ get_header();
 <!-- Krok 3: Płatność Stripe -->
 <div class="elegant-modal-step" data-step="2">
     <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Wprowadź dane płatności. Korzystamy z bezpiecznego operatora Stripe.</p>
-    <div id="payment-element">
-        <!-- Stripe Payment Element will be inserted here -->
+    <div id="payment-element-container">
+        <div class="payment-element-loader">
+            <div class="loading-spinner"></div>
+        </div>
+        <div id="payment-element" style="display: none;">
+            <!-- Stripe Payment Element will be inserted here -->
+        </div>
     </div>
     <div id="payment-message" class="hidden"></div>
 </div>
