@@ -163,8 +163,8 @@ export const Config = {
           en: "ENTER"
       },
       tippingSubmit: {
-          pl: "Przejdź do płatności",
-          en: "Proceed to Payment"
+          pl: "ENTER",
+          en: "ENTER"
       },
       tippingPay: {
         pl: "Płacę!",

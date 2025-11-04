@@ -3,6 +3,15 @@ import { UI } from './ui.js';
 import { State } from './state.js';
 import { API } from './api.js';
 
+// Helper do obsługi tłumaczeń, które mogą być obiektami
+function getTranslatedText(key, fallback) {
+    const translation = Utils.getTranslation(key);
+    if (typeof translation === 'object' && translation !== null) {
+        return translation[State.get('currentLang')] || fallback;
+    }
+    return translation || fallback;
+}
+
 let dom = {};
 let currentStep = 0;
 const totalSteps = 4; // 0: options, 1: amount, 2: payment, 3: processing
@@ -77,9 +86,9 @@ function updateStepDisplay(isShowingTerms = false) {
 
     // Zmiana tekstu przycisku w kroku 2 na "Płacę!"
     if (isPaymentStep) {
-        dom.submitBtn.textContent = Utils.getTranslation('tippingPay') || 'Płacę!';
+        dom.submitBtn.textContent = getTranslatedText('tippingPay', 'Płacę!');
     } else {
-        dom.submitBtn.textContent = Utils.getTranslation('tippingSubmit') || 'Przejdź do płatności';
+        dom.submitBtn.textContent = getTranslatedText('tippingSubmit', 'ENTER');
     }
 
     // Ukryj wszystkie przyciski w kroku przetwarzania
@@ -114,15 +123,12 @@ async function handleTippingSubmit() {
 
     collectData(1);
 
-    // Przejście do kroku 2: inicjalizacja płatności
-    currentStep = 2;
-    updateStepDisplay();
-
-    // Dodaj spinner do przycisku na czas inicjalizacji
+    // Zablokuj przycisk i pokaż spinner, ale NIE zmieniaj jeszcze kroku
     dom.submitBtn.disabled = true;
     const originalText = dom.submitBtn.textContent;
     dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
+    // Inicjalizuj płatność w tle
     await initializePaymentElement(originalText);
 }
 
@@ -234,9 +240,24 @@ async function initializePaymentElement(originalText) {
         paymentElement = elements.create("payment", paymentElementOptions);
         paymentElement.mount(dom.paymentElementContainer);
 
-        // Usuń spinner
-        dom.submitBtn.disabled = false;
-        dom.submitBtn.innerHTML = Utils.getTranslation('tippingPay') || 'Płacę!';
+        paymentElement.on('ready', () => {
+            // Przełącz widok DOPIERO gdy element jest gotowy
+            currentStep = 2;
+            updateStepDisplay();
+            // Przywróć przycisk
+            dom.submitBtn.disabled = false;
+            dom.submitBtn.innerHTML = getTranslatedText('tippingPay', 'Płacę!');
+        });
+
+        paymentElement.on('error', (event) => {
+            console.error('Payment Element error:', event.error);
+            UI.showToast(event.error.message, true);
+             // Przywróć przycisk i cofnij do Kroku 1
+            dom.submitBtn.disabled = false;
+            dom.submitBtn.innerHTML = originalText;
+            currentStep = 1;
+            updateStepDisplay();
+        });
 
 
     } catch (error) {
