@@ -143,7 +143,7 @@ export const Config = {
           en: "Thank you for every donation!"
       },
       tippingStep3Desc: {
-          pl: "Wprowadź dane płatności. Korzystamy z bezpiecznego operatora Stripe.",
+          pl: "Wybierz metodę napiwkowania",
           en: "Enter your payment details. We use the secure Stripe processor."
       },
       profileAccessAlert: {

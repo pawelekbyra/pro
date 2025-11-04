@@ -87,8 +87,12 @@ function updateStepDisplay(isShowingTerms = false) {
     // Change button text in the payment step
     if (isPaymentStep) {
         dom.submitBtn.textContent = getTranslatedText('tippingPay', 'Pay!');
+        dom.submitBtn.classList.remove('elegant-modal-btn-next');
+        dom.submitBtn.classList.add('elegant-modal-btn-submit');
     } else {
-        dom.submitBtn.textContent = getTranslatedText('tippingSubmit', 'Proceed to Payment');
+        dom.submitBtn.textContent = 'ENTER';
+        dom.submitBtn.classList.add('elegant-modal-btn-next');
+        dom.submitBtn.classList.remove('elegant-modal-btn-submit');
     }
 
     // Ukryj wszystkie przyciski w kroku przetwarzania
