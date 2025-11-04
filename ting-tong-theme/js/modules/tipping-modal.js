@@ -121,7 +121,7 @@ async function handleTippingSubmit() {
     // Dodaj spinner do przycisku na czas inicjalizacji
     dom.submitBtn.disabled = true;
     const originalText = dom.submitBtn.textContent;
-    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('savingButtonText') || 'Ładowanie...'}`;
+    dom.submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
     await initializePaymentElement(originalText);
 }
