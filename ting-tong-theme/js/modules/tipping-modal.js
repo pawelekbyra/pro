@@ -37,7 +37,6 @@ function cacheDOM() {
         // Error containers
         step0Error: document.getElementById('tippingStep0Error'),
         step1Error: document.getElementById('tippingStep1Error'),
-        step2Error: document.getElementById('tippingStep2Error'),
     };
 }
 
@@ -54,7 +53,6 @@ function showLocalError(step, message) {
 function hideLocalErrors() {
     if (dom.step0Error) { dom.step0Error.style.display = 'none'; dom.step0Error.classList.remove('show'); }
     if (dom.step1Error) { dom.step1Error.style.display = 'none'; dom.step1Error.classList.remove('show'); }
-    if (dom.step2Error) { dom.step2Error.style.display = 'none'; dom.step2Error.classList.remove('show'); }
 }
 
 function updateStepDisplay(isShowingTerms = false) {
@@ -226,7 +224,8 @@ async function initializePaymentElement(originalText) {
 
         const paymentElementOptions = {
             layout: {
-                type: 'tabs'
+                type: 'accordion',
+                defaultCollapsed: true, // Zwinięty domyślnie
             },
             wallets: { applePay: 'auto', googlePay: 'auto' },
             // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
@@ -245,8 +244,7 @@ async function initializePaymentElement(originalText) {
 
     } catch (error) {
         console.error("Error initializing Payment Element:", error);
-        // Zmień na lokalny błąd
-        showLocalError(1, error.message || "Błąd inicjalizacji płatności. Spróbuj ponownie.");
+        UI.showToast(error.message || "Błąd inicjalizacji płatności. Sprawdź, czy klucze Stripe są poprawne.", true);
 
         // Przywróć przycisk i cofnij do Kroku 1
         dom.submitBtn.disabled = false;
@@ -256,16 +254,20 @@ async function initializePaymentElement(originalText) {
     }
 }
 
+
 async function handleFormSubmit() {
+    // Sprawdź, czy na pewno jesteśmy w kroku płatności
     if (currentStep !== 2) return;
 
     dom.submitBtn.disabled = true;
     const originalText = dom.submitBtn.textContent;
     dom.submitBtn.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation('changingButtonText') || 'Przetwarzam...'}`;
 
+    // Ustawienie stanu przetwarzania
     currentStep = 3;
     updateStepDisplay();
 
+    // Domyślny return_url
     const returnUrl = window.location.href.split('#')[0];
 
     const { error, paymentIntent } = await stripe.confirmPayment({
@@ -279,13 +281,14 @@ async function handleFormSubmit() {
 
     if (error) {
         const errorMsg = error.message || "Wystąpił nieoczekiwany błąd płatności.";
-        // Zmień na lokalny błąd w kroku 2 (płatność)
-        showLocalError(2, errorMsg);
+        UI.showToast(errorMsg, true);
 
+        // Wróć do Kroku 2
         currentStep = 2;
         updateStepDisplay();
         dom.submitBtn.disabled = false;
         dom.submitBtn.textContent = originalText;
+
         return;
     }
 
