@@ -3333,8 +3333,8 @@ body,
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-color: #333;
-    border: 1px solid #555;
+    background-color: transparent;
+    border: none;
     color: white;
     padding: 10px 30px 10px 15px;
     border-radius: 8px;
@@ -5158,7 +5158,7 @@ body,
 
 @media (min-width: 600px) {
   #infoModal.modal-overlay,
-  div#tippingModal.elegant-modal-overlay {
+  #tippingModal.elegant-modal-overlay {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
