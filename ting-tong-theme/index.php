@@ -37,60 +37,62 @@ get_header();
                 </div>
 
                 <!-- Krok 2: Wybór kwoty -->
-<div class="elegant-modal-step" data-step="1">
-    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
-    <div class="elegant-modal-fields-container">
-        <div class="tipping-amount-container">
-            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-            <span id="tippingCurrency" class="tipping-currency">PLN</span>
-        </div>
-        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
-            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
-            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;">
-                Akceptuję <a href="#" data-action="show-terms" style="color: var(--accent-color); text-decoration: underline;">Regulamin i Politykę Prywatności</a>
-            </label>
-        </div>
-        <div id="tippingStep1Error" class="elegant-modal-error"></div>
-        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
-    </div>
-</div>
-
-<!-- Krok 3: Płatność Stripe -->
-<div class="elegant-modal-step" data-step="2">
-    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Wprowadź dane płatności. Korzystamy z bezpiecznego operatora Stripe.</p>
-    <div id="payment-element">
-        <!-- Stripe Payment Element will be inserted here -->
-    </div>
-    <div id="payment-message" class="hidden"></div>
-</div>
-
-<!-- Krok 4: Przetwarzanie płatności -->
-<div class="elegant-modal-step" data-step="3">
-    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc">Dziękujemy! Trwa weryfikacja Twojej płatności.</p>
-    <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
-        <div class="loading-spinner large"></div>
-        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingProcessingHint">To może potrwać chwilę...</p>
-    </div>
-</div>
-
-<!-- Step 5 (was 4): Regulamin -->
-<div class="elegant-modal-step" data-step="4" id="terms-step">
-    <h3 style="text-align: center; margin-bottom: 15px;">Regulamin i Polityka Prywatności</h3>
-    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;">
-        <p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p>
-                        <p><strong>2. Charakter Napiwków</strong><br>Użytkownik przyjmuje do wiadomości i akceptuje, że wszystkie przekazywane napiwki są dobrowolne i nie podlegają zwrotowi. Przekazanie napiwku nie rodzi żadnego zobowiązania po stronie Twórcy i nie stanowi podstawy do roszczeń o dostęp do ekskluzywnych treści, usług czy produktów.</p>
-                        <p><strong>3. Polityka Prywatności</strong><br>W przypadku podania adresu e-mail, jest on wykorzystywany wyłącznie w celu założenia konta w serwisie, co umożliwia śledzenie historii wsparcia. Nie udostępniamy Twojego adresu e-mail stronom trzecim w celach marketingowych.</p>
-                        <p><strong>4. Postanowienia końcowe</strong><br>Korzystając z funkcji napiwków, potwierdzasz, że przeczytałeś, zrozumiałeś i w pełni akceptujesz powyższy regulamin.</p>
+                <div class="elegant-modal-step" data-step="1">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc"></p>
+                    <div class="elegant-modal-fields-container">
+                        <div class="tipping-amount-container">
+                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
+                            <div class="tipping-currency-wrapper">
+                                <select id="tippingCurrency" class="tipping-currency-select">
+                                    <option value="pln">PLN</option>
+                                    <option value="eur">EUR</option>
+                                    <option value="usd">USD</option>
+                                    <option value="gbp">GBP</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;" data-translate-key="tippingAcceptTerms">
+                            </label>
+                        </div>
+                        <div id="tippingStep1Error" class="elegant-modal-error"></div>
+                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint"></p>
                     </div>
-                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;">Powrót</button>
+                </div>
+
+                <!-- Krok 3: Płatność Stripe -->
+                <div class="elegant-modal-step" data-step="2">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc"></p>
+                    <div id="payment-element">
+                        <!-- Stripe Payment Element will be inserted here -->
+                    </div>
+                    <div id="payment-message" class="hidden"></div>
+                </div>
+
+                <!-- Krok 4: Przetwarzanie płatności -->
+                <div class="elegant-modal-step" data-step="3">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc"></p>
+                    <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
+                        <div class="loading-spinner large"></div>
+                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingProcessingHint"></p>
+                    </div>
+                </div>
+
+                <!-- Step 5 (was 4): Regulamin -->
+                <div class="elegant-modal-step" data-step="4" id="terms-step">
+                    <h3 style="text-align: center; margin-bottom: 15px;" data-translate-key="tippingTermsTitle"></h3>
+                    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
+                    </div>
+                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton"></button>
                 </div>
             </div>
 
             <div class="elegant-modal-footer">
                 <div class="elegant-modal-footer-buttons">
-                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
-                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
+                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev"></button>
+                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext"></button>
+                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit"></button>
                 </div>
             </div>
         </form>
