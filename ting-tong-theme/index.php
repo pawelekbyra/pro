@@ -42,7 +42,7 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc"></p>
                     <div class="elegant-modal-fields-container">
                         <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="0" min="1" step="any">
+                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" placeholder="0" min="1" step="any">
                             <div class="tipping-currency-wrapper">
                                 <select id="tippingCurrency" class="tipping-currency-select">
                                     <option value="pln">PLN</option>
