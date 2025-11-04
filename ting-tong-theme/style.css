@@ -5109,3 +5109,8 @@ body,
     border: none !important;
   }
 }
+
+/* FIX: Ensure Stripe Payment Element has space to render on mobile */
+#payment-element {
+    min-height: 250px;
+}
