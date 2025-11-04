@@ -5085,6 +5085,25 @@ body,
     transform: translateY(-2px);
 }
 
+.elegant-modal-btn-subtle {
+    background: none;
+    border: none;
+    color: #8e8e93;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: auto;
+    display: inline-block;
+}
+
+.elegant-modal-btn-subtle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f0f0f0;
+}
+
 #terms-step .terms-content {
     background: rgba(0,0,0,0.2);
     border-radius: 8px;
