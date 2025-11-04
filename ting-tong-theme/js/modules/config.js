@@ -132,15 +132,19 @@ export const Config = {
       },
       tippingStep2Desc: {
           pl: "Wybierz kwotę napiwku",
-          en: "Choose the amount you want to support the project with."
+          en: "Choose the tip amount"
       },
       tippingAmountPlaceholder: {
           pl: "Wpisz kwotę",
           en: "Enter amount"
       },
+      tippingAmountHint: {
+          pl: "",
+          en: ""
+      },
       tippingStep3Desc: {
           pl: "Wybierz metodę napiwkowania",
-          en: "Enter your payment details. We use the secure Stripe processor."
+          en: "Choose your tipping method"
       },
       profileAccessAlert: {
         pl: "Zaloguj się, aby zobaczyć profil.",
