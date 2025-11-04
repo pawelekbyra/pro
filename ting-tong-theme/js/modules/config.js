@@ -143,8 +143,8 @@ export const Config = {
           en: "The minimum amount is 1 EUR. Thank you for all your support!"
       },
       tippingStep3Desc: {
-          pl: "Przekierowanie do płatności...",
-          en: "Redirecting to payment..."
+          pl: "Wybierz metodę napiwkowania",
+          en: "Choose a tipping method"
       },
       tippingRedirectHint: {
           pl: "Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności Stripe.",
