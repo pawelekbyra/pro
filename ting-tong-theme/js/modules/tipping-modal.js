@@ -232,11 +232,25 @@ async function initializePaymentElement(originalText) {
         };
 
         paymentElement = elements.create("payment", paymentElementOptions);
-        paymentElement.mount(dom.paymentElementContainer);
 
-        // Usuń spinner
-        dom.submitBtn.disabled = false;
-        dom.submitBtn.innerHTML = Utils.getTranslation('tippingPay') || 'Płacę!';
+        paymentElement.on('ready', () => {
+            console.log('Stripe Payment Element is ready.');
+            // Usuń spinner i aktywuj przycisk dopiero, gdy element jest gotowy
+            dom.submitBtn.disabled = false;
+            dom.submitBtn.innerHTML = Utils.getTranslation('tippingPay') || 'Płacę!';
+        });
+
+        paymentElement.on('error', (event) => {
+            console.error('Stripe Payment Element error:', event.error);
+            UI.showToast(`Błąd płatności: ${event.error.message}`, true);
+            // W razie błędu, przywróć przycisk i cofnij do kroku 1
+            dom.submitBtn.disabled = false;
+            dom.submitBtn.innerHTML = originalText;
+            currentStep = 1;
+            updateStepDisplay();
+        });
+
+        paymentElement.mount(dom.paymentElementContainer);
 
 
     } catch (error) {
