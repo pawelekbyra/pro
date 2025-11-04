@@ -424,8 +424,15 @@ function translateUI() {
     });
 }
 
+function updateLanguage() {
+    if (dom.modal && dom.modal.classList.contains('visible')) {
+        translateUI();
+    }
+}
+
 export const TippingModal = {
     init,
     showModal,
     hideModal,
+    updateLanguage,
 };
