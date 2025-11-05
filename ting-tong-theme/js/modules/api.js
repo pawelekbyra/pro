@@ -3,38 +3,24 @@ import { authManager } from './auth-manager.js';
 export let slidesData = [];
 
 async function _request(action, data = {}) {
-  try {
-    // Użyj AuthManager zamiast bezpośredniego fetch
-    return await authManager.ajax(action, data);
-  } catch (error) {
-    console.error(`API Client Error for action "${action}":`, error);
-    return { success: false, data: { message: error.message } };
-  }
+  // UWAGA: Usunięto blok try/catch. Teraz `authManager.ajax` będzie rzucał błędy,
+  // a obowiązkiem funkcji wywołującej (np. w tipping-modal.js) jest ich obsługa.
+  // To jest poprawny wzorzec, który zapobiega "połykaniu" błędów.
+  return await authManager.ajax(action, data);
 }
 
 export const API = {
   init: () => {
     if (typeof window.TingTongData !== "undefined" && window.TingTongData.slides) {
-      // Wyczyść tablicę i wstaw nowe dane.
       slidesData.length = 0;
       const newSlides = window.TingTongData.slides || [];
       newSlides.forEach((s) => {
         s.likeId = String(s.likeId);
         slidesData.push(s);
       });
-    } else {
-      console.warn(
-        "`TingTongData` is not defined or has no slides. Using mock data for standalone development.",
-      );
     }
   },
 
-  // === NOWE METODY STRIPE (NAPRAWIONY EKSPORT) ===
-
-  /**
-   * Tworzy Payment Intent na serwerze i zwraca client_secret.
-   * Wyrzuca błąd w przypadku niepowodzenia.
-   */
   createStripePaymentIntent: async (amount, currency) => {
     const result = await _request("tt_create_payment_intent", {
       amount,
@@ -45,33 +31,20 @@ export const API = {
         return result.data.clientSecret;
     }
 
-    // Wyrzuć błąd, aby mógł być obsłużony w initializePaymentElement
+    // Jeśli _request zwróci obiekt błędu (co nie powinno się już zdarzyć, ale dla bezpieczeństwa),
+    // lub jeśli odpowiedź sukcesu nie ma clientSecret, rzuć błąd.
     throw new Error(result.data?.message || 'Failed to create Payment Intent.');
   },
 
-  /**
-   * Wywołuje weryfikację płatności po stronie serwera po udanej transakcji.
-   */
   handleTipSuccess: async (paymentIntentId) => {
     return _request("tt_handle_tip_success", { payment_intent_id: paymentIntentId });
   },
 
-  // === ISTNIEJĄCE METODY ===
-
   uploadCommentImage: async (file) => {
     try {
-      // ... (pozostała logika bez zmian)
-      if (!file || !(file instanceof File)) {
-        throw new Error('Invalid file');
-      }
-
-      if (!file.type.startsWith('image/')) {
-        throw new Error('File must be an image');
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('File too large (max 5MB)');
-      }
+      if (!file || !(file instanceof File)) throw new Error('Invalid file');
+      if (!file.type.startsWith('image/')) throw new Error('File must be an image');
+      if (file.size > 5 * 1024 * 1024) throw new Error('File too large (max 5MB)');
 
       const formData = new FormData();
       formData.append('action', 'tt_upload_comment_image');
@@ -84,31 +57,16 @@ export const API = {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
       const json = await response.json();
-
-      if (!json || typeof json !== 'object') {
-        throw new Error('Invalid response format');
-      }
-
-      if (json.new_nonce) {
-        ajax_object.nonce = json.new_nonce;
-      }
-
-      if (json.success && !json.data?.url) {
-        throw new Error('Missing image URL in response');
-      }
-
+      if (!json || typeof json !== 'object') throw new Error('Invalid response format');
+      if (json.new_nonce) ajax_object.nonce = json.new_nonce;
+      if (json.success && !json.data?.url) throw new Error('Missing image URL in response');
       return json;
     } catch (error) {
       console.error('API Client Error for image upload:', error);
-      return {
-        success: false,
-        data: { message: error.message || 'Upload failed' }
-      };
+      // Rzuć błąd dalej, aby UI mogło go obsłużyć
+      throw error;
     }
   },
 
