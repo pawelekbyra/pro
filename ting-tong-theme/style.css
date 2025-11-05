@@ -3329,6 +3329,29 @@ body,
     display: inline-flex;
 }
 
+.amount-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+}
+
+.amount-placeholder-zero {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #8e8e93;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.elegant-modal-input.amount-input:not(:placeholder-shown) + .amount-placeholder-zero,
+.elegant-modal-input.amount-input:focus + .amount-placeholder-zero {
+    opacity: 0;
+}
+
 .tipping-currency-select {
     -webkit-appearance: none;
     -moz-appearance: none;

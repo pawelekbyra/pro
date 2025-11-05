@@ -131,11 +131,15 @@ async function handleNextStep() {
 function handlePrevStep() {
     hideLocalErrors();
     if (currentStep > 0) {
-        if (currentStep === 2 && paymentElement) {
-            // Demontaż Payment Element
-             try {
-                paymentElement.unmount();
-             } catch(e) { /* ignore */ }
+        if (currentStep === 2) { // Specifically when moving back from the payment step
+            if (paymentElement) {
+                try {
+                    paymentElement.unmount();
+                } catch (e) { /* ignore */ }
+            }
+            // Restore the next button's state
+            dom.nextBtn.disabled = false;
+            dom.nextBtn.innerHTML = getTranslatedText('tippingNext', 'ENTER');
         }
         currentStep--;
         updateStepDisplay();
@@ -368,7 +372,10 @@ function showModal() {
 
     const currentUser = State.get('currentUser');
     if(dom.emailInput) dom.emailInput.value = currentUser?.email || '';
-    if(dom.amountInput) dom.amountInput.value = '';
+    if (dom.amountInput) {
+        dom.amountInput.value = '';
+        dom.amountInput.placeholder = ' '; // Ensure placeholder is just a space for CSS selectors to work
+    }
 
     UI.openModal(dom.modal);
     updateStepDisplay();
