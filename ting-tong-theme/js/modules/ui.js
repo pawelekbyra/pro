@@ -108,6 +108,18 @@ function openModal(modal, options = {}) {
         }
     }
 
+    if (modal.id === 'infoModal') {
+        const endDate = new Date('2024-12-31T23:59:59');
+        const now = new Date();
+        const diffTime = Math.abs(endDate - now);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        const daysElement = modal.querySelector('.stats-grid .stat-item:nth-child(3) .stat-value');
+        if(daysElement) {
+            daysElement.textContent = `${diffDays} Dni`;
+        }
+    }
+
     modal.classList.add('visible');
     activeModals.add(modal);
 
