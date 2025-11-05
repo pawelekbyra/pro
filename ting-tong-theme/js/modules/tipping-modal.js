@@ -318,6 +318,7 @@ function hideModal() {
 }
 
 function init() {
+    // Pusta, ponieważ logika jest teraz w show/hide
 }
 
 function translateUI() {

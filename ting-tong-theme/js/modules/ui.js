@@ -92,7 +92,6 @@ function openModal(modal, options = {}) {
     }
 
     // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
-    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
     modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
 
     if (modal.id === 'comments-modal-container') {
