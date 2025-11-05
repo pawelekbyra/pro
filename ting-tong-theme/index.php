@@ -220,7 +220,7 @@ get_header();
                             <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
                             <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
                         </button>
-                        <button class="info-button" data-action="open-info-modal">
+                        <button class="info-button info-button-animation" data-action="open-info-modal">
                            <svg fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
                         </button>
                     </div>
@@ -770,19 +770,19 @@ get_header();
                         <span class="stat-label">Zebrano</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">5,000 PLN</span>
-                        <span class="stat-label">Cel</span>
+                        <span class="stat-value">128 Patronów</span>
+                        <span class="stat-label">Wspierających</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">128</span>
-                        <span class="stat-label">Wspierających</span>
+                        <span class="stat-value">14 Dni</span>
+                        <span class="stat-label">Do końca</span>
                     </div>
                 </div>
 
                 <div class="cta-section">
                     <button class="cta-button" data-action="show-tip-jar">
-                        <span class="cta-button-icon">💖</span>
-                        Wesprzyj Projekt
+                        <svg class="tip-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
+                        Napiwek
                     </button>
                     <p class="cta-description">Każda złotówka ma znaczenie. Dziękujemy!</p>
                 </div>
