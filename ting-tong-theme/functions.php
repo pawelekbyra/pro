@@ -1000,7 +1000,7 @@ function tt_custom_avatar_filter($args, $id_or_email) {
     }
 
     // Jeśli nie ma niestandardowego awatara, użyj domyślnego pliku 'jajk.png'
-    $default_avatar_url = get_template_directory_uri() . '/assets/img/jajk.png';
+    $default_avatar_url = get_template_directory_uri() . '/jajk.png';
     $args['url'] = $default_avatar_url;
     $args['found_avatar'] = true; // Zapobiegaj dalszemu przetwarzaniu przez Gravatar
 

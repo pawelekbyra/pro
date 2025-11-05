@@ -1544,9 +1544,8 @@ body,
     transform: translate(-50%, 10px);
   }
 }
-.modal-overlay,
+.modal-overlay:not(#comments-modal-container),
 .fl-modal-overlay,
-#commentsModal,
 .account-modal-overlay,
 #tiktok-profile-modal,
 .crop-modal,
@@ -3831,8 +3830,7 @@ body,
 
   /* NOWE: Ujednolicony selektor modali i widgetów */
 
-  #commentsModal,
-  .modal-overlay,
+  .modal-overlay:not(#comments-modal-container),
   .fl-modal-overlay,
   .crop-modal,
   .notification-popup,
@@ -3856,7 +3854,7 @@ body,
 
   /* NOWE: Wymuszenie dopasowania wewnętrznej zawartości modali do nowej szerokości */
   .modal-overlay#tiktok-profile-modal {
-    position: absolute !important;
+      position: fixed !important;
   }
   .modal-overlay .modal-content,
   .fl-modal-overlay .fl-modal-content,
