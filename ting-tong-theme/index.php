@@ -748,27 +748,45 @@ get_header();
     <div class="modal-content">
         <button class="modal-close-btn" data-action="close-modal">&times;</button>
         <div class="modal-body">
-            <h2 id="info-modal-title">O Projekcie Ting Tong</h2>
-            <p>Witaj w Ting Tong – innowacyjnej aplikacji, która rewolucjonizuje sposób, w jaki twórcy i widzowie wchodzą ze sobą w interakcje. Nasza platforma, zaprojektowana na wzór popularnych aplikacji z krótkimi formami wideo, to nie tylko miejsce do oglądania, ale przede wszystkim do realnego wspierania ulubionych autorów.</p>
+            <div class="crowdfunding-container">
+                <div class="crowdfunding-header">
+                    <h2 id="info-modal-title" class="crowdfunding-title">Wspieraj Rozwój Aplikacji!</h2>
+                    <p class="crowdfunding-subtitle">Twoje wsparcie to kolejny krok w naszej wspólnej podróży. Dołącz do grona Patronów Miłości i pomóż nam tworzyć przyszłość Ting Tong!</p>
+                </div>
 
-            <h3>Nasza Misja</h3>
-            <p>Celem Ting Tong jest stworzenie ekosystemu, w którym kreatywność jest bezpośrednio nagradzana. Wierzymy, że twórcy zasługują na transparentne i proste narzędzia do monetyzacji swojej pasji, a widzowie powinni mieć możliwość realnego wpływu na rozwój kanałów, które kochają. Chcemy zlikwidować barierę między twórcą a odbiorcą, budując społeczność opartą na wzajemnym szacunku i wsparciu.</p>
+                <div class="progress-section">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" style="width: 75%;"></div>
+                        <div class="progress-bar-sparkle"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span>Postęp: <strong>75%</strong></span>
+                    </div>
+                </div>
 
-            <h3>Kluczowe Funkcje</h3>
-            <ul>
-                <li><strong>Intuicyjny Interfejs:</strong> Przewijaj wideo w pionie, tak jak lubisz. Nasz interfejs jest szybki, płynny i zaprojektowany z myślą o urządzeniach mobilnych.</li>
-                <li><strong>System Napiwków:</strong> Podoba Ci się treść? Okaż swoje wsparcie jednym kliknięciem! Zintegrowany i bezpieczny system napiwków pozwala na błyskawiczne przekazywanie drobnych kwot bezpośrednio do twórcy.</li>
-                <li><strong>Społeczność:</strong> Komentuj, lajkuj i udostępniaj. Bądź częścią aktywnej społeczności skupionej wokół Twoich ulubionych tematów i twórców.</li>
-                <li><strong>Tryb PWA (Progressive Web App):</strong> Zainstaluj Ting Tong na swoim telefonie, aby uzyskać dostęp do dodatkowych funkcji, płynniejszego działania i powiadomień push – wszystko to bez konieczności pobierania aplikacji ze sklepu.</li>
-                <li><strong>Tryb Immersyjny:</strong> Zanurz się w treściach bez rozpraszaczy. Jedno dotknięcie ukrywa interfejs, pozwalając Ci skupić się na tym, co najważniejsze – wideo.</li>
-            </ul>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">3,750 PLN</span>
+                        <span class="stat-label">Zebrano</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">5,000 PLN</span>
+                        <span class="stat-label">Cel</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">128</span>
+                        <span class="stat-label">Wspierających</span>
+                    </div>
+                </div>
 
-            <h3>Dla Twórców</h3>
-            <p>Jesteś twórcą? Ting Tong oferuje Ci proste narzędzia do zarabiania na swojej pasji. Bez skomplikowanych algorytmów i niejasnych zasad. Po prostu twórz, a Twoi fani zajmą się resztą. Skup się na jakości, a my zapewnimy Ci platformę do jej monetyzacji.</p>
-
-            <h3>Dla Widzów</h3>
-            <p>Jako widz, masz realny wpływ. Twoje wsparcie nie tylko motywuje twórców do dalszej pracy, ale także pomaga im inwestować w lepszy sprzęt, rozwijać nowe formaty i poświęcać więcej czasu na to, co robią najlepiej. Każdy napiwek to cegiełka budująca przyszłość niezależnej twórczości w internecie.</p>
-            <p>Dziękujemy, że jesteś z nami. Przewijaj, odkrywaj i wspieraj!</p>
+                <div class="cta-section">
+                    <button class="cta-button" data-action="show-tip-jar">
+                        <span class="cta-button-icon">💖</span>
+                        Wesprzyj Projekt
+                    </button>
+                    <p class="cta-description">Każda złotówka ma znaczenie. Dziękujemy!</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
