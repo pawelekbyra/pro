@@ -49,6 +49,7 @@ function cacheDOM() {
 }
 
 function addManagedEventListener(element, type, listener) {
+    if (!element) return;
     element.addEventListener(type, listener);
     eventControllers.push({ element, type, listener });
 }
@@ -131,12 +132,15 @@ async function handleNextStep(e) {
         updateStepDisplay();
     } else if (currentStep === 1) {
         if (!validateStep(1)) return;
-        dom.nextBtn.disabled = true;
-        const originalText = dom.nextBtn.textContent;
-        dom.nextBtn.innerHTML = `<span class="loading-spinner"></span>`;
-        await initializePaymentElement(originalText);
+
+        // NAJPIERW PRZEJDŹ DO KROKU 3 (SPINNER), A DOPIERO POTEM INICJALIZUJ
+        currentStep = 3; // Krok "Processing"
+        updateStepDisplay();
+
+        await initializePaymentElement();
     }
 }
+
 
 function handlePrevStep(e) {
     e.preventDefault();
@@ -234,7 +238,7 @@ function collectData(step) {
     }
 }
 
-async function initializePaymentElement(originalText) {
+async function initializePaymentElement() {
     if (paymentElement) {
         try { paymentElement.unmount(); } catch(e) {}
     }
@@ -244,18 +248,25 @@ async function initializePaymentElement(originalText) {
         const appearance = { theme: 'night', labels: 'floating' };
         elements = stripe.elements({ appearance, clientSecret, locale: State.get('currentLang') || 'auto' });
         paymentElement = elements.create("payment", { layout: 'tabs' });
+
+        // TERAZ BEZPIECZNIE JEST MONTOWAĆ
+        currentStep = 2; // Zmień na krok płatności
+        updateStepDisplay(); // Pokaż kontener
+
         paymentElement.mount(dom.paymentElementContainer);
 
         paymentElement.on('ready', () => {
-            currentStep = 2;
-            updateStepDisplay();
             dom.submitBtn.disabled = false;
+        });
+
+        paymentElement.on('error', (event) => {
+            UI.showToast(event.error.message, true);
+            currentStep = 1;
+            updateStepDisplay();
         });
 
     } catch (error) {
         UI.showToast(error.message || "Payment initialization failed.", true);
-        dom.nextBtn.disabled = false;
-        dom.nextBtn.innerHTML = originalText;
         currentStep = 1;
         updateStepDisplay();
     }
