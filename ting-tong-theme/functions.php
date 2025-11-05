@@ -974,40 +974,6 @@ add_action('wp_ajax_tt_avatar_upload', function () {
         }
     }
 });
-// KOREKTA: Filtr awatara musi być wywołany wcześnie, aby działał globalnie
-add_filter('pre_get_avatar_data', 'tt_custom_avatar_filter', 10, 2);
-
-function tt_custom_avatar_filter($args, $id_or_email) {
-    $user_id = 0;
-    if (is_object($id_or_email) && isset($id_or_email->user_id)) {
-        $user_id = $id_or_email->user_id;
-    } elseif (is_numeric($id_or_email)) {
-        $user_id = (int) $id_or_email;
-    } elseif (is_string($id_or_email)) {
-        $user = get_user_by('email', $id_or_email);
-        if ($user) {
-            $user_id = $user->ID;
-        }
-    }
-
-    if ($user_id > 0) {
-        // Sprawdź, czy użytkownik ma wgrany niestandardowy awatar
-        $custom_avatar_url = get_user_meta($user_id, 'tt_avatar_url', true);
-        if (!empty($custom_avatar_url)) {
-            $args['url'] = $custom_avatar_url;
-            return $args; // Zwróć niestandardowy awatar
-        }
-    }
-
-    // Jeśli nie ma niestandardowego awatara, użyj domyślnego pliku 'jajk.png'
-    $default_avatar_url = get_template_directory_uri() . '/jajk.png';
-    $args['url'] = $default_avatar_url;
-    $args['found_avatar'] = true; // Zapobiegaj dalszemu przetwarzaniu przez Gravatar
-
-    return $args;
-}
-
-
 add_action('wp_ajax_tt_password_change', function () {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
     if (!is_user_logged_in()) {
