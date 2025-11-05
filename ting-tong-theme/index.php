@@ -42,7 +42,10 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc"></p>
                     <div class="elegant-modal-fields-container">
                         <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
+                            <div class="amount-input-wrapper">
+                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" placeholder=" " min="1" step="any">
+                                <span class="amount-placeholder-zero">0</span>
+                            </div>
                             <div class="tipping-currency-wrapper">
                                 <select id="tippingCurrency" class="tipping-currency-select">
                                     <option value="pln">PLN</option>
@@ -82,7 +85,6 @@ get_header();
 
                 <!-- Step 5 (was 4): Regulamin -->
                 <div class="elegant-modal-step" data-step="4" id="terms-step">
-                    <h3 style="text-align: center; margin-bottom: 15px;" data-translate-key="tippingTermsTitle"></h3>
                     <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
                     </div>
                     <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton"></button>
