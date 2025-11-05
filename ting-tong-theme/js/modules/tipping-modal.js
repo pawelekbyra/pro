@@ -132,12 +132,10 @@ async function handleNextStep(e) {
         updateStepDisplay();
     } else if (currentStep === 1) {
         if (!validateStep(1)) return;
-
-        // NAJPIERW PRZEJDŹ DO KROKU 3 (SPINNER), A DOPIERO POTEM INICJALIZUJ
-        currentStep = 3; // Krok "Processing"
-        updateStepDisplay();
-
-        await initializePaymentElement();
+        dom.nextBtn.disabled = true;
+        const originalText = dom.nextBtn.textContent;
+        dom.nextBtn.innerHTML = `<span class="loading-spinner"></span>`;
+        await initializePaymentElement(originalText);
     }
 }
 
@@ -238,7 +236,7 @@ function collectData(step) {
     }
 }
 
-async function initializePaymentElement() {
+async function initializePaymentElement(originalText) {
     if (paymentElement) {
         try { paymentElement.unmount(); } catch(e) {}
     }
@@ -249,24 +247,29 @@ async function initializePaymentElement() {
         elements = stripe.elements({ appearance, clientSecret, locale: State.get('currentLang') || 'auto' });
         paymentElement = elements.create("payment", { layout: 'tabs' });
 
-        // TERAZ BEZPIECZNIE JEST MONTOWAĆ
-        currentStep = 2; // Zmień na krok płatności
-        updateStepDisplay(); // Pokaż kontener
+        currentStep = 2;
+        updateStepDisplay();
 
         paymentElement.mount(dom.paymentElementContainer);
 
         paymentElement.on('ready', () => {
+            dom.nextBtn.disabled = false;
+            dom.nextBtn.innerHTML = originalText;
             dom.submitBtn.disabled = false;
         });
 
         paymentElement.on('error', (event) => {
             UI.showToast(event.error.message, true);
+            dom.nextBtn.disabled = false;
+            dom.nextBtn.innerHTML = originalText;
             currentStep = 1;
             updateStepDisplay();
         });
 
     } catch (error) {
         UI.showToast(error.message || "Payment initialization failed.", true);
+        dom.nextBtn.disabled = false;
+        dom.nextBtn.innerHTML = originalText;
         currentStep = 1;
         updateStepDisplay();
     }
@@ -315,7 +318,6 @@ function hideModal() {
 }
 
 function init() {
-    // init jest teraz pusty, cała logika przeniesiona do showModal/hideModal
 }
 
 function translateUI() {
