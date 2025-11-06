@@ -26,8 +26,32 @@ function cacheDOM() {
         passwordInput: document.getElementById('flPassword'),
         confirmPasswordInput: document.getElementById('flConfirmPassword'),
         emailDisplay: document.querySelector('.fl-email-display'),
+        nameError: document.getElementById('flNameError'),
+        passwordError: document.getElementById('flPasswordError'),
     };
 }
+
+function showLocalError(step, messageKey, isRawMessage = false) {
+    hideLocalErrors();
+    const message = isRawMessage ? messageKey : Utils.getTranslation(messageKey);
+    let errorEl;
+    if (step === 1) {
+        errorEl = dom.nameError;
+    } else if (step === 2) {
+        errorEl = dom.passwordError;
+    }
+
+    if (errorEl && message) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
+}
+
+function hideLocalErrors() {
+    if (dom.nameError) dom.nameError.style.display = 'none';
+    if (dom.passwordError) dom.passwordError.style.display = 'none';
+}
+
 
 function updateStepDisplay() {
     if (!dom.modal) return;
@@ -67,19 +91,24 @@ function handlePrevStep() {
 }
 
 function validateStep(step) {
+    hideLocalErrors();
     if (step === 1) { // Krok Imię/Nazwisko
         if (!dom.firstNameInput.value.trim() || !dom.lastNameInput.value.trim()) {
-            UI.showAlert(Utils.getTranslation('errorMissingNames'), true); // POPRAWIONO KLUCZ
+            showLocalError(1, 'errorMissingNames');
             return false;
         }
     }
     if (step === 2) { // Krok Hasło
+        if (!dom.passwordInput.value) {
+            showLocalError(2, 'errorPasswordRequired');
+            return false;
+        }
         if (dom.passwordInput.value.length < 8) {
-            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
+            showLocalError(2, 'errorMinPasswordLength');
             return false;
         }
         if (dom.passwordInput.value !== dom.confirmPasswordInput.value) {
-            UI.showAlert(Utils.getTranslation('errorPasswordsMismatch'), true); // POPRAWIONO KLUCZ
+            showLocalError(2, 'errorPasswordsMismatch');
             return false;
         }
     }
@@ -102,8 +131,6 @@ function collectData(step) {
 async function handleFormSubmit(e) {
     e.preventDefault();
 
-    // ZAWSZE zbierz dane z ostatniego kroku (Krok 2: Hasło) PRZED walidacją i wysłaniem.
-    // W tej funkcji walidujemy i zbieramy DANE Z CAŁEGO PROFILU (zebrane w krokach 0 i 1 oraz teraz krok 2).
     if (!validateStep(currentStep)) return;
     collectData(currentStep);
 
@@ -112,40 +139,24 @@ async function handleFormSubmit(e) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
-    // WALIDACJA PO ZBIERANIU DANYCH:
-    if (currentStep === 2) {
-        // Dodatkowa, niezbędna walidacja hasła, której brakuje, gdy pomijany jest krok 1.
-        if (formData.new_password.length < 8) {
-            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-            return;
-        }
-    }
-
-    // Dalsza logika formularza jest poprawna:
     try {
-        // ZMIANA: Wysyłamy jako standardowy formularz, a nie JSON
         const result = await authManager.ajax('tt_complete_profile', formData);
         if (result.success) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
-            // NOWE: Emitujemy zdarzenie user:login, aby odświeżyć UI i potencjalnie zamknąć login panel
             State.emit('user:login', { userData: updatedUser });
             UI.showToast(Utils.getTranslation('profileUpdateSuccess'));
             hideModal();
-            // Reset form state for next time
             currentStep = 0;
             formData = {};
             updateStepDisplay();
             dom.form.reset();
 
         } else {
-            // FIX: Złap błąd z komunikatu serwera i wyświetl
             throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError'));
         }
     } catch (error) {
-        UI.showAlert(error.message || Utils.getTranslation('genericError'), true);
+        showLocalError(currentStep, error.message || Utils.getTranslation('genericError'), true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
@@ -191,18 +202,20 @@ function showProfileCompletionModal() {
     if (!dom.modal) return;
     translateUI();
 
-    // FIX 2: Ustawienie domyślnego stanu: zgoda zaznaczona, język polski
     dom.consentCheckbox.checked = true;
-    dom.langOptionsContainer.classList.add('visible'); // Pokaż opcje językowe
+    dom.langOptionsContainer.classList.add('visible');
     dom.langOptions.forEach(opt => {
         opt.classList.remove('active');
-        if (opt.dataset.lang === 'pl') opt.classList.add('active'); // Domyślnie PL
+        if (opt.dataset.lang === 'pl') opt.classList.add('active');
     });
 
     const userEmail = State.get('currentUser')?.email || '';
     if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
 
-    UI.openModal(dom.modal);
+    UI.openModal(dom.modal, {
+        isPersistent: true,
+        onClose: null
+    });
     updateStepDisplay();
 }
 
@@ -211,10 +224,85 @@ function hideModal() {
     UI.closeModal(dom.modal);
 }
 
+function setupKeyboardShift() {
+    const content = dom.modal?.querySelector('.fl-modal-content-wrapper');
+    if (!content) return;
+
+    const inputsToObserve = [dom.passwordInput, dom.confirmPasswordInput];
+
+    const calculateShift = (inputEl) => {
+        if (typeof window.visualViewport === 'undefined') return 0;
+        const inputRect = inputEl.getBoundingClientRect();
+        const viewportBottom = window.visualViewport.height;
+        const safeMargin = 20;
+        const expectedBottom = viewportBottom - safeMargin;
+        if (inputRect.bottom > expectedBottom) {
+            const shiftNeeded = inputRect.bottom - expectedBottom;
+            return -shiftNeeded;
+        }
+        return 0;
+    };
+
+    const handleFocus = (e) => {
+        setTimeout(() => {
+            if (e.target.closest('.fl-step.active') === null) return;
+            let shift = calculateShift(e.target);
+            const topLimit = 20;
+            const currentTop = content.getBoundingClientRect().top;
+            if (currentTop + shift < topLimit) {
+                shift = topLimit - currentTop;
+            }
+            if (shift !== 0) {
+                content.style.transition = 'transform 0.3s ease-out';
+                content.style.transform = `translateY(${shift}px)`;
+            }
+        }, 150);
+    };
+
+    const handleBlur = () => {
+        content.style.transform = 'translateY(0)';
+        content.style.transition = '';
+    };
+
+    inputsToObserve.forEach(input => {
+        if (input) {
+            input.addEventListener('focus', handleFocus);
+            input.addEventListener('blur', handleBlur);
+        }
+    });
+
+    window.visualViewport?.addEventListener('resize', () => {
+        if (dom.modal.classList.contains('visible') && window.visualViewport.height === window.innerHeight) {
+            handleBlur();
+        }
+    });
+}
+
 function init() {
     cacheDOM();
     if (dom.modal) {
         setupEventListeners();
+        setupKeyboardShift();
+    }
+}
+
+function enforceModalIfIncomplete(userData) {
+    if (!userData || userData.is_profile_complete === undefined) {
+        return;
+    }
+
+    if (userData && !userData.is_profile_complete) {
+        document.body.classList.add('modal-enforced');
+        document.getElementById("preloader")?.classList.add("preloader-hiding");
+        document.getElementById("webyx-container")?.classList.add("ready");
+        showProfileCompletionModal();
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+            appFrame.style.pointerEvents = 'none';
+        }
+    } else {
+        document.body.classList.remove('modal-enforced');
+        document.getElementById("app-frame")?.style.removeProperty('pointer-events');
     }
 }
 
@@ -222,11 +310,10 @@ export const FirstLoginModal = {
     init,
     showProfileCompletionModal,
     checkProfileAndShowModal: (userData) => {
-        // ✅ FIX: Re-cache DOM just in case it wasn't ready during initial init.
-        // This makes the call much more robust.
         cacheDOM();
         if (userData && !userData.is_profile_complete) {
-            showProfileCompletionModal();
+            enforceModalIfIncomplete(userData);
         }
-    }
+    },
+    enforceModalIfIncomplete
 };

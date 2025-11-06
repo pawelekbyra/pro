@@ -3,10 +3,11 @@
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1, minimum-scale=1, interactive-widget=overlays-content">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: data: blob:; worker-src 'self' blob:; script-src 'self' 'unsafe-inline' https: blob:">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: data: blob:; worker-src 'self' blob:; script-src 'self' 'unsafe-inline' https: blob:"> -->
 
     <meta name="description" content="Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.">
     <meta name="theme-color" content="#000000">
+    <meta property="og:image" content="<?php echo get_template_directory_uri(); ?>/open.jpg">
     <link rel="manifest" href="<?php echo get_template_directory_uri(); ?>/manifest.json">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 

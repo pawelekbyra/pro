@@ -131,29 +131,25 @@ export const Config = {
           en: "You will receive login details for the patron section to the provided email."
       },
       tippingStep2Desc: {
-          pl: "Wybierz kwotę, którą chcesz wesprzeć projekt.",
-          en: "Choose the amount you want to support the project with."
+          pl: "Wpisz kwotę napiwku",
+          en: "Enter the tip amount"
       },
       tippingAmountPlaceholder: {
           pl: "Wpisz kwotę",
           en: "Enter amount"
       },
       tippingAmountHint: {
-          pl: "Minimalna kwota to 1 EUR. Dziękujemy za każde wsparcie!",
-          en: "The minimum amount is 1 EUR. Thank you for all your support!"
+          pl: "",
+          en: ""
       },
       tippingStep3Desc: {
-          pl: "Przekierowanie do płatności...",
-          en: "Redirecting to payment..."
+          pl: "Wybierz metodę napiwkowania",
+          en: "Choose your tipping method"
       },
-      tippingRedirectHint: {
-          pl: "Za chwilę zostaniesz przekierowany do bezpiecznej bramki płatności Stripe.",
-          en: "You will be redirected to the secure Stripe payment gateway shortly."
+      profileAccessAlert: {
+        pl: "Zaloguj się, aby zobaczyć profil.",
+        en: "Log in to view the profile.",
       },
-    profileAccessAlert: {
-      pl: "Zaloguj się, aby zobaczyć profil.",
-      en: "Log in to view the profile.",
-    },
       tippingPrev: {
           pl: "Wstecz",
           en: "Back"
@@ -163,20 +159,56 @@ export const Config = {
           en: "ENTER"
       },
       tippingSubmit: {
-          pl: "Przejdź do płatności",
+          pl: "ENTER!",
           en: "Proceed to Payment"
       },
+      tippingPay: {
+        pl: "ENTER!",
+        en: "Pay!"
+      },
       tippingSuccessMessage: {
-        pl: "Dziękujemy za napiwek w wysokości {amount} EUR!",
-        en: "Thank you for your {amount} EUR tip!",
+        pl: "Dziękujemy za napiwek w wysokości {amount} {currency}!",
+        en: "Thank you for your {amount} {currency} tip!",
+      },
+      errorEmailRequired: {
+        pl: "Adres e-mail jest wymagany.",
+        en: "Email address is required."
+      },
+      errorTermsNotAccepted: {
+        pl: "Musisz zaakceptować regulamin.",
+        en: "You must accept the terms and conditions."
+      },
+      tippingStep4Desc: {
+        pl: "Dziękujemy! Trwa weryfikacja Twojej płatności.",
+        en: "Thank you! Your payment is being verified."
+      },
+      tippingProcessingHint: {
+        pl: "To może potrwać chwilę...",
+        en: "This may take a moment..."
       },
       errorInvalidEmail: {
         pl: "Proszę podać poprawny adres email.",
         en: "Please provide a valid email address.",
       },
       errorMinTipAmount: {
-        pl: "Minimalna kwota napiwku to 1 EUR.",
-        en: "The minimum tip amount is 1 EUR.",
+        pl: "Minimalna kwota napiwku to {minAmount} {currency}.",
+        en: "The minimum tip amount is {minAmount} {currency}.",
+      },
+      tippingAcceptTerms: {
+        pl: "Akceptuję <a href=\"#\" data-action=\"show-terms\" style=\"color: var(--accent-color); text-decoration: underline;\">Regulamin i Politykę Prywatności</a>",
+        en: "I accept the <a href=\"#\" data-action=\"show-terms\" style=\"color: var(--accent-color); text-decoration: underline;\">Terms and Privacy Policy</a>"
+      },
+      tippingTermsTitle: {
+        pl: "Regulamin i Polityka Prywatności",
+        en: "Terms and Privacy Policy"
+      },
+      tippingTermsContent: {
+        pl: "<p><strong>1. Definicje</strong><br>Napiwek – dobrowolna, bezzwrotna wpłata pieniężna przekazywana przez Użytkownika na rzecz Twórcy jako forma uznania za jego pracę, niebędąca zapłatą za jakikolwiek produkt, usługę czy dostęp do treści.</p><p><strong>2. Charakter Napiwków</strong><br>Użytkownik przyjmuje do wiadomości i akceptuje, że wszystkie przekazywane napiwki są dobrowolne i nie podlegają zwrotowi. Przekazanie napiwku nie rodzi żadnego zobowiązania po stronie Twórcy i nie stanowi podstawy do roszczeń o dostęp do ekskluzywnych treści, usług czy produktów.</p><p><strong>3. Polityka Prywatności</strong><br>W przypadku podania adresu e-mail, jest on wykorzystywany wyłącznie w celu założenia konta w serwisie, co umożliwia śledzenie historii wsparcia. Nie udostępniamy Twojego adresu e-mail stronom trzecim w celach marketingowych.</p><p><strong>4. Postanowienia końcowe</strong><br>Korzystając z funkcji napiwków, potwierdzasz, że przeczytałeś, zrozumiałeś i w pełni akceptujesz powyższy regulamin.</p>",
+        en: "<p><strong>1. Definitions</strong><br>Tip – a voluntary, non-refundable payment of money made by the User to the Creator as a form of appreciation for their work, not as payment for any product, service, or access to content.</p><p><strong>2. Nature of Tips</strong><br>The User acknowledges and agrees that all tips are voluntary and non-refundable. Tipping does not create any obligation on the part of the Creator and does not form the basis for claims for access to exclusive content, services, or products.</p><p><strong>3. Privacy Policy</strong><br>If an email address is provided, it is used solely for the purpose of creating an account on the service, which allows for tracking support history. We do not share your email address with third parties for marketing purposes.</p><p><strong>4. Final Provisions</strong><br>By using the tipping feature, you confirm that you have read, understood, and fully accept the above terms and conditions.</p>"
+      },
+      tippingTermsBackButton: {
+        pl: "Powrót",
+        en: "Back"
       },
       noComments: "Brak komentarzy. Bądź pierwszy!",
       commentSortTriggerText: "Sortuj według: ",
@@ -196,7 +228,7 @@ export const Config = {
       accountModalTitlePassword: "Hasło",
       accountModalTitleDelete: "Usuń konto",
       avatarEditBtnTitle: "Zmień avatar",
-      patronBadgeText: "Patron Miłości",
+      patronBadgeText: "Patron",
       personalDataHeader: "Dane osobowe",
       firstNameLabel: "Imię",
       firstNamePlaceholder: "Twoje imię",
@@ -307,6 +339,14 @@ export const Config = {
       timeMinute: 'm',
       timeHour: 'h',
       timeDay: 'd',
+      crowdfundingTitle: "Wspieraj Ting Tong",
+      crowdfundingSubtitle: "i dołącz do grona Patronów",
+      crowdfundingGoalLabel: "Cel: <strong>{collected} z {goal} PLN</strong> ({percentage}%)",
+      crowdfundingPremiereLabel: "Premiera już",
+      crowdfundingCountdownLabel: "Pozostało",
+      crowdfundingSupportersLabel: "Patronów",
+      crowdfundingGoalStatLabel: "Cel",
+      crowdfundingCtaButton: "Zostań Patronem",
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -401,7 +441,7 @@ export const Config = {
       accountModalTitlePassword: "Password",
       accountModalTitleDelete: "Delete Account",
       avatarEditBtnTitle: "Change avatar",
-      patronBadgeText: "Patron of Love",
+      patronBadgeText: "Patron",
       personalDataHeader: "Personal Data",
       firstNameLabel: "First Name",
       firstNamePlaceholder: "Your first name",
@@ -503,6 +543,14 @@ export const Config = {
       timeMinute: 'm',
       timeHour: 'h',
       timeDay: 'd',
+      crowdfundingTitle: "Support Ting Tong",
+      crowdfundingSubtitle: "and join the Patrons",
+      crowdfundingGoalLabel: "Goal: <strong>{collected} of {goal} PLN</strong> ({percentage}%)",
+      crowdfundingPremiereLabel: "Premiere on",
+      crowdfundingCountdownLabel: "Time left",
+      crowdfundingSupportersLabel: "Patrons",
+      crowdfundingGoalStatLabel: "Goal",
+      crowdfundingCtaButton: "Become a Patron",
     }, // KONIEC 'en'
   },
 };

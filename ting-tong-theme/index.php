@@ -8,67 +8,6 @@
 get_header();
 ?>
 
-<!-- === Tipping Modal (New Elegant Version) === -->
-<div id="tippingModal" class="elegant-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="elegant-modal-content-wrapper">
-        <form id="tippingForm" class="elegant-modal-content">
-            <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle"></h2>
-                <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
-                <div class="elegant-modal-progress-bar-container">
-                    <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
-                </div>
-            </div>
-
-            <div class="elegant-modal-body" id="tippingBody">
-                <!-- Krok 1: E-mail i zgoda -->
-                <div class="elegant-modal-step" data-step="0">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc"></p>
-                    <div class="elegant-modal-fields-container">
-                        <label class="elegant-modal-preference-row">
-                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel"></span>
-                            <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
-                        </label>
-                        <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
-                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="">
-                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Krok 2: Wybór kwoty -->
-                <div class="elegant-modal-step" data-step="1">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
-                    <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
-                        </div>
-                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
-                    </div>
-                </div>
-
-                <!-- Krok 3: Przekierowanie do płatności -->
-                <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
-                    <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
-                        <div class="loading-spinner large"></div>
-                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="elegant-modal-footer">
-                <div class="elegant-modal-footer-buttons">
-                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
-                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- === First Login Modal (NEW & IMPROVED) === -->
 <div id="firstLoginModal" class="fl-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="fl-modal-content-wrapper">
@@ -229,7 +168,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-author-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-public-profile" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -254,9 +193,10 @@ get_header();
                         <div class="progress-bar-handle"></div>
                     </div>
                     <div class="text-info">
-                        <div class="slide-meta-line">
-                             <strong class="author-name"></strong>
-                             <span class="slide-title"></span>
+                        <h3 class="slide-title"></h3>
+                        <div class="slide-author-line">
+                            <span class="author-label">autor:</span>
+                            <span class="author-name"></span>
                         </div>
                         <p class="slide-description"></p>
                     </div>
@@ -264,41 +204,6 @@ get_header();
             </div>
         </div>
     </template>
-
-    <template id="comment-template">
-        <div class="comment-item" data-comment-id="">
-            <div class="comment-avatar">
-                <img src="" alt="Avatar">
-            </div>
-            <div class="comment-content">
-                <div class="comment-header">
-                    <span class="comment-author"></span>
-                    <span class="comment-timestamp"></span>
-                </div>
-                <p class="comment-text"></p>
-                <div class="comment-image-attachment" style="display: none;">
-                    <img src="" class="comment-image" alt="Comment image attachment">
-                </div>
-                <div class="comment-actions">
-                    <button class="comment-like-btn" data-action="toggle-comment-like">
-                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    </button>
-                    <span class="comment-like-count">0</span>
-                    <button class="comment-reply-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
-                </div>
-            </div>
-            <div class="comment-options" style="display: none;">
-                <button class="comment-options-trigger" data-action="toggle-comment-options">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-                </button>
-                <div class="comment-options-menu">
-                    <button data-action="edit-comment" data-translate-key="commentEdit">Edytuj</button>
-                    <button data-action="delete-comment" data-translate-key="commentDelete">Usuń</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
     <div id="webyx-container" class="swiper">
         <div class="swiper-wrapper">
         </div>
@@ -308,9 +213,7 @@ get_header();
         <span id="alertText"></span>
     </div>
 </div>
-
-<!-- Comments Modal -->
-<div id="comments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title" aria-hidden="true">
+<div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" data-translate-aria-label="commentsModalTitle" aria-label="Komentarze" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
         <div class="modal-header">
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
@@ -326,7 +229,7 @@ get_header();
                     </div>
                 </div>
             </div>
-            <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
+            <button class="modal-close-btn" data-action="close-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
         <div class="modal-body">
             <!-- Comments will be rendered here -->
@@ -652,7 +555,6 @@ get_header();
         </div>
     </div>
 </div>
-
 <div id="welcome-modal" class="modal-overlay welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title" aria-hidden="true">
     <div class="modal-content welcome-modal-content">
         <div class="welcome-icon-wrapper">

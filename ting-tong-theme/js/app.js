@@ -11,6 +11,7 @@ import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
 import { CommentsModal } from './modules/comments-modal.js';
+import { ProfileModal } from './modules/profile-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -170,9 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
-        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
-        FirstLoginModal.checkProfileAndShowModal(data.userData);
+        // Wymuś modal, jeśli potrzebny.
+        FirstLoginModal.enforceModalIfIncomplete(data.userData);
       });
 
       // Listener dla wylogowania
@@ -197,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.on('state:change:currentLang', ({ newValue }) => {
         console.log(`Language changed to: ${newValue}`);
         UI.updateTranslations();
+        TippingModal.updateLanguage();
       });
     }
 
@@ -211,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
+          FirstLoginModal.enforceModalIfIncomplete(userData);
         } else {
           console.log('User is not logged in');
         }
@@ -441,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
         FirstLoginModal.init();
         TippingModal.init();
         CommentsModal.init();
+        ProfileModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
@@ -465,9 +468,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
+      mockBtn.textContent = 'DEBUG: Pokaż First Login Modal';
+      mockBtn.removeEventListener('click', () => {}); // Usuń stary listener TippingModal
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
+        // 1. Mockuj logowanie jako użytkownik z niekompletnym profilem
+        authManager.mockLogin({
+          is_profile_complete: false,
+          email: 'mock_user_for_fl@test.com'
+        });
         UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+
+        // 2. Wymuś otwarcie modala bezpośrednio, używając danych z mocka
+        const userData = State.get('currentUser');
+        if (userData) {
+          FirstLoginModal.enforceModalIfIncomplete(userData);
+        }
       });
     }
     // Koniec LOGIKA MOCK BUTTON
