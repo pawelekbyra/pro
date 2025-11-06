@@ -125,13 +125,15 @@ const activeModals = new Set();
 
 function openModal(modal, options = {}) {
     if (!modal) {
-        console.error("Attempted to open a null modal element."); // Dodany log dla pewności
+        console.error("Attempted to open a null modal element.");
         return;
     }
 
-    // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
-    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
-    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
+    modal.style.display = 'flex';
+    modal.classList.remove("is-hiding");
+    if(options.animationClass) {
+        modal.classList.remove(options.animationClass);
+    }
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
@@ -150,23 +152,19 @@ function openModal(modal, options = {}) {
         startCountdown();
     }
 
-    modal.classList.add('visible');
+    // Delay adding the 'visible' class to allow the display property to take effect.
+    requestAnimationFrame(() => {
+        modal.classList.add('visible');
+        if (options.animationClass) {
+            modal.classList.add(options.animationClass);
+        }
+    });
+
     activeModals.add(modal);
+    document.body.style.overflow = 'hidden';
 
-    if (activeModals.size === 1) {
-        document.body.style.overflow = 'hidden';
-    }
-
-    // ... reszta kodu bez zmian ...
-
-    if (options.onOpen) {
-        options.onOpen();
-    }
-
-    // Store the onClose callback on the element itself
-    if (options.onClose) {
-        modal.onCloseCallback = options.onClose;
-    }
+    if (options.onOpen) options.onOpen();
+    if (options.onClose) modal.onCloseCallback = options.onClose;
 
     State.set("lastFocusedElement", document.activeElement);
     DOM.container.setAttribute("aria-hidden", "true");
@@ -176,17 +174,17 @@ function openModal(modal, options = {}) {
     modal._focusTrapDispose = trapFocus(modal);
 }
 
-function closeModal(modal) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+function closeModal(modal, options = {}) {
+    if (!modal || !activeModals.has(modal)) return;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
-
-    modal.classList.add("is-hiding");
+    const hidingClass = options.animationClass || 'is-hiding';
+    modal.classList.add(hidingClass);
     modal.setAttribute("aria-hidden", "true");
 
     const cleanup = () => {
-        modal.removeEventListener("transitionend", cleanup);
-        modal.classList.remove("visible", "is-hiding");
+        modal.removeEventListener("animationend", cleanup);
+        modal.classList.remove("visible", hidingClass);
+        modal.style.display = 'none';
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
@@ -197,33 +195,20 @@ function closeModal(modal) {
 
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
+            DOM.container.removeAttribute("aria-hidden");
         }
 
-        DOM.container.removeAttribute("aria-hidden");
-        State.get("lastFocusedElement")?.focus();
+        if(!options.keepFocus) {
+             State.get("lastFocusedElement")?.focus();
+        }
 
-        // Execute and clear the onClose callback
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
             delete modal.onCloseCallback;
         }
-
-        if (modal.id === "commentsModal") {
-            State.set("replyingToComment", null, true);
-            const replyContext = document.querySelector(".reply-context");
-            if (replyContext) replyContext.style.display = "none";
-            if (typeof UI.removeCommentImage === 'function') UI.removeCommentImage();
-            const commentInput = document.querySelector("#comment-input");
-            if (commentInput) commentInput.value = "";
-        }
     };
 
-    if (isAnimated) {
-        modal.addEventListener("transitionend", cleanup, { once: true });
-        setTimeout(cleanup, 500); // Fallback
-    } else {
-        cleanup();
-    }
+    modal.addEventListener("animationend", cleanup, { once: true });
 }
 
 function updateLikeButtonState(likeButton, liked, count) {

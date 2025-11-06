@@ -347,10 +347,9 @@ function resetModalState() {
     updateStepDisplay();
 }
 
-function showModal() {
+function showModal(options = {}) {
     cacheDOM();
 
-    // FIX: Poprawna inicjalizacja obiektu Stripe
     if (!stripe && window.Stripe) {
         const stripePk = (typeof window.TingTongData !== 'undefined' && window.TingTongData.stripePk) || null;
         if (!stripePk) {
@@ -374,10 +373,10 @@ function showModal() {
     if(dom.emailInput) dom.emailInput.value = currentUser?.email || '';
     if (dom.amountInput) {
         dom.amountInput.value = '';
-        dom.amountInput.placeholder = ' '; // Ensure placeholder is just a space for CSS selectors to work
+        dom.amountInput.placeholder = ' ';
     }
 
-    UI.openModal(dom.modal);
+    UI.openModal(dom.modal, options);
     updateStepDisplay();
 }
 
