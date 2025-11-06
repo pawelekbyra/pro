@@ -4171,7 +4171,7 @@ body,
    ========================================================================== */
 
 #comments-modal-container.modal-overlay {
-  align-items: flex-end;
+  align-items: flex-end !important; /* FIX: Override generic centering for bottom-sheet style */
   z-index: 10005;
   transition: visibility 0.3s ease-out;
 }
