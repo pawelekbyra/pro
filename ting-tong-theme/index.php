@@ -13,7 +13,7 @@ get_header();
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle"></h2>
+                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
                 <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
@@ -23,15 +23,15 @@ get_header();
             <div class="elegant-modal-body" id="tippingBody">
                 <!-- Krok 1: E-mail i zgoda -->
                 <div class="elegant-modal-step" data-step="0">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc"></p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Założyć konto Patrona? 🏆</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
-                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel"></span>
+                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">No raczej!</span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
-                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="">
-                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
+                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na ktory otrzymasz klucze logowania)">
+                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail otrzymasz dane dostępu do logowania do sekcji dla patronów.</p>
                         </div>
                         <div id="tippingStep0Error" class="elegant-modal-error"></div>
                     </div>
@@ -39,11 +39,11 @@ get_header();
 
                 <!-- Krok 2: Wybór kwoty -->
                 <div class="elegant-modal-step" data-step="1">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc"></p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wpisz kwotę napiwku</p>
                     <div class="elegant-modal-fields-container">
                         <div class="tipping-amount-container">
                             <div class="amount-input-wrapper">
-                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" placeholder=" " min="1" step="any">
+                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" placeholder=" " min="1" step="any" data-translate-placeholder="tippingAmountPlaceholder">
                                 <span class="amount-placeholder-zero">0</span>
                             </div>
                             <div class="tipping-currency-wrapper">
@@ -59,6 +59,7 @@ get_header();
                         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
                             <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
                             <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;" data-translate-key="tippingAcceptTerms">
+                                Akceptuję Regulamin i Politykę Prywatności
                             </label>
                         </div>
                         <div id="tippingStep1Error" class="elegant-modal-error"></div>
@@ -68,7 +69,7 @@ get_header();
 
                 <!-- Krok 3: Płatność Stripe -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc"></p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Wybierz metodę napiwkowania</p>
                     <div id="payment-element">
                         <!-- Stripe Payment Element will be inserted here -->
                     </div>
@@ -77,26 +78,27 @@ get_header();
 
                 <!-- Krok 4: Przetwarzanie płatności -->
                 <div class="elegant-modal-step" data-step="3">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc"></p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc">Dziękujemy! Trwa weryfikacja Twojej płatności.</p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
-                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingProcessingHint"></p>
+                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingProcessingHint">To może potrwać chwilę...</p>
                     </div>
                 </div>
 
                 <!-- Step 5 (was 4): Regulamin -->
                 <div class="elegant-modal-step" data-step="4" id="terms-step">
+                    <h3 class="elegant-modal-title" data-translate-key="tippingTermsTitle">Regulamin i Polityka Prywatności</h3>
                     <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
                     </div>
-                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton"></button>
+                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton">Powrót</button>
                 </div>
             </div>
 
             <div class="elegant-modal-footer">
                 <div class="elegant-modal-footer-buttons">
-                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev"></button>
-                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext"></button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit"></button>
+                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
+                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
+                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingPay">ENTER!</button>
                 </div>
             </div>
         </form>
@@ -746,19 +748,6 @@ get_header();
     <div class="modal-content">
         <button class="modal-close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
         <div class="modal-body" id="infoModalBody">
-            <?php
-            // Ta sekcja PHP jest już obecna w kodzie, nie ma potrzeby jej duplikować.
-            // Zapewnia ona, że dane są dostępne do wyświetlenia.
-            if (!isset($crowdfunding_data)) {
-                $crowdfunding_data = tt_get_crowdfunding_data();
-                $goal_eur = $crowdfunding_data['goal_eur'];
-                $collected_eur = $crowdfunding_data['collected_eur'];
-                $percentage = $crowdfunding_data['percentage'];
-                $supporters = $crowdfunding_data['supporters'];
-                $pln_goal = $crowdfunding_data['pln_goal'];
-                $pln_collected = $crowdfunding_data['pln_collected'];
-            }
-            ?>
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
                     <h2 id="info-modal-title" class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspieraj Ting Tong</h2>
