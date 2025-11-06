@@ -9,6 +9,41 @@ function setPwaModule(pwaModule) {
   PWA_MODULE = pwaModule;
 }
 
+let countdownInterval = null;
+
+function startCountdown() {
+  const countdownElement = document.getElementById('countdown-timer');
+  if (!countdownElement) return;
+
+  // Set a fixed end date for the crowdfunding campaign
+  const endDate = new Date('2025-12-31T23:59:59').getTime();
+
+  const updateCountdown = () => {
+    const now = new Date().getTime();
+    const distance = endDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownElement.textContent = "Zakończono";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdownElement.textContent =
+      `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
 let selectedCommentImage = null;
 
 const DOM = {};
@@ -106,6 +141,10 @@ function openModal(modal, options = {}) {
                 titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
             }
         }
+    }
+
+    if (modal.id === 'infoModal') {
+        startCountdown();
     }
 
     modal.classList.add('visible');
