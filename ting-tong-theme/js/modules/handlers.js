@@ -532,23 +532,17 @@ export const Handlers = {
         const tippingModal = document.getElementById('tippingModal');
 
         if (infoModal && tippingModal) {
-            // 1. Add class to slide out info modal
+            // Start both animations at the same time
             infoModal.classList.add('slide-out-left');
 
-            // 2. After a short delay, hide the info modal and show the tipping modal with animation
+            tippingModal.classList.add('slide-in-right');
+            TippingModal.showModal(); // This makes the modal visible so the animation can play
+
+            // After the animation duration, clean up classes
             setTimeout(() => {
                 infoModal.classList.remove('visible', 'slide-out-left');
-
-                // Prepare tipping modal for animation
-                tippingModal.classList.add('slide-in-right');
-                TippingModal.showModal(); // This function now just makes it visible
-
-                // 3. Remove animation class after it completes
-                setTimeout(() => {
-                    tippingModal.classList.remove('slide-in-right');
-                }, 500); // Animation duration
-
-            }, 500); // Animation duration
+                tippingModal.classList.remove('slide-in-right');
+            }, 500); // Must match the CSS animation duration
         } else {
             // Fallback for safety
             UI.closeModal(infoModal);
