@@ -170,9 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
-        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
-        FirstLoginModal.checkProfileAndShowModal(data.userData);
+        // Wymuś modal, jeśli potrzebny.
+        FirstLoginModal.enforceModalIfIncomplete(data.userData);
       });
 
       // Listener dla wylogowania
@@ -212,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
+          FirstLoginModal.enforceModalIfIncomplete(userData);
         } else {
           console.log('User is not logged in');
         }

@@ -1355,3 +1355,65 @@ break;
 header('HTTP/1.1 200 OK');
 exit();
 }
+
+add_action('wp_ajax_tt_complete_profile', function () {
+// 1. Zabezpieczenia
+check_ajax_referer('tt_ajax_nonce', 'nonce');
+if (!is_user_logged_in()) {
+wp_send_json_error(['message' => 'Musisz być zalogowany, aby uzupełnić profil.'], 401);
+}
+
+$u = wp_get_current_user();
+$user_id = $u->ID;
+
+// 2. Walidacja i pobranie danych
+$first_name = isset($_POST['first_name']) ? sanitize_text_field(wp_unslash($_POST['first_name'])) : '';
+$last_name = isset($_POST['last_name']) ? sanitize_text_field(wp_unslash($_POST['last_name'])) : '';
+$new_password = isset($_POST['new_password']) ? wp_unslash($_POST['new_password']) : '';
+$email_consent = isset($_POST['email_consent']) && $_POST['email_consent'] === 'true' ? 1 : 0;
+$email_language = isset($_POST['email_language']) ? sanitize_text_field($_POST['email_language']) : 'pl';
+
+if (empty($first_name) || empty($last_name)) {
+wp_send_json_error(['message' => 'Imię i nazwisko są wymagane.'], 400);
+}
+if (strlen($new_password) < 8) {
+wp_send_json_error(['message' => 'Hasło musi mieć co najmniej 8 znaków.'], 400);
+}
+
+// 3. Aktualizacja danych użytkownika
+update_user_meta($user_id, 'first_name', $first_name);
+update_user_meta($user_id, 'last_name', $last_name);
+update_user_meta($user_id, 'tt_email_consent', $email_consent);
+update_user_meta($user_id, 'tt_email_language', $email_language);
+
+// Ustawienie display_name
+$display_name = trim($first_name . ' ' . $last_name);
+wp_update_user(['ID' => $user_id, 'display_name' => $display_name]);
+
+// Ustawienie nowego hasła
+wp_set_password($new_password, $user_id);
+
+// 4. Oznacz profil jako kompletny (Kluczowe dla wyłączenia modala przy następnym logowaniu)
+update_user_meta($user_id, 'tt_first_login_completed', 1);
+
+// 5. Przygotowanie danych do odpowiedzi (zgodne z oczekiwaniami frontendu)
+$updated_user_data = [
+'user_id' => (int) $user_id,
+'username' => $u->user_login,
+'email' => $u->user_email,
+'display_name' => $display_name,
+'first_name' => $first_name,
+'last_name' => $last_name,
+'avatar' => get_avatar_url($user_id, ['size' => 96]),
+'is_profile_complete' => true,
+'email_consent' => $email_consent,
+'email_language' => $email_language,
+];
+
+// 6. Zwrócenie sukcesu
+wp_send_json_success([
+'message' => 'Profil został pomyślnie ukończony.',
+'userData' => $updated_user_data,
+'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
+]);
+});

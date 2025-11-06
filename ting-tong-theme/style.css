@@ -5519,3 +5519,16 @@ body,
         transform: translateX(0);
     }
 }
+
+#app-frame[style*="pointer-events: none"] {
+/* Opcjonalnie: wizualna informacja, że tło jest zablokowane */
+filter: blur(5px);
+transition: filter 0.3s ease;
+pointer-events: none; /* Domyślna obsługa przez JS */
+}
+
+/* Wymuszony modal musi być widoczny */
+#firstLoginModal.fl-modal-overlay {
+/* Upewnij się, że modal jest zawsze na wierzchu, nawet z `pointer-events: none` na rodzicu */
+z-index: 10021;
+}
