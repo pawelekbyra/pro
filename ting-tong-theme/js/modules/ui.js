@@ -932,6 +932,48 @@ function closeImageLightbox() {
   document.body.style.overflow = '';
 }
 
+function initCountdown() {
+  const countdownElement = document.getElementById('infoModal');
+  if (!countdownElement) return;
+
+  const daysEl = document.getElementById('days');
+  const hoursEl = document.getElementById('hours');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+
+  if (!daysEl || !hoursEl || !minutesEl || !secondsEl) return;
+
+  // Set a target date (e.g., end of the year)
+  const targetDate = new Date(new Date().getFullYear() + 1, 0, 1).getTime();
+
+  const updateTimer = () => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+          daysEl.textContent = '00';
+          hoursEl.textContent = '00';
+          minutesEl.textContent = '00';
+          secondsEl.textContent = '00';
+          clearInterval(timerInterval);
+          return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      daysEl.textContent = String(days).padStart(2, '0');
+      hoursEl.textContent = String(hours).padStart(2, '0');
+      minutesEl.textContent = String(minutes).padStart(2, '0');
+      secondsEl.textContent = String(seconds).padStart(2, '0');
+  };
+
+  const timerInterval = setInterval(updateTimer, 1000);
+  updateTimer(); // Initial call
+}
+
 function renderComments(comments) {
     const container = DOM.commentsModal.querySelector('.comments-list');
     const emptyState = DOM.commentsModal.querySelector('.comments-empty-state');
@@ -993,6 +1035,7 @@ function renderComments(comments) {
 
 function initGlobalPanels() {
   initEmojiPicker();
+  initCountdown();
 
   // Setup file input handler
   const fileInput = document.querySelector('.comment-image-input');

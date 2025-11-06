@@ -754,6 +754,25 @@ get_header();
                     <p class="crowdfunding-subtitle">Twoje wsparcie to kolejny krok w naszej wspólnej podróży. Dołącz do grona Patronów Miłości i pomóż nam tworzyć przyszłość Ting Tong!</p>
                 </div>
 
+                <div class="timer-section">
+                    <div class="timer-box">
+                        <span class="timer-value" id="days">00</span>
+                        <span class="timer-label">Dni</span>
+                    </div>
+                    <div class="timer-box">
+                        <span class="timer-value" id="hours">00</span>
+                        <span class="timer-label">Godzin</span>
+                    </div>
+                    <div class="timer-box">
+                        <span class="timer-value" id="minutes">00</span>
+                        <span class="timer-label">Minut</span>
+                    </div>
+                    <div class="timer-box">
+                        <span class="timer-value" id="seconds">00</span>
+                        <span class="timer-label">Sekund</span>
+                    </div>
+                </div>
+
                 <div class="progress-section">
                     <div class="progress-bar-wrapper">
                         <div class="progress-bar-fill" style="width: 75%;"></div>
@@ -761,6 +780,7 @@ get_header();
                     </div>
                     <div class="progress-label">
                         <span>Postęp: <strong>75%</strong></span>
+                        <span>Cel: <strong>5,000 PLN</strong></span>
                     </div>
                 </div>
 
@@ -770,21 +790,20 @@ get_header();
                         <span class="stat-label">Zebrano</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">5,000 PLN</span>
-                        <span class="stat-label">Cel</span>
+                        <span class="stat-value" id="patrons-count">128</span>
+                        <span class="stat-label">Patronów</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">128</span>
-                        <span class="stat-label">Wspierających</span>
+                        <span class="stat-value">5,000 PLN</span>
+                        <span class="stat-label">Cel</span>
                     </div>
                 </div>
 
                 <div class="cta-section">
                     <button class="cta-button" data-action="show-tip-jar">
-                        <span class="cta-button-icon">💖</span>
-                        Wesprzyj Projekt
+                        <svg class="tip-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"></rect><path d="M2 10h20"></path><circle cx="18" cy="13" r="2"></circle></svg>
+                        Napiwek
                     </button>
-                    <p class="cta-description">Każda złotówka ma znaczenie. Dziękujemy!</p>
                 </div>
             </div>
         </div>
