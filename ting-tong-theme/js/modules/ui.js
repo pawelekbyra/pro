@@ -175,15 +175,27 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal)) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
 
-    const hidingClass = options.animationClass || 'is-hiding';
+    const animationClass = options.animationClass;
+    const isSlideAnimation = animationClass && animationClass.includes('slide');
+
+    // Use is-hiding for standard fade-out, or a specific class for slide-out
+    const hidingClass = animationClass || 'is-hiding';
     modal.classList.add(hidingClass);
     modal.setAttribute("aria-hidden", "true");
 
+    // For non-slide animations, we also remove 'visible' to trigger the fade-out
+    if (!isSlideAnimation) {
+        modal.classList.remove('visible');
+    }
+
     const cleanup = () => {
+        // Remove both listeners to be safe
         modal.removeEventListener("animationend", cleanup);
-        modal.classList.remove("visible", hidingClass);
+        modal.removeEventListener("transitionend", cleanup);
+
+        modal.classList.remove("visible", "is-hiding", "slide-out-left", "slide-in-right");
         modal.style.display = 'none';
 
         if (modal._focusTrapDispose) {
@@ -198,8 +210,8 @@ function closeModal(modal, options = {}) {
             DOM.container.removeAttribute("aria-hidden");
         }
 
-        if(!options.keepFocus) {
-             State.get("lastFocusedElement")?.focus();
+        if (!options.keepFocus) {
+            State.get("lastFocusedElement")?.focus();
         }
 
         if (typeof modal.onCloseCallback === 'function') {
@@ -208,7 +220,12 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    modal.addEventListener("animationend", cleanup, { once: true });
+    // Listen to the appropriate event based on the animation type
+    const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
+    modal.addEventListener(eventToListen, cleanup, { once: true });
+
+    // Fallback timer to ensure the modal always closes
+    setTimeout(cleanup, 600);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {

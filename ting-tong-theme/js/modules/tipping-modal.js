@@ -65,6 +65,8 @@ function hideLocalErrors() {
 }
 
 function updateStepDisplay(isShowingTerms = false) {
+    const isLoggedIn = State.get('isUserLoggedIn');
+
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
         stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);
@@ -78,9 +80,14 @@ function updateStepDisplay(isShowingTerms = false) {
     const isPaymentStep = currentStep === 2;
     const isProcessingStep = currentStep === 3;
 
-    dom.prevBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
+    // Hide back button for logged in users on the amount step (their first step)
+    if (isLoggedIn && isAmountStep) {
+        dom.prevBtn.style.display = 'none';
+    } else {
+        dom.prevBtn.style.display = (isAmountStep || isPaymentStep) ? 'flex' : 'none';
+    }
 
-    // Obsługa przycisków
+    // Handle button visibility
     dom.nextBtn.style.display = (isEmailStep || isAmountStep) ? 'flex' : 'none';
     dom.submitBtn.style.display = isPaymentStep ? 'flex' : 'none';
 
@@ -365,11 +372,22 @@ function showModal(options = {}) {
     resetModalState();
     translateUI();
 
-    if(dom.createAccountCheckbox) dom.createAccountCheckbox.addEventListener('change', e => {
-        dom.emailContainer.classList.toggle('visible', e.target.checked);
-    });
-
+    const isLoggedIn = State.get('isUserLoggedIn');
     const currentUser = State.get('currentUser');
+
+    if (isLoggedIn) {
+        currentStep = 1; // Skip to amount step
+        formData.email = currentUser?.email || '';
+        formData.create_account = false;
+    } else {
+        currentStep = 0;
+        if(dom.createAccountCheckbox) {
+            dom.createAccountCheckbox.addEventListener('change', e => {
+                dom.emailContainer.classList.toggle('visible', e.target.checked);
+            });
+        }
+    }
+
     if(dom.emailInput) dom.emailInput.value = currentUser?.email || '';
     if (dom.amountInput) {
         dom.amountInput.value = '';

@@ -508,6 +508,7 @@ Text Domain: tingtongtheme
   --bottombar-height: calc(
     var(--bottombar-base-height) + var(--safe-area-bottom)
   );
+  --video-controls-height: 40px;
 }
 * {
   margin: 0;
@@ -987,12 +988,11 @@ body,
   bottom: 100%; /* Na górnej krawędzi bottombar */
   left: 0;
   width: 100%;
-  height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
+  height: 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   z-index: 10060; /* Podniesiony, aby był nad paskiem PWA */
   transition: height 0.2s ease-in-out;
-  transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
 
 /* 2. Usuń stare reguły dla app-frame--pwa-visible - pozostaje bez zmian */
@@ -1051,7 +1051,7 @@ body,
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
 .progress-bar:hover,
 .progress-bar.dragging {
-  height: 6px; /* Zwiększamy wysokość całego paska */
+  height: 4px; /* Zwiększamy wysokość całego paska */
 }
 
 .progress-bar:hover .progress-bar-handle,
@@ -1522,7 +1522,7 @@ body,
 
 #app-frame.hide-ui #alertBox {
   /* ✅ FIX: Dostosowano pozycję w trybie immersyjnym */
-  bottom: calc(var(--safe-area-bottom) + 12px);
+  bottom: calc(var(--video-controls-height) + var(--safe-area-bottom) + 12px);
 }
 
 #alertBox svg {
@@ -1713,6 +1713,7 @@ body,
     font-weight: 700;
     color: #fff;
     margin-bottom: 8px;
+    text-align: center;
 }
 
 .crowdfunding-subtitle {
@@ -2235,7 +2236,7 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(80px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
+  padding-bottom: calc(20px + var(--safe-area-bottom));
   position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elementów */
 }
 
