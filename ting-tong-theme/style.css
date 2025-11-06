@@ -1706,6 +1706,7 @@ body,
 
 .crowdfunding-header {
     margin-bottom: 24px;
+    text-align: center;
 }
 
 .crowdfunding-title {
@@ -5010,7 +5011,7 @@ body,
   display: flex !important;
   align-items: center;
   justify-content: center;
-  z-index: 10020;
+  z-index: 10200;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.4s ease, visibility 0.4s ease;
@@ -5485,7 +5486,9 @@ body,
 #infoModal .cta-button svg {
     width: 32px;
     height: 32px;
-    fill: #fff;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.5;
 }
 
 /* Modal Transition Animations */

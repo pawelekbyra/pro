@@ -175,27 +175,36 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) {
+        // If a callback is provided, ensure it's called even if the modal is already closing.
+        if (options.onCloseComplete) {
+            options.onCloseComplete();
+        }
+        return;
+    }
 
-    const animationClass = options.animationClass;
+    const { animationClass, keepFocus, onCloseComplete } = options;
     const isSlideAnimation = animationClass && animationClass.includes('slide');
+    const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
 
-    // Use is-hiding for standard fade-out, or a specific class for slide-out
-    const hidingClass = animationClass || 'is-hiding';
-    modal.classList.add(hidingClass);
+    modal.classList.add(animationClass || 'is-hiding');
     modal.setAttribute("aria-hidden", "true");
 
-    // For non-slide animations, we also remove 'visible' to trigger the fade-out
     if (!isSlideAnimation) {
         modal.classList.remove('visible');
     }
 
-    const cleanup = () => {
-        // Remove both listeners to be safe
-        modal.removeEventListener("animationend", cleanup);
-        modal.removeEventListener("transitionend", cleanup);
+    const cleanup = (event) => {
+        // Prevent cleanup from running on child element animations
+        if (event && event.target !== modal) {
+            return;
+        }
+
+        // Remove listener to prevent multiple executions
+        modal.removeEventListener(eventToListen, cleanup);
 
         modal.classList.remove("visible", "is-hiding", "slide-out-left", "slide-in-right");
+        if (animationClass) modal.classList.remove(animationClass);
         modal.style.display = 'none';
 
         if (modal._focusTrapDispose) {
@@ -210,22 +219,17 @@ function closeModal(modal, options = {}) {
             DOM.container.removeAttribute("aria-hidden");
         }
 
-        if (!options.keepFocus) {
+        if (!keepFocus) {
             State.get("lastFocusedElement")?.focus();
         }
 
-        if (typeof modal.onCloseCallback === 'function') {
-            modal.onCloseCallback();
-            delete modal.onCloseCallback;
+        // Execute the completion callback if provided
+        if (typeof onCloseComplete === 'function') {
+            onCloseComplete();
         }
     };
 
-    // Listen to the appropriate event based on the animation type
-    const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
     modal.addEventListener(eventToListen, cleanup, { once: true });
-
-    // Fallback timer to ensure the modal always closes
-    setTimeout(cleanup, 600);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
