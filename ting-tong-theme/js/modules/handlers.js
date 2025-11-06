@@ -557,8 +557,11 @@ export const Handlers = {
                 keepFocus: true, // Keep focus within the modal context
                 animationClass: 'slide-out-left'
             });
-            // Animate in the new modal immediately
-            TippingModal.showModal({ animationClass: 'slide-in-right' });
+
+            // Delay the new modal animation to sync with the old one closing
+            setTimeout(() => {
+                TippingModal.showModal({ animationClass: 'slide-in-right' });
+            }, 150); // A slight delay for a smoother "train" effect
         } else {
             // If info modal wasn't open, just open the tipping modal normally
             TippingModal.showModal();
