@@ -558,10 +558,8 @@ export const Handlers = {
                 animationClass: 'slide-out-left'
             });
 
-            // Delay the new modal animation to sync with the old one closing
-            setTimeout(() => {
-                TippingModal.showModal({ animationClass: 'slide-in-right' });
-            }, 150); // A slight delay for a smoother "train" effect
+            // Animate in the new modal simultaneously
+            TippingModal.showModal({ animationClass: 'slide-in-right' });
         } else {
             // If info modal wasn't open, just open the tipping modal normally
             TippingModal.showModal();
