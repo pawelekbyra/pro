@@ -160,6 +160,16 @@ function openModal(modal, options = {}) {
         }
     });
 
+    if (!options.isPersistent) {
+        // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
+        modal.addEventListener('click', function closeOnClick(e) {
+            if (e.target === modal) {
+                closeModal(modal);
+                modal.removeEventListener('click', closeOnClick);
+            }
+        });
+    }
+
     activeModals.add(modal);
     document.body.style.overflow = 'hidden';
 

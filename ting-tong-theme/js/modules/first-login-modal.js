@@ -202,7 +202,11 @@ function showProfileCompletionModal() {
     const userEmail = State.get('currentUser')?.email || '';
     if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
 
-    UI.openModal(dom.modal);
+    UI.openModal(dom.modal, {
+        isPersistent: true, // Nowa flaga w UI.js (patrz niżej)
+        // Zapewnienie, że funkcja zamykająca nie jest wywoływana
+        onClose: null
+    });
     updateStepDisplay();
 }
 
@@ -211,10 +215,119 @@ function hideModal() {
     UI.closeModal(dom.modal);
 }
 
+function setupKeyboardShift() {
+    // Cel: element, który ma być przesuwany (cała zawartość modala)
+    const content = dom.modal?.querySelector('.fl-modal-content-wrapper');
+
+    if (!content) return;
+
+    // Lista pól do obserwowania (inputy hasła)
+    const inputsToObserve = [dom.passwordInput, dom.confirmPasswordInput];
+
+    // Ustalanie optymalnego przesunięcia (tylko jeśli visualViewport jest dostępny)
+    const calculateShift = (inputEl) => {
+        if (typeof window.visualViewport === 'undefined') return 0;
+
+        const inputRect = inputEl.getBoundingClientRect();
+        const viewportBottom = window.visualViewport.height; // Dolna krawędź widocznego obszaru (nad klawiaturą)
+        const safeMargin = 20; // Margines bezpieczeństwa w pikselach
+
+        // Wymagana pozycja, czyli tuż nad klawiaturą z marginesem
+        const expectedBottom = viewportBottom - safeMargin;
+
+        if (inputRect.bottom > expectedBottom) {
+            // Pole jest niżej niż powinno - obliczamy shift w górę
+            const shiftNeeded = inputRect.bottom - expectedBottom;
+            return -shiftNeeded; // Wartość ujemna dla przesunięcia w górę
+        }
+
+        return 0;
+    };
+
+    const handleFocus = (e) => {
+        // Używamy requestAnimationFrame/setTimeout, aby dać klawiaturze czas na pojawienie się
+        // i zaktualizowanie window.visualViewport.height.
+        setTimeout(() => {
+            if (e.target.closest('.fl-step.active') === null) {
+                // Upewnij się, że fokus jest w aktualnie widocznym kroku
+                return;
+            }
+
+            let shift = calculateShift(e.target);
+
+            // Ogranicznik górny: nie przesuwaj powyżej 20px od góry
+            const topLimit = 20;
+            const currentTop = content.getBoundingClientRect().top;
+
+            // Jeśli aktualna pozycja przesunie się za wysoko, dostosuj shift
+            if (currentTop + shift < topLimit) {
+                shift = topLimit - currentTop;
+            }
+
+            if (shift !== 0) {
+                // Stosujemy transformację Y do elementu, który nie jest już animowany
+                content.style.transition = 'transform 0.3s ease-out';
+                content.style.transform = `translateY(${shift}px)`;
+            }
+        }, 150); // Krótkie opóźnienie dla stabilizacji klawiatury
+    };
+
+    const handleBlur = () => {
+        // Wróć do pozycji domyślnej po blur.
+        // Modal i tak ma transform: translateY(0) w stanie .visible, ale to resetuje dynamiczne przesunięcie.
+        content.style.transform = 'translateY(0)';
+        content.style.transition = ''; // Usuń customową transakcję
+    };
+
+    // Dodaj nasłuchiwanie do pól
+    inputsToObserve.forEach(input => {
+        if (input) {
+            input.addEventListener('focus', handleFocus);
+            input.addEventListener('blur', handleBlur);
+        }
+    });
+
+    // Dodatkowy listener do resetowania pozycji na iOS po ukryciu klawiatury
+    window.visualViewport?.addEventListener('resize', () => {
+        if (dom.modal.classList.contains('visible') && window.visualViewport.height === window.innerHeight) {
+            handleBlur();
+        }
+    });
+}
+
 function init() {
     cacheDOM();
     if (dom.modal) {
         setupEventListeners();
+        setupKeyboardShift();
+    }
+}
+
+function enforceModalIfIncomplete(userData) {
+    if (!userData || userData.is_profile_complete === undefined) {
+        // Jeśli nie mamy danych (np. błąd API, co oznacza, że i tak nie jesteśmy zalogowani), nie robimy nic.
+        return;
+    }
+
+    if (userData && !userData.is_profile_complete) {
+        // Zablokuj skrolowanie w tle
+        document.body.classList.add('modal-enforced');
+
+        // Ukryj preloader, aby pokazać UI pod modalem
+        document.getElementById("preloader")?.classList.add("preloader-hiding");
+        document.getElementById("webyx-container")?.classList.add("ready");
+
+        showProfileCompletionModal();
+
+        // KLUCZOWE: Zablokuj interakcje z głównym kontenerem aplikacji
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+            appFrame.style.pointerEvents = 'none';
+        }
+    } else {
+        // W przeciwnym razie upewnij się, że blokada jest usunięta
+        document.body.classList.remove('modal-enforced');
+        document.getElementById("app-frame")?.style.removeProperty('pointer-events');
     }
 }
 
@@ -222,11 +335,10 @@ export const FirstLoginModal = {
     init,
     showProfileCompletionModal,
     checkProfileAndShowModal: (userData) => {
-        // ✅ FIX: Re-cache DOM just in case it wasn't ready during initial init.
-        // This makes the call much more robust.
         cacheDOM();
         if (userData && !userData.is_profile_complete) {
-            showProfileCompletionModal();
+            enforceModalIfIncomplete(userData);
         }
-    }
+    },
+    enforceModalIfIncomplete
 };
