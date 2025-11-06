@@ -13,7 +13,7 @@ get_header();
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa 🤑</h2>
+                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle"></h2>
                 <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
@@ -23,51 +23,79 @@ get_header();
             <div class="elegant-modal-body" id="tippingBody">
                 <!-- Krok 1: E-mail i zgoda -->
                 <div class="elegant-modal-step" data-step="0">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Założyć konto Patrona? 🏆</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc"></p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
-                            <span class="elegant-modal-preference-label">No raczej</span>
+                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel"></span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
-                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na ktory otrzymasz klucze logowania)">
-                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail prześlemy dane do logowania.</p>
+                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="">
+                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint"></p>
                         </div>
+                        <div id="tippingStep0Error" class="elegant-modal-error"></div>
                     </div>
                 </div>
 
                 <!-- Krok 2: Wybór kwoty -->
                 <div class="elegant-modal-step" data-step="1">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc"></p>
                     <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-suggestions">
-                            <button type="button" class="amount-suggestion-btn" data-amount="5">5 PLN</button>
-                            <button type="button" class="amount-suggestion-btn active" data-amount="10">10 PLN</button>
-                            <button type="button" class="amount-suggestion-btn" data-amount="20">20 PLN</button>
-                        </div>
                         <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
+                            <div class="amount-input-wrapper">
+                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" placeholder=" " min="1" step="any">
+                                <span class="amount-placeholder-zero">0</span>
+                            </div>
+                            <div class="tipping-currency-wrapper">
+                                <select id="tippingCurrency" class="tipping-currency-select">
+                                    <option value="pln">PLN</option>
+                                    <option value="eur">EUR</option>
+                                    <option value="usd">USD</option>
+                                    <option value="gbp">GBP</option>
+                                </select>
+                            </div>
                         </div>
-                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
+                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;" data-translate-key="tippingAcceptTerms">
+                            </label>
+                        </div>
+                        <div id="tippingStep1Error" class="elegant-modal-error"></div>
+                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint"></p>
                     </div>
                 </div>
 
-                <!-- Krok 3: Przekierowanie do płatności -->
+                <!-- Krok 3: Płatność Stripe -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc"></p>
+                    <div id="payment-element">
+                        <!-- Stripe Payment Element will be inserted here -->
+                    </div>
+                    <div id="payment-message" class="hidden"></div>
+                </div>
+
+                <!-- Krok 4: Przetwarzanie płatności -->
+                <div class="elegant-modal-step" data-step="3">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc"></p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
-                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
+                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingProcessingHint"></p>
                     </div>
+                </div>
+
+                <!-- Step 5 (was 4): Regulamin -->
+                <div class="elegant-modal-step" data-step="4" id="terms-step">
+                    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
+                    </div>
+                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton"></button>
                 </div>
             </div>
 
             <div class="elegant-modal-footer">
                 <div class="elegant-modal-footer-buttons">
-                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
-                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
+                    <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev"></button>
+                    <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext"></button>
+                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit"></button>
                 </div>
             </div>
         </form>
@@ -192,7 +220,7 @@ get_header();
                             <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
                             <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
                         </button>
-                        <button class="info-button" data-action="open-info-modal">
+                        <button class="info-button glowing-info-button" data-action="open-info-modal">
                            <svg fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
                         </button>
                     </div>
@@ -204,11 +232,8 @@ get_header();
                 </div>
 
                 <div class="replay-overlay" aria-hidden="true">
-                    <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 2v6h-6"/>
-                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
-                        <path d="M3 22v-6h6"/>
-                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                    <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
                     </svg>
                 </div>
 
@@ -420,7 +445,7 @@ get_header();
                             <svg class="badge-icon" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
                             </svg>
-                            <span data-translate-key="patronBadgeText">Patron Miłości</span>
+                            <span data-translate-key="patronBadgeText">Patron</span>
                         </div>
                     </div>
                     <div class="status-message status-success" id="avatarSuccess" style="margin-top: 16px;"></div>
@@ -718,29 +743,49 @@ get_header();
 
 <div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
     <div class="modal-content">
-        <button class="modal-close-btn" data-action="close-modal">&times;</button>
-        <div class="modal-body">
-            <h2 id="info-modal-title">O Projekcie Ting Tong</h2>
-            <p>Witaj w Ting Tong – innowacyjnej aplikacji, która rewolucjonizuje sposób, w jaki twórcy i widzowie wchodzą ze sobą w interakcje. Nasza platforma, zaprojektowana na wzór popularnych aplikacji z krótkimi formami wideo, to nie tylko miejsce do oglądania, ale przede wszystkim do realnego wspierania ulubionych autorów.</p>
+        <button class="modal-close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
+        <div class="modal-body" id="infoModalBody">
+            <div class="crowdfunding-container">
+                <div class="crowdfunding-header">
+                    <h2 id="info-modal-title" class="crowdfunding-title" style="text-align: center; margin-bottom: 5px;">Wspieraj Ting Tong</h2>
+                    <p class="crowdfunding-subtitle" style="font-size: 14px;">i dołącz do grona Patronów</p>
+                </div>
 
-            <h3>Nasza Misja</h3>
-            <p>Celem Ting Tong jest stworzenie ekosystemu, w którym kreatywność jest bezpośrednio nagradzana. Wierzymy, że twórcy zasługują na transparentne i proste narzędzia do monetyzacji swojej pasji, a widzowie powinni mieć możliwość realnego wpływu na rozwój kanałów, które kochają. Chcemy zlikwidować barierę między twórcą a odbiorcą, budując społeczność opartą na wzajemnym szacunku i wsparciu.</p>
+                <div class="progress-section">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" style="width: 75%;"></div>
+                        <div class="progress-bar-sparkle"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span>Cel: <strong>3,750 z 5,000 PLN</strong> (75%)</span>
+                    </div>
+                </div>
 
-            <h3>Kluczowe Funkcje</h3>
-            <ul>
-                <li><strong>Intuicyjny Interfejs:</strong> Przewijaj wideo w pionie, tak jak lubisz. Nasz interfejs jest szybki, płynny i zaprojektowany z myślą o urządzeniach mobilnych.</li>
-                <li><strong>System Napiwków:</strong> Podoba Ci się treść? Okaż swoje wsparcie jednym kliknięciem! Zintegrowany i bezpieczny system napiwków pozwala na błyskawiczne przekazywanie drobnych kwot bezpośrednio do twórcy.</li>
-                <li><strong>Społeczność:</strong> Komentuj, lajkuj i udostępniaj. Bądź częścią aktywnej społeczności skupionej wokół Twoich ulubionych tematów i twórców.</li>
-                <li><strong>Tryb PWA (Progressive Web App):</strong> Zainstaluj Ting Tong na swoim telefonie, aby uzyskać dostęp do dodatkowych funkcji, płynniejszego działania i powiadomień push – wszystko to bez konieczności pobierania aplikacji ze sklepu.</li>
-                <li><strong>Tryb Immersyjny:</strong> Zanurz się w treściach bez rozpraszaczy. Jedno dotknięcie ukrywa interfejs, pozwalając Ci skupić się na tym, co najważniejsze – wideo.</li>
-            </ul>
+                <div class="countdown-section">
+                    <div class="premiere-date-label">Premiera już <br> <span style="font-size: 24px; font-weight: bold; color: white;">1.01.2026</span></div>
+                    <div class="countdown-label">Pozostało</div>
+                    <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
+                    <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
+                </div>
 
-            <h3>Dla Twórców</h3>
-            <p>Jesteś twórcą? Ting Tong oferuje Ci proste narzędzia do zarabiania na swojej pasji. Bez skomplikowanych algorytmów i niejasnych zasad. Po prostu twórz, a Twoi fani zajmą się resztą. Skup się na jakości, a my zapewnimy Ci platformę do jej monetyzacji.</p>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">128</span>
+                        <span class="stat-label">Patronów</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">5,000 PLN</span>
+                        <span class="stat-label">Cel</span>
+                    </div>
+                </div>
 
-            <h3>Dla Widzów</h3>
-            <p>Jako widz, masz realny wpływ. Twoje wsparcie nie tylko motywuje twórców do dalszej pracy, ale także pomaga im inwestować w lepszy sprzęt, rozwijać nowe formaty i poświęcać więcej czasu na to, co robią najlepiej. Każdy napiwek to cegiełka budująca przyszłość niezależnej twórczości w internecie.</p>
-            <p>Dziękujemy, że jesteś z nami. Przewijaj, odkrywaj i wspieraj!</p>
+                <div class="cta-section">
+                    <button class="cta-button" data-action="open-tipping-from-info">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px; fill: white; stroke: none;"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"></rect><path d="M2 10h20"></path><circle cx="18" cy="13" r="2"></circle></svg>
+                        <span>Zostań Patronem</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

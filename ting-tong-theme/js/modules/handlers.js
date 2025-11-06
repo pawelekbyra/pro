@@ -527,6 +527,10 @@ export const Handlers = {
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
+      case "open-tipping-from-info":
+        UI.closeModal(document.getElementById('infoModal'));
+        TippingModal.showModal();
+        break;
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
         break;

@@ -197,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.on('state:change:currentLang', ({ newValue }) => {
         console.log(`Language changed to: ${newValue}`);
         UI.updateTranslations();
+        TippingModal.updateLanguage();
       });
     }
 
@@ -364,9 +365,9 @@ document.addEventListener("DOMContentLoaded", () => {
             slideChange: handleMediaChange,
             click: function(swiper, event) {
               // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
-              // Jeśli tak, zatrzymaj propagację, aby nasz główny handler mógł zadziałać.
+              // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
+              // Główny handler na `document.body` zajmie się resztą.
               if (event.target.closest('[data-action]')) {
-                event.stopPropagation();
                 return;
               }
 
@@ -465,9 +466,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
+      // ZMIEŃ logikę mockBtn na otwieranie TippingModal
+      mockBtn.textContent = 'DEBUG: Pokaż Tipping Modal';
+      mockBtn.removeEventListener('click', (e) => {}); // Usuń stary listener jeśli istnieje
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
-        UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+        // Mockowe dane na potrzeby testu
+        State.set('isUserLoggedIn', true, true);
+        State.set('currentUser', { email: 'debug@test.com' }, true);
+        TippingModal.showModal();
+        UI.showAlert('Mock logowanie i otwarcie modala napiwków.', false);
       });
     }
     // Koniec LOGIKA MOCK BUTTON

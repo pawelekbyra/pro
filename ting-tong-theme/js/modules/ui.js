@@ -9,6 +9,44 @@ function setPwaModule(pwaModule) {
   PWA_MODULE = pwaModule;
 }
 
+let countdownInterval = null;
+
+function startCountdown() {
+  const countdownElement = document.getElementById('countdown-timer');
+  const countdownDateElement = document.getElementById('countdown-date');
+  if (!countdownElement || !countdownDateElement) return;
+
+  const endDate = new Date(countdownDateElement.textContent).getTime();
+
+  const updateCountdown = () => {
+    const now = new Date().getTime();
+    const distance = endDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownElement.textContent = "Premiera!";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdownElement.innerHTML = `
+      <span class="countdown-part">${days}<span class="countdown-label-small">dni</span></span>
+      <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label-small">h</span></span>
+      <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label-small">m</span></span>
+      <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label-small">s</span></span>`;
+  };
+
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
 let selectedCommentImage = null;
 
 const DOM = {};
@@ -106,6 +144,10 @@ function openModal(modal, options = {}) {
                 titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
             }
         }
+    }
+
+    if (modal.id === 'infoModal') {
+        startCountdown();
     }
 
     modal.classList.add('visible');

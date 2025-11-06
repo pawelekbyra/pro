@@ -12,6 +12,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-dev --working-dir=./ting-tong-theme/
+
     - name: FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
       with:
@@ -29,3 +32,4 @@ jobs:
           **/.git*/**
           **/node_modules/**
           .github/**
+          # Usunięto 'vendor/**' z tej listy, aby umożliwić wgranie
