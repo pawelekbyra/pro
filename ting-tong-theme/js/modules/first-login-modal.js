@@ -69,7 +69,7 @@ function handlePrevStep() {
 function validateStep(step) {
     if (step === 1) { // Krok Imię/Nazwisko
         if (!dom.firstNameInput.value.trim() || !dom.lastNameInput.value.trim()) {
-            UI.showAlert(Utils.getTranslation('errorMissingNames'), true); // POPRAWIONO KLUCZ
+            UI.showAlert(Utils.getTranslation('errorMissingNames'), true);
             return false;
         }
     }
@@ -79,7 +79,7 @@ function validateStep(step) {
             return false;
         }
         if (dom.passwordInput.value !== dom.confirmPasswordInput.value) {
-            UI.showAlert(Utils.getTranslation('errorPasswordsMismatch'), true); // POPRAWIONO KLUCZ
+            UI.showAlert(Utils.getTranslation('errorPasswordsMismatch'), true);
             return false;
         }
     }
@@ -102,8 +102,6 @@ function collectData(step) {
 async function handleFormSubmit(e) {
     e.preventDefault();
 
-    // ZAWSZE zbierz dane z ostatniego kroku (Krok 2: Hasło) PRZED walidacją i wysłaniem.
-    // W tej funkcji walidujemy i zbieramy DANE Z CAŁEGO PROFILU (zebrane w krokach 0 i 1 oraz teraz krok 2).
     if (!validateStep(currentStep)) return;
     collectData(currentStep);
 
@@ -112,36 +110,20 @@ async function handleFormSubmit(e) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
-    // WALIDACJA PO ZBIERANIU DANYCH:
-    if (currentStep === 2) {
-        // Dodatkowa, niezbędna walidacja hasła, której brakuje, gdy pomijany jest krok 1.
-        if (formData.new_password.length < 8) {
-            UI.showAlert(Utils.getTranslation('errorMinPasswordLength'), true);
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-            return;
-        }
-    }
-
-    // Dalsza logika formularza jest poprawna:
     try {
-        // ZMIANA: Wysyłamy jako standardowy formularz, a nie JSON
         const result = await authManager.ajax('tt_complete_profile', formData);
         if (result.success) {
             const updatedUser = { ...State.get('currentUser'), ...result.data.userData, is_profile_complete: true };
             State.set('currentUser', updatedUser);
-            // NOWE: Emitujemy zdarzenie user:login, aby odświeżyć UI i potencjalnie zamknąć login panel
             State.emit('user:login', { userData: updatedUser });
             UI.showToast(Utils.getTranslation('profileUpdateSuccess'));
             hideModal();
-            // Reset form state for next time
             currentStep = 0;
             formData = {};
             updateStepDisplay();
             dom.form.reset();
 
         } else {
-            // FIX: Złap błąd z komunikatu serwera i wyświetl
             throw new Error(result.data?.message || Utils.getTranslation('profileUpdateFailedError'));
         }
     } catch (error) {
@@ -191,20 +173,11 @@ function showProfileCompletionModal() {
     if (!dom.modal) return;
     translateUI();
 
-    // FIX 2: Ustawienie domyślnego stanu: zgoda zaznaczona, język polski
-    dom.consentCheckbox.checked = true;
-    dom.langOptionsContainer.classList.add('visible'); // Pokaż opcje językowe
-    dom.langOptions.forEach(opt => {
-        opt.classList.remove('active');
-        if (opt.dataset.lang === 'pl') opt.classList.add('active'); // Domyślnie PL
-    });
-
     const userEmail = State.get('currentUser')?.email || '';
     if (dom.emailDisplay) dom.emailDisplay.textContent = userEmail;
 
     UI.openModal(dom.modal, {
-        isPersistent: true, // Nowa flaga w UI.js (patrz niżej)
-        // Zapewnienie, że funkcja zamykająca nie jest wywoływana
+        isPersistent: true,
         onClose: null
     });
     updateStepDisplay();
@@ -216,70 +189,47 @@ function hideModal() {
 }
 
 function setupKeyboardShift() {
-    // Cel: element, który ma być przesuwany (cała zawartość modala)
     const content = dom.modal?.querySelector('.fl-modal-content-wrapper');
-
     if (!content) return;
 
-    // Lista pól do obserwowania (inputy hasła)
     const inputsToObserve = [dom.passwordInput, dom.confirmPasswordInput];
 
-    // Ustalanie optymalnego przesunięcia (tylko jeśli visualViewport jest dostępny)
     const calculateShift = (inputEl) => {
         if (typeof window.visualViewport === 'undefined') return 0;
-
         const inputRect = inputEl.getBoundingClientRect();
-        const viewportBottom = window.visualViewport.height; // Dolna krawędź widocznego obszaru (nad klawiaturą)
-        const safeMargin = 20; // Margines bezpieczeństwa w pikselach
-
-        // Wymagana pozycja, czyli tuż nad klawiaturą z marginesem
+        const viewportBottom = window.visualViewport.height;
+        const safeMargin = 20;
         const expectedBottom = viewportBottom - safeMargin;
-
         if (inputRect.bottom > expectedBottom) {
-            // Pole jest niżej niż powinno - obliczamy shift w górę
             const shiftNeeded = inputRect.bottom - expectedBottom;
-            return -shiftNeeded; // Wartość ujemna dla przesunięcia w górę
+            return -shiftNeeded;
         }
-
         return 0;
     };
 
     const handleFocus = (e) => {
-        // Używamy requestAnimationFrame/setTimeout, aby dać klawiaturze czas na pojawienie się
-        // i zaktualizowanie window.visualViewport.height.
         setTimeout(() => {
             if (e.target.closest('.fl-step.active') === null) {
-                // Upewnij się, że fokus jest w aktualnie widocznym kroku
                 return;
             }
-
             let shift = calculateShift(e.target);
-
-            // Ogranicznik górny: nie przesuwaj powyżej 20px od góry
             const topLimit = 20;
             const currentTop = content.getBoundingClientRect().top;
-
-            // Jeśli aktualna pozycja przesunie się za wysoko, dostosuj shift
             if (currentTop + shift < topLimit) {
                 shift = topLimit - currentTop;
             }
-
             if (shift !== 0) {
-                // Stosujemy transformację Y do elementu, który nie jest już animowany
                 content.style.transition = 'transform 0.3s ease-out';
                 content.style.transform = `translateY(${shift}px)`;
             }
-        }, 150); // Krótkie opóźnienie dla stabilizacji klawiatury
+        }, 150);
     };
 
     const handleBlur = () => {
-        // Wróć do pozycji domyślnej po blur.
-        // Modal i tak ma transform: translateY(0) w stanie .visible, ale to resetuje dynamiczne przesunięcie.
         content.style.transform = 'translateY(0)';
-        content.style.transition = ''; // Usuń customową transakcję
+        content.style.transition = '';
     };
 
-    // Dodaj nasłuchiwanie do pól
     inputsToObserve.forEach(input => {
         if (input) {
             input.addEventListener('focus', handleFocus);
@@ -287,7 +237,6 @@ function setupKeyboardShift() {
         }
     });
 
-    // Dodatkowy listener do resetowania pozycji na iOS po ukryciu klawiatury
     window.visualViewport?.addEventListener('resize', () => {
         if (dom.modal.classList.contains('visible') && window.visualViewport.height === window.innerHeight) {
             handleBlur();
@@ -305,27 +254,19 @@ function init() {
 
 function enforceModalIfIncomplete(userData) {
     if (!userData || userData.is_profile_complete === undefined) {
-        // Jeśli nie mamy danych (np. błąd API, co oznacza, że i tak nie jesteśmy zalogowani), nie robimy nic.
         return;
     }
 
     if (userData && !userData.is_profile_complete) {
-        // Zablokuj skrolowanie w tle
         document.body.classList.add('modal-enforced');
-
-        // Ukryj preloader, aby pokazać UI pod modalem
         document.getElementById("preloader")?.classList.add("preloader-hiding");
         document.getElementById("webyx-container")?.classList.add("ready");
-
         showProfileCompletionModal();
-
-        // KLUCZOWE: Zablokuj interakcje z głównym kontenerem aplikacji
         const appFrame = document.getElementById("app-frame");
         if (appFrame) {
             appFrame.style.pointerEvents = 'none';
         }
     } else {
-        // W przeciwnym razie upewnij się, że blokada jest usunięta
         document.body.classList.remove('modal-enforced');
         document.getElementById("app-frame")?.style.removeProperty('pointer-events');
     }

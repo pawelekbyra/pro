@@ -152,7 +152,6 @@ function openModal(modal, options = {}) {
         startCountdown();
     }
 
-    // Delay adding the 'visible' class to allow the display property to take effect.
     requestAnimationFrame(() => {
         modal.classList.add('visible');
         if (options.animationClass) {
@@ -161,7 +160,6 @@ function openModal(modal, options = {}) {
     });
 
     if (!options.isPersistent) {
-        // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
         modal.addEventListener('click', function closeOnClick(e) {
             if (e.target === modal) {
                 closeModal(modal);
@@ -190,18 +188,15 @@ function closeModal(modal, options = {}) {
     const animationClass = options.animationClass;
     const isSlideAnimation = animationClass && animationClass.includes('slide');
 
-    // Use is-hiding for standard fade-out, or a specific class for slide-out
     const hidingClass = animationClass || 'is-hiding';
     modal.classList.add(hidingClass);
     modal.setAttribute("aria-hidden", "true");
 
-    // For non-slide animations, we also remove 'visible' to trigger the fade-out
     if (!isSlideAnimation) {
         modal.classList.remove('visible');
     }
 
     const cleanup = () => {
-        // Remove both listeners to be safe
         modal.removeEventListener("animationend", cleanup);
         modal.removeEventListener("transitionend", cleanup);
 
@@ -230,11 +225,9 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    // Listen to the appropriate event based on the animation type
     const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
     modal.addEventListener(eventToListen, cleanup, { once: true });
 
-    // Fallback timer to ensure the modal always closes
     setTimeout(cleanup, 600);
 }
 
@@ -263,9 +256,6 @@ function applyLikeStateToDom(likeId, liked, count) {
     .forEach((btn) => updateLikeButtonState(btn, liked, count));
 }
 
-/**
- * Sprawdza czy dla danego slajdu jest aktywna nakładka blokująca
- */
 function isSlideOverlayActive(slideElement) {
   if (!slideElement) return false;
 
@@ -283,7 +273,6 @@ function updateUIForLoginState() {
   const isLoggedIn = State.get("isUserLoggedIn");
   const currentSlideIndex = State.get("currentSlideIndex");
 
-  // Update global UI elements
   const topbar = document.querySelector("#app-frame > .topbar");
   const loginPanel = document.querySelector("#app-frame > .login-panel");
   const loggedInMenu = document.querySelector(
@@ -306,7 +295,6 @@ function updateUIForLoginState() {
     loggedInMenu.classList.remove("active");
   }
 
-  // Update per-slide elements
   DOM.container.querySelectorAll(".webyx-section").forEach((section) => {
     const sim = section.querySelector(".tiktok-symulacja");
     sim.classList.toggle("is-logged-in", isLoggedIn);
@@ -316,16 +304,13 @@ function updateUIForLoginState() {
     const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
     const video = section.querySelector("video");
 
-    // Determine overlay visibility
     const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
 
-    // If an overlay is active, force the UI to be visible
     if (showSecret || showPwaSecret) {
       sim.classList.add("video-loaded");
     }
 
-    // Toggle "secret" overlay
     const secretOverlay = section.querySelector(".secret-overlay");
     if (secretOverlay) {
         secretOverlay.classList.toggle("visible", showSecret);
@@ -341,7 +326,6 @@ function updateUIForLoginState() {
         }
     }
 
-    // Toggle "pwa-secret" overlay
     const pwaSecretOverlay = section.querySelector(".pwa-secret-overlay");
     if (pwaSecretOverlay) {
         pwaSecretOverlay.classList.toggle("visible", showPwaSecret);
@@ -356,19 +340,15 @@ function updateUIForLoginState() {
         }
     }
 
-    // Control video playback based on overlay state
     if (video) {
         const isOverlayVisible = showSecret || showPwaSecret;
         const isCurrentSlide = section.classList.contains('swiper-slide-active');
 
-        // First, enforce pausing if any overlay is active.
-        // This is the most important rule.
         if (isOverlayVisible) {
             if (!video.paused) {
                 video.pause();
             }
         }
-        // Only if no overlays are active, consider playing the video.
         else if (isCurrentSlide && video.paused) {
             video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
         }
@@ -418,7 +398,6 @@ function updateTranslations() {
       );
     });
 
-  // Handle composite elements
   const sortTrigger = document.querySelector(".sort-trigger");
   if (sortTrigger) {
     const sortOrder = State.get("commentSortOrder");
@@ -466,21 +445,17 @@ function createSlideElement(slideData, index) {
     const videoEl = section.querySelector("video");
     if (videoEl) {
       videoEl.src = slideData.mp4Url;
-      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli warunki są spełnione.
       if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
         videoEl.pause();
       }
     }
   }
 
-  // Ustawienie początkowej widoczności nakładek.
-  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
   if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
     }
-    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był widoczny
     section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 
@@ -513,18 +488,15 @@ function createSlideElement(slideData, index) {
   const replayOverlay = section.querySelector(".replay-overlay");
 
   if (videoEl && pauseOverlay && replayOverlay) {
-    // Gdy video się kończy - pokaż replay
     videoEl.addEventListener("ended", () => {
       replayOverlay.classList.add("visible");
     });
 
-    // Gdy video zaczyna grać - ukryj overlays
     videoEl.addEventListener("play", () => {
       replayOverlay.classList.remove("visible");
       pauseOverlay.classList.remove("visible");
     });
 
-    // Gdy video jest odtwarzane (po play) - ukryj overlays
     videoEl.addEventListener("playing", () => {
       replayOverlay.classList.remove("visible");
       pauseOverlay.classList.remove("visible");
@@ -534,7 +506,6 @@ function createSlideElement(slideData, index) {
   const progressBarFill = section.querySelector(".progress-bar-fill");
 
   if (videoEl) {
-    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
     videoEl.addEventListener(
       "loadedmetadata",
       () => {
@@ -543,11 +514,9 @@ function createSlideElement(slideData, index) {
       { once: true },
     );
 
-    // Spróbuj odtworzyć (może zadziałać lub nie - ale UI już będzie widoczny)
     videoEl.addEventListener(
       "canplay",
       () => {
-        // Tylko jeśli to aktywny slajd i brak overlay
         if (section.classList.contains('swiper-slide-active')) {
           const secretOverlay = section.querySelector('.secret-overlay');
           const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
@@ -661,7 +630,6 @@ function populateProfileModal(slideData) {
 
   const { author } = slideData;
 
-  // Basic info
   const atUsername = `@${author.name
     .toLowerCase()
     .replace(/\s/g, "")
@@ -681,7 +649,6 @@ function populateProfileModal(slideData) {
   DOM.tiktokProfileModal.querySelector("#tiktok-profile-bio").textContent =
     author.description;
 
-  // Stats
   DOM.tiktokProfileModal.querySelector(
     "#tiktok-following-count",
   ).textContent = Math.floor(Math.random() * 500);
@@ -689,11 +656,10 @@ function populateProfileModal(slideData) {
     "#tiktok-followers-count",
   ).textContent = Utils.formatCount(Math.floor(Math.random() * 5000000));
   DOM.tiktokProfileModal.querySelector("#tiktok-likes-count").textContent =
-    Utils.formatCount(slideData.initialLikes * 3.5); // Mock total likes
+    Utils.formatCount(slideData.initialLikes * 3.5);
 
-  // Video Grid (mock data)
   const videoGrid = DOM.tiktokProfileModal.querySelector("#videos-grid");
-  videoGrid.innerHTML = ""; // Clear previous
+  videoGrid.innerHTML = "";
   for (let i = 1; i <= 9; i++) {
     const thumb = document.createElement("div");
     thumb.className = "video-thumbnail";
@@ -735,11 +701,6 @@ function updateVolumeButton(isMuted) {
   });
 }
 
-/**
- * Globalny Keyboard Listener (v2 - Niezawodny)
- * Odporny na zmiany orientacji i poprawnie współpracuje z CSS "Freezer".
- */
-
 function initEmojiPicker() {
   const emojiPicker = document.querySelector('.emoji-picker');
   if (!emojiPicker || emojiPicker.children.length > 0) return;
@@ -772,7 +733,6 @@ function insertEmoji(emoji) {
   hideEmojiPicker();
 }
 
-// Dodaj zmienną dla debounce na początku pliku (przed funkcją)
 let emojiPickerTimeout = null;
 let emojiPickerClickListener = null;
 
@@ -783,7 +743,6 @@ function toggleEmojiPicker() {
     return;
   }
 
-  // Debounce - zapobiegaj podwójnym kliknięciom
   if (emojiPickerTimeout) {
     return;
   }
@@ -795,20 +754,17 @@ function toggleEmojiPicker() {
   } else {
     picker.classList.add('visible');
 
-    // Usuń stary listener jeśli istnieje
     if (emojiPickerClickListener) {
       document.removeEventListener('click', emojiPickerClickListener);
       emojiPickerClickListener = null;
     }
 
-    // Dodaj nowy listener po micro-delay
     setTimeout(() => {
       emojiPickerClickListener = (e) => closeEmojiPickerOnClickOutside(e);
       document.addEventListener('click', emojiPickerClickListener, { once: true });
     }, 10);
   }
 
-  // Debounce timer
   emojiPickerTimeout = setTimeout(() => {
     emojiPickerTimeout = null;
   }, 300);
@@ -820,7 +776,6 @@ function hideEmojiPicker() {
     picker.classList.remove('visible');
   }
 
-  // Usuń pending listener
   if (emojiPickerClickListener) {
     document.removeEventListener('click', emojiPickerClickListener);
     emojiPickerClickListener = null;
@@ -831,12 +786,10 @@ function closeEmojiPickerOnClickOutside(e) {
   const picker = document.querySelector('.emoji-picker');
   const emojiBtn = document.querySelector('.emoji-btn');
 
-  // Walidacja elementów
   if (!picker || !emojiBtn) {
     return;
   }
 
-  // Sprawdź czy kliknięcie było poza pickerem i przyciskiem
   if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
     hideEmojiPicker();
   }
@@ -854,7 +807,6 @@ function handleImageAttachment() {
     return;
   }
 
-  // Sprawdź czy użytkownik jest zalogowany
   if (!State.get('isUserLoggedIn')) {
     UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać obraz', true);
     return;
@@ -870,7 +822,6 @@ function handleImageSelect(e) {
     return;
   }
 
-  // Walidacja typu
   if (!file.type.startsWith('image/')) {
     UI.showAlert(
       Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG, PNG, GIF)',
@@ -880,7 +831,6 @@ function handleImageSelect(e) {
     return;
   }
 
-  // Walidacja rozmiaru
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
     UI.showAlert(
@@ -891,7 +841,6 @@ function handleImageSelect(e) {
     return;
   }
 
-  // Sprawdź czy można odczytać plik
   const reader = new FileReader();
 
   reader.onerror = () => {
@@ -904,15 +853,12 @@ function handleImageSelect(e) {
   };
 
   reader.onload = () => {
-    // Plik jest OK - zapisz go
     selectedCommentImage = file;
     showImagePreview(file);
   };
 
-  // Rozpocznij odczyt (tylko dla walidacji)
   reader.readAsDataURL(file);
 
-  // Wyczyść input żeby można było wybrać ten sam plik ponownie
   e.target.value = '';
 }
 
@@ -1048,13 +994,11 @@ function renderComments(comments) {
 function initGlobalPanels() {
   initEmojiPicker();
 
-  // Setup file input handler
   const fileInput = document.querySelector('.comment-image-input');
   if (fileInput) {
     fileInput.addEventListener('change', handleImageSelect);
   }
 
-  // Setup lightbox close
   const lightboxClose = document.querySelector('.image-lightbox-close');
   if (lightboxClose) {
     lightboxClose.addEventListener('click', closeImageLightbox);
@@ -1071,11 +1015,10 @@ function initGlobalPanels() {
 }
 function openAuthorModal(slideData) {
   if (!slideData || !slideData.author) {
-    // Lepszy komunikat błędu
     console.error("Slide data or Author object is missing/incomplete.");
     return;
   }
-  populateProfileModal(slideData); // Przekazanie całego obiektu slajdu
+  populateProfileModal(slideData);
   openModal(DOM.tiktokProfileModal);
 }
 
@@ -1106,8 +1049,8 @@ export const UI = {
   scrollToComment,
   openImageLightbox,
   closeImageLightbox,
-  isSlideOverlayActive, // ✅ NOWE
-  setPwaModule, // ✅ NOWE
+  isSlideOverlayActive,
+  setPwaModule,
   closeCommentsModal,
 };
 
@@ -1132,6 +1075,5 @@ function closeCommentsModal() {
     };
 
     modal.addEventListener('transitionend', cleanup, { once: true });
-    // Fallback w razie gdyby event się nie odpalił
     setTimeout(cleanup, 400);
 }
