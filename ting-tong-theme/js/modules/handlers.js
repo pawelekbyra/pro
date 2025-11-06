@@ -533,12 +533,12 @@ export const Handlers = {
             // Animate out the old modal
             UI.closeModal(infoModal, {
                 keepFocus: true,
-                animationClass: 'slide-out-left'
+                animationClass: 'modal-is-sliding-out'
             });
         }
 
         // Animate in the new modal
-        TippingModal.showModal({ animationClass: 'slide-in-right' });
+        TippingModal.showModal({ animationClass: 'modal-is-sliding-in' });
         break;
       }
       case "open-desktop-pwa-modal":
