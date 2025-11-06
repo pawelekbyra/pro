@@ -1772,10 +1772,31 @@ body,
 }
 
 .countdown-value {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 700;
     color: #fff;
     letter-spacing: 2px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.countdown-part {
+    display: flex;
+    flex-direction: column;
+}
+
+.countdown-label-small {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.premiere-date-label {
+    margin-top: 16px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .countdown-label {
