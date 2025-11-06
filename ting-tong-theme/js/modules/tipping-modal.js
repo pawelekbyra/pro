@@ -86,7 +86,7 @@ function updateStepDisplay(isShowingTerms = false) {
 
     // Change button text in the payment step
     if (isPaymentStep) {
-        dom.submitBtn.textContent = getTranslatedText('tippingPay', 'Pay!');
+        dom.submitBtn.textContent = getTranslatedText('tippingNext', 'ENTER');
     } else {
         // The text for nextBtn ("ENTER") is set via HTML attribute and the `translateUI` function,
         // but we set it here again to be sure.
@@ -252,7 +252,7 @@ async function initializePaymentElement(originalText) {
             // Pokaż element i przywróć przycisk
             dom.paymentElementContainer.classList.add('ready');
             dom.submitBtn.disabled = false;
-            dom.submitBtn.innerHTML = getTranslatedText('tippingPay', 'Płacę!');
+            dom.submitBtn.innerHTML = getTranslatedText('tippingNext', 'ENTER');
         });
 
         paymentElement.on('error', (event) => {

@@ -832,18 +832,22 @@ body,
   transform: scale(0.9);
 }
 
-.glowing-info-button {
-    animation: pulse-glow-info 2.5s infinite;
+.glowing-info-button svg {
+    animation: gentle-wobble 2.5s infinite;
 }
 
-@keyframes pulse-glow-info {
+@keyframes gentle-wobble {
     0%, 100% {
-        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
-        transform: scale(1);
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(10deg);
     }
     50% {
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-        transform: scale(1.05);
+        transform: rotate(-10deg);
+    }
+    75% {
+        transform: rotate(5deg);
     }
 }
 
