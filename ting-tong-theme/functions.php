@@ -951,7 +951,16 @@ add_action('wp_ajax_tt_avatar_upload', function () {
         }
 
         $u = wp_get_current_user();
-        $ext = ($mime === 'image/png') ? 'png' : 'jpg'; // Uproszczenie dla najczęstszych typów
+
+        // Rozbudowana logika mapowania MIME na rozszerzenie
+        $mime_to_ext = [
+            'image/jpeg' => 'jpg',
+            'image/png'  => 'png',
+            'image/gif'  => 'gif',
+            'image/webp' => 'webp',
+        ];
+        $ext = isset($mime_to_ext[$mime]) ? $mime_to_ext[$mime] : 'jpg'; // Domyślnie jpg
+
         $filename = 'tt-avatar-' . (int) $u->ID . '-' . time() . '.' . $ext;
 
         $upload_dir = wp_upload_dir();
@@ -1073,7 +1082,7 @@ function tt_custom_avatar_filter($args, $id_or_email) {
         $user_id = (int) $id_or_email->user_id;
     }
 
-    $default_avatar_url = get_template_directory_uri() . '/assets/img/jajk.png';
+    $default_avatar_url = get_template_directory_uri() . '/jajk.png';
 
     if ($user_id) {
         // Check for the custom uploaded avatar URL first
