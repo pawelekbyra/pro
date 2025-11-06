@@ -104,12 +104,34 @@ function handleShare(button) {
   }
 }
 
-function handleLanguageToggle() {
-  const newLang = State.get("currentLang") === "pl" ? "en" : "pl";
+async function handleLanguageToggle() { // Zmień na async
+  const oldLang = State.get("currentLang");
+  const newLang = oldLang === "pl" ? "en" : "pl";
+
+  // Mapowanie na lokalizację WP
+  const newLocale = newLang === 'pl' ? 'pl_PL' : 'en_GB';
+
+  // 1. Aktualizacja stanu aplikacji
   State.set("currentLang", newLang);
   localStorage.setItem("tt_lang", newLang);
+
+  // 2. Aktualizacja UI
   UI.updateTranslations();
   Notifications.render();
+
+  // 3. Wysłanie nowej lokalizacji do API WordPressa
+  if (State.get("isUserLoggedIn")) {
+      try {
+        const result = await API.updateLocale(newLocale);
+        if (result.success) {
+          console.log(`WordPress locale updated to: ${newLocale}`);
+        } else {
+          console.warn("Failed to update WP locale via main toggle:", result.data?.message);
+        }
+      } catch (error) {
+        console.error("API Error updating WP locale via main toggle:", error);
+      }
+  }
 }
 
 
@@ -480,28 +502,6 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-public-profile": {
-        const swiper = State.get('swiper');
-        if (!swiper) break;
-
-        // Use realIndex to get the correct slide data, which is reliable in loop mode.
-        const slideData = slidesData[swiper.realIndex];
-
-        if (!slideData) {
-            console.error("Could not find slide data for realIndex:", swiper.realIndex);
-            break;
-        }
-
-        if (!State.get("isUserLoggedIn")) {
-            Utils.vibrateTry();
-            UI.showAlert(Utils.getTranslation("profileAccessAlert"));
-            return;
-        }
-
-        UI.populateProfileModal(slideData);
-        UI.openModal(document.getElementById('tiktok-profile-modal'));
-        break;
-      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
@@ -518,16 +518,29 @@ export const Handlers = {
         }
         break;
       }
-      case "close-comments-modal": {
-        const modal = document.getElementById('comments-modal-container');
-        if (modal) {
-            modal.classList.remove('visible');
-        }
+      case "close-comments-modal":
+        UI.closeCommentsModal();
         break;
-      }
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
+      case "open-tipping-from-info": {
+        const infoModal = document.getElementById('infoModal');
+        if (infoModal && infoModal.classList.contains('visible')) {
+            // Animate out the old modal
+            UI.closeModal(infoModal, {
+                keepFocus: true, // Keep focus within the modal context
+                animationClass: 'slide-out-left'
+            });
+
+            // Animate in the new modal simultaneously
+            TippingModal.showModal({ animationClass: 'slide-in-right' });
+        } else {
+            // If info modal wasn't open, just open the tipping modal normally
+            TippingModal.showModal();
+        }
+        break;
+      }
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
         break;
@@ -537,6 +550,30 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
+      case "open-public-profile": {
+        if (!State.get("isUserLoggedIn")) {
+          Utils.vibrateTry();
+          UI.showToast(Utils.getTranslation("profileViewAlert"));
+          return;
+        }
+
+        const swiper = State.get('swiper');
+        if (!swiper || !swiper.slides[swiper.activeIndex]) {
+            console.error('Swiper or active slide not found');
+            return;
+        }
+
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        const slideId = activeSlide.dataset.slideId;
+
+        const slideData = slidesData.find(s => s.id === slideId);
+
+        if (slideData) {
+            UI.populateProfileModal(slideData);
+            UI.openModal(document.getElementById('tiktok-profile-modal'));
+        }
+        break;
+      }
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
         AccountPanel.openAccountModal();
@@ -602,7 +639,7 @@ export const Handlers = {
           }
 
           if (UI.DOM.commentsModal.classList.contains("visible")) {
-            UI.closeModal(UI.DOM.commentsModal);
+            UI.closeCommentsModal();
           }
           if (loginPanel) loginPanel.classList.toggle("active");
           if (topbar) topbar.classList.toggle("login-panel-active");
@@ -658,6 +695,7 @@ export const Handlers = {
         break;
       }
       case "toggle-volume":
+        e.stopPropagation();
         const isMuted = !State.get("isSoundMuted");
         State.set("isSoundMuted", isMuted);
         const activeSlideVideo = document.querySelector(".swiper-slide-active video");

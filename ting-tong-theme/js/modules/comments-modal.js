@@ -1,360 +1,383 @@
-import { UI } from './ui.js';
-import { API, slidesData } from './api.js';
+import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
+import { API, slidesData } from './api.js';
 
 let selectedCommentImage = null;
+const DOM = {};
+let currentSort = 'newest';
 
-const CommentsModal = {
-    modal: null,
-    modalBody: null,
-    sortTrigger: null,
-    sortOptionsContainer: null,
-    closeButton: null,
-    commentForm: null,
-    commentInput: null,
-    imagePreviewContainer: null,
-    loginPrompt: null,
+function sortAndRerenderComments() {
+    const swiper = State.get('swiper');
+    if (!swiper) return;
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+    const slideData = slidesData.find(s => s.id === slideId);
 
-    init() {
-        this.modal = UI.DOM.commentsModal;
-        if (!this.modal) {
-            console.error('Comments modal element not found!');
-            return;
-        }
-
-        this.modalBody = this.modal.querySelector('.comments-modal-body');
-        this.sortTrigger = this.modal.querySelector('.sort-trigger');
-        this.sortOptionsContainer = this.modal.querySelector('.sort-options');
-        this.closeButton = this.modal.querySelector('.comments-modal-close-btn');
-        this.commentForm = this.modal.querySelector('#comment-form');
-        this.commentInput = this.modal.querySelector('#comment-input');
-        this.imagePreviewContainer = this.modal.querySelector('.image-preview-container');
-        this.loginPrompt = this.modal.querySelector('.login-to-comment-prompt');
-
-        this.addEventListeners();
-    },
-
-    addEventListeners() {
-        if (this.sortTrigger) {
-            this.sortTrigger.addEventListener('click', () => this.toggleSortOptions());
-        }
-        if (this.sortOptionsContainer) {
-            this.sortOptionsContainer.addEventListener('click', (e) => this.handleSortOptionClick(e));
-        }
-        if (this.closeButton) {
-            this.closeButton.addEventListener('click', () => this.close());
-        }
-        if (this.commentForm) {
-            this.commentForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
-        }
-
-        // Delegacja zdarzeń dla akcji wewnątrz modala
-        this.modal.addEventListener('click', (e) => {
-            if (e.target === this.modal) {
-                this.close();
+    if (slideData && slideData.comments) {
+        const sortedComments = [...slideData.comments].sort((a, b) => {
+            if (currentSort === 'popular') {
+                return b.likes - a.likes;
             }
-
-            const actionTarget = e.target.closest('[data-action]');
-            if (!actionTarget) return;
-
-            const action = actionTarget.dataset.action;
-            const commentItem = actionTarget.closest('.comment-item');
-            const commentId = commentItem ? commentItem.dataset.commentId : null;
-
-            switch (action) {
-                case 'toggle-emoji-picker':
-                    UI.toggleEmojiPicker();
-                    break;
-                case 'attach-image':
-                    this.handleImageAttachment();
-                    break;
-                case 'remove-comment-image':
-                    this.removeCommentImage();
-                    break;
-                case 'toggle-comment-like':
-                    if (commentId) this.toggleCommentLike(commentId, actionTarget);
-                    break;
-                case 'edit-comment':
-                    if (commentId) this.editComment(commentId);
-                    break;
-                case 'delete-comment':
-                    if (commentId) this.deleteComment(commentId);
-                    break;
-                case 'reply-to-comment':
-                    // TODO: Implement reply functionality if needed
-                    break;
-            }
+            // Default to newest
+            return new Date(b.timestamp) - new Date(a.timestamp);
         });
+        renderComments(sortedComments);
+    }
+}
 
-        const fileInput = this.modal.querySelector('.comment-image-input');
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => this.handleImageSelect(e));
+
+function cacheDOM() {
+    DOM.commentsModal = document.getElementById("comments-modal-container");
+    if (!DOM.commentsModal) {
+        console.error("Comments modal container not found in cacheDOM!");
+        return;
+    }
+    DOM.modalBody = DOM.commentsModal.querySelector(".modal-body");
+    DOM.emojiPicker = DOM.commentsModal.querySelector('.emoji-picker');
+    DOM.commentInput = DOM.commentsModal.querySelector('#comment-input');
+    DOM.fileInput = DOM.commentsModal.querySelector('.comment-image-input');
+    DOM.imagePreviewContainer = DOM.commentsModal.querySelector('.image-preview-container');
+    DOM.form = DOM.commentsModal.querySelector('#comment-form');
+    DOM.prompt = DOM.commentsModal.querySelector('.login-to-comment-prompt');
+    DOM.lightbox = document.querySelector('.image-lightbox');
+    DOM.lightboxClose = document.querySelector('.image-lightbox-close');
+}
+
+async function handleCommentAction(e) {
+    const actionTarget = e.target.closest('[data-action]');
+    if (!actionTarget) return;
+
+    const action = actionTarget.dataset.action;
+    const commentItem = actionTarget.closest('.comment-item');
+    if (!commentItem) return;
+
+    const commentId = commentItem.dataset.commentId;
+    const swiper = State.get('swiper');
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+
+    switch (action) {
+        case 'toggle-comment-like':
+            // Basic optimistic update
+            actionTarget.classList.toggle('active');
+            const result = await API.toggleCommentLike(slideId, commentId);
+            if (!result.success) {
+                actionTarget.classList.toggle('active'); // Revert on failure
+            }
+            // Full re-render would be better, but this is a quick fix
+            const countEl = commentItem.querySelector('.comment-like-count');
+            if (countEl && result.data?.likes !== undefined) {
+                countEl.textContent = Utils.formatCount(result.data.likes);
+            }
+            break;
+        case 'edit-comment':
+             const currentText = commentItem.querySelector('.comment-text').textContent;
+             const newText = prompt("Edit your comment:", currentText);
+             if (newText && newText.trim() !== currentText) {
+                 const result = await API.editComment(slideId, commentId, newText.trim());
+                 if (result.success) {
+                     commentItem.querySelector('.comment-text').textContent = newText.trim();
+                 }
+             }
+            break;
+        case 'delete-comment':
+             if (confirm("Are you sure you want to delete this comment?")) {
+                 const result = await API.deleteComment(slideId, commentId);
+                 if (result.success) {
+                     commentItem.remove();
+                 }
+             }
+            break;
+    }
+}
+
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const text = DOM.commentInput.value.trim();
+    if (!text && !selectedCommentImage) return;
+
+    const swiper = State.get('swiper');
+    if (!swiper) return;
+
+    const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+    const button = DOM.form.querySelector('button[type="submit"]');
+    button.disabled = true;
+
+    try {
+        let imageUrl = null;
+        if (selectedCommentImage) {
+            const uploadResult = await API.uploadCommentImage(selectedCommentImage);
+            if (uploadResult.success) {
+                imageUrl = uploadResult.data.url;
+            } else {
+                throw new Error(uploadResult.data.message || 'Image upload failed');
+            }
         }
-    },
 
-    open() {
-        const swiper = State.get('swiper');
-        if (!swiper) return;
+        const postResult = await API.postComment(slideId, text, null, imageUrl);
+        if (postResult.success) {
+            DOM.commentInput.value = '';
+            removeCommentImage();
 
-        const slideData = slidesData[swiper.realIndex];
-        if (!slideData) {
-            console.error('No slide data found for comments modal.');
-            return;
-        }
+            const commentsResult = await API.getComments(slideId);
+            if (commentsResult.success) {
+                renderComments(commentsResult.data);
 
-        this.updateCommentFormVisibility();
-        // UI.renderComments now handles the loading state internally if needed
-        this.modal.classList.add('visible');
-
-        this.loadComments(slideData.id);
-    },
-
-    close() {
-        this.modal.classList.remove('visible');
-        // Clear content on close to ensure it's fresh on next open
-        const container = this.modal.querySelector('.comments-list');
-        if (container) container.innerHTML = '';
-    },
-
-    loadComments(slideId) {
-        // Show a loading state if desired, e.g., by clearing and showing a spinner
-        const container = this.modal.querySelector('.comments-list');
-        container.innerHTML = '<div class="loading-spinner"></div>';
-
-        API.fetchComments(slideId)
-            .then(response => {
-                if (!response || !response.success) {
-                    throw new Error(response?.data?.message || 'Failed to load comments');
-                }
-                const comments = response.data || [];
                 const slideData = slidesData.find(s => s.id === slideId);
-                if (slideData) {
-                    slideData.comments = comments;
-                }
-                this.renderSortedComments(comments);
-            })
-            .catch(error => {
-                console.error('Failed to load comments:', error);
-                // UI.renderComments will handle displaying the error state
-                UI.renderComments(null);
-            });
-    },
-
-    toggleSortOptions() {
-        this.sortTrigger.parentElement.classList.toggle('open');
-    },
-
-    handleSortOptionClick(e) {
-        const sortOption = e.target.closest('.sort-option');
-        if (!sortOption) return;
-
-        const dropdown = sortOption.closest('.sort-dropdown');
-        const newSortOrder = sortOption.dataset.sort;
-
-        if (State.get("commentSortOrder") === newSortOrder) {
-            if (dropdown) dropdown.classList.remove('open');
-            return;
-        }
-
-        State.set("commentSortOrder", newSortOrder);
-        if (dropdown) {
-            dropdown.querySelectorAll('.sort-option').forEach(opt => opt.classList.remove('active'));
-        }
-        sortOption.classList.add('active');
-        UI.updateTranslations(); // To update the trigger text
-        if (dropdown) dropdown.classList.remove('open');
-
-        const swiper = State.get('swiper');
-        const slideData = slidesData[swiper.realIndex];
-        if (slideData && Array.isArray(slideData.comments)) {
-            this.renderSortedComments(slideData.comments);
-        }
-    },
-
-    renderSortedComments(comments) {
-        const sortOrder = State.get("commentSortOrder");
-        let sortedComments = [...comments];
-
-        if (sortOrder === "popular") {
-            sortedComments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        } else {
-            sortedComments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        }
-
-        UI.renderComments(sortedComments);
-    },
-
-    async handleFormSubmit(e) {
-        e.preventDefault();
-        if (!State.get('isUserLoggedIn')) {
-            UI.showAlert(Utils.getTranslation('likeAlert'), true);
-            return;
-        }
-
-        const text = this.commentInput.value.trim();
-        if (!text && !selectedCommentImage) return;
-
-        const swiper = State.get('swiper');
-        const slideData = slidesData[swiper.realIndex];
-        const slideId = slideData.id;
-
-        const submitButton = this.commentForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-
-        try {
-            let imageUrl = null;
-            if (selectedCommentImage) {
-                const uploadResponse = await API.uploadCommentImage(selectedCommentImage);
-                if (uploadResponse.success) {
-                    imageUrl = uploadResponse.data.url;
-                } else {
-                    throw new Error(uploadResponse.data.message || 'Image upload failed');
-                }
-            }
-
-            const commentResponse = await API.postComment(slideId, text, null, imageUrl);
-            if (commentResponse.success) {
-                this.commentInput.value = '';
-                this.removeCommentImage();
-                this.loadComments(slideId);
-                // Update comment count on the slide
-                const commentCountEl = document.querySelector(`.swiper-slide-active .comment-count`);
-                if(commentCountEl) commentCountEl.textContent = Utils.formatCount(commentResponse.data.new_comment_count);
-            } else {
-                throw new Error(commentResponse.data.message || 'Failed to post comment');
-            }
-        } catch (error) {
-            UI.showAlert(error.message, true);
-        } finally {
-            submitButton.disabled = false;
-        }
-    },
-
-    handleImageAttachment() {
-        this.modal.querySelector('.comment-image-input').click();
-    },
-
-    handleImageSelect(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        // Simple validation
-        if (!file.type.startsWith('image/')) {
-            UI.showAlert('Proszę wybrać plik graficzny.', true);
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) { // 5MB
-            UI.showAlert('Plik jest za duży (max 5MB).', true);
-            return;
-        }
-
-        selectedCommentImage = file;
-        this.showImagePreview(file);
-    },
-
-    showImagePreview(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            this.imagePreviewContainer.innerHTML = `
-                <div class="image-preview">
-                    <img src="${e.target.result}" alt="Preview">
-                    <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
-                </div>
-            `;
-            this.imagePreviewContainer.classList.add('visible');
-        };
-        reader.readAsDataURL(file);
-    },
-
-    removeCommentImage() {
-        selectedCommentImage = null;
-        this.imagePreviewContainer.innerHTML = '';
-        this.imagePreviewContainer.classList.remove('visible');
-        const fileInput = this.modal.querySelector('.comment-image-input');
-        if (fileInput) fileInput.value = '';
-    },
-
-    toggleCommentLike(commentId, button) {
-        if (!State.get('isUserLoggedIn')) {
-            UI.showAlert(Utils.getTranslation('likeAlert'), true);
-            return;
-        }
-
-        // Prevent multiple clicks while the request is in progress
-        if (button.disabled) return;
-        button.disabled = true;
-
-        API.toggleCommentLike(commentId).then(response => {
-            if (response.success) {
-                button.classList.toggle('active', response.data.isLiked);
-                const commentItem = button.closest('.comment-item');
-                if (commentItem) {
-                    const countEl = commentItem.querySelector('.comment-like-count');
-                    if (countEl) countEl.textContent = Utils.formatCount(response.data.likes);
-                }
-            } else {
-                UI.showAlert(response.data.message || Utils.getTranslation('failedToUpdateLike'), true);
-            }
-        }).finally(() => {
-            button.disabled = false;
-        });
-    },
-
-    editComment(commentId) {
-        const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-        if (!commentItem) return;
-
-        const commentTextEl = commentItem.querySelector('.comment-text');
-        const currentText = commentTextEl.textContent;
-
-        // Replace with a more sophisticated editing UI if needed
-        const newText = prompt(Utils.getTranslation('editCommentPrompt'), currentText);
-
-        if (newText !== null && newText.trim() !== '' && newText !== currentText) {
-            API.editComment(commentId, newText).then(response => {
-                if (response.success) {
-                    commentTextEl.textContent = response.data.text;
-                    UI.showAlert(Utils.getTranslation('commentUpdateSuccess'));
-                } else {
-                    UI.showAlert(response.data.message || Utils.getTranslation('commentUpdateError'), true);
-                }
-            });
-        }
-    },
-
-    deleteComment(commentId) {
-        if (confirm(Utils.getTranslation('deleteCommentConfirm'))) {
-            API.deleteComment(commentId).then(response => {
-                if (response.success) {
-                    const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-                    if (commentItem) {
-                        commentItem.remove();
+                if(slideData) {
+                    slideData.initialComments = commentsResult.data.length;
+                    const countElement = document.querySelector(`.swiper-slide-active .comment-count`);
+                    if(countElement) {
+                        countElement.textContent = Utils.formatCount(slideData.initialComments);
                     }
-                    const swiper = State.get('swiper');
-                    if (swiper && swiper.slides[swiper.activeIndex]) {
-                         const commentCountEl = swiper.slides[swiper.activeIndex].querySelector('.comment-count');
-                        if (commentCountEl) {
-                            commentCountEl.textContent = Utils.formatCount(response.data.new_count);
-                        }
-                    }
-                    UI.showAlert(Utils.getTranslation('commentDeleteSuccess'));
-                } else {
-                     UI.showAlert(response.data.message || Utils.getTranslation('commentDeleteError'), true);
+                }
+            }
+
+        } else {
+            throw new Error(postResult.data.message || 'Failed to post comment');
+        }
+
+    } catch (error) {
+        console.error("Comment post error:", error);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+
+function initEmojiPicker() {
+    if (!DOM.emojiPicker || DOM.emojiPicker.children.length > 0) return;
+    const fragment = document.createDocumentFragment();
+    Config.EMOJI_LIST.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'emoji-item';
+        btn.textContent = emoji;
+        btn.setAttribute('aria-label', `Insert ${emoji}`);
+        btn.addEventListener('click', () => insertEmoji(emoji));
+        fragment.appendChild(btn);
+    });
+    DOM.emojiPicker.appendChild(fragment);
+}
+
+function insertEmoji(emoji) {
+    if (!DOM.commentInput) return;
+    const { selectionStart, selectionEnd, value } = DOM.commentInput;
+    DOM.commentInput.value = value.substring(0, selectionStart) + emoji + value.substring(selectionEnd);
+    DOM.commentInput.selectionStart = DOM.commentInput.selectionEnd = selectionStart + emoji.length;
+    DOM.commentInput.focus();
+    hideEmojiPicker();
+}
+
+function toggleEmojiPicker() {
+    if (!DOM.emojiPicker) return;
+    DOM.emojiPicker.classList.toggle('visible');
+}
+
+function hideEmojiPicker() {
+    if (!DOM.emojiPicker) return;
+    DOM.emojiPicker.classList.remove('visible');
+}
+
+function handleImageAttachment() {
+    if (!DOM.fileInput) return;
+    if (!State.get('isUserLoggedIn')) {
+        console.warn("User not logged in, cannot attach image.");
+        return;
+    }
+    DOM.fileInput.click();
+}
+
+function handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        console.warn("Invalid file type");
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+        console.warn("File is too large");
+        return;
+    }
+
+    selectedCommentImage = file;
+    showImagePreview(file);
+    e.target.value = '';
+}
+
+function showImagePreview(file) {
+    if (!DOM.imagePreviewContainer) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        DOM.imagePreviewContainer.innerHTML = `
+      <div class="image-preview">
+        <img src="${e.target.result}" alt="Preview">
+        <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
+      </div>
+    `;
+        DOM.imagePreviewContainer.classList.add('visible');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeCommentImage() {
+    selectedCommentImage = null;
+    if (DOM.imagePreviewContainer) {
+        DOM.imagePreviewContainer.classList.remove('visible');
+        DOM.imagePreviewContainer.innerHTML = '';
+    }
+}
+
+function openImageLightbox(imageUrl) {
+    if (!DOM.lightbox) return;
+    DOM.lightbox.querySelector('img').src = imageUrl;
+    DOM.lightbox.classList.add('visible');
+}
+
+function closeImageLightbox() {
+    if (!DOM.lightbox) return;
+    DOM.lightbox.classList.remove('visible');
+}
+
+function renderComments(comments) {
+    if (!DOM.modalBody) {
+        console.error("Cannot render comments: modal body is not cached.");
+        return;
+    }
+
+    DOM.modalBody.innerHTML = "";
+
+    if (!comments || comments.length === 0) {
+        DOM.modalBody.innerHTML = `<p class="no-comments-message" data-translate-key="noComments">${Utils.getTranslation('noComments')}</p>`;
+        return;
+    }
+
+    const commentList = document.createElement("div");
+    commentList.className = "comments-list";
+
+    const commentTemplate = document.getElementById('comment-template');
+
+    if (!commentTemplate) {
+        console.error("Comment template not found!");
+        DOM.modalBody.innerHTML = `<p class="no-comments-message">Error: Comment template is missing.</p>`;
+        return;
+    }
+
+    comments.forEach(comment => {
+        const templateClone = commentTemplate.content.cloneNode(true);
+        const commentItem = templateClone.querySelector('.comment-item');
+
+        commentItem.dataset.commentId = comment.id;
+
+        templateClone.querySelector('.comment-author').textContent = comment.user;
+        templateClone.querySelector('.comment-avatar img').src = comment.avatar;
+        templateClone.querySelector('.comment-text').textContent = comment.text;
+        templateClone.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
+        templateClone.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
+
+        const likeBtn = templateClone.querySelector('.comment-like-btn');
+        if (comment.isLiked) {
+            likeBtn.classList.add('active');
+        }
+
+        const commentImageAttachment = templateClone.querySelector('.comment-image-attachment');
+        if (comment.image_url) {
+            commentImageAttachment.style.display = 'block';
+            templateClone.querySelector('.comment-image').src = comment.image_url;
+            templateClone.querySelector('.comment-image').addEventListener('click', () => openImageLightbox(comment.image_url));
+        }
+
+        if (comment.canEdit) {
+             templateClone.querySelector('.comment-options').style.display = 'block';
+        }
+
+        commentList.appendChild(templateClone);
+    });
+
+    DOM.modalBody.appendChild(commentList);
+}
+
+function updateCommentFormVisibility() {
+    const isLoggedIn = State.get("isUserLoggedIn");
+    if (DOM.form && DOM.prompt) {
+        DOM.form.style.display = isLoggedIn ? "flex" : "none";
+        DOM.prompt.style.display = isLoggedIn ? "none" : "block";
+    }
+}
+
+export const CommentsModal = {
+    init() {
+        cacheDOM();
+
+        if (!DOM.commentsModal) {
+            console.error("CommentsModal.init() failed: Modal container not found.");
+            return;
+        }
+
+        initEmojiPicker();
+
+        if (DOM.fileInput) {
+            DOM.fileInput.addEventListener('change', handleImageSelect);
+        }
+
+        if (DOM.lightboxClose) {
+            DOM.lightboxClose.addEventListener('click', closeImageLightbox);
+        }
+
+        if (DOM.lightbox) {
+            DOM.lightbox.addEventListener('click', (e) => {
+                if (e.target === DOM.lightbox) {
+                    closeImageLightbox();
                 }
             });
         }
-    },
 
-    updateCommentFormVisibility() {
-        if (State.get("isUserLoggedIn")) {
-            this.commentForm.style.display = 'flex';
-            this.loginPrompt.style.display = 'none';
-        } else {
-            this.commentForm.style.display = 'none';
-            this.loginPrompt.style.display = 'block';
+        if (DOM.form) {
+            DOM.form.addEventListener('submit', handleFormSubmit);
         }
+
+        if (DOM.modalBody) {
+            DOM.modalBody.addEventListener('click', handleCommentAction);
+        }
+
+        const sortDropdown = DOM.commentsModal.querySelector('.sort-dropdown');
+        if (sortDropdown) {
+            const trigger = sortDropdown.querySelector('.sort-trigger');
+            const options = sortDropdown.querySelectorAll('.sort-option');
+
+            trigger.addEventListener('click', () => sortDropdown.classList.toggle('open'));
+
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const newSort = option.dataset.sort;
+                    if (newSort !== currentSort) {
+                        currentSort = newSort;
+                        sortAndRerenderComments();
+
+                        // Update UI
+                        sortDropdown.querySelector('.current-sort').textContent = option.textContent;
+                        options.forEach(opt => opt.classList.remove('active'));
+                        option.classList.add('active');
+                    }
+                    sortDropdown.classList.remove('open');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!sortDropdown.contains(e.target)) {
+                    sortDropdown.classList.remove('open');
+                }
+            });
+        }
+
+        console.log("CommentsModal initialized successfully.");
     },
+    renderComments,
+    updateCommentFormVisibility,
+    toggleEmojiPicker,
+    hideEmojiPicker,
+    handleImageAttachment,
+    removeCommentImage,
+    selectedCommentImage: () => selectedCommentImage
 };
-
-export { CommentsModal };

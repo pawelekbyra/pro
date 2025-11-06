@@ -11,6 +11,7 @@ import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
 import { CommentsModal } from './modules/comments-modal.js';
+import { ProfileModal } from './modules/profile-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -96,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
             if (e.target === modal) UI.closeModal(modal);
@@ -105,6 +106,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .querySelector(".modal-close-btn, .topbar-close-btn")
             ?.addEventListener("click", () => UI.closeModal(modal));
         });
+
+      // Dedicated handler for comments modal background click
+      const commentsModal = UI.DOM.commentsModal;
+      if (commentsModal) {
+        commentsModal.addEventListener('click', (e) => {
+          if (e.target === commentsModal) {
+            UI.closeCommentsModal();
+          }
+        });
+      }
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
@@ -160,9 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
-        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
-        FirstLoginModal.checkProfileAndShowModal(data.userData);
+        // Wymuś modal, jeśli potrzebny.
+        FirstLoginModal.enforceModalIfIncomplete(data.userData);
       });
 
       // Listener dla wylogowania
@@ -187,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.on('state:change:currentLang', ({ newValue }) => {
         console.log(`Language changed to: ${newValue}`);
         UI.updateTranslations();
+        TippingModal.updateLanguage();
       });
     }
 
@@ -201,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
+          FirstLoginModal.enforceModalIfIncomplete(userData);
         } else {
           console.log('User is not logged in');
         }
@@ -327,6 +339,12 @@ document.addEventListener("DOMContentLoaded", () => {
               handleMediaChange(swiper);
 
               // *** NOWA LOGIKA UKRYWANIA PRELOADERA (PRZYSPIESZENIE) ***
+              setTimeout(() => {
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                if (activeSlide) {
+                    activeSlide.querySelector('.tiktok-symulacja').classList.add('video-loaded');
+                }
+              }, 400);
               UI.DOM.preloader.classList.add("preloader-hiding");
               UI.DOM.container.classList.add("ready");
               PWA.runStandaloneCheck();
@@ -346,57 +364,27 @@ document.addEventListener("DOMContentLoaded", () => {
               // *******************************************************
             },
             slideChange: handleMediaChange,
-            click: function (swiper, event) {
-                // 1. Zidentyfikuj element interaktywny (z sidebar'a lub innego miejsca)
-                const actionTarget = event.target.closest('[data-action]');
+            click: function(swiper, event) {
+              // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
+              // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
+              // Główny handler na `document.body` zajmie się resztą.
+              if (event.target.closest('[data-action]')) {
+                return;
+              }
 
-                if (actionTarget) {
-                    // KLUCZOWA ZMIANA: Natychmiast zatrzymaj propagację ZDARZENIA.
-                    // Gwarantuje to, że żaden inny globalny listener (ani dalsza logika Swipera)
-                    // nie przetworzy tego jako kliknięcia "w tle" lub na wideo.
-                    event.stopPropagation();
+              const activeSlide = swiper.slides[swiper.activeIndex];
+              const video = activeSlide?.querySelector("video");
+              if (!video) return;
 
-                    // Wywołaj centralny handler, który wie, co zrobić z tą akcją.
-                    Handlers.mainClickHandler(event);
-
-                    return; // Zakończ działanie handlera Swipera
-                }
-
-                // 2. Jeśli kliknięto na element wewnątrz sidebara lub bottombara, który
-                // nie ma data-action, nadal zignoruj.
-                if (event.target.closest('.sidebar, .bottombar, .secret-overlay')) {
-                    return;
-                }
-
-                // 3. Jeśli nie było to kliknięcie na interaktywny element ani pasek UI,
-                // przejdź do oryginalnej logiki play/pause wideo.
-
-                const activeSlide = swiper.slides[swiper.activeIndex];
-                const video = activeSlide?.querySelector('video');
-
-                if (!video) return;
-
-                const pauseOverlay = activeSlide.querySelector('.pause-overlay');
-                const replayOverlay = activeSlide.querySelector('.replay-overlay');
-
-                // Case 1: Video has ended -> Replay
-                if (video.ended) {
-                    video.currentTime = 0;
-                    video.play().catch(err => console.log("Błąd replay:", err));
-                    if (replayOverlay) replayOverlay.classList.remove('visible');
-                    return;
-                }
-
-                // Case 2: Video is paused -> Play
-                if (video.paused) {
-                    video.play().catch(err => console.log("Błąd play:", err));
-                    if (pauseOverlay) pauseOverlay.classList.remove('visible');
-                }
-                // Case 3: Video is playing -> Pause
-                else {
-                    video.pause();
-                    if (pauseOverlay) pauseOverlay.classList.add('visible');
-                }
+              if (video.paused) {
+                video.play().catch((err) => console.log("Błąd play:", err));
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
+                if (pauseOverlay) pauseOverlay.classList.remove("visible");
+              } else {
+                video.pause();
+                const pauseOverlay = activeSlide.querySelector(".pause-overlay");
+                if (pauseOverlay) pauseOverlay.classList.add("visible");
+              }
             },
           },
         });
@@ -455,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
         FirstLoginModal.init();
         TippingModal.init();
         CommentsModal.init();
+        ProfileModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
@@ -479,9 +468,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
+      mockBtn.textContent = 'DEBUG: Pokaż First Login Modal';
+      mockBtn.removeEventListener('click', () => {}); // Usuń stary listener TippingModal
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
+        // 1. Mockuj logowanie jako użytkownik z niekompletnym profilem
+        authManager.mockLogin({
+          is_profile_complete: false,
+          email: 'mock_user_for_fl@test.com'
+        });
         UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+
+        // 2. Wymuś otwarcie modala bezpośrednio, używając danych z mocka
+        const userData = State.get('currentUser');
+        if (userData) {
+          FirstLoginModal.enforceModalIfIncomplete(userData);
+        }
       });
     }
     // Koniec LOGIKA MOCK BUTTON

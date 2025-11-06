@@ -9,6 +9,44 @@ function setPwaModule(pwaModule) {
   PWA_MODULE = pwaModule;
 }
 
+let countdownInterval = null;
+
+function startCountdown() {
+  const countdownElement = document.getElementById('countdown-timer');
+  const countdownDateElement = document.getElementById('countdown-date');
+  if (!countdownElement || !countdownDateElement) return;
+
+  const endDate = new Date(countdownDateElement.textContent).getTime();
+
+  const updateCountdown = () => {
+    const now = new Date().getTime();
+    const distance = endDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownElement.textContent = "Premiera!";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdownElement.innerHTML = `
+      <span class="countdown-part">${days}<span class="countdown-label-small">dni</span></span>
+      <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label-small">h</span></span>
+      <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label-small">m</span></span>
+      <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label-small">s</span></span>`;
+  };
+
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
 let selectedCommentImage = null;
 
 const DOM = {};
@@ -86,24 +124,59 @@ function trapFocus(modal) {
 const activeModals = new Set();
 
 function openModal(modal, options = {}) {
-    if (!modal) return;
+    if (!modal) {
+        console.error("Attempted to open a null modal element.");
+        return;
+    }
 
-    modal.style.display = ''; // Remove inline style if it exists
-    modal.classList.add('visible');
+    modal.style.display = 'flex';
+    modal.classList.remove("is-hiding");
+    if(options.animationClass) {
+        modal.classList.remove(options.animationClass);
+    }
+
+    if (modal.id === 'comments-modal-container') {
+        const swiper = State.get('swiper');
+        if (swiper) {
+            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+            const count = slideData ? slideData.initialComments : 0;
+            const titleEl = modal.querySelector('#commentsTitle');
+            if (titleEl) {
+                titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
+            }
+        }
+    }
+
+    if (modal.id === 'infoModal') {
+        startCountdown();
+    }
+
+    // Delay adding the 'visible' class to allow the display property to take effect.
+    requestAnimationFrame(() => {
+        modal.classList.add('visible');
+        if (options.animationClass) {
+            modal.classList.add(options.animationClass);
+        }
+    });
+
+    if (!options.isPersistent) {
+        // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
+        const closeOnClick = (e) => {
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        };
+        modal.addEventListener('click', closeOnClick);
+        // Przechowaj referencję do funkcji, aby móc ją usunąć
+        modal._closeOnClick = closeOnClick;
+    }
+
     activeModals.add(modal);
+    document.body.style.overflow = 'hidden';
 
-    if (activeModals.size === 1) {
-        document.body.style.overflow = 'hidden';
-    }
-
-    if (options.onOpen) {
-        options.onOpen();
-    }
-
-    // Store the onClose callback on the element itself
-    if (options.onClose) {
-        modal.onCloseCallback = options.onClose;
-    }
+    if (options.onOpen) options.onOpen();
+    if (options.onClose) modal.onCloseCallback = options.onClose;
 
     State.set("lastFocusedElement", document.activeElement);
     DOM.container.setAttribute("aria-hidden", "true");
@@ -113,17 +186,27 @@ function openModal(modal, options = {}) {
     modal._focusTrapDispose = trapFocus(modal);
 }
 
-function closeModal(modal) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+function closeModal(modal, options = {}) {
+    if (!modal || !activeModals.has(modal)) return;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
+    const animationClass = options.animationClass || '';
+    const isSlideAnimation = animationClass.includes('slide');
 
-    modal.classList.add("is-hiding");
+    // Unbind the background click listener immediately
+    if (modal._closeOnClick) {
+        modal.removeEventListener('click', modal._closeOnClick);
+        delete modal._closeOnClick;
+    }
+
     modal.setAttribute("aria-hidden", "true");
 
     const cleanup = () => {
+        modal.removeEventListener("animationend", cleanup);
         modal.removeEventListener("transitionend", cleanup);
+
+        modal.style.display = 'none';
         modal.classList.remove("visible", "is-hiding");
+        if(animationClass) modal.classList.remove(animationClass);
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
@@ -134,33 +217,33 @@ function closeModal(modal) {
 
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
+            DOM.container.removeAttribute("aria-hidden");
         }
 
-        DOM.container.removeAttribute("aria-hidden");
-        State.get("lastFocusedElement")?.focus();
+        if (!options.keepFocus) {
+            State.get("lastFocusedElement")?.focus();
+        }
 
-        // Execute and clear the onClose callback
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
             delete modal.onCloseCallback;
         }
-
-        if (modal.id === "commentsModal") {
-            State.set("replyingToComment", null, true);
-            const replyContext = document.querySelector(".reply-context");
-            if (replyContext) replyContext.style.display = "none";
-            if (typeof UI.removeCommentImage === 'function') UI.removeCommentImage();
-            const commentInput = document.querySelector("#comment-input");
-            if (commentInput) commentInput.value = "";
-        }
     };
 
-    if (isAnimated) {
-        modal.addEventListener("transitionend", cleanup, { once: true });
-        setTimeout(cleanup, 500); // Fallback
+    // Choose the right event to listen for
+    const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
+    modal.addEventListener(eventToListen, cleanup, { once: true });
+
+    // Trigger the animation/transition
+    if (animationClass) {
+        modal.classList.add(animationClass);
     } else {
-        cleanup();
+        modal.classList.add('is-hiding'); // For modals like comments
+        modal.classList.remove('visible'); // For standard fade-out modals
     }
+
+    // Fallback timer
+    setTimeout(cleanup, 500);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
@@ -1022,4 +1105,30 @@ export const UI = {
   closeImageLightbox,
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
+  closeCommentsModal,
 };
+
+function closeCommentsModal() {
+    const modal = DOM.commentsModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const cleanup = () => {
+        modal.removeEventListener('transitionend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            State.get('lastFocusedElement')?.focus();
+        }
+    };
+
+    modal.addEventListener('transitionend', cleanup, { once: true });
+    // Fallback w razie gdyby event się nie odpalił
+    setTimeout(cleanup, 400);
+}
