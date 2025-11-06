@@ -1569,7 +1569,6 @@ body,
 .fl-modal-overlay,
 #commentsModal,
 .account-modal-overlay,
-#tiktok-profile-modal,
 .crop-modal,
 .image-lightbox {
   position: fixed;
@@ -3325,6 +3324,12 @@ body,
   height: 16px;
   margin-right: 4px;
   fill: white;
+}
+
+@media (min-width: 600px) {
+  #tiktok-profile-modal {
+    position: absolute !important;
+  }
 }
 
 /* --- Toast Notification --- */
