@@ -129,39 +129,33 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    modal.style.display = 'flex';
-    modal.classList.remove("is-hiding");
-    if(options.animationClass) {
-        modal.classList.remove(options.animationClass);
-    }
+    // Reset any previous animation classes
+    modal.classList.remove('modal-is-sliding-out', 'modal-is-sliding-in', 'is-hiding');
 
-    if (modal.id === 'comments-modal-container') {
-        const swiper = State.get('swiper');
-        if (swiper) {
-            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-            const count = slideData ? slideData.initialComments : 0;
-            const titleEl = modal.querySelector('#commentsTitle');
-            if (titleEl) {
-                titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
-            }
-        }
-    }
+    modal.style.display = 'flex';
 
     if (modal.id === 'infoModal') {
         startCountdown();
     }
 
-    // Delay adding the 'visible' class to allow the display property to take effect.
-    requestAnimationFrame(() => {
-        modal.classList.add('visible');
-        if (options.animationClass) {
-            modal.classList.add(options.animationClass);
-        }
-    });
+    // This part handles the "wagon" animation
+    if (options.animationClass === 'modal-is-sliding-in') {
+        modal.classList.add('visible'); // Make overlay visible immediately
+        modal.classList.add('modal-is-sliding-in');
+
+        const onAnimationEnd = () => {
+            modal.classList.remove('modal-is-sliding-in');
+            modal.removeEventListener('animationend', onAnimationEnd);
+        };
+        modal.addEventListener('animationend', onAnimationEnd);
+    } else {
+        // Standard fade-in/scale-in animation
+        requestAnimationFrame(() => {
+            modal.classList.add('visible');
+        });
+    }
 
     if (!options.isPersistent) {
-        // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
         modal.addEventListener('click', function closeOnClick(e) {
             if (e.target === modal) {
                 closeModal(modal);
@@ -180,32 +174,20 @@ function openModal(modal, options = {}) {
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
     const focusable = getFocusable(modal);
-    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content"))?.focus();
+    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .elegant-modal-content"))?.focus();
     modal._focusTrapDispose = trapFocus(modal);
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+    if (!modal || !activeModals.has(modal)) return;
 
-    const animationClass = options.animationClass;
-    const isSlideAnimation = animationClass && animationClass.includes('slide');
-
-    // Use is-hiding for standard fade-out, or a specific class for slide-out
-    const hidingClass = animationClass || 'is-hiding';
-    modal.classList.add(hidingClass);
     modal.setAttribute("aria-hidden", "true");
 
-    // For non-slide animations, we also remove 'visible' to trigger the fade-out
-    if (!isSlideAnimation) {
-        modal.classList.remove('visible');
-    }
-
     const cleanup = () => {
-        // Remove both listeners to be safe
-        modal.removeEventListener("animationend", cleanup);
-        modal.removeEventListener("transitionend", cleanup);
+        modal.removeEventListener('animationend', cleanup);
+        modal.removeEventListener('transitionend', cleanup);
 
-        modal.classList.remove("visible", "is-hiding", "slide-out-left", "slide-in-right");
+        modal.classList.remove('visible', 'is-hiding', 'modal-is-sliding-out', 'modal-is-sliding-in');
         modal.style.display = 'none';
 
         if (modal._focusTrapDispose) {
@@ -230,12 +212,17 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    // Listen to the appropriate event based on the animation type
-    const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
-    modal.addEventListener(eventToListen, cleanup, { once: true });
+    if (options.animationClass === 'modal-is-sliding-out') {
+        modal.classList.add('modal-is-sliding-out');
+        modal.addEventListener('animationend', cleanup, { once: true });
+    } else {
+        // Standard fade-out
+        modal.classList.remove('visible');
+        modal.addEventListener('transitionend', cleanup, { once: true });
+    }
 
-    // Fallback timer to ensure the modal always closes
-    setTimeout(cleanup, 600);
+    // Fallback timer
+    setTimeout(cleanup, 550);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
