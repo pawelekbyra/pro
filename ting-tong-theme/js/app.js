@@ -466,15 +466,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
-      // ZMIEŃ logikę mockBtn na otwieranie TippingModal
-      mockBtn.textContent = 'DEBUG: Pokaż Tipping Modal';
-      mockBtn.removeEventListener('click', (e) => {}); // Usuń stary listener jeśli istnieje
+      mockBtn.textContent = 'DEBUG: Pokaż First Login Modal';
+      mockBtn.removeEventListener('click', () => {}); // Usuń stary listener TippingModal
       mockBtn.addEventListener('click', () => {
-        // Mockowe dane na potrzeby testu
-        State.set('isUserLoggedIn', true, true);
-        State.set('currentUser', { email: 'debug@test.com' }, true);
-        TippingModal.showModal();
-        UI.showAlert('Mock logowanie i otwarcie modala napiwków.', false);
+        // 1. Mockuj logowanie jako użytkownik z niekompletnym profilem
+        authManager.mockLogin({
+          is_profile_complete: false,
+          email: 'mock_user_for_fl@test.com'
+        });
+        UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+
+        // 2. Wymuś otwarcie modala bezpośrednio, używając danych z mocka
+        const userData = State.get('currentUser');
+        if (userData) {
+          FirstLoginModal.enforceModalIfIncomplete(userData);
+        }
       });
     }
     // Koniec LOGIKA MOCK BUTTON
