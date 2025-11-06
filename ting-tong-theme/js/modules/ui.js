@@ -162,12 +162,14 @@ function openModal(modal, options = {}) {
 
     if (!options.isPersistent) {
         // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
-        modal.addEventListener('click', function closeOnClick(e) {
+        const closeOnClick = (e) => {
             if (e.target === modal) {
                 closeModal(modal);
-                modal.removeEventListener('click', closeOnClick);
             }
-        });
+        };
+        modal.addEventListener('click', closeOnClick);
+        // Przechowaj referencję do funkcji, aby móc ją usunąć
+        modal._closeOnClick = closeOnClick;
     }
 
     activeModals.add(modal);
@@ -185,28 +187,26 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+    if (!modal || !activeModals.has(modal)) return;
 
-    const animationClass = options.animationClass;
-    const isSlideAnimation = animationClass && animationClass.includes('slide');
+    const animationClass = options.animationClass || '';
+    const isSlideAnimation = animationClass.includes('slide');
 
-    // Use is-hiding for standard fade-out, or a specific class for slide-out
-    const hidingClass = animationClass || 'is-hiding';
-    modal.classList.add(hidingClass);
-    modal.setAttribute("aria-hidden", "true");
-
-    // For non-slide animations, we also remove 'visible' to trigger the fade-out
-    if (!isSlideAnimation) {
-        modal.classList.remove('visible');
+    // Unbind the background click listener immediately
+    if (modal._closeOnClick) {
+        modal.removeEventListener('click', modal._closeOnClick);
+        delete modal._closeOnClick;
     }
 
+    modal.setAttribute("aria-hidden", "true");
+
     const cleanup = () => {
-        // Remove both listeners to be safe
         modal.removeEventListener("animationend", cleanup);
         modal.removeEventListener("transitionend", cleanup);
 
-        modal.classList.remove("visible", "is-hiding", "slide-out-left", "slide-in-right");
         modal.style.display = 'none';
+        modal.classList.remove("visible", "is-hiding");
+        if(animationClass) modal.classList.remove(animationClass);
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
@@ -230,12 +230,20 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    // Listen to the appropriate event based on the animation type
+    // Choose the right event to listen for
     const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
     modal.addEventListener(eventToListen, cleanup, { once: true });
 
-    // Fallback timer to ensure the modal always closes
-    setTimeout(cleanup, 600);
+    // Trigger the animation/transition
+    if (animationClass) {
+        modal.classList.add(animationClass);
+    } else {
+        modal.classList.add('is-hiding'); // For modals like comments
+        modal.classList.remove('visible'); // For standard fade-out modals
+    }
+
+    // Fallback timer
+    setTimeout(cleanup, 500);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
