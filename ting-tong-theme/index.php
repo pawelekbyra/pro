@@ -53,6 +53,7 @@ get_header();
                                     <option value="usd">USD</option>
                                     <option value="gbp">GBP</option>
                                 </select>
+                                <span class="currency-dropdown-arrow">▼</span>
                             </div>
                         </div>
                         <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
@@ -748,7 +749,7 @@ get_header();
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
                     <h2 id="info-modal-title" class="crowdfunding-title" style="text-align: center; margin-bottom: 5px;">Wspieraj Ting Tong</h2>
-                    <p class="crowdfunding-subtitle" style="font-size: 14px;">Dołącz do grona Patronów</p>
+                    <p class="crowdfunding-subtitle" style="font-size: 14px;">i dołącz do grona Patronów</p>
                 </div>
 
                 <div class="progress-section">
@@ -762,10 +763,10 @@ get_header();
                 </div>
 
                 <div class="countdown-section">
+                    <div class="premiere-date-label">Premiera już <br> <span class="premiere-date-value">1.01.2026</span></div>
                     <div class="countdown-label">Pozostało</div>
                     <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
                     <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
-                    <div class="premiere-date-label">Premiera już <br> <span style="font-size: 24px; font-weight: bold;">.01.2026</span></div>
                 </div>
 
                 <div class="stats-grid">
@@ -781,9 +782,7 @@ get_header();
 
                 <div class="cta-section">
                     <button class="cta-button" data-action="open-tipping-from-info">
-                        <div class="shiny-tip-button">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"></rect><path d="M2 10h20"></path><circle cx="18" cy="13" r="2"></circle></svg>
-                        </div>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
                         <span>Zostań Patronem</span>
                     </button>
                 </div>
