@@ -527,6 +527,19 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
+      case "open-profile-modal":
+        const swiperInstance = State.get('swiper');
+        if (swiperInstance) {
+            const activeSlide = swiperInstance.slides[swiperInstance.activeIndex];
+            const slideId = activeSlide.dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData && slideData.author) {
+                import('./profile-modal.js').then(({ ProfileModal }) => {
+                    ProfileModal.open(slideData.author);
+                });
+            }
+        }
+        break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
         AccountPanel.openAccountModal();
