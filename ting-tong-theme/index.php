@@ -139,6 +139,7 @@ get_header();
           <div class="fl-fields-container">
             <input type="text" id="flFirstName" class="fl-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Imię">
             <input type="text" id="flLastName" class="fl-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Nazwisko">
+            <div id="flNameError" class="elegant-modal-error"></div>
             <p class="fl-hint-text" data-translate-key="firstLoginNameHint">Informacje te będą widoczne publicznie.</p>
           </div>
         </div>
@@ -150,6 +151,7 @@ get_header();
             <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
             <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
             <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
+            <div id="flPasswordError" class="elegant-modal-error"></div>
           </div>
         </div>
 
