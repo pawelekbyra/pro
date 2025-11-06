@@ -529,20 +529,16 @@ export const Handlers = {
         break;
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
-
-        // 1. Immediately start the process for the new modal
-        TippingModal.showModal({ animationClass: 'slide-in-right' });
-
-        // 2. Animate out the old modal simultaneously
         if (infoModal && infoModal.classList.contains('visible')) {
-            infoModal.classList.add('slide-out-left');
-
-            // 3. Clean up the old modal after the animation
-            setTimeout(() => {
-                UI.closeModal(infoModal, { keepFocus: true });
-                infoModal.classList.remove('slide-out-left'); // Reset for next time
-            }, 500); // Duration should match CSS animation
+            // Animate out the old modal
+            UI.closeModal(infoModal, {
+                keepFocus: true,
+                animationClass: 'slide-out-left'
+            });
         }
+
+        // Animate in the new modal
+        TippingModal.showModal({ animationClass: 'slide-in-right' });
         break;
       }
       case "open-desktop-pwa-modal":
