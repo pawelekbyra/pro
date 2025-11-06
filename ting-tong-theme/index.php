@@ -344,6 +344,59 @@ get_header();
     </div>
 </div>
 
+<!-- TikTok Profile Modal -->
+<div id="tiktok-profile-modal">
+    <div class="profile-content">
+        <header class="profile-header">
+            <button class="back-btn" data-action="close-profile-modal"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+            <h2 class="username-header"></h2>
+            <button class="options-btn"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+        </header>
+        <main>
+            <div class="info-section">
+                <div class="avatar-container">
+                    <img src="" alt="Avatar" class="profile-avatar">
+                </div>
+                <div class="stats-container">
+                    <div class="stat">
+                        <strong class="stat-number following-count">0</strong>
+                        <span class="stat-label" data-translate-key="following">Obserwuje</span>
+                    </div>
+                    <div class="stat">
+                        <strong class="stat-number followers-count">0</strong>
+                        <span class="stat-label" data-translate-key="followers">Obserwujący</span>
+                    </div>
+                    <div class="stat">
+                        <strong class="stat-number likes-count">0</strong>
+                        <span class="stat-label" data-translate-key="likes">Polubienia</span>
+                    </div>
+                </div>
+            </div>
+            <h1 class="fullname"></h1>
+            <p class="bio"></p>
+            <div class="profile-actions">
+                <button class="follow-btn" data-translate-key="follow">Obserwuj</button>
+                <button class="social-btn instagram"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></button>
+                <button class="social-btn youtube"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2A29 29 0 0 0 23 11.75a29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></button>
+            </div>
+            <div class="tabs">
+                <div class="tab active" data-tab-content="videos-grid"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg></div>
+                <div class="tab" data-tab-content="liked-grid"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+                <div class="tab" data-tab-content="reposts-grid"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
+            </div>
+            <div class="video-gallery active" id="videos-grid">
+                <!-- Video thumbnails will be dynamically inserted here -->
+            </div>
+             <div class="video-gallery" id="liked-grid">
+                <!-- Liked video thumbnails will be dynamically inserted here -->
+            </div>
+            <div class="video-gallery" id="reposts-grid">
+                <!-- Reposted video thumbnails will be dynamically inserted here -->
+            </div>
+        </main>
+    </div>
+</div>
+
 <!-- Comments Modal -->
 <div id="comments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title" aria-hidden="true">
     <div class="modal-content" tabindex="-1">

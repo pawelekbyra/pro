@@ -11,6 +11,7 @@ import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
 import { CommentsModal } from './modules/comments-modal.js';
+import { ProfileModal } from './modules/profile-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -94,6 +95,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
+
+      document.body.addEventListener('click', e => {
+        const profileButton = e.target.closest('.profileButton');
+        if (profileButton) {
+            e.stopPropagation();
+            const swiper = State.get('swiper');
+            if (!swiper) return;
+            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+            const slideData = slidesData.find((s) => s.id === slideId);
+            if (slideData && slideData.author) {
+                ProfileModal.open(slideData.author);
+            }
+        }
+      }, true);
 
       document
         .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container)")
@@ -442,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
         FirstLoginModal.init();
         TippingModal.init();
         CommentsModal.init();
+        ProfileModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
