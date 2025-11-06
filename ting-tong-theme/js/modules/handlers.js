@@ -527,32 +527,17 @@ export const Handlers = {
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'));
         break;
-      case "open-tipping-from-info":
+      case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
-        const tippingModal = document.getElementById('tippingModal');
-
-        if (infoModal && tippingModal) {
-            // Prevent flickering by making the background of the incoming modal transparent
-            const originalTippingBg = tippingModal.style.background;
-            tippingModal.style.background = 'transparent';
-
-            // Start both animations simultaneously
-            infoModal.classList.add('slide-out-left');
-            tippingModal.classList.add('slide-in-right');
-            TippingModal.showModal(); // Make the modal visible to play animation
-
-            // After the animation, clean up and restore background
-            setTimeout(() => {
-                infoModal.classList.remove('visible', 'slide-out-left');
-                tippingModal.classList.remove('slide-in-right');
-                tippingModal.style.background = originalTippingBg; // Restore background
-            }, 500); // Corresponds to CSS animation duration
-        } else {
-            // Fallback for safety
-            UI.closeModal(infoModal);
-            TippingModal.showModal();
+        if (infoModal) {
+            UI.closeModal(infoModal, { animationClass: 'slide-out-left', keepFocus: true });
         }
+        // Open tipping modal with a slight delay to ensure the animations look smooth
+        setTimeout(() => {
+            TippingModal.showModal({ animationClass: 'slide-in-right' });
+        }, 50); // A small delay can help browsers sequence the animations
         break;
+      }
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
         break;

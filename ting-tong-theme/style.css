@@ -4202,7 +4202,7 @@ body,
   color: #e4e6eb;
   width: 100%;
   max-width: 100%;
-  max-height: 90vh;
+  height: 75vh;
   border-radius: 16px 16px 0 0;
   padding: 0;
   transform: translateY(100%);
@@ -5482,8 +5482,8 @@ body,
 }
 
 #infoModal .cta-button svg {
-    width: 22px;
-    height: 22px;
+    width: 32px;
+    height: 32px;
     fill: #fff;
 }
 
