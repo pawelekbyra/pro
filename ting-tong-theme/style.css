@@ -5491,44 +5491,33 @@ body,
     stroke-width: 1.5;
 }
 
-/* ============================================================================
-   --- MODAL WAGON TRANSITION ---
-   ============================================================================ */
-
-/* Animacja dla modala znikającego w lewo */
-@keyframes slide-out-to-left {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(-110%); /* Move a bit further to avoid edge artifacts */
-    opacity: 0;
-  }
+/* Modal Transition Animations */
+.modal-overlay.slide-out-left .modal-content,
+.modal-overlay.slide-out-left .elegant-modal-content {
+    animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Animacja dla modala pojawiającego się z prawej */
-@keyframes slide-in-from-right {
-  from {
-    transform: translateX(110%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.modal-overlay.slide-in-right .modal-content,
+.modal-overlay.slide-in-right .elegant-modal-content {
+    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Klasa dla modala, który ma zniknąć */
-.modal-is-sliding-out .modal-content,
-.modal-is-sliding-out .elegant-modal-content {
-  animation: slide-out-to-left 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
 }
 
-/* Klasa dla modala, który ma się pojawić */
-.modal-is-sliding-in .modal-content,
-.modal-is-sliding-in .elegant-modal-content {
-  animation: slide-in-from-right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
 }
 
 #app-frame[style*="pointer-events: none"] {

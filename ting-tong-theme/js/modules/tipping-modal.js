@@ -172,14 +172,7 @@ function validateStep(step) {
     else if (step === 1) {
         const amount = parseFloat(dom.amountInput.value);
         const currency = dom.currencySelect.value.toLowerCase();
-        let minAmount;
-        if (currency === 'pln') {
-            minAmount = 1;
-        } else if (currency === 'eur') {
-            minAmount = 0.5;
-        } else {
-            minAmount = 1;
-        }
+        const minAmount = (currency === 'pln') ? 5 : 1;
 
         if (isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
