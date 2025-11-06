@@ -746,44 +746,57 @@ get_header();
     <div class="modal-content">
         <button class="modal-close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
         <div class="modal-body" id="infoModalBody">
+            <?php
+            // Ta sekcja PHP jest już obecna w kodzie, nie ma potrzeby jej duplikować.
+            // Zapewnia ona, że dane są dostępne do wyświetlenia.
+            if (!isset($crowdfunding_data)) {
+                $crowdfunding_data = tt_get_crowdfunding_data();
+                $goal_eur = $crowdfunding_data['goal_eur'];
+                $collected_eur = $crowdfunding_data['collected_eur'];
+                $percentage = $crowdfunding_data['percentage'];
+                $supporters = $crowdfunding_data['supporters'];
+                $pln_goal = $crowdfunding_data['pln_goal'];
+                $pln_collected = $crowdfunding_data['pln_collected'];
+            }
+            ?>
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
-                    <h2 id="info-modal-title" class="crowdfunding-title" style="text-align: center; margin-bottom: 5px;">Wspieraj Ting Tong</h2>
-                    <p class="crowdfunding-subtitle" style="font-size: 14px;">i dołącz do grona Patronów</p>
+                    <h2 id="info-modal-title" class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspieraj Ting Tong</h2>
+                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">i dołącz do grona Patronów</p>
                 </div>
 
                 <div class="progress-section">
                     <div class="progress-bar-wrapper">
-                        <div class="progress-bar-fill" style="width: 75%;"></div>
+                        <div class="progress-bar-fill" style="width: <?php echo esc_attr($percentage); ?>%;"></div>
                         <div class="progress-bar-sparkle"></div>
                     </div>
-                    <div class="progress-label">
-                        <span>Cel: <strong>3,750 z 5,000 PLN</strong> (75%)</span>
+                    <div class="progress-label" data-translate-key-dynamic="crowdfundingGoalLabel" data-collected="<?php echo esc_attr(number_format($pln_collected, 0, ',', ' ')); ?>" data-goal="<?php echo esc_attr(number_format($pln_goal, 0, ',', ' ')); ?>" data-percentage="<?php echo esc_attr(round($percentage)); ?>">
+                        <span>Cel: <strong><?php echo esc_html(number_format($pln_collected, 0, ',', ' ')); ?> z <?php echo esc_html(number_format($pln_goal, 0, ',', ' ')); ?> PLN</strong> (<?php echo esc_html(round($percentage)); ?>%)</span>
                     </div>
                 </div>
 
                 <div class="countdown-section">
-                    <div class="premiere-date-label">Premiera już <br> <span class="premiere-date-value">1.01.2026</span></div>
-                    <div class="countdown-label">Pozostało</div>
+                    <div class="premiere-date-label" data-translate-key="crowdfundingPremiereLabel">Premiera już <br> <span class="premiere-date-value">1.01.2026</span></div>
+                    <div class="countdown-label" data-translate-key="crowdfundingCountdownLabel">Pozostało</div>
                     <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
                     <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-value">128</span>
-                        <span class="stat-label">Patronów</span>
+                        <span class="stat-value"><?php echo esc_html($supporters); ?></span>
+                        <span class="stat-label" data-translate-key="crowdfundingSupportersLabel">Patronów</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">5,000 PLN</span>
-                        <span class="stat-label">Cel</span>
+                        <span class="stat-value"><?php echo esc_html(number_format($pln_goal, 0, ',', ' ')); ?> PLN</span>
+                        <span class="stat-label" data-translate-key="crowdfundingGoalStatLabel">Cel</span>
                     </div>
                 </div>
 
                 <div class="cta-section">
                     <button class="cta-button" data-action="open-tipping-from-info">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
-                        <span>Zostań Patronem</span>
+                        <span data-translate-key="crowdfundingCtaButton">Zostań Patronem</span>
                     </button>
                 </div>
             </div>

@@ -131,8 +131,8 @@ export const Config = {
           en: "You will receive login details for the patron section to the provided email."
       },
       tippingStep2Desc: {
-          pl: "Wybierz kwotę napiwku",
-          en: "Choose the tip amount"
+          pl: "Wpisz kwotę napiwku",
+          en: "Enter the tip amount"
       },
       tippingAmountPlaceholder: {
           pl: "Wpisz kwotę",
@@ -159,11 +159,11 @@ export const Config = {
           en: "ENTER"
       },
       tippingSubmit: {
-          pl: "Przejdź do płatności",
+          pl: "ENTER!",
           en: "Proceed to Payment"
       },
       tippingPay: {
-        pl: "Płacę!",
+        pl: "ENTER!",
         en: "Pay!"
       },
       tippingSuccessMessage: {
@@ -339,6 +339,14 @@ export const Config = {
       timeMinute: 'm',
       timeHour: 'h',
       timeDay: 'd',
+      crowdfundingTitle: "Wspieraj Ting Tong",
+      crowdfundingSubtitle: "i dołącz do grona Patronów",
+      crowdfundingGoalLabel: "Cel: <strong>{collected} z {goal} PLN</strong> ({percentage}%)",
+      crowdfundingPremiereLabel: "Premiera już",
+      crowdfundingCountdownLabel: "Pozostało",
+      crowdfundingSupportersLabel: "Patronów",
+      crowdfundingGoalStatLabel: "Cel",
+      crowdfundingCtaButton: "Zostań Patronem",
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -535,6 +543,14 @@ export const Config = {
       timeMinute: 'm',
       timeHour: 'h',
       timeDay: 'd',
+      crowdfundingTitle: "Support Ting Tong",
+      crowdfundingSubtitle: "and join the Patrons",
+      crowdfundingGoalLabel: "Goal: <strong>{collected} of {goal} PLN</strong> ({percentage}%)",
+      crowdfundingPremiereLabel: "Premiere on",
+      crowdfundingCountdownLabel: "Time left",
+      crowdfundingSupportersLabel: "Patrons",
+      crowdfundingGoalStatLabel: "Goal",
+      crowdfundingCtaButton: "Become a Patron",
     }, // KONIEC 'en'
   },
 };
