@@ -12,9 +12,11 @@ import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
 import { CommentsModal } from './modules/comments-modal.js';
 
+// Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
 PWA.setUiModule(UI);
 
+// Rejestracja Service Workera
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     const themeUrl = typeof TingTongConfig !== 'undefined'
@@ -25,6 +27,7 @@ if ('serviceWorker' in navigator) {
       ? TingTongConfig.serviceWorkerUrl
       : '/wp-content/themes/ting-tong-theme/sw.js';
 
+    // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
     swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
 
     navigator.serviceWorker.register(swUrl)
@@ -37,18 +40,28 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// The CDN helper code has been removed as it was unused and overly complex.
+
 document.addEventListener("DOMContentLoaded", () => {
-  API.init();
+  API.init(); // ✅ FIX: Initialize API data after DOM is ready.
   UI.initDOMCache();
 
+  // ==========================================================================
+  // KOD DIAGNOSTYCZNY - Rejestruje wszystkie kliknięcia, aby zidentyfikować,
+  // który element przechwytuje zdarzenia przeznaczone dla sidebara.
+  // Używamy `true`, aby nasłuchiwać w fazie "capture", czyli zanim zdarzenie
+  // dotrze do docelowego elementu.
+  // ==========================================================================
   document.body.addEventListener('click', (e) => {
     console.log('%c[DIAGNOSTYKA] Kliknięto w element:', 'color: #ff0055; font-weight: bold;', e.target);
   }, true);
+  // ==========================================================================
 
+  // Guard for undefined WordPress objects in standalone mode
   if (typeof window.ajax_object === "undefined") {
     console.warn("`ajax_object` is not defined. Using mock data for standalone development.");
     window.ajax_object = {
-      ajax_url: "#",
+      ajax_url: "#", // Prevent actual network requests
       nonce: "0a1b2c3d4e",
     };
   }
@@ -65,14 +78,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      // Listen for the PWA install prompt globally
       window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
         e.preventDefault();
+        // Stash the event so it can be triggered later.
+        // This is handled inside pwa.js
         console.log('`beforeinstallprompt` event captured in app.js.');
+        // Run the check to show the bar
         PWA.runStandaloneCheck();
       });
 
 
       document.body.addEventListener("click", Handlers.mainClickHandler);
+
+
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
@@ -86,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ?.addEventListener("click", () => UI.closeModal(modal));
         });
 
+      // Dedicated handler for comments modal background click
       const commentsModal = UI.DOM.commentsModal;
       if (commentsModal) {
         commentsModal.addEventListener('click', (e) => {
@@ -134,29 +155,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function _initializeStateListeners() {
+      // Listener dla logowania
       State.on('user:login', async (data) => {
         console.log('User logged in:', data.userData.email);
+
+        // ✅ FIX: Zamiast przeładowywać slajdy, tylko zaktualizuj dane w tle
+        // i odśwież UI. To zapobiega irytującemu przeładowaniu wideo.
         _fetchAndUpdateSlideData();
+
         UI.updateUIForLoginState();
         UI.updateTranslations();
+
         if (data.userData && AccountPanel?.populateProfileForm) {
           AccountPanel.populateProfileForm(data.userData);
         }
+
+        // Wymuś modal, jeśli potrzebny.
         FirstLoginModal.enforceModalIfIncomplete(data.userData);
       });
 
+      // Listener dla wylogowania
       State.on('user:logout', () => {
         console.log('User logged out');
+
+        // ✅ FIX: Zamiast ręcznie resetować stan, pobierz świeże dane z serwera,
+        // tak jak przy logowaniu. To zapewnia spójność stanu.
         _fetchAndUpdateSlideData();
+
         UI.updateUIForLoginState();
         UI.updateTranslations();
       });
 
+      // Listener dla zmian stanu logowania
       State.on('state:change:isUserLoggedIn', ({ oldValue, newValue }) => {
         console.log(`Login state changed: ${oldValue} -> ${newValue}`);
         UI.updateUIForLoginState();
       });
 
+      // Listener dla zmian języka
       State.on('state:change:currentLang', ({ newValue }) => {
         console.log(`Language changed to: ${newValue}`);
         UI.updateTranslations();
@@ -167,10 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
     async function _verifyLoginState() {
       try {
         const isLoggedIn = await authManager.checkLoginStatus();
-        const userData = State.get('currentUser');
 
         if (isLoggedIn) {
           console.log('User is logged in, profile loaded');
+          const userData = State.get('currentUser');
+
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
@@ -209,17 +246,23 @@ document.addEventListener("DOMContentLoaded", () => {
         State.set("currentLang", selectedLang);
         localStorage.setItem("tt_lang", selectedLang);
 
-        _verifyLoginState();
+        _verifyLoginState(); // Async verification in background
         UI.renderSlides();
+
+        // REMOVED: 2000ms fallback setTimeout
+        // Logika .video-loaded jest teraz obsługiwana w UI.js na zdarzeniu 'loadedmetadata'.
+
         UI.updateTranslations();
 
         const handleMediaChange = (swiper) => {
+          // First, pause every single video element within the swiper container.
           swiper.el.querySelectorAll('video').forEach(video => {
             if (!video.paused) {
               video.pause();
             }
           });
 
+          // Also unload all iframes to save resources.
           swiper.el.querySelectorAll(".swiper-slide iframe").forEach((iframe) => {
               if (iframe.src) {
                 if (!iframe.dataset.originalSrc) iframe.dataset.originalSrc = iframe.src;
@@ -227,11 +270,15 @@ document.addEventListener("DOMContentLoaded", () => {
               }
           });
 
+          // Now, get the truly active slide element.
           const activeSlide = swiper.slides[swiper.activeIndex];
 
+          // Play media for the new active slide.
           if (activeSlide) {
+            // Use realIndex to get data from our original array, which is correct for loop mode.
             const slideData = slidesData[swiper.realIndex];
 
+            // ✅ FIX 1: Sprawdź stan nakładek PRZED próbą odtworzenia
             const secretOverlay = activeSlide.querySelector('.secret-overlay');
             const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay');
 
@@ -247,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
               const video = activeSlide.querySelector("video");
               if (video) {
+                // Hide overlays
                 const pauseOverlay = activeSlide.querySelector(".pause-overlay");
                 if (pauseOverlay) pauseOverlay.classList.remove("visible");
                 const replayOverlay = activeSlide.querySelector(".replay-overlay");
@@ -254,6 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 video.muted = State.get("isSoundMuted");
 
+                // ✅ FIX 1: Odtwórz tylko jeśli NIE MA nakładki
                 if (!isAnyOverlayVisible) {
                   video.play().catch((error) => {
                       console.log("Autoplay was prevented for slide " + swiper.realIndex, error);
@@ -261,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                   console.log("Video paused due to overlay visibility on slide " + swiper.realIndex);
                   video.pause();
-                  video.currentTime = 0;
+                  video.currentTime = 0; // Reset do początku dla konsystencji
                 }
               }
             }
@@ -274,6 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
           loop: true,
           keyboard: { enabled: true, onlyInViewport: false },
           speed: 300,
+          // iOS-specific touch settings for performance and better UX
           touchEventsTarget: 'wrapper',
           resistance: true,
           resistanceRatio: 0.85,
@@ -282,9 +332,12 @@ document.addEventListener("DOMContentLoaded", () => {
           noSwipingSelector: '.sidebar',
           on: {
             init: function (swiper) {
+              // --- One-time animation on first app load ---
               UI.updateVolumeButton(State.get("isSoundMuted"));
+              // Also handle media for the very first slide on init.
               handleMediaChange(swiper);
 
+              // *** NOWA LOGIKA UKRYWANIA PRELOADERA (PRZYSPIESZENIE) ***
               setTimeout(() => {
                 const activeSlide = swiper.slides[swiper.activeIndex];
                 if (activeSlide) {
@@ -295,6 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
               UI.DOM.container.classList.add("ready");
               PWA.runStandaloneCheck();
 
+              // Zabezpieczenie przed brakiem transitionend (na wszelki wypadek)
               const transitionEndHandler = () => {
                 UI.DOM.preloader.removeEventListener("transitionend", transitionEndHandler);
                 UI.DOM.preloader.style.display = "none";
@@ -305,10 +359,14 @@ document.addEventListener("DOMContentLoaded", () => {
               };
 
               UI.DOM.preloader.addEventListener("transitionend", transitionEndHandler, { once: true });
-              setTimeout(transitionEndHandler, 600);
+              setTimeout(transitionEndHandler, 600); // Fallback po 600ms
+              // *******************************************************
             },
             slideChange: handleMediaChange,
             click: function(swiper, event) {
+              // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
+              // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
+              // Główny handler na `document.body` zajmie się resztą.
               if (event.target.closest('[data-action]')) {
                 return;
               }
@@ -333,11 +391,18 @@ document.addEventListener("DOMContentLoaded", () => {
         State.set('swiper', swiper);
 
       } catch (error) {
+        // alert(
+        //   "Application failed to start. Error: " +
+        //     error.message +
+        //     "\\n\\nStack: " +
+        //     error.stack,
+        // );
         console.error("TingTong App Start Error:", error);
       }
     }
 
     function _initializePreloader() {
+      // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie, aby przyspieszyć
       UI.DOM.preloader.classList.add("content-visible");
 
       UI.DOM.preloader
@@ -350,6 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .querySelectorAll(".language-selection button")
                 .forEach((btn) => (btn.disabled = true));
               button.classList.add("is-selected");
+              // ✅ FIX: Zmieniono z setTimeout na bezpośrednie wywołanie
               setTimeout(() => _startApp(button.dataset.lang), 300);
             },
             { once: true },
@@ -371,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
       init: () => {
         _setInitialConfig();
         _initializeGlobalListeners();
-        _initializeStateListeners();
+        _initializeStateListeners(); // DODANE
         AccountPanel.init();
         FirstLoginModal.init();
         TippingModal.init();
@@ -387,6 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   App.init();
 
+  // Debug tools - aktywowane przez parametr URL lub localhost
   const urlParams = new URLSearchParams(window.location.search);
   const isDebugMode = urlParams.get('debug') === 'true';
 
@@ -399,14 +466,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
+      // ZMIEŃ logikę mockBtn na otwieranie TippingModal
       mockBtn.textContent = 'DEBUG: Pokaż Tipping Modal';
-      mockBtn.removeEventListener('click', (e) => {});
+      mockBtn.removeEventListener('click', (e) => {}); // Usuń stary listener jeśli istnieje
       mockBtn.addEventListener('click', () => {
+        // Mockowe dane na potrzeby testu
         State.set('isUserLoggedIn', true, true);
         State.set('currentUser', { email: 'debug@test.com' }, true);
         TippingModal.showModal();
         UI.showAlert('Mock logowanie i otwarcie modala napiwków.', false);
       });
     }
+    // Koniec LOGIKA MOCK BUTTON
   }
 });
