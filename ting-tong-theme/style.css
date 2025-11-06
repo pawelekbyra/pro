@@ -301,6 +301,12 @@ Text Domain: tingtongtheme
   box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
 }
 
+#flNameError,
+#flPasswordError {
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
 /* --- Tipping Modal Specific Styles --- */
 
 .tipping-amount-container {
@@ -2237,7 +2243,7 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(20px + var(--safe-area-bottom));
+  padding-bottom: calc(80px + var(--safe-area-bottom)); /* Zwiększony padding na dole */
   position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elementów */
 }
 
@@ -5034,6 +5040,7 @@ body,
   border-radius: 20px;
   width: 90%;
   max-width: 420px;
+  max-height: 85vh; /* Dodano maksymalną wysokość */
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -5092,7 +5099,7 @@ body,
 
 .elegant-modal-body {
   padding: 0 24px 20px;
-  overflow: hidden; /* Steps will manage their own visibility */
+  overflow-y: auto; /* Włączono przewijanie */
   flex-grow: 1;
 }
 
