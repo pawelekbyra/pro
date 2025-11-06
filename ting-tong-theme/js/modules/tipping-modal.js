@@ -174,7 +174,7 @@ function validateStep(step) {
         const currency = dom.currencySelect.value.toLowerCase();
         let minAmount;
         if (currency === 'pln') {
-            minAmount = 5;
+            minAmount = 1;
         } else if (currency === 'eur') {
             minAmount = 0.5;
         } else {
