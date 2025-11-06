@@ -554,13 +554,18 @@ export const Handlers = {
         if (infoModal && infoModal.classList.contains('visible')) {
             // Animate out the old modal
             UI.closeModal(infoModal, {
-                keepFocus: true,
+                keepFocus: true, // Keep focus within the modal context
                 animationClass: 'slide-out-left'
             });
-        }
 
-        // Animate in the new modal
-        TippingModal.showModal({ animationClass: 'slide-in-right' });
+            // Delay the new modal animation to sync with the old one closing
+            setTimeout(() => {
+                TippingModal.showModal({ animationClass: 'slide-in-right' });
+            }, 150); // A slight delay for a smoother "train" effect
+        } else {
+            // If info modal wasn't open, just open the tipping modal normally
+            TippingModal.showModal();
+        }
         break;
       }
       case "open-desktop-pwa-modal":

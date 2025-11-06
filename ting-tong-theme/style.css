@@ -1721,6 +1721,7 @@ body,
     color: #fff;
     margin-bottom: 8px;
     text-align: center;
+    width: 100%;
 }
 
 .crowdfunding-subtitle {
@@ -1729,6 +1730,22 @@ body,
     line-height: 1.5;
     max-width: 90%;
     margin: 0 auto;
+    margin-bottom: 16px;
+}
+
+.crowdfunding-description {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    max-width: 90%;
+    margin: 0 auto 24px;
+}
+
+#infoModal .premiere-date-value {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 22px;
+    margin-top: 4px;
 }
 
 .progress-section {
@@ -5538,4 +5555,46 @@ pointer-events: none; /* Domyślna obsługa przez JS */
 #firstLoginModal.fl-modal-overlay {
 /* Upewnij się, że modal jest zawsze na wierzchu, nawet z `pointer-events: none` na rodzicu */
 z-index: 10021;
+}
+
+/* Overwrite the default fade-in/scale-in for slideable modals */
+.modal-overlay.slide-out-left .modal-content,
+.modal-overlay.slide-in-right .modal-content,
+.modal-overlay.slide-out-left .elegant-modal-content,
+.modal-overlay.slide-in-right .elegant-modal-content {
+    opacity: 1;
+    transform: translateX(0); /* Start at a neutral position */
+}
+
+/* Apply animations */
+.modal-overlay.slide-out-left .modal-content,
+.modal-overlay.slide-out-left .elegant-modal-content {
+    animation: slideOutLeft 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+.modal-overlay.slide-in-right .modal-content,
+.modal-overlay.slide-in-right .elegant-modal-content {
+    animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-105%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(105%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }

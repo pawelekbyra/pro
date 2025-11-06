@@ -756,18 +756,21 @@ get_header();
                     <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">i dołącz do grona Patronów</p>
                 </div>
 
+                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Zbieram na rozwój wydarzeń i nowe projekty. Twoje wsparcie ma znaczenie!</p>
+
                 <div class="progress-section">
                     <div class="progress-bar-wrapper">
-                        <div class="progress-bar-fill" style="width: <?php echo esc_attr($percentage); ?>%;"></div>
+                        <div class="progress-bar-fill" style="width: 0%;"></div>
                         <div class="progress-bar-sparkle"></div>
                     </div>
-                    <div class="progress-label" data-translate-key-dynamic="crowdfundingGoalLabel" data-collected="<?php echo esc_attr(number_format($pln_collected, 0, ',', ' ')); ?>" data-goal="<?php echo esc_attr(number_format($pln_goal, 0, ',', ' ')); ?>" data-percentage="<?php echo esc_attr(round($percentage)); ?>">
-                        <span>Cel: <strong><?php echo esc_html(number_format($pln_collected, 0, ',', ' ')); ?> z <?php echo esc_html(number_format($pln_goal, 0, ',', ' ')); ?> PLN</strong> (<?php echo esc_html(round($percentage)); ?>%)</span>
+                    <div class="progress-label" data-translate-key-dynamic="crowdfundingGoalLabel" data-collected="0" data-goal="500" data-percentage="0">
+                        <span>Cel: <strong>0 z 500 EUR</strong> (0%)</span>
                     </div>
                 </div>
 
                 <div class="countdown-section">
-                    <div class="premiere-date-label" data-translate-key="crowdfundingPremiereLabel">Premiera już <br> <span class="premiere-date-value">1.01.2026</span></div>
+                    <div class="premiere-date-label" data-translate-key="crowdfundingPremiereLabel">Premiera już</div>
+                    <div class="premiere-date-value">1.01.2026</div>
                     <div class="countdown-label" data-translate-key="crowdfundingCountdownLabel">Pozostało</div>
                     <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
                     <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
@@ -775,11 +778,11 @@ get_header();
 
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-value"><?php echo esc_html($supporters); ?></span>
+                        <span class="stat-value">0</span>
                         <span class="stat-label" data-translate-key="crowdfundingSupportersLabel">Patronów</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value"><?php echo esc_html(number_format($pln_goal, 0, ',', ' ')); ?> PLN</span>
+                        <span class="stat-value">500 EUR</span>
                         <span class="stat-label" data-translate-key="crowdfundingGoalStatLabel">Cel</span>
                     </div>
                 </div>
