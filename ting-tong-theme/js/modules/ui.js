@@ -60,7 +60,6 @@ function initDOMCache() {
   DOM.alertText = document.getElementById("alertText");
   DOM.commentsModal = document.getElementById("comments-modal-container");
   DOM.accountModal = document.getElementById("accountModal");
-  DOM.tiktokProfileModal = document.getElementById("tiktok-profile-modal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
@@ -664,58 +663,6 @@ function renderSlides() {
   });
 }
 
-function populateProfileModal(slideData) {
-  if (!slideData || !slideData.author || !DOM.tiktokProfileModal) return;
-
-  const { author } = slideData;
-
-  // Basic info
-  const atUsername = `@${author.name
-    .toLowerCase()
-    .replace(/\s/g, "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")}`;
-  DOM.tiktokProfileModal.querySelector("#tiktok-profile-avatar").src =
-    author.avatar;
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-profile-username",
-  ).textContent = author.name;
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-profile-nickname",
-  ).textContent = author.name;
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-profile-at-username",
-  ).textContent = atUsername;
-  DOM.tiktokProfileModal.querySelector("#tiktok-profile-bio").textContent =
-    author.description;
-
-  // Stats
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-following-count",
-  ).textContent = Math.floor(Math.random() * 500);
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-followers-count",
-  ).textContent = Utils.formatCount(Math.floor(Math.random() * 5000000));
-  DOM.tiktokProfileModal.querySelector("#tiktok-likes-count").textContent =
-    Utils.formatCount(slideData.initialLikes * 3.5); // Mock total likes
-
-  // Video Grid (mock data)
-  const videoGrid = DOM.tiktokProfileModal.querySelector("#videos-grid");
-  videoGrid.innerHTML = ""; // Clear previous
-  for (let i = 1; i <= 9; i++) {
-    const thumb = document.createElement("div");
-    thumb.className = "video-thumbnail";
-    thumb.innerHTML = `
-                    <img src="https://picsum.photos/200/280?random=${slideData.id}-${i}" alt="Miniatura filmu">
-                    <div class="video-views">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                        ${Utils.formatCount(Math.floor(Math.random() * 3000000))}
-                    </div>
-                `;
-    videoGrid.appendChild(thumb);
-  }
-}
-
 function updateCommentFormVisibility() {
   const isLoggedIn = State.get("isUserLoggedIn");
   const form = document.getElementById("comment-form");
@@ -1077,16 +1024,6 @@ function initGlobalPanels() {
     });
   }
 }
-function openAuthorModal(slideData) {
-  if (!slideData || !slideData.author) {
-    // Lepszy komunikat błędu
-    console.error("Slide data or Author object is missing/incomplete.");
-    return;
-  }
-  populateProfileModal(slideData); // Przekazanie całego obiektu slajdu
-  openModal(DOM.tiktokProfileModal);
-}
-
 
 export const UI = {
   initDOMCache,
@@ -1100,10 +1037,8 @@ export const UI = {
   createSlideElement,
   renderSlides,
   initGlobalPanels,
-  populateProfileModal,
   renderComments,
   updateCommentFormVisibility,
-  openAuthorModal,
   showToast,
   updateVolumeButton,
   toggleEmojiPicker,
