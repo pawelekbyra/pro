@@ -62,7 +62,7 @@ add_action('after_setup_theme', 'tt_define_stripe_constants_safely', 1);
 * @param string $email Adres email uzytkownika.
 * @return WP_User|WP_Error Obiekt uzytkownika lub błąd.
 */
-function tt_create_user_from_email_if_not_exists($email) {
+function tt_create_user_from_email_if_not_exists($email, $locale = 'en_GB') {
 if (empty($email) || !is_email($email)) {
 return new WP_Error('invalid_email', 'Nieprawidłowy adres email.');
 }
@@ -71,11 +71,12 @@ return new WP_Error('invalid_email', 'Nieprawidłowy adres email.');
 $user = get_user_by('email', $email);
 
 if ($user) {
-// Ważne: Jeśli użytkownik już istnieje, upewnij się, że jego hasło tymczasowe nie zostanie zresetowane,
-// chyba że flaga pierwszego logowania jest nadal 0.
-// Jeśli użytkownik już wypełnił modal, wychodzimy stąd.
-return $user;
-}
+        // Zaktualizuj locale, nawet jeśli użytkownik już istnieje
+        if (get_user_meta($user->ID, 'locale', true) !== $locale) {
+            wp_update_user(['ID' => $user->ID, 'locale' => $locale]);
+        }
+        return $user;
+    }
 
 // 2. Generuj unikalną nazwę uzytkownika (wymagana przez WordPress)
 $username_base = sanitize_user(explode('@', $email)[0], true);
@@ -108,7 +109,11 @@ update_user_meta($user_id, 'first_name', '');
 update_user_meta($user_id, 'last_name', '');
 
 // c) Ustaw display_name
-wp_update_user(['ID' => $user_id, 'display_name' => $username]);
+    wp_update_user([
+        'ID' => $user_id,
+        'display_name' => $username,
+        'locale' => $locale // USTAW LOKALIZACJĘ
+    ]);
 
 // 6. W tym miejscu nalezy DODAĆ WYSYŁKĘ EMAILA z loginem i hasłem (np. 'tingtong').
 // UWAGA: Użycie stałego hasła 'tingtong' jest mniej bezpieczne, ale ułatwia logowanie.
@@ -497,6 +502,38 @@ function tt_ajax_logout_callback() {
 }
 add_action( 'wp_ajax_tt_ajax_logout', 'tt_ajax_logout_callback' );
 add_action( 'wp_ajax_nopriv_tt_ajax_logout', 'tt_ajax_logout_callback' );
+
+/**
+ * AJAX: Aktualizuje pole 'locale' dla zalogowanego użytkownika na podstawie przełącznika języka.
+ */
+add_action('wp_ajax_tt_update_locale', function () {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz być zalogowany.'], 401);
+    }
+
+    $user_id = get_current_user_id();
+    $new_locale = isset($_POST['locale']) ? sanitize_text_field(wp_unslash($_POST['locale'])) : '';
+
+    // Akceptowalne formaty: pl_PL, en_GB, lub pusta wartość (domyślny język instalacji WP)
+    if (!in_array($new_locale, ['pl_PL', 'en_GB', ''])) {
+        wp_send_json_error(['message' => 'Nieprawidłowa lokalizacja.'], 400);
+    }
+
+    $res = wp_update_user([
+        'ID'     => $user_id,
+        'locale' => $new_locale, // Zapis standardowego pola 'locale'
+    ]);
+
+    if (is_wp_error($res)) {
+        wp_send_json_error(['message' => $res->get_error_message() ?: 'Błąd aktualizacji lokalizacji WP.'], 500);
+    }
+
+    wp_send_json_success([
+        'message' => 'Lokalizacja została zaktualizowana.',
+        'locale'  => $new_locale,
+    ]);
+});
 add_action( 'wp_ajax_tt_refresh_nonce', function() {
     wp_send_json_success(['nonce' => wp_create_nonce( 'tt_ajax_nonce' )]);
 } );
@@ -1121,6 +1158,7 @@ function tt_create_payment_intent() {
 
         $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $currency = isset($_POST['currency']) ? strtolower($_POST['currency']) : 'pln';
+        $country_code_hint = isset($_POST['country_code_hint']) ? sanitize_text_field($_POST['country_code_hint']) : null; // POBIERZ HINT
 
         // Validate amount according to the minimum rule
         $min_amount = ($currency === 'pln') ? 5.00 : 1.00;
@@ -1138,10 +1176,16 @@ function tt_create_payment_intent() {
         // Stripe expects amount in the smallest currency unit (e.g., cents, groszy)
         $amount_in_cents = round($amount * 100);
 
+        $metadata = [];
+        if ($country_code_hint) {
+            $metadata['country_hint'] = $country_code_hint; // ZAPIS HINTU W METADANYCH
+        }
+
         $payment_intent = \Stripe\PaymentIntent::create([
             'amount' => $amount_in_cents,
             'currency' => $currency,
             'automatic_payment_methods' => ['enabled' => true],
+            'metadata' => $metadata, // PRZEKAŻ METADANE
         ]);
 
         wp_send_json_success(['clientSecret' => $payment_intent->client_secret]);
@@ -1188,8 +1232,8 @@ add_action('template_redirect', function() {
  * Rejestracja endpoint dla manifestu PWA
  */
 add_action('init', function() {
-    add_rewrite_rule('^manifest\.json$', 'index.php?tt_manifest=1', 'top');
-    add_rewrite_rule('^tt-manifest\.json$', 'index.php?tt_manifest=1', 'top');
+    add_rewrite_rule('^manifest\\.json$', 'index.php?tt_manifest=1', 'top');
+    add_rewrite_rule('^tt-manifest\\.json$', 'index.php?tt_manifest=1', 'top');
 });
 
 /**
@@ -1319,48 +1363,69 @@ error_log('Stripe Webhook Error (General): ' . $e->getMessage());
 exit();
 }
 
-// KROK 2: Obsługa zdarzenia
+$email = null;
+$country_code = null;
+$payment_intent_id = null;
+
+// KROK 2: Ujednolicona ekstrakcja danych na podstawie typu zdarzenia
 switch ($event->type) {
-case 'payment_intent.succeeded':
-$intent = $event->data->object;
-$email = $intent->receipt_email;
-
-if (empty($email)) {
-// Jeśli brakuje emaila (co jest rzadkie po stronie Stripe), zwracamy błąd, aby Stripe ponowił próbę
-header('HTTP/1.1 500 Email is missing from Payment Intent', true, 500);
-error_log('STRIPE WEBHOOK: payment_intent.succeeded - Email is missing for PI: ' . $intent->id);
-exit();
+    case 'payment_intent.succeeded':
+        $intent = $event->data->object;
+        $email = $intent->receipt_email;
+        $payment_intent_id = $intent->id;
+        // W tym wypadku country_code_hint musi być pobrany w Kroku 3
+        break;
+    case 'checkout.session.completed':
+        $session = $event->data->object;
+        $email = $session->customer_details->email ?? null;
+        // POBIERZ KOD KRAJU Z ADRESU BILLINGOWEGO (PRIORYTET)
+        $country_code = $session->customer_details->address->country ?? null;
+        $payment_intent_id = $session->payment_intent ?? null;
+        break;
+    default:
+        header('HTTP/1.1 200 OK');
+        exit();
 }
 
-// Utwórz/pobierz uzytkownika WP
-$user_or_error = tt_create_user_from_email_if_not_exists($email);
+// KROK 3: Uzupełnienie country_code z metadanych PaymentIntent, jeśli brakuje (FALLBACK)
+if (empty($country_code) && !empty($payment_intent_id) && defined('TT_STRIPE_SECRET_KEY')) {
+    try {
+        \Stripe\Stripe::setApiKey(TT_STRIPE_SECRET_KEY);
+        $intent_from_api = \Stripe\PaymentIntent::retrieve($payment_intent_id);
+        // Wykorzystujemy metadaną 'country_hint' ustawioną w tt_create_payment_intent
+        $country_code = $intent_from_api->metadata['country_hint'] ?? null;
+    } catch (Exception $e) {
+        error_log('STRIPE WEBHOOK: Failed to retrieve PI metadata: ' . $e->getMessage());
+    }
+}
 
-if (is_wp_error($user_or_error)) {
-// Płatność jest OK, więc zwracamy 200, ale logujemy błąd WP
-error_log('STRIPE WEBHOOK: WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
+
+// KROK 4: Główna logika biznesowa (tworzenie użytkownika i ustawianie lokalizacji)
+if (!empty($email)) {
+
+    // Ustawienie Lokalizacji WP
+    $locale = 'en_GB'; // DOMYŚLNY EN_GB
+    $country_code_upper = strtoupper($country_code);
+
+    // Jeśli kod kraju to 'PL', ustaw lokalizację na polski (pl_PL)
+    if (!empty($country_code_upper) && $country_code_upper === 'PL') {
+        $locale = 'pl_PL';
+    }
+
+    // Utwórz/pobierz uzytkownika WP, przekazując ustaloną lokalizację
+    $user_or_error = tt_create_user_from_email_if_not_exists($email, $locale);
+
+    if (is_wp_error($user_or_error)) {
+        error_log('STRIPE WEBHOOK: WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
+    } else {
+        error_log('STRIPE WEBHOOK: Patron User ' . $email . ' created or retrieved successfully. Set locale to: ' . $locale . ' (Country: ' . ($country_code ?: 'N/A') . ')');
+    }
 } else {
-error_log('STRIPE WEBHOOK: Patron User ' . $email . ' created or retrieved successfully.');
+     error_log('STRIPE WEBHOOK: Missing email in processed event. Cannot create user.');
 }
 
-break;
-case 'checkout.session.completed':
-// Alternatywny scenariusz dla Checkout Session
-$session = $event->data->object;
-$email = $session->customer_details->email ?? null;
 
-if ($email) {
-$user_or_error = tt_create_user_from_email_if_not_exists($email);
-if (is_wp_error($user_or_error)) {
-error_log('STRIPE WEBHOOK: Checkout Session - WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
-}
-}
-break;
-default:
-// Zdarzenia, które ignorujemy
-break;
-}
-
-// KROK 3: Zawsze zwracaj 200 OK, jeśli przetwarzanie było pomyślne.
+// KROK 5: Zawsze zwracaj 200 OK, jeśli przetwarzanie było pomyślne.
 header('HTTP/1.1 200 OK');
 exit();
 }

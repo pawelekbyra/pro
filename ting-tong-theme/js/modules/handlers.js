@@ -104,12 +104,34 @@ function handleShare(button) {
   }
 }
 
-function handleLanguageToggle() {
-  const newLang = State.get("currentLang") === "pl" ? "en" : "pl";
+async function handleLanguageToggle() { // Zmień na async
+  const oldLang = State.get("currentLang");
+  const newLang = oldLang === "pl" ? "en" : "pl";
+
+  // Mapowanie na lokalizację WP
+  const newLocale = newLang === 'pl' ? 'pl_PL' : 'en_GB';
+
+  // 1. Aktualizacja stanu aplikacji
   State.set("currentLang", newLang);
   localStorage.setItem("tt_lang", newLang);
+
+  // 2. Aktualizacja UI
   UI.updateTranslations();
   Notifications.render();
+
+  // 3. Wysłanie nowej lokalizacji do API WordPressa
+  if (State.get("isUserLoggedIn")) {
+      try {
+        const result = await API.updateLocale(newLocale);
+        if (result.success) {
+          console.log(`WordPress locale updated to: ${newLocale}`);
+        } else {
+          console.warn("Failed to update WP locale via main toggle:", result.data?.message);
+        }
+      } catch (error) {
+        console.error("API Error updating WP locale via main toggle:", error);
+      }
+  }
 }
 
 

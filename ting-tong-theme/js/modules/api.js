@@ -35,19 +35,24 @@ export const API = {
    * Tworzy Payment Intent na serwerze i zwraca client_secret.
    * Wyrzuca błąd w przypadku niepowodzenia.
    */
-  createStripePaymentIntent: async (amount, currency) => {
+  createStripePaymentIntent: async (amount, currency, countryCodeHint) => { // DODANO HINT
     const result = await _request("tt_create_payment_intent", {
       amount,
       currency,
+      country_code_hint: countryCodeHint, // PRZEKAZANIE HINTU
     });
 
     if (result.success && result.data?.clientSecret) {
         return result.data.clientSecret;
     }
 
-    // Wyrzuć błąd, aby mógł być obsłużony w initializePaymentElement
     throw new Error(result.data?.message || 'Failed to create Payment Intent.');
   },
+
+  /**
+   * AJAX: Zapisuje Lokalizację (locale) w profilu WP użytkownika.
+   */
+  updateLocale: (locale) => _request("tt_update_locale", { locale }), // DODANO NOWĄ METODĘ
 
   /**
    * Wywołuje weryfikację płatności po stronie serwera po udanej transakcji.

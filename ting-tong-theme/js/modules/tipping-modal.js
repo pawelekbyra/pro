@@ -124,13 +124,16 @@ async function handleNextStep() {
         // Re-validate specifically for step 1 before proceeding
         if (!validateStep(1)) return;
 
-        // Logic from former handleTippingSubmit
         dom.nextBtn.disabled = true;
         const originalText = dom.nextBtn.textContent;
         dom.nextBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
+        // --- NOWA LOGIKA: MAPOWANIE JĘZYKA NA KOD KRAJU ---
+        const appLang = State.get('currentLang');
+        const countryCodeHint = appLang === 'pl' ? 'PL' : 'GB'; // PL -> PL, EN -> GB
+
         // Initialize payment in the background
-        await initializePaymentElement(originalText);
+        await initializePaymentElement(originalText, countryCodeHint); // PRZEKAZANO HINT
     }
 }
 
@@ -215,7 +218,7 @@ function collectData(step) {
     }
 }
 
-async function initializePaymentElement(originalText) {
+async function initializePaymentElement(originalText, countryCodeHint) { // DODANO HINT
     // Demontaż starego elementu na wszelki wypadek
     if (paymentElement) {
         try {
@@ -224,7 +227,8 @@ async function initializePaymentElement(originalText) {
     }
 
     try {
-        const clientSecret = await API.createStripePaymentIntent(formData.amount, formData.currency);
+        // UŻYJ NOWEJ SYGNATURY API.createStripePaymentIntent
+        const clientSecret = await API.createStripePaymentIntent(formData.amount, formData.currency, countryCodeHint);
 
         const appearance = {
             theme: 'night',
