@@ -5438,3 +5438,84 @@ body,
     border: none !important;
   }
 }
+
+/* Custom UI Adjustments requested */
+
+/* Info Modal: Header adjustments */
+#infoModal .crowdfunding-title {
+    font-size: 22px; /* Make header smaller */
+    margin-top: -8px;  /* Move header closer to the top */
+    margin-bottom: 4px;
+}
+
+/* Info Modal: Style for the premiere date */
+#infoModal .premiere-date-value {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+/* Tipping Modal: Style for currency dropdown indicator */
+.tipping-currency-wrapper .currency-dropdown-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* Make sure the select has padding to not overlap with the new arrow */
+.tipping-currency-wrapper .tipping-currency-select {
+    padding-right: 30px !important;
+}
+
+/* Hide the old pseudo-element to avoid duplicate arrows */
+.tipping-currency-wrapper::after {
+    content: none !important;
+}
+
+/* Info Modal: Adjust CTA button to better fit the icon */
+#infoModal .cta-button {
+    gap: 10px;
+}
+
+#infoModal .cta-button svg {
+    width: 22px;
+    height: 22px;
+    fill: #fff;
+}
+
+/* Modal Transition Animations */
+.modal-overlay.slide-out-left .modal-content,
+.modal-overlay.slide-out-left .elegant-modal-content {
+    animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.modal-overlay.slide-in-right .modal-content,
+.modal-overlay.slide-in-right .elegant-modal-content {
+    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-100%) scale(0.9);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}

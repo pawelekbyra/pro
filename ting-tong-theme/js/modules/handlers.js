@@ -528,8 +528,32 @@ export const Handlers = {
         UI.openModal(document.getElementById('infoModal'));
         break;
       case "open-tipping-from-info":
-        UI.closeModal(document.getElementById('infoModal'));
-        TippingModal.showModal();
+        const infoModal = document.getElementById('infoModal');
+        const tippingModal = document.getElementById('tippingModal');
+
+        if (infoModal && tippingModal) {
+            // 1. Add class to slide out info modal
+            infoModal.classList.add('slide-out-left');
+
+            // 2. After a short delay, hide the info modal and show the tipping modal with animation
+            setTimeout(() => {
+                infoModal.classList.remove('visible', 'slide-out-left');
+
+                // Prepare tipping modal for animation
+                tippingModal.classList.add('slide-in-right');
+                TippingModal.showModal(); // This function now just makes it visible
+
+                // 3. Remove animation class after it completes
+                setTimeout(() => {
+                    tippingModal.classList.remove('slide-in-right');
+                }, 500); // Animation duration
+
+            }, 500); // Animation duration
+        } else {
+            // Fallback for safety
+            UI.closeModal(infoModal);
+            TippingModal.showModal();
+        }
         break;
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
