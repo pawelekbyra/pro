@@ -85,8 +85,30 @@ function toggleEmailConsent() {
 }
 
 function selectLanguage(lang) {
+  // Mapowanie języka aplikacji na locale WordPressa
+  const newLocale = lang === 'pl' ? 'pl_PL' : 'en_GB';
+
+  // 1. Aktualizacja ustawień maili (stary kod)
   userSettings.emailLanguage = lang;
   updateSettingsUI();
+
+  // 2. Wysłanie nowej lokalizacji do API WordPressa (wywołanie asynchroniczne)
+  if (State.get("isUserLoggedIn")) {
+      // Zmień na to:
+      API.updateLocale(newLocale)
+        .then(result => {
+          if (result.success) {
+            console.log(`WordPress locale updated to: ${newLocale}`);
+          } else {
+            console.error("Failed to update WordPress locale:", result.data?.message);
+            showError("settingsError", result.data?.message || Utils.getTranslation("localeUpdateError"));
+          }
+        })
+        .catch(error => {
+           console.error("API Error updating WordPress locale:", error);
+           showError("settingsError", error.message || Utils.getTranslation("localeUpdateError"));
+        });
+  }
 }
 
 async function saveSettings() {
