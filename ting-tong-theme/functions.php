@@ -898,17 +898,34 @@ add_action('wp_ajax_tt_profile_update', function () {
 });
 add_action('wp_ajax_tt_avatar_upload', function () {
     try {
-        check_ajax_referer('tt_ajax_nonce', 'nonce');
+        // Logika weryfikacji Nonce dla JSON
+        $nonce = '';
+        if (isset($_SERVER['HTTP_X_WP_NONCE'])) {
+            $nonce = $_SERVER['HTTP_X_WP_NONCE'];
+        } elseif (isset($_REQUEST['nonce'])) {
+            $nonce = $_REQUEST['nonce'];
+        }
+
+        if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
+            wp_send_json_error(['message' => 'Błąd weryfikacji nonce.'], 403);
+            return;
+        }
+
+
         if ( ! is_user_logged_in() ) {
             wp_send_json_error(['message' => 'Brak uprawnień: Musisz być zalogowany.'], 401);
         }
 
-        $dataUrl = isset($_POST['image']) ? trim( wp_unslash($_POST['image']) ) : '';
+        // Odczytaj dane JSON
+        $json_data = json_decode(file_get_contents('php://input'), true);
+        $dataUrl = isset($json_data['image']) ? trim($json_data['image']) : '';
+
+
         if (empty($dataUrl) || strpos($dataUrl, 'data:image') !== 0) {
             wp_send_json_error(['message' => 'Błąd danych: Nieprawidłowy format data URL.'], 400);
         }
 
-        if ( ! preg_match('#^data:(image/(?:png|jpeg|gif));base64,(.+)$#', $dataUrl, $matches) ) {
+        if ( ! preg_match('#^data:(image/(?:png|jpeg|gif|webp));base64,(.+)$#', $dataUrl, $matches) ) {
             wp_send_json_error(['message' => 'Błąd formatu: Oczekiwano obrazu PNG, JPEG lub GIF.'], 400);
         }
 
@@ -1013,6 +1030,62 @@ add_action('wp_ajax_tt_account_delete', function () {
     wp_logout();
     wp_send_json_success(['message' => 'Konto usunięte.']);
 });
+
+
+// ============================================================================
+// CUSTOM AVATAR LOGIC
+// ============================================================================
+/**
+ * Filters the avatar data to use a custom uploaded avatar or a local default.
+ * This function bypasses Gravatar and enforces a local default avatar
+ * for users who have not uploaded their own.
+ *
+ * @param array $args Arguments passed to get_avatar_data().
+ * @param mixed $id_or_email The user identifier.
+ * @return array The modified arguments.
+ */
+function tt_custom_avatar_filter($args, $id_or_email) {
+    // We only want to filter on the front-end
+    if (is_admin()) {
+        return $args;
+    }
+
+    $user_id = false;
+    if ($id_or_email instanceof WP_User) {
+        $user_id = $id_or_email->ID;
+    } elseif (is_numeric($id_or_email)) {
+        $user_id = (int) $id_or_email;
+    } elseif (is_string($id_or_email) && is_email($id_or_email)) {
+        $user = get_user_by('email', $id_or_email);
+        if ($user) {
+            $user_id = $user->ID;
+        }
+    } elseif ($id_or_email instanceof WP_Comment) {
+        $user_id = (int) $id_or_email->user_id;
+    }
+
+    $default_avatar_url = get_template_directory_uri() . '/assets/img/jajk.png';
+
+    if ($user_id) {
+        // Check for the custom uploaded avatar URL first
+        $custom_avatar_url = get_user_meta($user_id, 'tt_avatar_url', true);
+        if (!empty($custom_avatar_url) && filter_var($custom_avatar_url, FILTER_VALIDATE_URL)) {
+            $args['url'] = $custom_avatar_url;
+        } else {
+            // User exists but has no custom avatar, use our default
+            $args['url'] = $default_avatar_url;
+        }
+    } else {
+        // User not found or comment from a guest, use our default
+        $args['url'] = $default_avatar_url;
+    }
+
+    // Force 'found' to be true to prevent Gravatar fallback
+    $args['found_avatar'] = true;
+
+    return $args;
+}
+add_filter('pre_get_avatar_data', 'tt_custom_avatar_filter', 99, 2);
 
 
 // ============================================================================

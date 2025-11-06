@@ -360,6 +360,10 @@ export const Handlers = {
           break;
         }
       }
+      // Return to avoid double-handling reply-to-comment
+      if (actionTarget.dataset.action !== 'reply-to-comment') {
+          return;
+      }
     }
 
     if (!actionTarget) {

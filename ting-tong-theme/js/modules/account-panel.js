@@ -572,9 +572,9 @@ async function cropAndSave() {
   }
 }
 
-async function apiRequest(action, data = {}) {
+async function apiRequest(action, data = {}, sendAsJSON = false) {
   try {
-    return await authManager.ajax(action, data);
+    return await authManager.ajax(action, data, sendAsJSON);
   } catch (error) {
     console.error(`API error for action "${action}":`, error);
     return {
@@ -584,7 +584,7 @@ async function apiRequest(action, data = {}) {
   }
 }
 async function uploadAvatar(dataUrl) {
-  return apiRequest("tt_avatar_upload", { image: dataUrl });
+  return apiRequest("tt_avatar_upload", { image: dataUrl }, true);
 }
 async function updateProfile(data) {
   return apiRequest("tt_profile_update", data);
