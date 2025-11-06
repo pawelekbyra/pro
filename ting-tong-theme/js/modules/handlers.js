@@ -145,29 +145,6 @@ export const Handlers = {
       item.classList.remove("unread");
     }
   },
-  profileModalTabHandler: (e) => {
-    const tab = e.target.closest(".tab");
-    if (!tab) return;
-
-    const modal = tab.closest("#tiktok-profile-modal");
-    if (!modal) return;
-
-    // Deactivate all tabs and galleries
-    modal
-      .querySelectorAll(".tab")
-      .forEach((t) => t.classList.remove("active"));
-    modal
-      .querySelectorAll(".video-gallery")
-      .forEach((g) => g.classList.remove("active"));
-
-    // Activate clicked tab and corresponding gallery
-    tab.classList.add("active");
-    const contentId = tab.dataset.tabContent;
-    const gallery = modal.querySelector(`#${contentId}`);
-    if (gallery) {
-      gallery.classList.add("active");
-    }
-  },
   mainClickHandler: (e) => {
     const target = e.target;
     const actionTarget = target.closest("[data-action]");
@@ -502,31 +479,6 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-author-modal": {
-        const swiper = State.get('swiper');
-        if (!swiper || !swiper.slides[swiper.activeIndex]) {
-            console.error("Swiper or active slide not available.");
-            break;
-        }
-
-        const activeSlideElement = swiper.slides[swiper.activeIndex];
-        const slideId = activeSlideElement.dataset.slideId;
-
-        if (!slideId) {
-            console.error("Could not find slideId on the active slide element.");
-            break;
-        }
-
-        const slideData = slidesData.find(s => String(s.id) === String(slideId));
-
-        if (!slideData || !slideData.author) {
-          console.error(`Could not find author data for slideId: ${slideId}.`);
-          break;
-        }
-
-        UI.openAuthorModal(slideData);
-        break;
-      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
