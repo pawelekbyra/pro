@@ -532,17 +532,21 @@ export const Handlers = {
         const tippingModal = document.getElementById('tippingModal');
 
         if (infoModal && tippingModal) {
-            // Start both animations at the same time
+            // Prevent flickering by making the background of the incoming modal transparent
+            const originalTippingBg = tippingModal.style.background;
+            tippingModal.style.background = 'transparent';
+
+            // Start both animations simultaneously
             infoModal.classList.add('slide-out-left');
-
             tippingModal.classList.add('slide-in-right');
-            TippingModal.showModal(); // This makes the modal visible so the animation can play
+            TippingModal.showModal(); // Make the modal visible to play animation
 
-            // After the animation duration, clean up classes
+            // After the animation, clean up and restore background
             setTimeout(() => {
                 infoModal.classList.remove('visible', 'slide-out-left');
                 tippingModal.classList.remove('slide-in-right');
-            }, 500); // Must match the CSS animation duration
+                tippingModal.style.background = originalTippingBg; // Restore background
+            }, 500); // Corresponds to CSS animation duration
         } else {
             // Fallback for safety
             UI.closeModal(infoModal);
