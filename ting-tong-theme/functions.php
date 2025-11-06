@@ -71,10 +71,13 @@ return new WP_Error('invalid_email', 'Nieprawidłowy adres email.');
 $user = get_user_by('email', $email);
 
 if ($user) {
-return $user; // Uzytkownik istnieje, zwróć go
+// Ważne: Jeśli użytkownik już istnieje, upewnij się, że jego hasło tymczasowe nie zostanie zresetowane,
+// chyba że flaga pierwszego logowania jest nadal 0.
+// Jeśli użytkownik już wypełnił modal, wychodzimy stąd.
+return $user;
 }
 
-// 2. Generuj unikalną nazwę uzytkownika
+// 2. Generuj unikalną nazwę uzytkownika (wymagana przez WordPress)
 $username_base = sanitize_user(explode('@', $email)[0], true);
 $username = $username_base;
 $i = 1;
@@ -83,8 +86,9 @@ $username = $username_base . $i;
 $i++;
 }
 
-// 3. Generuj hasło (tymczasowe, które zostanie zmienione w FirstLoginModal)
-$password = wp_generate_password(12, false);
+// 3. Ustaw stałe hasło (lub wygenerowane, jeśli chcesz bezpieczniejsze)
+// Zgodnie z życzeniem, ustawiamy stałe hasło: tingtong
+$password = 'tingtong'; // <-- STAŁE HASŁO
 
 // 4. Utwórz uzytkownika (domyślnie rola 'subscriber')
 $user_id = wp_create_user($username, $password, $email);
@@ -95,15 +99,20 @@ return $user_id;
 
 $new_user = get_user_by('id', $user_id);
 
-// 5. Ustaw flagę profilu jako NIEKOMPLETNĄ (0), aby wymusić modal pierwszego logowania.
-// ZGODNIE Z LOGIKĄ FRONTENDU, to jest kluczowe.
+// 5. Ustaw stan profilu:
+// a) Ustaw flagę profilu jako NIEKOMPLETNĄ (0), aby wymusić modal pierwszego logowania.
 update_user_meta($user_id, 'tt_first_login_completed', 0);
 
-// 6. Ustaw display_name
+// b) Zadbaj o to, by pola first_name i last_name były PUSTE (choć domyślnie takie są, to jest to zabezpieczenie)
+update_user_meta($user_id, 'first_name', '');
+update_user_meta($user_id, 'last_name', '');
+
+// c) Ustaw display_name
 wp_update_user(['ID' => $user_id, 'display_name' => $username]);
 
-// 7. W tym miejscu nalezy DODAĆ WYSYŁKĘ EMAILA z loginem i tymczasowym hasłem.
-// (Na potrzeby instrukcji, funkcja ta jest pominięta).
+// 6. W tym miejscu nalezy DODAĆ WYSYŁKĘ EMAILA z loginem i hasłem (np. 'tingtong').
+// UWAGA: Użycie stałego hasła 'tingtong' jest mniej bezpieczne, ale ułatwia logowanie.
+// Zawsze powiadom użytkownika, że musi zmienić hasło w modalu.
 
 return $new_user;
 }
@@ -1286,10 +1295,6 @@ $webhook_secret = defined('STRIPE_WEBHOOK_SECRET') ? STRIPE_WEBHOOK_SECRET : 'wh
 $payload = @file_get_contents('php://input');
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
 $event = null;
-
-if ($webhook_secret === 'whsec_YOUR_STRIPE_WEBHOOK_SECRET') {
-error_log('BŁĄD KONFIGURACJI: STRIPE_WEBHOOK_SECRET nie jest ustawiony w functions.php.');
-}
 
 // KROK 1: Weryfikacja sygnatury (kluczowa dla bezpieczeństwa)
 try {
