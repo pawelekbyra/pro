@@ -13,10 +13,10 @@ let countdownInterval = null;
 
 function startCountdown() {
   const countdownElement = document.getElementById('countdown-timer');
-  if (!countdownElement) return;
+  const countdownDateElement = document.getElementById('countdown-date');
+  if (!countdownElement || !countdownDateElement) return;
 
-  // Set a fixed end date for the crowdfunding campaign
-  const endDate = new Date('2025-12-31T23:59:59').getTime();
+  const endDate = new Date(countdownDateElement.textContent).getTime();
 
   const updateCountdown = () => {
     const now = new Date().getTime();
@@ -24,7 +24,7 @@ function startCountdown() {
 
     if (distance < 0) {
       clearInterval(countdownInterval);
-      countdownElement.textContent = "Zakończono";
+      countdownElement.textContent = "Premiera!";
       return;
     }
 
@@ -33,8 +33,11 @@ function startCountdown() {
     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    countdownElement.textContent =
-      `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    countdownElement.innerHTML = `
+      <span class="countdown-part">${days}<span class="countdown-label-small">dni</span></span>
+      <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label-small">h</span></span>
+      <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label-small">m</span></span>
+      <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label-small">s</span></span>`;
   };
 
   if (countdownInterval) {

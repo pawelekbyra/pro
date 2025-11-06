@@ -750,8 +750,8 @@ get_header();
         <div class="modal-body" id="infoModalBody">
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
-                    <h2 id="info-modal-title" class="crowdfunding-title" style="text-align: center;">Wspieraj Rozwój Aplikacji!</h2>
-                    <p class="crowdfunding-subtitle">Twoje wsparcie to kolejny krok w naszej wspólnej podróży. Dołącz do grona Patronów Miłości i pomóż nam tworzyć przyszłość Ting Tong!</p>
+                    <h2 id="info-modal-title" class="crowdfunding-title" style="text-align: center; margin-bottom: 5px;">Wspieraj Rozwój Aplikacji!</h2>
+                    <p class="crowdfunding-subtitle" style="font-size: 14px;">Dołącz do grona Patronów</p>
                 </div>
 
                 <div class="progress-section">
@@ -765,8 +765,9 @@ get_header();
                 </div>
 
                 <div class="countdown-section">
-                    <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
                     <div class="countdown-label">Premiera już za</div>
+                    <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
+                    <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
                 </div>
 
                 <div class="stats-grid">
@@ -781,7 +782,7 @@ get_header();
                 </div>
 
                 <div class="cta-section">
-                    <button class="cta-button" data-action="show-tip-jar">
+                    <button class="cta-button" data-action="open-tipping-from-info">
                         <div class="shiny-tip-button">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
                         </div>

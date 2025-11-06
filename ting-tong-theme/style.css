@@ -832,18 +832,18 @@ body,
   transform: scale(0.9);
 }
 
-.glowing-info-button {
-    animation: pulse-glow-info 2.5s infinite;
+.info-button svg {
+    animation: pulse-icon 2s infinite ease-in-out;
 }
 
-@keyframes pulse-glow-info {
+@keyframes pulse-icon {
     0%, 100% {
-        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
         transform: scale(1);
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
     }
     50% {
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-        transform: scale(1.05);
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
     }
 }
 
