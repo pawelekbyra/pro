@@ -23,6 +23,35 @@ let stripe;
 let elements;
 let paymentElement;
 
+function _getPreferredCurrencyByLocale() {
+    const EUROPEAN_CURRENCY_MAP = {
+        EUR: ['AT', 'BE', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES'],
+        GBP: ['GB'],
+    };
+
+    try {
+        const locale = navigator.language.split('-')[1]?.toUpperCase();
+
+        if (locale) {
+            if (EUROPEAN_CURRENCY_MAP.EUR.includes(locale)) {
+                return 'eur';
+            }
+            if (EUROPEAN_CURRENCY_MAP.GBP.includes(locale)) {
+                return 'gbp';
+            }
+        }
+    } catch (e) {
+        console.warn("Could not determine currency from locale:", e);
+    }
+
+    // Fallback logic
+    if (State.get('currentLang') === 'pl') {
+        return 'usd'; // Default for Polish UI if no region match
+    }
+
+    return 'usd'; // Global fallback
+}
+
 function cacheDOM() {
     dom = {
         modal: document.getElementById('tippingModal'),
@@ -376,6 +405,10 @@ function showModal(options = {}) {
     resetModalState();
     translateUI();
 
+    if (dom.currencySelect) {
+        dom.currencySelect.value = _getPreferredCurrencyByLocale();
+    }
+
     const isLoggedIn = State.get('isUserLoggedIn');
     const currentUser = State.get('currentUser');
 
@@ -385,10 +418,10 @@ function showModal(options = {}) {
         formData.create_account = false;
     } else {
         currentStep = 0;
+        // The event listener is in init(), so we just ensure the state is correct
         if(dom.createAccountCheckbox) {
-            dom.createAccountCheckbox.addEventListener('change', e => {
-                dom.emailContainer.classList.toggle('visible', e.target.checked);
-            });
+             dom.createAccountCheckbox.checked = false;
+             dom.emailContainer.classList.remove('visible');
         }
     }
 
@@ -410,6 +443,12 @@ function hideModal() {
 function init() {
     cacheDOM();
     if (!dom.modal) return;
+
+    if(dom.createAccountCheckbox) {
+        dom.createAccountCheckbox.addEventListener('change', e => {
+            dom.emailContainer.classList.toggle('visible', e.target.checked);
+        });
+    }
 
     if(dom.closeBtn) dom.closeBtn.addEventListener('click', hideModal);
 
