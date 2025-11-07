@@ -5561,7 +5561,6 @@ z-index: 10021;
 .modal-overlay.slide-out-left .elegant-modal-content,
 .modal-overlay.slide-in-right .elegant-modal-content {
     opacity: 1;
-    transform: translateX(0); /* Start at a neutral position */
     transition: none; /* Disable conflicting transitions */
 }
 
