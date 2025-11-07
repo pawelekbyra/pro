@@ -42,13 +42,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 function tt_define_stripe_constants_safely() {
     // Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
     if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-        $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
+        $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : null;
         define('TT_STRIPE_PUBLISHABLE_KEY', $pk_value);
     }
 
     // Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
     if (!defined('TT_STRIPE_SECRET_KEY')) {
-        $sk_value = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
+        $sk_value = defined('SECRET_KEY') ? SECRET_KEY : null;
         define('TT_STRIPE_SECRET_KEY', $sk_value);
     }
 }
@@ -179,6 +179,23 @@ function tt_create_database_tables() {
     dbDelta( $sql_comment_likes );
     update_option( 'tt_comment_likes_db_version', '1.0' );
 
+    // Tabela: Donacje
+    $table_name_donations = $wpdb->prefix . 'tt_donations';
+    $sql_donations        = "CREATE TABLE {$table_name_donations} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT UNSIGNED NOT NULL,
+        payment_intent_id VARCHAR(255) NOT NULL,
+        amount_cents BIGINT UNSIGNED NOT NULL,
+        currency VARCHAR(10) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uniq_payment_intent (payment_intent_id(191)),
+        KEY idx_user_id (user_id)
+    ) {$charset_collate};";
+    dbDelta($sql_donations);
+    update_option('tt_donations_db_version', '1.0');
+
+
     // Rejestracja reguły dla webhooka i odświeżenie reguł
     add_rewrite_rule('^tt-webhook/stripe$', 'index.php?tt-webhook-type=stripe', 'top');
     flush_rewrite_rules();
@@ -193,7 +210,8 @@ add_action(
     function () {
         if ( get_option( 'tt_likes_db_version' ) !== '1.0'
             || get_option( 'tt_comments_db_version' ) !== '1.0'
-            || get_option( 'tt_comment_likes_db_version' ) !== '1.0' ) {
+            || get_option( 'tt_comment_likes_db_version' ) !== '1.0'
+            || get_option('tt_donations_db_version') !== '1.0') {
             tt_create_database_tables();
         }
     }
@@ -1060,6 +1078,22 @@ add_action('wp_ajax_tt_password_change', function () {
     wp_set_password($n1, $u->ID);
     wp_send_json_success(['message' => 'Hasło zmienione. Zaloguj się ponownie.']);
 });
+add_action('wp_ajax_tt_save_settings', function () {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz być zalogowany.'], 401);
+    }
+
+    $user_id = get_current_user_id();
+    $email_consent = isset($_POST['email_consent']) ? (bool) $_POST['email_consent'] : false;
+    $email_language = isset($_POST['email_language']) ? sanitize_text_field($_POST['email_language']) : 'pl';
+
+    update_user_meta($user_id, 'tt_email_consent', $email_consent);
+    update_user_meta($user_id, 'tt_email_language', $email_language);
+
+    wp_send_json_success(['message' => 'Ustawienia zapisane.']);
+});
+
 add_action('wp_ajax_tt_account_delete', function () {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
     if (!is_user_logged_in()) {
@@ -1197,6 +1231,29 @@ function tt_create_payment_intent() {
 }
 add_action('wp_ajax_tt_create_payment_intent', 'tt_create_payment_intent');
 add_action('wp_ajax_nopriv_tt_create_payment_intent', 'tt_create_payment_intent'); // Umożliwienie płatności bez logowania
+
+/**
+ * Obsługuje potwierdzenie sukcesu napiwku po stronie klienta.
+ * Jego główną rolą jest potwierdzenie, że proces na froncie się zakończył.
+ * Główna logika (tworzenie użytkownika) jest obsługiwana przez webhook.
+ */
+function tt_handle_tip_success() {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+    $payment_intent_id = isset($_POST['payment_intent_id']) ? sanitize_text_field($_POST['payment_intent_id']) : '';
+
+    if (empty($payment_intent_id)) {
+        wp_send_json_error(['message' => 'Brak ID Payment Intent.'], 400);
+        return;
+    }
+
+    // Można dodać logowanie w celu debugowania
+    // error_log('Potwierdzenie sukcesu napiwku dla Payment Intent: ' . $payment_intent_id);
+
+    wp_send_json_success(['message' => 'Tip success acknowledged.']);
+}
+add_action('wp_ajax_tt_handle_tip_success', 'tt_handle_tip_success');
+add_action('wp_ajax_nopriv_tt_handle_tip_success', 'tt_handle_tip_success');
 
 
 // ============================================================================
@@ -1338,8 +1395,12 @@ require_once $composer_autoload;
 
 // ⚠️ KRYTYCZNE: ZMIEŃ NA SWÓJ TAJNY KLUCZ WEBHOOKA
 // Ten klucz znajdziesz w Panelu Stripe -> Developers -> Webhooks -> [Twój endpoint] -> Signing secret.
-$webhook_secret = defined('STRIPE_WEBHOOK_SECRET') ? STRIPE_WEBHOOK_SECRET : 'whsec_YOUR_STRIPE_WEBHOOK_SECRET';
-
+$webhook_secret = defined('STRIPE_WEBHOOK_SECRET') ? STRIPE_WEBHOOK_SECRET : null;
+if (empty($webhook_secret)) {
+    header('HTTP/1.1 500 Missing Webhook Secret', true, 500);
+    error_log('BŁĄD KRYTYCZNY STRIPE: Brak zdefiniowanej stałej STRIPE_WEBHOOK_SECRET w wp-config.php.');
+    exit();
+}
 $payload = @file_get_contents('php://input');
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
 $event = null;
@@ -1394,6 +1455,8 @@ if (empty($country_code) && !empty($payment_intent_id) && defined('TT_STRIPE_SEC
         $intent_from_api = \Stripe\PaymentIntent::retrieve($payment_intent_id);
         // Wykorzystujemy metadaną 'country_hint' ustawioną w tt_create_payment_intent
         $country_code = $intent_from_api->metadata['country_hint'] ?? null;
+        $amount_cents = $intent_from_api->amount;
+        $currency = $intent_from_api->currency;
     } catch (Exception $e) {
         error_log('STRIPE WEBHOOK: Failed to retrieve PI metadata: ' . $e->getMessage());
     }
@@ -1418,6 +1481,15 @@ if (!empty($email)) {
     if (is_wp_error($user_or_error)) {
         error_log('STRIPE WEBHOOK: WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
     } else {
+        $user_id = $user_or_error->ID;
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'tt_donations';
+        $wpdb->insert($table_name, [
+            'user_id' => $user_id,
+            'payment_intent_id' => $payment_intent_id,
+            'amount_cents' => $amount_cents,
+            'currency' => $currency,
+        ]);
         error_log('STRIPE WEBHOOK: Patron User ' . $email . ' created or retrieved successfully. Set locale to: ' . $locale . ' (Country: ' . ($country_code ?: 'N/A') . ')');
     }
 } else {
@@ -1429,6 +1501,25 @@ if (!empty($email)) {
 header('HTTP/1.1 200 OK');
 exit();
 }
+
+add_action('wp_ajax_nopriv_tt_get_crowdfunding_stats', function() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'tt_donations';
+
+    $patrons_count = $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table_name}");
+
+    $total_pln_cents = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount_cents) FROM {$table_name} WHERE currency = %s", 'pln'));
+    $total_eur_cents = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount_cents) FROM {$table_name} WHERE currency = %s", 'eur'));
+
+    // Przelicznik PLN na EUR
+    $pln_to_eur_rate = 4.5;
+    $collected_eur = ($total_eur_cents / 100) + (($total_pln_cents / 100) / $pln_to_eur_rate);
+
+    wp_send_json_success([
+        'patrons_count' => (int) $patrons_count,
+        'collected_eur' => round($collected_eur, 2),
+    ]);
+});
 
 add_action('wp_ajax_tt_complete_profile', function () {
 // 1. Zabezpieczenia
