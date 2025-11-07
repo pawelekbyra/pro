@@ -442,6 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
         FirstLoginModal.init();
         TippingModal.init();
         CommentsModal.init();
+        Notifications.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();

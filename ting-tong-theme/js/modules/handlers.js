@@ -600,15 +600,8 @@ export const Handlers = {
           UI.showAlert(Utils.getTranslation("subscribeAlert"));
         }
         break;
-      case "toggle-notifications":
-        if (State.get("isUserLoggedIn")) {
-          const popup = UI.DOM.notificationPopup;
-          popup.classList.toggle("visible");
-          if (popup.classList.contains("visible")) Notifications.render();
-        } else {
-          Utils.vibrateTry();
-          UI.showAlert(Utils.getTranslation("notificationAlert"));
-        }
+      case "toggle-push-notifications":
+        Notifications.handleBellClick();
         break;
       case "close-notifications":
         if (UI.DOM.notificationPopup) {

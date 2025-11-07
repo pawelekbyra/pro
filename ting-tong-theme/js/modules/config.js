@@ -347,6 +347,11 @@ export const Config = {
       crowdfundingSupportersLabel: "Patronów",
       crowdfundingGoalStatLabel: "Cel",
       crowdfundingCtaButton: "Zostań Patronem",
+      enableNotificationsBtn: "Włącz powiadomienia",
+      notificationsPermissionDenied: "Odmówiono zgody na powiadomienia. Możesz ją zmienić w ustawieniach przeglądarki.",
+      notificationsEnabledSuccess: "Powiadomienia włączone!",
+      notificationsSaveError: "Nie udało się zapisać subskrypcji.",
+      badge: "Odznaka",
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -551,6 +556,11 @@ export const Config = {
       crowdfundingSupportersLabel: "Patrons",
       crowdfundingGoalStatLabel: "Goal",
       crowdfundingCtaButton: "Become a Patron",
+      enableNotificationsBtn: "Enable Notifications",
+      notificationsPermissionDenied: "Notification permission was denied. You can change it in your browser settings.",
+      notificationsEnabledSuccess: "Notifications enabled!",
+      notificationsSaveError: "Failed to save subscription.",
+      badge: "Badge",
     }, // KONIEC 'en'
   },
 };

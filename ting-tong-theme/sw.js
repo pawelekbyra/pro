@@ -104,3 +104,80 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
+// ============================================================================
+// LISTENERY DLA POWIADOMIEŃ PUSH I ODZNAK (BADGE API)
+// ============================================================================
+
+/**
+ * Listener zdarzenia 'push'. Wywoływany, gdy serwer wysyła powiadomienie.
+ */
+self.addEventListener('push', event => {
+  console.log('[SW] 📥 Push Received.');
+
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (e) {
+    console.error('[SW] Error parsing push data:', e);
+    data = {
+      title: 'Nowe powiadomienie',
+      body: 'Otrzymano nowe powiadomienie.',
+      badge: 0
+    };
+  }
+
+  const title = data.title || 'Ting Tong';
+  const options = {
+    body: data.body || 'Masz nową wiadomość.',
+    icon: data.icon || '/assets/icons/icon-192x192.svg',
+    badge: data.badge ? '/assets/icons/badge.png' : '', // URL do ikony odznaki
+    data: {
+      url: self.registration.scope // URL do otwarcia po kliknięciu
+    }
+  };
+
+  // Ustaw odznakę aplikacji (Badge API)
+  if (navigator.setAppBadge && typeof data.badge !== 'undefined') {
+    navigator.setAppBadge(data.badge).catch(err => {
+      console.error('[SW] Error setting app badge:', err);
+    });
+  }
+
+  // Wyświetl powiadomienie
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+/**
+ * Listener zdarzenia 'notificationclick'. Wywoływany, gdy użytkownik kliknie powiadomienie.
+ */
+self.addEventListener('notificationclick', event => {
+  console.log('[SW] 🖱️ Notification clicked.');
+  event.notification.close(); // Zamknij powiadomienie
+
+  // Wyczyść odznakę aplikacji
+  if (navigator.clearAppBadge) {
+    navigator.clearAppBadge().catch(err => {
+      console.error('[SW] Error clearing app badge:', err);
+    });
+  }
+
+  // Otwórz okno aplikacji lub przejdź do istniejącego
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      const urlToOpen = event.notification.data.url || '/';
+
+      for (const client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});
