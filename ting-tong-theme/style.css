@@ -3075,7 +3075,7 @@ body,
   opacity: 1;
 }
 
-#tiktok-profile-modal .profile-content {
+#tiktok-profile-modal .tiktok-profile-content {
   background-color: #121212;
   color: #fff;
   width: 100%;
@@ -3089,12 +3089,12 @@ body,
 }
 
 /* Animation state for sliding in */
-#tiktok-profile-modal.visible .profile-content {
+#tiktok-profile-modal.visible .tiktok-profile-content {
   transform: translateX(0);
 }
 
 /* Animation state for sliding out */
-#tiktok-profile-modal.is-hiding .profile-content {
+#tiktok-profile-modal.is-hiding .tiktok-profile-content {
   transform: translateX(100%);
 }
 
@@ -5871,12 +5871,12 @@ z-index: 10021;
     animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
 
-#tiktok-profile-modal.slide-in-right .profile-content {
+#tiktok-profile-modal.slide-in-right .tiktok-profile-content {
     animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
 
-#tiktok-profile-modal.slide-out-left .profile-content {
-    animation: slideOutLeft 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+#tiktok-profile-modal.slide-out-right .tiktok-profile-content {
+    animation: slideOutRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
 
 
