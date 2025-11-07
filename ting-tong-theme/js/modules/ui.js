@@ -1063,15 +1063,29 @@ async function updateCrowdfundingStats() {
         const result = await API.getNewCrowdfundingStats();
         if (result.success && result.data) {
             const stats = result.data;
-            const patronsEl = document.getElementById('patrons-count');
-            const collectedEl = document.getElementById('collected-amount');
-            const progressFillEl = document.getElementById('progress-fill');
+            const patronsEl = document.querySelector('.stats-grid .stat-item:nth-child(1) .stat-value');
+            const collectedEl = document.querySelector('.progress-label span strong');
+            const progressFillEl = document.querySelector('.progress-section .progress-bar-fill');
+            const progressLabelEl = document.querySelector('.progress-label');
 
             if (patronsEl) patronsEl.textContent = stats.patrons_count;
-            if (collectedEl) collectedEl.textContent = `€${stats.collected_eur.toFixed(2)}`;
+
+            if (progressLabelEl) {
+                const goal = parseFloat(progressLabelEl.dataset.goal) || 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressLabelEl.dataset.collected = stats.collected_eur.toFixed(2);
+                progressLabelEl.dataset.percentage = percentage.toFixed(0);
+
+                if (collectedEl) collectedEl.textContent = `${stats.collected_eur.toFixed(2)} z ${goal} EUR`;
+
+                const labelSpan = progressLabelEl.querySelector('span');
+                if(labelSpan) {
+                    labelSpan.innerHTML = `Cel: <strong>${stats.collected_eur.toFixed(2)} z ${goal} EUR</strong> (${percentage.toFixed(0)}%)`;
+                }
+            }
 
             if (progressFillEl) {
-                const goal = 1000; // Przykładowy cel
+                const goal = 500;
                 const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
                 progressFillEl.style.width = `${percentage}%`;
             }
