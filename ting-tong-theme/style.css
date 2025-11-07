@@ -3082,15 +3082,9 @@ body,
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* Default state: off-screen to the right */
   transform: translateX(100%);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Animation state for sliding out */
-#tiktok-profile-modal.is-hiding .tiktok-profile-content {
-  transform: translateX(100%);
 }
 
 .tiktok-profile-header {
