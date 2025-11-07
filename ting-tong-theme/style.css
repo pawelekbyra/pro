@@ -5800,14 +5800,6 @@ main::-webkit-scrollbar {
     }
 }
 
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-    }
-    to {
-        transform: translateX(0);
-    }
-}
 
 @keyframes slideOutRight {
     from {
@@ -5823,10 +5815,6 @@ main::-webkit-scrollbar {
     will-change: transform;
 }
 
-.modal-overlay.slide-in-right .modal-content,
-.modal-overlay.slide-out-right .modal-content,
-.modal-overlay.slide-in-right .elegant-modal-content,
-.modal-overlay.slide-out-right .elegant-modal-content,
 #tiktok-profile-modal.visible .profile-content {
     opacity: 1;
     transform: translateX(0);
@@ -5867,14 +5855,14 @@ z-index: 10021;
     animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
 
-@keyframes slideOutLeft {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        transform: translateX(-105%);
-    }
+#tiktok-profile-modal.slide-in-right .profile-content {
+    animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
+
+#tiktok-profile-modal.slide-out-left .profile-content {
+    animation: slideOutLeft 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
 
 @keyframes slideInRight {
     from {
