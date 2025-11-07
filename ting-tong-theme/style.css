@@ -3088,11 +3088,6 @@ body,
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Animation state for sliding in */
-#tiktok-profile-modal.visible .tiktok-profile-content {
-  transform: translateX(0);
-}
-
 /* Animation state for sliding out */
 #tiktok-profile-modal.is-hiding .tiktok-profile-content {
   transform: translateX(100%);
@@ -5826,7 +5821,7 @@ main::-webkit-scrollbar {
     }
 }
 
-#tiktok-profile-modal .profile-content {
+#tiktok-profile-modal .tiktok-profile-content {
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
 }
@@ -5873,6 +5868,10 @@ z-index: 10021;
 
 #tiktok-profile-modal.slide-in-right .tiktok-profile-content {
     animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+#tiktok-profile-modal.slide-out-left .tiktok-profile-content {
+    animation: slideOutLeft 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
 
 #tiktok-profile-modal.slide-out-right .tiktok-profile-content {
