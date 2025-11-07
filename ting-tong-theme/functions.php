@@ -1165,7 +1165,13 @@ add_action('wp_ajax_tt_account_delete', function () {
 
 // --- Subskrypcje Web Push ---
 add_action('wp_ajax_tt_save_push_subscription', function() {
-    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    // Ręczna weryfikacja nonce z nagłówka dla żądań JSON
+    $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : '';
+    if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
+        wp_send_json_error(['message' => 'Błąd weryfikacji nonce.'], 403);
+        return;
+    }
+
     if (!is_user_logged_in()) {
         wp_send_json_error(['message' => 'Musisz być zalogowany, aby zapisać subskrypcję.'], 401);
     }
