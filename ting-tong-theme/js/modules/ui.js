@@ -128,14 +128,20 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    // Przygotowanie modala do animacji
+    // Usunięcie wszystkich klas animacji i ukrywania przed otwarciem
     modal.style.display = 'flex';
-    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left');
+    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left', 'slide-in-right');
+
+    // Ustawienie widoczności
     modal.classList.add('visible');
 
-    // Dodanie klasy animacji w następnej klatce
+    // Dodanie klasy animacji w następnej klatce (daje czas na reset styli)
     if (options.animationClass) {
         requestAnimationFrame(() => {
+            // Usuń przeciwną klasę przed dodaniem nowej
+            if (options.animationClass.includes('slide-in')) {
+                modal.classList.remove('slide-out-right', 'slide-out-left');
+            }
             modal.classList.add(options.animationClass);
         });
     }
@@ -157,6 +163,18 @@ function openModal(modal, options = {}) {
         startCountdown();
     }
 
+    // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
+    if (!options.isPersistent) {
+        const closeOnClick = (e) => {
+            // Sprawdź, czy kliknięto bezpośrednio w overlay
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        };
+        modal.addEventListener('click', closeOnClick);
+        modal._closeOnClick = closeOnClick;
+    }
+
     activeModals.add(modal);
     document.body.style.overflow = 'hidden';
     DOM.container.setAttribute("aria-hidden", "true");
@@ -165,9 +183,14 @@ function openModal(modal, options = {}) {
     // Zarządzanie focusem
     State.set("lastFocusedElement", document.activeElement);
     const focusable = getFocusable(modal);
+    const focusTarget = modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content, .profile-content") || modal;
+
     if (focusable.length > 0) {
         focusable[0].focus();
+    } else {
+        focusTarget.focus();
     }
+
     modal._focusTrapDispose = trapFocus(modal);
 
     if (options.onOpen) options.onOpen();
@@ -177,24 +200,46 @@ function openModal(modal, options = {}) {
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal)) return;
 
-    modal.classList.add('is-hiding');
-    if (options.animationClass) {
-        modal.classList.add(options.animationClass);
+    // Wybierz klasę animacji wyjścia. Jeśli modal ma klasę 'slide-in-right', użyj 'slide-out-right'.
+    let animationClass = options.animationClass || '';
+    if (!animationClass && modal.classList.contains('slide-in-right')) {
+        animationClass = 'slide-out-right';
     }
 
+    const isSlideAnimation = animationClass.includes('slide');
+
+    // Unbind the background click listener immediately
+    if (modal._closeOnClick) {
+        modal.removeEventListener('click', modal._closeOnClick);
+        delete modal._closeOnClick;
+    }
+
+    modal.setAttribute("aria-hidden", "true");
+
     const cleanup = () => {
-        modal.removeEventListener('animationend', cleanup);
+        // Usuń wszystkie listenery i klasy animacji
+        modal.removeEventListener("animationend", cleanup);
+        modal.removeEventListener("transitionend", cleanup);
+
         modal.style.display = 'none';
-        modal.classList.remove('visible', 'is-hiding', 'slide-in-right', 'slide-out-right');
+        modal.classList.remove("visible", "is-hiding", "slide-in-right", "slide-out-right", "slide-out-left");
+
+        // Czyszczenie focus trap
+        if (modal._focusTrapDispose) {
+            modal._focusTrapDispose();
+            delete modal._focusTrapDispose;
+        }
 
         activeModals.delete(modal);
+
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
             DOM.container.removeAttribute("aria-hidden");
         }
 
-        if (modal._focusTrapDispose) modal._focusTrapDispose();
-        State.get("lastFocusedElement")?.focus();
+        if (!options.keepFocus) {
+            State.get("lastFocusedElement")?.focus();
+        }
 
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
@@ -202,9 +247,19 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    modal.addEventListener('animationend', cleanup, { once: true });
+    // Trigger the animation/transition
+    if (isSlideAnimation) {
+        // Dla modali z animacją (np. profil)
+        modal.classList.add(animationClass);
+        modal.addEventListener("animationend", cleanup, { once: true });
+    } else {
+        // Dla standardowych modali (fade-out, np. infoModal)
+        modal.classList.add('is-hiding'); // Użyj is-hiding dla fade-out
+        modal.classList.remove('visible');
+        modal.addEventListener("transitionend", cleanup, { once: true });
+    }
 
-    // Fallback na wypadek, gdyby animacja się nie zakończyła
+    // Fallback timer
     setTimeout(cleanup, 500);
 }
 
