@@ -128,10 +128,16 @@ function openModal(modal, options = {}) {
         return;
     }
 
+    // Przygotowanie modala do animacji
     modal.style.display = 'flex';
-    modal.classList.remove("is-hiding");
-    if(options.animationClass) {
-        modal.classList.remove(options.animationClass);
+    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left');
+    modal.classList.add('visible');
+
+    // Dodanie klasy animacji w następnej klatce
+    if (options.animationClass) {
+        requestAnimationFrame(() => {
+            modal.classList.add(options.animationClass);
+        });
     }
 
     if (modal.id === 'comments-modal-container') {
@@ -151,77 +157,44 @@ function openModal(modal, options = {}) {
         startCountdown();
     }
 
-    // Delay adding the 'visible' class to allow the display property to take effect.
-    requestAnimationFrame(() => {
-        modal.classList.add('visible');
-        if (options.animationClass) {
-            modal.classList.add(options.animationClass);
-        }
-    });
-
-    if (!options.isPersistent) {
-        // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
-        const closeOnClick = (e) => {
-            if (e.target === modal) {
-                closeModal(modal);
-            }
-        };
-        modal.addEventListener('click', closeOnClick);
-        // Przechowaj referencję do funkcji, aby móc ją usunąć
-        modal._closeOnClick = closeOnClick;
-    }
-
     activeModals.add(modal);
     document.body.style.overflow = 'hidden';
+    DOM.container.setAttribute("aria-hidden", "true");
+    modal.setAttribute("aria-hidden", "false");
+
+    // Zarządzanie focusem
+    State.set("lastFocusedElement", document.activeElement);
+    const focusable = getFocusable(modal);
+    if (focusable.length > 0) {
+        focusable[0].focus();
+    }
+    modal._focusTrapDispose = trapFocus(modal);
 
     if (options.onOpen) options.onOpen();
     if (options.onClose) modal.onCloseCallback = options.onClose;
-
-    State.set("lastFocusedElement", document.activeElement);
-    DOM.container.setAttribute("aria-hidden", "true");
-    modal.setAttribute("aria-hidden", "false");
-    const focusable = getFocusable(modal);
-    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content"))?.focus();
-    modal._focusTrapDispose = trapFocus(modal);
 }
 
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal)) return;
 
-    const animationClass = options.animationClass || '';
-    const isSlideAnimation = animationClass.includes('slide');
-
-    // Unbind the background click listener immediately
-    if (modal._closeOnClick) {
-        modal.removeEventListener('click', modal._closeOnClick);
-        delete modal._closeOnClick;
+    modal.classList.add('is-hiding');
+    if (options.animationClass) {
+        modal.classList.add(options.animationClass);
     }
 
-    modal.setAttribute("aria-hidden", "true");
-
     const cleanup = () => {
-        modal.removeEventListener("animationend", cleanup);
-        modal.removeEventListener("transitionend", cleanup);
-
+        modal.removeEventListener('animationend', cleanup);
         modal.style.display = 'none';
-        modal.classList.remove("visible", "is-hiding");
-        if(animationClass) modal.classList.remove(animationClass);
-
-        if (modal._focusTrapDispose) {
-            modal._focusTrapDispose();
-            delete modal._focusTrapDispose;
-        }
+        modal.classList.remove('visible', 'is-hiding', 'slide-in-right', 'slide-out-right');
 
         activeModals.delete(modal);
-
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
             DOM.container.removeAttribute("aria-hidden");
         }
 
-        if (!options.keepFocus) {
-            State.get("lastFocusedElement")?.focus();
-        }
+        if (modal._focusTrapDispose) modal._focusTrapDispose();
+        State.get("lastFocusedElement")?.focus();
 
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
@@ -229,19 +202,9 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    // Choose the right event to listen for
-    const eventToListen = isSlideAnimation ? "animationend" : "transitionend";
-    modal.addEventListener(eventToListen, cleanup, { once: true });
+    modal.addEventListener('animationend', cleanup, { once: true });
 
-    // Trigger the animation/transition
-    if (animationClass) {
-        modal.classList.add(animationClass);
-    } else {
-        modal.classList.add('is-hiding'); // For modals like comments
-        modal.classList.remove('visible'); // For standard fade-out modals
-    }
-
-    // Fallback timer
+    // Fallback na wypadek, gdyby animacja się nie zakończyła
     setTimeout(cleanup, 500);
 }
 

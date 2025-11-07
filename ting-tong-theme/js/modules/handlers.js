@@ -534,6 +534,7 @@ export const Handlers = {
             const slideId = activeSlide.dataset.slideId;
             const slideData = slidesData.find(s => s.id === slideId);
             if (slideData && slideData.author) {
+                // Zaimportuj i użyj ProfileModal
                 import('./profile-modal.js').then(({ ProfileModal }) => {
                     ProfileModal.open(slideData.author);
                 });
