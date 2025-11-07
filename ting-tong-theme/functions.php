@@ -42,14 +42,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function tt_define_stripe_constants_safely() {
     // Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
     if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-        $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : null;
-        define('TT_STRIPE_PUBLISHABLE_KEY', $pk_value);
+        define('TT_STRIPE_PUBLISHABLE_KEY', null);
     }
 
     // Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
     if (!defined('TT_STRIPE_SECRET_KEY')) {
-        $sk_value = defined('SECRET_KEY') ? SECRET_KEY : null;
-        define('TT_STRIPE_SECRET_KEY', $sk_value);
+        define('TT_STRIPE_SECRET_KEY', null);
     }
 }
 // Kluczowy hak: Wymusza definicję po wczytaniu wp-config.php, ale przed rejestracją skryptów.
@@ -375,7 +373,7 @@ function tt_enqueue_and_localize_scripts() {
             'isLoggedIn' => is_user_logged_in(),
             'slides'     => tt_get_slides_data(),
             // W tym miejscu używamy stałej PHP, która musi być zdefiniowana w wp-config.php
-            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY',
+            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : null,
         ]
     );
 
@@ -1085,8 +1083,13 @@ add_action('wp_ajax_tt_save_settings', function () {
     }
 
     $user_id = get_current_user_id();
-    $email_consent = isset($_POST['email_consent']) ? (bool) $_POST['email_consent'] : false;
+    $email_consent = isset($_POST['email_consent']) ? rest_sanitize_boolean($_POST['email_consent']) : false;
     $email_language = isset($_POST['email_language']) ? sanitize_text_field($_POST['email_language']) : 'pl';
+
+    // Walidacja języka
+    if (!in_array($email_language, ['pl', 'en'])) {
+        $email_language = 'pl';
+    }
 
     update_user_meta($user_id, 'tt_email_consent', $email_consent);
     update_user_meta($user_id, 'tt_email_language', $email_language);

@@ -7,13 +7,12 @@
 
     <meta name="description" content="Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.">
     <meta name="theme-color" content="#000000">
-    <meta property="og:image" content="<?php echo get_template_directory_uri(); ?>/open.jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-
     <meta property="og:image" content="<?php echo get_template_directory_uri(); ?>/jajk.png">
     <meta property="og:image:width" content="500">
     <meta property="og:image:height" content="500">
+    <meta property="og:image" content="<?php echo get_template_directory_uri(); ?>/open.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <link rel="manifest" href="<?php echo get_template_directory_uri(); ?>/manifest.json">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
