@@ -264,7 +264,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-tiktok-profile-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-author-profile" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -581,6 +581,54 @@ get_header();
     </div>
 </div>
 
+<!-- === Author Profile Modal === -->
+<div id="author-profile-modal" class="author-profile-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="author-profile-modal-content">
+        <div class="author-profile-header">
+            <button class="close-btn" data-action="close-author-profile-modal" aria-label="Close author profile">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <h2 class="author-username"></h2>
+            <button class="options-btn" aria-label="Options">
+                 <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+        </div>
+        <div class="author-profile-body">
+            <div class="author-info-section">
+                <div class="author-avatar-container">
+                    <img src="" alt="Author Avatar" class="author-avatar">
+                </div>
+                <div class="author-stats">
+                    <div class="stat-item">
+                        <strong class="stat-value" id="author-following-count">0</strong>
+                        <span class="stat-label" data-translate-key="following">Following</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong class="stat-value" id="author-followers-count">0</strong>
+                        <span class="stat-label" data-translate-key="followers">Followers</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong class="stat-value" id="author-likes-count">0</strong>
+                        <span class="stat-label" data-translate-key="likes">Likes</span>
+                    </div>
+                </div>
+                <h3 class="author-display-name"></h3>
+                <p class="author-bio"></p>
+                <button class="follow-btn" data-translate-key="follow">Follow</button>
+            </div>
+            <div class="author-content-tabs">
+                <button class="tab-btn active" data-tab="videos">
+                     <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
+                </button>
+                <!-- Add other tabs like 'liked' or 'private' here if needed -->
+            </div>
+            <div class="author-video-grid">
+                <!-- Video thumbnails will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="crop-modal" id="cropModal">
     <div class="crop-modal-content">
         <div class="crop-header">
@@ -604,69 +652,6 @@ get_header();
     </div>
 </div>
 <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
-
-<!-- TikTok Profile Modal -->
-<div id="tiktok-profile-modal" class="modal-overlay" style="display: none;">
-    <div class="tiktok-profile-content">
-        <header class="profile-header">
-            <button class="back-btn" data-action="close-tiktok-profile-modal">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            </button>
-            <div class="username-header"></div>
-            <button class="options-btn" data-action="profile-options">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            </button>
-        </header>
-        <main>
-            <section class="info-section">
-                <div class="avatar-container">
-                    <img src="" alt="User Avatar" class="profile-avatar">
-                </div>
-                <div class="stats-container">
-                    <div class="stat">
-                        <span class="stat-number following-count">123</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Obserwuje</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number followers-count">45.6K</span>
-                        <span class="stat-label" data-translate-key="profileFollowers">Obserwujący</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number likes-count">1.2M</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Polubienia</span>
-                    </div>
-                </div>
-                <h2 class="fullname"></h2>
-                <p class="bio"></p>
-                <div class="profile-actions">
-                    <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
-                    <button class="social-btn instagram" style="display: none;"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></button>
-                    <button class="social-btn youtube" style="display: none;"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></button>
-                </div>
-            </section>
-            <div class="tabs">
-                <div class="tab active" data-tab-content="videos-grid">
-                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-                </div>
-                <div class="tab" data-tab-content="liked-grid">
-                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                </div>
-                <div class="tab" data-tab-content="reposts-grid">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 7l-4 4 4 4"/><path d="M21 11H3"/><path d="M17 17l4-4-4-4"/><path d="M3 15h18"/></svg>
-                </div>
-            </div>
-            <section id="videos-grid" class="video-gallery active">
-                <!-- Video thumbnails will be dynamically inserted here -->
-            </section>
-            <section id="liked-grid" class="video-gallery">
-                <!-- Liked video thumbnails will be here -->
-            </section>
-            <section id="reposts-grid" class="video-gallery">
-                 <!-- Reposted video thumbnails will be here -->
-            </section>
-        </main>
-    </div>
-</div>
 
 <div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true">
     <div class="pwa-prompt-content">

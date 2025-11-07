@@ -5586,34 +5586,197 @@ z-index: 10021;
     }
 }
 
-/* ============================================================================
-   --- TIKTOK PROFILE MODAL ---
-   ============================================================================ */
-#tiktok-profile-modal {
+/* ==========================================================================
+   --- AUTHOR PROFILE MODAL STYLES ---
+   ========================================================================== */
+
+.author-profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
   background: transparent;
-  align-items: flex-start;
-  justify-content: flex-end;
-  transition: visibility 0.4s;
+  z-index: 10200;
+  opacity: 0;
+  visibility: hidden;
+  transition: visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-#tiktok-profile-modal.visible {
+.author-profile-modal-overlay.visible {
+  opacity: 1;
   visibility: visible;
 }
 
-#tiktok-profile-modal .tiktok-profile-content {
+.author-profile-modal-content {
+  position: relative;
   width: 100%;
-  height: 100%;
-  max-width: 500px;
-  background-color: #1a1a1a;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  transform: translateX(100%); /* Start off-screen to the right */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform;
 }
 
-#tiktok-profile-modal.visible .tiktok-profile-content {
+.author-profile-modal-overlay.visible .author-profile-modal-content {
   transform: translateX(0);
+}
+
+.author-profile-modal-overlay.is-hiding .author-profile-modal-content {
+  transform: translateX(100%);
+}
+
+.author-profile-header {
+  position: relative;
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  padding-top: var(--safe-area-top);
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.author-profile-header .author-username {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 120px);
+}
+
+.author-profile-header .close-btn,
+.author-profile-header .options-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.author-profile-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px;
+}
+
+.author-profile-body::-webkit-scrollbar {
+    display: none;
+}
+
+.author-info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.author-avatar-container {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.author-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.author-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.author-stats .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.author-stats .stat-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.author-stats .stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.author-display-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.author-bio {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+}
+
+.follow-btn {
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.author-content-tabs {
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2px;
+}
+
+.author-content-tabs .tab-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.author-content-tabs .tab-btn.active {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+.author-video-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+.author-video-grid .video-thumbnail {
+    position: relative;
+    padding-bottom: 150%; /* Aspect ratio for vertical videos */
+    background: #333;
 }
 
 @keyframes slideOutLeft {

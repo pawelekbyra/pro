@@ -8,7 +8,7 @@ import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
 import { CommentsModal } from './comments-modal.js';
-import { ProfileModal } from './profile-modal.js';
+import AuthorProfileModal from './author-profile-modal.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -528,11 +528,27 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
-      case "open-tiktok-profile-modal":
-        ProfileModal.openProfileModal();
+      case "open-author-profile": {
+        const swiper = State.get('swiper');
+        if (!swiper) return;
+
+        // Use realIndex to get the correct slide data, especially in loop mode
+        const slideData = slidesData[swiper.realIndex];
+        if (slideData && slideData.author) {
+            AuthorProfileModal.openModal(slideData.author);
+        } else {
+            console.error("Could not find author data for the current slide.");
+            // Fallback to account modal if author data is missing or user is not logged in
+            if (State.get("isUserLoggedIn")) {
+                AccountPanel.openAccountModal();
+            } else {
+                UI.showAlert(Utils.getTranslation("loginToViewProfile"));
+            }
+        }
         break;
-      case "close-tiktok-profile-modal":
-        ProfileModal.closeProfileModal();
+      }
+      case "close-author-profile-modal":
+        AuthorProfileModal.closeModal();
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
