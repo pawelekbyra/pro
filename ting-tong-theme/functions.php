@@ -40,14 +40,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * że stałe zdefiniowane w wp-config.php są już w pełni dostępne.
  */
 function tt_define_stripe_constants_safely() {
-    // Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
+    // Priorytet dla Klucza Publicznego: Sprawdzamy najpierw STRIPE_PUBLISHABLE_KEY, potem krótszą nazwę.
+    $pk_source = defined('STRIPE_PUBLISHABLE_KEY')
+        ? STRIPE_PUBLISHABLE_KEY
+        : (defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : null);
+
     if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-        define('TT_STRIPE_PUBLISHABLE_KEY', defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : null);
+        define('TT_STRIPE_PUBLISHABLE_KEY', $pk_source);
     }
 
-    // Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
+    // Priorytet dla Klucza Prywatnego: Sprawdzamy STRIPE_SECRET_KEY (najczęstsza nazwa), potem krótszą nazwę.
+    $sk_source = defined('STRIPE_SECRET_KEY')
+        ? STRIPE_SECRET_KEY
+        : (defined('SECRET_KEY') ? SECRET_KEY : null);
+
     if (!defined('TT_STRIPE_SECRET_KEY')) {
-        define('TT_STRIPE_SECRET_KEY', defined('STRIPE_SECRET_KEY') ? STRIPE_SECRET_KEY : null);
+        define('TT_STRIPE_SECRET_KEY', $sk_source);
     }
 }
 // Kluczowy hak: Wymusza definicję po wczytaniu wp-config.php, ale przed rejestracją skryptów.
