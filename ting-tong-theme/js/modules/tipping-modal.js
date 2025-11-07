@@ -46,7 +46,7 @@ function _getPreferredCurrencyByLocale() {
 
     // Fallback logic
     if (State.get('currentLang') === 'pl') {
-        return 'usd'; // Default for Polish UI if no region match
+        return 'pln';
     }
 
     return 'usd'; // Global fallback

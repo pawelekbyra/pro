@@ -85,35 +85,22 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Dla wszystkich innych żądań GET, użyj strategii "cache-first"
+  // Dla wszystkich innych żądań GET, użyj strategii "Network-first"
   event.respondWith(
-    caches.match(request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          console.log(`[SW] 💾 Serving from cache: ${request.url}`);
-          return cachedResponse;
+    fetch(request) // Spróbuj pobrać z sieci (PRIORYTET)
+      .then(networkResponse => {
+        // Jeśli sukces, zaktualizuj cache i zwróć odpowiedź z sieci
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, responseToCache);
+          });
         }
-
-        console.log(`[SW] ☁️ Fetching from network: ${request.url}`);
-        return fetch(request).then(networkResponse => {
-          // Klonuj odpowiedź i zapisz w cache, jeśli jest poprawna
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              console.log(`[SW]  caching new asset: ${request.url}`);
-              cache.put(request, responseToCache);
-            });
-          }
-          return networkResponse;
-        });
+        return networkResponse;
       })
-      .catch(error => {
-        console.error(`[SW] ❌ Fetch error for ${request.url}:`, error);
-        // Zwróć prostą odpowiedź błędu sieciowego
-        return new Response('Network error occurred', {
-          status: 408,
-          headers: { 'Content-Type': 'text/plain' },
-        });
+      .catch(() => {
+        // Jeśli błąd sieci, spróbuj z cache (FALLBACK)
+        return caches.match(request);
       })
   );
 });
