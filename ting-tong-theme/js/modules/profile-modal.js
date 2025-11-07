@@ -78,9 +78,9 @@ const ProfileModal = {
   close() {
     if (!this.modal) return;
 
-    // Użyj UI.closeModal z klasą animacji slide-out-right
+    // Użyj UI.closeModal z klasą animacji slide-out-left
     UI.closeModal(this.modal, {
-        animationClass: 'slide-out-right'
+        animationClass: 'slide-out-left'
     });
   }
 };
