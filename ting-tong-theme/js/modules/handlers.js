@@ -8,6 +8,7 @@ import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
 import { CommentsModal } from './comments-modal.js';
+import { ProfileModal } from './profile-modal.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -528,17 +529,7 @@ export const Handlers = {
         // This is now handled directly in the PWA module.
         break;
       case "open-profile-modal":
-        const swiperInstance = State.get('swiper');
-        if (swiperInstance) {
-            const activeSlide = swiperInstance.slides[swiperInstance.activeIndex];
-            const slideId = activeSlide.dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-            if (slideData && slideData.author) {
-                import('./profile-modal.js').then(({ ProfileModal }) => {
-                    ProfileModal.open(slideData.author);
-                });
-            }
-        }
+        ProfileModal.openProfileModal();
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");

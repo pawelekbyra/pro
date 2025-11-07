@@ -3055,276 +3055,6 @@ body,
   display: none !important;
 }
 
-/* ==========================================================================
-   --- TIKTOK PUBLIC PROFILE MODAL ---
-   ========================================================================== */
-#tiktok-profile-modal {
-  /* This modal requires a special override. It must be `fixed` to slide over
-     the #app-frame, which has `overflow: hidden`. On desktop, we revert this
-     to `absolute` to keep it constrained. */
-  position: fixed;
-}
-
-#tiktok-profile-modal .profile-content {
-  background-color: #121212;
-  color: #fff;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.4s ease-in-out;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
-}
-
-#tiktok-profile-modal.visible .tiktok-profile-content {
-  transform: translateX(0);
-}
-
-#tiktok-profile-modal.is-hiding .tiktok-profile-content {
-  transform: translateX(100%);
-}
-
-.tiktok-profile-header {
-  height: var(--topbar-height);
-  display: grid;
-  grid-template-columns: 60px 1fr 60px;
-  align-items: center;
-  padding: 0;
-  padding-top: var(--safe-area-top);
-  background-color: #1f1f1f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
-}
-
-.tiktok-profile-header .username {
-  font-size: 16px;
-  font-weight: 700;
-  text-align: center;
-  grid-column: 2;
-}
-
-.tiktok-profile-header .profile-action-btn,
-#tiktok-profile-modal .modal-close-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    transform 0.1s ease-in-out,
-    opacity 0.2s;
-}
-
-.tiktok-profile-header .profile-action-btn:active,
-#tiktok-profile-modal .modal-close-btn:active {
-  transform: scale(0.9);
-}
-
-#tiktok-profile-modal .modal-close-btn {
-  position: static;
-  color: #fff;
-  font-size: 28px;
-}
-
-.profile-main {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 20px 16px;
-}
-
-.profile-main::-webkit-scrollbar {
-  display: none;
-}
-
-.profile-summary {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.profile-avatar-wrapper {
-  flex-shrink: 0;
-}
-
-.profile-avatar {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-stats {
-  display: flex;
-  justify-content: space-around;
-  flex-grow: 1;
-  gap: 20px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 18px;
-  font-weight: 700;
-  display: block;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.profile-nickname {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-#tiktok-profile-at-username {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: -8px;
-}
-
-.profile-bio {
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 16px;
-  white-space: pre-wrap;
-}
-
-.profile-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.profile-actions .follow-button {
-  flex-grow: 1;
-  background-color: var(--accent-color);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.profile-actions .icon-button {
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-.profile-actions .icon-button svg {
-  width: 24px;
-  height: 24px;
-  fill: #fff;
-}
-
-.profile-tabs {
-  display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  gap: 2px;
-}
-
-.profile-tabs .tab {
-  flex: 1;
-  padding: 14px;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  color: rgba(255, 255, 255, 0.8);
-  background-color: #1f1f1f;
-  border-radius: 4px 4px 0 0;
-  transition: background-color 0.2s ease;
-}
-
-.profile-tabs .tab:hover {
-  background-color: #2a2a2a;
-}
-
-.profile-tabs .tab.active {
-  color: #fff;
-  background-color: #3a3a3a;
-}
-
-.profile-tabs .tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: var(--accent-color);
-}
-
-.profile-tabs .tab svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor;
-}
-
-.video-gallery {
-  display: none;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding-top: 2px;
-}
-
-.video-gallery.active {
-  display: grid;
-}
-
-.video-thumbnail {
-  position: relative;
-  padding-bottom: 140%;
-  background-color: #333;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.video-thumbnail img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-views {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  color: var(--white);
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.video-views svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  fill: white;
-}
 
 /* --- Toast Notification --- */
 /* (This style is now handled by #alertBox for consistency) */
@@ -3942,7 +3672,6 @@ body,
   .image-lightbox,
   #bmc-w-modal-container,
   .account-modal-overlay,
-  #tiktok-profile-modal,
   #bmc-w-modal-container iframe,
   #bmc-w-modal-container > div
   {
@@ -3963,8 +3692,7 @@ body,
   .fl-modal-overlay .fl-modal-content,
   .crop-modal .crop-modal-content,
   .notification-popup,
-  .account-modal-content,
-  .tiktok-profile-content
+.account-modal-content
   {
     width: 100% !important;
     max-width: 100% !important;
@@ -5427,37 +5155,6 @@ body,
     transform: translateY(-2px);
 }
 
-/* ==========================================================================
-           --- TIKTOK PUBLIC PROFILE MODAL ---
-           ========================================================================== */
-#tiktok-profile-modal {
-  /* This modal requires a special override. It must be `fixed` to slide over
-     the #app-frame, which has `overflow: hidden`. On desktop, we revert this
-     to `absolute` to keep it constrained. */
-  position: fixed;
-}
-
-#tiktok-profile-modal .profile-content {
-  background-color: #121212;
-  color: #fff;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.4s ease-in-out;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
-}
-
-#tiktok-profile-modal.visible .profile-content {
-  transform: translateX(0);
-}
-
-#tiktok-profile-modal.is-hiding .profile-content {
-  transform: translateX(100%);
-}
 
 .profile-header {
   height: var(--topbar-height);
@@ -5824,13 +5521,25 @@ main::-webkit-scrollbar {
     }
 }
 
-@keyframes slideInRight {
+
+@keyframes slideOutRight {
     from {
-        transform: translateX(100%);
-    }
-    to {
         transform: translateX(0);
     }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+#tiktok-profile-modal .tiktok-profile-content {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+#tiktok-profile-modal.visible .profile-content {
+    opacity: 1;
+    transform: translateX(0);
+    transition: none;
 }
 
 #app-frame[style*="pointer-events: none"] {
@@ -5867,18 +5576,230 @@ z-index: 10021;
     animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
 }
 
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* ============================================================================
+   --- TIKTOK PROFILE MODAL STYLES ---
+   ============================================================================ */
+
+.tiktok-profile-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent; /* Tło jest częścią contentu */
+    z-index: 10200;
+    opacity: 0;
+    visibility: hidden;
+    transition: visibility 0.4s ease;
+}
+
+.tiktok-profile-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tiktok-profile-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #121212;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+/* Animations */
+.tiktok-profile-modal-overlay.visible .tiktok-profile-content {
+    transform: translateX(0);
+}
+
+.tiktok-profile-modal-overlay.is-hiding .tiktok-profile-content {
+    transform: translateX(100%);
+}
+
+.tiktok-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    height: var(--topbar-height);
+    padding-top: var(--safe-area-top);
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tiktok-profile-username-header {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.profile-action-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.tiktok-profile-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.tiktok-profile-body::-webkit-scrollbar {
+  display: none;
+}
+
+
+.profile-info-section {
+    padding: 20px 16px;
+    text-align: center;
+}
+
+.profile-avatar-container {
+    margin-bottom: 12px;
+}
+
+.tiktok-profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.tiktok-profile-username {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.profile-stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.tiktok-profile-bio {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #eee;
+    margin-bottom: 20px;
+}
+
+.profile-actions .follow-btn {
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 250px;
+}
+
+.profile-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-tabs .tab-btn {
+    flex: 1;
+    padding: 14px;
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-bottom-color 0.2s;
+}
+.profile-tabs .tab-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+
+.profile-tabs .tab-btn.active {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+.video-placeholder {
+    padding-bottom: 150%; /* Aspect ratio for vertical videos */
+    background: #222;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+#tiktok-profile-modal.visible {
+    animation: none; /* remove fade in */
+}
+
+#tiktok-profile-modal.visible .tiktok-profile-content {
+    animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 @keyframes slideOutLeft {
     from {
         transform: translateX(0);
     }
     to {
-        transform: translateX(-105%);
+        transform: translateX(-100%);
     }
 }
 
-@keyframes slideInRight {
+@keyframes slideInLeft {
     from {
-        transform: translateX(105%);
+        transform: translateX(-100%);
     }
     to {
         transform: translateX(0);
