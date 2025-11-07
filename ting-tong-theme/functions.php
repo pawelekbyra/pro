@@ -42,12 +42,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function tt_define_stripe_constants_safely() {
     // Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
     if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-        define('TT_STRIPE_PUBLISHABLE_KEY', null);
+        define('TT_STRIPE_PUBLISHABLE_KEY', defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : null);
     }
 
     // Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
     if (!defined('TT_STRIPE_SECRET_KEY')) {
-        define('TT_STRIPE_SECRET_KEY', null);
+        define('TT_STRIPE_SECRET_KEY', defined('STRIPE_SECRET_KEY') ? STRIPE_SECRET_KEY : null);
     }
 }
 // Kluczowy hak: Wymusza definicję po wczytaniu wp-config.php, ale przed rejestracją skryptów.
