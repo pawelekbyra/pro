@@ -11,22 +11,13 @@ const ProfileModal = {
     this.modal = document.getElementById('tiktok-profile-modal');
     if (!this.modal) return;
 
-    // Obsługa kliknięcia przycisku wstecz (jest to back-btn w HTML)
-    const backBtn = this.modal.querySelector('.profile-header .back-btn');
+    const backBtn = this.modal.querySelector('.back-btn');
     if (backBtn) {
         backBtn.addEventListener('click', (e) => {
             e.preventDefault();
             this.close();
         });
     }
-
-    // Obsługa tła jest już w openModal, ale dodajmy tu kliknięcie w body modala
-    this.modal.addEventListener('click', (e) => {
-        // W HTML jest div .profile-content, więc kliknięcie w tło modala to target === this.modal
-        if (e.target === this.modal && this.modal.classList.contains('visible')) {
-            this.close();
-        }
-    });
 
     // Event listener for tab switching
     this.modal.querySelectorAll('.tabs .tab').forEach(tab => {
@@ -54,16 +45,15 @@ const ProfileModal = {
         likes: Math.floor(Math.random() * 5000) + 500,
     };
 
-    // Populate modal with author data
     this.modal.querySelector('.username-header').textContent = authorData.name;
     this.modal.querySelector('.profile-avatar').src = authorData.avatar;
     this.modal.querySelector('.fullname').textContent = authorData.name;
-    this.modal.querySelector('.bio').textContent = authorData.description || 'No bio available.';
+    this.modal.querySelector('.bio').textContent = authorData.description || 'Brak biogramu.';
 
     // Ustawienie statystyk
-    this.modal.querySelector('.following-count').textContent = Utils.formatCount(stats.following);
-    this.modal.querySelector('.followers-count').textContent = Utils.formatCount(stats.followers);
-    this.modal.querySelector('.likes-count').textContent = Utils.formatCount(stats.likes);
+    this.modal.querySelector('.followers-count .stat-number').textContent = Utils.formatCount(stats.followers);
+    this.modal.querySelector('.following-count .stat-number').textContent = Utils.formatCount(stats.following);
+    this.modal.querySelector('.likes-count .stat-number').textContent = Utils.formatCount(stats.likes);
 
     // Użyj UI.openModal z klasą animacji slide-in-right
     UI.openModal(this.modal, {
