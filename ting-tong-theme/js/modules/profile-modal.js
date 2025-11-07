@@ -55,15 +55,15 @@ const ProfileModal = {
     };
 
     // Populate modal with author data
-    this.modal.querySelector('.username-header').textContent = authorData.name;
-    this.modal.querySelector('.profile-avatar').src = authorData.avatar;
-    this.modal.querySelector('.fullname').textContent = authorData.name;
-    this.modal.querySelector('.bio').textContent = authorData.description || 'No bio available.';
+    this.modal.querySelector('#tiktok-profile-username').textContent = authorData.name;
+    this.modal.querySelector('#tiktok-profile-avatar').src = authorData.avatar;
+    this.modal.querySelector('#tiktok-profile-nickname').textContent = authorData.name;
+    this.modal.querySelector('#tiktok-profile-bio').textContent = authorData.description || 'No bio available.';
 
     // Ustawienie statystyk
-    this.modal.querySelector('.following-count').textContent = Utils.formatCount(stats.following);
-    this.modal.querySelector('.followers-count').textContent = Utils.formatCount(stats.followers);
-    this.modal.querySelector('.likes-count').textContent = Utils.formatCount(stats.likes);
+    this.modal.querySelector('#tiktok-following-count').textContent = Utils.formatCount(stats.following);
+    this.modal.querySelector('#tiktok-followers-count').textContent = Utils.formatCount(stats.followers);
+    this.modal.querySelector('#tiktok-likes-count').textContent = Utils.formatCount(stats.likes);
 
     // Użyj UI.openModal z klasą animacji slide-in-right
     UI.openModal(this.modal, {
