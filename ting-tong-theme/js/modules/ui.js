@@ -158,6 +158,7 @@ function openModal(modal, options = {}) {
 
     if (modal.id === 'infoModal') {
         startCountdown();
+        updateCrowdfundingStats();
     }
 
     // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
@@ -1054,7 +1055,31 @@ export const UI = {
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
+  updateCrowdfundingStats,
 };
+
+async function updateCrowdfundingStats() {
+    try {
+        const result = await API.getNewCrowdfundingStats();
+        if (result.success && result.data) {
+            const stats = result.data;
+            const patronsEl = document.getElementById('patrons-count');
+            const collectedEl = document.getElementById('collected-amount');
+            const progressFillEl = document.getElementById('progress-fill');
+
+            if (patronsEl) patronsEl.textContent = stats.patrons_count;
+            if (collectedEl) collectedEl.textContent = `€${stats.collected_eur.toFixed(2)}`;
+
+            if (progressFillEl) {
+                const goal = 1000; // Przykładowy cel
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressFillEl.style.width = `${percentage}%`;
+            }
+        }
+    } catch (error) {
+        console.error("Failed to update crowdfunding stats:", error);
+    }
+}
 
 function closeCommentsModal() {
     const modal = DOM.commentsModal;
