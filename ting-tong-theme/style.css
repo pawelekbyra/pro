@@ -5587,205 +5587,33 @@ z-index: 10021;
 }
 
 /* ============================================================================
-   --- TIKTOK PROFILE MODAL STYLES ---
+   --- TIKTOK PROFILE MODAL ---
    ============================================================================ */
-
-.tiktok-profile-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent; /* Tło jest częścią contentu */
-    z-index: 10200;
-    opacity: 0;
-    visibility: hidden;
-    transition: visibility 0.4s ease;
-}
-
-.tiktok-profile-modal-overlay.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.tiktok-profile-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #121212;
-    display: flex;
-    flex-direction: column;
-    transform: translateX(100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform;
-}
-
-/* Animations */
-.tiktok-profile-modal-overlay.visible .tiktok-profile-content {
-    transform: translateX(0);
-}
-
-.tiktok-profile-modal-overlay.is-hiding .tiktok-profile-content {
-    transform: translateX(100%);
-}
-
-.tiktok-profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 16px;
-    height: var(--topbar-height);
-    padding-top: var(--safe-area-top);
-    flex-shrink: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tiktok-profile-username-header {
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-}
-
-.profile-action-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    padding: 8px;
-    cursor: pointer;
-}
-
-.tiktok-profile-body {
-    flex-grow: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-.tiktok-profile-body::-webkit-scrollbar {
-  display: none;
-}
-
-
-.profile-info-section {
-    padding: 20px 16px;
-    text-align: center;
-}
-
-.profile-avatar-container {
-    margin-bottom: 12px;
-}
-
-.tiktok-profile-avatar {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.tiktok-profile-username {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.profile-stats-container {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 16px;
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.stat-value {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.stat-label {
-    font-size: 14px;
-    color: #aaa;
-}
-
-.tiktok-profile-bio {
-    font-size: 14px;
-    line-height: 1.5;
-    color: #eee;
-    margin-bottom: 20px;
-}
-
-.profile-actions .follow-btn {
-    background: var(--accent-color);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100%;
-    max-width: 250px;
-}
-
-.profile-tabs {
-    display: flex;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-tabs .tab-btn {
-    flex: 1;
-    padding: 14px;
-    background: none;
-    border: none;
-    color: #aaa;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-bottom-color 0.2s;
-}
-.profile-tabs .tab-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-}
-
-
-.profile-tabs .tab-btn.active {
-    color: #fff;
-    border-bottom-color: #fff;
-}
-
-.video-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-}
-
-.video-placeholder {
-    padding-bottom: 150%; /* Aspect ratio for vertical videos */
-    background: #222;
-}
-
-@keyframes slideInRight {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-}
-
-@keyframes slideOutRight {
-    from { transform: translateX(0); }
-    to { transform: translateX(100%); }
+#tiktok-profile-modal {
+  background: transparent;
+  align-items: flex-start;
+  justify-content: flex-end;
+  transition: visibility 0.4s;
 }
 
 #tiktok-profile-modal.visible {
-    animation: none; /* remove fade in */
+  visibility: visible;
+}
+
+#tiktok-profile-modal .tiktok-profile-content {
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  background-color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 #tiktok-profile-modal.visible .tiktok-profile-content {
-    animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform: translateX(0);
 }
 
 @keyframes slideOutLeft {

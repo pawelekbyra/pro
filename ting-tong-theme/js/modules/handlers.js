@@ -528,8 +528,11 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
-      case "open-profile-modal":
+      case "open-tiktok-profile-modal":
         ProfileModal.openProfileModal();
+        break;
+      case "close-tiktok-profile-modal":
+        ProfileModal.closeProfileModal();
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
