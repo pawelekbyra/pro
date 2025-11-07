@@ -504,16 +504,12 @@ export const Handlers = {
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
         if (infoModal && infoModal.classList.contains('visible')) {
-            // Animate out the old modal
             UI.closeModal(infoModal, {
-                keepFocus: true, // Keep focus within the modal context
+                keepFocus: true,
                 animationClass: 'slide-out-left'
             });
-
-            // Animate in the new modal simultaneously
             TippingModal.showModal({ animationClass: 'slide-in-right' });
         } else {
-            // If info modal wasn't open, just open the tipping modal normally
             TippingModal.showModal();
         }
         break;

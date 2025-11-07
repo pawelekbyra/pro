@@ -130,7 +130,8 @@ function openModal(modal, options = {}) {
 
     // Usunięcie wszystkich klas animacji i ukrywania przed otwarciem
     modal.style.display = 'flex';
-    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left', 'slide-in-right');
+    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left', 'slide-in-right', 'slide-in-left');
+
 
     // Ustawienie widoczności
     modal.classList.add('visible');
@@ -138,10 +139,6 @@ function openModal(modal, options = {}) {
     // Dodanie klasy animacji w następnej klatce (daje czas na reset styli)
     if (options.animationClass) {
         requestAnimationFrame(() => {
-            // Usuń przeciwną klasę przed dodaniem nowej
-            if (options.animationClass.includes('slide-in')) {
-                modal.classList.remove('slide-out-right', 'slide-out-left');
-            }
             modal.classList.add(options.animationClass);
         });
     }
@@ -200,15 +197,9 @@ function openModal(modal, options = {}) {
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal)) return;
 
-    // Wybierz klasę animacji wyjścia. Jeśli modal ma klasę 'slide-in-right', użyj 'slide-out-right'.
-    let animationClass = options.animationClass || '';
-    if (!animationClass && modal.classList.contains('slide-in-right')) {
-        animationClass = 'slide-out-right';
-    }
-
+    const animationClass = options.animationClass || '';
     const isSlideAnimation = animationClass.includes('slide');
 
-    // Unbind the background click listener immediately
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
         delete modal._closeOnClick;
@@ -217,14 +208,11 @@ function closeModal(modal, options = {}) {
     modal.setAttribute("aria-hidden", "true");
 
     const cleanup = () => {
-        // Usuń wszystkie listenery i klasy animacji
         modal.removeEventListener("animationend", cleanup);
         modal.removeEventListener("transitionend", cleanup);
-
         modal.style.display = 'none';
-        modal.classList.remove("visible", "is-hiding", "slide-in-right", "slide-out-right", "slide-out-left");
+        modal.classList.remove("visible", "is-hiding", "slide-in-right", "slide-out-right", "slide-out-left", "slide-in-left");
 
-        // Czyszczenie focus trap
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
@@ -247,20 +235,16 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    // Trigger the animation/transition
     if (isSlideAnimation) {
-        // Dla modali z animacją (np. profil)
         modal.classList.add(animationClass);
         modal.addEventListener("animationend", cleanup, { once: true });
     } else {
-        // Dla standardowych modali (fade-out, np. infoModal)
-        modal.classList.add('is-hiding'); // Użyj is-hiding dla fade-out
         modal.classList.remove('visible');
+        modal.classList.add('is-hiding');
         modal.addEventListener("transitionend", cleanup, { once: true });
     }
 
-    // Fallback timer
-    setTimeout(cleanup, 500);
+    setTimeout(cleanup, 400); // Skrócony fallback
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
