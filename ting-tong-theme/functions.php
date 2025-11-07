@@ -1181,6 +1181,13 @@ add_filter('pre_get_avatar_data', 'tt_custom_avatar_filter', 99, 2);
 
 // 4. AJAX Handler for Creating a Payment Intent
 function tt_create_payment_intent() {
+    // --- TYMCZASOWY KOD DIAGNOSTYCZNY (USUŃ PO NAPRAWIE BŁĘDU) ---
+    // Wymusza wyświetlanie błędów PHP
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+    // --- KONIEC TYMCZASOWEGO KODU DIAGNOSTYCZNEGO ---
+
     check_ajax_referer('tt_ajax_nonce', 'nonce');
 
     // Weryfikacja: jeśli Composer nie załadował Stripe, to będzie błąd 500.
