@@ -344,57 +344,6 @@ get_header();
     </div>
 </div>
 
-<div id="tiktok-profile-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tiktok-profile-username" aria-hidden="true">
-    <div class="tiktok-profile-content">
-        <header class="tiktok-profile-header">
-            <button class="profile-action-btn" data-action="close-modal" aria-label="Close profile" style="font-size: 28px;">&times;</button>
-            <h2 id="tiktok-profile-username" class="username"></h2>
-        </header>
-        <main class="profile-main">
-            <div class="profile-summary">
-                <div class="profile-avatar-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                     <img src="" alt="Avatar użytkownika" class="profile-avatar" id="tiktok-profile-avatar">
-                     <h1 class="profile-nickname" id="tiktok-profile-nickname"></h1>
-                     <p id="tiktok-profile-at-username"></p>
-                </div>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-number" id="tiktok-following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowingLabel">Obserwuje</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="tiktok-followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowersLabel">Obserwujący</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="tiktok-likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikesLabel">Polubienia</span>
-                    </div>
-                </div>
-            </div>
-            <p class="profile-bio" id="tiktok-profile-bio"></p>
-            <div class="profile-actions">
-                <button class="follow-button" data-translate-key="profileFollowBtn">Obserwuj</button>
-                <button class="icon-button"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></button>
-            </div>
-
-            <div class="profile-tabs">
-                <div class="tab active" data-tab-content="videos-grid"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/></svg></div>
-                <div class="tab" data-tab-content="liked-grid"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
-                <div class="tab" data-tab-content="reposts-grid"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
-            </div>
-            <div class="video-gallery active" id="videos-grid">
-                <!-- Video thumbnails will be dynamically inserted here -->
-            </div>
-             <div class="video-gallery" id="liked-grid">
-                <!-- Liked video thumbnails will be dynamically inserted here -->
-            </div>
-            <div class="video-gallery" id="reposts-grid">
-                <!-- Reposted video thumbnails will be dynamically inserted here -->
-            </div>
-        </main>
-    </div>
-</div>
 
 <!-- Comments Modal -->
 <div id="comments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title" aria-hidden="true">
