@@ -2,10 +2,10 @@ import { authManager } from './auth-manager.js';
 
 export let slidesData = [];
 
-async function _request(action, data = {}) {
+async function _request(action, data = {}, sendAsJson = false) {
   try {
-    // Użyj AuthManager zamiast bezpośredniego fetch
-    return await authManager.ajax(action, data);
+    // Użyj AuthManager zamiast bezpośredniego fetch, przekazując flagę sendAsJson
+    return await authManager.ajax(action, data, sendAsJson);
   } catch (error) {
     console.error(`API Client Error for action "${action}":`, error);
     return { success: false, data: { message: error.message } };
@@ -158,4 +158,13 @@ export const API = {
   deleteAccount: (data) => _request("tt_account_delete", data),
   loadUserProfile: () => _request("tt_profile_get"),
   getNewCrowdfundingStats: () => _request("tt_get_crowdfunding_stats"),
+
+  /**
+   * Zapisuje subskrypcję Web Push na serwerze.
+   * @param {PushSubscription} subscription Obiekt subskrypcji z przeglądarki.
+   */
+  savePushSubscription: (subscription) => {
+    // Używamy _request z opcją `sendAsJson = true`
+    return _request("tt_save_push_subscription", subscription, true);
+  },
 };

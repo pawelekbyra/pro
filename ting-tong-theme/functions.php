@@ -5,17 +5,21 @@
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
 
+// Import klas z biblioteki WebPush na początku pliku
+use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
+
 // =========================================================================
 // 0. ŁADOWANIE COMPOSER I KLUCZE (NAPRAWIONA LOGIKA POBIERANIA Z WP-CONFIG)
 // =========================================================================
 
-// Wymagaj autoloader'a Composera (nadal potrzebny dla klasy Stripe)
+// Wymagaj autoloader'a Composera (nadal potrzebny dla klasy Stripe i WebPush)
 $composer_autoload = __DIR__ . '/vendor/autoload.php';
 if (file_exists($composer_autoload)) {
     require_once $composer_autoload;
 } else {
     // Jeśli nie znaleziono Composera, błąd krytyczny zostanie zalogowany.
-    error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php. Wgraj katalog vendor/ na serwer.');
+    error_log('BŁĄD KRYTYCZNY: Nie znaleziono pliku autoload.php. Uruchom `composer install` lub wgraj katalog `vendor/`.');
 }
 
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
@@ -29,6 +33,22 @@ if ( ! function_exists( 'wp_new_user_notification' ) ) {
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
+
+/**
+ * Definiuje klucze VAPID, używając stałych z wp-config.php.
+ */
+function tt_define_vapid_constants_safely() {
+    if (defined('VAPID_PUBLIC_KEY') && !defined('TT_VAPID_PUBLIC_KEY')) {
+        define('TT_VAPID_PUBLIC_KEY', VAPID_PUBLIC_KEY);
+    }
+    if (defined('VAPID_PRIVATE_KEY') && !defined('TT_VAPID_PRIVATE_KEY')) {
+        define('TT_VAPID_PRIVATE_KEY', VAPID_PRIVATE_KEY);
+    }
+    if (defined('VAPID_SUBJECT') && !defined('TT_VAPID_SUBJECT')) {
+        define('TT_VAPID_SUBJECT', VAPID_SUBJECT);
+    }
+}
+add_action('after_setup_theme', 'tt_define_vapid_constants_safely', 1);
 
 // =========================================================================
 // 1. Define Stripe API Keys (NAPRAWA TIMINGU Z UŻYCIEM HOOKA)
@@ -62,7 +82,7 @@ function tt_define_stripe_constants_safely() {
 add_action('after_setup_theme', 'tt_define_stripe_constants_safely', 1);
 
 /**
-* Tworzy нового uzytkownika WordPress, jeśli nie istnieje, lub zwraca istniejącego.
+* Tworzy nowego uzytkownika WordPress, jeśli nie istnieje, lub zwraca istniejącego.
 * Ustawia flagę tt_first_login_completed na 0, aby wymusić uzupełnienie profilu.
 *
 * @param string $email Adres email uzytkownika.
@@ -201,6 +221,21 @@ function tt_create_database_tables() {
     dbDelta($sql_donations);
     update_option('tt_donations_db_version', '1.0');
 
+    // Tabela: Subskrypcje Web Push
+    $table_name_push = $wpdb->prefix . 'tt_push_subscriptions';
+    $sql_push = "CREATE TABLE {$table_name_push} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT UNSIGNED NOT NULL,
+        endpoint VARCHAR(512) NOT NULL,
+        p256dh VARCHAR(255) NOT NULL,
+        auth VARCHAR(255) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uniq_endpoint (endpoint(191)),
+        KEY idx_user_id (user_id)
+    ) {$charset_collate};";
+    dbDelta($sql_push);
+    update_option('tt_push_subscriptions_db_version', '1.0');
 
     // Rejestracja reguły dla webhooka i odświeżenie reguł
     add_rewrite_rule('^tt-webhook/stripe$', 'index.php?tt-webhook-type=stripe', 'top');
@@ -217,7 +252,8 @@ add_action(
         if ( get_option( 'tt_likes_db_version' ) !== '1.0'
             || get_option( 'tt_comments_db_version' ) !== '1.0'
             || get_option( 'tt_comment_likes_db_version' ) !== '1.0'
-            || get_option('tt_donations_db_version') !== '1.0') {
+            || get_option('tt_donations_db_version') !== '1.0'
+            || get_option('tt_push_subscriptions_db_version') !== '1.0') {
             tt_create_database_tables();
         }
     }
@@ -382,6 +418,7 @@ function tt_enqueue_and_localize_scripts() {
             'slides'     => tt_get_slides_data(),
             // W tym miejscu używamy stałej PHP, która musi być zdefiniowana w wp-config.php
             'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : null,
+            'vapidPk'    => defined('TT_VAPID_PUBLIC_KEY') ? TT_VAPID_PUBLIC_KEY : null,
         ]
     );
 
@@ -1125,6 +1162,117 @@ add_action('wp_ajax_tt_account_delete', function () {
     wp_logout();
     wp_send_json_success(['message' => 'Konto usunięte.']);
 });
+
+// --- Subskrypcje Web Push ---
+add_action('wp_ajax_tt_save_push_subscription', function() {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz być zalogowany, aby zapisać subskrypcję.'], 401);
+    }
+
+    // Odczytaj dane z ciała żądania JSON
+    $subscription_data = json_decode(file_get_contents('php://input'), true);
+    if (empty($subscription_data['endpoint']) || empty($subscription_data['keys']['p256dh']) || empty($subscription_data['keys']['auth'])) {
+        wp_send_json_error(['message' => 'Nieprawidłowe dane subskrypcji.'], 400);
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'tt_push_subscriptions';
+    $user_id = get_current_user_id();
+    $endpoint = esc_url_raw($subscription_data['endpoint']);
+    $p256dh = sanitize_text_field($subscription_data['keys']['p256dh']);
+    $auth = sanitize_text_field($subscription_data['keys']['auth']);
+
+    $existing_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_name} WHERE endpoint = %s", $endpoint));
+
+    $data = [
+        'user_id' => $user_id,
+        'endpoint' => $endpoint,
+        'p256dh' => $p256dh,
+        'auth' => $auth,
+    ];
+
+    if ($existing_id) {
+        // Jeśli subskrypcja (endpoint) już istnieje, zaktualizuj ją (np. na wypadek, gdyby zmienił się użytkownik)
+        $wpdb->update($table_name, $data, ['id' => $existing_id]);
+    } else {
+        // W przeciwnym razie, wstaw nową
+        $wpdb->insert($table_name, $data);
+    }
+
+    wp_send_json_success(['message' => 'Subskrypcja zapisana pomyślnie.']);
+});
+
+// ============================================================================
+// WEB PUSH NOTIFICATIONS
+// ============================================================================
+
+/**
+ * Wysyła powiadomienie Web Push do konkretnego użytkownika.
+ *
+ * @param int    $user_id ID użytkownika WordPress.
+ * @param string $title Tytuł powiadomienia.
+ * @param string $body Treść powiadomienia.
+ * @param int    $badge_count Liczba na odznace aplikacji.
+ * @return array Wyniki wysyłki.
+ */
+function tt_send_push_notification($user_id, $title, $body, $badge_count = 0) {
+    if (!defined('TT_VAPID_PUBLIC_KEY') || !defined('TT_VAPID_PRIVATE_KEY') || !defined('TT_VAPID_SUBJECT')) {
+        error_log('VAPID keys not defined. Cannot send push notification.');
+        return ['error' => 'VAPID keys not configured on the server.'];
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'tt_push_subscriptions';
+    $subscriptions_raw = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table_name} WHERE user_id = %d", $user_id));
+
+    if (empty($subscriptions_raw)) {
+        return ['status' => 'no_subscriptions_found_for_user'];
+    }
+
+    $auth = [
+        'VAPID' => [
+            'subject' => TT_VAPID_SUBJECT,
+            'publicKey' => TT_VAPID_PUBLIC_KEY,
+            'privateKey' => TT_VAPID_PRIVATE_KEY,
+        ],
+    ];
+
+    $webPush = new WebPush($auth);
+    $webPush->setReuseVAPIDHeaders(true); // Optymalizacja
+
+    $payload = json_encode([
+        'title' => $title,
+        'body' => $body,
+        'badge' => (int) $badge_count,
+        'icon' => get_template_directory_uri() . '/assets/icons/icon-192x192.svg', // Domyślna ikona
+    ]);
+
+    foreach ($subscriptions_raw as $sub_raw) {
+        $subscription = Subscription::create([
+            'endpoint' => $sub_raw->endpoint,
+            'publicKey' => $sub_raw->p256dh,
+            'authToken' => $sub_raw->auth,
+        ]);
+        $webPush->queueNotification($subscription, $payload);
+    }
+
+    $results = [];
+    foreach ($webPush->flush() as $report) {
+        $endpoint = $report->getRequest()->getUri()->__toString();
+        if ($report->isSuccess()) {
+            $results[$endpoint] = 'success';
+        } else {
+            $results[$endpoint] = 'failed: ' . $report->getReason();
+            // Jeśli subskrypcja wygasła (kod 410 Gone), usuń ją z bazy
+            if ($report->getResponse() && $report->getResponse()->getStatusCode() === 410) {
+                $wpdb->delete($table_name, ['endpoint' => $endpoint]);
+            }
+        }
+    }
+
+    return $results;
+}
 
 
 // ============================================================================
