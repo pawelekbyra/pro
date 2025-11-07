@@ -11,7 +11,6 @@ import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
 import { CommentsModal } from './modules/comments-modal.js';
-import { ProfileModal } from './modules/profile-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -443,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
         FirstLoginModal.init();
         TippingModal.init();
         CommentsModal.init();
-        ProfileModal.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
