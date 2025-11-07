@@ -128,19 +128,23 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    // Usunięcie wszystkich klas animacji i ukrywania przed otwarciem
+    // Przygotowanie modala do animacji
     modal.style.display = 'flex';
     modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left', 'slide-in-right', 'slide-in-left');
-
 
     // Ustawienie widoczności
     modal.classList.add('visible');
 
-    // Dodanie klasy animacji w następnej klatce (daje czas na reset styli)
+    // Zastosuj animację, jeśli została zdefiniowana
     if (options.animationClass) {
-        requestAnimationFrame(() => {
-            modal.classList.add(options.animationClass);
-        });
+        const content = modal.querySelector('.modal-content, .elegant-modal-content');
+        if (content) {
+            // Uruchom animację i nasłuchuj jej zakończenia
+            content.style.animation = `${options.animationClass} 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+            content.addEventListener('animationend', () => {
+                content.style.animation = ''; // Wyczyść animację po zakończeniu
+            }, { once: true });
+        }
     }
 
     if (modal.id === 'comments-modal-container') {
@@ -198,9 +202,6 @@ function openModal(modal, options = {}) {
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal)) return;
 
-    const animationClass = options.animationClass || '';
-    const isSlideAnimation = animationClass.includes('slide');
-
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
         delete modal._closeOnClick;
@@ -209,8 +210,6 @@ function closeModal(modal, options = {}) {
     modal.setAttribute("aria-hidden", "true");
 
     const cleanup = () => {
-        modal.removeEventListener("animationend", cleanup);
-        modal.removeEventListener("transitionend", cleanup);
         modal.style.display = 'none';
         modal.classList.remove("visible", "is-hiding", "slide-in-right", "slide-out-right", "slide-out-left", "slide-in-left");
 
@@ -236,16 +235,20 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    if (isSlideAnimation) {
-        modal.classList.add(animationClass);
-        modal.addEventListener("animationend", cleanup, { once: true });
+    const content = modal.querySelector('.modal-content, .elegant-modal-content');
+
+    if (options.animationClass && content) {
+        content.style.animation = `${options.animationClass} 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+        content.addEventListener('animationend', () => {
+            content.style.animation = '';
+            modal.classList.remove('visible');
+            cleanup();
+        }, { once: true });
     } else {
         modal.classList.remove('visible');
-        modal.classList.add('is-hiding');
-        modal.addEventListener("transitionend", cleanup, { once: true });
+        modal.addEventListener('transitionend', cleanup, { once: true });
+        setTimeout(cleanup, 400); // Fallback
     }
-
-    setTimeout(cleanup, 400); // Skrócony fallback
 }
 
 function updateLikeButtonState(likeButton, liked, count) {

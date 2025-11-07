@@ -5442,19 +5442,6 @@ main::-webkit-scrollbar {
     opacity: 1;
 }
 
-@media (min-width: 600px) {
-  #infoModal.modal-overlay,
-  div#tippingModal.elegant-modal-overlay {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100vw !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-  }
-}
 
 /* Custom UI Adjustments requested */
 
@@ -5507,32 +5494,25 @@ main::-webkit-scrollbar {
 }
 
 /* Modal Transition Animations */
-.modal-overlay.slide-out-left .modal-content,
-.modal-overlay.slide-out-left .elegant-modal-content {
-    animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.modal-overlay.slide-in-right .modal-content,
-.modal-overlay.slide-in-right .elegant-modal-content {
-    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
 @keyframes slideOutLeft {
     from {
         transform: translateX(0);
+        opacity: 1;
     }
     to {
-        transform: translateX(-100%);
+        transform: translateX(-50%);
+        opacity: 0;
     }
 }
 
-
-@keyframes slideOutRight {
+@keyframes slideInRight {
     from {
-        transform: translateX(0);
+        transform: translateX(50%);
+        opacity: 0;
     }
     to {
-        transform: translateX(100%);
+        transform: translateX(0);
+        opacity: 1;
     }
 }
 
@@ -5560,44 +5540,6 @@ pointer-events: none; /* Domyślna obsługa przez JS */
 z-index: 10021;
 }
 
-/* Overwrite the default fade-in/scale-in for slideable modals */
-.modal-overlay.slide-out-left .modal-content,
-.modal-overlay.slide-in-right .modal-content,
-.modal-overlay.slide-out-left .elegant-modal-content,
-.modal-overlay.slide-in-right .elegant-modal-content {
-    opacity: 1;
-    transition: none; /* Disable conflicting transitions */
-}
-
-/* Apply animations */
-.modal-overlay.slide-out-left .modal-content,
-.modal-overlay.slide-out-left .elegant-modal-content {
-    animation: slideOutLeft 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
-}
-
-.modal-overlay.slide-in-right .modal-content,
-.modal-overlay.slide-in-right .elegant-modal-content {
-    animation: slideInRight 0.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
-}
-
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-    }
-    to {
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideOutLeft {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        transform: translateX(-100%);
-    }
-}
 
 @keyframes slideInLeft {
     from {
