@@ -127,24 +127,28 @@ function openModal(modal, options = {}) {
         console.error("Attempted to open a null modal element.");
         return;
     }
+
     const content = modal.querySelector('.modal-content, .elegant-modal-content');
 
-    // Clean up any lingering animation classes
-    modal.classList.remove('is-hiding');
-    if (content) {
-        content.classList.remove('slide-out-left', 'slide-in-right', 'slide-in-left', 'slide-out-right');
+    // Wyczyść stare klasy animacji
+    if(content) {
+        content.classList.remove('slideOutLeft', 'slideInRight');
     }
 
     modal.style.display = 'flex';
-    modal.classList.add('visible');
+    modal.classList.remove('is-hiding');
 
-    // Apply animation if specified
-    if (content && options.animationClass) {
-        content.classList.add(options.animationClass);
-        content.addEventListener('animationend', () => {
-            content.classList.remove(options.animationClass);
-        }, { once: true });
-    }
+    // Użyj `requestAnimationFrame` aby upewnić się, że `display` zostało zaaplikowane
+    requestAnimationFrame(() => {
+        modal.classList.add('visible');
+
+        if (options.animationClass && content) {
+            content.classList.add(options.animationClass);
+            content.addEventListener('animationend', () => {
+                content.classList.remove(options.animationClass);
+            }, { once: true });
+        }
+    });
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
@@ -164,8 +168,10 @@ function openModal(modal, options = {}) {
         updateCrowdfundingStats();
     }
 
+    // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
     if (!options.isPersistent) {
         const closeOnClick = (e) => {
+            // Sprawdź, czy kliknięto bezpośrednio w overlay
             if (e.target === modal) {
                 closeModal(modal);
             }
@@ -179,6 +185,7 @@ function openModal(modal, options = {}) {
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
 
+    // Zarządzanie focusem
     State.set("lastFocusedElement", document.activeElement);
     const focusable = getFocusable(modal);
     const focusTarget = modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content, .profile-content") || modal;
@@ -196,8 +203,7 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal) || modal._isClosing) return;
-    modal._isClosing = true;
+    if (!modal || !activeModals.has(modal)) return;
 
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
@@ -205,22 +211,30 @@ function closeModal(modal, options = {}) {
     }
 
     modal.setAttribute("aria-hidden", "true");
+    modal.classList.add("is-hiding");
 
-    const content = modal.querySelector('.modal-content, .elegant-modal-content');
+    const animationClass = options.animationClass;
 
     const cleanup = () => {
-        content?.removeEventListener('animationend', cleanup);
-        modal.removeEventListener('transitionend', cleanup);
-        if (modal._closeFallback) clearTimeout(modal._closeFallback);
-
         modal.style.display = 'none';
         modal.classList.remove("visible", "is-hiding");
-        if (content && options.animationClass) {
-            content.classList.remove(options.animationClass);
+
+        const content = modal.querySelector('.modal-content, .elegant-modal-content');
+        if (content) {
+            if (content._animationEndHandler) {
+                content.removeEventListener('animationend', content._animationEndHandler);
+                delete content._animationEndHandler;
+            }
+            if (animationClass) {
+                content.classList.remove(animationClass);
+            }
         }
 
-        if (modal._focusTrapDispose) modal._focusTrapDispose();
-        delete modal._focusTrapDispose;
+
+        if (modal._focusTrapDispose) {
+            modal._focusTrapDispose();
+            delete modal._focusTrapDispose;
+        }
 
         activeModals.delete(modal);
 
@@ -229,23 +243,29 @@ function closeModal(modal, options = {}) {
             DOM.container.removeAttribute("aria-hidden");
         }
 
-        if (!options.keepFocus) State.get("lastFocusedElement")?.focus();
-        if (typeof modal.onCloseCallback === 'function') modal.onCloseCallback();
-        delete modal.onCloseCallback;
+        if (!options.keepFocus) {
+            State.get("lastFocusedElement")?.focus();
+        }
 
-        delete modal._isClosing;
+        if (typeof modal.onCloseCallback === 'function') {
+            modal.onCloseCallback();
+            delete modal.onCloseCallback;
+        }
     };
 
-    modal.classList.add('is-hiding');
+    const content = modal.querySelector('.modal-content, .elegant-modal-content');
 
-    if (content && options.animationClass) {
+    if (options.animationClass && content) {
         content.classList.add(options.animationClass);
-        content.addEventListener('animationend', cleanup, { once: true });
-        modal._closeFallback = setTimeout(cleanup, 500); // Animation fallback
+        content._animationEndHandler = () => {
+            cleanup();
+        };
+        content.addEventListener('animationend', content._animationEndHandler, { once: true });
     } else {
         modal.classList.remove('visible');
+        // Standardowe przejście, jeśli nie ma animacji
         modal.addEventListener('transitionend', cleanup, { once: true });
-        modal._closeFallback = setTimeout(cleanup, 400); // Transition fallback
+        setTimeout(cleanup, 400); // Fallback
     }
 }
 
