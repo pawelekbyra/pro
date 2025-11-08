@@ -338,7 +338,12 @@ async function handleFormSubmit() {
         elements,
         confirmParams: {
             return_url: returnUrl,
-            receipt_email: formData.email || undefined
+            receipt_email: formData.email || undefined,
+            payment_method_data: {
+                billing_details: {
+                    email: formData.email ? formData.email : undefined,
+                }
+            }
         },
         redirect: 'if_required'
     });
@@ -502,4 +507,6 @@ export const TippingModal = {
     showModal,
     hideModal,
     updateLanguage,
+    handleNextStep,
+    handlePrevStep,
 };
