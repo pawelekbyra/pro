@@ -3633,27 +3633,26 @@ body,
    ============================================================================ */
 
 @media (min-width: 600px) {
-  /* Główny kontener aplikacji */
-  #webyx-container {
+  /* Utwórz ujednoliconą definicję dla głównego kontenera aplikacji i preloadera */
+  #webyx-container,
+  #preloader,
+  #app-frame {
+    /* Ustawienie rozmiaru 9:16 */
+    width: calc(100vh * 9 / 16);
     height: 100vh;
-    width: calc(100vh * 9 / 16); /* Proporcje 9:16 */
     max-width: 100%;
-    margin: 0 auto; /* Wyśrodkowanie */
-    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    border-left: 1px solid #333;
-    border-right: 1px solid #333;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+
     overflow: hidden;
+    position: fixed !important; /* Ważne, aby upewnić się, że jest fixed/sticky */
+    background: #000 !important; /* Gwarantuje czarne tło pod cień */
+    color: #fff !important;
   }
 
-  /* App frame - jeśli używasz */
-  #app-frame {
-    width: calc(100vh * 9 / 16);
-    max-width: 100%;
-    margin: 0 auto;
-    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
+  /* Wymuś ten sam styl dla preloadera, aby cienie się zgadzały */
+  #preloader {
+    box-shadow:
+      0 0 60px rgba(0, 0, 0, 0.95),
+      0 0 40px var(--accent-color);
   }
 
   /* [FIX] Centrowanie i ograniczanie szerokości paska PWA na desktopie */
@@ -3718,6 +3717,7 @@ body,
     background: white;
     overflow-x: hidden;
   }
+
 
   /* Wymuszenie czarnego tła dla emulatora i jego zawartości */
   #webyx-container, #preloader {
