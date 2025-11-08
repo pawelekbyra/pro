@@ -206,17 +206,20 @@ function validateStep(step) {
         const currency = dom.currencySelect.value.toLowerCase();
         const minAmount = (currency === 'pln') ? 5 : 1;
 
-        if (dom.amountInput.value.trim() !== '' && (isNaN(amount) || amount < minAmount)) {
+        const amountStr = dom.amountInput.value.trim();
+        if (amountStr === '') {
+             // Jeśli pole jest puste, walidacja się nie udaje, ale nie pokazujemy błędu.
+             // Błąd zostanie pokazany przez funkcję wywołującą (handleNextStep), jeśli to konieczne.
+            return false;
+        }
+
+        const amountValue = parseFloat(amountStr);
+        if (isNaN(amountValue) || amountValue < minAmount) {
             const currencyDisplay = currency.toUpperCase();
             const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
                 .replace('{minAmount}', minAmount)
                 .replace('{currency}', currencyDisplay);
-
             showLocalError(1, message);
-            return false;
-        }
-
-        if (isNaN(amount) || amount < minAmount) {
             return false;
         }
 
