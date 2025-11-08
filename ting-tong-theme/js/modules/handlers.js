@@ -504,12 +504,17 @@ export const Handlers = {
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
         if (infoModal && infoModal.classList.contains('visible')) {
+            // Close info modal with slide-out animation
             UI.closeModal(infoModal, {
-                keepFocus: true,
-                animationClass: 'slide-out-left'
+                animationClass: 'slide-out-left',
+                keepFocus: true // Prevent focus from jumping back to the main page momentarily
             });
-            TippingModal.showModal({ animationClass: 'slide-in-right' });
+            // Open tipping modal with slide-in animation, without delay
+            TippingModal.showModal({
+                animationClass: 'slide-in-right'
+            });
         } else {
+            // Fallback for safety
             TippingModal.showModal();
         }
         break;

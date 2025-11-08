@@ -127,24 +127,23 @@ function openModal(modal, options = {}) {
         console.error("Attempted to open a null modal element.");
         return;
     }
+    const content = modal.querySelector('.modal-content, .elegant-modal-content');
 
-    // Przygotowanie modala do animacji
+    // Clean up any lingering animation classes
+    modal.classList.remove('is-hiding');
+    if (content) {
+        content.classList.remove('slide-out-left', 'slide-in-right', 'slide-in-left', 'slide-out-right');
+    }
+
     modal.style.display = 'flex';
-    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left', 'slide-in-right', 'slide-in-left');
-
-    // Ustawienie widoczności
     modal.classList.add('visible');
 
-    // Zastosuj animację, jeśli została zdefiniowana
-    if (options.animationClass) {
-        const content = modal.querySelector('.modal-content, .elegant-modal-content');
-        if (content) {
-            // Uruchom animację i nasłuchuj jej zakończenia
-            content.style.animation = `${options.animationClass} 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-            content.addEventListener('animationend', () => {
-                content.style.animation = ''; // Wyczyść animację po zakończeniu
-            }, { once: true });
-        }
+    // Apply animation if specified
+    if (content && options.animationClass) {
+        content.classList.add(options.animationClass);
+        content.addEventListener('animationend', () => {
+            content.classList.remove(options.animationClass);
+        }, { once: true });
     }
 
     if (modal.id === 'comments-modal-container') {
@@ -165,10 +164,8 @@ function openModal(modal, options = {}) {
         updateCrowdfundingStats();
     }
 
-    // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
     if (!options.isPersistent) {
         const closeOnClick = (e) => {
-            // Sprawdź, czy kliknięto bezpośrednio w overlay
             if (e.target === modal) {
                 closeModal(modal);
             }
@@ -182,7 +179,6 @@ function openModal(modal, options = {}) {
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
 
-    // Zarządzanie focusem
     State.set("lastFocusedElement", document.activeElement);
     const focusable = getFocusable(modal);
     const focusTarget = modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content, .profile-content") || modal;
@@ -200,7 +196,8 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal)) return;
+    if (!modal || !activeModals.has(modal) || modal._isClosing) return;
+    modal._isClosing = true;
 
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
@@ -209,14 +206,21 @@ function closeModal(modal, options = {}) {
 
     modal.setAttribute("aria-hidden", "true");
 
-    const cleanup = () => {
-        modal.style.display = 'none';
-        modal.classList.remove("visible", "is-hiding", "slide-in-right", "slide-out-right", "slide-out-left", "slide-in-left");
+    const content = modal.querySelector('.modal-content, .elegant-modal-content');
 
-        if (modal._focusTrapDispose) {
-            modal._focusTrapDispose();
-            delete modal._focusTrapDispose;
+    const cleanup = () => {
+        content?.removeEventListener('animationend', cleanup);
+        modal.removeEventListener('transitionend', cleanup);
+        if (modal._closeFallback) clearTimeout(modal._closeFallback);
+
+        modal.style.display = 'none';
+        modal.classList.remove("visible", "is-hiding");
+        if (content && options.animationClass) {
+            content.classList.remove(options.animationClass);
         }
+
+        if (modal._focusTrapDispose) modal._focusTrapDispose();
+        delete modal._focusTrapDispose;
 
         activeModals.delete(modal);
 
@@ -225,29 +229,23 @@ function closeModal(modal, options = {}) {
             DOM.container.removeAttribute("aria-hidden");
         }
 
-        if (!options.keepFocus) {
-            State.get("lastFocusedElement")?.focus();
-        }
+        if (!options.keepFocus) State.get("lastFocusedElement")?.focus();
+        if (typeof modal.onCloseCallback === 'function') modal.onCloseCallback();
+        delete modal.onCloseCallback;
 
-        if (typeof modal.onCloseCallback === 'function') {
-            modal.onCloseCallback();
-            delete modal.onCloseCallback;
-        }
+        delete modal._isClosing;
     };
 
-    const content = modal.querySelector('.modal-content, .elegant-modal-content');
+    modal.classList.add('is-hiding');
 
-    if (options.animationClass && content) {
-        content.style.animation = `${options.animationClass} 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-        content.addEventListener('animationend', () => {
-            content.style.animation = '';
-            modal.classList.remove('visible');
-            cleanup();
-        }, { once: true });
+    if (content && options.animationClass) {
+        content.classList.add(options.animationClass);
+        content.addEventListener('animationend', cleanup, { once: true });
+        modal._closeFallback = setTimeout(cleanup, 500); // Animation fallback
     } else {
         modal.classList.remove('visible');
         modal.addEventListener('transitionend', cleanup, { once: true });
-        setTimeout(cleanup, 400); // Fallback
+        modal._closeFallback = setTimeout(cleanup, 400); // Transition fallback
     }
 }
 
