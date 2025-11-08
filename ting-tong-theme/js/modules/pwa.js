@@ -67,6 +67,18 @@ function runStandaloneCheck() {
     if (isPreloaderHidden && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.classList.add('visible');
+        }
+
+        setTimeout(() => {
+            const tiktokSymulacja = document.querySelector('.tiktok-symulacja');
+            if (tiktokSymulacja) {
+                tiktokSymulacja.classList.add('controls-visible');
+            }
+        }, 800); // Czas trwania animacji pasków
     } else if (installBar) {
         // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
         installBar.classList.remove("visible");

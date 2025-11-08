@@ -251,6 +251,11 @@ function closeModal(modal, options = {}) {
             modal.onCloseCallback();
             delete modal.onCloseCallback;
         }
+
+        // Poprawiona obsługa onClose - wywołanie po zakończeniu animacji
+        if (options.onClose) {
+            options.onClose();
+        }
     };
 
     const content = modal.querySelector('.modal-content, .elegant-modal-content');
