@@ -3633,28 +3633,37 @@ body,
    ============================================================================ */
 
 @media (min-width: 600px) {
-  /* Główny kontener aplikacji */
-  #webyx-container {
+  /* Utwórz ujednoliconą definicję dla głównego kontenera aplikacji i preloadera */
+  #webyx-container,
+  #preloader,
+  #app-frame {
+    /* Ustawienie rozmiaru 9:16 */
+    width: calc(100vh * 9 / 16);
     height: 100vh;
-    width: calc(100vh * 9 / 16); /* Proporcje 9:16 */
     max-width: 100%;
-    margin: 0 auto; /* Wyśrodkowanie */
-    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    border-left: 1px solid #333;
-    border-right: 1px solid #333;
-    /* ZMIEŃ: Użyj intensywnego cienia z akcentem kolorystycznym */
-    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 85, 0.25);
+
+    /* Wyśrodkowanie */
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+
+    /* Spójne obramowanie i cień dla efektu "emulatora" */
+    border-left: 2px solid #333;
+    border-right: 2px solid #333;
+    box-shadow:
+      0 0 60px rgba(0, 0, 0, 0.95),
+      0 0 40px var(--accent-color); /* Cień z akcentem kolorystycznym */
     overflow: hidden;
+    position: fixed !important; /* Ważne, aby upewnić się, że jest fixed/sticky */
+    background: #000 !important; /* Gwarantuje czarne tło pod cień */
+    color: #fff !important;
   }
 
-  /* App frame - jeśli używasz */
-  #app-frame {
-    width: calc(100vh * 9 / 16);
-    max-width: 100%;
-    margin: 0 auto;
-    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
+  /* Wymuś ten sam styl dla preloadera, aby cienie się zgadzały */
+  #preloader {
+    box-shadow:
+      0 0 60px rgba(0, 0, 0, 0.95),
+      0 0 40px var(--accent-color);
   }
 
   /* [FIX] Centrowanie i ograniczanie szerokości paska PWA na desktopie */
@@ -3731,11 +3740,11 @@ body,
     height: 100%;
     background: radial-gradient(
       circle at center,
-      rgba(255, 0, 85, 0.12) 0%, /* Jaśniejszy punkt w centrum */
-      rgba(255, 0, 85, 0.05) 30%, /* Większy zasięg */
+      rgba(255, 0, 85, 0.18) 0%, /* Wzmocnij poświatę */
+      rgba(255, 0, 85, 0.08) 30%,
       transparent 65%
     );
-    opacity: 0.9;
+    opacity: 1; /* Upewnij się, że jest w pełni widoczny */
     z-index: -1;
     pointer-events: none;
     animation: subtleShimmer 8s ease-in-out infinite;
