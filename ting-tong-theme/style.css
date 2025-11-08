@@ -1601,6 +1601,7 @@ body,
   position: relative;
   /* Generic transition for modals that fade/scale */
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  will-change: transform, opacity; /* GPU acceleration hint */
 }
 
 /* Default state for modals that just fade/scale */
@@ -4794,6 +4795,7 @@ body,
   transform: scale(0.95) translateY(10px);
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+  will-change: transform, opacity; /* GPU acceleration hint */
 }
 
 .elegant-modal-overlay.visible .elegant-modal-content {
@@ -5548,4 +5550,13 @@ z-index: 10021;
     to {
         transform: translateX(0);
     }
+}
+
+/* --- Modal "Train" Transition Animations --- */
+.slide-out-left {
+  animation: slideOutLeft 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
