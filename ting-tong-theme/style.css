@@ -2952,36 +2952,36 @@ overflow: hidden;
   opacity: 0.7;
 }
 .pwa-ios-body {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .pwa-ios-body p {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.75rem;
 }
 
 .pwa-ios-body p:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .pwa-ios-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 .pwa-ios-icon svg {
-    width: 20px;
-    height: 20px;
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 /* --- Desktop PWA Modal --- */
