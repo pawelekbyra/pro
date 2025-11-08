@@ -202,11 +202,13 @@ function validateStep(step) {
     }
     // Step 1: Amount and terms validation
     else if (step === 1) {
-        const amount = parseFloat(dom.amountInput.value);
+        // Kluczowa zmiana: Jawne sprawdzenie pustego pola LUB błędnej kwoty.
+        const inputValue = dom.amountInput.value.trim();
+        const amount = parseFloat(inputValue);
         const currency = dom.currencySelect.value.toLowerCase();
         const minAmount = (currency === 'pln') ? 5 : 1;
 
-        if (isNaN(amount) || amount < minAmount) {
+        if (inputValue === '' || isNaN(amount) || amount < minAmount) {
             const currencyDisplay = currency.toUpperCase();
             const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
                 .replace('{minAmount}', minAmount)
@@ -220,7 +222,7 @@ function validateStep(step) {
             showLocalError(1, getTranslatedText('errorTermsNotAccepted', 'You must accept the terms and conditions.'));
             return false;
         }
-        return true; // FIX: Ensure true is returned on successful validation
+        return true;
     }
     return true;
 }

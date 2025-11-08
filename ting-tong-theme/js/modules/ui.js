@@ -510,7 +510,9 @@ function createSlideElement(slideData, index) {
     if (pwaSecretOverlay) {
       pwaSecretOverlay.classList.add('visible');
     }
-    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był widoczny
+  }
+
+  if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
     section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 

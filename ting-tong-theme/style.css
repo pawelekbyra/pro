@@ -960,7 +960,7 @@ body,
     transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.tiktok-symulacja.video-loaded .sidebar.visible {
+.tiktok-symulacja.video-loaded .sidebar {
   transform: translateY(-50%) translateX(0);
 }
 .tiktok-symulacja .bottombar {
@@ -977,7 +977,7 @@ body,
   z-index: 10050;
   padding-bottom: calc(10px + var(--safe-area-bottom));
   opacity: 0;
-  transition: opacity 0.6s ease-out;
+  transition: opacity 0.6s ease-out 0.4s;
 }
 
 /* ✅ NOWE: Pokaż bottombar dopiero gdy video jest załadowane */
@@ -3628,29 +3628,33 @@ body,
    ============================================================================ */
 
 @media (min-width: 600px) {
-  /* Główny kontener aplikacji */
-  #webyx-container {
-    height: 100vh;
-    width: calc(100vh * 9 / 16); /* Proporcje 9:16 */
-    max-width: 100%;
-    margin: 0 auto; /* Wyśrodkowanie */
-    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    border-left: 1px solid #333;
-    border-right: 1px solid #333;
-    /* ZMIEŃ: Użyj intensywnego cienia z akcentem kolorystycznym */
-    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 85, 0.25);
-    overflow: hidden;
-  }
+ /* Utwórz ujednoliconą definicję dla głównego kontenera aplikacji i preloadera */
+ #webyx-container, #preloader, #app-frame {
+ /* Ustawienie rozmiaru 9:16 */
+ width: calc(100vh * 9 / 16);
+ height: 100vh;
+ max-width: 100%;
 
-  /* App frame - jeśli używasz */
-  #app-frame {
-    width: calc(100vh * 9 / 16);
-    max-width: 100%;
-    margin: 0 auto;
-    left: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-    right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
-  }
+/* Wyśrodkowanie */
+margin: 0 auto;
+left: 0;
+right: 0;
+
+/* Spójne obramowanie i cień dla efektu "emulatora" */
+border-left: 2px solid #333;
+border-right: 2px solid #333;
+box-shadow:
+0 0 60px rgba(0, 0, 0, 0.95),
+0 0 40px var(--accent-color); /* Cień z akcentem kolorystycznym */
+overflow: hidden;
+position: fixed !important; /* Ważne, aby upewnić się, że jest fixed/sticky */
+background: #000 !important; /* Gwarantuje czarne tło pod cień */
+color: #fff !important;
+}
+
+/* Wymuś ten sam styl dla preloadera, aby cienie się zgadzały */ #preloader {
+ box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 40px var(--accent-color);
+ }
 
   /* [FIX] Centrowanie i ograniczanie szerokości paska PWA na desktopie */
   .pwa-prompt,
@@ -3726,11 +3730,11 @@ body,
     height: 100%;
     background: radial-gradient(
       circle at center,
-      rgba(255, 0, 85, 0.12) 0%, /* Jaśniejszy punkt w centrum */
-      rgba(255, 0, 85, 0.05) 30%, /* Większy zasięg */
+      rgba(255, 0, 85, 0.18) 0%, /* Wzmocnij poświatę */
+      rgba(255, 0, 85, 0.08) 30%,
       transparent 65%
     );
-    opacity: 0.9;
+    opacity: 1; /* Upewnij się, że jest w pełni widoczny */
     z-index: -1;
     pointer-events: none;
     animation: subtleShimmer 8s ease-in-out infinite;
@@ -3748,16 +3752,6 @@ body,
   }
   #preloader h2, #preloader button {
       color: #fff !important;
-  }
-
-  #preloader {
-    width: calc(100vh * 9 / 16);
-    max-width: 100%;
-    margin: 0 auto;
-    left: 0;
-    right: 0;
-    border-left: 1px solid #333;
-    border-right: 1px solid #333;
   }
 }
 
@@ -5486,13 +5480,13 @@ main::-webkit-scrollbar {
         transform: translateX(0);
     }
     to {
-        transform: translateX(-100%);
+        transform: translateX(-50%);
     }
 }
 
 @keyframes slideInRight {
     from {
-        transform: translateX(100%);
+        transform: translateX(50%);
     }
     to {
         transform: translateX(0);
@@ -5505,29 +5499,6 @@ main::-webkit-scrollbar {
 
 .modal-content.slideInRight, .elegant-modal-content.slideInRight {
     animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-/* Modal Transition Animations */
-@keyframes slideOutLeft {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(-50%);
-        opacity: 0;
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(50%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
 }
 
 #tiktok-profile-modal .tiktok-profile-content {
