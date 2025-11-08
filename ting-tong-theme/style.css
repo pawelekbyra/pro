@@ -2141,6 +2141,9 @@ body,
   opacity: 0;
   visibility: hidden;
   transition: visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+/* === KOREKTA KLUCZOWA DLA DESKTOPU === */
+overflow: hidden;
 }
 
 .account-modal-overlay.visible {
@@ -2629,6 +2632,7 @@ body,
   align-items: center;
   justify-content: center;
   padding: 20px;
+overflow: hidden;
 }
 
 .crop-modal.visible {
