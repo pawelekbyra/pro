@@ -67,6 +67,18 @@ function runStandaloneCheck() {
     if (isPreloaderHidden && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.classList.add('visible');
+        }
+
+        setTimeout(() => {
+            const tiktokSymulacja = document.querySelector('.tiktok-symulacja');
+            if (tiktokSymulacja) {
+                tiktokSymulacja.classList.add('controls-visible');
+            }
+        }, 800); // Czas trwania animacji pasków
     } else if (installBar) {
         // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
         installBar.classList.remove("visible");
@@ -141,4 +153,65 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule };
+/**
+ * Obsługuje proces subskrypcji powiadomień Push.
+ * @returns {Promise<string>} 'granted', 'denied', lub 'unsupported'.
+ */
+async function handlePushSubscription() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+    console.warn('Push Notifications are not supported in this browser.');
+    return 'unsupported';
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    console.log('Notification permission was not granted.');
+    return permission;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+  let subscription = await registration.pushManager.getSubscription();
+
+  if (subscription === null) {
+    const vapidPublicKey = window.TingTongData?.vapidPk;
+    if (!vapidPublicKey) {
+      console.error('VAPID public key is not available.');
+      return 'error';
+    }
+
+    try {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: Utils.urlBase64ToUint8Array(vapidPublicKey),
+      });
+    } catch (error) {
+      console.error('Failed to subscribe to push notifications:', error);
+      return 'error';
+    }
+  }
+
+  try {
+    const subscriptionData = subscription.toJSON();
+    const API = (await import('./api.js')).API;
+    const result = await API.savePushSubscription({
+        endpoint: subscriptionData.endpoint,
+        keys: {
+            p256dh: subscriptionData.keys.p256dh,
+            auth: subscriptionData.keys.auth
+        }
+    });
+
+    if (result.success) {
+      console.log('Push subscription saved successfully.');
+      return 'granted';
+    } else {
+      console.error('Failed to save push subscription on server:', result.data.message);
+      return 'error';
+    }
+  } catch (error) {
+    console.error('Error saving push subscription:', error);
+    return 'error';
+  }
+}
+
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule, handlePushSubscription };

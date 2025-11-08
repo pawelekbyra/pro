@@ -5,17 +5,21 @@
  * Zawiera całą logikę backendową dla aplikacji opartej na WordPressie.
  */
 
+// Import klas z biblioteki WebPush na początku pliku
+use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
+
 // =========================================================================
 // 0. ŁADOWANIE COMPOSER I KLUCZE (NAPRAWIONA LOGIKA POBIERANIA Z WP-CONFIG)
 // =========================================================================
 
-// Wymagaj autoloader'a Composera (nadal potrzebny dla klasy Stripe)
+// Wymagaj autoloader'a Composera (nadal potrzebny dla klasy Stripe i WebPush)
 $composer_autoload = __DIR__ . '/vendor/autoload.php';
 if (file_exists($composer_autoload)) {
     require_once $composer_autoload;
 } else {
     // Jeśli nie znaleziono Composera, błąd krytyczny zostanie zalogowany.
-    error_log('BŁĄD KRYTYCZNY STRIPE: Nie znaleziono pliku autoload.php. Wgraj katalog vendor/ na serwer.');
+    error_log('BŁĄD KRYTYCZNY: Nie znaleziono pliku autoload.php. Uruchom `composer install` lub wgraj katalog `vendor/`.');
 }
 
 /* Wyłącz domyślny e-mail powitalny WordPressa przy tworzeniu użytkownika */
@@ -30,6 +34,22 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Zabezpieczenie przed bezpośrednim dostępem.
 }
 
+/**
+ * Definiuje klucze VAPID, używając stałych z wp-config.php.
+ */
+function tt_define_vapid_constants_safely() {
+    if (defined('VAPID_PUBLIC_KEY') && !defined('TT_VAPID_PUBLIC_KEY')) {
+        define('TT_VAPID_PUBLIC_KEY', VAPID_PUBLIC_KEY);
+    }
+    if (defined('VAPID_PRIVATE_KEY') && !defined('TT_VAPID_PRIVATE_KEY')) {
+        define('TT_VAPID_PRIVATE_KEY', VAPID_PRIVATE_KEY);
+    }
+    if (defined('VAPID_SUBJECT') && !defined('TT_VAPID_SUBJECT')) {
+        define('TT_VAPID_SUBJECT', VAPID_SUBJECT);
+    }
+}
+add_action('after_setup_theme', 'tt_define_vapid_constants_safely', 1);
+
 // =========================================================================
 // 1. Define Stripe API Keys (NAPRAWA TIMINGU Z UŻYCIEM HOOKA)
 // =========================================================================
@@ -40,23 +60,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  * że stałe zdefiniowane w wp-config.php są już w pełni dostępne.
  */
 function tt_define_stripe_constants_safely() {
-    // Klucz publiczny: Jeśli globalna stała PUBLISHABLE_KEY istnieje, użyj jej.
+    // Priorytet dla Klucza Publicznego: Sprawdzamy najpierw STRIPE_PUBLISHABLE_KEY, potem krótszą nazwę.
+    $pk_source = defined('STRIPE_PUBLISHABLE_KEY')
+        ? STRIPE_PUBLISHABLE_KEY
+        : (defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : null);
+
     if (!defined('TT_STRIPE_PUBLISHABLE_KEY')) {
-        $pk_value = defined('PUBLISHABLE_KEY') ? PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY';
-        define('TT_STRIPE_PUBLISHABLE_KEY', $pk_value);
+        define('TT_STRIPE_PUBLISHABLE_KEY', $pk_source);
     }
 
-    // Klucz prywatny: Jeśli globalna stała SECRET_KEY istnieje, użyj jej.
+    // Priorytet dla Klucza Prywatnego: Sprawdzamy STRIPE_SECRET_KEY (najczęstsza nazwa), potem krótszą nazwę.
+    $sk_source = defined('STRIPE_SECRET_KEY')
+        ? STRIPE_SECRET_KEY
+        : (defined('SECRET_KEY') ? SECRET_KEY : null);
+
     if (!defined('TT_STRIPE_SECRET_KEY')) {
-        $sk_value = defined('SECRET_KEY') ? SECRET_KEY : 'sk_test_YOUR_SECRET_KEY';
-        define('TT_STRIPE_SECRET_KEY', $sk_value);
+        define('TT_STRIPE_SECRET_KEY', $sk_source);
     }
 }
 // Kluczowy hak: Wymusza definicję po wczytaniu wp-config.php, ale przed rejestracją skryptów.
 add_action('after_setup_theme', 'tt_define_stripe_constants_safely', 1);
 
 /**
-* Tworzy нового uzytkownika WordPress, jeśli nie istnieje, lub zwraca istniejącego.
+* Tworzy nowego uzytkownika WordPress, jeśli nie istnieje, lub zwraca istniejącego.
 * Ustawia flagę tt_first_login_completed na 0, aby wymusić uzupełnienie profilu.
 *
 * @param string $email Adres email uzytkownika.
@@ -179,6 +205,38 @@ function tt_create_database_tables() {
     dbDelta( $sql_comment_likes );
     update_option( 'tt_comment_likes_db_version', '1.0' );
 
+    // Tabela: Donacje
+    $table_name_donations = $wpdb->prefix . 'tt_donations';
+    $sql_donations        = "CREATE TABLE {$table_name_donations} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT UNSIGNED NOT NULL,
+        payment_intent_id VARCHAR(255) NOT NULL,
+        amount_cents BIGINT UNSIGNED NOT NULL,
+        currency VARCHAR(10) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uniq_payment_intent (payment_intent_id(191)),
+        KEY idx_user_id (user_id)
+    ) {$charset_collate};";
+    dbDelta($sql_donations);
+    update_option('tt_donations_db_version', '1.0');
+
+    // Tabela: Subskrypcje Web Push
+    $table_name_push = $wpdb->prefix . 'tt_push_subscriptions';
+    $sql_push = "CREATE TABLE {$table_name_push} (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT UNSIGNED NOT NULL,
+        endpoint VARCHAR(512) NOT NULL,
+        p256dh VARCHAR(255) NOT NULL,
+        auth VARCHAR(255) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uniq_endpoint (endpoint(191)),
+        KEY idx_user_id (user_id)
+    ) {$charset_collate};";
+    dbDelta($sql_push);
+    update_option('tt_push_subscriptions_db_version', '1.0');
+
     // Rejestracja reguły dla webhooka i odświeżenie reguł
     add_rewrite_rule('^tt-webhook/stripe$', 'index.php?tt-webhook-type=stripe', 'top');
     flush_rewrite_rules();
@@ -193,7 +251,9 @@ add_action(
     function () {
         if ( get_option( 'tt_likes_db_version' ) !== '1.0'
             || get_option( 'tt_comments_db_version' ) !== '1.0'
-            || get_option( 'tt_comment_likes_db_version' ) !== '1.0' ) {
+            || get_option( 'tt_comment_likes_db_version' ) !== '1.0'
+            || get_option('tt_donations_db_version') !== '1.0'
+            || get_option('tt_push_subscriptions_db_version') !== '1.0') {
             tt_create_database_tables();
         }
     }
@@ -302,6 +362,17 @@ function tt_get_simulated_posts() {
                 'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
                 'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
                 'is_vip'      => true,
+                'bio'         => 'Twórca aplikacji Ting Tong | Web Developer | Miłośnik muzyki',
+                'stats'       => [
+                    'following' => 150,
+                    'followers' => '25.5K',
+                    'likes'     => '1.3M'
+                ],
+                'videos'      => [
+                    ['thumbnail' => 'https://i.ytimg.com/vi/g7_gQyY0c-s/maxresdefault.jpg', 'views' => '1.2M'],
+                    ['thumbnail' => 'https://i.ytimg.com/vi/g7_gQyY0c-s/maxresdefault.jpg', 'views' => '890K'],
+                    ['thumbnail' => 'https://i.ytimg.com/vi/g7_gQyY0c-s/maxresdefault.jpg', 'views' => '2.5M'],
+                ]
             ],
             'post_content' => 'Jedna z moich ulubionych piosenek w moim wykonaniu. Mam nadzieję, że się Wam spodoba!',
         ],
@@ -357,7 +428,8 @@ function tt_enqueue_and_localize_scripts() {
             'isLoggedIn' => is_user_logged_in(),
             'slides'     => tt_get_slides_data(),
             // W tym miejscu używamy stałej PHP, która musi być zdefiniowana w wp-config.php
-            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : 'pk_test_YOUR_PUBLISHABLE_KEY',
+            'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : null,
+            'vapidPk'    => defined('TT_VAPID_PUBLIC_KEY') ? TT_VAPID_PUBLIC_KEY : null,
         ]
     );
 
@@ -1060,6 +1132,27 @@ add_action('wp_ajax_tt_password_change', function () {
     wp_set_password($n1, $u->ID);
     wp_send_json_success(['message' => 'Hasło zmienione. Zaloguj się ponownie.']);
 });
+add_action('wp_ajax_tt_save_settings', function () {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz być zalogowany.'], 401);
+    }
+
+    $user_id = get_current_user_id();
+    $email_consent = isset($_POST['email_consent']) ? rest_sanitize_boolean($_POST['email_consent']) : false;
+    $email_language = isset($_POST['email_language']) ? sanitize_text_field($_POST['email_language']) : 'pl';
+
+    // Walidacja języka
+    if (!in_array($email_language, ['pl', 'en'])) {
+        $email_language = 'pl';
+    }
+
+    update_user_meta($user_id, 'tt_email_consent', $email_consent);
+    update_user_meta($user_id, 'tt_email_language', $email_language);
+
+    wp_send_json_success(['message' => 'Ustawienia zapisane.']);
+});
+
 add_action('wp_ajax_tt_account_delete', function () {
     check_ajax_referer('tt_ajax_nonce', 'nonce');
     if (!is_user_logged_in()) {
@@ -1080,6 +1173,59 @@ add_action('wp_ajax_tt_account_delete', function () {
     wp_logout();
     wp_send_json_success(['message' => 'Konto usunięte.']);
 });
+
+// --- Subskrypcje Web Push ---
+add_action('wp_ajax_tt_save_push_subscription', function() {
+    // Ręczna weryfikacja nonce z nagłówka dla żądań JSON
+    $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : '';
+    if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
+        wp_send_json_error(['message' => 'Błąd weryfikacji nonce.'], 403);
+        return;
+    }
+
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz być zalogowany, aby zapisać subskrypcję.'], 401);
+    }
+
+    // Odczytaj dane z ciała żądania JSON
+    $subscription_data = json_decode(file_get_contents('php://input'), true);
+    if (empty($subscription_data['endpoint']) || empty($subscription_data['keys']['p256dh']) || empty($subscription_data['keys']['auth'])) {
+        wp_send_json_error(['message' => 'Nieprawidłowe dane subskrypcji.'], 400);
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'tt_push_subscriptions';
+    $user_id = get_current_user_id();
+    $endpoint = esc_url_raw($subscription_data['endpoint']);
+    $p256dh = sanitize_text_field($subscription_data['keys']['p256dh']);
+    $auth = sanitize_text_field($subscription_data['keys']['auth']);
+
+    $existing_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_name} WHERE endpoint = %s", $endpoint));
+
+    $data = [
+        'user_id' => $user_id,
+        'endpoint' => $endpoint,
+        'p256dh' => $p256dh,
+        'auth' => $auth,
+    ];
+
+    if ($existing_id) {
+        // Jeśli subskrypcja (endpoint) już istnieje, zaktualizuj ją (np. na wypadek, gdyby zmienił się użytkownik)
+        $wpdb->update($table_name, $data, ['id' => $existing_id]);
+    } else {
+        // W przeciwnym razie, wstaw nową
+        $wpdb->insert($table_name, $data);
+    }
+
+    wp_send_json_success(['message' => 'Subskrypcja zapisana pomyślnie.']);
+});
+
+// ============================================================================
+// WEB PUSH NOTIFICATIONS
+// ============================================================================
+
+// Starsza wersja funkcji została usunięta, aby uniknąć błędu redeklaracji.
+// Nowa, zrefaktoryzowana wersja znajduje się w sekcji "TING TONG PUSH CENTER".
 
 
 // ============================================================================
@@ -1144,6 +1290,13 @@ add_filter('pre_get_avatar_data', 'tt_custom_avatar_filter', 99, 2);
 
 // 4. AJAX Handler for Creating a Payment Intent
 function tt_create_payment_intent() {
+    // --- TYMCZASOWY KOD DIAGNOSTYCZNY (USUŃ PO NAPRAWIE BŁĘDU) ---
+    // Wymusza wyświetlanie błędów PHP
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+    // --- KONIEC TYMCZASOWEGO KODU DIAGNOSTYCZNEGO ---
+
     check_ajax_referer('tt_ajax_nonce', 'nonce');
 
     // Weryfikacja: jeśli Composer nie załadował Stripe, to będzie błąd 500.
@@ -1197,6 +1350,29 @@ function tt_create_payment_intent() {
 }
 add_action('wp_ajax_tt_create_payment_intent', 'tt_create_payment_intent');
 add_action('wp_ajax_nopriv_tt_create_payment_intent', 'tt_create_payment_intent'); // Umożliwienie płatności bez logowania
+
+/**
+ * Obsługuje potwierdzenie sukcesu napiwku po stronie klienta.
+ * Jego główną rolą jest potwierdzenie, że proces na froncie się zakończył.
+ * Główna logika (tworzenie użytkownika) jest obsługiwana przez webhook.
+ */
+function tt_handle_tip_success() {
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+    $payment_intent_id = isset($_POST['payment_intent_id']) ? sanitize_text_field($_POST['payment_intent_id']) : '';
+
+    if (empty($payment_intent_id)) {
+        wp_send_json_error(['message' => 'Brak ID Payment Intent.'], 400);
+        return;
+    }
+
+    // Można dodać logowanie w celu debugowania
+    // error_log('Potwierdzenie sukcesu napiwku dla Payment Intent: ' . $payment_intent_id);
+
+    wp_send_json_success(['message' => 'Tip success acknowledged.']);
+}
+add_action('wp_ajax_tt_handle_tip_success', 'tt_handle_tip_success');
+add_action('wp_ajax_nopriv_tt_handle_tip_success', 'tt_handle_tip_success');
 
 
 // ============================================================================
@@ -1338,8 +1514,12 @@ require_once $composer_autoload;
 
 // ⚠️ KRYTYCZNE: ZMIEŃ NA SWÓJ TAJNY KLUCZ WEBHOOKA
 // Ten klucz znajdziesz w Panelu Stripe -> Developers -> Webhooks -> [Twój endpoint] -> Signing secret.
-$webhook_secret = defined('STRIPE_WEBHOOK_SECRET') ? STRIPE_WEBHOOK_SECRET : 'whsec_YOUR_STRIPE_WEBHOOK_SECRET';
-
+$webhook_secret = defined('STRIPE_WEBHOOK_SECRET') ? STRIPE_WEBHOOK_SECRET : null;
+if (empty($webhook_secret)) {
+    header('HTTP/1.1 500 Missing Webhook Secret', true, 500);
+    error_log('BŁĄD KRYTYCZNY STRIPE: Brak zdefiniowanej stałej STRIPE_WEBHOOK_SECRET w wp-config.php.');
+    exit();
+}
 $payload = @file_get_contents('php://input');
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
 $event = null;
@@ -1394,6 +1574,8 @@ if (empty($country_code) && !empty($payment_intent_id) && defined('TT_STRIPE_SEC
         $intent_from_api = \Stripe\PaymentIntent::retrieve($payment_intent_id);
         // Wykorzystujemy metadaną 'country_hint' ustawioną w tt_create_payment_intent
         $country_code = $intent_from_api->metadata['country_hint'] ?? null;
+        $amount_cents = $intent_from_api->amount;
+        $currency = $intent_from_api->currency;
     } catch (Exception $e) {
         error_log('STRIPE WEBHOOK: Failed to retrieve PI metadata: ' . $e->getMessage());
     }
@@ -1418,6 +1600,15 @@ if (!empty($email)) {
     if (is_wp_error($user_or_error)) {
         error_log('STRIPE WEBHOOK: WP User Creation Failed for ' . $email . ': ' . $user_or_error->get_error_message());
     } else {
+        $user_id = $user_or_error->ID;
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'tt_donations';
+        $wpdb->insert($table_name, [
+            'user_id' => $user_id,
+            'payment_intent_id' => $payment_intent_id,
+            'amount_cents' => $amount_cents,
+            'currency' => $currency,
+        ]);
         error_log('STRIPE WEBHOOK: Patron User ' . $email . ' created or retrieved successfully. Set locale to: ' . $locale . ' (Country: ' . ($country_code ?: 'N/A') . ')');
     }
 } else {
@@ -1425,10 +1616,29 @@ if (!empty($email)) {
 }
 
 
-// KROK 5: Zawsze zwracaj 200 OK, jeśli przetwarzanie było pomyślne.
+// KROK 5: Zawsze zwracaj 200 OK, jeśli przetwarzanie było pomyślnie.
 header('HTTP/1.1 200 OK');
 exit();
 }
+
+add_action('wp_ajax_nopriv_tt_get_crowdfunding_stats', function() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'tt_donations';
+
+    $patrons_count = $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table_name}");
+
+    $total_pln_cents = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount_cents) FROM {$table_name} WHERE currency = %s", 'pln'));
+    $total_eur_cents = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount_cents) FROM {$table_name} WHERE currency = %s", 'eur'));
+
+    // Przelicznik PLN na EUR
+    $pln_to_eur_rate = 4.5;
+    $collected_eur = ($total_eur_cents / 100) + (($total_pln_cents / 100) / $pln_to_eur_rate);
+
+    wp_send_json_success([
+        'patrons_count' => (int) $patrons_count,
+        'collected_eur' => round($collected_eur, 2),
+    ]);
+});
 
 add_action('wp_ajax_tt_complete_profile', function () {
 // 1. Zabezpieczenia
@@ -1491,3 +1701,280 @@ wp_send_json_success([
 'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
 ]);
 });
+// ============================================================================
+// TING TONG PUSH CENTER - PANEL ADMINISTRACYJNY
+// ============================================================================
+
+/**
+ * Dodaje stronę "Ting Tong Push Center" do menu w panelu administracyjnym.
+ */
+function tt_add_push_panel() {
+    add_menu_page(
+        'Ting Tong Push Center',
+        'Push Center',
+        'manage_options',
+        'ting_tong_push_center',
+        'tt_render_push_panel',
+        'dashicons-bell',
+        25
+    );
+}
+add_action('admin_menu', 'tt_add_push_panel');
+
+/**
+ * Renderuje zawartość panelu "Ting Tong Push Center".
+ */
+function tt_render_push_panel() {
+    global $wpdb;
+    $subscriptions_table = $wpdb->prefix . 'tt_push_subscriptions';
+    $total_subscriptions = $wpdb->get_var("SELECT COUNT(*) FROM {$subscriptions_table}");
+
+    ?>
+    <div class="wrap">
+        <h1>Ting Tong Push Center</h1>
+        <p>Panel do wysyłania masowych powiadomień Web Push do subskrybentów.</p>
+
+        <div id="push-dashboard">
+            <div id="push-form-container">
+                <form id="tt-push-form">
+                    <?php wp_nonce_field('tt_admin_send_push_nonce', 'tt_push_nonce'); ?>
+
+                    <h2><span class="dashicons dashicons-admin-generic"></span> Ustawienia Powiadomienia</h2>
+
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th scope="row"><label for="tt_push_title">Tytuł</label></th>
+                            <td><input type="text" id="tt_push_title" name="tt_push_title" class="regular-text" maxlength="50" required />
+                            <p class="description">Nagłówek powiadomienia (max 50 znaków).</p></td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row"><label for="tt_push_body">Treść</label></th>
+                            <td><textarea id="tt_push_body" name="tt_push_body" rows="4" class="large-text" maxlength="150" required></textarea>
+                            <p class="description">Główna treść wiadomości (max 150 znaków).</p></td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row"><label for="tt_push_url">Docelowy URL</label></th>
+                            <td><input type="url" id="tt_push_url" name="tt_push_url" class="regular-text" placeholder="https://app.com/slide-005" />
+                            <p class="description">Link, który otworzy się po kliknięciu. Zostaw puste, aby otworzyć stronę główną.</p></td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row"><label for="tt_push_badge">Licznik Odznaki</label></th>
+                            <td><input type="number" id="tt_push_badge" name="tt_push_badge" class="small-text" min="1" step="1" />
+                            <p class="description">Wartość numeryczna dla ikony aplikacji (Badge API).</p></td>
+                        </tr>
+                    </table>
+
+                    <h2><span class="dashicons dashicons-admin-users"></span> Targetowanie</h2>
+
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th scope="row">Język</th>
+                            <td>
+                                <select name="tt_push_language" id="tt_push_language">
+                                    <option value="all">Wszystkie</option>
+                                    <option value="pl_PL">Polski (pl_PL)</option>
+                                    <option value="en_GB">Angielski (en_GB)</option>
+                                </select>
+                                <p class="description">Filtruj użytkowników na podstawie ich ustawień językowych w profilu.</p>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row">Grupa Docelowa</th>
+                            <td>
+                                <fieldset>
+                                    <label><input type="radio" name="tt_push_target" value="all" checked="checked" /> Wszyscy Subskrybenci</label><br>
+                                    <label><input type="radio" name="tt_push_target" value="patrons" /> Tylko Patroni (dokonali co najmniej jednej donacji)</label><br>
+                                    <label><input type="radio" name="tt_push_target" value="incomplete_profile" /> Tylko Wymagający Uzupełnienia Profilu</label>
+                                </fieldset>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <?php submit_button('Wyślij Powiadomienia'); ?>
+                </form>
+            </div>
+            <div id="push-summary-container">
+                <div class="summary-box">
+                    <h2><span class="dashicons dashicons-chart-bar"></span> Podsumowanie</h2>
+                    <p><strong>Liczba subskrypcji:</strong> <span id="total-subscriptions"><?php echo esc_html($total_subscriptions); ?></span></p>
+                    <hr>
+                    <div id="push-result-log" style="display:none;">
+                        <h3>Wynik Ostatniej Wysyłki:</h3>
+                        <div id="log-content"></div>
+                    </div>
+                     <div id="push-spinner" style="display:none; text-align:center;">
+                        <span class="spinner is-active" style="float:none;"></span>
+                        <p>Wysyłanie w toku...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        #push-dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        #push-form-container { background: #fff; padding: 20px; border-radius: 4px; }
+        #push-summary-container .summary-box { background: #fff; padding: 20px; border-radius: 4px; }
+        #log-content { max-height: 300px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
+        .log-success { color: green; } .log-error { color: red; }
+    </style>
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('#tt-push-form').on('submit', function(e) {
+                e.preventDefault();
+
+                var formData = $(this).serialize();
+                var logContainer = $('#log-content');
+                var resultLog = $('#push-result-log');
+                var spinner = $('#push-spinner');
+
+                spinner.show();
+                resultLog.hide();
+                logContainer.html('');
+
+                $.ajax({
+                    type: 'POST',
+                    url: ajaxurl,
+                    data: formData + '&action=tt_admin_send_push',
+                    success: function(response) {
+                        spinner.hide();
+                        if (response.success) {
+                            var summary = '<p class="log-success"><strong>Sukces!</strong></p>';
+                            summary += '<p>Wysłano pomyślnie: ' + response.data.sent_count + '</p>';
+                            summary += '<p>Wygasłe i usunięte: ' + response.data.expired_count + '</p>';
+                            logContainer.html(summary);
+                        } else {
+                            logContainer.html('<p class="log-error"><strong>Błąd:</strong> ' + response.data.message + '</p>');
+                        }
+                        resultLog.show();
+                    },
+                    error: function() {
+                        spinner.hide();
+                        logContainer.html('<p class="log-error"><strong>Błąd:</strong> Wystąpił błąd serwera.</p>');
+                        resultLog.show();
+                    }
+                });
+            });
+        });
+    </script>
+    <?php
+}
+
+/**
+ * Przetwarza żądanie AJAX do wysyłki powiadomień z panelu admina.
+ */
+function tt_admin_send_push_handler() {
+    // Weryfikacja uprawnień i nonce
+    if (!current_user_can('manage_options') || !check_ajax_referer('tt_admin_send_push_nonce', 'tt_push_nonce', false)) {
+        wp_send_json_error(['message' => 'Brak uprawnień.'], 403);
+        return;
+    }
+
+    // Pobranie i walidacja danych
+    $title = isset($_POST['tt_push_title']) ? sanitize_text_field($_POST['tt_push_title']) : '';
+    $body = isset($_POST['tt_push_body']) ? sanitize_textarea_field($_POST['tt_push_body']) : '';
+    $url = isset($_POST['tt_push_url']) ? esc_url_raw($_POST['tt_push_url']) : home_url('/');
+    $badge = isset($_POST['tt_push_badge']) ? absint($_POST['tt_push_badge']) : 0;
+    $language = isset($_POST['tt_push_language']) ? sanitize_text_field($_POST['tt_push_language']) : 'all';
+    $target = isset($_POST['tt_push_target']) ? sanitize_text_field($_POST['tt_push_target']) : 'all';
+
+    if (empty($title) || empty($body)) {
+        wp_send_json_error(['message' => 'Tytuł i treść są wymagane.'], 400);
+        return;
+    }
+
+    global $wpdb;
+    $subs_table = $wpdb->prefix . 'tt_push_subscriptions';
+    $users_table = $wpdb->prefix . 'users';
+    $usermeta_table = $wpdb->prefix . 'usermeta';
+    $donations_table = $wpdb->prefix . 'tt_donations';
+
+    $query = "SELECT s.* FROM {$subs_table} s";
+    $params = [];
+
+    if ($language !== 'all') {
+        $query .= " JOIN {$usermeta_table} um ON s.user_id = um.user_id AND um.meta_key = 'locale' AND um.meta_value = %s";
+        $params[] = $language;
+    }
+
+    if ($target === 'patrons') {
+        $query .= " JOIN {$donations_table} d ON s.user_id = d.user_id";
+    } elseif ($target === 'incomplete_profile') {
+        $query .= " JOIN {$usermeta_table} um_profile ON s.user_id = um_profile.user_id AND um_profile.meta_key = 'tt_first_login_completed' AND um_profile.meta_value = '0'";
+    }
+
+    $query .= " GROUP BY s.id"; // Uniknięcie duplikatów
+
+    $subscriptions = $wpdb->get_results($wpdb->prepare($query, $params));
+
+    $sent_count = 0;
+    $expired_count = 0;
+
+    foreach ($subscriptions as $subscription) {
+        $result = tt_send_push_notification($subscription, $title, $body, $badge, $url);
+        if (isset($result['status']) && $result['status'] === 'success') {
+            $sent_count++;
+        } elseif (isset($result['status']) && $result['status'] === 'expired') {
+            $expired_count++;
+        }
+    }
+
+    wp_send_json_success([
+        'sent_count' => $sent_count,
+        'expired_count' => $expired_count,
+    ]);
+}
+add_action('wp_ajax_tt_admin_send_push', 'tt_admin_send_push_handler');
+
+/**
+ * Wysyła powiadomienie Web Push do pojedynczej subskrypcji.
+ *
+ * @param object $subscription_data Obiekt subskrypcji z bazy danych.
+ * @param string $title Tytuł powiadomienia.
+ * @param string $body Treść powiadomienia.
+ * @param int    $badge_count Liczba na odznace aplikacji.
+ * @param string $url URL do otwarcia po kliknięciu.
+ * @return array Wynik wysyłki.
+ */
+function tt_send_push_notification($subscription_data, $title, $body, $badge_count = 0, $url = '') {
+    if (!defined('TT_VAPID_PUBLIC_KEY') || !defined('TT_VAPID_PRIVATE_KEY') || !defined('TT_VAPID_SUBJECT')) {
+        return ['status' => 'error', 'message' => 'VAPID keys not configured.'];
+    }
+
+    $auth = [
+        'VAPID' => [
+            'subject' => TT_VAPID_SUBJECT,
+            'publicKey' => TT_VAPID_PUBLIC_KEY,
+            'privateKey' => TT_VAPID_PRIVATE_KEY,
+        ],
+    ];
+
+    $webPush = new WebPush($auth);
+
+    $payload = json_encode([
+        'title' => $title,
+        'body' => $body,
+        'badge' => (int) $badge_count,
+        'icon' => get_template_directory_uri() . '/assets/icons/icon-192x192.svg',
+        'data' => ['url' => $url ?: home_url('/')]
+    ]);
+
+    $subscription = Subscription::create([
+        'endpoint' => $subscription_data->endpoint,
+        'publicKey' => $subscription_data->p256dh,
+        'authToken' => $subscription_data->auth,
+    ]);
+
+    $report = $webPush->sendOneNotification($subscription, $payload);
+
+    if ($report->isSuccess()) {
+        return ['status' => 'success'];
+    } else {
+        // Jeśli subskrypcja wygasła, usuń ją
+        if ($report->getResponse() && $report->getResponse()->getStatusCode() === 410) {
+            global $wpdb;
+            $wpdb->delete($wpdb->prefix . 'tt_push_subscriptions', ['id' => $subscription_data->id]);
+            return ['status' => 'expired'];
+        }
+        return ['status' => 'failed', 'message' => $report->getReason()];
+    }
+}

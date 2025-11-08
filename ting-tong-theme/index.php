@@ -170,6 +170,13 @@ get_header();
 </div>
 
 <div id="preloader">
+    <div class="preloader-icon-container">
+        <img
+            src="<?php echo get_template_directory_uri(); ?>/jajk.png"
+            alt="Logo aplikacji"
+            class="splash-icon"
+        >
+    </div>
     <div class="preloader-content-container">
         <div class="language-selection">
             <h2>Wybierz Język / Select Language</h2>
@@ -179,7 +186,7 @@ get_header();
             </div>
         </div>
     </div>
-    <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: block;">
+    <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
         DEBUG: Pokaż First Login Modal
     </button>
 </div>
@@ -200,7 +207,7 @@ get_header();
                         <svg class="eye-icon-closed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
                     </button>
                 </div>
-                <button type="submit" id="tt-login-submit">ENTER.</button>
+                <button type="submit" id="tt-login-submit">ENTER</button>
             </form>
         </div>
     <div class="logged-in-menu" aria-hidden="true">
@@ -264,7 +271,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-author-profile" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-account-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -581,54 +588,6 @@ get_header();
     </div>
 </div>
 
-<!-- === Author Profile Modal === -->
-<div id="author-profile-modal" class="author-profile-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="author-profile-modal-content">
-        <div class="author-profile-header">
-            <button class="close-btn" data-action="close-author-profile-modal" aria-label="Close author profile">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            </button>
-            <h2 class="author-username"></h2>
-            <button class="options-btn" aria-label="Options">
-                 <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-            </button>
-        </div>
-        <div class="author-profile-body">
-            <div class="author-info-section">
-                <div class="author-avatar-container">
-                    <img src="" alt="Author Avatar" class="author-avatar">
-                </div>
-                <div class="author-stats">
-                    <div class="stat-item">
-                        <strong class="stat-value" id="author-following-count">0</strong>
-                        <span class="stat-label" data-translate-key="following">Following</span>
-                    </div>
-                    <div class="stat-item">
-                        <strong class="stat-value" id="author-followers-count">0</strong>
-                        <span class="stat-label" data-translate-key="followers">Followers</span>
-                    </div>
-                    <div class="stat-item">
-                        <strong class="stat-value" id="author-likes-count">0</strong>
-                        <span class="stat-label" data-translate-key="likes">Likes</span>
-                    </div>
-                </div>
-                <h3 class="author-display-name"></h3>
-                <p class="author-bio"></p>
-                <button class="follow-btn" data-translate-key="follow">Follow</button>
-            </div>
-            <div class="author-content-tabs">
-                <button class="tab-btn active" data-tab="videos">
-                     <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
-                </button>
-                <!-- Add other tabs like 'liked' or 'private' here if needed -->
-            </div>
-            <div class="author-video-grid">
-                <!-- Video thumbnails will be dynamically inserted here -->
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="crop-modal" id="cropModal">
     <div class="crop-modal-content">
         <div class="crop-header">
@@ -665,12 +624,12 @@ get_header();
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">
     <div class="pwa-ios-header">
-        <h3>Jak zainstalować aplikację</h3>
+        <h3>Zainstaluj aplikację na iPhone</h3>
         <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
     </div>
     <div class="pwa-ios-body">
-        <p>1. Stuknij ikonę <strong>udostępniania</strong> w przeglądarce.</p>
-        <p>2. Wybierz <strong>"Dodaj do ekranu początkowego"</strong>.</p>
+        <p>1. Stuknij ikonę udostępniania <span class="pwa-ios-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a.75.75 0 01.75.75v10.51l2.22-2.22a.75.75 0 111.06 1.06l-3.5 3.5a.75.75 0 01-1.06 0l-3.5-3.5a.75.75 0 111.06-1.06l2.22 2.22V3.25a.75.75 0 01.75-.75zM3.75 13a.75.75 0 00-1.5 0v5.5c0 1.24 1.01 2.25 2.25 2.25h15c1.24 0 2.25-1.01 2.25-2.25v-5.5a.75.75 0 00-1.5 0v5.5c0 .41-.34.75-.75.75h-15a.75.75 0 01-.75-.75v-5.5z" /></svg></span> w przeglądarce Safari.</p>
+        <p>2. Wybierz opcję "Dodaj do ekranu początkowego" <span class="pwa-ios-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.75a.75.75 0 01.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6a.75.75 0 01.75-.75z" /></svg></span>.</p>
         <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
     </div>
 </div>
@@ -793,6 +752,73 @@ get_header();
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- === Author Profile Modal === -->
+<div id="author-profile-modal" class="author-profile-modal" aria-hidden="true">
+    <div class="profile-content">
+        <header class="profile-header">
+            <button class="back-btn" data-action="close-author-modal">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+            </button>
+            <h2 class="username-header"></h2>
+            <button class="options-btn" data-action="author-options">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                </svg>
+            </button>
+        </header>
+        <main>
+            <section class="info-section">
+                <div class="avatar-container">
+                    <img src="" alt="Author Avatar" class="profile-avatar">
+                </div>
+                <div class="stats-container">
+                    <div class="stat">
+                        <span class="stat-number following-count">0</span>
+                        <span class="stat-label">Obserwuje</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number followers-count">0</span>
+                        <span class="stat-label">Obserwujący</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number likes-count">0</span>
+                        <span class="stat-label">Polubienia</span>
+                    </div>
+                </div>
+                <p class="fullname"></p>
+                <p class="bio"></p>
+                <div class="profile-actions">
+                    <button class="follow-btn">Obserwuj</button>
+                    <button class="social-btn instagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></button>
+                    <button class="social-btn youtube"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2A29 29 0 0 0 23 11.75a29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></button>
+                </div>
+            </section>
+            <nav class="tabs">
+                <div class="tab active" data-tab-content="videos-grid">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+                </div>
+                <div class="tab" data-tab-content="liked-grid">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+                 <div class="tab" data-tab-content="reposts-grid">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                </div>
+            </nav>
+            <section id="videos-grid" class="video-gallery active">
+                <!-- Video thumbnails will be dynamically inserted here -->
+            </section>
+            <section id="liked-grid" class="video-gallery">
+                <!-- Liked video thumbnails -->
+            </section>
+            <section id="reposts-grid" class="video-gallery">
+                <!-- Reposted video thumbnails -->
+            </section>
+        </main>
     </div>
 </div>
 

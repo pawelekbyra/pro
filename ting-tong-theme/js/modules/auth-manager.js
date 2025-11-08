@@ -103,33 +103,35 @@ class AuthManager {
     }
 
     const performFetch = async (currentNonce) => {
-        let url = ajax_object.ajax_url;
+        const url = ajax_object.ajax_url;
         const headers = { 'Credentials': 'same-origin' };
         let body;
 
+        // UWAGA: Logika została uproszczona, aby zawsze używać POST i przekazywać
+        // akcję w ciele, co jest bardziej standardowe dla `admin-ajax.php`.
         if (sendAsJSON) {
-            url = `${ajax_object.ajax_url}?action=${action}`;
             headers['Content-Type'] = 'application/json; charset=UTF-8';
+            // Nonce jest wysyłany w nagłówku, co jest dobrą praktyką dla API REST-podobnych.
             headers['X-WP-Nonce'] = currentNonce;
+            // W ciele JSON wysyłamy tylko dane właściwe, akcja jest w URL
             body = JSON.stringify(data);
+            // Akcja musi być w URL, aby WordPress wiedział, który hook `wp_ajax_` wywołać
+            const queryParams = new URLSearchParams({ action });
+            const requestUrl = `${url}?${queryParams.toString()}`;
+
+            const response = await fetch(requestUrl, { method: 'POST', headers, body });
+            const json = await response.json();
+            return this.validateResponse(response, json);
+
         } else {
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-            const bodyData = new URLSearchParams({
-                action,
-                nonce: currentNonce,
-                ...data
-            });
+            const bodyData = new URLSearchParams({ action, nonce: currentNonce, ...data });
             body = bodyData.toString();
+
+            const response = await fetch(url, { method: 'POST', headers, body });
+            const json = await response.json();
+            return this.validateResponse(response, json);
         }
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers,
-            body
-        });
-
-        const json = await response.json();
-        return this.validateResponse(response, json);
     };
 
     const requestFn = async () => {

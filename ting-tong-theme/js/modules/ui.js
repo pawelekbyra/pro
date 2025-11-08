@@ -128,23 +128,40 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    // Usunięcie wszystkich klas animacji i ukrywania przed otwarciem
-    modal.style.display = 'flex';
-    modal.classList.remove('is-hiding', 'slide-out-right', 'slide-out-left', 'slide-in-right');
+    const content = modal.querySelector('.modal-content, .elegant-modal-content');
 
-    // Ustawienie widoczności
-    modal.classList.add('visible');
-
-    // Dodanie klasy animacji w następnej klatce (daje czas na reset styli)
-    if (options.animationClass) {
-        requestAnimationFrame(() => {
-            // Usuń przeciwną klasę przed dodaniem nowej
-            if (options.animationClass.includes('slide-in')) {
-                modal.classList.remove('slide-out-right', 'slide-out-left');
-            }
-            modal.classList.add(options.animationClass);
-        });
+    // Wyczyść stare klasy animacji
+    if (content) {
+        content.classList.remove('slideOutLeft', 'slideInRight');
+        // Usuń stary event listener, jeśli istnieje
+        if (content._animationEndHandler) {
+            content.removeEventListener('animationend', content._animationEndHandler);
+        }
     }
+
+    modal.style.display = 'flex';
+    modal.classList.remove('is-hiding');
+
+    // Użyj `requestAnimationFrame`, aby upewnić się, że `display` zostało zaaplikowane
+    requestAnimationFrame(() => {
+        modal.classList.add('visible');
+
+        // Jeśli jest to animacja slideInRight, upewnij się, że zaczyna od stanu `opacity: 1`
+        if (options.animationClass === 'slideInRight' && content) {
+            content.style.opacity = '1';
+        }
+
+        if (options.animationClass && content) {
+            content.classList.add(options.animationClass);
+            // Zapisz handler, aby można go było usunąć
+            content._animationEndHandler = () => {
+                content.classList.remove(options.animationClass);
+                // Przywróć domyślą przeźroczystość po animacji
+                content.style.opacity = '';
+            };
+            content.addEventListener('animationend', content._animationEndHandler, { once: true });
+        }
+    });
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
@@ -161,6 +178,7 @@ function openModal(modal, options = {}) {
 
     if (modal.id === 'infoModal') {
         startCountdown();
+        updateCrowdfundingStats();
     }
 
     // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
@@ -200,31 +218,33 @@ function openModal(modal, options = {}) {
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal)) return;
 
-    // Wybierz klasę animacji wyjścia. Jeśli modal ma klasę 'slide-in-right', użyj 'slide-out-right'.
-    let animationClass = options.animationClass || '';
-    if (!animationClass && modal.classList.contains('slide-in-right')) {
-        animationClass = 'slide-out-right';
-    }
-
-    const isSlideAnimation = animationClass.includes('slide');
-
-    // Unbind the background click listener immediately
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
         delete modal._closeOnClick;
     }
 
     modal.setAttribute("aria-hidden", "true");
+    modal.classList.add("is-hiding");
+
+    const animationClass = options.animationClass;
+    const content = modal.querySelector('.modal-content, .elegant-modal-content');
 
     const cleanup = () => {
-        // Usuń wszystkie listenery i klasy animacji
-        modal.removeEventListener("animationend", cleanup);
-        modal.removeEventListener("transitionend", cleanup);
-
         modal.style.display = 'none';
-        modal.classList.remove("visible", "is-hiding", "slide-in-right", "slide-out-right", "slide-out-left");
+        modal.classList.remove("visible", "is-hiding");
 
-        // Czyszczenie focus trap
+        if (content) {
+            if (content._animationEndHandler) {
+                content.removeEventListener('animationend', content._animationEndHandler);
+                delete content._animationEndHandler;
+            }
+            if (animationClass) {
+                content.classList.remove(animationClass);
+            }
+            // Zresetuj styl opacity po zakończeniu
+            content.style.opacity = '';
+        }
+
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
@@ -247,20 +267,20 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    // Trigger the animation/transition
-    if (isSlideAnimation) {
-        // Dla modali z animacją (np. profil)
-        modal.classList.add(animationClass);
-        modal.addEventListener("animationend", cleanup, { once: true });
+    if (animationClass && content) {
+        // Wymuś opacity na 1 na czas animacji slideOut
+        content.style.opacity = '1';
+        content.classList.add(animationClass);
+        content._animationEndHandler = () => {
+            cleanup();
+        };
+        content.addEventListener('animationend', content._animationEndHandler, { once: true });
     } else {
-        // Dla standardowych modali (fade-out, np. infoModal)
-        modal.classList.add('is-hiding'); // Użyj is-hiding dla fade-out
         modal.classList.remove('visible');
-        modal.addEventListener("transitionend", cleanup, { once: true });
+        // Standardowe zamykanie z przejściem opacity
+        modal.addEventListener('transitionend', cleanup, { once: true });
+        setTimeout(cleanup, 400); // Fallback
     }
-
-    // Fallback timer
-    setTimeout(cleanup, 500);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
@@ -512,6 +532,8 @@ function createSlideElement(slideData, index) {
   section.querySelector(".tiktok-symulacja").dataset.access =
     slideData.access;
   const avatarImg = section.querySelector(".profileButton img");
+    const profileButton = section.querySelector(".profileButton");
+  profileButton.dataset.action = 'open-author-modal';
   avatarImg.src = slideData.author.avatar;
   if (slideData.author.is_vip) {
     avatarImg.classList.add("vip-avatar-border");
@@ -1070,7 +1092,45 @@ export const UI = {
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
+  updateCrowdfundingStats,
 };
+
+async function updateCrowdfundingStats() {
+    try {
+        const result = await API.getNewCrowdfundingStats();
+        if (result.success && result.data) {
+            const stats = result.data;
+            const patronsEl = document.querySelector('.stats-grid .stat-item:nth-child(1) .stat-value');
+            const collectedEl = document.querySelector('.progress-label span strong');
+            const progressFillEl = document.querySelector('.progress-section .progress-bar-fill');
+            const progressLabelEl = document.querySelector('.progress-label');
+
+            if (patronsEl) patronsEl.textContent = stats.patrons_count;
+
+            if (progressLabelEl) {
+                const goal = parseFloat(progressLabelEl.dataset.goal) || 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressLabelEl.dataset.collected = stats.collected_eur.toFixed(2);
+                progressLabelEl.dataset.percentage = percentage.toFixed(0);
+
+                if (collectedEl) collectedEl.textContent = `${stats.collected_eur.toFixed(2)} z ${goal} EUR`;
+
+                const labelSpan = progressLabelEl.querySelector('span');
+                if(labelSpan) {
+                    labelSpan.innerHTML = `Cel: <strong>${stats.collected_eur.toFixed(2)} z ${goal} EUR</strong> (${percentage.toFixed(0)}%)`;
+                }
+            }
+
+            if (progressFillEl) {
+                const goal = 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressFillEl.style.width = `${percentage}%`;
+            }
+        }
+    } catch (error) {
+        console.error("Failed to update crowdfunding stats:", error);
+    }
+}
 
 function closeCommentsModal() {
     const modal = DOM.commentsModal;

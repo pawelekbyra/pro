@@ -46,7 +46,7 @@ function _getPreferredCurrencyByLocale() {
 
     // Fallback logic
     if (State.get('currentLang') === 'pl') {
-        return 'usd'; // Default for Polish UI if no region match
+        return 'pln';
     }
 
     return 'usd'; // Global fallback
@@ -274,9 +274,12 @@ async function initializePaymentElement(originalText, countryCodeHint) { // DODA
         const paymentElementOptions = {
             layout: 'tabs',
             wallets: { applePay: 'auto', googlePay: 'auto' },
-            // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
             fields: {
-                 billingDetails: { email: formData.email ? 'never' : 'auto' }
+                 billingDetails: {
+                     name: 'auto', // Zbieraj Imię i Nazwisko TYLKO, gdy Stripe tego potrzebuje dla metody płatności
+                     email: formData.email ? 'never' : 'auto',
+                     // Adres pozostawiamy w domyślnym trybie 'auto' / 'never', który jest uproszczony
+                 }
             }
         };
 
@@ -338,7 +341,12 @@ async function handleFormSubmit() {
         elements,
         confirmParams: {
             return_url: returnUrl,
-            receipt_email: formData.email || undefined
+            receipt_email: formData.email || undefined,
+            payment_method_data: {
+                billing_details: {
+                    email: formData.email ? formData.email : undefined,
+                }
+            }
         },
         redirect: 'if_required'
     });
@@ -502,4 +510,6 @@ export const TippingModal = {
     showModal,
     hideModal,
     updateLanguage,
+    handleNextStep,
+    handlePrevStep,
 };

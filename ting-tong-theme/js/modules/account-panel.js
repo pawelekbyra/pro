@@ -2,6 +2,7 @@ import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { authManager } from './auth-manager.js';
 import { State } from './state.js';
+import { API } from './api.js';
 
 // Global variables for the panel
 let cropImage = null;
@@ -117,11 +118,18 @@ async function saveSettings() {
   try {
     button.disabled = true;
     button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation("savingButtonText")}`;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    showSuccess(
-      "settingsSuccess",
-      Utils.getTranslation("settingsUpdateSuccess"),
-    );
+
+    const result = await API.saveSettings(userSettings);
+
+    if (result.success) {
+      showSuccess(
+        "settingsSuccess",
+        Utils.getTranslation("settingsUpdateSuccess"),
+      );
+    } else {
+      throw new Error(result.data?.message || "Failed to save settings.");
+    }
+
   } catch (error) {
     showError("settingsError", error.message);
   } finally {
@@ -594,31 +602,20 @@ async function cropAndSave() {
   }
 }
 
-async function apiRequest(action, data = {}, sendAsJSON = false) {
-  try {
-    return await authManager.ajax(action, data, sendAsJSON);
-  } catch (error) {
-    console.error(`API error for action "${action}":`, error);
-    return {
-      success: false,
-      data: { message: error.message || 'Request failed' }
-    };
-  }
-}
 async function uploadAvatar(dataUrl) {
-  return apiRequest("tt_avatar_upload", { image: dataUrl }, true);
+  return API.uploadAvatar({ image: dataUrl });
 }
 async function updateProfile(data) {
-  return apiRequest("tt_profile_update", data);
+  return API.updateProfile(data);
 }
 async function changePassword(data) {
-  return apiRequest("tt_password_change", data);
+  return API.changePassword(data);
 }
 async function deleteAccount(confirmText) {
-  return apiRequest("tt_account_delete", { confirm_text: confirmText });
+  return API.deleteAccount({ confirm_text: confirmText });
 }
 async function loadUserProfile() {
-  return apiRequest("tt_profile_get");
+  return API.loadUserProfile();
 }
 
 async function handleProfileSubmit(event) {

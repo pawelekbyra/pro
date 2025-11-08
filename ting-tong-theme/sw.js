@@ -85,35 +85,99 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Dla wszystkich innych żądań GET, użyj strategii "cache-first"
+  // Dla wszystkich innych żądań GET, użyj strategii "Network-first"
   event.respondWith(
-    caches.match(request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          console.log(`[SW] 💾 Serving from cache: ${request.url}`);
-          return cachedResponse;
+    fetch(request) // Spróbuj pobrać z sieci (PRIORYTET)
+      .then(networkResponse => {
+        // Jeśli sukces, zaktualizuj cache i zwróć odpowiedź z sieci
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, responseToCache);
+          });
         }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Jeśli błąd sieci, spróbuj z cache (FALLBACK)
+        return caches.match(request);
+      })
+  );
+});
 
-        console.log(`[SW] ☁️ Fetching from network: ${request.url}`);
-        return fetch(request).then(networkResponse => {
-          // Klonuj odpowiedź i zapisz w cache, jeśli jest poprawna
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              console.log(`[SW]  caching new asset: ${request.url}`);
-              cache.put(request, responseToCache);
-            });
-          }
-          return networkResponse;
-        });
-      })
-      .catch(error => {
-        console.error(`[SW] ❌ Fetch error for ${request.url}:`, error);
-        // Zwróć prostą odpowiedź błędu sieciowego
-        return new Response('Network error occurred', {
-          status: 408,
-          headers: { 'Content-Type': 'text/plain' },
-        });
-      })
+// ============================================================================
+// LISTENERY DLA POWIADOMIEŃ PUSH I ODZNAK (BADGE API)
+// ============================================================================
+
+/**
+ * Listener zdarzenia 'push'. Wywoływany, gdy serwer wysyła powiadomienie.
+ */
+self.addEventListener('push', event => {
+  console.log('[SW] 📥 Push Received.');
+
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (e) {
+    console.error('[SW] Error parsing push data:', e);
+    data = {
+      title: 'Nowe powiadomienie',
+      body: 'Otrzymano nowe powiadomienie.',
+      badge: 0
+    };
+  }
+
+  const title = data.title || 'Ting Tong';
+  const options = {
+    body: data.body || 'Masz nową wiadomość.',
+    icon: data.icon || '/assets/icons/icon-192x192.svg',
+    badge: data.badge ? '/assets/icons/badge.png' : '', // URL do ikony odznaki
+    data: {
+      url: self.registration.scope // URL do otwarcia po kliknięciu
+    }
+  };
+
+  // Ustaw odznakę aplikacji (Badge API)
+  if (navigator.setAppBadge && typeof data.badge !== 'undefined') {
+    navigator.setAppBadge(data.badge).catch(err => {
+      console.error('[SW] Error setting app badge:', err);
+    });
+  }
+
+  // Wyświetl powiadomienie
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+/**
+ * Listener zdarzenia 'notificationclick'. Wywoływany, gdy użytkownik kliknie powiadomienie.
+ */
+self.addEventListener('notificationclick', event => {
+  console.log('[SW] 🖱️ Notification clicked.');
+  event.notification.close(); // Zamknij powiadomienie
+
+  // Wyczyść odznakę aplikacji
+  if (navigator.clearAppBadge) {
+    navigator.clearAppBadge().catch(err => {
+      console.error('[SW] Error clearing app badge:', err);
+    });
+  }
+
+  // Otwórz okno aplikacji lub przejdź do istniejącego
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      const urlToOpen = event.notification.data.url || '/';
+
+      for (const client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
   );
 });
