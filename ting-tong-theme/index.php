@@ -271,7 +271,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-author-profile" data-translate-aria-label="authorProfileAriaLabel" aria-label="Profil autora"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-account-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -611,56 +611,6 @@ get_header();
     </div>
 </div>
 <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
-
-<!-- === Author Profile Modal (v2 - "Odpicowany") === -->
-<div id="author-profile-modal" class="modal-overlay author-profile-modal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="author-profile-content">
-        <!-- New Banner Section -->
-        <div class="profile-banner">
-            <div class="banner-avatar-bg"></div>
-            <div class="banner-gradient-overlay"></div>
-            <header class="profile-header">
-                 <button class="back-btn" data-action="close-author-profile" aria-label="Back">
-                    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                </button>
-                 <h2 class="username-header"></h2>
-                 <button class="options-btn" data-action="open-author-options" aria-label="Options">
-                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                </button>
-            </header>
-            <div class="banner-info">
-                <h3 class="fullname"></h3>
-                <div class="stats-container">
-                    <div class="stat">
-                        <span class="stat-number followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowers">Obserwujących</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Polubień</span>
-                    </div>
-                </div>
-                 <div class="profile-actions">
-                    <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
-                </div>
-            </div>
-        </div>
-        <!-- Content Section -->
-        <main>
-            <p class="bio"></p>
-            <div class="tabs">
-                <div class="tab active" data-tab-content="videos-grid"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></div>
-                <div class="tab" data-tab-content="liked-grid"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
-            </div>
-            <div id="videos-grid" class="video-gallery active">
-                <!-- Video thumbnails will be dynamically inserted here -->
-            </div>
-            <div id="liked-grid" class="video-gallery">
-                <!-- Liked video thumbnails will be dynamically inserted here -->
-            </div>
-        </main>
-    </div>
-</div>
 
 <div id="pwa-install-bar" class="pwa-prompt" aria-hidden="true">
     <div class="pwa-prompt-content">

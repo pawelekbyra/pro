@@ -8,7 +8,6 @@ import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
 import { CommentsModal } from './comments-modal.js';
-import { AuthorProfileModal } from './author-profile-modal.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -505,17 +504,12 @@ export const Handlers = {
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
         if (infoModal && infoModal.classList.contains('visible')) {
-            // Close info modal with slide-out animation
             UI.closeModal(infoModal, {
-                animationClass: 'slide-out-left',
-                keepFocus: true // Prevent focus from jumping back to the main page momentarily
+                keepFocus: true,
+                animationClass: 'slideOutLeft'
             });
-            // Open tipping modal with slide-in animation, without delay
-            TippingModal.showModal({
-                animationClass: 'slide-in-right'
-            });
+            TippingModal.showModal({ animationClass: 'slideInRight' });
         } else {
-            // Fallback for safety
             TippingModal.showModal();
         }
         break;
@@ -528,19 +522,6 @@ export const Handlers = {
         break;
       case "install-pwa":
         // This is now handled directly in the PWA module.
-        break;
-      case "open-author-profile":
-        const swiper = State.get('swiper');
-        if (swiper) {
-            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-            if (slideData && slideData.author) {
-                AuthorProfileModal.open(slideData.author);
-            }
-        }
-        break;
-      case "close-author-profile":
-        AuthorProfileModal.close();
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");
