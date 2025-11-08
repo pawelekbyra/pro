@@ -612,28 +612,25 @@ get_header();
 </div>
 <input type="file" class="file-input" id="avatarFileInput" accept="image/*">
 
-<!-- === Author Profile Modal === -->
+<!-- === Author Profile Modal (v2 - "Odpicowany") === -->
 <div id="author-profile-modal" class="modal-overlay author-profile-modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="author-profile-content">
-        <header class="profile-header">
-            <button class="back-btn" data-action="close-author-profile" aria-label="Back">
-                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            </button>
-            <h2 class="username-header"></h2>
-            <button class="options-btn" data-action="open-author-options" aria-label="Options">
-                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            </button>
-        </header>
-        <main>
-            <div class="info-section">
-                <div class="avatar-container">
-                    <img src="" alt="Author Avatar" class="profile-avatar">
-                </div>
+        <!-- New Banner Section -->
+        <div class="profile-banner">
+            <div class="banner-avatar-bg"></div>
+            <div class="banner-gradient-overlay"></div>
+            <header class="profile-header">
+                 <button class="back-btn" data-action="close-author-profile" aria-label="Back">
+                    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                </button>
+                 <h2 class="username-header"></h2>
+                 <button class="options-btn" data-action="open-author-options" aria-label="Options">
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+            </header>
+            <div class="banner-info">
+                <h3 class="fullname"></h3>
                 <div class="stats-container">
-                    <div class="stat">
-                        <span class="stat-number following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Obserwuje</span>
-                    </div>
                     <div class="stat">
                         <span class="stat-number followers-count">0</span>
                         <span class="stat-label" data-translate-key="profileFollowers">Obserwujących</span>
@@ -643,27 +640,23 @@ get_header();
                         <span class="stat-label" data-translate-key="profileLikes">Polubień</span>
                     </div>
                 </div>
+                 <div class="profile-actions">
+                    <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
+                </div>
             </div>
-            <h3 class="fullname"></h3>
+        </div>
+        <!-- Content Section -->
+        <main>
             <p class="bio"></p>
-            <div class="profile-actions">
-                <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
-                <a href="#" class="social-btn instagram" target="_blank" rel="noopener noreferrer" style="display: none;"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-                <a href="#" class="social-btn youtube" target="_blank" rel="noopener noreferrer" style="display: none;"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></a>
-            </div>
             <div class="tabs">
                 <div class="tab active" data-tab-content="videos-grid"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></div>
                 <div class="tab" data-tab-content="liked-grid"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
-                <div class="tab" data-tab-content="reposts-grid"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
             </div>
             <div id="videos-grid" class="video-gallery active">
                 <!-- Video thumbnails will be dynamically inserted here -->
             </div>
             <div id="liked-grid" class="video-gallery">
                 <!-- Liked video thumbnails will be dynamically inserted here -->
-            </div>
-             <div id="reposts-grid" class="video-gallery">
-                <!-- Reposted video thumbnails will be dynamically inserted here -->
             </div>
         </main>
     </div>
