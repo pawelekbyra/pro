@@ -624,12 +624,12 @@ get_header();
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">
     <div class="pwa-ios-header">
-        <h3>Jak zainstalować aplikację</h3>
+        <h3>Zainstaluj aplikację na iPhone</h3>
         <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
     </div>
     <div class="pwa-ios-body">
-        <p>1. Stuknij ikonę <strong>udostępniania</strong> w przeglądarce.</p>
-        <p>2. Wybierz <strong>"Dodaj do ekranu początkowego"</strong>.</p>
+        <p>1. Stuknij ikonę udostępniania <span class="pwa-ios-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a.75.75 0 01.75.75v10.51l2.22-2.22a.75.75 0 111.06 1.06l-3.5 3.5a.75.75 0 01-1.06 0l-3.5-3.5a.75.75 0 111.06-1.06l2.22 2.22V3.25a.75.75 0 01.75-.75zM3.75 13a.75.75 0 00-1.5 0v5.5c0 1.24 1.01 2.25 2.25 2.25h15c1.24 0 2.25-1.01 2.25-2.25v-5.5a.75.75 0 00-1.5 0v5.5c0 .41-.34.75-.75.75h-15a.75.75 0 01-.75-.75v-5.5z" /></svg></span> w przeglądarce Safari.</p>
+        <p>2. Wybierz opcję "Dodaj do ekranu początkowego" <span class="pwa-ios-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.75a.75.75 0 01.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6a.75.75 0 01.75-.75z" /></svg></span>.</p>
         <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
     </div>
 </div>
