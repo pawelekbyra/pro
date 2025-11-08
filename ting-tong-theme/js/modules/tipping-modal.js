@@ -274,9 +274,12 @@ async function initializePaymentElement(originalText, countryCodeHint) { // DODA
         const paymentElementOptions = {
             layout: 'tabs',
             wallets: { applePay: 'auto', googlePay: 'auto' },
-            // Zapewnienie, że email jest przekazywany automatycznie jeśli go mamy
             fields: {
-                 billingDetails: { email: formData.email ? 'never' : 'auto' }
+                 billingDetails: {
+                     name: 'auto', // Zbieraj Imię i Nazwisko TYLKO, gdy Stripe tego potrzebuje dla metody płatności
+                     email: formData.email ? 'never' : 'auto',
+                     // Adres pozostawiamy w domyślnym trybie 'auto' / 'never', który jest uproszczony
+                 }
             }
         };
 
