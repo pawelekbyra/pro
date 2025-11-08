@@ -506,11 +506,9 @@ export const Handlers = {
         if (infoModal && infoModal.classList.contains('visible')) {
             UI.closeModal(infoModal, {
                 keepFocus: true,
-                animationClass: 'slideOutLeft',
-                onClose: () => {
-                    TippingModal.showModal({ animationClass: 'slideInRight' });
-                }
+                animationClass: 'slideOutLeft'
             });
+            TippingModal.showModal({ animationClass: 'slideInRight' });
         } else {
             TippingModal.showModal();
         }
