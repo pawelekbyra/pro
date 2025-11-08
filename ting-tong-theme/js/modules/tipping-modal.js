@@ -206,13 +206,17 @@ function validateStep(step) {
         const currency = dom.currencySelect.value.toLowerCase();
         const minAmount = (currency === 'pln') ? 5 : 1;
 
-        if (isNaN(amount) || amount < minAmount) {
+        if (dom.amountInput.value.trim() !== '' && (isNaN(amount) || amount < minAmount)) {
             const currencyDisplay = currency.toUpperCase();
             const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
                 .replace('{minAmount}', minAmount)
                 .replace('{currency}', currencyDisplay);
 
             showLocalError(1, message);
+            return false;
+        }
+
+        if (isNaN(amount) || amount < minAmount) {
             return false;
         }
 
