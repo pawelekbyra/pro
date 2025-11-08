@@ -263,7 +263,6 @@ function closeModal(modal, options = {}) {
         content.addEventListener('animationend', content._animationEndHandler, { once: true });
     } else {
         modal.classList.remove('visible');
-        // Standardowe przejście, jeśli nie ma animacji
         modal.addEventListener('transitionend', cleanup, { once: true });
         setTimeout(cleanup, 400); // Fallback
     }
