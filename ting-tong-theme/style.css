@@ -3755,11 +3755,11 @@ overflow: hidden;
   }
 
   body {
-    background: url('chmurki.jpg') no-repeat center center fixed !important;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background-image: url('chmurki.jpg') !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
     overflow-x: hidden;
   }
 
@@ -5856,8 +5856,12 @@ main::-webkit-scrollbar {
     animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.modal-content.slideInRight, .elegant-modal-content.slideInRight {
-    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+.modal-content.slideInRight, .elegant-modal-content.slideInRight, .profile-modal-content.slideInRight {
+    animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.profile-modal-content.slideOutRight {
+    animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 /* Modal Transition Animations */
