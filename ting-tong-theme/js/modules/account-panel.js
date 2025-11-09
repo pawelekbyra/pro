@@ -192,39 +192,33 @@ function populateProfileForm(data) {
 
 // Modal visibility functions
 function openAccountModal() {
-  const modal = document.getElementById("accountModal");
-  if (!modal) {
-    console.error('Account modal element not found');
-    return;
-  }
-
-  modal.classList.add("visible");
-  document.body.style.overflow = "hidden";
-
-  const currentUser = State.get('currentUser');
-
-  if (currentUser && currentUser.user_id) {
-    console.log('Using existing user data');
-    populateProfileForm(currentUser);
-  } else {
-    console.log('Loading fresh user data');
-    loadInitialProfileData();
-  }
+    const modal = document.getElementById("accountModal");
+    if (!modal) {
+        console.error('Account modal element not found');
+        return;
+    }
+    // Użycie centralnego mechanizmu UI.openModal.
+    UI.openModal(modal, {
+        // Logika ładowania danych zostaje przeniesiona do callbacka onOpen,
+        // co gwarantuje, że dane są pobierane i wstawiane w momencie wyświetlenia.
+        onOpen: () => {
+            const currentUser = State.get('currentUser');
+            if (currentUser && currentUser.user_id) {
+                console.log('Using cached user data for account panel');
+                populateProfileForm(currentUser);
+            } else {
+                console.log('Loading fresh user data for account panel');
+                loadInitialProfileData();
+            }
+        }
+    });
 }
 
 function closeAccountModal() {
-  const modal = document.getElementById("accountModal");
-  if (!modal) return;
-
-  modal.classList.add("is-hiding");
-  modal.addEventListener(
-    "transitionend",
-    () => {
-      modal.classList.remove("visible", "is-hiding");
-      document.body.style.overflow = "";
-    },
-    { once: true },
-  );
+    const modal = document.getElementById("accountModal");
+    if (!modal) return;
+    // Użycie centralnej funkcji UI.closeModal.
+    UI.closeModal(modal);
 }
 
 // Tab switching
