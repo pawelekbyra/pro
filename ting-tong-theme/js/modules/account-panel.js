@@ -223,22 +223,9 @@ function openAccountModal() {
 
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
-    if (!modal || !modal.classList.contains("visible")) return;
-
-    modal.classList.add('is-hiding');
-
-    const onTransitionEnd = () => {
-        modal.classList.remove('visible', 'is-hiding');
-        modal.removeEventListener('transitionend', onTransitionEnd);
-    };
-
-    modal.addEventListener('transitionend', onTransitionEnd);
-
-    // Fallback in case transitionend doesn't fire
-    setTimeout(() => {
-        modal.classList.remove('visible', 'is-hiding');
-        modal.removeEventListener('transitionend', onTransitionEnd);
-    }, 500);
+    if (modal) {
+        UI.closeModal(modal, { animationClass: 'slideOutLeft' });
+    }
 }
 
 // Tab switching
