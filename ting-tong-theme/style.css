@@ -4977,7 +4977,7 @@ overflow: hidden;
 
 .elegant-modal-email-container.visible {
     opacity: 1;
-    max-height: 100px;
+    max-height: 150px; /* Zwiększono, aby pomieścić dłuższy hint */
     margin-top: 8px; /* small gap */
 }
 
