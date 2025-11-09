@@ -65,6 +65,7 @@ function initDOMCache() {
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
   DOM.welcomeModal = document.getElementById("welcome-modal");
   DOM.infoModal = document.getElementById("infoModal");
+  DOM.authorProfileModal = document.getElementById("author-profile-modal");
 }
 function showToast(message, isError = false) {
     showAlert(message, isError);
@@ -532,8 +533,6 @@ function createSlideElement(slideData, index) {
   section.querySelector(".tiktok-symulacja").dataset.access =
     slideData.access;
   const avatarImg = section.querySelector(".profileButton img");
-    const profileButton = section.querySelector(".profileButton");
-  profileButton.dataset.action = 'open-author-modal';
   avatarImg.src = slideData.author.avatar;
   if (slideData.author.is_vip) {
     avatarImg.classList.add("vip-avatar-border");
@@ -1093,7 +1092,71 @@ export const UI = {
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
   updateCrowdfundingStats,
+  openAuthorProfileModal,
+  closeAuthorProfileModal,
+  handleAuthorProfileTabClick,
 };
+
+function handleAuthorProfileTabClick(tabElement) {
+    const modal = DOM.authorProfileModal;
+    if (!modal) return;
+
+    const tabName = tabElement.dataset.tab;
+    if (!tabName) return;
+
+    // Remove active class from all tabs and content panes
+    modal.querySelectorAll('.author-tab').forEach(tab => tab.classList.remove('active'));
+    modal.querySelectorAll('.author-tab-content').forEach(content => content.classList.remove('active'));
+
+    // Add active class to the clicked tab and corresponding content pane
+    tabElement.classList.add('active');
+    const contentToShow = modal.querySelector(`#${tabName}-grid`);
+    if (contentToShow) {
+        contentToShow.classList.add('active');
+    }
+}
+
+function openAuthorProfileModal(slideId) {
+    const slideData = slidesData.find(s => s.id === slideId);
+    if (!slideData) return;
+
+    const author = slideData.author;
+    const modal = DOM.authorProfileModal;
+
+    modal.querySelector('.author-profile-username').textContent = author.name;
+    modal.querySelector('.author-profile-avatar').src = author.avatar;
+    modal.querySelector('#author-following-count').textContent = author.following;
+    modal.querySelector('#author-followers-count').textContent = author.followers;
+    modal.querySelector('#author-likes-count').textContent = author.likes;
+    modal.querySelector('.author-bio-text').textContent = author.bio;
+
+    const videosGrid = modal.querySelector('#videos-grid');
+    videosGrid.innerHTML = ''; // Clear previous videos
+
+    if (author.videos && author.videos.length > 0) {
+        author.videos.forEach(video => {
+            const videoItem = document.createElement('div');
+            videoItem.className = 'author-video-item';
+            videoItem.innerHTML = `
+                <img src="${video.thumbnail_url}" alt="Video thumbnail" loading="lazy">
+                <div class="video-view-count">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>
+                    <span>${video.view_count}</span>
+                </div>
+            `;
+            videosGrid.appendChild(videoItem);
+        });
+    }
+
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('visible');
+}
+
+function closeAuthorProfileModal() {
+    const modal = DOM.authorProfileModal;
+    modal.classList.remove('visible');
+    modal.setAttribute('aria-hidden', 'true');
+}
 
 async function updateCrowdfundingStats() {
     try {

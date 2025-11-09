@@ -8,7 +8,6 @@ import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
 import { CommentsModal } from './comments-modal.js';
-import { AuthorProfile } from './author-profile.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -149,6 +148,22 @@ export const Handlers = {
   mainClickHandler: (e) => {
     const target = e.target;
     const actionTarget = target.closest("[data-action]");
+
+    if (target.closest('.author-tab')) {
+        UI.handleAuthorProfileTabClick(target.closest('.author-tab'));
+        return;
+    }
+
+    if (target.closest('.profileButton')) {
+        const swiper = State.get('swiper');
+        if (!swiper) return;
+
+        const slideElement = swiper.slides[swiper.activeIndex];
+        if (slideElement) {
+            UI.openAuthorProfileModal(slideElement.dataset.slideId);
+        }
+        return; // Zakończ, aby uniknąć dalszego przetwarzania
+    }
 
     // Handle comment-related actions first
     if (actionTarget && actionTarget.closest(".comment-item")) {
@@ -526,19 +541,8 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
-      case "open-author-modal": {
-        const swiper = State.get('swiper');
-        if (swiper) {
-            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-            if (slideData) {
-                AuthorProfile.open(slideData.author);
-            }
-        }
-        break;
-      }
-      case "close-author-modal":
-        AuthorProfile.close();
+      case "close-author-profile-modal":
+        UI.closeAuthorProfileModal();
         break;
       case "open-account-modal":
         if (loggedInMenu) loggedInMenu.classList.remove("active");

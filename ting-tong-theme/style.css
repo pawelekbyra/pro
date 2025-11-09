@@ -1588,6 +1588,7 @@ body,
   transition:
     opacity 0.3s ease-out,
     visibility 0.3s ease-out;
+  overflow: hidden;
 }
 .modal-overlay.visible {
   opacity: 1;
@@ -2141,6 +2142,9 @@ body,
   opacity: 0;
   visibility: hidden;
   transition: visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+/* === KOREKTA KLUCZOWA DLA DESKTOPU === */
+overflow: hidden;
 }
 
 .account-modal-overlay.visible {
@@ -2629,6 +2633,7 @@ body,
   align-items: center;
   justify-content: center;
   padding: 20px;
+overflow: hidden;
 }
 
 .crop-modal.visible {
@@ -2947,36 +2952,36 @@ body,
   opacity: 0.7;
 }
 .pwa-ios-body {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .pwa-ios-body p {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.75rem;
 }
 
 .pwa-ios-body p:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .pwa-ios-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 .pwa-ios-icon svg {
-    width: 20px;
-    height: 20px;
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 /* --- Desktop PWA Modal --- */
@@ -4760,6 +4765,7 @@ body,
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.4s ease, visibility 0.4s ease;
+  overflow: hidden;
 }
 
 #tippingModal, #infoModal {
@@ -5505,178 +5511,146 @@ main::-webkit-scrollbar {
     }
 }
 
-/* === Author Profile Modal Styles === */
+/* ============================================================================
+   --- NOWE: Author Profile Modal ---
+   ============================================================================ */
+
 .author-profile-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
-    background: transparent; /* Overlay is not needed for this type of modal */
-    z-index: 10200;
-    visibility: hidden;
-    transition: visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.author-profile-modal.visible {
-    visibility: visible;
-}
-
-.author-profile-modal .profile-content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: #121212;
+    height: 100%;
+    z-index: 10300;
+    background: #000;
     transform: translateX(100%);
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     flex-direction: column;
-    will-change: transform;
+    visibility: hidden;
 }
 
-.author-profile-modal.visible .profile-content {
+.author-profile-modal.visible {
     transform: translateX(0);
+    visibility: visible;
 }
 
-.author-profile-modal.is-hiding .profile-content {
-    transform: translateX(100%);
+.author-profile-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.author-profile-modal .profile-header {
-    height: var(--topbar-height);
+.author-profile-header {
     display: grid;
-    grid-template-columns: 60px 1fr 60px;
+    grid-template-columns: 50px 1fr 50px;
     align-items: center;
-    padding: 0;
+    padding: 0 10px;
+    height: var(--topbar-height);
     padding-top: var(--safe-area-top);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
 }
 
-.author-profile-modal .username-header {
+.author-profile-username {
     font-size: 16px;
     font-weight: 700;
     text-align: center;
-    grid-column: 2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.author-profile-modal .back-btn,
-.author-profile-modal .options-btn {
+.author-profile-back-btn,
+.author-profile-options-btn {
     background: none;
     border: none;
     color: #fff;
     cursor: pointer;
-    padding: 0;
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.1s ease-in-out, opacity 0.2s;
 }
 
-.author-profile-modal .back-btn {
-    grid-column: 1;
-    justify-self: start;
-    margin-left: 10px;
-}
-.author-profile-modal .options-btn {
-    grid-column: 3;
-    justify-self: end;
-    margin-right: 10px;
-}
-
-.author-profile-modal .back-btn:active,
-.author-profile-modal .options-btn:active {
-    transform: scale(0.9);
-}
-
-.author-profile-modal .back-btn svg,
-.author-profile-modal .options-btn svg {
+.author-profile-back-btn svg,
+.author-profile-options-btn svg {
     width: 24px;
     height: 24px;
-    fill: currentColor;
 }
 
-.author-profile-modal main {
+.author-profile-body {
     flex-grow: 1;
     overflow-y: auto;
     padding: 20px 16px;
 }
-
-.author-profile-modal main::-webkit-scrollbar {
-    display: none;
+.author-profile-body::-webkit-scrollbar {
+  display: none;
 }
 
-.author-profile-modal .info-section {
+.author-info-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
-.author-profile-modal .avatar-container .profile-avatar {
+.author-avatar-container {
     width: 90px;
     height: 90px;
+}
+
+.author-profile-avatar {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.author-profile-modal .stats-container {
+.author-stats {
     display: flex;
     justify-content: space-around;
-    gap: 20px;
-    width: 100%;
+    gap: 24px;
 }
 
-.author-profile-modal .stats-container .stat {
+.author-stats .stat-item {
     text-align: center;
 }
 
-.author-profile-modal .stats-container .stat-number {
+.stat-value {
     font-size: 18px;
     font-weight: 700;
     display: block;
 }
 
-.author-profile-modal .stats-container .stat-label {
+.stat-label {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.6);
 }
 
-.author-profile-modal .fullname {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 4px;
+.author-bio-section {
     text-align: center;
+    margin-bottom: 20px;
 }
 
-.author-profile-modal .bio {
+.author-bio-text {
     font-size: 14px;
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 16px;
-    white-space: pre-wrap;
-    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-.author-profile-modal .profile-actions {
+.author-actions {
     display: flex;
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     justify-content: center;
 }
 
-.author-profile-modal .profile-actions .follow-btn {
+.subscribe-btn {
     flex-grow: 1;
-    max-width: 200px;
+    max-width: 220px;
     background-color: var(--accent-color);
     color: #fff;
     border: none;
@@ -5687,7 +5661,7 @@ main::-webkit-scrollbar {
     cursor: pointer;
 }
 
-.author-profile-modal .profile-actions .social-btn {
+.dm-btn {
     padding: 10px;
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
@@ -5696,41 +5670,32 @@ main::-webkit-scrollbar {
     align-items: center;
     justify-content: center;
 }
-.author-profile-modal .profile-actions .social-btn svg {
+
+.dm-btn svg {
     width: 24px;
     height: 24px;
-    fill: #fff;
-    stroke: none;
-}
-.author-profile-modal .profile-actions .social-btn.instagram svg {
-    stroke: #fff;
-    stroke-width: 2px;
-    fill: none;
-}
-.author-profile-modal .profile-actions .social-btn.youtube svg {
-    fill: #fff;
-    stroke: none;
 }
 
-.author-profile-modal .tabs {
+.author-tabs {
     display: flex;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.author-profile-modal .tabs .tab {
+.author-tab {
     flex: 1;
     padding: 14px;
-    text-align: center;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     position: relative;
-    color: rgba(255, 255, 255, 0.6);
 }
 
-.author-profile-modal .tabs .tab.active {
+.author-tab.active {
     color: #fff;
 }
 
-.author-profile-modal .tabs .tab.active::after {
+.author-tab.active::after {
     content: "";
     position: absolute;
     bottom: -1px;
@@ -5740,40 +5705,39 @@ main::-webkit-scrollbar {
     background-color: #fff;
 }
 
-.author-profile-modal .tabs .tab svg {
+.author-tab svg {
     width: 28px;
     height: 28px;
     fill: currentColor;
 }
-.author-profile-modal .tabs .tab[data-tab-content="liked-grid"] svg {
+
+.author-tab[data-tab="liked"] svg {
     stroke: currentColor;
-    stroke-width: 2px;
     fill: none;
-}
-.author-profile-modal .tabs .tab[data-tab-content="reposts-grid"] svg {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2px;
 }
 
-.author-profile-modal .video-gallery {
+.author-tab-content {
     display: none;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
     padding-top: 2px;
 }
 
-.author-profile-modal .video-gallery.active {
+.author-tab-content.active {
+    display: block;
+}
+
+#videos-grid {
     display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
 }
 
-.author-profile-modal .video-thumbnail {
+.author-video-item {
     position: relative;
-    padding-bottom: 140%;
-    background-color: #333;
+    padding-bottom: 140%; /* Aspect ratio for vertical videos */
+    background-color: #222;
 }
 
-.author-profile-modal .video-thumbnail img {
+.author-video-item img {
     position: absolute;
     top: 0;
     left: 0;
@@ -5782,7 +5746,7 @@ main::-webkit-scrollbar {
     object-fit: cover;
 }
 
-.author-profile-modal .video-views {
+.video-view-count {
     position: absolute;
     bottom: 8px;
     left: 8px;
@@ -5794,11 +5758,29 @@ main::-webkit-scrollbar {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.author-profile-modal .video-views svg {
+.video-view-count svg {
     width: 16px;
     height: 16px;
     margin-right: 4px;
     fill: white;
+}
+
+#liked-grid .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#liked-grid .empty-state svg {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+#liked-grid .empty-state p {
+    font-size: 15px;
+    font-weight: 500;
 }
 
 .modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
