@@ -3683,6 +3683,7 @@ overflow: hidden;
     right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
     border-left: 1px solid #333;
     border-right: 1px solid #333;
+    animation: cloud-wave 6s infinite ease-in-out;
     overflow: hidden;
   }
 
@@ -3786,6 +3787,7 @@ overflow: hidden;
     right: 0;
     border-left: 1px solid #333;
     border-right: 1px solid #333;
+    animation: cloud-wave 6s infinite ease-in-out;
     background: #000 !important;
   }
 }
