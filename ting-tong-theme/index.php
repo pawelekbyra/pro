@@ -69,7 +69,10 @@ get_header();
 
                 <!-- Krok 3: Płatność Stripe -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Wybierz metodę napiwkowania</p>
+                    <div class="elegant-modal-step-header">
+                        <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Wybierz metodę napiwkowania</p>
+                        <span id="tippingSummaryAmount" class="tipping-summary-amount"></span>
+                    </div>
                     <div id="payment-element">
                         <!-- Stripe Payment Element will be inserted here -->
                     </div>

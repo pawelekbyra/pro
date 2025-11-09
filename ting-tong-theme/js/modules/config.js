@@ -210,6 +210,10 @@ export const Config = {
         pl: "Powrót",
         en: "Back"
       },
+      tippingSummaryLabel: {
+          pl: "Kwota napiwku:",
+          en: "Tip amount:"
+      },
       noComments: "Brak komentarzy. Bądź pierwszy!",
       commentSortTriggerText: "Sortuj według: ",
       commentSortNewest: "Fresz",
