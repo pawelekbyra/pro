@@ -271,7 +271,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-account-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-author-profile" data-translate-aria-label="authorProfileAriaLabel" aria-label="Profil autora"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -348,6 +348,73 @@ get_header();
     <div id="alertBox" role="status" aria-live="polite">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:18px; height:18px; stroke:white; stroke-width:2; fill:none; margin-right:6px;"><path d="M6 10V8a6 6 0 1 1 12 0v2" /><rect x="4" y="10" width="16" height="10" rx="2" ry="2" /></svg>
         <span id="alertText"></span>
+    </div>
+</div>
+
+<!-- Author Profile Modal -->
+<div id="author-profile-modal" class="profile-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="author-profile-title" aria-hidden="true">
+    <div class="profile-modal-content">
+        <header class="profile-header">
+            <button class="back-btn" data-action="close-author-profile" aria-label="Close profile">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>
+            </button>
+            <h2 id="author-profile-title" class="username-header"></h2>
+            <button class="options-btn" aria-label="Options">
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+        </header>
+        <main>
+            <section class="info-section">
+                <div class="avatar-container">
+                    <img src="" alt="User Avatar" class="profile-avatar">
+                </div>
+                <div class="stats-container">
+                    <div class="stat">
+                        <span class="stat-number following-count">0</span>
+                        <span class="stat-label" data-translate-key="profileFollowing">Obserwuje</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number followers-count">0</span>
+                        <span class="stat-label" data-translate-key="profileFollowers">Obserwujący</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number likes-count">0</span>
+                        <span class="stat-label" data-translate-key="profileLikes">Polubienia</span>
+                    </div>
+                </div>
+            </section>
+            <p class="fullname"></p>
+            <p class="bio"></p>
+            <div class="profile-actions">
+                <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
+                <button class="social-btn instagram" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </button>
+                 <button class="social-btn youtube" aria-label="YouTube">
+                    <svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                </button>
+            </div>
+            <div class="tabs">
+                <div class="tab active" data-tab-content="videos-grid">
+                    <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"></path></svg>
+                </div>
+                <div class="tab" data-tab-content="reposts-grid">
+                    <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                </div>
+                <div class="tab" data-tab-content="liked-grid">
+                     <svg viewBox="0 0 24 24"><path d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>
+                </div>
+            </div>
+            <div id="videos-grid" class="video-gallery active">
+                <!-- Video thumbnails will be inserted here -->
+            </div>
+            <div id="reposts-grid" class="video-gallery">
+                <!-- Reposted video thumbnails will be inserted here -->
+            </div>
+            <div id="liked-grid" class="video-gallery">
+                <!-- Liked video thumbnails will be inserted here -->
+            </div>
+        </main>
     </div>
 </div>
 

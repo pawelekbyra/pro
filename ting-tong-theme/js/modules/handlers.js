@@ -525,9 +525,19 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
-      case "open-account-modal":
-        if (loggedInMenu) loggedInMenu.classList.remove("active");
-        AccountPanel.openAccountModal();
+      case "open-author-profile":
+        const swiper = State.get('swiper');
+        if (swiper) {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            const slideId = activeSlide.dataset.slideId;
+            const slideData = slidesData.find((s) => s.id === slideId);
+            if (slideData) {
+                UI.openAuthorProfileModal(slideData);
+            }
+        }
+        break;
+      case "close-author-profile":
+        UI.closeAuthorProfileModal();
         break;
       case "close-modal":
         const modal = actionTarget.closest(".modal-overlay");
