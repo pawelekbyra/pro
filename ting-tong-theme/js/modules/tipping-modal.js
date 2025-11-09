@@ -75,6 +75,7 @@ function cacheDOM() {
         // Error containers
         step0Error: document.getElementById('tippingStep0Error'),
         step1Error: document.getElementById('tippingStep1Error'),
+        tippingSummaryAmount: document.getElementById('tippingSummaryAmount'),
     };
 }
 
@@ -162,6 +163,17 @@ function updateStepDisplay(isShowingTerms = false) {
 
     // Korekta progresu - totalSteps to 4 (0-3), ale kroki są 0, 1, 2, 3
     dom.progressBar.style.width = `${(currentStep / (totalSteps - 1)) * 100}%`;
+
+    // Display tip amount summary on the payment step
+    if (isPaymentStep && dom.tippingSummaryAmount) {
+        const amount = formData.amount || 0;
+        const currency = formData.currency || 'EUR';
+        const label = getTranslatedText('tippingSummaryLabel', 'Tip amount:');
+        dom.tippingSummaryAmount.textContent = `${label} ${amount.toFixed(2)} ${currency.toUpperCase()}`;
+        dom.tippingSummaryAmount.style.display = 'block';
+    } else if (dom.tippingSummaryAmount) {
+        dom.tippingSummaryAmount.style.display = 'none';
+    }
 }
 
 async function handleNextStep() {

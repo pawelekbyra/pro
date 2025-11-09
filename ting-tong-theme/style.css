@@ -5544,6 +5544,31 @@ main::-webkit-scrollbar {
     }
 }
 
+/* New styles for tipping summary */
+.elegant-modal-step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.elegant-modal-step-header .elegant-modal-step-description {
+    margin-bottom: 0;
+    text-align: left;
+    flex-grow: 1;
+}
+
+.tipping-summary-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f0f0f0;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
 /* --- Nowe klasy dla FIX: Wysokość modala --- */
 .elegant-modal-content.fixed-height-transition {
     transition: height 0.3s ease-out;
