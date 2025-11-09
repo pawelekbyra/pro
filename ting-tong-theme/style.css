@@ -2167,13 +2167,6 @@ overflow: hidden;
   transform: translateX(0);
 }
 
-.account-modal-overlay.is-hiding .account-modal-content {
-  transform: translateX(-100%);
-}
-
-.account-modal-overlay.is-hiding .account-modal-content {
-  transform: translateX(-100%);
-}
 
 .account-header {
   position: relative;
@@ -5618,43 +5611,18 @@ main::-webkit-scrollbar {
     text-overflow: ellipsis;
 }
 
-#author-profile-modal .back-btn,
-#author-profile-modal .options-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    padding: 0;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.1s ease-in-out, opacity 0.2s;
-}
-
-#author-profile-modal .back-btn {
-    grid-column: 1;
-    justify-self: start;
-    margin-left: 10px;
-}
-
-#author-profile-modal .options-btn {
+#author-profile-modal .modal-close-btn {
     grid-column: 3;
     justify-self: end;
     margin-right: 10px;
+    font-size: 28px;
+    font-weight: 300;
 }
 
-#author-profile-modal .back-btn:active,
-#author-profile-modal .options-btn:active {
-    transform: scale(0.9);
-}
-
-#author-profile-modal .back-btn svg,
-#author-profile-modal .options-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
+#author-profile-modal .options-btn {
+    grid-column: 1; /* Zmieniamy na 1, aby był po lewej */
+    justify-self: start;
+    margin-left: 10px;
 }
 
 #author-profile-modal main {
