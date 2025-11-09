@@ -210,6 +210,13 @@ function openAccountModal() {
                 console.log('Loading fresh user data for account panel');
                 loadInitialProfileData();
             }
+        },
+        // NOWE: Dodano callback onClose do zamykania menu
+        onClose: () => {
+            const loggedInMenu = document.querySelector(".logged-in-menu");
+            if (loggedInMenu) {
+                loggedInMenu.classList.remove("active");
+            }
         }
     });
 }
@@ -217,13 +224,6 @@ function openAccountModal() {
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
     if (!modal) return;
-
-    // Dodano logikę do ukrywania menu
-    const loggedInMenu = document.querySelector(".logged-in-menu");
-    if (loggedInMenu) {
-        loggedInMenu.classList.remove("active");
-    }
-
     // Użycie centralnej funkcji UI.closeModal.
     UI.closeModal(modal);
 }
