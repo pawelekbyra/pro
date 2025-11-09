@@ -5865,15 +5865,21 @@ main::-webkit-scrollbar {
     animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
+.modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
+    animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.modal-content.slideInRight, .elegant-modal-content.slideInRight, .profile-modal-content.slideInRight {
+    animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 /* Modal Transition Animations */
 @keyframes slideOutLeft {
     from {
         transform: translateX(0);
-        opacity: 1;
     }
     to {
         transform: translateX(-100%);
-        opacity: 1;
     }
 }
 
@@ -5889,11 +5895,9 @@ main::-webkit-scrollbar {
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
-        opacity: 1;
     }
     to {
         transform: translateX(0);
-        opacity: 1;
     }
 }
 
