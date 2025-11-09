@@ -355,8 +355,8 @@ get_header();
 <div id="author-profile-modal" class="profile-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="author-profile-title" aria-hidden="true">
     <div class="profile-modal-content">
         <header class="profile-header">
-            <button class="back-btn" data-action="close-author-profile" aria-label="Close profile">
-                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg>
+            <button class="modal-close-btn" data-action="close-author-profile" aria-label="Close profile">
+                &times;
             </button>
             <h2 id="author-profile-title" class="username-header"></h2>
             <button class="options-btn" aria-label="Options">
@@ -384,7 +384,7 @@ get_header();
                 </div>
             </section>
             <p class="fullname"></p>
-            <p class="bio"></p>
+            <p class="bio">Paweł Polutek, wieloletni pasjonat-odkrywca zaginionych światów i niestrudzony badacz alternatywnych rzeczywistości. W swoich podróżach po meandrach wyobraźni, odkrywa historie, które inni boją się opowiedzieć, tworząc opowieści, które na długo zapadają w pamięć. Jego misją jest nie tylko dokumentowanie nieznanego, ale także inspirowanie innych do przekraczania granic własnej percepcji i odkrywania magii w codzienności.</p>
             <div class="profile-actions">
                 <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
                 <button class="social-btn instagram" aria-label="Instagram">
