@@ -78,6 +78,38 @@ function cacheDOM() {
     };
 }
 
+function _forceModalMinHeight(targetHeight) {
+    const modalBody = dom.modal.querySelector('.elegant-modal-body');
+    const modalContent = dom.modal.querySelector('.elegant-modal-content');
+
+    if (!modalBody || !modalContent) return;
+
+    // Ustawia zmienną CSS na korzeniu modala
+    modalContent.style.setProperty('--tipping-min-height', `${targetHeight}px`);
+
+    // Użyj transition, aby przejście było płynne
+    modalBody.classList.add('min-height-transition');
+
+    // Wymuszaj min-height
+    modalBody.classList.add('force-min-height');
+}
+
+function _clearModalMinHeight() {
+    const modalBody = dom.modal.querySelector('.elegant-modal-body');
+    const modalContent = dom.modal.querySelector('.elegant-modal-content');
+
+    if (!modalBody || !modalContent) return;
+
+    // Usuń wymuszenie
+    modalBody.classList.remove('force-min-height');
+
+    // Usuń zmienną CSS po chwili, aby przejście było widoczne
+    setTimeout(() => {
+        modalContent.style.removeProperty('--tipping-min-height');
+        modalBody.classList.remove('min-height-transition');
+    }, 400); // 400ms na płynne przejście
+}
+
 function showLocalError(step, message) {
     hideLocalErrors();
     const errorContainer = dom[`step${step}Error`];
@@ -153,9 +185,16 @@ async function handleNextStep() {
         // Re-validate specifically for step 1 before proceeding
         if (!validateStep(1)) return;
 
+        // KROK 1: Zdobądź aktualną wysokość Kroku 1
+        const step1El = dom.steps[1];
+        if (step1El) {
+            const currentHeight = step1El.offsetHeight;
+            _forceModalMinHeight(currentHeight);
+        }
+
         dom.nextBtn.disabled = true;
         const originalText = dom.nextBtn.textContent;
-        dom.nextBtn.innerHTML = `<span class="loading-spinner"></span>`;
+        dom.nextBtn.innerHTML = ``;
 
         // --- NOWA LOGIKA: MAPOWANIE JĘZYKA NA KOD KRAJU ---
         const appLang = State.get('currentLang');
@@ -169,6 +208,8 @@ async function handleNextStep() {
 
 function handlePrevStep() {
     hideLocalErrors();
+    _clearModalMinHeight(); // <-- DODANE: Wyczyść min-height przy cofaniu
+
     if (currentStep > 0) {
         if (currentStep === 2) { // Specifically when moving back from the payment step
             if (paymentElement) {
@@ -296,9 +337,13 @@ async function initializePaymentElement(originalText, countryCodeHint) { // DODA
         paymentElement.mount(dom.paymentElementContainer);
 
         paymentElement.on('ready', () => {
+            // KROK 2: Wyczyść wymuszoną wysokość, gdy element Stripe jest gotowy
+            _clearModalMinHeight();
+
             // Przełącz widok DOPIERO gdy element jest gotowy
             currentStep = 2;
             updateStepDisplay();
+
             // Pokaż element i przywróć przycisk
             dom.paymentElementContainer.classList.add('ready');
             dom.submitBtn.disabled = false;

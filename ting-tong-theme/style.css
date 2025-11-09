@@ -844,18 +844,18 @@ body,
   transform: scale(0.9);
 }
 
-.info-button svg {
-    animation: pulse-icon 2s infinite ease-in-out;
+.pulsing-info-icon {
+    animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-@keyframes pulse-icon {
+@keyframes pulse {
     0%, 100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+        opacity: 1;
     }
     50% {
-        transform: scale(1.15);
-        filter: drop-shadow(0 0 18px rgba(255, 215, 0, 1));
+        transform: scale(1.1);
+        opacity: 0.7;
     }
 }
 
@@ -5542,6 +5542,15 @@ main::-webkit-scrollbar {
     to {
         transform: translateX(0);
     }
+}
+
+/* --- Nowe klasy dla FIX: Wysokość modala --- */
+.elegant-modal-body.min-height-transition {
+transition: min-height 0.3s ease-out; /* Dodaje płynne przejście */
+}
+
+.elegant-modal-body.force-min-height {
+min-height: var(--tipping-min-height, auto);
 }
 
 @keyframes cloud-wave {
