@@ -177,7 +177,7 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    const content = modal.querySelector('.modal-content, .elegant-modal-content');
+    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content');
 
     // Wyczyść stare klasy animacji
     if (content) {
@@ -276,7 +276,7 @@ function closeModal(modal, options = {}) {
     modal.classList.add("is-hiding");
 
     const animationClass = options.animationClass;
-    const content = modal.querySelector('.modal-content, .elegant-modal-content');
+    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content');
 
     const cleanup = () => {
         modal.style.display = 'none';
