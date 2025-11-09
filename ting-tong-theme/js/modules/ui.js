@@ -65,7 +65,61 @@ function initDOMCache() {
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
   DOM.welcomeModal = document.getElementById("welcome-modal");
   DOM.infoModal = document.getElementById("infoModal");
+  DOM.authorProfileModal = document.getElementById("author-profile-modal");
 }
+
+function openAuthorProfileModal(slideData) {
+    const modal = DOM.authorProfileModal;
+    if (!modal) return;
+
+    // Populate data
+    const author = slideData.author;
+    modal.querySelector('.username-header').textContent = author.name;
+    modal.querySelector('.profile-avatar').src = author.avatar;
+    modal.querySelector('.fullname').textContent = author.name; // Assuming fullname is the same as name
+    modal.querySelector('.bio').textContent = author.bio || ''; // Assuming bio is available
+
+    // Mockup stats for now
+    modal.querySelector('.following-count').textContent = '123';
+    modal.querySelector('.followers-count').textContent = '45.6K';
+    modal.querySelector('.likes-count').textContent = '1.2M';
+
+    // Populate video grid (mockup)
+    const videosGrid = modal.querySelector('#videos-grid');
+    videosGrid.innerHTML = ''; // Clear previous content
+    for (let i = 0; i < 12; i++) {
+        const views = `${Math.floor(Math.random() * 10) + 1}.${Math.floor(Math.random() * 10)}K`;
+        const thumbnailUrl = `https://picsum.photos/200/300?random=${i}`; // Placeholder images
+        const videoThumbnail = `
+            <div class="video-thumbnail">
+                <img src="${thumbnailUrl}" alt="Video thumbnail">
+                <div class="video-views">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                    <span>${views}</span>
+                </div>
+            </div>
+        `;
+        videosGrid.innerHTML += videoThumbnail;
+    }
+
+    // Show modal
+    modal.classList.add('visible');
+}
+
+function closeAuthorProfileModal() {
+    const modal = DOM.authorProfileModal;
+    if (!modal || !modal.classList.contains('visible')) return;
+
+    modal.classList.add('is-hiding');
+
+    const content = modal.querySelector('.profile-modal-content');
+    const cleanup = () => {
+        modal.classList.remove('visible', 'is-hiding');
+        content.removeEventListener('transitionend', cleanup);
+    };
+    content.addEventListener('transitionend', cleanup, { once: true });
+}
+
 function showToast(message, isError = false) {
     showAlert(message, isError);
 }
@@ -1091,6 +1145,8 @@ export const UI = {
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
   updateCrowdfundingStats,
+  openAuthorProfileModal,
+  closeAuthorProfileModal,
 };
 
 async function updateCrowdfundingStats() {

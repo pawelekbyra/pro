@@ -5511,6 +5511,308 @@ main::-webkit-scrollbar {
     }
 }
 
+/* ============================================================================
+   --- AUTHOR PROFILE MODAL STYLES ---
+   ============================================================================ */
+
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10300; /* Above other modals */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  overflow: hidden;
+}
+
+.profile-modal-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.profile-modal-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: #1C1C1E;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.profile-modal-overlay.visible .profile-modal-content {
+  transform: translateX(0);
+}
+
+.profile-modal-overlay.is-hiding .profile-modal-content {
+  transform: translateX(100%);
+}
+
+#author-profile-modal .profile-header {
+    height: var(--topbar-height);
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    align-items: center;
+    padding: 0;
+    padding-top: var(--safe-area-top);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+#author-profile-modal .username-header {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    grid-column: 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#author-profile-modal .back-btn,
+#author-profile-modal .options-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease-in-out, opacity 0.2s;
+}
+
+#author-profile-modal .back-btn {
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 10px;
+}
+
+#author-profile-modal .options-btn {
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 10px;
+}
+
+#author-profile-modal .back-btn:active,
+#author-profile-modal .options-btn:active {
+    transform: scale(0.9);
+}
+
+#author-profile-modal .back-btn svg,
+#author-profile-modal .options-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+#author-profile-modal main {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+}
+
+#author-profile-modal main::-webkit-scrollbar {
+    display: none;
+}
+
+#author-profile-modal .info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+#author-profile-modal .avatar-container .profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#author-profile-modal .stats-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    width: 100%;
+}
+
+#author-profile-modal .stats-container .stat {
+    text-align: center;
+}
+
+#author-profile-modal .stats-container .stat-number {
+    font-size: 18px;
+    font-weight: 700;
+    display: block;
+}
+
+#author-profile-modal .stats-container .stat-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#author-profile-modal .fullname {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+#author-profile-modal .bio {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+    text-align: center;
+}
+
+#author-profile-modal .profile-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+#author-profile-modal .profile-actions .follow-btn {
+    flex-grow: 1;
+    max-width: 200px;
+    background-color: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#author-profile-modal .profile-actions .social-btn {
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#author-profile-modal .profile-actions .social-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+    stroke: none;
+}
+
+#author-profile-modal .profile-actions .social-btn.instagram svg {
+    stroke: #fff;
+    stroke-width: 2px;
+    fill: none;
+}
+
+#author-profile-modal .tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#author-profile-modal .tabs .tab {
+    flex: 1;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#author-profile-modal .tabs .tab.active {
+    color: #fff;
+}
+
+#author-profile-modal .tabs .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #fff;
+}
+
+#author-profile-modal .tabs .tab svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+}
+#author-profile-modal .tabs .tab[data-tab-content="liked-grid"] svg {
+    stroke: currentColor;
+    stroke-width: 2px;
+    fill: none;
+}
+#author-profile-modal .tabs .tab[data-tab-content="reposts-grid"] svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2px;
+}
+
+#author-profile-modal .video-gallery {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding-top: 2px;
+}
+
+#author-profile-modal .video-gallery.active {
+    display: grid;
+}
+
+#author-profile-modal .video-thumbnail {
+    position: relative;
+    padding-bottom: 140%;
+    background-color: #333;
+}
+
+#author-profile-modal .video-thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#author-profile-modal .video-views {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+#author-profile-modal .video-views svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    fill: white;
+}
+
 .modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
     animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
