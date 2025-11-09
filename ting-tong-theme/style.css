@@ -3773,7 +3773,6 @@ overflow: hidden;
     border-left: 1px solid #333;
     border-right: 1px solid #333;
     animation: cloud-wave 6s infinite ease-in-out;
-    background: transparent !important;
   }
 }
 
