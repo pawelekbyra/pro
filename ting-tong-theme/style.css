@@ -3590,6 +3590,21 @@ overflow: hidden;
   }
 }
 
+@keyframes slideOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9) rotateX(-10deg);
+  }
+}
+
+.welcome-modal.is-hiding .welcome-modal-content {
+  animation: slideOutDown 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
 
 /* Animacja pojawiania się overlay */
 @keyframes errorFadeIn {
@@ -3668,7 +3683,6 @@ overflow: hidden;
     right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
     border-left: 1px solid #333;
     border-right: 1px solid #333;
-    animation: cloud-wave 6s infinite ease-in-out;
     overflow: hidden;
   }
 
@@ -3772,7 +3786,6 @@ overflow: hidden;
     right: 0;
     border-left: 1px solid #333;
     border-right: 1px solid #333;
-    animation: cloud-wave 6s infinite ease-in-out;
     background: #000 !important;
   }
 }
@@ -5856,6 +5869,15 @@ main::-webkit-scrollbar {
     to {
         transform: translateX(-100%);
         opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
     }
 }
 

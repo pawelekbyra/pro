@@ -308,6 +308,13 @@ function tt_comment_likes_user_has( $comment_id, $user_id ) {
  * @return array
  */
 function tt_get_simulated_posts() {
+    $author_pawel = [
+        'name'        => 'Paweł Polutek',
+        'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
+        'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
+        'is_vip'      => true,
+    ];
+
     return [
         [
             'post_id'      => 1,
@@ -315,12 +322,7 @@ function tt_get_simulated_posts() {
             'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
             'access'       => 'public',
             'comments'     => 10,
-            'author'       => [
-                'name'        => 'Big Buck Bunny',
-                'description' => 'Oficjalny profil Big Buck Bunny. Zobaczcie moje przygody!',
-                'avatar'      => 'https://i.pravatar.cc/100?u=bunny',
-                'is_vip'      => false,
-            ],
+            'author'       => $author_pawel,
             'post_content' => 'Królik w akcji!',
         ],
         [
@@ -329,12 +331,7 @@ function tt_get_simulated_posts() {
             'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
             'access'       => 'secret',
             'comments'     => 20,
-            'author'       => [
-                'name'        => 'Elephants Dream',
-                'description' => 'Twórcy filmu "Elephants Dream". Dzielimy się kulisami naszej pracy.',
-                'avatar'      => 'https://i.pravatar.cc/100?u=elephant',
-                'is_vip'      => false,
-            ],
+            'author'       => $author_pawel,
             'post_content' => 'Sen słonia, tylko dla zalogowanych.',
         ],
         [
@@ -343,12 +340,7 @@ function tt_get_simulated_posts() {
             'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
             'access'       => 'pwa-secret',
             'comments'     => 30,
-            'author'       => [
-                'name'        => 'For Bigger Blazes',
-                'description' => 'Profil poświęcony filmom z efektami specjalnymi. Tylko dla fanów PWA!',
-                'avatar'      => 'https://i.pravatar.cc/100?u=blaze',
-                'is_vip'      => false,
-            ],
+            'author'       => $author_pawel,
             'post_content' => 'Tajemniczy film tylko dla użytkowników PWA.',
         ],
         [
@@ -357,12 +349,7 @@ function tt_get_simulated_posts() {
             'video_url'    => 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
             'access'       => 'public',
             'comments'     => 15,
-            'author'       => [
-                'name'        => 'Paweł Polutek',
-                'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
-                'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
-                'is_vip'      => true,
-            ],
+            'author'       => $author_pawel,
             'post_content' => 'Jedna z moich ulubionych piosenek w moim wykonaniu. Mam nadzieję, że się Wam spodoba!',
         ],
     ];

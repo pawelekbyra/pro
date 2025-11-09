@@ -74,6 +74,7 @@ function openAuthorProfileModal(slideData) {
 
     // Używamy centralnej funkcji openModal, a logikę populacji przenosimy do onOpen.
     openModal(modal, {
+        animationClass: 'slideInRight',
         onOpen: () => {
             // Populate data
             const author = slideData.author;
@@ -111,8 +112,7 @@ function openAuthorProfileModal(slideData) {
 function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
-    // Używamy centralnej funkcji closeModal.
-    closeModal(modal);
+    closeModal(modal, { animationClass: 'slideOutRight' });
 }
 
 function showToast(message, isError = false) {
@@ -317,18 +317,14 @@ function closeModal(modal, options = {}) {
     };
 
     if (animationClass && content) {
-        // Wymuś opacity na 1 na czas animacji slideOut
         content.style.opacity = '1';
         content.classList.add(animationClass);
-        content._animationEndHandler = () => {
-            cleanup();
-        };
-        content.addEventListener('animationend', content._animationEndHandler, { once: true });
+        content.addEventListener('animationend', cleanup, { once: true });
     } else {
         modal.classList.remove('visible');
-        // Standardowe zamykanie z przejściem opacity
+        const transitionDuration = parseFloat(getComputedStyle(modal).transitionDuration) * 1000;
         modal.addEventListener('transitionend', cleanup, { once: true });
-        setTimeout(cleanup, 400); // Fallback
+        setTimeout(cleanup, transitionDuration + 50);
     }
 }
 
@@ -1112,6 +1108,37 @@ function initGlobalPanels() {
   }
 }
 
+function closeWelcomeModal() {
+    const modal = DOM.welcomeModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const content = modal.querySelector('.welcome-modal-content');
+
+    const cleanup = () => {
+        if(content) content.removeEventListener('animationend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            const lastFocused = State.get('lastFocusedElement');
+            if(lastFocused) lastFocused.focus();
+        }
+    };
+
+    if(content){
+        content.addEventListener('animationend', cleanup, { once: true });
+        setTimeout(cleanup, 700); // Fallback
+    } else {
+        closeModal(modal); // Fallback for simple structure
+    }
+}
+
 export const UI = {
   initDOMCache,
   DOM,
@@ -1139,6 +1166,7 @@ export const UI = {
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
+  closeWelcomeModal,
   updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,

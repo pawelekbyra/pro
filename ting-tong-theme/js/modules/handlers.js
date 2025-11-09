@@ -548,7 +548,7 @@ export const Handlers = {
         }
         break;
       case "close-welcome-modal":
-        UI.closeModal(UI.DOM.welcomeModal);
+        UI.closeWelcomeModal();
         break;
       case "open-account-modal":
         AccountPanel.openAccountModal();
