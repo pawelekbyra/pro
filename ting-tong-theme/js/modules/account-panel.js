@@ -206,8 +206,7 @@ function openAccountModal() {
 
     // Użycie centralnego mechanizmu UI.openModal, ale bez onClose
     UI.openModal(modal, {
-        // Logika ładowania danych zostaje przeniesiona do callbacka onOpen,
-        // co gwarantuje, że dane są pobierane i wstawiane w momencie wyświetlenia.
+        animationClass: 'slideInRight',
         onOpen: () => {
             const currentUser = State.get('currentUser');
             if (currentUser && currentUser.user_id) {
@@ -224,8 +223,7 @@ function openAccountModal() {
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
     if (!modal) return;
-    // Użycie centralnej funkcji UI.closeModal.
-    UI.closeModal(modal);
+    UI.closeModal(modal, { animationClass: 'slideOutLeft' });
 }
 
 // Tab switching

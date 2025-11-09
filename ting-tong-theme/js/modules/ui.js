@@ -112,7 +112,7 @@ function openAuthorProfileModal(slideData) {
 function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
-    closeModal(modal, { animationClass: 'slideOutRight' });
+    closeModal(modal, { animationClass: 'slideOutLeft' });
 }
 
 function showToast(message, isError = false) {
@@ -1108,37 +1108,6 @@ function initGlobalPanels() {
   }
 }
 
-function closeWelcomeModal() {
-    const modal = DOM.welcomeModal;
-    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
-        return;
-    }
-
-    modal.classList.add('is-hiding');
-    modal.setAttribute('aria-hidden', 'true');
-
-    const content = modal.querySelector('.welcome-modal-content');
-
-    const cleanup = () => {
-        if(content) content.removeEventListener('animationend', cleanup);
-        modal.classList.remove('visible', 'is-hiding');
-        activeModals.delete(modal);
-
-        if (activeModals.size === 0) {
-            DOM.container.removeAttribute('aria-hidden');
-            const lastFocused = State.get('lastFocusedElement');
-            if(lastFocused) lastFocused.focus();
-        }
-    };
-
-    if(content){
-        content.addEventListener('animationend', cleanup, { once: true });
-        setTimeout(cleanup, 700); // Fallback
-    } else {
-        closeModal(modal); // Fallback for simple structure
-    }
-}
-
 export const UI = {
   initDOMCache,
   DOM,
@@ -1166,7 +1135,6 @@ export const UI = {
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
   closeCommentsModal,
-  closeWelcomeModal,
   updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,

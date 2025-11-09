@@ -2157,18 +2157,11 @@ overflow: hidden;
   width: 100%;
   height: 100vh;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
-}
 
-.account-modal-overlay.visible .account-modal-content {
-  transform: translateX(0);
-}
-
-.account-modal-overlay.is-hiding .account-modal-content {
   transform: translateX(-100%);
+  transition: none;
 }
 
 .account-header {
@@ -3588,21 +3581,6 @@ overflow: hidden;
     opacity: 1;
     transform: translateY(0) scale(1) rotateX(0);
   }
-}
-
-@keyframes slideOutDown {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1) rotateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(50px) scale(0.9) rotateX(-10deg);
-  }
-}
-
-.welcome-modal.is-hiding .welcome-modal-content {
-  animation: slideOutDown 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
 }
 
 
@@ -5862,19 +5840,28 @@ main::-webkit-scrollbar {
     animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-.profile-modal-content.slideOutRight {
-    animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+.profile-modal-content.slideOutRight, .profile-modal-content.slideOutLeft {
+    animation: slideOutLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 /* Modal Transition Animations */
 @keyframes slideOutLeft {
     from {
         transform: translateX(0);
-        opacity: 1;
+        opacity: 1; /* Wymuś nieprzezroczystość */
     }
     to {
         transform: translateX(-100%);
-        opacity: 1;
+        opacity: 1; /* Wymuś nieprzezroczystość */
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
     }
 }
 
