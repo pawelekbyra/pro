@@ -78,36 +78,28 @@ function cacheDOM() {
     };
 }
 
-function _forceModalMinHeight(targetHeight) {
-    const modalBody = dom.modal.querySelector('.elegant-modal-body');
+function _setModalFixedSize() {
     const modalContent = dom.modal.querySelector('.elegant-modal-content');
+    if (!modalContent) return;
 
-    if (!modalBody || !modalContent) return;
+    const currentHeight = modalContent.offsetHeight;
+    modalContent.style.setProperty('--tipping-fixed-height', `${currentHeight}px`);
 
-    // Ustawia zmienną CSS na korzeniu modala
-    modalContent.style.setProperty('--tipping-min-height', `${targetHeight}px`);
-
-    // Użyj transition, aby przejście było płynne
-    modalBody.classList.add('min-height-transition');
-
-    // Wymuszaj min-height
-    modalBody.classList.add('force-min-height');
+    modalContent.classList.add('fixed-height-transition');
+    modalContent.classList.add('force-fixed-height');
 }
 
-function _clearModalMinHeight() {
-    const modalBody = dom.modal.querySelector('.elegant-modal-body');
+function _clearModalFixedSize() {
     const modalContent = dom.modal.querySelector('.elegant-modal-content');
+    if (!modalContent) return;
 
-    if (!modalBody || !modalContent) return;
+    modalContent.classList.remove('force-fixed-height');
 
-    // Usuń wymuszenie
-    modalBody.classList.remove('force-min-height');
-
-    // Usuń zmienną CSS po chwili, aby przejście było widoczne
+    // Usuń zmienną po zakończeniu przejścia
     setTimeout(() => {
-        modalContent.style.removeProperty('--tipping-min-height');
-        modalBody.classList.remove('min-height-transition');
-    }, 400); // 400ms na płynne przejście
+        modalContent.style.removeProperty('--tipping-fixed-height');
+        modalContent.classList.remove('fixed-height-transition');
+    }, 300); // Czas musi pasować do transition w CSS
 }
 
 function showLocalError(step, message) {
@@ -182,42 +174,32 @@ async function handleNextStep() {
         currentStep++;
         updateStepDisplay();
     } else if (currentStep === 1) {
-        // Re-validate specifically for step 1 before proceeding
         if (!validateStep(1)) return;
 
-        // KROK 1: Zdobądź aktualną wysokość Kroku 1
-        const step1El = dom.steps[1];
-        if (step1El) {
-            const currentHeight = step1El.offsetHeight;
-            _forceModalMinHeight(currentHeight);
-        }
+        _setModalFixedSize();
 
         dom.nextBtn.disabled = true;
         const originalText = dom.nextBtn.textContent;
         dom.nextBtn.innerHTML = ``;
 
-        // --- NOWA LOGIKA: MAPOWANIE JĘZYKA NA KOD KRAJU ---
         const appLang = State.get('currentLang');
-        const countryCodeHint = appLang === 'pl' ? 'PL' : 'GB'; // PL -> PL, EN -> GB
+        const countryCodeHint = appLang === 'pl' ? 'PL' : 'GB';
 
-        // Initialize payment in the background
-        await initializePaymentElement(originalText, countryCodeHint); // PRZEKAZANO HINT
+        await initializePaymentElement(originalText, countryCodeHint);
     }
 }
 
-
 function handlePrevStep() {
     hideLocalErrors();
-    _clearModalMinHeight(); // <-- DODANE: Wyczyść min-height przy cofaniu
+    _clearModalFixedSize();
 
     if (currentStep > 0) {
-        if (currentStep === 2) { // Specifically when moving back from the payment step
+        if (currentStep === 2) {
             if (paymentElement) {
                 try {
                     paymentElement.unmount();
                 } catch (e) { /* ignore */ }
             }
-            // Restore the next button's state
             dom.nextBtn.disabled = false;
             dom.nextBtn.innerHTML = getTranslatedText('tippingNext', 'ENTER');
         }
@@ -337,14 +319,11 @@ async function initializePaymentElement(originalText, countryCodeHint) { // DODA
         paymentElement.mount(dom.paymentElementContainer);
 
         paymentElement.on('ready', () => {
-            // KROK 2: Wyczyść wymuszoną wysokość, gdy element Stripe jest gotowy
-            _clearModalMinHeight();
+            _clearModalFixedSize();
 
-            // Przełącz widok DOPIERO gdy element jest gotowy
             currentStep = 2;
             updateStepDisplay();
 
-            // Pokaż element i przywróć przycisk
             dom.paymentElementContainer.classList.add('ready');
             dom.submitBtn.disabled = false;
             dom.submitBtn.innerHTML = getTranslatedText('tippingPay', 'Płacę!');

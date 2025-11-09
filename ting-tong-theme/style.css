@@ -5545,12 +5545,13 @@ main::-webkit-scrollbar {
 }
 
 /* --- Nowe klasy dla FIX: Wysokość modala --- */
-.elegant-modal-body.min-height-transition {
-transition: min-height 0.3s ease-out; /* Dodaje płynne przejście */
+.elegant-modal-content.fixed-height-transition {
+    transition: height 0.3s ease-out;
 }
 
-.elegant-modal-body.force-min-height {
-min-height: var(--tipping-min-height, auto);
+.elegant-modal-content.force-fixed-height {
+    height: var(--tipping-fixed-height, auto);
+    overflow: hidden;
 }
 
 @keyframes cloud-wave {
