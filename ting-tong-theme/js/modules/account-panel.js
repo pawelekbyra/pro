@@ -203,8 +203,9 @@ function openAccountModal() {
         loggedInMenu.classList.remove("active");
     }
 
+    // Ensure it's not in a hiding state before making it visible
+    modal.classList.remove("is-hiding");
     modal.classList.add("visible");
-    modal.classList.remove("is-hiding"); // Just in case
 
     const currentUser = State.get('currentUser');
     if (currentUser && currentUser.user_id) {
@@ -216,18 +217,20 @@ function openAccountModal() {
 
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
-    if (modal && modal.classList.contains("visible")) {
+    const modalContent = modal ? modal.querySelector('.account-modal-content') : null;
+
+    if (modal && modal.classList.contains("visible") && modalContent) {
         modal.classList.add("is-hiding");
 
-        const content = modal.querySelector('.account-modal-content');
-        if (content) {
-            content.addEventListener('transitionend', () => {
-                modal.classList.remove("visible", "is-hiding");
-            }, { once: true });
-        } else {
-            // Fallback if content is not found
-            modal.classList.remove("visible", "is-hiding");
-        }
+        const onTransitionEnd = (event) => {
+            // Ensure the event is for the modal content's transform property
+            if (event.target === modalContent && event.propertyName === 'transform') {
+                modal.classList.remove("visible");
+                modal.classList.remove("is-hiding");
+                modalContent.removeEventListener('transitionend', onTransitionEnd);
+            }
+        };
+        modalContent.addEventListener('transitionend', onTransitionEnd);
     }
 }
 
