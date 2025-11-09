@@ -192,7 +192,7 @@ async function handleNextStep() {
 
         dom.nextBtn.disabled = true;
         const originalText = dom.nextBtn.textContent;
-        dom.nextBtn.innerHTML = `<span class="loading-spinner"></span> ${originalText}`;
+        dom.nextBtn.innerHTML = `<span class="loading-spinner"></span>`;
 
         const appLang = State.get('currentLang');
         const countryCodeHint = appLang === 'pl' ? 'PL' : 'GB';
