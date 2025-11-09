@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container):not(#cropModal)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
             if (e.target === modal) UI.closeModal(modal);
