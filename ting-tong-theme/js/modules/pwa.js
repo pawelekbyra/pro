@@ -48,10 +48,16 @@ function closePwaModals() {
 }
 
 function runStandaloneCheck() {
+    // Te dwie funkcje powinny być pobrane ze State i Utils (przekazane przez UI, które je importuje)
+    const isUserLoggedIn = (UI_MODULE && UI_MODULE.getIsUserLoggedIn()) || false;
+    const isDesktopDevice = isDesktop(); // Używamy istniejącej funkcji isDesktop()
+
     const appFrame = document.getElementById("app-frame");
 
-    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
-    if (isStandalone()) {
+    // Warunki, KIEDY NALEŻY UKRYĆ pasek:
+    // 1. Jest to tryb PWA/Standalone (ukrywa się zawsze)
+    // 2. Jesteśmy na desktopie I użytkownik jest zalogowany
+    if (isStandalone() || (isDesktopDevice && isUserLoggedIn)) {
         if (installBar) {
             installBar.classList.remove("visible");
             if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
@@ -59,11 +65,12 @@ function runStandaloneCheck() {
         return true;
     }
 
-    // Jeśli nie jest standalone, pokaż pasek po zniknięciu preloadera.
+    // Jeśli nie jest standalone, pokaż pasek po zniknięciu preloadera (tylko na urządzeniach mobilnych lub gdy jest to gość na desktopie).
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
+    // Ogranicz wyświetlanie dla gości na urządzeniach desktopowych (pokaże się, ale tylko dla gości)
     if (isPreloaderHidden && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
@@ -78,7 +85,7 @@ function runStandaloneCheck() {
             if (tiktokSymulacja) {
                 tiktokSymulacja.classList.add('controls-visible');
             }
-        }, 800); // Czas trwania animacji pasków
+        }, 800);
     } else if (installBar) {
         // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
         installBar.classList.remove("visible");
@@ -214,4 +221,4 @@ async function handlePushSubscription() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule, handlePushSubscription };
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule, handlePushSubscription, isDesktop };
