@@ -198,33 +198,36 @@ function openAccountModal() {
         return;
     }
 
-    // Natychmiastowe ukrycie menu
     const loggedInMenu = document.querySelector(".logged-in-menu");
     if (loggedInMenu) {
         loggedInMenu.classList.remove("active");
     }
 
-    // Użycie centralnego mechanizmu UI.openModal, ale bez onClose
-    UI.openModal(modal, {
-        // Logika ładowania danych zostaje przeniesiona do callbacka onOpen,
-        // co gwarantuje, że dane są pobierane i wstawiane w momencie wyświetlenia.
-        onOpen: () => {
-            const currentUser = State.get('currentUser');
-            if (currentUser && currentUser.user_id) {
-                console.log('Using cached user data for account panel');
-                populateProfileForm(currentUser);
-            } else {
-                console.log('Loading fresh user data for account panel');
-                loadInitialProfileData();
-            }
-        }
-    });
+    modal.classList.add("visible");
+    modal.classList.remove("is-hiding"); // Just in case
+
+    const currentUser = State.get('currentUser');
+    if (currentUser && currentUser.user_id) {
+        populateProfileForm(currentUser);
+    } else {
+        loadInitialProfileData();
+    }
 }
 
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
-    if (modal) {
-        UI.closeModal(modal, { animationClass: 'slideOutLeft' });
+    if (modal && modal.classList.contains("visible")) {
+        modal.classList.add("is-hiding");
+
+        const content = modal.querySelector('.account-modal-content');
+        if (content) {
+            content.addEventListener('transitionend', () => {
+                modal.classList.remove("visible", "is-hiding");
+            }, { once: true });
+        } else {
+            // Fallback if content is not found
+            modal.classList.remove("visible", "is-hiding");
+        }
     }
 }
 
