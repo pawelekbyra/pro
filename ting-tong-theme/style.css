@@ -1710,6 +1710,8 @@ body,
 .crowdfunding-container {
     padding: 16px;
     text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .crowdfunding-header {
@@ -2165,6 +2167,10 @@ overflow: hidden;
 
 .account-modal-overlay.visible .account-modal-content {
   transform: translateX(0);
+}
+
+.account-modal-overlay.is-hiding .account-modal-content {
+  transform: translateX(-100%);
 }
 
 
@@ -5612,17 +5618,17 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .modal-close-btn {
-    grid-column: 3;
-    justify-self: end;
-    margin-right: 10px;
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 10px;
     font-size: 28px;
     font-weight: 300;
 }
 
 #author-profile-modal .options-btn {
-    grid-column: 1; /* Zmieniamy na 1, aby był po lewej */
-    justify-self: start;
-    margin-left: 10px;
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 10px;
 }
 
 #author-profile-modal main {
