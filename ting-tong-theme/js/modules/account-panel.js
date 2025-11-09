@@ -210,6 +210,13 @@ function openAccountModal() {
                 console.log('Loading fresh user data for account panel');
                 loadInitialProfileData();
             }
+        },
+        // NOWE: Dodano callback onClose do zamykania menu
+        onClose: () => {
+            const loggedInMenu = document.querySelector(".logged-in-menu");
+            if (loggedInMenu) {
+                loggedInMenu.classList.remove("active");
+            }
         }
     });
 }
