@@ -384,7 +384,7 @@ get_header();
                 </div>
             </section>
             <p class="fullname"></p>
-            <p class="bio">Paweł Polutek, wieloletni pasjonat-odkrywca zaginionych światów i niestrudzony badacz alternatywnych rzeczywistości. W swoich podróżach po meandrach wyobraźni, odkrywa historie, które inni boją się opowiedzieć, tworząc opowieści, które na długo zapadają w pamięć. Jego misją jest nie tylko dokumentowanie nieznanego, ale także inspirowanie innych do przekraczania granic własnej percepcji i odkrywania magii w codzienności.</p>
+            <p class="bio"></p>
             <div class="profile-actions">
                 <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
                 <button class="social-btn instagram" aria-label="Instagram">

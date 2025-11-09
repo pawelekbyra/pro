@@ -313,6 +313,7 @@ function tt_get_simulated_posts() {
         'description' => 'Cześć! Jestem Paweł Polutek, entuzjasta technologii webowych i twórca tej aplikacji. Dzielę się tutaj moimi eksperymentami i projektami. Zapraszam do oglądania!',
         'avatar'      => get_template_directory_uri() . '/assets/img/avatar-pawel-polutek.png',
         'is_vip'      => true,
+        'bio'         => 'Paweł Polutek, wieloletni pasjonat-odkrywca zaginionych światów i niestrudzony badacz alternatywnych rzeczywistości. W swoich podróżach po meandrach wyobraźni, odkrywa historie, które inni boją się opowiedzieć, tworząc opowieści, które na długo zapadają w pamięć. Jego misją jest nie tylko dokumentowanie nieznanego, ale także inspirowanie innych do przekraczania granic własnej percepcji i odkrywania magii w codzienności.'
     ];
 
     return [

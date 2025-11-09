@@ -81,7 +81,7 @@ function openAuthorProfileModal(slideData) {
             modal.querySelector('.username-header').textContent = author.name;
             modal.querySelector('.profile-avatar').src = author.avatar;
             modal.querySelector('.fullname').textContent = author.name; // Assuming fullname is the same as name
-            modal.querySelector('.bio').textContent = author.bio || ''; // Assuming bio is available
+            modal.querySelector('.bio').textContent = author.bio || '';
 
             // Mockup stats for now
             modal.querySelector('.following-count').textContent = '123';
