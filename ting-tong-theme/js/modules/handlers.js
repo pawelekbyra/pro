@@ -554,7 +554,7 @@ export const Handlers = {
         AccountPanel.openAccountModal();
         break;
       case "close-account-modal":
-        UI.closeModal(UI.DOM.accountModal);
+        UI.closeModal(UI.DOM.accountModal, { animationClass: 'slideOutLeft' });
         break;
       case "logout":
         e.preventDefault();
