@@ -3704,6 +3704,7 @@ overflow: hidden;
   .image-lightbox,
   #bmc-w-modal-container,
   .account-modal-overlay,
+  .profile-modal-overlay,
   #bmc-w-modal-container iframe,
   #bmc-w-modal-container > div
   {
@@ -5641,6 +5642,10 @@ main::-webkit-scrollbar {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#author-profile-modal .avatar-container .profile-avatar {
+    object-fit: cover !important;
 }
 
 #author-profile-modal .stats-container {
