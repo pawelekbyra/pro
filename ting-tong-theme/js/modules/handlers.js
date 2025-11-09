@@ -550,6 +550,9 @@ export const Handlers = {
       case "close-welcome-modal":
         UI.closeModal(UI.DOM.welcomeModal);
         break;
+      case "open-account-modal":
+        AccountPanel.openAccountModal();
+        break;
       case "close-account-modal":
         UI.closeModal(UI.DOM.accountModal);
         break;
