@@ -197,7 +197,14 @@ function openAccountModal() {
         console.error('Account modal element not found');
         return;
     }
-    // Użycie centralnego mechanizmu UI.openModal.
+
+    // Natychmiastowe ukrycie menu
+    const loggedInMenu = document.querySelector(".logged-in-menu");
+    if (loggedInMenu) {
+        loggedInMenu.classList.remove("active");
+    }
+
+    // Użycie centralnego mechanizmu UI.openModal, ale bez onClose
     UI.openModal(modal, {
         // Logika ładowania danych zostaje przeniesiona do callbacka onOpen,
         // co gwarantuje, że dane są pobierane i wstawiane w momencie wyświetlenia.
@@ -209,13 +216,6 @@ function openAccountModal() {
             } else {
                 console.log('Loading fresh user data for account panel');
                 loadInitialProfileData();
-            }
-        },
-        // NOWE: Dodano callback onClose do zamykania menu
-        onClose: () => {
-            const loggedInMenu = document.querySelector(".logged-in-menu");
-            if (loggedInMenu) {
-                loggedInMenu.classList.remove("active");
             }
         }
     });
