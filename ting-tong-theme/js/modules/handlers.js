@@ -503,15 +503,19 @@ export const Handlers = {
         break;
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
+        const tippingModal = document.getElementById('tippingModal');
+
         if (infoModal && infoModal.classList.contains('visible')) {
+            // Zamknij infoModal z animacją w lewo
             UI.closeModal(infoModal, {
-                keepFocus: true,
                 animationClass: 'slideOutLeft',
-                onClose: () => {
-                    TippingModal.showModal({ animationClass: 'slideInRight' });
-                }
+                keepFocus: true // Nie przenoś fokusu, bo zaraz otworzy się nowy modal
             });
+
+            // Otwórz tippingModal z animacją z prawej
+            TippingModal.showModal({ animationClass: 'slideInRight' });
         } else {
+            // Domyślne zachowanie, jeśli infoModal nie jest otwarty
             TippingModal.showModal();
         }
         break;

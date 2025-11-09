@@ -1654,7 +1654,7 @@ body,
 }
 #infoModal .modal-body {
   overflow-y: auto;
-  padding: 24px; /* Padding przeniesiony tutaj */
+  padding: 16px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -1708,7 +1708,7 @@ body,
 }
 
 .crowdfunding-container {
-    padding: 24px;
+    padding: 16px;
     text-align: center;
 }
 
@@ -2165,6 +2165,10 @@ overflow: hidden;
 
 .account-modal-overlay.visible .account-modal-content {
   transform: translateX(0);
+}
+
+.account-modal-overlay.is-hiding .account-modal-content {
+  transform: translateX(-100%);
 }
 
 .account-modal-overlay.is-hiding .account-modal-content {
@@ -5201,7 +5205,7 @@ overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.profile-header .back-btn,
+.profile-header .modal-close-btn,
 .profile-header .options-btn {
   background: none;
   border: none;
@@ -5218,7 +5222,7 @@ overflow: hidden;
     opacity 0.2s;
 }
 
-.profile-header .back-btn {
+.profile-header .modal-close-btn {
   grid-column: 1;
   justify-self: start;
   margin-left: 10px;
@@ -5234,7 +5238,11 @@ overflow: hidden;
   transform: scale(0.9);
 }
 
-.profile-header .back-btn svg,
+.profile-header .back-btn {
+    font-size: 28px;
+    font-weight: 300;
+}
+
 .profile-header .options-btn svg {
   width: 24px;
   height: 24px;
