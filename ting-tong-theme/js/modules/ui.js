@@ -9,6 +9,10 @@ function setPwaModule(pwaModule) {
   PWA_MODULE = pwaModule;
 }
 
+function getIsUserLoggedIn() {
+return State.get("isUserLoggedIn");
+}
+
 let countdownInterval = null;
 
 function startCountdown() {
@@ -1165,6 +1169,7 @@ export const UI = {
   closeImageLightbox,
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
+  getIsUserLoggedIn, // << DODANA NOWA FUNKCJA
   closeCommentsModal,
   closeWelcomeModal,
   updateCrowdfundingStats,
