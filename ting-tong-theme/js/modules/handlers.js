@@ -598,9 +598,18 @@ export const Handlers = {
             }
         }
         break;
-      case "close-author-profile":
+      case "close-author-profile": {
+        const authorModal = document.getElementById('author-profile-modal');
+
+        // Nowa logika do zatrzymania odtwarzania wideo z kafelka
+        const activeVideoPlayer = authorModal.querySelector('.video-tile-content.active video');
+        if (activeVideoPlayer) {
+            activeVideoPlayer.pause();
+            activeVideoPlayer.currentTime = 0; // Przewinięcie na początek
+        }
         UI.closeAuthorProfileModal();
         break;
+      }
       case "close-modal":
         e.stopPropagation(); // Stop the event from bubbling up to parent elements
         const modal = actionTarget.closest(".modal-overlay");
