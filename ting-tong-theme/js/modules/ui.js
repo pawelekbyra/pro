@@ -1181,8 +1181,6 @@ export const UI = {
   openAuthorProfileModal,
   closeAuthorProfileModal,
 };
-
-
 function closeCommentsModal() {
     const modal = DOM.commentsModal;
     if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
