@@ -398,19 +398,14 @@ function openCropModal(callback) {
     const modal = document.getElementById("cropModal");
     if (!modal) return;
 
-    // Funkcja do wykonania po animacji
-    const onModalReady = () => {
-        if (typeof callback === 'function') {
-            callback();
-        }
-        modal.removeEventListener('animationend', onModalReady, { once: true });
-    };
-
-    // Nasłuchuj końca animacji wejścia
-    modal.addEventListener('animationend', onModalReady, { once: true });
-
-    // Pokaż modal
     modal.classList.add("visible");
+
+    // Initialize the cropper immediately.
+    // The previous animationend event was unreliable.
+    if (typeof callback === 'function') {
+        // Use a short timeout to ensure the modal is rendered before canvas calculations
+        setTimeout(callback, 50);
+    }
 }
 function closeCropModal() {
   document.getElementById("cropModal").classList.remove("visible");
