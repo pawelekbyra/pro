@@ -1178,7 +1178,6 @@ export const UI = {
   getIsUserLoggedIn,
   closeCommentsModal,
   closeWelcomeModal,
-  updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,
 };
