@@ -1389,12 +1389,12 @@ body,
   visibility: hidden;
 }
 .login-panel.active {
-  animation: slideInDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform: translateY(0);
+  opacity: 1;
   pointer-events: auto;
   visibility: visible;
 }
 .login-panel.login-panel--closing {
-    animation: slideOutUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     pointer-events: none;
 }
 .login-panel > div,
@@ -5695,8 +5695,8 @@ main::-webkit-scrollbar {
     border-radius: 8px;
     white-space: nowrap;
     order: 1;
-    align-self: flex-end; /* Align this specific item to the right */
-    margin-right: 4px; /* Small margin from the edge */
+    align-self: center; /* Align this specific item to the center */
+    margin-right: 0; /* Remove margin */
     margin-bottom: 0; /* Remove bottom margin, rely on gap */
 }
 

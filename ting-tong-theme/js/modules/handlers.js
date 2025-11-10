@@ -148,6 +148,22 @@ export const Handlers = {
   mainClickHandler: (e) => {
     const target = e.target;
     const actionTarget = target.closest("[data-action]");
+    const videoThumbnail = target.closest(".video-thumbnail");
+
+    if (videoThumbnail) {
+        const videoUrl = videoThumbnail.dataset.videoUrl;
+        if (videoUrl) {
+            const videoModal = document.getElementById('video-player-modal');
+            const videoPlayer = videoModal.querySelector('video');
+            videoPlayer.src = videoUrl;
+            UI.openModal(videoModal);
+            videoPlayer.play();
+
+            const closeModalHandler = () => videoPlayer.pause();
+            videoModal.addEventListener('modal:close', closeModalHandler, { once: true });
+            return;
+        }
+    }
 
     // Handle comment-related actions first
     if (actionTarget && actionTarget.closest(".comment-item")) {
@@ -612,14 +628,7 @@ export const Handlers = {
             UI.closeCommentsModal();
           }
           if (loginPanel) {
-            if (loginPanel.classList.contains('active')) {
-                loginPanel.classList.add('login-panel--closing');
-                loginPanel.addEventListener('animationend', () => {
-                    loginPanel.classList.remove('active', 'login-panel--closing');
-                }, { once: true });
-            } else {
-                loginPanel.classList.add('active');
-            }
+            loginPanel.classList.toggle('active');
           }
           if (topbar) topbar.classList.toggle("login-panel-active");
         }
