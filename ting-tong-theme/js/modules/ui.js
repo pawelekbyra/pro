@@ -191,12 +191,12 @@ function openModal(modal, options = {}) {
 
     modal.style.display = 'flex';
     modal.classList.remove('is-hiding');
+    modal.classList.add('visible');
 
     requestAnimationFrame(() => {
-        modal.classList.add('visible');
         if (content && animationClass) {
             content.classList.add(animationClass);
-            content._lastAnimationClass = animationClass; // Zapisz klasę do późniejszego usunięcia
+            content._lastAnimationClass = animationClass;
         }
     });
 
