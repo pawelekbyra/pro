@@ -203,9 +203,7 @@ function openAccountModal() {
         loggedInMenu.classList.remove("active");
     }
 
-    // Ensure it's not in a hiding state before making it visible
-    modal.classList.remove("is-hiding");
-    modal.classList.add("visible");
+    UI.openModal(modal);
 
     const currentUser = State.get('currentUser');
     if (currentUser && currentUser.user_id) {
@@ -217,20 +215,8 @@ function openAccountModal() {
 
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
-    const modalContent = modal ? modal.querySelector('.account-modal-content') : null;
-
-    if (modal && modal.classList.contains("visible") && modalContent) {
-        modal.classList.add("is-hiding");
-
-        const onTransitionEnd = (event) => {
-            // Ensure the event is for the modal content's transform property
-            if (event.target === modalContent && event.propertyName === 'transform') {
-                modal.classList.remove("visible");
-                modal.classList.remove("is-hiding");
-                modalContent.removeEventListener('transitionend', onTransitionEnd);
-            }
-        };
-        modalContent.addEventListener('transitionend', onTransitionEnd);
+    if (modal) {
+      UI.closeModal(modal);
     }
 }
 
@@ -398,17 +384,20 @@ function openCropModal(callback) {
     const modal = document.getElementById("cropModal");
     if (!modal) return;
 
-    modal.classList.add("visible");
-
-    // Initialize the cropper immediately.
-    // The previous animationend event was unreliable.
-    if (typeof callback === 'function') {
-        // Use a short timeout to ensure the modal is rendered before canvas calculations
-        setTimeout(callback, 50);
-    }
+    UI.openModal(modal, {
+      onOpen: () => {
+        if (typeof callback === 'function') {
+            // Use a short timeout to ensure the modal is rendered before canvas calculations
+            setTimeout(callback, 50);
+        }
+      }
+    });
 }
 function closeCropModal() {
-  document.getElementById("cropModal").classList.remove("visible");
+  const modal = document.getElementById("cropModal");
+  if(modal) {
+    UI.closeModal(modal);
+  }
   cropImage = null;
 }
 
