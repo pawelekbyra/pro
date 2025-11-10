@@ -653,6 +653,7 @@ export const Handlers = {
                 loginPanel.classList.remove('active', 'login-panel--closing');
               }, { once: true });
             } else {
+              loginPanel.classList.remove('login-panel--closing');
               loginPanel.classList.add('active');
             }
           }
