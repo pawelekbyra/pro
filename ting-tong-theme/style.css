@@ -6214,7 +6214,7 @@ z-index: 114;
 border-top: none;
 /* Domyślny stan - poza ekranem, ukryty i bez transition w bazowej klasie */
 transform: translateY(-100%);
-transition: none !important;
+transition: none;
 visibility: hidden;
 opacity: 0; /* Utrzymaj dla klikalności */
 }

@@ -152,7 +152,7 @@ export const API = {
     }),
   getNewCrowdfundingStats: () => _request("tt_get_crowdfunding_stats"),
   saveSettings: (data) => _request("tt_save_settings", data),
-  uploadAvatar: (data) => _request("tt_avatar_upload", data, true),
+  uploadAvatar: (data) => _request("tt_avatar_upload", data),
   updateProfile: (data) => _request("tt_profile_update", data),
   changePassword: (data) => _request("tt_password_change", data),
   deleteAccount: (data) => _request("tt_account_delete", data),
