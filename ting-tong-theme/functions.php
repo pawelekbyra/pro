@@ -1081,7 +1081,7 @@ add_action('wp_ajax_tt_avatar_upload', function () {
 
         wp_send_json_success(['url' => $url, 'attachment_id' => $attach_id]);
 
-    } catch (Throwable $e) {
+    } catch (Exception $e) {
         // Złap wszystkie błędy krytyczne (w tym błędy parsowania, itp.)
         if (defined('WP_DEBUG') && WP_DEBUG) {
             wp_send_json_error(['message' => 'Krytyczny błąd serwera: ' . $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);

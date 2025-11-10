@@ -487,8 +487,13 @@ function showModal(options = {}) {
 }
 
 function hideModal() {
-    UI.closeModal(dom.modal);
-    setTimeout(resetModalState, 300);
+    if (!dom.modal) return;
+    dom.modal.classList.add('is-hiding');
+    dom.modal.addEventListener('animationend', () => {
+        UI.closeModal(dom.modal);
+        dom.modal.classList.remove('is-hiding');
+        resetModalState();
+    }, { once: true });
 }
 
 function init() {

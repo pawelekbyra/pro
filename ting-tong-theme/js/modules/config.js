@@ -267,9 +267,9 @@ export const Config = {
       deleteHelperText:
         "Po usunięciu konta zostaniesz automatycznie wylogowany.",
       deleteAccountBtn: "Trwale usuń konto",
-      profileFollowingLabel: "Obserwuje",
-      profileFollowersLabel: "Obserwujący",
-      profileLikesLabel: "Polubienia",
+      profileFollowingLabel: "Follow",
+      profileFollowersLabel: "Follow",
+      profileLikesLabel: "Likes",
       profileFollowBtn: "Obserwuj",
       savingButtonText: "Zapisywanie...",
       changingButtonText: "Zmienianie...",
@@ -485,8 +485,8 @@ export const Config = {
       deleteHelperText:
         "After deleting your account, you will be automatically logged out.",
       deleteAccountBtn: "Permanently delete account",
-      profileFollowingLabel: "Following",
-      profileFollowersLabel: "Followers",
+      profileFollowingLabel: "Follow",
+      profileFollowersLabel: "Follow",
       profileLikesLabel: "Likes",
       profileFollowBtn: "Follow",
       savingButtonText: "Saving...",

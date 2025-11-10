@@ -4,6 +4,7 @@
 
 import { State } from './state.js';
 import { Utils } from './utils.js';
+import { PWA } from './pwa.js';
 
 class AuthManager {
   constructor() {
@@ -212,6 +213,8 @@ class AuthManager {
         requires_first_login_setup: !!requires_first_login_setup
       });
 
+      PWA.runStandaloneCheck();
+
       return {
         success: true,
         userData,
@@ -236,6 +239,7 @@ class AuthManager {
       State.set('isUserLoggedIn', false);
       State.set('currentUser', null);
       State.emit('user:logout');
+      PWA.runStandaloneCheck();
       return { success: true };
     }
 
