@@ -359,9 +359,6 @@ get_header();
     <div class="profile-modal-content">
         <header class="profile-header">
             <h2 id="author-profile-title" class="username-header"></h2>
-            <button class="options-btn" aria-label="Options">
-                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-            </button>
             <button class="modal-close-btn" data-action="close-author-profile" aria-label="Close profile">
                 &times;
             </button>
@@ -374,15 +371,15 @@ get_header();
                 <div class="stats-container">
                     <div class="stat">
                         <span class="stat-number following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Obserw.</span>
+                        <span class="stat-label" data-translate-key="profileFollowing">Followers</span>
                     </div>
                     <div class="stat">
                         <span class="stat-number followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowers">Obserw.</span>
+                        <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
                     </div>
                     <div class="stat">
                         <span class="stat-number likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Likes</span>
+                        <span class="stat-label" data-translate-key="profileLikes">Followers</span>
                     </div>
                 </div>
             </section>
