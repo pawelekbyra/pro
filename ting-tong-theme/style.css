@@ -1639,7 +1639,11 @@ body,
 /* Modal: Info */
 .info-modal-overlay {
     background: transparent;
-    transition: opacity 0.6s ease, visibility 0.6s ease;
+    transition: background-color 0.6s ease; /* Zmieniamy na tło */
+}
+
+.info-modal-overlay.visible {
+    background: rgba(0, 0, 0, 0.5); /* Płynne przyciemnienie */
 }
 
 .info-modal-content {
@@ -1650,6 +1654,7 @@ body,
     display: flex !important;
     flex-direction: column;
     will-change: transform;
+    transform: translateY(-100%); /* Start off-screen */
 }
 
 @keyframes slideInFromTop {
