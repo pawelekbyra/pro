@@ -1402,7 +1402,7 @@ body,
   left: 0;
   width: 100%;
   color: white;
-  z-index: 10301 !important;
+  z-index: 114;
   border-top: none;
   /* Start hidden by default */
   visibility: hidden;
@@ -5810,7 +5810,7 @@ main::-webkit-scrollbar {
   z-index: 10300; /* Above other modals */
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
   overflow: hidden;
 }
 
