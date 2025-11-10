@@ -1350,6 +1350,24 @@ body,
 /* ==========================================================================
            --- KOMPONENTY UI: PANELE I MENU ---
            ========================================================================== */
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutToTop {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-100%);
+    }
+}
+
 @keyframes slideInDown {
     from {
         transform: translateY(-100%);
@@ -1382,20 +1400,18 @@ body,
   color: white;
   z-index: 110 !important;
   border-top: none;
-  /* Start hidden */
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
+  /* Start hidden by default */
   visibility: hidden;
 }
+
 .login-panel.active {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
   visibility: visible;
+  animation: slideInFromTop 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
+
 .login-panel.login-panel--closing {
-    pointer-events: none;
+  animation: slideOutToTop 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
 }
 .login-panel > div,
 .login-panel > form {
@@ -5473,6 +5489,56 @@ main::-webkit-scrollbar {
     stroke-width: 2px;
 }
 
+.profile-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-tab {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  color: rgba(255, 255, 255, 0.6);
+  background: none;
+  border: none;
+}
+
+.profile-tab.active {
+  color: #fff;
+}
+
+.profile-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #fff;
+}
+
+.profile-tab svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+.profile-tab[data-tab="liked-grid"] svg {
+    stroke: currentColor;
+    stroke-width: 2px;
+    fill: none;
+}
+.profile-tab[data-tab="reposts-grid"] svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2px;
+}
+
+.profile-tab-content {
+  padding-top: 2px;
+}
+
 
 .video-gallery {
   display: none;
@@ -5611,6 +5677,16 @@ main::-webkit-scrollbar {
 
 #video-player-modal {
     z-index: 10400 !important;
+    background-color: #000;
+}
+
+#video-player-modal video {
+    width: 100%;
+    height: 100%;
+}
+
+#video-player-modal .modal-close-btn {
+    color: #fff;
 }
 
 /* ============================================================================
@@ -5842,6 +5918,7 @@ main::-webkit-scrollbar {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.1);
+    background-color: white;
 }
 
 #author-profile-modal .avatar-container .profile-avatar {
