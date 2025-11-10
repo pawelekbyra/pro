@@ -13,42 +13,38 @@ function getIsUserLoggedIn() {
 return State.get("isUserLoggedIn");
 }
 
-let countdownInterval = null;
-
-function startCountdown() {
-  const countdownElement = document.getElementById('countdown-timer');
-  const countdownDateElement = document.getElementById('countdown-date');
-  if (!countdownElement || !countdownDateElement) return;
-
-  const endDate = new Date(countdownDateElement.textContent).getTime();
-
-  const updateCountdown = () => {
-    const now = new Date().getTime();
-    const distance = endDate - now;
-
-    if (distance < 0) {
-      clearInterval(countdownInterval);
-      countdownElement.textContent = "Premiera!";
-      return;
+function updateProgress() {
+    let progress = 0;
+    function animate() {
+        if(progress < 200){
+            progress += 2;
+            let percentage = (progress/500*100).toFixed(0);
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressLabel').innerHTML = `Cel: <strong>${progress} z 500 EUR</strong> (${percentage}%)`;
+            document.getElementById('supportersCount').innerText = Math.floor(progress/5);
+            requestAnimationFrame(animate);
+        }
     }
+    requestAnimationFrame(animate);
+}
 
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    countdownElement.innerHTML = `
-      <span class="countdown-part">${days}<span class="countdown-label-small">dni</span></span>
-      <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label-small">h</span></span>
-      <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label-small">m</span></span>
-      <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label-small">s</span></span>`;
-  };
-
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-  }
-  updateCountdown();
-  countdownInterval = setInterval(updateCountdown, 1000);
+function countdown() {
+    const target = new Date('2026-01-01T00:00:00');
+    const now = new Date();
+    const diff = target - now;
+    if(diff > 0){
+        const days = Math.floor(diff/(1000*60*60*24));
+        const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+        const minutes = Math.floor((diff%(1000*60*60))/(1000*60));
+        const seconds = Math.floor((diff%(1000*60))/1000);
+        document.getElementById('days').innerText = days;
+        document.getElementById('hours').innerText = hours;
+        document.getElementById('minutes').innerText = minutes;
+        document.getElementById('seconds').innerText = seconds;
+        setTimeout(countdown,1000);
+    } else {
+        document.getElementById('countdownTimer').innerText = 'Premiera!';
+    }
 }
 
 let selectedCommentImage = null;
@@ -214,8 +210,8 @@ function openModal(modal, options = {}) {
     }
 
     if (modal.id === 'infoModal') {
-        startCountdown();
-        updateCrowdfundingStats();
+        updateProgress();
+        countdown();
     }
 
     // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
@@ -1187,42 +1183,6 @@ export const UI = {
   closeAuthorProfileModal,
 };
 
-async function updateCrowdfundingStats() {
-    try {
-        const result = await API.getNewCrowdfundingStats();
-        if (result.success && result.data) {
-            const stats = result.data;
-            const patronsEl = document.querySelector('.stats-grid .stat-item:nth-child(1) .stat-value');
-            const collectedEl = document.querySelector('.progress-label span strong');
-            const progressFillEl = document.querySelector('.progress-section .progress-bar-fill');
-            const progressLabelEl = document.querySelector('.progress-label');
-
-            if (patronsEl) patronsEl.textContent = stats.patrons_count;
-
-            if (progressLabelEl) {
-                const goal = parseFloat(progressLabelEl.dataset.goal) || 500;
-                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
-                progressLabelEl.dataset.collected = stats.collected_eur.toFixed(2);
-                progressLabelEl.dataset.percentage = percentage.toFixed(0);
-
-                if (collectedEl) collectedEl.textContent = `${stats.collected_eur.toFixed(2)} z ${goal} EUR`;
-
-                const labelSpan = progressLabelEl.querySelector('span');
-                if(labelSpan) {
-                    labelSpan.innerHTML = `Cel: <strong>${stats.collected_eur.toFixed(2)} z ${goal} EUR</strong> (${percentage.toFixed(0)}%)`;
-                }
-            }
-
-            if (progressFillEl) {
-                const goal = 500;
-                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
-                progressFillEl.style.width = `${percentage}%`;
-            }
-        }
-    } catch (error) {
-        console.error("Failed to update crowdfunding stats:", error);
-    }
-}
 
 function closeCommentsModal() {
     const modal = DOM.commentsModal;
