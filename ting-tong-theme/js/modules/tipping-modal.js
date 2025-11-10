@@ -519,14 +519,7 @@ function init() {
 
     dom.modal.addEventListener('click', e => {
       if (e.target === dom.modal || e.target.closest('.modal-close-btn')) {
-        // 1. Dodaj klasę, by zainicjować animację wyjścia CSS
-        dom.modal.classList.add('is-hiding');
-
-        // 2. Oczekiwanie na zakończenie animacji (300ms)
-        setTimeout(() => {
-            // 3. Wywołaj właściwą funkcję zamykającą z UI.js
-            hideModal();
-        }, 300); // Czas trwania animacji CSS
+        hideModal();
       }
       if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
       if (e.target.closest('[data-action="hide-terms"]')) hideTerms();

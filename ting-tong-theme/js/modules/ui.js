@@ -122,13 +122,12 @@ function closeAuthorProfileModal() {
     if (!modal) return;
     closeModal(modal, { animationClass: 'slideOutRight' });
 
-    // Dodatkowo zamknij odtwarzacz wideo, jeśli jest otwarty
     const videoModal = document.getElementById('video-player-modal');
     if (videoModal && videoModal.classList.contains('visible')) {
         const videoPlayer = videoModal.querySelector('video');
         if (videoPlayer) {
             videoPlayer.pause();
-            videoPlayer.src = ''; // Wyczyść źródło, aby zatrzymać buforowanie
+            videoPlayer.src = '';
         }
         closeModal(videoModal);
     }
@@ -265,19 +264,33 @@ function closeModal(modal, options = {}) {
     }
 
     modal.setAttribute("aria-hidden", "true");
-    modal.classList.add("is-hiding");
-    modal.classList.remove("visible");
 
+    const contentElement = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content');
+    const hasCustomAnimation = options.animationClass && contentElement;
+
+    const eventToListenFor = hasCustomAnimation ? 'animationend' : 'transitionend';
+    const elementToListenOn = hasCustomAnimation ? contentElement : modal;
+    const fallbackDuration = hasCustomAnimation ? 600 : 500;
+
+    let cleanupHasRun = false;
     const cleanup = () => {
-        modal.removeEventListener('transitionend', cleanup);
+        if (cleanupHasRun) return;
+        cleanupHasRun = true;
+
+        elementToListenOn.removeEventListener(eventToListenFor, cleanup);
+
         modal.style.display = 'none';
         modal.classList.remove('is-hiding');
+        if (hasCustomAnimation) {
+            contentElement.classList.remove(options.animationClass);
+        }
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
         }
         activeModals.delete(modal);
+
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
             DOM.container.removeAttribute("aria-hidden");
@@ -291,20 +304,16 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    let eventFired = false;
-    const duration = 500; // Match the longest transition time in CSS
+    modal.classList.add("is-hiding");
+    modal.classList.remove("visible");
 
-    modal.addEventListener('transitionend', () => {
-        eventFired = true;
-        cleanup();
-    }, { once: true });
+    if (hasCustomAnimation) {
+        contentElement.classList.add(options.animationClass);
+    }
 
-    // Fallback in case the transitionend event doesn't fire
-    setTimeout(() => {
-        if (!eventFired) {
-            cleanup();
-        }
-    }, duration);
+    elementToListenOn.addEventListener(eventToListenFor, cleanup, { once: true });
+
+    setTimeout(cleanup, fallbackDuration);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
