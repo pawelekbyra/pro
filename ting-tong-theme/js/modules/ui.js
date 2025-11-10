@@ -181,38 +181,22 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content');
+    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content, .info-modal-content');
+    const animationClass = options.animationClass;
 
-    // Wyczyść stare klasy animacji
-    if (content) {
-        content.classList.remove('slideOutLeft', 'slideInRight');
-        // Usuń stary event listener, jeśli istnieje
-        if (content._animationEndHandler) {
-            content.removeEventListener('animationend', content._animationEndHandler);
-        }
+    // Usunięcie poprzednich klas animacji, aby uniknąć konfliktów
+    if (content && content._lastAnimationClass) {
+        content.classList.remove(content._lastAnimationClass);
     }
 
     modal.style.display = 'flex';
     modal.classList.remove('is-hiding');
 
-    // Użyj `requestAnimationFrame`, aby upewnić się, że `display` zostało zaaplikowane
     requestAnimationFrame(() => {
         modal.classList.add('visible');
-
-        // Jeśli jest to animacja slideInRight, upewnij się, że zaczyna od stanu `opacity: 1`
-        if (options.animationClass === 'slideInRight' && content) {
-            content.style.opacity = '1';
-        }
-
-        if (options.animationClass && content) {
-            content.classList.add(options.animationClass);
-            // Zapisz handler, aby można go było usunąć
-            content._animationEndHandler = () => {
-                content.classList.remove(options.animationClass);
-                // Przywróć domyślą przeźroczystość po animacji
-                content.style.opacity = '';
-            };
-            content.addEventListener('animationend', content._animationEndHandler, { once: true });
+        if (content && animationClass) {
+            content.classList.add(animationClass);
+            content._lastAnimationClass = animationClass; // Zapisz klasę do późniejszego usunięcia
         }
     });
 
@@ -269,7 +253,7 @@ function openModal(modal, options = {}) {
 }
 
 function closeModal(modal, options = {}) {
-    if (!modal || !activeModals.has(modal)) return;
+    if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
 
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
@@ -280,23 +264,25 @@ function closeModal(modal, options = {}) {
     modal.classList.add("is-hiding");
 
     const animationClass = options.animationClass;
-    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content');
+    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content, .info-modal-content');
 
     const cleanup = () => {
+        // Usuń event listener, żeby uniknąć wielokrotnego wywołania
+        if (content) content.removeEventListener('animationend', cleanup);
+        modal.removeEventListener('transitionend', cleanup);
+
         modal.style.display = 'none';
         modal.classList.remove("visible", "is-hiding");
 
-        if (content) {
-            if (content._animationEndHandler) {
-                content.removeEventListener('animationend', content._animationEndHandler);
-                delete content._animationEndHandler;
-            }
-            if (animationClass) {
-                content.classList.remove(animationClass);
-            }
-            // Zresetuj styl opacity po zakończeniu
-            content.style.opacity = '';
+        // Usuń klasy animacji
+        if (content && content._lastAnimationClass) {
+            content.classList.remove(content._lastAnimationClass);
+            delete content._lastAnimationClass;
         }
+        if (content && animationClass) {
+            content.classList.remove(animationClass);
+        }
+
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
@@ -320,15 +306,39 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    if (animationClass && content) {
-        content.style.opacity = '1';
+    let animationEventFired = false;
+    const duration = 600; // Domyślny czas trwania animacji w ms
+
+    if (content && animationClass) {
+        // Usuń poprzednią klasę animacji wejściowej
+        if (content._lastAnimationClass) {
+            content.classList.remove(content._lastAnimationClass);
+        }
         content.classList.add(animationClass);
-        content.addEventListener('animationend', cleanup, { once: true });
+        content._lastAnimationClass = animationClass; // Zapamiętaj klasę wyjściową
+
+        content.addEventListener('animationend', () => {
+            animationEventFired = true;
+            cleanup();
+        }, { once: true });
+
+        // Fallback, jeśli event 'animationend' się nie odpali
+        setTimeout(() => {
+            if (!animationEventFired) cleanup();
+        }, duration + 50);
+
     } else {
         modal.classList.remove('visible');
-        const transitionDuration = parseFloat(getComputedStyle(modal).transitionDuration) * 1000;
-        modal.addEventListener('transitionend', cleanup, { once: true });
-        setTimeout(cleanup, transitionDuration + 50);
+        // Dla modali bez animacji keyframe (np. comments, które używają transition)
+        modal.addEventListener('transitionend', () => {
+             animationEventFired = true;
+             cleanup();
+        }, { once: true });
+
+        // Fallback
+        setTimeout(() => {
+            if (!animationEventFired) cleanup();
+        }, duration);
     }
 }
 

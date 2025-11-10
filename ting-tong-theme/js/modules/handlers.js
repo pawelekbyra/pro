@@ -499,7 +499,9 @@ export const Handlers = {
         UI.closeCommentsModal();
         break;
       case "open-info-modal":
-        UI.openModal(document.getElementById('infoModal'));
+        UI.openModal(document.getElementById('infoModal'), {
+          animationClass: 'slideInFromTop'
+        });
         break;
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
@@ -542,7 +544,11 @@ export const Handlers = {
       case "close-modal":
         const modal = actionTarget.closest(".modal-overlay");
         if (modal) {
-          UI.closeModal(modal);
+          if (modal.id === 'infoModal') {
+            UI.closeModal(modal, { animationClass: 'slideOutToTop' });
+          } else {
+            UI.closeModal(modal);
+          }
         } else {
           PWA.closePwaModals();
         }

@@ -704,13 +704,13 @@ get_header();
     </div>
 </div>
 
-<div id="pwa-desktop-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
+<div id="pwa-desktop-modal" class="modal-overlay pwa-desktop-mini-modal" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
-        <button class="modal-close-btn" data-action="close-modal">&times;</button>
-        <h2 id="pwa-desktop-title" data-translate-key="pwaModalTitle">Pełne doświadczenie Ting Tong na Twoim telefonie!</h2>
+        <button class="modal-close-btn" data-action="close-modal" aria-label="Zamknij">&times;</button>
         <div class="modal-body" style="text-align: center;">
-            <p data-translate-key="pwaModalBody">Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.</p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://example.com" alt="QR Code" style="margin-top: 16px; border-radius: 8px;">
+            <svg class="phone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 1h-8C6.12 1 5 2.12 5 3.5v17C5 21.88 6.12 23 7.5 23h8c1.38 0 2.5-1.12 2.5-2.5v-17C18 2.12 16.88 1 15.5 1zm-8 2h8c.28 0 .5.22.5.5v17c0 .28-.22.5-.5.5h-8c-.28 0-.5-.22-.5-.5v-17c0-.28.22-.5.5-.5zM12 19.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/></svg>
+            <p class="pwa-mini-modal-text">Ting Tong to aplikacja mobilna!</p>
+            <p class="pwa-mini-modal-subtitle">Wejdź na <strong>www.pawelperfect.pl</strong> na swoim telefonie, aby pobrać</p>
         </div>
     </div>
 </div>
@@ -773,17 +773,20 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
-    <div class="modal-content">
-        <button class="modal-close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
+<div id="infoModal" class="modal-overlay info-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
+    <div class="modal-content info-modal-content">
+        <div class="account-header">
+            <h2 id="info-modal-title" data-translate-key="crowdfundingTitle">Wspieraj Projekt</h2>
+            <button class="close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
+        </div>
         <div class="modal-body" id="infoModalBody">
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
-                    <h2 id="info-modal-title" class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspieraj Ting Tong</h2>
-                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">i dołącz do grona Patronów</p>
+                    <h2 class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspólnie Tworzymy Historię!</h2>
+                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
                 </div>
 
-                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Zbieram na rozwój wydarzeń i nowe projekty. Twoje wsparcie ma znaczenie!</p>
+                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie to nie tylko pomoc finansowa, ale przede wszystkim wotum zaufania i nieoceniona motywacja. Dzięki Tobie możemy się rozwijać, organizować niezwykłe wydarzenia i dostarczać jeszcze więcej emocji. Zostań częścią tej podróży!</p>
 
                 <div class="progress-section">
                     <div class="progress-bar-wrapper">
