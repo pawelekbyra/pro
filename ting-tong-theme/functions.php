@@ -423,7 +423,7 @@ function tt_enqueue_and_localize_scripts() {
         'tingtong-app-script',
         'TingTongConfig',
         [
-            'serviceWorkerUrl' => home_url('/sw.js'),
+            'serviceWorkerUrl' => get_template_directory_uri() . '/sw.js', // Bezpośrednia ścieżka do pliku
             'themeUrl'         => get_template_directory_uri(),
         ]
     );
@@ -1355,27 +1355,8 @@ add_action('wp_ajax_nopriv_tt_handle_tip_success', 'tt_handle_tip_success');
 // ============================================================================
 // SERVICE WORKER AT ROOT
 // ============================================================================
-add_action('init', function() {
-    add_rewrite_rule('^sw\\.js$', 'index.php?tt_sw=1', 'top');
-});
-
-add_filter('query_vars', function($vars) {
-    $vars[] = 'tt_sw';
-    return $vars;
-});
-
-add_action('template_redirect', function() {
-    if (get_query_var('tt_sw')) {
-        header('Content-Type: application/javascript; charset=utf-8');
-        header('Service-Worker-Allowed: /');
-
-        $sw_path = get_template_directory() . '/sw.js';
-        if (file_exists($sw_path)) {
-            readfile($sw_path);
-        }
-        exit;
-    }
-});
+// The rewrite rule logic has been removed to fix the "behind a redirect"
+// error when registering the service worker. The SW is now loaded directly.
 
 // ============================================================================
 // DYNAMICZNY MANIFEST PWA
