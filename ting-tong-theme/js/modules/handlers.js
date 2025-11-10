@@ -647,20 +647,7 @@ export const Handlers = {
             UI.closeCommentsModal();
           }
           if (loginPanel) {
-            // Natychmiast usuń animację zamykania, jeśli istnieje
-            loginPanel.classList.remove('login-panel--closing');
-
-            // Przełącz stan
-            const isActive = loginPanel.classList.toggle('active');
-
-            if (!isActive) {
-                // Jeśli panel się zamyka, dodaj klasę animacji zamykania
-                loginPanel.classList.add('login-panel--closing');
-                loginPanel.addEventListener('animationend', () => {
-                    // Posprzątaj po zakończeniu animacji
-                    loginPanel.classList.remove('login-panel--closing');
-                }, { once: true });
-            }
+            loginPanel.classList.toggle("active");
           }
           if (topbar) topbar.classList.toggle("login-panel-active");
         }
