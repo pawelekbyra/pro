@@ -90,4 +90,30 @@ export const Utils = {
     // For older dates, return a simple date format
     return date.toLocaleDateString(lang, { month: 'short', day: 'numeric' });
   },
+
+  isValidEmail: (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  },
+
+  /**
+   * Konwertuje klucz VAPID z formatu URL-safe base64 na Uint8Array.
+   * @param {string} base64String Klucz w formacie base64.
+   * @returns {Uint8Array}
+   */
+  urlBase64ToUint8Array: (base64String) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  },
 };

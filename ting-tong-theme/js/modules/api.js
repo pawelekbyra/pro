@@ -2,10 +2,10 @@ import { authManager } from './auth-manager.js';
 
 export let slidesData = [];
 
-async function _request(action, data = {}) {
+async function _request(action, data = {}, sendAsJson = false) {
   try {
-    // Użyj AuthManager zamiast bezpośredniego fetch
-    return await authManager.ajax(action, data);
+    // Użyj AuthManager zamiast bezpośredniego fetch, przekazując flagę sendAsJson
+    return await authManager.ajax(action, data, sendAsJson);
   } catch (error) {
     console.error(`API Client Error for action "${action}":`, error);
     return { success: false, data: { message: error.message } };
@@ -29,9 +29,43 @@ export const API = {
     }
   },
 
+  // === NOWE METODY STRIPE (NAPRAWIONY EKSPORT) ===
+
+  /**
+   * Tworzy Payment Intent na serwerze i zwraca client_secret.
+   * Wyrzuca błąd w przypadku niepowodzenia.
+   */
+  createStripePaymentIntent: async (amount, currency, countryCodeHint) => { // DODANO HINT
+    const result = await _request("tt_create_payment_intent", {
+      amount,
+      currency,
+      country_code_hint: countryCodeHint, // PRZEKAZANIE HINTU
+    });
+
+    if (result.success && result.data?.clientSecret) {
+        return result.data.clientSecret;
+    }
+
+    throw new Error(result.data?.message || 'Failed to create Payment Intent.');
+  },
+
+  /**
+   * AJAX: Zapisuje Lokalizację (locale) w profilu WP użytkownika.
+   */
+  updateLocale: (locale) => _request("tt_update_locale", { locale }), // DODANO NOWĄ METODĘ
+
+  /**
+   * Wywołuje weryfikację płatności po stronie serwera po udanej transakcji.
+   */
+  handleTipSuccess: async (paymentIntentId) => {
+    return _request("tt_handle_tip_success", { payment_intent_id: paymentIntentId });
+  },
+
+  // === ISTNIEJĄCE METODY ===
+
   uploadCommentImage: async (file) => {
     try {
-      // Walidacja pliku
+      // ... (pozostała logika bez zmian)
       if (!file || !(file instanceof File)) {
         throw new Error('Invalid file');
       }
@@ -61,7 +95,6 @@ export const API = {
 
       const json = await response.json();
 
-      // Walidacja odpowiedzi
       if (!json || typeof json !== 'object') {
         throw new Error('Invalid response format');
       }
@@ -70,7 +103,6 @@ export const API = {
         ajax_object.nonce = json.new_nonce;
       }
 
-      // Sprawdź czy sukces i czy mamy URL
       if (json.success && !json.data?.url) {
         throw new Error('Missing image URL in response');
       }
@@ -84,6 +116,7 @@ export const API = {
       };
     }
   },
+
   login: (data) => _request("tt_ajax_login", data),
   logout: () => _request("tt_ajax_logout"),
   toggleLike: (postId) => _request("toggle_like", { post_id: postId }),
@@ -117,4 +150,20 @@ export const API = {
       slide_id: slideId,
       comment_id: commentId,
     }),
+  getNewCrowdfundingStats: () => _request("tt_get_crowdfunding_stats"),
+  saveSettings: (data) => _request("tt_save_settings", data),
+  uploadAvatar: (data) => _request("tt_avatar_upload", data, true),
+  updateProfile: (data) => _request("tt_profile_update", data),
+  changePassword: (data) => _request("tt_password_change", data),
+  deleteAccount: (data) => _request("tt_account_delete", data),
+  loadUserProfile: () => _request("tt_profile_get"),
+
+  /**
+   * Zapisuje subskrypcję Web Push na serwerze.
+   * @param {PushSubscription} subscription Obiekt subskrypcji z przeglądarki.
+   */
+  savePushSubscription: (subscription) => {
+    // Używamy _request z opcją `sendAsJson = true`
+    return _request("tt_save_push_subscription", subscription, true);
+  },
 };

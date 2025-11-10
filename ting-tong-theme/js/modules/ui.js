@@ -9,6 +9,48 @@ function setPwaModule(pwaModule) {
   PWA_MODULE = pwaModule;
 }
 
+function getIsUserLoggedIn() {
+return State.get("isUserLoggedIn");
+}
+
+let countdownInterval = null;
+
+function startCountdown() {
+  const countdownElement = document.getElementById('countdown-timer');
+  const countdownDateElement = document.getElementById('countdown-date');
+  if (!countdownElement || !countdownDateElement) return;
+
+  const endDate = new Date(countdownDateElement.textContent).getTime();
+
+  const updateCountdown = () => {
+    const now = new Date().getTime();
+    const distance = endDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownElement.textContent = "Premiera!";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdownElement.innerHTML = `
+      <span class="countdown-part">${days}<span class="countdown-label-small">dni</span></span>
+      <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label-small">h</span></span>
+      <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label-small">m</span></span>
+      <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label-small">s</span></span>`;
+  };
+
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
 let selectedCommentImage = null;
 
 const DOM = {};
@@ -22,13 +64,76 @@ function initDOMCache() {
   DOM.alertText = document.getElementById("alertText");
   DOM.commentsModal = document.getElementById("comments-modal-container");
   DOM.accountModal = document.getElementById("accountModal");
-  DOM.tiktokProfileModal = document.getElementById("tiktok-profile-modal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
   DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
   DOM.welcomeModal = document.getElementById("welcome-modal");
   DOM.infoModal = document.getElementById("infoModal");
+  DOM.authorProfileModal = document.getElementById("author-profile-modal");
 }
+
+function openAuthorProfileModal(slideData) {
+    const modal = DOM.authorProfileModal;
+    if (!modal) return;
+
+    openModal(modal, {
+        animationClass: 'slideInRight',
+        onOpen: () => {
+            const author = slideData.author;
+            modal.querySelector('.username-header').textContent = author.name;
+            modal.querySelector('.profile-avatar').src = author.avatar;
+            modal.querySelector('.fullname').textContent = author.name;
+            modal.querySelector('.bio').textContent = author.bio || '';
+
+            // Mockup stats
+            modal.querySelector('.following-count').textContent = '123';
+            modal.querySelector('.followers-count').textContent = '45.6K';
+            modal.querySelector('.likes-count').textContent = '1.2M';
+
+            // Populate video grid with real thumbnails
+            const videosGrid = modal.querySelector('#videos-grid');
+            videosGrid.innerHTML = '';
+
+            const authorSlides = slidesData.filter(s => s.author.name === author.name && !s.isIframe);
+
+            // Display author's slides, with the current slide as the last one
+            const otherSlides = authorSlides.filter(s => s.id !== slideData.id);
+            const orderedSlides = [...otherSlides, slideData];
+
+            orderedSlides.forEach(authorSlide => {
+                const thumbnailUrl = authorSlide.thumbnailUrl || `https://picsum.photos/200/300?random=${authorSlide.id}`;
+                const videoThumbnail = `
+                    <div class="video-thumbnail" data-video-url="${authorSlide.mp4Url}">
+                        <img src="${thumbnailUrl}" alt="Video thumbnail">
+                        <div class="video-views">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                            <span>${Utils.formatCount(authorSlide.initialLikes)}</span>
+                        </div>
+                    </div>
+                `;
+                videosGrid.innerHTML += videoThumbnail;
+            });
+        }
+    });
+}
+
+function closeAuthorProfileModal() {
+    const modal = DOM.authorProfileModal;
+    if (!modal) return;
+    closeModal(modal, { animationClass: 'slideOutRight' });
+
+    // Dodatkowo zamknij odtwarzacz wideo, jeśli jest otwarty
+    const videoModal = document.getElementById('video-player-modal');
+    if (videoModal && videoModal.classList.contains('visible')) {
+        const videoPlayer = videoModal.querySelector('video');
+        if (videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.src = ''; // Wyczyść źródło, aby zatrzymać buforowanie
+        }
+        closeModal(videoModal);
+    }
+}
+
 function showToast(message, isError = false) {
     showAlert(message, isError);
 }
@@ -87,13 +192,28 @@ const activeModals = new Set();
 
 function openModal(modal, options = {}) {
     if (!modal) {
-        console.error("Attempted to open a null modal element."); // Dodany log dla pewności
+        console.error("Attempted to open a null modal element.");
         return;
     }
 
-    // ZMIANY: Wymuś wyświetlanie i usuń blokującą klasę
-    modal.style.display = 'block'; // **Kluczowa zmiana: wymusza widoczność, nadpisując CSS**
-    modal.classList.remove("is-hiding"); // Zapobiega błędom po przerwanej animacji zamykania
+    // Pauzowanie wideo w tle
+    const swiper = State.get('swiper');
+    if (swiper && swiper.slides[swiper.activeIndex]) {
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        const video = activeSlide.querySelector('video');
+        if (video && !video.paused) {
+            video.pause();
+            State.set('videoPausedByModal', true);
+        }
+    }
+
+    modal.style.display = 'flex';
+    modal.classList.remove('is-hiding');
+
+    // Force a reflow before adding the class to ensure the transition is applied.
+    void modal.offsetWidth;
+
+    modal.classList.add('visible');
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
@@ -108,80 +228,107 @@ function openModal(modal, options = {}) {
         }
     }
 
-    modal.classList.add('visible');
+    if (modal.id === 'infoModal') {
+        startCountdown();
+        updateCrowdfundingStats();
+    }
+
+    // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
+    if (!options.isPersistent) {
+        const closeOnClick = (e) => {
+            // Sprawdź, czy kliknięto bezpośrednio w overlay
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        };
+        modal.addEventListener('click', closeOnClick);
+        modal._closeOnClick = closeOnClick;
+    }
+
     activeModals.add(modal);
-
-    if (activeModals.size === 1) {
-        document.body.style.overflow = 'hidden';
-    }
-
-    // ... reszta kodu bez zmian ...
-
-    if (options.onOpen) {
-        options.onOpen();
-    }
-
-    // Store the onClose callback on the element itself
-    if (options.onClose) {
-        modal.onCloseCallback = options.onClose;
-    }
-
-    State.set("lastFocusedElement", document.activeElement);
+    document.body.style.overflow = 'hidden';
     DOM.container.setAttribute("aria-hidden", "true");
     modal.setAttribute("aria-hidden", "false");
+
+    // Zarządzanie focusem
+    State.set("lastFocusedElement", document.activeElement);
     const focusable = getFocusable(modal);
-    (focusable.length > 0 ? focusable[0] : modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content"))?.focus();
+    const focusTarget = modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content, .profile-content") || modal;
+
+    if (focusable.length > 0) {
+        focusable[0].focus();
+    } else {
+        focusTarget.focus();
+    }
+
     modal._focusTrapDispose = trapFocus(modal);
+
+    if (options.onOpen) options.onOpen();
+    if (options.onClose) modal.onCloseCallback = options.onClose;
 }
 
-function closeModal(modal) {
-    if (!modal || !activeModals.has(modal) || modal.classList.contains("is-hiding")) return;
+function closeModal(modal, options = {}) {
+    if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
 
-    const isAnimated = modal.querySelector('.first-login-modal-content-wrapper, .modal-content, .tiktok-profile-content, .account-modal-content');
+    if (modal._closeOnClick) {
+        modal.removeEventListener('click', modal._closeOnClick);
+        delete modal._closeOnClick;
+    }
 
-    modal.classList.add("is-hiding");
     modal.setAttribute("aria-hidden", "true");
+    modal.classList.add("is-hiding");
+    modal.classList.remove("visible");
 
     const cleanup = () => {
-        modal.removeEventListener("transitionend", cleanup);
-        modal.classList.remove("visible", "is-hiding");
+        modal.removeEventListener('transitionend', cleanup);
+        modal.style.display = 'none';
+        modal.classList.remove('is-hiding');
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
         }
-
         activeModals.delete(modal);
-
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
+            DOM.container.removeAttribute("aria-hidden");
+
+            // Wznawianie wideo w tle
+            if (State.get('videoPausedByModal')) {
+                const swiper = State.get('swiper');
+                if (swiper && swiper.slides[swiper.activeIndex]) {
+                    const activeSlide = swiper.slides[swiper.activeIndex];
+                    const video = activeSlide.querySelector('video');
+                    if (video && video.paused) {
+                        video.play().catch(e => console.error("Błąd odtwarzania wideo po zamknięciu modala:", e));
+                    }
+                }
+                State.set('videoPausedByModal', false);
+            }
         }
-
-        DOM.container.removeAttribute("aria-hidden");
-        State.get("lastFocusedElement")?.focus();
-
-        // Execute and clear the onClose callback
+        if (!options.keepFocus) {
+            State.get("lastFocusedElement")?.focus();
+        }
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
             delete modal.onCloseCallback;
         }
-
-        if (modal.id === "commentsModal") {
-            State.set("replyingToComment", null, true);
-            const replyContext = document.querySelector(".reply-context");
-            if (replyContext) replyContext.style.display = "none";
-            if (typeof UI.removeCommentImage === 'function') UI.removeCommentImage();
-            const commentInput = document.querySelector("#comment-input");
-            if (commentInput) commentInput.value = "";
-        }
     };
 
-    if (isAnimated) {
-        modal.addEventListener("transitionend", cleanup, { once: true });
-        setTimeout(cleanup, 500); // Fallback
-    } else {
+    let eventFired = false;
+    const duration = 500; // Match the longest transition time in CSS
+
+    modal.addEventListener('transitionend', () => {
+        eventFired = true;
         cleanup();
-    }
+    }, { once: true });
+
+    // Fallback in case the transitionend event doesn't fire
+    setTimeout(() => {
+        if (!eventFired) {
+            cleanup();
+        }
+    }, duration);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
@@ -602,58 +749,6 @@ function renderSlides() {
   });
 }
 
-function populateProfileModal(slideData) {
-  if (!slideData || !slideData.author || !DOM.tiktokProfileModal) return;
-
-  const { author } = slideData;
-
-  // Basic info
-  const atUsername = `@${author.name
-    .toLowerCase()
-    .replace(/\s/g, "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")}`;
-  DOM.tiktokProfileModal.querySelector("#tiktok-profile-avatar").src =
-    author.avatar;
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-profile-username",
-  ).textContent = author.name;
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-profile-nickname",
-  ).textContent = author.name;
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-profile-at-username",
-  ).textContent = atUsername;
-  DOM.tiktokProfileModal.querySelector("#tiktok-profile-bio").textContent =
-    author.description;
-
-  // Stats
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-following-count",
-  ).textContent = Math.floor(Math.random() * 500);
-  DOM.tiktokProfileModal.querySelector(
-    "#tiktok-followers-count",
-  ).textContent = Utils.formatCount(Math.floor(Math.random() * 5000000));
-  DOM.tiktokProfileModal.querySelector("#tiktok-likes-count").textContent =
-    Utils.formatCount(slideData.initialLikes * 3.5); // Mock total likes
-
-  // Video Grid (mock data)
-  const videoGrid = DOM.tiktokProfileModal.querySelector("#videos-grid");
-  videoGrid.innerHTML = ""; // Clear previous
-  for (let i = 1; i <= 9; i++) {
-    const thumb = document.createElement("div");
-    thumb.className = "video-thumbnail";
-    thumb.innerHTML = `
-                    <img src="https://picsum.photos/200/280?random=${slideData.id}-${i}" alt="Miniatura filmu">
-                    <div class="video-views">
-                        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                        ${Utils.formatCount(Math.floor(Math.random() * 3000000))}
-                    </div>
-                `;
-    videoGrid.appendChild(thumb);
-  }
-}
-
 function updateCommentFormVisibility() {
   const isLoggedIn = State.get("isUserLoggedIn");
   const form = document.getElementById("comment-form");
@@ -1015,16 +1110,37 @@ function initGlobalPanels() {
     });
   }
 }
-function openAuthorModal(slideData) {
-  if (!slideData || !slideData.author) {
-    // Lepszy komunikat błędu
-    console.error("Slide data or Author object is missing/incomplete.");
-    return;
-  }
-  populateProfileModal(slideData); // Przekazanie całego obiektu slajdu
-  openModal(DOM.tiktokProfileModal);
-}
 
+function closeWelcomeModal() {
+    const modal = DOM.welcomeModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const content = modal.querySelector('.welcome-modal-content');
+
+    const cleanup = () => {
+        if(content) content.removeEventListener('animationend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            const lastFocused = State.get('lastFocusedElement');
+            if(lastFocused) lastFocused.focus();
+        }
+    };
+
+    if(content){
+        content.addEventListener('animationend', cleanup, { once: true });
+        setTimeout(cleanup, 700); // Fallback
+    } else {
+        closeModal(modal); // Fallback for simple structure
+    }
+}
 
 export const UI = {
   initDOMCache,
@@ -1038,10 +1154,8 @@ export const UI = {
   createSlideElement,
   renderSlides,
   initGlobalPanels,
-  populateProfileModal,
   renderComments,
   updateCommentFormVisibility,
-  openAuthorModal,
   showToast,
   updateVolumeButton,
   toggleEmojiPicker,
@@ -1054,8 +1168,50 @@ export const UI = {
   closeImageLightbox,
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
+  getIsUserLoggedIn,
   closeCommentsModal,
+  closeWelcomeModal,
+  updateCrowdfundingStats,
+  openAuthorProfileModal,
+  closeAuthorProfileModal,
 };
+
+async function updateCrowdfundingStats() {
+    try {
+        const result = await API.getNewCrowdfundingStats();
+        if (result.success && result.data) {
+            const stats = result.data;
+            const patronsEl = document.querySelector('.stats-grid .stat-item:nth-child(1) .stat-value');
+            const collectedEl = document.querySelector('.progress-label span strong');
+            const progressFillEl = document.querySelector('.progress-section .progress-bar-fill');
+            const progressLabelEl = document.querySelector('.progress-label');
+
+            if (patronsEl) patronsEl.textContent = stats.patrons_count;
+
+            if (progressLabelEl) {
+                const goal = parseFloat(progressLabelEl.dataset.goal) || 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressLabelEl.dataset.collected = stats.collected_eur.toFixed(2);
+                progressLabelEl.dataset.percentage = percentage.toFixed(0);
+
+                if (collectedEl) collectedEl.textContent = `${stats.collected_eur.toFixed(2)} z ${goal} EUR`;
+
+                const labelSpan = progressLabelEl.querySelector('span');
+                if(labelSpan) {
+                    labelSpan.innerHTML = `Cel: <strong>${stats.collected_eur.toFixed(2)} z ${goal} EUR</strong> (${percentage.toFixed(0)}%)`;
+                }
+            }
+
+            if (progressFillEl) {
+                const goal = 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressFillEl.style.width = `${percentage}%`;
+            }
+        }
+    } catch (error) {
+        console.error("Failed to update crowdfunding stats:", error);
+    }
+}
 
 function closeCommentsModal() {
     const modal = DOM.commentsModal;
