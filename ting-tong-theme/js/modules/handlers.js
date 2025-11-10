@@ -647,14 +647,19 @@ export const Handlers = {
             UI.closeCommentsModal();
           }
           if (loginPanel) {
-            if (loginPanel.classList.contains('active')) {
-              loginPanel.classList.add('login-panel--closing');
-              loginPanel.addEventListener('animationend', () => {
-                loginPanel.classList.remove('active', 'login-panel--closing');
-              }, { once: true });
-            } else {
-              loginPanel.classList.remove('login-panel--closing');
-              loginPanel.classList.add('active');
+            // Natychmiast usuń animację zamykania, jeśli istnieje
+            loginPanel.classList.remove('login-panel--closing');
+
+            // Przełącz stan
+            const isActive = loginPanel.classList.toggle('active');
+
+            if (!isActive) {
+                // Jeśli panel się zamyka, dodaj klasę animacji zamykania
+                loginPanel.classList.add('login-panel--closing');
+                loginPanel.addEventListener('animationend', () => {
+                    // Posprzątaj po zakończeniu animacji
+                    loginPanel.classList.remove('login-panel--closing');
+                }, { once: true });
             }
           }
           if (topbar) topbar.classList.toggle("login-panel-active");
