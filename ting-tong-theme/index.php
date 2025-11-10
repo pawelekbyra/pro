@@ -14,7 +14,7 @@ get_header();
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
                 <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
-                <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
+                <button type="button" class="modal-close-btn" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
                 </div>
@@ -371,7 +371,7 @@ get_header();
                 <div class="stats-container">
                     <div class="stat">
                         <span class="stat-number following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Followers</span>
+                        <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
                     </div>
                     <div class="stat">
                         <span class="stat-number followers-count">0</span>
@@ -379,7 +379,7 @@ get_header();
                     </div>
                     <div class="stat">
                         <span class="stat-number likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Followers</span>
+                        <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
                     </div>
                 </div>
             </section>
