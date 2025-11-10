@@ -483,6 +483,10 @@ get_header();
         </div>
     </div>
 </div>
+<div id="video-player-modal" class="modal-overlay" style="background-color: #000;">
+    <video controls style="width: 100%; height: 100%;"></video>
+    <button class="modal-close-btn" data-action="close-modal" style="color: #fff;">&times;</button>
+</div>
 
 <div class="notification-popup" id="notificationPopup" role="dialog" aria-modal="true" aria-labelledby="notification-title">
     <div class="notification-header">

@@ -76,39 +76,43 @@ function openAuthorProfileModal(slideData) {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
 
-    // Używamy centralnej funkcji openModal, a logikę populacji przenosimy do onOpen.
     openModal(modal, {
         animationClass: 'slideInRight',
         onOpen: () => {
-            // Populate data
             const author = slideData.author;
             modal.querySelector('.username-header').textContent = author.name;
             modal.querySelector('.profile-avatar').src = author.avatar;
-            modal.querySelector('.fullname').textContent = author.name; // Assuming fullname is the same as name
+            modal.querySelector('.fullname').textContent = author.name;
             modal.querySelector('.bio').textContent = author.bio || '';
 
-            // Mockup stats for now
+            // Mockup stats
             modal.querySelector('.following-count').textContent = '123';
             modal.querySelector('.followers-count').textContent = '45.6K';
             modal.querySelector('.likes-count').textContent = '1.2M';
 
-            // Populate video grid (mockup)
+            // Populate video grid with real thumbnails
             const videosGrid = modal.querySelector('#videos-grid');
-            videosGrid.innerHTML = ''; // Clear previous content
-            for (let i = 0; i < 12; i++) {
-                const views = `${Math.floor(Math.random() * 10) + 1}.${Math.floor(Math.random() * 10)}K`;
-                const thumbnailUrl = `https://picsum.photos/200/300?random=${i}`; // Placeholder images
+            videosGrid.innerHTML = '';
+
+            const authorSlides = slidesData.filter(s => s.author.name === author.name && !s.isIframe);
+
+            // Display author's slides, with the current slide as the last one
+            const otherSlides = authorSlides.filter(s => s.id !== slideData.id);
+            const orderedSlides = [...otherSlides, slideData];
+
+            orderedSlides.forEach(authorSlide => {
+                const thumbnailUrl = authorSlide.thumbnailUrl || `https://picsum.photos/200/300?random=${authorSlide.id}`;
                 const videoThumbnail = `
-                    <div class="video-thumbnail">
+                    <div class="video-thumbnail" data-video-url="${authorSlide.mp4Url}">
                         <img src="${thumbnailUrl}" alt="Video thumbnail">
                         <div class="video-views">
                             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                            <span>${views}</span>
+                            <span>${Utils.formatCount(authorSlide.initialLikes)}</span>
                         </div>
                     </div>
                 `;
                 videosGrid.innerHTML += videoThumbnail;
-            }
+            });
         }
     });
 }
