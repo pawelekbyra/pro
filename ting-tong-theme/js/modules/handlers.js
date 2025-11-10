@@ -611,7 +611,16 @@ export const Handlers = {
           if (UI.DOM.commentsModal.classList.contains("visible")) {
             UI.closeCommentsModal();
           }
-          if (loginPanel) loginPanel.classList.toggle("active");
+          if (loginPanel) {
+            if (loginPanel.classList.contains('active')) {
+                loginPanel.classList.add('login-panel--closing');
+                loginPanel.addEventListener('animationend', () => {
+                    loginPanel.classList.remove('active', 'login-panel--closing');
+                }, { once: true });
+            } else {
+                loginPanel.classList.add('active');
+            }
+          }
           if (topbar) topbar.classList.toggle("login-panel-active");
         }
         break;

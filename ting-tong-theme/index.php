@@ -359,6 +359,9 @@ get_header();
     <div class="profile-modal-content">
         <header class="profile-header">
             <h2 id="author-profile-title" class="username-header"></h2>
+            <button class="options-btn" aria-label="Options">
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
             <button class="modal-close-btn" data-action="close-author-profile" aria-label="Close profile">
                 &times;
             </button>
@@ -770,67 +773,60 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<div id="infoModal" class="info-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
-    <div class="info-modal-content">
+<div id="infoModal" class="modal-overlay info-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
+    <div class="modal-content info-modal-content">
         <div class="account-header">
-            <h2 id="info-modal-title">Wspieraj Projekt</h2>
-            <button class="close-btn" data-action="close-modal">&times;</button>
+            <h2 id="info-modal-title" data-translate-key="crowdfundingTitle">Wspieraj Projekt</h2>
+            <button class="close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
         </div>
-
-        <div class="crowdfunding-container">
-            <h2 class="crowdfunding-title">Wspólnie Tworzymy Historię!</h2>
-            <p class="crowdfunding-subtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
-            <p class="crowdfunding-description">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie pozwala nam rozwijać się, tworzyć wydarzenia, dostarczać unikalne doświadczenia i emocje. Dołącz do naszej podróży i zostaw po sobie ślad w historii!</p>
-
-            <div class="progress-section">
-                <div class="progress-bar-wrapper">
-                    <div class="progress-bar-fill" id="progressFill"></div>
-                    <div class="progress-bar-sparkle"></div>
+        <div class="modal-body" id="infoModalBody">
+            <div class="crowdfunding-container">
+                <div class="crowdfunding-header">
+                    <h2 class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspólnie Tworzymy Historię!</h2>
+                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
                 </div>
-                <div class="progress-label" id="progressLabel">Cel: <strong>0 z 500 EUR</strong> (0%)</div>
-            </div>
 
-            <div class="countdown-section">
-                <div class="premiere-date-label">Premiera już</div>
-                <div class="premiere-date-value" id="premiereDate">1.01.2026</div>
-                <div class="countdown-label">Pozostało</div>
-                <div class="countdown-value" id="countdownTimer">
-                    <div class="countdown-part">
-                        <span id="days">--</span>
-                        <span class="countdown-label-small">Dni</span>
+                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie to nie tylko pomoc finansowa, ale przede wszystkim wotum zaufania i nieoceniona motywacja. Dzięki Tobie możemy się rozwijać, organizować niezwykłe wydarzenia i dostarczać jeszcze więcej emocji. Zostań częścią tej podróży!</p>
+
+                <div class="progress-section">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                        <div class="progress-bar-sparkle"></div>
                     </div>
-                    <div class="countdown-part">
-                        <span id="hours">--</span>
-                        <span class="countdown-label-small">Godziny</span>
-                    </div>
-                    <div class="countdown-part">
-                        <span id="minutes">--</span>
-                        <span class="countdown-label-small">Minuty</span>
-                    </div>
-                    <div class="countdown-part">
-                        <span id="seconds">--</span>
-                        <span class="countdown-label-small">Sekundy</span>
+                    <div class="progress-label" data-translate-key-dynamic="crowdfundingGoalLabel" data-collected="0" data-goal="500" data-percentage="0">
+                        <span>Cel: <strong>0 z 500 EUR</strong> (0%)</span>
                     </div>
                 </div>
-            </div>
 
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="supportersCount">0</div>
-                    <div class="stat-label">Patronów</div>
+                <div class="countdown-section">
+                    <div class="premiere-date-label" data-translate-key="crowdfundingPremiereLabel">Premiera już</div>
+                    <div class="premiere-date-value">1.01.2026</div>
+                    <div class="countdown-label" data-translate-key="crowdfundingCountdownLabel">Pozostało</div>
+                    <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
+                    <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value">500 EUR</div>
-                    <div class="stat-label">Cel</div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label" data-translate-key="crowdfundingSupportersLabel">Patronów</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">500 EUR</span>
+                        <span class="stat-label" data-translate-key="crowdfundingGoalStatLabel">Cel</span>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <button class="cta-button" data-action="open-tipping-from-info">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
+                        <span data-translate-key="crowdfundingCtaButton">Zostań Patronem</span>
+                    </button>
                 </div>
             </div>
-
-            <button class="cta-button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
-                Zostań Patronem
-            </button>
         </div>
     </div>
 </div>
+
 
 <?php get_footer(); ?>
