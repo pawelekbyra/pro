@@ -844,8 +844,9 @@ body,
   transform: scale(0.9);
 }
 
-.info-icon-pulsing {
+.info-button svg.info-icon-pulsing {
     animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    transition: none !important;
 }
 
 @keyframes pulse {
