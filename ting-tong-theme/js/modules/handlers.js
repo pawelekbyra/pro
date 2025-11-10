@@ -577,6 +577,7 @@ export const Handlers = {
         UI.closeAuthorProfileModal();
         break;
       case "close-modal":
+        e.stopPropagation(); // Stop the event from bubbling up to parent elements
         const modal = actionTarget.closest(".modal-overlay");
         if (modal) {
           if (modal.id === 'infoModal') {
