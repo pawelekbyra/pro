@@ -97,7 +97,7 @@ function openAuthorProfileModal(slideData) {
             videosGrid.innerHTML = ''; // Clear previous content
             for (let i = 0; i < 12; i++) {
                 const views = `${Math.floor(Math.random() * 10) + 1}.${Math.floor(Math.random() * 10)}K`;
-                const thumbnailUrl = `https://picsum.photos/200/300?random=${i}`; // Placeholder images
+                const thumbnailUrl = (i === 11 && slideData.videoThumbnail) ? slideData.videoThumbnail : `https://picsum.photos/200/300?random=${i}`;
                 const videoThumbnail = `
                     <div class="video-thumbnail">
                         <img src="${thumbnailUrl}" alt="Video thumbnail">
