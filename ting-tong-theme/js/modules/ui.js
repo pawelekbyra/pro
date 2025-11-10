@@ -185,24 +185,13 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content, .info-modal-content');
-    const animationClass = options.animationClass;
-
-    // Usunięcie poprzednich klas animacji, aby uniknąć konfliktów
-    if (content && content._lastAnimationClass) {
-        content.classList.remove(content._lastAnimationClass);
-    }
-
     modal.style.display = 'flex';
     modal.classList.remove('is-hiding');
-    modal.classList.add('visible');
 
-    requestAnimationFrame(() => {
-        if (content && animationClass) {
-            content.classList.add(animationClass);
-            content._lastAnimationClass = animationClass;
-        }
-    });
+    // Force a reflow before adding the class to ensure the transition is applied.
+    void modal.offsetWidth;
+
+    modal.classList.add('visible');
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
@@ -266,84 +255,45 @@ function closeModal(modal, options = {}) {
 
     modal.setAttribute("aria-hidden", "true");
     modal.classList.add("is-hiding");
-
-    const animationClass = options.animationClass;
-    const content = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content, .info-modal-content');
+    modal.classList.remove("visible");
 
     const cleanup = () => {
-        // Usuń event listener, żeby uniknąć wielokrotnego wywołania
-        if (content) content.removeEventListener('animationend', cleanup);
         modal.removeEventListener('transitionend', cleanup);
-
         modal.style.display = 'none';
-        modal.classList.remove("visible", "is-hiding");
-
-        // Usuń klasy animacji
-        if (content && content._lastAnimationClass) {
-            content.classList.remove(content._lastAnimationClass);
-            delete content._lastAnimationClass;
-        }
-        if (content && animationClass) {
-            content.classList.remove(animationClass);
-        }
-
+        modal.classList.remove('is-hiding');
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
         }
-
         activeModals.delete(modal);
-
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
             DOM.container.removeAttribute("aria-hidden");
         }
-
         if (!options.keepFocus) {
             State.get("lastFocusedElement")?.focus();
         }
-
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
             delete modal.onCloseCallback;
         }
     };
 
-    let animationEventFired = false;
-    const duration = 600; // Domyślny czas trwania animacji w ms
+    let eventFired = false;
+    const duration = 500; // Match the longest transition time in CSS
 
-    if (content && animationClass) {
-        // Usuń poprzednią klasę animacji wejściowej
-        if (content._lastAnimationClass) {
-            content.classList.remove(content._lastAnimationClass);
-        }
-        content.classList.add(animationClass);
-        content._lastAnimationClass = animationClass; // Zapamiętaj klasę wyjściową
+    modal.addEventListener('transitionend', () => {
+        eventFired = true;
+        cleanup();
+    }, { once: true });
 
-        content.addEventListener('animationend', () => {
-            animationEventFired = true;
+    // Fallback in case the transitionend event doesn't fire
+    setTimeout(() => {
+        if (!eventFired) {
             cleanup();
-        }, { once: true });
-
-        // Fallback, jeśli event 'animationend' się nie odpali
-        setTimeout(() => {
-            if (!animationEventFired) cleanup();
-        }, duration + 50);
-
-    } else {
-        modal.classList.remove('visible');
-        // Dla modali bez animacji keyframe (np. comments, które używają transition)
-        modal.addEventListener('transitionend', () => {
-             animationEventFired = true;
-             cleanup();
-        }, { once: true });
-
-        // Fallback
-        setTimeout(() => {
-            if (!animationEventFired) cleanup();
-        }, duration);
-    }
+        }
+    }, duration);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
