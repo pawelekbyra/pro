@@ -5856,16 +5856,11 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .modal-close-btn {
-    position: absolute;
-    top: var(--safe-area-top);
-    left: 10px;
-    height: var(--topbar-base-height);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 10px;
     font-size: 28px;
     font-weight: 300;
-    z-index: 10;
 }
 
 #author-profile-modal .options-btn {
@@ -5898,25 +5893,18 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .info-section {
-    display: grid;
-    grid-template-areas:
-        "avatar stats"
-        "avatar stats";
-    grid-template-columns: auto 1fr;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    width: 100%;
-}
-
-#author-profile-modal .avatar-container {
-    grid-area: avatar;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 #author-profile-modal .stats-container {
-    grid-area: stats;
     display: flex;
     justify-content: space-around;
-    gap: 10px; /* Zmniejszony odstęp */
+    gap: 20px;
+    width: 100%;
 }
 
 #author-profile-modal .stats-container .stat {

@@ -374,15 +374,15 @@ get_header();
                 <div class="stats-container">
                     <div class="stat">
                         <span class="stat-number following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Obserwuje</span>
+                        <span class="stat-label" data-translate-key="profileFollowing">Obserw.</span>
                     </div>
                     <div class="stat">
                         <span class="stat-number followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowers">Obserwujący</span>
+                        <span class="stat-label" data-translate-key="profileFollowers">Obserw.</span>
                     </div>
                     <div class="stat">
                         <span class="stat-number likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Polubienia</span>
+                        <span class="stat-label" data-translate-key="profileLikes">Likes</span>
                     </div>
                 </div>
             </section>
