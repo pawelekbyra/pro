@@ -156,10 +156,35 @@ export const Handlers = {
             const videoModal = document.getElementById('video-player-modal');
             const videoPlayer = videoModal.querySelector('video');
             videoPlayer.src = videoUrl;
+
+            // 1. Zlokalizuj wideo w tle i zapauzuj, jeśli gra
+            const swiper = State.get('swiper');
+            let mainVideo;
+            if (swiper && swiper.slides[swiper.activeIndex]) {
+                mainVideo = swiper.slides[swiper.activeIndex].querySelector('video');
+                // Pauzujemy główne wideo tylko, jeśli już leci
+                if (mainVideo && !mainVideo.paused && !mainVideo.ended) {
+                    mainVideo.pause();
+                    State.set('videoPausedByAuthorModal', true); // Nowa flaga
+                }
+            }
+
+            // 2. Otwórz modal z wideo
             UI.openModal(videoModal);
             videoPlayer.play();
 
-            const closeModalHandler = () => videoPlayer.pause();
+            // 3. Dodaj handler, aby wznowić główne wideo po zamknięciu
+            const closeModalHandler = () => {
+                videoPlayer.pause();
+
+                // Wznów tylko jeśli zostało zapauzowane przez modal autora
+                if (State.get('videoPausedByAuthorModal') && mainVideo) {
+                    mainVideo.play().catch(e => console.error("Błąd odtwarzania głównego wideo:", e));
+                    State.set('videoPausedByAuthorModal', false);
+                }
+                // Musimy też upewnić się, że flaga jest czyszczona przy zamykaniu modala
+                State.set('videoPausedByAuthorModal', false);
+            };
             videoModal.addEventListener('modal:close', closeModalHandler, { once: true });
             return;
         }
@@ -632,39 +657,48 @@ export const Handlers = {
         break;
       case "toggle-login-panel":
         if (!State.get("isUserLoggedIn")) {
-          const swiper = State.get('swiper');
-          if (swiper) {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            const video = activeSlide?.querySelector('video');
-            if (video) {
-              State.set('videoPlaybackState', {
-                slideId: activeSlide.dataset.slideId,
-                currentTime: video.currentTime,
-              });
-            }
-          }
-
-          if (UI.DOM.commentsModal.classList.contains("visible")) {
-            UI.closeCommentsModal();
-          }
-          if (loginPanel) {
-            if (loginPanel.classList.contains('active')) {
-                loginPanel.classList.add('login-panel--closing');
-                loginPanel.addEventListener('animationend', () => {
-                    loginPanel.classList.remove('active', 'login-panel--closing');
-                    if (topbar) {
-                        topbar.classList.remove("login-panel-active");
-                    }
-                }, { once: true });
-            } else {
-                // To open, first remove any lingering closing class, then add active
-                loginPanel.classList.remove('login-panel--closing');
-                loginPanel.classList.add('active');
-                if (topbar) {
-                    topbar.classList.add("login-panel-active");
+            // Kod do zapisania stanu odtwarzania wideo w tle (zachowany)
+            const swiper = State.get('swiper');
+            if (swiper) {
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const video = activeSlide?.querySelector('video');
+                if (video) {
+                    State.set('videoPlaybackState', {
+                        slideId: activeSlide.dataset.slideId,
+                        currentTime: video.currentTime,
+                    });
                 }
             }
-        }
+
+            if (UI.DOM.commentsModal.classList.contains("visible")) {
+                UI.closeCommentsModal();
+            }
+            if (loginPanel) {
+                if (loginPanel.classList.contains('active')) {
+                    // CLOSING
+                    loginPanel.classList.add('login-panel--closing');
+                    // Użyj transitionend dla transform, aby zapewnić płynne zamknięcie i prawidłowe czyszczenie
+                    const onTransitionEnd = (e) => {
+                        // Upewnij się, że event dotyczy właściwej właściwości i że jest to stan zamykania
+                        if (e.propertyName === 'transform' && loginPanel.classList.contains('login-panel--closing')) {
+                            loginPanel.classList.remove('active', 'login-panel--closing');
+                            loginPanel.removeEventListener('transitionend', onTransitionEnd);
+                            if (topbar) {
+                                topbar.classList.remove("login-panel-active");
+                            }
+                        }
+                    };
+                    // Użyj { once: true } na ogólnym listenerze dla bezpieczeństwa
+                    loginPanel.addEventListener('transitionend', onTransitionEnd);
+                } else {
+                    // OPENING
+                    loginPanel.classList.remove('login-panel--closing');
+                    loginPanel.classList.add('active');
+                    if (topbar) {
+                        topbar.classList.add("login-panel-active");
+                    }
+                }
+            }
         }
         break;
       case "subscribe":
