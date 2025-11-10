@@ -121,6 +121,17 @@ function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
     closeModal(modal, { animationClass: 'slideOutRight' });
+
+    // Dodatkowo zamknij odtwarzacz wideo, jeśli jest otwarty
+    const videoModal = document.getElementById('video-player-modal');
+    if (videoModal && videoModal.classList.contains('visible')) {
+        const videoPlayer = videoModal.querySelector('video');
+        if (videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.src = ''; // Wyczyść źródło, aby zatrzymać buforowanie
+        }
+        closeModal(videoModal);
+    }
 }
 
 function showToast(message, isError = false) {
@@ -183,6 +194,17 @@ function openModal(modal, options = {}) {
     if (!modal) {
         console.error("Attempted to open a null modal element.");
         return;
+    }
+
+    // Pauzowanie wideo w tle
+    const swiper = State.get('swiper');
+    if (swiper && swiper.slides[swiper.activeIndex]) {
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        const video = activeSlide.querySelector('video');
+        if (video && !video.paused) {
+            video.pause();
+            State.set('videoPausedByModal', true);
+        }
     }
 
     modal.style.display = 'flex';
@@ -270,6 +292,19 @@ function closeModal(modal, options = {}) {
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
             DOM.container.removeAttribute("aria-hidden");
+
+            // Wznawianie wideo w tle
+            if (State.get('videoPausedByModal')) {
+                const swiper = State.get('swiper');
+                if (swiper && swiper.slides[swiper.activeIndex]) {
+                    const activeSlide = swiper.slides[swiper.activeIndex];
+                    const video = activeSlide.querySelector('video');
+                    if (video && video.paused) {
+                        video.play().catch(e => console.error("Błąd odtwarzania wideo po zamknięciu modala:", e));
+                    }
+                }
+                State.set('videoPausedByModal', false);
+            }
         }
         if (!options.keepFocus) {
             State.get("lastFocusedElement")?.focus();

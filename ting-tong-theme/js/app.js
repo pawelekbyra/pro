@@ -366,6 +366,14 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function(swiper, event) {
+              const activeSlide = swiper.slides[swiper.activeIndex];
+              const secretOverlay = activeSlide.querySelector('.secret-overlay.visible');
+              const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay.visible');
+
+              if (secretOverlay || pwaSecretOverlay) {
+                return; // Blokuj kliknięcie, jeśli nakładka jest widoczna
+              }
+
               // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
               // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
               // Główny handler na `document.body` zajmie się resztą.
@@ -373,7 +381,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
               }
 
-              const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector("video");
               if (!video) return;
 
