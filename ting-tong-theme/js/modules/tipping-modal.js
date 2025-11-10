@@ -487,13 +487,10 @@ function showModal(options = {}) {
 }
 
 function hideModal() {
-    if (!dom.modal) return;
-    dom.modal.classList.add('is-hiding');
-    dom.modal.addEventListener('animationend', () => {
-        UI.closeModal(dom.modal);
-        dom.modal.classList.remove('is-hiding');
-        resetModalState();
-    }, { once: true });
+  if (!dom.modal) return;
+  // Nie dodajemy już klasy 'is-hiding', bo robimy to bezpośrednio w UI.closeModal
+  UI.closeModal(dom.modal);
+  resetModalState();
 }
 
 function init() {
@@ -505,8 +502,6 @@ function init() {
             dom.emailContainer.classList.toggle('visible', e.target.checked);
         });
     }
-
-    if(dom.closeBtn) dom.closeBtn.addEventListener('click', hideModal);
 
     // PRZYCISK "ENTER" (Krok 0 -> 1 i Krok 1 -> 2)
     if(dom.nextBtn) dom.nextBtn.addEventListener('click', async (e) => {
@@ -523,9 +518,12 @@ function init() {
     if(dom.prevBtn) dom.prevBtn.addEventListener('click', handlePrevStep);
 
     dom.modal.addEventListener('click', e => {
-        if (e.target === dom.modal) hideModal();
-        if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
-        if (e.target.closest('[data-action="hide-terms"]')) hideTerms();
+      if (e.target === dom.modal) {
+          UI.closeModal(dom.modal); // Użyj standardowego zamknięcia dla tła
+          resetModalState(); // Zresetuj stan
+      }
+      if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
+      if (e.target.closest('[data-action="hide-terms"]')) hideTerms();
     });
 }
 

@@ -6171,3 +6171,113 @@ z-index: 10021;
         transform: translateX(0);
     }
 }
+
+/* ============================================================================
+FIX: 1. Miniaturowy Modal Instalacji PWA (pwa-desktop-mini-modal)
+============================================================================ */
+#pwa-desktop-modal .modal-content {
+max-width: 300px; /* Zmniejszenie maksymalnej szerokości */
+width: 90%;
+padding: 16px; /* Mniejszy padding */
+border-radius: 12px;
+}
+.pwa-desktop-mini-modal .modal-close-btn {
+top: 6px;
+right: 10px;
+font-size: 20px;
+}
+.phone-icon {
+width: 32px; /* Mniejsza ikona */
+height: 32px;
+margin-bottom: 8px;
+}
+.pwa-mini-modal-text {
+font-size: 14px; /* Mniejszy font */
+font-weight: 600;
+margin-bottom: 4px;
+}
+.pwa-mini-modal-subtitle {
+font-size: 11px; /* Mniejszy font */
+}
+
+
+/* ============================================================================
+FIX: 2. Panel Logowania (Czysta Animacja Slide In/Out - bez opacity)
+============================================================================ */
+.login-panel {
+position: absolute;
+top: var(--topbar-height);
+left: 0;
+width: 100%;
+color: white;
+z-index: 114;
+border-top: none;
+/* Domyślny stan - poza ekranem, ukryty i bez transition w bazowej klasie */
+transform: translateY(-100%);
+transition: none !important;
+visibility: hidden;
+opacity: 0; /* Utrzymaj dla klikalności */
+}
+
+.login-panel.active {
+visibility: visible;
+opacity: 1;
+transform: translateY(0);
+transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* KLUCZOWE: Tylko Transform */
+}
+
+.login-panel.login-panel--closing {
+visibility: visible; /* KLUCZOWE: Utrzymaj widoczność podczas animacji wyjścia */
+opacity: 1;
+transform: translateY(-100%);
+transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53); /* Czysta animacja wyjścia */
+pointer-events: none;
+}
+
+
+/* ============================================================================
+FIX: 3. Author Modal - Usunięcie Transition z Hiding + Wymiary
+============================================================================ */
+
+/* Usunięcie transition przy chowaniu */
+.profile-modal-overlay.is-hiding .profile-modal-content {
+transform: translateX(100%);
+transition: none;
+}
+
+/* Usunięcie transition przy chowaniu z Account Modal */
+.account-modal-overlay.is-hiding .account-modal-content {
+transform: translateX(-100%);
+transition: none;
+}
+
+/* FIX: Author Modal - Ułożenie Nagłówka (Usunięcie ikony 3 kropek) */
+#author-profile-modal .profile-header {
+grid-template-columns: 1fr 40px; /* 1fr dla tytułu, 40px dla X */
+}
+#author-profile-modal .username-header {
+grid-column: 1;
+justify-self: center; /* Wyśrodkuj tytuł */
+}
+#author-profile-modal .modal-close-btn {
+grid-column: 2; /* Przesunięcie X do prawej kolumny */
+justify-self: end;
+margin-right: 10px;
+}
+/* Ukrycie nieistniejącego już .options-btn */
+.profile-header .options-btn {
+display: none !important;
+}
+
+
+/* FIX: Author Modal - Wymiary Stats (zapobieganie poziomemu scrollowi) */
+#author-profile-modal .stats-container {
+gap: 10px; /* Zmniejszenie odstępów */
+}
+#author-profile-modal .stats-container .stat-number {
+font-size: 14px; /* Zmniejszenie stat-number */
+}
+#author-profile-modal .stats-container .stat-label {
+font-size: 10px; /* Zmniejszenie stat-label */
+white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
+}

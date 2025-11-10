@@ -196,17 +196,6 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    // Pauzowanie wideo w tle
-    const swiper = State.get('swiper');
-    if (swiper && swiper.slides[swiper.activeIndex]) {
-        const activeSlide = swiper.slides[swiper.activeIndex];
-        const video = activeSlide.querySelector('video');
-        if (video && !video.paused) {
-            video.pause();
-            State.set('videoPausedByModal', true);
-        }
-    }
-
     modal.style.display = 'flex';
     modal.classList.remove('is-hiding');
 
@@ -292,19 +281,6 @@ function closeModal(modal, options = {}) {
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
             DOM.container.removeAttribute("aria-hidden");
-
-            // Wznawianie wideo w tle
-            if (State.get('videoPausedByModal')) {
-                const swiper = State.get('swiper');
-                if (swiper && swiper.slides[swiper.activeIndex]) {
-                    const activeSlide = swiper.slides[swiper.activeIndex];
-                    const video = activeSlide.querySelector('video');
-                    if (video && video.paused) {
-                        video.play().catch(e => console.error("Błąd odtwarzania wideo po zamknięciu modala:", e));
-                    }
-                }
-                State.set('videoPausedByModal', false);
-            }
         }
         if (!options.keepFocus) {
             State.get("lastFocusedElement")?.focus();
