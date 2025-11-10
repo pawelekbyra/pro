@@ -1153,7 +1153,7 @@ body,
   transition:
     border-color 0.1s ease-in-out,
     filter 0.2s;
-  background-color: white; /* Dodane białe tło */
+  background-color: white;
 }
 
 /* Styl dla obwódki VIP */
@@ -4898,6 +4898,21 @@ overflow: hidden;
     opacity: 1;
 }
 
+@keyframes elegantFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+}
+
+.elegant-modal-overlay.is-hiding .elegant-modal-content {
+  animation: elegantFadeOut 0.4s ease-out forwards;
+}
+
 .elegant-modal-content-wrapper {
     display: flex;
     align-items: center;
@@ -5878,9 +5893,9 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .modal-close-btn {
-    grid-column: 1;
-    justify-self: start;
-    margin-left: 10px;
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 10px;
     font-size: 28px;
     font-weight: 300;
 }
