@@ -28,10 +28,12 @@ let userSettings = {
 
 // Main initialization function
 function init() {
-  initializeModal();
-  initializeCropper();
-  setupEventListeners();
-  loadUserSettings();
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeModal();
+    initializeCropper();
+    setupEventListeners();
+    loadUserSettings();
+  });
 
   // NOWE: Nasłuchuj zmian w State
   State.on('user:login', (data) => {

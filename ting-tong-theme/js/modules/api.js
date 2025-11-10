@@ -157,7 +157,6 @@ export const API = {
   changePassword: (data) => _request("tt_password_change", data),
   deleteAccount: (data) => _request("tt_account_delete", data),
   loadUserProfile: () => _request("tt_profile_get"),
-  getNewCrowdfundingStats: () => _request("tt_get_crowdfunding_stats"),
 
   /**
    * Zapisuje subskrypcję Web Push na serwerze.
