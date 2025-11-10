@@ -647,9 +647,23 @@ export const Handlers = {
             UI.closeCommentsModal();
           }
           if (loginPanel) {
-            loginPanel.classList.toggle("active");
-          }
-          if (topbar) topbar.classList.toggle("login-panel-active");
+            if (loginPanel.classList.contains('active')) {
+                loginPanel.classList.add('login-panel--closing');
+                loginPanel.addEventListener('animationend', () => {
+                    loginPanel.classList.remove('active', 'login-panel--closing');
+                    if (topbar) {
+                        topbar.classList.remove("login-panel-active");
+                    }
+                }, { once: true });
+            } else {
+                // To open, first remove any lingering closing class, then add active
+                loginPanel.classList.remove('login-panel--closing');
+                loginPanel.classList.add('active');
+                if (topbar) {
+                    topbar.classList.add("login-panel-active");
+                }
+            }
+        }
         }
         break;
       case "subscribe":

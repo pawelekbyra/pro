@@ -28,12 +28,10 @@ let userSettings = {
 
 // Main initialization function
 function init() {
-  document.addEventListener('DOMContentLoaded', () => {
-    initializeModal();
-    initializeCropper();
-    setupEventListeners();
-    loadUserSettings();
-  });
+  initializeModal();
+  initializeCropper();
+  setupEventListeners();
+  loadUserSettings();
 
   // NOWE: Nasłuchuj zmian w State
   State.on('user:login', (data) => {
@@ -369,31 +367,50 @@ function setupEventListeners() {
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (!file.type.startsWith("image/"))
-    return showError(
-      "avatarError",
-      Utils.getTranslation("fileSelectImageError"),
-    );
-  if (file.size > 5 * 1024 * 1024)
-    return showError(
-      "avatarError",
-      Utils.getTranslation("fileTooLargeError"),
-    );
+
+  // Walidacja pliku (przeniesiona dla czytelności)
+  if (!file.type.startsWith("image/")) {
+    return showError("avatarError", Utils.getTranslation("fileSelectImageError"));
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return showError("avatarError", Utils.getTranslation("fileTooLargeError"));
+  }
 
   const reader = new FileReader();
   reader.onload = function (e) {
     cropImage = new Image();
     cropImage.onload = function () {
-      openCropModal();
-      initializeCropCanvas();
+      // Przekazujemy inicjalizację jako callback
+      openCropModal(initializeCropCanvas);
+    };
+    cropImage.onerror = () => {
+      showError("avatarError", "Nie udało się załadować obrazu.");
     };
     cropImage.src = e.target.result;
+  };
+  reader.onerror = () => {
+    showError("avatarError", "Nie udało się odczytać pliku.");
   };
   reader.readAsDataURL(file);
 }
 
-function openCropModal() {
-  document.getElementById("cropModal").classList.add("visible");
+function openCropModal(callback) {
+    const modal = document.getElementById("cropModal");
+    if (!modal) return;
+
+    // Funkcja do wykonania po animacji
+    const onModalReady = () => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+        modal.removeEventListener('animationend', onModalReady, { once: true });
+    };
+
+    // Nasłuchuj końca animacji wejścia
+    modal.addEventListener('animationend', onModalReady, { once: true });
+
+    // Pokaż modal
+    modal.classList.add("visible");
 }
 function closeCropModal() {
   document.getElementById("cropModal").classList.remove("visible");
