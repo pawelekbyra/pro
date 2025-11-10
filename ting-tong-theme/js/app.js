@@ -28,7 +28,9 @@ if ('serviceWorker' in navigator) {
       : '/wp-content/themes/ting-tong-theme/sw.js';
 
     // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
-    swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
+    // Użyj `&` jeśli URL już ma `?`, w przeciwnym razie `?`
+    const separator = swUrl.includes('?') ? '&' : '?';
+    swUrl += `${separator}themeUrl=${encodeURIComponent(themeUrl)}`;
 
     navigator.serviceWorker.register(swUrl, { scope: '/' })
       .then(registration => {
