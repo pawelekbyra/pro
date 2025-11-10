@@ -48,15 +48,11 @@ function closePwaModals() {
 }
 
 function runStandaloneCheck() {
-    // Te dwie funkcje powinny być pobrane ze State i Utils (przekazane przez UI, które je importuje)
     const isUserLoggedIn = (UI_MODULE && UI_MODULE.getIsUserLoggedIn()) || false;
-    const isDesktopDevice = isDesktop(); // Używamy istniejącej funkcji isDesktop()
+    const isDesktopDevice = isDesktop();
 
     const appFrame = document.getElementById("app-frame");
 
-    // Warunki, KIEDY NALEŻY UKRYĆ pasek:
-    // 1. Jest to tryb PWA/Standalone (ukrywa się zawsze)
-    // 2. Jesteśmy na desktopie I użytkownik jest zalogowany
     if (isStandalone() || (isDesktopDevice && isUserLoggedIn)) {
         if (installBar) {
             installBar.classList.remove("visible");
@@ -65,12 +61,10 @@ function runStandaloneCheck() {
         return true;
     }
 
-    // Jeśli nie jest standalone, pokaż pasek po zniknięciu preloadera (tylko na urządzeniach mobilnych lub gdy jest to gość na desktopie).
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
 
-    // Ogranicz wyświetlanie dla gości na urządzeniach desktopowych (pokaże się, ale tylko dla gości)
     if (isPreloaderHidden && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
@@ -87,7 +81,6 @@ function runStandaloneCheck() {
             }
         }, 800);
     } else if (installBar) {
-        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
         installBar.classList.remove("visible");
         if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
@@ -95,46 +88,31 @@ function runStandaloneCheck() {
     return false;
 }
 
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
-  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
 });
 
 function handleInstallClick() {
-  // FIX: Najpierw sprawdzamy, czy aplikacja nie jest już zainstalowana (standalone).
-  // Jeśli tak, wyświetlamy stosowny komunikat i przerywamy.
   if (isStandalone()) {
     if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaAlreadyInstalled"));
     return;
   }
 
-  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
-  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
-  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
   } else if (isIOS()) {
     showIosInstructions();
   } else if (isDesktop()) {
     showDesktopModal();
   } else {
-    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
-    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
-    // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
     if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
 function init() {
-  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
-  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
   if (installButton) {
     installButton.addEventListener('click', handleInstallClick);
   }
@@ -142,7 +120,6 @@ function init() {
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
     if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("appInstalledSuccessText"));
-    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
   });
 
   if (iosCloseButton) {
@@ -160,10 +137,6 @@ function init() {
   }
 }
 
-/**
- * Obsługuje proces subskrypcji powiadomień Push.
- * @returns {Promise<string>} 'granted', 'denied', lub 'unsupported'.
- */
 async function handlePushSubscription() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     console.warn('Push Notifications are not supported in this browser.');

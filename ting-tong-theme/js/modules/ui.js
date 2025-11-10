@@ -1169,7 +1169,7 @@ export const UI = {
   closeImageLightbox,
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
-  getIsUserLoggedIn, // << DODANA NOWA FUNKCJA
+  getIsUserLoggedIn,
   closeCommentsModal,
   closeWelcomeModal,
   updateCrowdfundingStats,
