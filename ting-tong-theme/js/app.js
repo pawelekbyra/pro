@@ -30,7 +30,7 @@ if ('serviceWorker' in navigator) {
     // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
     swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
 
-    navigator.serviceWorker.register(swUrl)
+    navigator.serviceWorker.register(swUrl, { scope: '/' })
       .then(registration => {
         console.log('✅ Service Worker zarejestrowany:', registration);
       })
