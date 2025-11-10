@@ -511,6 +511,25 @@ export const Handlers = {
         }
         break;
       }
+      case "switch-profile-tab": {
+        const tabButton = actionTarget;
+        const tabContentId = tabButton.dataset.tab;
+
+        const modal = tabButton.closest('.profile-modal-content');
+        if (!modal) return;
+
+        // Deactivate all tabs and hide all content
+        modal.querySelectorAll('.profile-tab').forEach(tab => tab.classList.remove('active'));
+        modal.querySelectorAll('.video-gallery').forEach(content => content.classList.remove('active'));
+
+        // Activate the clicked tab and show its content
+        tabButton.classList.add('active');
+        const activeContent = modal.querySelector(`#${tabContentId}`);
+        if (activeContent) {
+          activeContent.classList.add('active');
+        }
+        break;
+      }
       case "close-comments-modal":
         UI.closeCommentsModal();
         break;
@@ -628,7 +647,14 @@ export const Handlers = {
             UI.closeCommentsModal();
           }
           if (loginPanel) {
-            loginPanel.classList.toggle('active');
+            if (loginPanel.classList.contains('active')) {
+              loginPanel.classList.add('login-panel--closing');
+              loginPanel.addEventListener('animationend', () => {
+                loginPanel.classList.remove('active', 'login-panel--closing');
+              }, { once: true });
+            } else {
+              loginPanel.classList.add('active');
+            }
           }
           if (topbar) topbar.classList.toggle("login-panel-active");
         }

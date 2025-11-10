@@ -397,25 +397,27 @@ get_header();
                     <svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
                 </button>
             </div>
-            <div class="tabs">
-                <div class="tab active" data-tab-content="videos-grid">
+            <div class="profile-tabs">
+                <button class="profile-tab active" data-tab="videos-grid" data-action="switch-profile-tab">
                     <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"></path></svg>
-                </div>
-                <div class="tab" data-tab-content="reposts-grid">
+                </button>
+                <button class="profile-tab" data-tab="reposts-grid" data-action="switch-profile-tab">
                     <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
-                </div>
-                <div class="tab" data-tab-content="liked-grid">
+                </button>
+                <button class="profile-tab" data-tab="liked-grid" data-action="switch-profile-tab">
                      <svg viewBox="0 0 24 24"><path d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>
+                </button>
+            </div>
+            <div class="profile-tab-content">
+                <div id="videos-grid" class="video-gallery active">
+                    <!-- Video thumbnails will be inserted here -->
                 </div>
-            </div>
-            <div id="videos-grid" class="video-gallery active">
-                <!-- Video thumbnails will be inserted here -->
-            </div>
-            <div id="reposts-grid" class="video-gallery">
-                <!-- Reposted video thumbnails will be inserted here -->
-            </div>
-            <div id="liked-grid" class="video-gallery">
-                <!-- Liked video thumbnails will be inserted here -->
+                <div id="reposts-grid" class="video-gallery">
+                    <!-- Reposted video thumbnails will be inserted here -->
+                </div>
+                <div id="liked-grid" class="video-gallery">
+                    <!-- Liked video thumbnails will be inserted here -->
+                </div>
             </div>
         </main>
     </div>
