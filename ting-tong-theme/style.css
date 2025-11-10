@@ -1694,7 +1694,7 @@ body,
 }
 
 .info-modal-overlay.visible {
-    background: rgba(0, 0, 0, 0.5); /* Płynne przyciemnienie */
+    background: transparent;
 }
 
 .info-modal-content {
@@ -5817,7 +5817,7 @@ main::-webkit-scrollbar {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
   z-index: 10300; /* Above other modals */
   opacity: 0;
   visibility: hidden;
