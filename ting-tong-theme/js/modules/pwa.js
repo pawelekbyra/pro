@@ -143,20 +143,20 @@ async function handlePushSubscription() {
     return 'unsupported';
   }
 
-  // >>> KRYTYCZNA POPRAWKA: Użyj navigator.serviceWorker.ready
-  const registration = await navigator.serviceWorker.ready;
-
-  if (!registration) { // To powinno być niemożliwe po użyciu .ready, ale dla pewności
-    console.error('Service Worker is not ready or accessible.');
-    return 'error';
-  }
-
   const permission = await Notification.requestPermission();
 
   // Dalsza logika będzie kontynuowana TYLKO po uzyskaniu zgody
   if (permission !== 'granted') {
     console.log('Notification permission was not granted.');
     return permission;
+  }
+
+  // >>> KRYTYCZNA POPRAWKA: Użyj navigator.serviceWorker.ready
+  const registration = await navigator.serviceWorker.ready;
+
+  if (!registration) { // To powinno być niemożliwe po użyciu .ready, ale dla pewności
+    console.error('Service Worker is not ready or accessible.');
+    return 'error';
   }
 
   let subscription = await registration.pushManager.getSubscription();
