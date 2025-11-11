@@ -5846,18 +5846,18 @@ main::-webkit-scrollbar {
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.4s ease-in-out;
+  /* transition: transform 0.4s ease-in-out; */ /* Zastąpione animacją */
   will-change: transform;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .profile-modal-overlay.visible .profile-modal-content {
-  transform: translateX(0);
+  transform: translateX(0); /* Początkowa pozycja, animacja wejścia jest obsługiwana przez JS */
 }
 
 .profile-modal-overlay.is-hiding .profile-modal-content {
-  transform: translateX(100%);
+  animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 #author-profile-modal .profile-header {
@@ -6421,30 +6421,31 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 #slide-002 .secret-overlay .secret-icon,
 #slide-002 .secret-overlay .secret-title,
 #slide-002 .secret-overlay .secret-subtitle {
-  color: #000 !important; /* Wymuś czarny kolor na nakładce */
+  color: #000 !important; /* Force black color on the overlay */
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-/* Wymuś czarny stroke/fill dla ikon w sidebarze */
+/* Force black stroke/fill for sidebar icons, excluding the avatar */
 #slide-002 .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
-  stroke: #000 !important; /* Wymuszenie czarnej ramki */
-  fill: #000 !important;   /* Wymuszenie czarnego wypełnienia (np. dla ikony serca, gdy jest active) */
+  stroke: #000 !important;
+  fill: #000 !important;
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
 
-/* Wymuś czarny kolor dla tekstu pod ikonami */
+/* Force black color for text under icons */
 #slide-002 .tiktok-symulacja .sidebar .icon-button .icon-label {
   color: #000 !important;
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
-/* Upewnij się, że ikona serca jest czarna nawet w stanie "unliked" */
-#slide-002 .tiktok-symulacja .like-button > svg {
+/* Ensure heart icon is black when unliked */
+#slide-002 .tiktok-symulacja .like-button:not(.active) > svg {
   stroke: #000 !important;
   fill: none !important;
 }
-/* A w stanie polubionym (jeśli to wideo publiczne, ale jest secret) */
+
+/* Ensure heart icon has a white stroke when liked for contrast */
 #slide-002 .tiktok-symulacja .like-button.active > svg {
-  stroke: #fff !important; /* Czasem polubione ma być białe dla kontrastu */
+  stroke: #fff !important;
   fill: var(--accent-color) !important;
 }
