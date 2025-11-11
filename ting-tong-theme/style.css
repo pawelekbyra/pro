@@ -619,7 +619,7 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background-image: url('../../wall.png');
+  background-image: url('../../wall.jpg');
   background-size: cover;
   background-position: center;
   z-index: 100;
