@@ -5859,6 +5859,8 @@ main::-webkit-scrollbar {
   transform: translateX(100%);
   transition: transform 0.4s ease-in-out;
   will-change: transform;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .profile-modal-overlay.visible .profile-modal-content {
@@ -5916,7 +5918,7 @@ main::-webkit-scrollbar {
 
 #author-profile-modal main {
     flex-grow: 1;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 20px 16px;
 }
 
