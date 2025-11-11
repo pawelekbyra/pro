@@ -6418,7 +6418,8 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 }
 
 /* Custom styles for slides with a light theme, like "Elephants Dream" */
-.slide--light-theme .secret-overlay .secret-icon,
+
+/* Text elements should be black */
 .slide--light-theme .secret-overlay .secret-title,
 .slide--light-theme .secret-overlay .secret-subtitle,
 .slide--light-theme .tiktok-symulacja .sidebar .icon-button .icon-label,
@@ -6426,25 +6427,23 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 .slide--light-theme .tiktok-symulacja .bottombar .slide-title,
 .slide--light-theme .tiktok-symulacja .bottombar .slide-description {
   color: #000 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  text-shadow: none !important;
 }
 
-.slide--light-theme .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
+/* The lock icon which uses currentColor */
+.slide--light-theme .secret-overlay .secret-icon {
+  color: #000 !important;
+}
+
+/* For all sidebar icons on this slide, set stroke to black and keep other properties */
+.slide--light-theme .tiktok-symulacja .sidebar .icon-button svg {
   stroke: #000 !important;
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  fill: none !important; /* This is the default, but let's be explicit */
+  stroke-width: 1.5 !important; /* Explicitly keep the same stroke-width */
 }
 
-.slide--light-theme .tiktok-symulacja .like-button:not(.active) > svg {
-  fill: none !important;
-}
-
+/* Special case for the ACTIVE like button, restore original look for contrast */
 .slide--light-theme .tiktok-symulacja .like-button.active > svg {
   fill: var(--accent-color) !important;
-  stroke: var(--accent-color) !important;
-}
-
-.slide--light-theme .tiktok-symulacja .commentsButton svg,
-.slide--light-theme .tiktok-symulacja .shareButton svg,
-.slide--light-theme .tiktok-symulacja .tipButton svg {
-    fill: #000 !important;
+  stroke: white !important; /* White stroke looks better on red fill */
 }
