@@ -144,16 +144,6 @@ function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
     closeModal(modal, { animationClass: 'slideOutRight' });
-
-    const videoModal = document.getElementById('video-player-modal');
-    if (videoModal && videoModal.classList.contains('visible')) {
-        const videoPlayer = videoModal.querySelector('video');
-        if (videoPlayer) {
-            videoPlayer.pause();
-            videoPlayer.src = '';
-        }
-        closeModal(videoModal);
-    }
 }
 
 function showToast(message, isError = false) {
@@ -278,8 +268,23 @@ function openModal(modal, options = {}) {
     if (options.onClose) modal.onCloseCallback = options.onClose;
 }
 
+function _resetVideoPlayer(videoModal) {
+    if (!videoModal) return;
+    const videoPlayer = videoModal.querySelector('video');
+    if (videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.currentTime = 0;
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
+    }
+}
+
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
+
+    if (modal.id === 'video-player-modal') {
+        _resetVideoPlayer(modal);
+    }
 
     if (modal._closeOnClick) {
         modal.removeEventListener('click', modal._closeOnClick);
