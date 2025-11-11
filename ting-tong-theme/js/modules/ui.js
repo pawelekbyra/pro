@@ -159,9 +159,10 @@ function openAuthorProfileModal(slideData) {
 function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
-    // Wymuszamy animację wyjścia 'slideOutRight', aby była lustrzana
+
+    // NAPRAWA: Jawne dodanie animationClass: 'slideOutRight'
     closeModal(modal, {
-        animationClass: 'slideOutRight', // <--- ZMIANA: DODANO JAWNĄ KLASĘ WYJŚCIA
+        animationClass: 'slideOutRight', // <--- POPRAWIONO
         contentSelector: '.profile-modal-content'
     });
 }
