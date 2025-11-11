@@ -160,9 +160,8 @@ function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
 
-    // NAPRAWA: Jawne dodanie animationClass: 'slideOutRight'
     closeModal(modal, {
-        animationClass: 'slideOutRight', // <--- POPRAWIONO
+        animationClass: 'slideOutRight',
         contentSelector: '.profile-modal-content'
     });
 }
@@ -238,7 +237,7 @@ function openModal(modal, options = {}) {
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
     if (options.animationClass && contentElement) {
-        contentElement.style.animation = `${options.animationClass} 0.4s ease-in-out forwards`;
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
         contentElement.addEventListener('animationend', () => {
             contentElement.style.animation = '';
         }, { once: true });
@@ -307,23 +306,34 @@ function _resetVideoPlayer(videoModal) {
     }
 }
 
-function closeModal(modal) {
+function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
 
     modal.classList.add('is-hiding');
-    modal.classList.remove('visible');
     modal.setAttribute('aria-hidden', 'true');
+
+    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
+    const contentElement = modal.querySelector(contentSelector);
+
+    if (options.animationClass && contentElement) {
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+    } else {
+        modal.classList.remove('visible');
+    }
 
     let cleanupHasRun = false;
     const cleanup = () => {
         if (cleanupHasRun) return;
         cleanupHasRun = true;
 
+        if (contentElement) {
+            contentElement.removeEventListener('animationend', cleanup);
+            contentElement.style.animation = '';
+        }
         modal.removeEventListener('transitionend', cleanup);
-        modal.removeEventListener('animationend', cleanup);
 
         modal.style.display = 'none';
-        modal.classList.remove('is-hiding');
+        modal.classList.remove('is-hiding', 'visible');
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
