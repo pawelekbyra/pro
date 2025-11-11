@@ -80,7 +80,7 @@ function openAuthorProfileModal(slideData) {
         animationClass: 'slideInRight',
         onOpen: () => {
             const author = slideData.author;
-            modal.querySelector('.username-header').textContent = author.name;
+            modal.querySelector('.username-header').textContent = Utils.getTranslation('authorProfileTitle');
             modal.querySelector('.profile-avatar').src = author.avatar;
             modal.querySelector('.fullname').textContent = author.name;
             modal.querySelector('.bio').textContent = author.bio || '';

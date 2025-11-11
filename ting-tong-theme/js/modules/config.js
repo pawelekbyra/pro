@@ -357,6 +357,7 @@ export const Config = {
       notificationsSaveError: "Nie udało się zapisać subskrypcji.",
       badge: "Odznaka",
       becomePatronToWatch: "Zostań patronem, aby obejrzeć",
+      authorProfileTitle: "Profil Twórcy",
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -567,6 +568,7 @@ export const Config = {
       notificationsSaveError: "Failed to save subscription.",
       badge: "Badge",
       becomePatronToWatch: "Become a patron to watch",
+      authorProfileTitle: "Creator's Profile",
     }, // KONIEC 'en'
   },
 };
