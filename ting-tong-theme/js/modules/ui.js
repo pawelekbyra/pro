@@ -568,6 +568,10 @@ function createSlideElement(slideData, index) {
   section.dataset.index = index;
   section.dataset.slideId = slideData.id;
 
+  if (slideData.id === 'slide-002') {
+    section.classList.add('slide--light-theme');
+  }
+
   if (slideData.isIframe) {
     const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
     const videoEl = tiktokSymulacja.querySelector("video");

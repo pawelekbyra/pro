@@ -6417,35 +6417,34 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     transition: none !important;
 }
 
-/* Custom styles for "Elephants Dream" slide (slide-002) */
-[data-slide-id="slide-002"] .secret-overlay .secret-icon,
-[data-slide-id="slide-002"] .secret-overlay .secret-title,
-[data-slide-id="slide-002"] .secret-overlay .secret-subtitle {
-  color: #000 !important; /* Force black color on the overlay */
+/* Custom styles for slides with a light theme, like "Elephants Dream" */
+.slide--light-theme .secret-overlay .secret-icon,
+.slide--light-theme .secret-overlay .secret-title,
+.slide--light-theme .secret-overlay .secret-subtitle,
+.slide--light-theme .tiktok-symulacja .sidebar .icon-button .icon-label,
+.slide--light-theme .tiktok-symulacja .bottombar .author-name,
+.slide--light-theme .tiktok-symulacja .bottombar .slide-title,
+.slide--light-theme .tiktok-symulacja .bottombar .slide-description {
+  color: #000 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
-/* Force black stroke/fill for sidebar icons, excluding the avatar */
-[data-slide-id="slide-002"] .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
+.slide--light-theme .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
   stroke: #000 !important;
-  fill: #000 !important;
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
 
-/* Force black color for text under icons */
-[data-slide-id="slide-002"] .tiktok-symulacja .sidebar .icon-button .icon-label {
-  color: #000 !important;
-  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
-}
-
-/* Ensure heart icon is black when unliked */
-[data-slide-id="slide-002"] .tiktok-symulacja .like-button:not(.active) > svg {
-  stroke: #000 !important;
+.slide--light-theme .tiktok-symulacja .like-button:not(.active) > svg {
   fill: none !important;
 }
 
-/* Ensure heart icon has a white stroke when liked for contrast */
-[data-slide-id="slide-002"] .tiktok-symulacja .like-button.active > svg {
-  stroke: #fff !important;
+.slide--light-theme .tiktok-symulacja .like-button.active > svg {
   fill: var(--accent-color) !important;
+  stroke: var(--accent-color) !important;
+}
+
+.slide--light-theme .tiktok-symulacja .commentsButton svg,
+.slide--light-theme .tiktok-symulacja .shareButton svg,
+.slide--light-theme .tiktok-symulacja .tipButton svg {
+    fill: #000 !important;
 }
