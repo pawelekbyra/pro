@@ -6108,8 +6108,8 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .video-views {
     position: absolute;
-    bottom: 8px;
-    left: 8px;
+    bottom: 4px;
+    left: 4px;
     color: white;
     font-size: 13px;
     font-weight: 600;
@@ -6149,8 +6149,8 @@ main::-webkit-scrollbar {
 
 .thumbnail-overlay-block .badge {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    bottom: 4px;
+    right: 4px;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 50%;
     width: 28px;
