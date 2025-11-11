@@ -6447,3 +6447,14 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
   fill: var(--accent-color) !important;
   stroke: white !important; /* White stroke looks better on red fill */
 }
+
+/* Avatar border and glow */
+.slide--light-theme .tiktok-symulacja .profile img {
+  border-color: #000 !important;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Underline for the login link */
+.slide--light-theme .secret-subtitle u {
+  border-bottom-color: #000 !important;
+}
