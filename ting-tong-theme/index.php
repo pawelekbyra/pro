@@ -387,7 +387,7 @@ get_header();
             </div>
             <div class="profile-actions">
                 <button class="follow-btn" data-action="show-tip-jar">
-                    <span data-translate-key="becomePatronBtn">Zostań Patronem</span>
+                    <span data-translate-key="becomePatronBtn">ZostańPatronem</span>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
                 </button>
                 <button class="social-btn instagram" aria-label="Instagram">
