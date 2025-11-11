@@ -1152,7 +1152,7 @@ add_action('wp_ajax_tt_account_delete', function () {
 });
 
 // --- Subskrypcje Web Push ---
-function tt_ajax_save_push_subscription_callback() {
+add_action('wp_ajax_tt_save_push_subscription', function() {
     // Ręczna weryfikacja nonce z nagłówka dla żądań JSON
     $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : '';
     if (!wp_verify_nonce($nonce, 'tt_ajax_nonce')) {
@@ -1160,19 +1160,18 @@ function tt_ajax_save_push_subscription_callback() {
         return;
     }
 
-    // POBRANIE DANYCH (bez zmian)
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'Musisz być zalogowany, aby zapisać subskrypcję.'], 401);
+    }
+
+    // Odczytaj dane z ciała żądania JSON
     $subscription_data = json_decode(file_get_contents('php://input'), true);
     if (empty($subscription_data['endpoint']) || empty($subscription_data['keys']['p256dh']) || empty($subscription_data['keys']['auth'])) {
         wp_send_json_error(['message' => 'Nieprawidłowe dane subskrypcji.'], 400);
-        return;
     }
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'tt_push_subscriptions';
-
-    // ************************************************
-    // FIX: Używamy get_current_user_id(). Zwróci ono 0 dla niezalogowanych.
-    // ************************************************
     $user_id = get_current_user_id();
     $endpoint = esc_url_raw($subscription_data['endpoint']);
     $p256dh = sanitize_text_field($subscription_data['keys']['p256dh']);
@@ -1181,14 +1180,14 @@ function tt_ajax_save_push_subscription_callback() {
     $existing_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$table_name} WHERE endpoint = %s", $endpoint));
 
     $data = [
-        'user_id' => $user_id, // Używamy ID (lub 0)
+        'user_id' => $user_id,
         'endpoint' => $endpoint,
         'p256dh' => $p256dh,
         'auth' => $auth,
     ];
 
     if ($existing_id) {
-        // Jeśli subskrypcja (endpoint) już istnieje, zaktualizuj ją
+        // Jeśli subskrypcja (endpoint) już istnieje, zaktualizuj ją (np. na wypadek, gdyby zmienił się użytkownik)
         $wpdb->update($table_name, $data, ['id' => $existing_id]);
     } else {
         // W przeciwnym razie, wstaw nową
@@ -1196,15 +1195,7 @@ function tt_ajax_save_push_subscription_callback() {
     }
 
     wp_send_json_success(['message' => 'Subskrypcja zapisana pomyślnie.']);
-}
-// Koniec funkcji
-
-// ... dalszy kod w functions.php
-// --- Subskrypcje Web Push ---
-
-// Zarejestruj handler dla zalogowanych i niezalogowanych (gości)
-add_action('wp_ajax_tt_save_push_subscription', 'tt_ajax_save_push_subscription_callback');
-add_action('wp_ajax_nopriv_tt_save_push_subscription', 'tt_ajax_save_push_subscription_callback');
+});
 
 // ============================================================================
 // WEB PUSH NOTIFICATIONS
