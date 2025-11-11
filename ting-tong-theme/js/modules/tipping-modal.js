@@ -488,8 +488,11 @@ function showModal(options = {}) {
 
 function hideModal() {
   if (!dom.modal) return;
-  // Nie dodajemy już klasy 'is-hiding', bo robimy to bezpośrednio w UI.closeModal
-  UI.closeModal(dom.modal);
+
+  UI.closeModal(dom.modal, {
+    animationClass: 'elegantFadeOut',
+    contentSelector: '.elegant-modal-content'
+  });
   resetModalState();
 }
 
