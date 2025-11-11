@@ -5848,7 +5848,7 @@ main::-webkit-scrollbar {
 
 .profile-modal-overlay.is-hiding .profile-modal-content {
   transform: translateX(100%);
-  transition: none;
+  transition: transform 0.4s ease-in-out;
 }
 
 #author-profile-modal .profile-header {
@@ -5875,18 +5875,22 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .modal-close-btn {
     position: absolute;
-    top: calc(var(--safe-area-top) + 6px);
+    top: var(--safe-area-top);
     right: 10px;
-    z-index: 10;
-    grid-column: auto;
-    justify-self: auto;
-    font-size: 28px;
-    font-weight: 300;
+    height: var(--topbar-base-height);
     width: 40px;
-    height: 40px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
 }
 
 #author-profile-modal .options-btn {
@@ -5943,6 +5947,7 @@ main::-webkit-scrollbar {
     justify-content: space-around;
     gap: 20px;
     width: 100%;
+    margin: 24px 0;
 }
 
 #author-profile-modal .stats-container .stat {
@@ -6138,7 +6143,7 @@ main::-webkit-scrollbar {
     transition: opacity 0.3s ease;
 }
 
-.video-thumbnail:hover .thumbnail-overlay-block {
+#author-profile-modal .video-thumbnail.locked-thumbnail .thumbnail-overlay-block {
     opacity: 1;
 }
 

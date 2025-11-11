@@ -158,9 +158,10 @@ function showAlert(message, isError = false) {
   requestAnimationFrame(() => {
     DOM.alertBox.style.animation = "";
     DOM.alertText.textContent = message;
-    DOM.alertBox.style.backgroundColor = isError
-      ? "var(--accent-color)"
-      : "rgba(0, 0, 0, 0.85)";
+    DOM.alertBox.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+    DOM.alertBox.style.border = isError
+      ? "1px solid var(--accent-color)"
+      : "1px solid #000";
     DOM.alertBox.classList.add("visible");
   });
   alertTimeout = setTimeout(
