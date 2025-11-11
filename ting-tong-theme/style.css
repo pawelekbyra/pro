@@ -619,13 +619,12 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background-image: url('/wall.png');
+  background-color: #111111; /* DODANE: Jednolity kolor jako fallback/baza */
+  background-image: url('../wall.png');
   background-size: cover;
   background-position: center;
   z-index: 100;
   display: flex;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
   text-align: center;
   padding: 20px;
