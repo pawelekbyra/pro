@@ -104,12 +104,34 @@ function handleShare(button) {
   }
 }
 
-function handleLanguageToggle() {
-  const newLang = State.get("currentLang") === "pl" ? "en" : "pl";
+async function handleLanguageToggle() { // Zmień na async
+  const oldLang = State.get("currentLang");
+  const newLang = oldLang === "pl" ? "en" : "pl";
+
+  // Mapowanie na lokalizację WP
+  const newLocale = newLang === 'pl' ? 'pl_PL' : 'en_GB';
+
+  // 1. Aktualizacja stanu aplikacji
   State.set("currentLang", newLang);
   localStorage.setItem("tt_lang", newLang);
+
+  // 2. Aktualizacja UI
   UI.updateTranslations();
   Notifications.render();
+
+  // 3. Wysłanie nowej lokalizacji do API WordPressa
+  if (State.get("isUserLoggedIn")) {
+      try {
+        const result = await API.updateLocale(newLocale);
+        if (result.success) {
+          console.log(`WordPress locale updated to: ${newLocale}`);
+        } else {
+          console.warn("Failed to update WP locale via main toggle:", result.data?.message);
+        }
+      } catch (error) {
+        console.error("API Error updating WP locale via main toggle:", error);
+      }
+  }
 }
 
 
@@ -123,32 +145,54 @@ export const Handlers = {
       item.classList.remove("unread");
     }
   },
-  profileModalTabHandler: (e) => {
-    const tab = e.target.closest(".tab");
-    if (!tab) return;
-
-    const modal = tab.closest("#tiktok-profile-modal");
-    if (!modal) return;
-
-    // Deactivate all tabs and galleries
-    modal
-      .querySelectorAll(".tab")
-      .forEach((t) => t.classList.remove("active"));
-    modal
-      .querySelectorAll(".video-gallery")
-      .forEach((g) => g.classList.remove("active"));
-
-    // Activate clicked tab and corresponding gallery
-    tab.classList.add("active");
-    const contentId = tab.dataset.tabContent;
-    const gallery = modal.querySelector(`#${contentId}`);
-    if (gallery) {
-      gallery.classList.add("active");
-    }
-  },
   mainClickHandler: (e) => {
     const target = e.target;
     const actionTarget = target.closest("[data-action]");
+    const videoThumbnail = target.closest(".video-thumbnail");
+
+    if (videoThumbnail) {
+        if (videoThumbnail.classList.contains('locked-thumbnail')) {
+            UI.showAlert(Utils.getTranslation('becomePatronToWatch'), true);
+            return;
+        }
+        const videoUrl = videoThumbnail.dataset.videoUrl;
+        if (videoUrl) {
+            const videoModal = document.getElementById('video-player-modal');
+            const videoPlayer = videoModal.querySelector('video');
+            videoPlayer.src = videoUrl;
+
+            // 1. Zlokalizuj wideo w tle i zapauzuj, jeśli gra
+            const swiper = State.get('swiper');
+            let mainVideo;
+            if (swiper && swiper.slides[swiper.activeIndex]) {
+                mainVideo = swiper.slides[swiper.activeIndex].querySelector('video');
+                // Pauzujemy główne wideo tylko, jeśli już leci
+                if (mainVideo && !mainVideo.paused && !mainVideo.ended) {
+                    mainVideo.pause();
+                    State.set('videoPausedByAuthorModal', true); // Nowa flaga
+                }
+            }
+
+            // 2. Otwórz modal z wideo
+            UI.openModal(videoModal);
+            videoPlayer.play();
+
+            // 3. Dodaj handler, aby wznowić główne wideo po zamknięciu
+            const closeModalHandler = () => {
+                videoPlayer.pause();
+
+                // Wznów tylko jeśli zostało zapauzowane przez modal autora
+                if (State.get('videoPausedByAuthorModal') && mainVideo) {
+                    mainVideo.play().catch(e => console.error("Błąd odtwarzania głównego wideo:", e));
+                    State.set('videoPausedByAuthorModal', false);
+                }
+                // Musimy też upewnić się, że flaga jest czyszczona przy zamykaniu modala
+                State.set('videoPausedByAuthorModal', false);
+            };
+            videoModal.addEventListener('modal:close', closeModalHandler, { once: true });
+            return;
+        }
+    }
 
     // Handle comment-related actions first
     if (actionTarget && actionTarget.closest(".comment-item")) {
@@ -480,31 +524,6 @@ export const Handlers = {
           UI.closeModal(modalToClose);
         }
         break;
-      case "open-author-modal": {
-        const swiper = State.get('swiper');
-        if (!swiper || !swiper.slides[swiper.activeIndex]) {
-            console.error("Swiper or active slide not available.");
-            break;
-        }
-
-        const activeSlideElement = swiper.slides[swiper.activeIndex];
-        const slideId = activeSlideElement.dataset.slideId;
-
-        if (!slideId) {
-            console.error("Could not find slideId on the active slide element.");
-            break;
-        }
-
-        const slideData = slidesData.find(s => String(s.id) === String(slideId));
-
-        if (!slideData || !slideData.author) {
-          console.error(`Could not find author data for slideId: ${slideId}.`);
-          break;
-        }
-
-        UI.openAuthorModal(slideData);
-        break;
-      }
       case "toggle-like":
         handleLikeToggle(actionTarget);
         break;
@@ -521,12 +540,48 @@ export const Handlers = {
         }
         break;
       }
+      case "switch-profile-tab": {
+        const tabButton = actionTarget;
+        const tabContentId = tabButton.dataset.tab;
+
+        const modal = tabButton.closest('.profile-modal-content');
+        if (!modal) return;
+
+        // Deactivate all tabs and hide all content
+        modal.querySelectorAll('.profile-tab').forEach(tab => tab.classList.remove('active'));
+        modal.querySelectorAll('.video-gallery').forEach(content => content.classList.remove('active'));
+
+        // Activate the clicked tab and show its content
+        tabButton.classList.add('active');
+        const activeContent = modal.querySelector(`#${tabContentId}`);
+        if (activeContent) {
+          activeContent.classList.add('active');
+        }
+        break;
+      }
       case "close-comments-modal":
         UI.closeCommentsModal();
         break;
       case "open-info-modal":
-        UI.openModal(document.getElementById('infoModal'));
+        UI.openModal(document.getElementById('infoModal'), {
+          animationClass: 'slideInFromTop'
+        });
         break;
+      case "open-tipping-from-info": {
+        const infoModal = document.getElementById('infoModal');
+        if (infoModal && infoModal.classList.contains('visible')) {
+            UI.closeModal(infoModal, {
+                keepFocus: true,
+                animationClass: 'slideOutLeft',
+                onClose: () => {
+                    TippingModal.showModal({ animationClass: 'slideInRight' });
+                }
+            });
+        } else {
+            TippingModal.showModal();
+        }
+        break;
+      }
       case "open-desktop-pwa-modal":
         PWA.openDesktopModal();
         break;
@@ -536,23 +591,50 @@ export const Handlers = {
       case "install-pwa":
         // This is now handled directly in the PWA module.
         break;
-      case "open-account-modal":
-        if (loggedInMenu) loggedInMenu.classList.remove("active");
-        AccountPanel.openAccountModal();
+      case "open-author-profile":
+        const swiper = State.get('swiper');
+        if (swiper) {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            const slideId = activeSlide.dataset.slideId;
+            const slideData = slidesData.find((s) => s.id === slideId);
+            if (slideData) {
+                UI.openAuthorProfileModal(slideData);
+            }
+        }
         break;
+      case "close-author-profile": {
+        const authorModal = document.getElementById('author-profile-modal');
+
+        // Nowa logika do zatrzymania odtwarzania wideo z kafelka
+        const activeVideoPlayer = authorModal.querySelector('.video-tile-content.active video');
+        if (activeVideoPlayer) {
+            activeVideoPlayer.pause();
+            activeVideoPlayer.currentTime = 0; // Przewinięcie na początek
+        }
+        UI.closeAuthorProfileModal();
+        break;
+      }
       case "close-modal":
+        e.stopPropagation(); // Stop the event from bubbling up to parent elements
         const modal = actionTarget.closest(".modal-overlay");
         if (modal) {
-          UI.closeModal(modal);
+          if (modal.id === 'infoModal') {
+            UI.closeModal(modal, { animationClass: 'slideOutToTop' });
+          } else {
+            UI.closeModal(modal);
+          }
         } else {
           PWA.closePwaModals();
         }
         break;
       case "close-welcome-modal":
-        UI.closeModal(UI.DOM.welcomeModal);
+        UI.closeWelcomeModal();
+        break;
+      case "open-account-modal":
+        AccountPanel.openAccountModal();
         break;
       case "close-account-modal":
-        UI.closeModal(UI.DOM.accountModal);
+        UI.closeModal(UI.DOM.accountModal, { animationClass: 'slideOutLeft' });
         break;
       case "logout":
         e.preventDefault();
@@ -588,23 +670,48 @@ export const Handlers = {
         break;
       case "toggle-login-panel":
         if (!State.get("isUserLoggedIn")) {
-          const swiper = State.get('swiper');
-          if (swiper) {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            const video = activeSlide?.querySelector('video');
-            if (video) {
-              State.set('videoPlaybackState', {
-                slideId: activeSlide.dataset.slideId,
-                currentTime: video.currentTime,
-              });
+            // Kod do zapisania stanu odtwarzania wideo w tle (zachowany)
+            const swiper = State.get('swiper');
+            if (swiper) {
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const video = activeSlide?.querySelector('video');
+                if (video) {
+                    State.set('videoPlaybackState', {
+                        slideId: activeSlide.dataset.slideId,
+                        currentTime: video.currentTime,
+                    });
+                }
             }
-          }
 
-          if (UI.DOM.commentsModal.classList.contains("visible")) {
-            UI.closeCommentsModal();
-          }
-          if (loginPanel) loginPanel.classList.toggle("active");
-          if (topbar) topbar.classList.toggle("login-panel-active");
+            if (UI.DOM.commentsModal.classList.contains("visible")) {
+                UI.closeCommentsModal();
+            }
+            if (loginPanel) {
+                if (loginPanel.classList.contains('active')) {
+                    // CLOSING
+                    loginPanel.classList.add('login-panel--closing');
+                    // Użyj transitionend dla transform, aby zapewnić płynne zamknięcie i prawidłowe czyszczenie
+                    const onTransitionEnd = (e) => {
+                        // Upewnij się, że event dotyczy właściwej właściwości i że jest to stan zamykania
+                        if (e.propertyName === 'transform' && loginPanel.classList.contains('login-panel--closing')) {
+                            loginPanel.classList.remove('active', 'login-panel--closing');
+                            loginPanel.removeEventListener('transitionend', onTransitionEnd);
+                            if (topbar) {
+                                topbar.classList.remove("login-panel-active");
+                            }
+                        }
+                    };
+                    // Użyj { once: true } na ogólnym listenerze dla bezpieczeństwa
+                    loginPanel.addEventListener('transitionend', onTransitionEnd);
+                } else {
+                    // OPENING
+                    loginPanel.classList.remove('login-panel--closing');
+                    loginPanel.classList.add('active');
+                    if (topbar) {
+                        topbar.classList.add("login-panel-active");
+                    }
+                }
+            }
         }
         break;
       case "subscribe":
@@ -613,15 +720,8 @@ export const Handlers = {
           UI.showAlert(Utils.getTranslation("subscribeAlert"));
         }
         break;
-      case "toggle-notifications":
-        if (State.get("isUserLoggedIn")) {
-          const popup = UI.DOM.notificationPopup;
-          popup.classList.toggle("visible");
-          if (popup.classList.contains("visible")) Notifications.render();
-        } else {
-          Utils.vibrateTry();
-          UI.showAlert(Utils.getTranslation("notificationAlert"));
-        }
+      case "toggle-push-notifications":
+        Notifications.handleBellClick();
         break;
       case "close-notifications":
         if (UI.DOM.notificationPopup) {

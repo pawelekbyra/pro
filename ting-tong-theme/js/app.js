@@ -28,9 +28,11 @@ if ('serviceWorker' in navigator) {
       : '/wp-content/themes/ting-tong-theme/sw.js';
 
     // ✅ FIX: Dołącz `themeUrl` jako parametr zapytania, aby SW znał ścieżkę motywu
-    swUrl += `?themeUrl=${encodeURIComponent(themeUrl)}`;
+    // Użyj `&` jeśli URL już ma `?`, w przeciwnym razie `?`
+    const separator = swUrl.includes('?') ? '&' : '?';
+    swUrl += `${separator}themeUrl=${encodeURIComponent(themeUrl)}`;
 
-    navigator.serviceWorker.register(swUrl)
+    navigator.serviceWorker.register(swUrl, { scope: '/' })
       .then(registration => {
         console.log('✅ Service Worker zarejestrowany:', registration);
       })
@@ -170,9 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
           AccountPanel.populateProfileForm(data.userData);
         }
 
-        // ✅ FIX: Użyj dedykowanej, solidnej funkcji do obsługi modala pierwszego logowania.
-        // Ta funkcja zawiera logikę sprawdzającą i jest bardziej odporna na błędy timingowe.
-        FirstLoginModal.checkProfileAndShowModal(data.userData);
+        // Wymuś modal, jeśli potrzebny.
+        FirstLoginModal.enforceModalIfIncomplete(data.userData);
       });
 
       // Listener dla wylogowania
@@ -197,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
       State.on('state:change:currentLang', ({ newValue }) => {
         console.log(`Language changed to: ${newValue}`);
         UI.updateTranslations();
+        TippingModal.updateLanguage();
       });
     }
 
@@ -211,6 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (userData && AccountPanel?.populateProfileForm) {
             AccountPanel.populateProfileForm(userData);
           }
+          FirstLoginModal.enforceModalIfIncomplete(userData);
         } else {
           console.log('User is not logged in');
         }
@@ -363,14 +366,21 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             slideChange: handleMediaChange,
             click: function(swiper, event) {
+              const activeSlide = swiper.slides[swiper.activeIndex];
+              const secretOverlay = activeSlide.querySelector('.secret-overlay.visible');
+              const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay.visible');
+
+              if (secretOverlay || pwaSecretOverlay) {
+                return; // Blokuj kliknięcie, jeśli nakładka jest widoczna
+              }
+
               // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
-              // Jeśli tak, zatrzymaj propagację, aby nasz główny handler mógł zadziałać.
+              // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
+              // Główny handler na `document.body` zajmie się resztą.
               if (event.target.closest('[data-action]')) {
-                event.stopPropagation();
                 return;
               }
 
-              const activeSlide = swiper.slides[swiper.activeIndex];
               const video = activeSlide?.querySelector("video");
               if (!video) return;
 
@@ -441,6 +451,7 @@ document.addEventListener("DOMContentLoaded", () => {
         FirstLoginModal.init();
         TippingModal.init();
         CommentsModal.init();
+        Notifications.init();
         UI.initGlobalPanels();
         PWA.init();
         _initializePreloader();
@@ -465,9 +476,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
       mockBtn.style.display = 'block';
+      mockBtn.textContent = 'DEBUG: Pokaż First Login Modal';
+      mockBtn.removeEventListener('click', () => {}); // Usuń stary listener TippingModal
       mockBtn.addEventListener('click', () => {
-        authManager.mockLogin({ is_profile_complete: false, email: 'mock_user_for_test@test.com' });
+        // 1. Mockuj logowanie jako użytkownik z niekompletnym profilem
+        authManager.mockLogin({
+          is_profile_complete: false,
+          email: 'mock_user_for_fl@test.com'
+        });
         UI.showAlert('Mock logowanie (wymaga setup) zainicjowane.');
+
+        // 2. Wymuś otwarcie modala bezpośrednio, używając danych z mocka
+        const userData = State.get('currentUser');
+        if (userData) {
+          FirstLoginModal.enforceModalIfIncomplete(userData);
+        }
       });
     }
     // Koniec LOGIKA MOCK BUTTON

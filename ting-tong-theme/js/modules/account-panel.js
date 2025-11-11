@@ -2,6 +2,7 @@ import { Utils } from './utils.js';
 import { UI } from './ui.js';
 import { authManager } from './auth-manager.js';
 import { State } from './state.js';
+import { API } from './api.js';
 
 // Global variables for the panel
 let cropImage = null;
@@ -85,8 +86,30 @@ function toggleEmailConsent() {
 }
 
 function selectLanguage(lang) {
+  // Mapowanie języka aplikacji na locale WordPressa
+  const newLocale = lang === 'pl' ? 'pl_PL' : 'en_GB';
+
+  // 1. Aktualizacja ustawień maili (stary kod)
   userSettings.emailLanguage = lang;
   updateSettingsUI();
+
+  // 2. Wysłanie nowej lokalizacji do API WordPressa (wywołanie asynchroniczne)
+  if (State.get("isUserLoggedIn")) {
+      // Zmień na to:
+      API.updateLocale(newLocale)
+        .then(result => {
+          if (result.success) {
+            console.log(`WordPress locale updated to: ${newLocale}`);
+          } else {
+            console.error("Failed to update WordPress locale:", result.data?.message);
+            showError("settingsError", result.data?.message || Utils.getTranslation("localeUpdateError"));
+          }
+        })
+        .catch(error => {
+           console.error("API Error updating WordPress locale:", error);
+           showError("settingsError", error.message || Utils.getTranslation("localeUpdateError"));
+        });
+  }
 }
 
 async function saveSettings() {
@@ -95,11 +118,18 @@ async function saveSettings() {
   try {
     button.disabled = true;
     button.innerHTML = `<span class="loading-spinner"></span> ${Utils.getTranslation("savingButtonText")}`;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    showSuccess(
-      "settingsSuccess",
-      Utils.getTranslation("settingsUpdateSuccess"),
-    );
+
+    const result = await API.saveSettings(userSettings);
+
+    if (result.success) {
+      showSuccess(
+        "settingsSuccess",
+        Utils.getTranslation("settingsUpdateSuccess"),
+      );
+    } else {
+      throw new Error(result.data?.message || "Failed to save settings.");
+    }
+
   } catch (error) {
     showError("settingsError", error.message);
   } finally {
@@ -162,39 +192,32 @@ function populateProfileForm(data) {
 
 // Modal visibility functions
 function openAccountModal() {
-  const modal = document.getElementById("accountModal");
-  if (!modal) {
-    console.error('Account modal element not found');
-    return;
-  }
+    const modal = document.getElementById("accountModal");
+    if (!modal) {
+        console.error('Account modal element not found');
+        return;
+    }
 
-  modal.classList.add("visible");
-  document.body.style.overflow = "hidden";
+    const loggedInMenu = document.querySelector(".logged-in-menu");
+    if (loggedInMenu) {
+        loggedInMenu.classList.remove("active");
+    }
 
-  const currentUser = State.get('currentUser');
+    UI.openModal(modal);
 
-  if (currentUser && currentUser.user_id) {
-    console.log('Using existing user data');
-    populateProfileForm(currentUser);
-  } else {
-    console.log('Loading fresh user data');
-    loadInitialProfileData();
-  }
+    const currentUser = State.get('currentUser');
+    if (currentUser && currentUser.user_id) {
+        populateProfileForm(currentUser);
+    } else {
+        loadInitialProfileData();
+    }
 }
 
 function closeAccountModal() {
-  const modal = document.getElementById("accountModal");
-  if (!modal) return;
-
-  modal.classList.add("is-hiding");
-  modal.addEventListener(
-    "transitionend",
-    () => {
-      modal.classList.remove("visible", "is-hiding");
-      document.body.style.overflow = "";
-    },
-    { once: true },
-  );
+    const modal = document.getElementById("accountModal");
+    if (modal) {
+      UI.closeModal(modal);
+    }
 }
 
 // Tab switching
@@ -330,34 +353,51 @@ function setupEventListeners() {
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (!file.type.startsWith("image/"))
-    return showError(
-      "avatarError",
-      Utils.getTranslation("fileSelectImageError"),
-    );
-  if (file.size > 5 * 1024 * 1024)
-    return showError(
-      "avatarError",
-      Utils.getTranslation("fileTooLargeError"),
-    );
+
+  // Walidacja pliku (przeniesiona dla czytelności)
+  if (!file.type.startsWith("image/")) {
+    return showError("avatarError", Utils.getTranslation("fileSelectImageError"));
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return showError("avatarError", Utils.getTranslation("fileTooLargeError"));
+  }
 
   const reader = new FileReader();
   reader.onload = function (e) {
     cropImage = new Image();
     cropImage.onload = function () {
-      openCropModal();
-      initializeCropCanvas();
+      // Przekazujemy inicjalizację jako callback
+      openCropModal(initializeCropCanvas);
+    };
+    cropImage.onerror = () => {
+      showError("avatarError", "Nie udało się załadować obrazu.");
     };
     cropImage.src = e.target.result;
+  };
+  reader.onerror = () => {
+    showError("avatarError", "Nie udało się odczytać pliku.");
   };
   reader.readAsDataURL(file);
 }
 
-function openCropModal() {
-  document.getElementById("cropModal").classList.add("visible");
+function openCropModal(callback) {
+    const modal = document.getElementById("cropModal");
+    if (!modal) return;
+
+    UI.openModal(modal, {
+      onOpen: () => {
+        if (typeof callback === 'function') {
+            // Use a short timeout to ensure the modal is rendered before canvas calculations
+            setTimeout(callback, 50);
+        }
+      }
+    });
 }
 function closeCropModal() {
-  document.getElementById("cropModal").classList.remove("visible");
+  const modal = document.getElementById("cropModal");
+  if(modal) {
+    UI.closeModal(modal);
+  }
   cropImage = null;
 }
 
@@ -572,31 +612,20 @@ async function cropAndSave() {
   }
 }
 
-async function apiRequest(action, data = {}) {
-  try {
-    return await authManager.ajax(action, data);
-  } catch (error) {
-    console.error(`API error for action "${action}":`, error);
-    return {
-      success: false,
-      data: { message: error.message || 'Request failed' }
-    };
-  }
-}
 async function uploadAvatar(dataUrl) {
-  return apiRequest("tt_avatar_upload", { image: dataUrl });
+  return API.uploadAvatar({ image: dataUrl });
 }
 async function updateProfile(data) {
-  return apiRequest("tt_profile_update", data);
+  return API.updateProfile(data);
 }
 async function changePassword(data) {
-  return apiRequest("tt_password_change", data);
+  return API.changePassword(data);
 }
 async function deleteAccount(confirmText) {
-  return apiRequest("tt_account_delete", { confirm_text: confirmText });
+  return API.deleteAccount({ confirm_text: confirmText });
 }
 async function loadUserProfile() {
-  return apiRequest("tt_profile_get");
+  return API.loadUserProfile();
 }
 
 async function handleProfileSubmit(event) {

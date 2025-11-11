@@ -48,10 +48,12 @@ function closePwaModals() {
 }
 
 function runStandaloneCheck() {
+    const isUserLoggedIn = (UI_MODULE && UI_MODULE.getIsUserLoggedIn()) || false;
+    const isDesktopDevice = isDesktop();
+
     const appFrame = document.getElementById("app-frame");
 
-    // Jeśli aplikacja działa w trybie standalone, zawsze ukrywaj pasek.
-    if (isStandalone()) {
+    if (isStandalone() || (isDesktopDevice && isUserLoggedIn)) {
         if (installBar) {
             installBar.classList.remove("visible");
             if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
@@ -59,7 +61,6 @@ function runStandaloneCheck() {
         return true;
     }
 
-    // Jeśli nie jest standalone, pokaż pasek po zniknięciu preloadera.
     const preloader = document.getElementById("preloader");
     const container = document.getElementById("webyx-container");
     const isPreloaderHidden = (preloader && preloader.classList.contains("preloader-hiding")) || (container && container.classList.contains("ready"));
@@ -67,8 +68,19 @@ function runStandaloneCheck() {
     if (isPreloaderHidden && installBar) {
         installBar.classList.add("visible");
         if (appFrame) appFrame.classList.add("app-frame--pwa-visible");
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.classList.add('visible');
+        }
+
+        setTimeout(() => {
+            const tiktokSymulacja = document.querySelector('.tiktok-symulacja');
+            if (tiktokSymulacja) {
+                tiktokSymulacja.classList.add('controls-visible');
+            }
+        }, 800);
     } else if (installBar) {
-        // W każdym innym przypadku (np. preloader widoczny), ukryj pasek.
         installBar.classList.remove("visible");
         if (appFrame) appFrame.classList.remove("app-frame--pwa-visible");
     }
@@ -76,46 +88,31 @@ function runStandaloneCheck() {
     return false;
 }
 
-// ✅ FIX: Nasłuchuj zdarzenia `beforeinstallprompt` natychmiast po załadowaniu modułu.
-// Jest to kluczowe, aby przechwycić zdarzenie, które może zostać wyemitowane bardzo wcześnie.
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   installPromptEvent = e;
   console.log("✅ `beforeinstallprompt` event fired and captured.");
-  // Już nie wywołujemy tutaj `runStandaloneCheck()`.
-  // Logika w `app.js` jest teraz jedynym źródłem prawdy.
 });
 
 function handleInstallClick() {
-  // FIX: Najpierw sprawdzamy, czy aplikacja nie jest już zainstalowana (standalone).
-  // Jeśli tak, wyświetlamy stosowny komunikat i przerywamy.
   if (isStandalone()) {
     if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaAlreadyInstalled"));
     return;
   }
 
-  // Ta funkcja jest teraz znacznie prostsza. Jej jedynym zadaniem jest
-  // wywołanie zachowanego zdarzenia `prompt()` lub, w przypadku jego braku,
-  // pokazanie odpowiednich instrukcji dla iOS lub desktop.
   if (installPromptEvent) {
     installPromptEvent.prompt();
-    // Logika `userChoice` zostanie obsłużona w listenerze `appinstalled`.
   } else if (isIOS()) {
     showIosInstructions();
   } else if (isDesktop()) {
     showDesktopModal();
   } else {
-    // Jeśli dotarliśmy tutaj, oznacza to, że przeglądarka nie obsługuje
-    // `beforeinstallprompt` i nie jest to ani iOS, ani desktop.
-    // To rzadki przypadek, ale warto go odnotować.
     console.warn("PWA installation not supported on this browser.");
     if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("pwaNotSupported"));
   }
 }
 
 function init() {
-  // ✅ FIX: Dodajemy bezpośredni listener do przycisku instalacji.
-  // To zapewnia, że kliknięcie jest zawsze obsługiwane przez ten moduł.
   if (installButton) {
     installButton.addEventListener('click', handleInstallClick);
   }
@@ -123,7 +120,6 @@ function init() {
   window.addEventListener("appinstalled", () => {
     installPromptEvent = null;
     if (UI_MODULE) UI_MODULE.showAlert(Utils.getTranslation("appInstalledSuccessText"));
-    // Nie ukrywamy już tutaj paska - `runStandaloneCheck` się tym zajmie.
   });
 
   if (iosCloseButton) {
@@ -141,4 +137,73 @@ function init() {
   }
 }
 
-export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule };
+async function handlePushSubscription() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+    console.warn('Push Notifications are not supported in this browser.');
+    return 'unsupported';
+  }
+
+  // >>> KROK 1: NATYCHMIASTOWE WYWOŁANIE PROMPTU (KRYTYCZNE)
+  // To musi być wykonane jako pierwsza operacja asynchroniczna, aby kontekst kliknięcia nie został utracony.
+  const permission = await Notification.requestPermission();
+
+  if (permission !== 'granted') {
+    console.log('Notification permission was not granted.');
+    return permission;
+  }
+
+  // --- KROK 2: DALSZA LOGIKA TYLKO PO UZYSKANIU ZGODY ('granted') ---
+
+  // Oczekiwanie na Service Worker jest teraz bezpieczne, ponieważ zgoda jest już udzielona.
+  const registration = await navigator.serviceWorker.ready;
+
+  if (!registration) {
+    console.error('Service Worker jest niedostępny po uzyskaniu zgody.');
+    return 'error';
+  }
+
+  let subscription = await registration.pushManager.getSubscription();
+
+  if (subscription === null) {
+    const vapidPublicKey = window.TingTongData?.vapidPk;
+    if (!vapidPublicKey) {
+      console.error('VAPID public key is not available.');
+      return 'error';
+    }
+
+    try {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: Utils.urlBase64ToUint8Array(vapidPublicKey),
+      });
+    } catch (error) {
+      console.error('Failed to subscribe to push notifications:', error);
+      return 'error';
+    }
+  }
+
+  try {
+    const subscriptionData = subscription.toJSON();
+    const API = (await import('./api.js')).API;
+    const result = await API.savePushSubscription({
+        endpoint: subscriptionData.endpoint,
+        keys: {
+            p256dh: subscriptionData.keys.p256dh,
+            auth: subscriptionData.keys.auth
+        }
+    });
+
+    if (result.success) {
+      console.log('Push subscription saved successfully.');
+      return 'granted';
+    } else {
+      console.error('Failed to save push subscription on server:', result.data.message);
+      return 'error';
+    }
+  } catch (error) {
+    console.error('Error saving push subscription:', error);
+    return 'error';
+  }
+}
+
+export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule, handlePushSubscription, isDesktop };

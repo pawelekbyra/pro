@@ -13,6 +13,25 @@ Text Domain: tingtongtheme
 /* ==========================================================================
            --- PRELOADER ---
            ========================================================================== */
+.preloader-icon-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    z-index: 10001;
+    opacity: 1;
+    transition: opacity 0.5s linear;
+}
+
+.splash-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: pulse-glow 2.5s infinite ease-in-out;
+}
+
 #preloader {
   position: fixed;
   top: 0;
@@ -77,6 +96,12 @@ Text Domain: tingtongtheme
 .fl-modal-overlay.visible .fl-modal-content {
     transform: scale(1) translateY(0);
     opacity: 1;
+}
+
+.elegant-modal-overlay.is-hiding .elegant-modal-content {
+  transform: scale(0.95) translateY(10px);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53), opacity 0.3s ease-out !important;
 }
 
 .fl-modal-content {
@@ -301,6 +326,12 @@ Text Domain: tingtongtheme
   box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
 }
 
+#flNameError,
+#flPasswordError {
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
 /* --- Tipping Modal Specific Styles --- */
 
 .tipping-amount-container {
@@ -361,27 +392,13 @@ Text Domain: tingtongtheme
     height: 48px;
     border-width: 4px;
 }
-.preloader-icon-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 192px;
-  height: 192px;
-}
-.splash-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  animation: pulse-glow 2.5s infinite ease-in-out;
-}
 @keyframes pulse-glow {
   0% {
     transform: scale(1);
     opacity: 0.9;
   }
   50% {
-    transform: scale(1.03);
+    transform: scale(1.05);
     opacity: 1;
   }
   100% {
@@ -391,7 +408,7 @@ Text Domain: tingtongtheme
 }
 .preloader-content-container {
   position: absolute;
-  top: calc(50% + 96px); /* 96px is half of the icon's 192px height */
+  top: calc(50% + 80px); /* Odsunięcie w dół o połowę wysokości obrazka (80px to połowa z 160px) */
   bottom: 0;
   left: 0;
   width: 100%;
@@ -508,6 +525,7 @@ Text Domain: tingtongtheme
   --bottombar-height: calc(
     var(--bottombar-base-height) + var(--safe-area-bottom)
   );
+  --video-controls-height: 40px;
 }
 * {
   margin: 0;
@@ -832,9 +850,37 @@ body,
   transform: scale(0.9);
 }
 
+.info-button svg.info-icon-pulsing {
+    animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    transition: none !important;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+}
+
 .cc-button {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.elegant-modal-error {
+    color: #ff8a80; /* Light red for dark theme */
+    background-color: rgba(255, 138, 128, 0.1); /* Subtle red background */
+    border: 1px solid rgba(255, 138, 128, 0.3);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+    display: none; /* Hidden by default */
 }
 .topbar {
   background: #000;
@@ -910,21 +956,18 @@ body,
       var(--topbar-height)
   );
   right: 2px;
-  transform: translateY(-50%) translateX(100%);
+  transform: translateY(-50%) translateX(150%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   z-index: 10052;
-  opacity: 0;
   transition:
     top 0.3s ease-out,
-    opacity 0.6s ease-out,
     transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.tiktok-symulacja.video-loaded .sidebar {
-  opacity: 1;
+.tiktok-symulacja.video-loaded .sidebar.visible {
   transform: translateY(-50%) translateX(0);
 }
 .tiktok-symulacja .bottombar {
@@ -960,12 +1003,11 @@ body,
   bottom: 100%; /* Na górnej krawędzi bottombar */
   left: 0;
   width: 100%;
-  height: 4px; /* Zmniejszona wysokość, aby zlikwidować przerwę */
+  height: 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   z-index: 10060; /* Podniesiony, aby był nad paskiem PWA */
   transition: height 0.2s ease-in-out;
-  transform: translateY(2px); /* Przesunięcie w dół o 2px */
 }
 
 /* 2. Usuń stare reguły dla app-frame--pwa-visible - pozostaje bez zmian */
@@ -1024,7 +1066,7 @@ body,
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
 .progress-bar:hover,
 .progress-bar.dragging {
-  height: 6px; /* Zwiększamy wysokość całego paska */
+  height: 4px; /* Zwiększamy wysokość całego paska */
 }
 
 .progress-bar:hover .progress-bar-handle,
@@ -1117,7 +1159,7 @@ body,
   transition:
     border-color 0.1s ease-in-out,
     filter 0.2s;
-  background-color: white; /* Dodane białe tło */
+  background-color: white;
 }
 
 /* Styl dla obwódki VIP */
@@ -1314,25 +1356,76 @@ body,
 /* ==========================================================================
            --- KOMPONENTY UI: PANELE I MENU ---
            ========================================================================== */
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToTop {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutUp {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
 .login-panel {
   position: absolute;
   top: var(--topbar-height);
   left: 0;
   width: 100%;
   color: white;
-  z-index: 110 !important;
+  z-index: 114;
   border-top: none;
-  transform: translateY(-100%);
+  /* Start hidden by default */
+  visibility: hidden;
   opacity: 0;
-  pointer-events: none;
-  transition:
-    transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    opacity 0.3s ease-out;
 }
+
 .login-panel.active {
-  transform: translateY(0);
+  visibility: visible;
   opacity: 1;
-  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.login-panel.login-panel--closing {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
 }
 .login-panel > div,
 .login-panel > form {
@@ -1479,7 +1572,7 @@ body,
   align-items: center;
   justify-content: center;
   gap: 10px;
-  z-index: 10001; /* Podniesiony z-index */
+  z-index: 10301; /* Podniesiony z-index, aby był nad modalem autora */
   white-space: nowrap; /* ✅ FIX: Wymuś jedną linię dla krótkich tekstów */
 
   /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
@@ -1495,7 +1588,7 @@ body,
 
 #app-frame.hide-ui #alertBox {
   /* ✅ FIX: Dostosowano pozycję w trybie immersyjnym */
-  bottom: calc(var(--safe-area-bottom) + 12px);
+  bottom: calc(var(--video-controls-height) + var(--safe-area-bottom) + 12px);
 }
 
 #alertBox svg {
@@ -1536,7 +1629,6 @@ body,
 .fl-modal-overlay,
 #commentsModal,
 .account-modal-overlay,
-#tiktok-profile-modal,
 .crop-modal,
 .image-lightbox {
   position: fixed;
@@ -1545,15 +1637,16 @@ body,
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
   transition:
     opacity 0.3s ease-out,
     visibility 0.3s ease-out;
+  overflow: hidden;
 }
 .modal-overlay.visible {
   opacity: 1;
@@ -1604,43 +1697,57 @@ body,
 }
 
 /* Modal: Info */
-#infoModal .modal-content {
-  background: #1f1f1f;
-  color: #fff;
-  border-radius: 16px;
-  max-width: 90%;
-  width: 500px;
-  max-height: 85vh;
-  padding: 0; /* Usunięto padding z kontenera */
-  display: flex !important;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+.info-modal-overlay {
+    background: transparent;
+    transition: background-color 0.6s ease; /* Zmieniamy na tło */
 }
+
+.info-modal-overlay.visible {
+    background: transparent;
+}
+
+.info-modal-content {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    display: flex !important;
+    flex-direction: column;
+    will-change: transform, opacity;
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+}
+
+.info-modal-overlay.visible .info-modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
 #infoModal .modal-body {
   overflow-y: auto;
-  padding: 20px; /* Padding przeniesiony tutaj */
+  padding: 16px 24px;
   -webkit-overflow-scrolling: touch;
 }
 
 #infoModal .modal-body::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 #infoModal .modal-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
 }
 #infoModal .modal-body::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
+    border-radius: 2px;
 }
 #infoModal .modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.4);
 }
 
 #infoModal h2 {
   margin-top: 0;
   padding-right: 40px;
-  color: var(--accent-color);
+  color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.15);
   padding-bottom: 10px;
   margin-bottom: 15px;
@@ -1670,6 +1777,222 @@ body,
 
 #infoModal li {
     margin-bottom: 8px;
+}
+
+.crowdfunding-container {
+    padding: 16px 10px;
+    text-align: center;
+}
+
+.crowdfunding-header {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.crowdfunding-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    text-align: center;
+    width: 100%;
+}
+
+.crowdfunding-subtitle {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    max-width: 90%;
+    margin: 0 auto;
+    margin-bottom: 16px;
+}
+
+.crowdfunding-description {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    max-width: 90%;
+    margin: 0 auto 24px;
+}
+
+#infoModal .premiere-date-value {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 22px;
+    margin-top: 4px;
+}
+
+.progress-section {
+    margin-bottom: 20px;
+}
+
+.progress-bar-wrapper {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 12px;
+    background: linear-gradient(90deg, #ff0055, #ff4081);
+    border-radius: 7px;
+    transition: width 1s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+}
+
+.progress-bar-sparkle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.4);
+    filter: blur(4px);
+    transform: skewX(-20deg);
+    animation: sparkle-animation 2.5s infinite linear;
+}
+
+@keyframes sparkle-animation {
+    0% { left: -10%; }
+    100% { left: 110%; }
+}
+
+.progress-label {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.countdown-section {
+    margin-bottom: 24px;
+}
+
+.countdown-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.countdown-part {
+    display: flex;
+    flex-direction: column;
+}
+
+.countdown-label-small {
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.premiere-date-label {
+    margin-top: 16px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.countdown-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 16px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.stat-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+}
+
+.cta-section {
+    margin-top: 20px;
+}
+
+.cta-button {
+    background: linear-gradient(135deg, #ff0055, #ff4081);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(255, 0, 85, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 30px rgba(255, 0, 85, 0.5);
+}
+
+.shiny-tip-button {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.shiny-tip-button svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+    stroke: none;
+}
+
+.shiny-tip-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+    transform: rotate(30deg);
+    animation: shiny-effect 3s infinite linear;
+}
+
+@keyframes shiny-effect {
+    0% {
+        transform: rotate(30deg) translateX(-150%);
+    }
+    100% {
+        transform: rotate(30deg) translateX(150%);
+    }
 }
 
 
@@ -1890,7 +2213,8 @@ body,
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  overflow: hidden;
 }
 
 .account-modal-overlay.visible {
@@ -1904,9 +2228,10 @@ body,
   height: 100vh;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 .account-modal-overlay.visible .account-modal-content {
@@ -1915,7 +2240,9 @@ body,
 
 .account-modal-overlay.is-hiding .account-modal-content {
   transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
 
 .account-header {
   position: relative;
@@ -2011,7 +2338,7 @@ body,
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: calc(80px + var(--safe-area-bottom)); /* ZWIĘKSZONO PADDING: Zapewnia więcej miejsca na dole */
+  padding-bottom: calc(80px + var(--safe-area-bottom)); /* Zwiększony padding na dole */
   position: relative; /* Niezbędne dla kontekstu pozycjonowania potomnych elementów */
 }
 
@@ -2379,6 +2706,7 @@ body,
   align-items: center;
   justify-content: center;
   padding: 20px;
+overflow: hidden;
 }
 
 .crop-modal.visible {
@@ -2700,8 +3028,33 @@ body,
   font-size: 1rem;
   line-height: 1.5;
 }
+
 .pwa-ios-body p {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
   margin-bottom: 0.75rem;
+}
+
+.pwa-ios-body p:last-child {
+  margin-bottom: 0;
+}
+
+.pwa-ios-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.pwa-ios-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 /* --- Desktop PWA Modal --- */
@@ -2807,276 +3160,6 @@ body,
   display: none !important;
 }
 
-/* ==========================================================================
-   --- TIKTOK PUBLIC PROFILE MODAL ---
-   ========================================================================== */
-#tiktok-profile-modal {
-  /* This modal requires a special override. It must be `fixed` to slide over
-     the #app-frame, which has `overflow: hidden`. On desktop, we revert this
-     to `absolute` to keep it constrained. */
-  position: fixed;
-}
-
-#tiktok-profile-modal .tiktok-profile-content {
-  background-color: #2d2d2d;
-  color: #fff;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.4s ease-in-out;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
-}
-
-#tiktok-profile-modal.visible .tiktok-profile-content {
-  transform: translateX(0);
-}
-
-#tiktok-profile-modal.is-hiding .tiktok-profile-content {
-  transform: translateX(100%);
-}
-
-.tiktok-profile-header {
-  height: var(--topbar-height);
-  display: grid;
-  grid-template-columns: 60px 1fr 60px;
-  align-items: center;
-  padding: 0;
-  padding-top: var(--safe-area-top);
-  background-color: #1f1f1f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
-}
-
-.tiktok-profile-header .username {
-  font-size: 16px;
-  font-weight: 700;
-  text-align: center;
-  grid-column: 2;
-}
-
-.tiktok-profile-header .profile-action-btn,
-#tiktok-profile-modal .modal-close-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    transform 0.1s ease-in-out,
-    opacity 0.2s;
-}
-
-.tiktok-profile-header .profile-action-btn:active,
-#tiktok-profile-modal .modal-close-btn:active {
-  transform: scale(0.9);
-}
-
-#tiktok-profile-modal .modal-close-btn {
-  position: static;
-  color: #fff;
-  font-size: 28px;
-}
-
-.profile-main {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 20px 16px;
-}
-
-.profile-main::-webkit-scrollbar {
-  display: none;
-}
-
-.profile-summary {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.profile-avatar-wrapper {
-  flex-shrink: 0;
-}
-
-.profile-avatar {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.profile-stats {
-  display: flex;
-  justify-content: space-around;
-  flex-grow: 1;
-  gap: 20px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 18px;
-  font-weight: 700;
-  display: block;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.profile-nickname {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-#tiktok-profile-at-username {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: -8px;
-}
-
-.profile-bio {
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 16px;
-  white-space: pre-wrap;
-}
-
-.profile-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.profile-actions .follow-button {
-  flex-grow: 1;
-  background-color: var(--accent-color);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.profile-actions .icon-button {
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-.profile-actions .icon-button svg {
-  width: 24px;
-  height: 24px;
-  fill: #fff;
-}
-
-.profile-tabs {
-  display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  gap: 2px;
-}
-
-.profile-tabs .tab {
-  flex: 1;
-  padding: 14px;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-  color: rgba(255, 255, 255, 0.8);
-  background-color: #1f1f1f;
-  border-radius: 4px 4px 0 0;
-  transition: background-color 0.2s ease;
-}
-
-.profile-tabs .tab:hover {
-  background-color: #2a2a2a;
-}
-
-.profile-tabs .tab.active {
-  color: #fff;
-  background-color: #3a3a3a;
-}
-
-.profile-tabs .tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: var(--accent-color);
-}
-
-.profile-tabs .tab svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor;
-}
-
-.video-gallery {
-  display: none;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding-top: 2px;
-}
-
-.video-gallery.active {
-  display: grid;
-}
-
-.video-thumbnail {
-  position: relative;
-  padding-bottom: 140%;
-  background-color: #333;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.video-thumbnail img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-views {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  color: var(--white);
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.video-views svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  fill: white;
-}
 
 /* --- Toast Notification --- */
 /* (This style is now handled by #alertBox for consistency) */
@@ -3312,6 +3395,83 @@ body,
   margin-bottom: 24px;
 }
 
+.tipping-currency-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+}
+
+.amount-placeholder-zero {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #8e8e93;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.elegant-modal-input.amount-input:not(:placeholder-shown) + .amount-placeholder-zero,
+.elegant-modal-input.amount-input:focus + .amount-placeholder-zero {
+    opacity: 0;
+}
+
+.tipping-currency-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    color: white;
+    padding: 10px 10px 10px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+}
+
+.tipping-currency-wrapper::after {
+    content: ''; /* Remove the default arrow */
+    display: none;
+}
+
+.tipping-currency-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.tipping-currency-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #333;
+    border: 1px solid #555;
+    color: white;
+    padding: 10px 30px 10px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+}
+
+.tipping-currency-wrapper::after {
+    content: '▼';
+    font-size: 12px;
+    color: #999;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
 .welcome-btn {
   padding: 18px 28px;
   border-radius: 16px;
@@ -3503,6 +3663,21 @@ body,
   }
 }
 
+@keyframes slideOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9) rotateX(-10deg);
+  }
+}
+
+.welcome-modal.is-hiding .welcome-modal-content {
+  animation: slideOutDown 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
 
 /* Animacja pojawiania się overlay */
 @keyframes errorFadeIn {
@@ -3571,6 +3746,18 @@ body,
    ============================================================================ */
 
 @media (min-width: 600px) {
+  #tippingModal.elegant-modal-overlay {
+    width: calc(100vh * 9 / 16) !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 auto !important;
+    top: 0 !important;
+    height: 100% !important;
+    border-left: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color) !important;
+    box-sizing: border-box !important;
+  }
   /* Główny kontener aplikacji */
   #webyx-container {
     height: 100vh;
@@ -3581,8 +3768,7 @@ body,
     right: 0; /* POPRAWKA: Niezbędne do centrowania elementu fixed/absolute */
     border-left: 1px solid #333;
     border-right: 1px solid #333;
-    /* ZMIEŃ: Użyj intensywnego cienia z akcentem kolorystycznym */
-    box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 0, 85, 0.25);
+    animation: cloud-wave 6s infinite ease-in-out;
     overflow: hidden;
   }
 
@@ -3612,12 +3798,13 @@ body,
   #commentsModal,
   .modal-overlay,
   .fl-modal-overlay,
+  .elegant-modal-overlay,
   .crop-modal,
   .notification-popup,
   .image-lightbox,
   #bmc-w-modal-container,
   .account-modal-overlay,
-  #tiktok-profile-modal,
+  .profile-modal-overlay,
   #bmc-w-modal-container iframe,
   #bmc-w-modal-container > div
   {
@@ -3634,15 +3821,11 @@ body,
   }
 
   /* NOWE: Wymuszenie dopasowania wewnętrznej zawartości modali do nowej szerokości */
-  .modal-overlay#tiktok-profile-modal {
-    position: absolute !important;
-  }
   .modal-overlay .modal-content,
   .fl-modal-overlay .fl-modal-content,
   .crop-modal .crop-modal-content,
   .notification-popup,
-  .account-modal-content,
-  .tiktok-profile-content
+.account-modal-content
   {
     width: 100% !important;
     max-width: 100% !important;
@@ -3658,36 +3841,40 @@ body,
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
   }
 
-  /* ZMIEŃ: Uproszczenie tła body do ciemnej czerni */
   body {
-    background: #0a0a0a !important;
+    background-image: url('chmurki.jpg') !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
     overflow-x: hidden;
   }
 
-  /* NOWA REGULA: Ambient Glow */
-  /* Ambient Glow - duży, rozmyty gradient w kolorze akcentu */
-  body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(
-      circle at center,
-      rgba(255, 0, 85, 0.12) 0%, /* Jaśniejszy punkt w centrum */
-      rgba(255, 0, 85, 0.05) 30%, /* Większy zasięg */
-      transparent 65%
-    );
-    opacity: 0.9;
-    z-index: -1;
-    pointer-events: none;
-    animation: subtleShimmer 8s ease-in-out infinite;
-  }
 
   @keyframes subtleShimmer {
     0%, 100% { transform: scale(1); opacity: 0.9; }
     50% { transform: scale(1.1); opacity: 1; }
+  }
+
+  /* Wymuszenie czarnego tła dla emulatora i jego zawartości */
+  #webyx-container, #preloader {
+    background: #000 !important;
+    color: #fff !important;
+  }
+  #preloader h2, #preloader button {
+      color: #fff !important;
+  }
+
+  #preloader {
+    width: calc(100vh * 9 / 16);
+    max-width: 100%;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+    animation: cloud-wave 6s infinite ease-in-out;
+    background: #000 !important;
   }
 }
 
@@ -3717,34 +3904,6 @@ body,
 /* ============================================================================
    OPCJONALNIE - Gradient background za aplikacją
    ============================================================================ */
-
-/* NOWA REGULA: Ambient Glow */
-@media (min-width: 600px) {
-  /* Ambient Glow - duży, rozmyty gradient w kolorze akcentu */
-  body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(
-      circle at center,
-      rgba(255, 0, 85, 0.07) 0%, /* Jasny punkt w centrum */
-      rgba(255, 0, 85, 0.03) 25%,
-      transparent 70%
-    );
-    opacity: 0.8;
-    z-index: -1;
-    pointer-events: none;
-    animation: subtleShimmer 10s ease-in-out infinite;
-  }
-
-  @keyframes subtleShimmer {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 0.9; }
-  }
-}
 
 /* WZMOCNIONE ukrywanie w trybie standalone */
 @media (display-mode: standalone) {
@@ -3891,7 +4050,7 @@ body,
    ========================================================================== */
 
 #comments-modal-container.modal-overlay {
-  align-items: flex-end;
+  align-items: flex-end !important; /* FIX: Override generic centering for bottom-sheet style */
   z-index: 10005;
   transition: visibility 0.3s ease-out;
 }
@@ -3902,11 +4061,10 @@ body,
   width: 100%;
   max-width: 100%;
   height: 75vh;
-  max-height: 75vh;
   border-radius: 16px 16px 0 0;
   padding: 0;
   transform: translateY(100%);
-  transition: transform 0.3s ease-out;
+  transition: transform 0.4s ease-out;
   display: flex;
   flex-direction: column;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -3934,26 +4092,41 @@ body,
 
 /* Header */
 #comments-modal-container .modal-header {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
     align-items: center;
-    padding: 4px 8px;
+    justify-content: center;
+    position: relative;
+    padding: 0 12px;
     flex-shrink: 0;
-    height: 40px;
+    height: 48px;
     border-bottom: 1px solid #3a3b3c;
 }
 
+#commentsTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e4e6eb;
+    margin: 0;
+}
+
 #comments-modal-container .modal-close-btn {
-  color: #b0b3b8;
-  opacity: 1;
-  position: static;
-  transform: none;
-  width: 30px;
-  height: 30px;
-  font-size: 24px;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0b3b8;
+    width: 32px;
+    height: 32px;
+    font-size: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
 }
 
 #comments-modal-container .modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   opacity: 1;
 }
 
@@ -4460,10 +4633,11 @@ body,
 
 /* Sort Options */
 .comment-sort-options {
-  position: static;
-  transform: none;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 10;
-  flex-shrink: 0;
 }
 
 .sort-dropdown {
@@ -4689,16 +4863,14 @@ body,
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.7);
   display: flex !important;
   align-items: center;
   justify-content: center;
-  z-index: 10020;
+  z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  overflow: hidden;
 }
 
 #tippingModal, #infoModal {
@@ -4718,6 +4890,7 @@ body,
   border-radius: 20px;
   width: 90%;
   max-width: 420px;
+  max-height: 85vh; /* Dodano maksymalną wysokość */
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4728,8 +4901,19 @@ body,
 }
 
 .elegant-modal-overlay.visible .elegant-modal-content {
-  transform: scale(1) translateY(0);
-  opacity: 1;
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+
+.elegant-modal-content-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .elegant-modal-header {
@@ -4737,6 +4921,10 @@ body,
   text-align: center;
   flex-shrink: 0;
   position: relative; /* Needed for the close button */
+}
+
+.elegant-modal-header .modal-close-btn {
+    color: #fff; /* Light color for the 'x' */
 }
 
 .elegant-modal-title {
@@ -4762,7 +4950,7 @@ body,
 
 .elegant-modal-body {
   padding: 0 24px 20px;
-  overflow: hidden; /* Steps will manage their own visibility */
+  overflow-y: auto; /* Włączono przewijanie */
   flex-grow: 1;
 }
 
@@ -4775,6 +4963,7 @@ body,
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 
 .elegant-modal-step.active {
   display: block;
@@ -4824,8 +5013,8 @@ body,
 
 .elegant-modal-preference-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.05);
   padding: 14px 16px;
   border-radius: 10px;
@@ -4833,6 +5022,7 @@ body,
   border: 1px solid transparent;
   transition: background-color 0.2s, border-color 0.2s;
   flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 .elegant-modal-preference-row:hover {
@@ -4864,7 +5054,7 @@ body,
 
 .elegant-modal-email-container.visible {
     opacity: 1;
-    max-height: 100px;
+    max-height: 150px; /* Zwiększono, aby pomieścić dłuższy hint */
     margin-top: 8px; /* small gap */
 }
 
@@ -4920,6 +5110,9 @@ body,
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .elegant-modal-btn:active {
@@ -4927,15 +5120,19 @@ body,
 }
 
 .elegant-modal-btn-prev {
-  background: #3a3a3c;
-  color: #f0f0f0;
-  display: none; /* Hidden by default */
+    background: transparent;
+    color: #a0a0a0;
+    flex: 0 1 30%; /* Take up less space */
+    font-size: 14px;
+    box-shadow: none;
+    border: 1px solid #4a4a4c;
 }
 
 .elegant-modal-btn-next,
 .elegant-modal-btn-submit {
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(255, 0, 85, 0.25);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 0, 85, 0.25);
+    flex: 1; /* Make the main action button take more space */
 }
 
 .elegant-modal-btn-next {
@@ -5069,20 +5266,1088 @@ body,
     transform: translateY(-2px);
 }
 
-/* ============================================================================
-   MODAL CENTERING FIX
-   ============================================================================ */
-@media (min-width: 600px) {
-  #infoModal.modal-overlay,
-  #tippingModal.modal-overlay {
-    width: 100% !important;
-    max-width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 !important;
-    border-left: none !important;
-    border-right: none !important;
-  }
+
+.profile-header {
+  height: var(--topbar-height);
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+  padding: 0;
+  padding-top: var(--safe-area-top);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.profile-header .username-header {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  grid-column: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-header .modal-close-btn,
+.profile-header .options-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.1s ease-in-out,
+    opacity 0.2s;
+}
+
+.profile-header .modal-close-btn {
+  grid-column: 1;
+  justify-self: start;
+  margin-left: 10px;
+}
+.profile-header .options-btn {
+  grid-column: 3;
+  justify-self: end;
+  margin-right: 10px;
+}
+
+.profile-header .back-btn:active,
+.profile-header .options-btn:active {
+  transform: scale(0.9);
+}
+
+.profile-header .back-btn {
+    font-size: 28px;
+    font-weight: 300;
+}
+
+.profile-header .options-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+main {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+}
+
+main::-webkit-scrollbar {
+  display: none;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.avatar-container .profile-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  width: 100%;
+}
+
+.stats-container .stat {
+  text-align: center;
+}
+
+.stats-container .stat-number {
+  font-size: 18px;
+  font-weight: 700;
+  display: block;
+}
+
+.stats-container .stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.fullname {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.bio {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 16px;
+  white-space: pre-wrap;
+  text-align: center;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.profile-actions .follow-btn {
+  flex-grow: 1;
+  max-width: 200px;
+  background-color: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.profile-actions .social-btn {
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-actions .social-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+  stroke: none;
+}
+.profile-actions .social-btn.instagram svg {
+    stroke: #fff;
+    stroke-width: 2px;
+    fill: none;
+}
+.profile-actions .social-btn.youtube svg {
+    fill: #fff;
+    stroke: none;
 }
 
 
+.tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tabs .tab {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tabs .tab.active {
+  color: #fff;
+}
+
+.tabs .tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #fff;
+}
+
+.tabs .tab svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+.tabs .tab[data-tab-content="liked-grid"] svg {
+    stroke: currentColor;
+    stroke-width: 2px;
+    fill: none;
+}
+.tabs .tab[data-tab-content="reposts-grid"] svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2px;
+}
+
+#author-profile-modal .profile-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#author-profile-modal .profile-tab {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  color: rgba(255, 255, 255, 0.6);
+  background: none;
+  border: none;
+}
+
+.profile-tab.active {
+  color: #fff;
+}
+
+.profile-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #fff;
+}
+
+.profile-tab svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+.profile-tab[data-tab="liked-grid"] svg {
+    stroke: currentColor;
+    stroke-width: 2px;
+    fill: none;
+}
+.profile-tab[data-tab="reposts-grid"] svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2px;
+}
+
+.profile-tab-content {
+  padding-top: 2px;
+}
+
+
+.video-gallery {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.video-gallery.active {
+  display: grid;
+}
+
+.video-thumbnail {
+  position: relative;
+  padding-bottom: 140%;
+  background-color: #333;
+}
+
+.video-thumbnail img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-views {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.video-views svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  fill: white;
+}
+
+#terms-step .terms-content {
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+#terms-step .terms-content p {
+    margin-bottom: 10px;
+}
+
+#payment-element {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#payment-element.ready {
+    opacity: 1;
+}
+
+
+/* Custom UI Adjustments requested */
+
+/* Info Modal: Header adjustments */
+#infoModal .crowdfunding-title {
+    font-size: 22px; /* Make header smaller */
+    margin-top: -8px;  /* Move header closer to the top */
+    margin-bottom: 4px;
+}
+
+/* Info Modal: Style for the premiere date */
+#infoModal .premiere-date-value {
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+/* Tipping Modal: Style for currency dropdown indicator */
+.tipping-currency-wrapper .currency-dropdown-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* Make sure the select has padding to not overlap with the new arrow */
+.tipping-currency-wrapper .tipping-currency-select {
+    padding-right: 30px !important;
+}
+
+/* Hide the old pseudo-element to avoid duplicate arrows */
+.tipping-currency-wrapper::after {
+    content: none !important;
+}
+
+/* Info Modal: Adjust CTA button to better fit the icon */
+#infoModal .cta-button {
+    gap: 10px;
+}
+
+#infoModal .cta-button svg {
+    width: 32px;
+    height: 32px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.5;
+}
+
+/* Modal Transition Animations */
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+#video-player-modal {
+    z-index: 10400 !important;
+    background-color: #000;
+}
+
+#video-player-modal video {
+    width: 100%;
+    height: 100%;
+}
+
+#video-player-modal .modal-close-btn {
+    color: #fff;
+}
+
+/* ============================================================================
+   --- PWA DESKTOP MINI MODAL ---
+   ============================================================================ */
+
+.pwa-desktop-mini-modal .modal-content {
+    background: #ffffff;
+    color: #333;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 320px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e5e5;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.pwa-desktop-mini-modal .modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 26px;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.pwa-desktop-mini-modal .modal-close-btn:hover {
+  opacity: 1;
+}
+
+.phone-icon {
+    width: 40px;
+    height: 40px;
+    color: #ff3366;
+    margin-bottom: 10px;
+}
+
+.pwa-mini-modal-text {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #222;
+}
+
+.pwa-mini-modal-subtitle {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* New styles for tipping summary */
+.elegant-modal-step-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the description by default */
+    width: 100%;
+    margin-bottom: 16px; /* A bit more space for the whole block */
+    gap: 4px;
+}
+
+.elegant-modal-step-header .elegant-modal-step-description {
+    margin-bottom: 0;
+    text-align: center;
+    width: 100%;
+    order: 2;
+    font-size: 14px; /* Make it slightly smaller to give prominence to amount */
+    color: #999;
+}
+
+.tipping-summary-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f0f0f0;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    order: 1;
+    align-self: center; /* Align this specific item to the center */
+    margin-right: 0; /* Remove margin */
+    margin-bottom: 0; /* Remove bottom margin, rely on gap */
+}
+
+/* --- Nowe klasy dla FIX: Wysokość modala --- */
+.elegant-modal-content.fixed-height-transition {
+    transition: height 0.3s ease-out;
+}
+
+.elegant-modal-content.force-fixed-height {
+    height: var(--tipping-fixed-height, auto);
+    overflow: hidden;
+}
+
+@keyframes cloud-wave {
+  0% {
+    box-shadow: 0 0 60px 20px rgba(255, 255, 255, 0.7), 0 0 100px 40px rgba(200, 200, 220, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 70px 25px rgba(255, 255, 255, 0.75), 0 0 110px 45px rgba(200, 200, 220, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 60px 20px rgba(255, 255, 255, 0.7), 0 0 100px 40px rgba(200, 200, 220, 0.5);
+  }
+}
+
+/* ============================================================================
+   --- AUTHOR PROFILE MODAL STYLES ---
+   ============================================================================ */
+
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 10300; /* Above other modals */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  overflow: hidden;
+}
+
+.profile-modal-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.profile-modal-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: #1C1C1E;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s ease-in-out;
+  will-change: transform;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.profile-modal-overlay.visible .profile-modal-content {
+  transform: translateX(0);
+}
+
+.profile-modal-overlay.is-hiding .profile-modal-content {
+  transform: translateX(100%);
+  transition: none;
+}
+
+#author-profile-modal .profile-header {
+    height: var(--topbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    padding-top: var(--safe-area-top);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    position: relative;
+}
+
+#author-profile-modal .username-header {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    grid-column: 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#author-profile-modal .modal-close-btn {
+    position: absolute;
+    top: calc(var(--safe-area-top) + 2px);
+    right: 5px;
+    z-index: 10;
+    grid-column: auto;
+    justify-self: auto;
+    font-size: 28px;
+    font-weight: 300;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#author-profile-modal .options-btn {
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 10px;
+}
+
+#author-profile-modal main {
+    flex-grow: 1;
+    overflow-y: visible;
+    padding: 20px 16px;
+}
+
+#author-profile-modal main::-webkit-scrollbar {
+    display: none;
+}
+
+#author-profile-modal .info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+#author-profile-modal .avatar-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    background: transparent;
+}
+
+#author-profile-modal .avatar-container .profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+#author-profile-modal .info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+#author-profile-modal .stats-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    width: 100%;
+}
+
+#author-profile-modal .stats-container .stat {
+    text-align: center;
+}
+
+#author-profile-modal .stats-container .stat-number {
+    font-size: 14px;
+    font-weight: 700;
+    display: block;
+}
+
+#author-profile-modal .stats-container .stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#author-profile-modal .fullname {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+#author-profile-modal .bio {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 16px;
+    white-space: pre-wrap;
+    text-align: center;
+}
+
+#author-profile-modal .profile-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+#author-profile-modal .profile-actions .follow-btn {
+    flex-grow: 1;
+    max-width: 200px;
+    background-color: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#author-profile-modal .profile-actions .follow-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.5;
+}
+
+#author-profile-modal .profile-actions .social-btn {
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#author-profile-modal .profile-actions .social-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+    stroke: none;
+}
+
+#author-profile-modal .profile-actions .social-btn.instagram svg {
+    stroke: #fff;
+    stroke-width: 2px;
+    fill: none;
+}
+
+#author-profile-modal .tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#author-profile-modal .tabs .tab {
+    flex: 1;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#author-profile-modal .tabs .tab.active {
+    color: #fff;
+}
+
+#author-profile-modal .tabs .tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #fff;
+}
+
+#author-profile-modal .tabs .tab svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+}
+#author-profile-modal .tabs .tab[data-tab-content="liked-grid"] svg {
+    stroke: currentColor;
+    stroke-width: 2px;
+    fill: none;
+}
+#author-profile-modal .tabs .tab[data-tab-content="reposts-grid"] svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2px;
+}
+
+#author-profile-modal .video-gallery {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding-top: 2px;
+}
+
+#author-profile-modal .video-gallery.active {
+    display: grid;
+}
+
+#author-profile-modal .video-thumbnail {
+    position: relative;
+    padding-bottom: 140%;
+    background-color: #333;
+}
+
+#author-profile-modal .video-thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#author-profile-modal .video-views {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+#author-profile-modal .video-views svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    fill: white;
+}
+
+/* Nowe style dla nakładki na miniatury w profilu autora */
+.thumbnail-overlay-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    pointer-events: none;
+}
+
+.thumbnail-overlay-block .lock-icon {
+    width: 35%;
+    height: 35%;
+    opacity: 0.9;
+}
+
+.thumbnail-overlay-block .badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.thumbnail-overlay-block .badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+.modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
+    animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.modal-content.slideInRight, .elegant-modal-content.slideInRight, .profile-modal-content.slideInRight {
+    animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+
+.modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
+    animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+
+/* Modal Transition Animations */
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+#tiktok-profile-modal .tiktok-profile-content {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+#tiktok-profile-modal.visible .profile-content {
+    opacity: 1;
+    transform: translateX(0);
+    transition: none;
+}
+
+#app-frame[style*="pointer-events: none"] {
+/* Opcjonalnie: wizualna informacja, że tło jest zablokowane */
+filter: blur(5px);
+transition: filter 0.3s ease;
+pointer-events: none; /* Domyślna obsługa przez JS */
+}
+
+/* Wymuszony modal musi być widoczny */
+#firstLoginModal.fl-modal-overlay {
+/* Upewnij się, że modal jest zawsze na wierzchu, nawet z `pointer-events: none` na rodzicu */
+z-index: 10021;
+}
+
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* ============================================================================
+FIX: 1. Miniaturowy Modal Instalacji PWA (pwa-desktop-mini-modal)
+============================================================================ */
+#pwa-desktop-modal .modal-content {
+max-width: 300px; /* Zmniejszenie maksymalnej szerokości */
+width: 90%;
+padding: 16px; /* Mniejszy padding */
+border-radius: 12px;
+}
+.pwa-desktop-mini-modal .modal-close-btn {
+top: 6px;
+right: 10px;
+font-size: 20px;
+}
+.phone-icon {
+width: 32px; /* Mniejsza ikona */
+height: 32px;
+margin-bottom: 8px;
+}
+.pwa-mini-modal-text {
+font-size: 14px; /* Mniejszy font */
+font-weight: 600;
+margin-bottom: 4px;
+}
+.pwa-mini-modal-subtitle {
+font-size: 11px; /* Mniejszy font */
+}
+
+
+/* ============================================================================
+FIX: 2. Panel Logowania (Czysta Animacja Slide In/Out - bez opacity)
+============================================================================ */
+.login-panel {
+position: absolute;
+top: var(--topbar-height);
+left: 0;
+width: 100%;
+color: white;
+z-index: 114;
+border-top: none;
+/* Domyślny stan - poza ekranem, ukryty i bez transition w bazowej klasie */
+transform: translateY(-100%);
+transition: none;
+visibility: hidden;
+opacity: 0; /* Utrzymaj dla klikalności */
+}
+
+.login-panel.active {
+visibility: visible;
+opacity: 1;
+transform: translateY(0);
+transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* KLUCZOWE: Tylko Transform */
+}
+
+.login-panel.login-panel--closing {
+visibility: visible; /* KLUCZOWE: Utrzymaj widoczność podczas animacji wyjścia */
+opacity: 1;
+transform: translateY(-100%);
+transition: transform 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53); /* Czysta animacja wyjścia */
+pointer-events: none;
+}
+
+
+/* ============================================================================
+FIX: 3. Author Modal - Usunięcie Transition z Hiding + Wymiary
+============================================================================ */
+
+/* Poprawiona animacja wyjścia dla modala autora */
+.profile-modal-overlay.is-hiding .profile-modal-content {
+  transform: translateX(100%);
+  transition: transform 0.4s ease-in-out !important;
+}
+
+/* Poprawiona animacja wyjścia dla modala konta */
+.account-modal-overlay.is-hiding .account-modal-content {
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* FIX: Author Modal - Ułożenie Nagłówka (Usunięcie ikony 3 kropek) */
+#author-profile-modal .profile-header {
+grid-template-columns: 1fr 40px; /* 1fr dla tytułu, 40px dla X */
+}
+#author-profile-modal .username-header {
+grid-column: 1;
+justify-self: center; /* Wyśrodkuj tytuł */
+}
+#author-profile-modal .modal-close-btn {
+grid-column: 2; /* Przesunięcie X do prawej kolumny */
+justify-self: end;
+margin-right: 10px;
+}
+/* Ukrycie nieistniejącego już .options-btn */
+.profile-header .options-btn {
+display: none !important;
+}
+
+
+/* FIX: Author Modal - Wymiary Stats (zapobieganie poziomemu scrollowi) */
+#author-profile-modal .stats-container {
+gap: 10px; /* Zmniejszenie odstępów */
+}
+#author-profile-modal .stats-container .stat-number {
+font-size: 14px; /* Zmniejszenie stat-number */
+}
+#author-profile-modal .stats-container .stat-label {
+font-size: 10px; /* Zmniejszenie stat-label */
+white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
+}

@@ -13,7 +13,7 @@ get_header();
     <div class="elegant-modal-content-wrapper">
         <form id="tippingForm" class="elegant-modal-content">
             <div class="elegant-modal-header">
-                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa 🤑</h2>
+                <h2 id="tippingTitle" class="elegant-modal-title" data-translate-key="tippingTitle">Bramka Napiwkowa</h2>
                 <button type="button" class="modal-close-btn" data-action="close-modal" aria-label="Close tipping modal">&times;</button>
                 <div class="elegant-modal-progress-bar-container">
                     <div class="elegant-modal-progress-bar-fill" id="tippingProgressBar"></div>
@@ -26,40 +26,74 @@ get_header();
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Założyć konto Patrona? 🏆</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
+                            <span class="elegant-modal-preference-label" data-translate-key="tippingCreateAccountLabel">No raczej!</span>
                             <input type="checkbox" id="tippingCreateAccount" class="elegant-modal-checkbox">
-                            <span class="elegant-modal-preference-label">No raczej!</span>
                         </label>
                         <div id="tippingEmailContainer" class="elegant-modal-email-container visible">
-                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na ktory otrzymasz klucze logowania logowania)">
-                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail prześlemy dane do logowania.</p>
+                            <input type="email" id="tippingEmail" class="elegant-modal-input" data-translate-placeholder="emailPlaceholder" placeholder="(podaj mail na ktory otrzymasz klucze logowania)">
+                            <p class="elegant-modal-hint-text" data-translate-key="tippingEmailHint">Na podany e-mail otrzymasz dane dostępu do logowania do sekcji dla patronów.</p>
                         </div>
+                        <div id="tippingStep0Error" class="elegant-modal-error"></div>
                     </div>
                 </div>
 
                 <!-- Krok 2: Wybór kwoty -->
                 <div class="elegant-modal-step" data-step="1">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wybierz lub wpisz kwotę, którą chcesz wesprzeć twórcę. Każdy gest ma znaczenie!</p>
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep2Desc">Wpisz kwotę napiwku</p>
                     <div class="elegant-modal-fields-container">
-                        <div class="tipping-amount-suggestions">
-                            <button type="button" class="amount-suggestion-btn" data-amount="5">5 PLN</button>
-                            <button type="button" class="amount-suggestion-btn active" data-amount="10">10 PLN</button>
-                            <button type="button" class="amount-suggestion-btn" data-amount="20">20 PLN</button>
-                        </div>
                         <div class="tipping-amount-container">
-                            <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" data-translate-placeholder="tippingAmountPlaceholder" placeholder="Wpisz kwotę" min="1" step="any">
-                            <span class="tipping-currency">PLN</span>
+                            <div class="amount-input-wrapper">
+                                <input type="number" id="tippingAmount" class="elegant-modal-input amount-input" placeholder=" " min="1" step="any" data-translate-placeholder="tippingAmountPlaceholder">
+                                <span class="amount-placeholder-zero">0</span>
+                            </div>
+                            <div class="tipping-currency-wrapper">
+                                <select id="tippingCurrency" class="tipping-currency-select">
+                                    <option value="pln">PLN</option>
+                                    <option value="eur">EUR</option>
+                                    <option value="usd">USD</option>
+                                    <option value="gbp">GBP</option>
+                                </select>
+                                <span class="currency-dropdown-arrow">▼</span>
+                            </div>
                         </div>
-                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint">Dziękujemy za każde wsparcie!</p>
+                        <div class="elegant-modal-preference-row" style="justify-content: center; gap: 10px;">
+                            <input type="checkbox" id="termsAccept" class="elegant-modal-checkbox">
+                            <label for="termsAccept" class="elegant-modal-preference-label" style="font-size: 13px;" data-translate-key="tippingAcceptTerms">
+                                Akceptuję Regulamin i Politykę Prywatności
+                            </label>
+                        </div>
+                        <div id="tippingStep1Error" class="elegant-modal-error"></div>
+                        <p class="elegant-modal-hint-text" data-translate-key="tippingAmountHint"></p>
                     </div>
                 </div>
 
-                <!-- Krok 3: Przekierowanie do płatności -->
+                <!-- Krok 3: Płatność Stripe -->
                 <div class="elegant-modal-step" data-step="2">
-                    <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Dziękujemy! Za chwilę nastąpi przekierowanie do bezpiecznej bramki płatności.</p>
+                    <div class="elegant-modal-step-header">
+                        <p class="elegant-modal-step-description" data-translate-key="tippingStep3Desc">Wybierz metodę napiwkowania</p>
+                        <span id="tippingSummaryAmount" class="tipping-summary-amount"></span>
+                    </div>
+                    <div id="payment-element">
+                        <!-- Stripe Payment Element will be inserted here -->
+                    </div>
+                    <div id="payment-message" class="hidden"></div>
+                </div>
+
+                <!-- Krok 4: Przetwarzanie płatności -->
+                <div class="elegant-modal-step" data-step="3">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingStep4Desc">Dziękujemy! Trwa weryfikacja Twojej płatności.</p>
                     <div class="elegant-modal-fields-container" style="text-align: center; padding: 40px 0;">
                         <div class="loading-spinner large"></div>
-                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingRedirectHint">Trwa przetwarzanie, prosimy o cierpliwość...</p>
+                        <p class="elegant-modal-hint-text" style="margin-top: 20px;" data-translate-key="tippingProcessingHint">To może potrwać chwilę...</p>
                     </div>
+                </div>
+
+                <!-- Step 5 (was 4): Regulamin -->
+                <div class="elegant-modal-step" data-step="4" id="terms-step">
+                    <h3 class="elegant-modal-title" data-translate-key="tippingTermsTitle">Regulamin i Polityka Prywatności</h3>
+                    <div class="terms-content" style="font-size: 12px; line-height: 1.5; max-height: 250px; overflow-y: auto; padding-right: 10px;" data-translate-key="tippingTermsContent">
+                    </div>
+                    <button type="button" class="elegant-modal-btn" data-action="hide-terms" style="margin-top: 20px;" data-translate-key="tippingTermsBackButton">Powrót</button>
                 </div>
             </div>
 
@@ -67,7 +101,7 @@ get_header();
                 <div class="elegant-modal-footer-buttons">
                     <button type="button" id="tippingPrevBtn" class="elegant-modal-btn elegant-modal-btn-prev" data-action="tipping-prev" data-translate-key="tippingPrev">Wstecz</button>
                     <button type="button" id="tippingNextBtn" class="elegant-modal-btn elegant-modal-btn-next" data-action="tipping-next" data-translate-key="tippingNext">ENTER</button>
-                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingSubmit">Przejdź do płatności</button>
+                    <button type="submit" id="tippingSubmitBtn" class="elegant-modal-btn elegant-modal-btn-submit" data-translate-key="tippingPay">ENTER!</button>
                 </div>
             </div>
         </form>
@@ -108,6 +142,7 @@ get_header();
           <div class="fl-fields-container">
             <input type="text" id="flFirstName" class="fl-input" data-translate-placeholder="firstNamePlaceholder" placeholder="Imię">
             <input type="text" id="flLastName" class="fl-input" data-translate-placeholder="lastNamePlaceholder" placeholder="Nazwisko">
+            <div id="flNameError" class="elegant-modal-error"></div>
             <p class="fl-hint-text" data-translate-key="firstLoginNameHint">Informacje te będą widoczne publicznie.</p>
           </div>
         </div>
@@ -119,6 +154,7 @@ get_header();
             <p class="fl-hint-text" data-translate-key="firstLoginPasswordDesc">Twoje konto zostało utworzone z hasłem tymczasowym. Ustaw teraz nowe, bezpieczne hasło.</p>
             <input type="password" id="flPassword" class="fl-input" data-translate-placeholder="newPasswordPlaceholder" placeholder="Nowe hasło">
             <input type="password" id="flConfirmPassword" class="fl-input" data-translate-placeholder="confirmPasswordPlaceholder" placeholder="Potwierdź hasło">
+            <div id="flPasswordError" class="elegant-modal-error"></div>
           </div>
         </div>
 
@@ -137,6 +173,13 @@ get_header();
 </div>
 
 <div id="preloader">
+    <div class="preloader-icon-container">
+        <img
+            src="<?php echo get_template_directory_uri(); ?>/jajk.png"
+            alt="Logo aplikacji"
+            class="splash-icon"
+        >
+    </div>
     <div class="preloader-content-container">
         <div class="language-selection">
             <h2>Wybierz Język / Select Language</h2>
@@ -167,7 +210,7 @@ get_header();
                         <svg class="eye-icon-closed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>
                     </button>
                 </div>
-                <button type="submit" id="tt-login-submit">ENTER.</button>
+                <button type="submit" id="tt-login-submit">ENTER</button>
             </form>
         </div>
     <div class="logged-in-menu" aria-hidden="true">
@@ -193,7 +236,7 @@ get_header();
                             <svg class="fullscreen-exit-icon" style="display: none;" viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
                         </button>
                         <button class="info-button" data-action="open-info-modal">
-                           <svg fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
+                           <svg class="info-icon-pulsing" fill="white" viewBox="0 0 24 24" width="28" height="28"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg>
                         </button>
                     </div>
                 </div>
@@ -204,11 +247,8 @@ get_header();
                 </div>
 
                 <div class="replay-overlay" aria-hidden="true">
-                    <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 2v6h-6"/>
-                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
-                        <path d="M3 22v-6h6"/>
-                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                    <svg class="replay-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
                     </svg>
                 </div>
 
@@ -234,7 +274,7 @@ get_header();
                 </div>
                 <div class="sidebar visible">
                     <div class="profile">
-                        <button class="profileButton" data-action="open-author-modal" data-translate-aria-label="accountAriaLabel" aria-label="Konto"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
+                        <button class="profileButton" data-action="open-author-profile" data-translate-aria-label="authorProfileAriaLabel" aria-label="Profil autora"><img src="" alt="Profil" loading="lazy" decoding="async" /></button>
                         <div class="plus" aria-hidden="true">+</div>
                     </div>
                     <button class="icon-button like-button" data-action="toggle-like" data-like-id="" data-translate-alert="likeAlert" data-translate-aria-label="likeAriaLabel" aria-label="Polub" aria-pressed="false">
@@ -314,6 +354,76 @@ get_header();
     </div>
 </div>
 
+<!-- Author Profile Modal -->
+<div id="author-profile-modal" class="profile-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="author-profile-title" aria-hidden="true">
+    <div class="profile-modal-content">
+        <header class="profile-header">
+            <h2 id="author-profile-title" class="username-header"></h2>
+            <button class="modal-close-btn" data-action="close-author-profile" aria-label="Close profile">
+                &times;
+            </button>
+        </header>
+        <main>
+            <section class="info-section">
+                <div class="avatar-container">
+                    <img src="" alt="User Avatar" class="profile-avatar">
+                </div>
+                <p class="fullname"></p>
+                <p class="bio"></p>
+            </section>
+            <div class="stats-container">
+                <div class="stat">
+                    <span class="stat-number following-count">0</span>
+                    <span class="stat-label" data-translate-key="profileFollowing">Filmików</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number followers-count">0</span>
+                    <span class="stat-label" data-translate-key="profileFollowers">Patronów</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number likes-count">0</span>
+                    <span class="stat-label" data-translate-key="profileLikes">Lajkaczy</span>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <button class="follow-btn">
+                    <span>Zostań Patronem</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+                <button class="social-btn instagram" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </button>
+                 <button class="social-btn youtube" aria-label="YouTube">
+                    <svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                </button>
+            </div>
+            <div class="profile-tabs">
+                <button class="profile-tab active" data-tab="videos-grid" data-action="switch-profile-tab">
+                    <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"></path></svg>
+                </button>
+                <button class="profile-tab" data-tab="reposts-grid" data-action="switch-profile-tab">
+                    <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                </button>
+                <button class="profile-tab" data-tab="liked-grid" data-action="switch-profile-tab">
+                     <svg viewBox="0 0 24 24"><path d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>
+                </button>
+            </div>
+            <div class="profile-tab-content">
+                <div id="videos-grid" class="video-gallery active">
+                    <!-- Video thumbnails will be inserted here -->
+                </div>
+                <div id="reposts-grid" class="video-gallery">
+                    <!-- Reposted video thumbnails will be inserted here -->
+                </div>
+                <div id="liked-grid" class="video-gallery">
+                    <!-- Liked video thumbnails will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+
 <!-- Comments Modal -->
 <div id="comments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
@@ -374,6 +484,10 @@ get_header();
             <input type="file" class="comment-image-input" accept="image/*">
         </div>
     </div>
+</div>
+<div id="video-player-modal" class="modal-overlay" style="background-color: #000;">
+    <video controls style="width: 100%; height: 100%;"></video>
+    <button class="modal-close-btn" data-action="close-modal" style="color: #fff;">&times;</button>
 </div>
 
 <div class="notification-popup" id="notificationPopup" role="dialog" aria-modal="true" aria-labelledby="notification-title">
@@ -549,57 +663,6 @@ get_header();
         </div>
     </div>
 </div>
-<div id="tiktok-profile-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tiktok-profile-username" aria-hidden="true">
-    <div class="tiktok-profile-content">
-        <header class="tiktok-profile-header">
-            <button class="profile-action-btn" data-action="close-modal" aria-label="Close profile" style="font-size: 28px;">&times;</button>
-            <h2 id="tiktok-profile-username" class="username"></h2>
-        </header>
-        <main class="profile-main">
-            <div class="profile-summary">
-                <div class="profile-avatar-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                     <img src="" alt="Avatar użytkownika" class="profile-avatar" id="tiktok-profile-avatar">
-                     <h1 class="profile-nickname" id="tiktok-profile-nickname"></h1>
-                     <p id="tiktok-profile-at-username"></p>
-                </div>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-number" id="tiktok-following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowingLabel">Obserwuje</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="tiktok-followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowersLabel">Obserwujący</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="tiktok-likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikesLabel">Polubienia</span>
-                    </div>
-                </div>
-            </div>
-            <p class="profile-bio" id="tiktok-profile-bio"></p>
-            <div class="profile-actions">
-                <button class="follow-button" data-translate-key="profileFollowBtn">Obserwuj</button>
-                <button class="icon-button"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></button>
-            </div>
-
-            <div class="profile-tabs">
-                <div class="tab active" data-tab-content="videos-grid"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/></svg></div>
-                <div class="tab" data-tab-content="liked-grid"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
-                <div class="tab" data-tab-content="reposts-grid"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></div>
-            </div>
-            <div class="video-gallery active" id="videos-grid">
-                <!-- Video thumbnails will be dynamically inserted here -->
-            </div>
-             <div class="video-gallery" id="liked-grid">
-                <!-- Liked video thumbnails will be dynamically inserted here -->
-            </div>
-            <div class="video-gallery" id="reposts-grid">
-                <!-- Reposted video thumbnails will be dynamically inserted here -->
-            </div>
-        </main>
-    </div>
-</div>
 
 <div class="crop-modal" id="cropModal">
     <div class="crop-modal-content">
@@ -637,23 +700,23 @@ get_header();
 
 <div id="pwa-ios-instructions" class="pwa-prompt-ios">
     <div class="pwa-ios-header">
-        <h3>Jak zainstalować aplikację</h3>
+        <h3>Zainstaluj aplikację na iPhone</h3>
         <button id="pwa-ios-close-button" class="pwa-ios-close-button">&times;</button>
     </div>
     <div class="pwa-ios-body">
-        <p>1. Stuknij ikonę <strong>udostępniania</strong> w przeglądarce.</p>
-        <p>2. Wybierz <strong>"Dodaj do ekranu początkowego"</strong>.</p>
+        <p>1. Stuknij ikonę udostępniania <span class="pwa-ios-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a.75.75 0 01.75.75v10.51l2.22-2.22a.75.75 0 111.06 1.06l-3.5 3.5a.75.75 0 01-1.06 0l-3.5-3.5a.75.75 0 111.06-1.06l2.22 2.22V3.25a.75.75 0 01.75-.75zM3.75 13a.75.75 0 00-1.5 0v5.5c0 1.24 1.01 2.25 2.25 2.25h15c1.24 0 2.25-1.01 2.25-2.25v-5.5a.75.75 0 00-1.5 0v5.5c0 .41-.34.75-.75.75h-15a.75.75 0 01-.75-.75v-5.5z" /></svg></span> w przeglądarce Safari.</p>
+        <p>2. Wybierz opcję "Dodaj do ekranu początkowego" <span class="pwa-ios-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.75a.75.75 0 01.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6a.75.75 0 01.75-.75z" /></svg></span>.</p>
         <p>3. Potwierdź, a aplikacja pojawi się na Twoim ekranie!</p>
     </div>
 </div>
 
-<div id="pwa-desktop-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
+<div id="pwa-desktop-modal" class="modal-overlay pwa-desktop-mini-modal" role="dialog" aria-modal="true" aria-labelledby="pwa-desktop-title" aria-hidden="true">
     <div class="modal-content" tabindex="-1">
-        <button class="modal-close-btn" data-action="close-modal">&times;</button>
-        <h2 id="pwa-desktop-title" data-translate-key="pwaModalTitle">Pełne doświadczenie Ting Tong na Twoim telefonie!</h2>
+        <button class="modal-close-btn" data-action="close-modal" aria-label="Zamknij">&times;</button>
         <div class="modal-body" style="text-align: center;">
-            <p data-translate-key="pwaModalBody">Zeskanuj kod QR lub odwiedź nas na telefonie, aby pobrać aplikację i odblokować pełne możliwości.</p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://example.com" alt="QR Code" style="margin-top: 16px; border-radius: 8px;">
+            <svg class="phone-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 1h-8C6.12 1 5 2.12 5 3.5v17C5 21.88 6.12 23 7.5 23h8c1.38 0 2.5-1.12 2.5-2.5v-17C18 2.12 16.88 1 15.5 1zm-8 2h8c.28 0 .5.22.5.5v17c0 .28-.22.5-.5.5h-8c-.28 0-.5-.22-.5-.5v-17c0-.28.22-.5.5-.5zM12 19.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/></svg>
+            <p class="pwa-mini-modal-text">Ting Tong to aplikacja mobilna!</p>
+            <p class="pwa-mini-modal-subtitle">Wejdź na <strong>www.pawelperfect.pl</strong> na swoim telefonie, aby pobrać</p>
         </div>
     </div>
 </div>
@@ -716,31 +779,57 @@ get_header();
     <button class="image-lightbox-close">&times;</button>
 </div>
 
-<div id="infoModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
-    <div class="modal-content">
-        <button class="modal-close-btn" data-action="close-modal">&times;</button>
-        <div class="modal-body">
-            <h2 id="info-modal-title">O Projekcie Ting Tong</h2>
-            <p>Witaj w Ting Tong – innowacyjnej aplikacji, która rewolucjonizuje sposób, w jaki twórcy i widzowie wchodzą ze sobą w interakcje. Nasza platforma, zaprojektowana na wzór popularnych aplikacji z krótkimi formami wideo, to nie tylko miejsce do oglądania, ale przede wszystkim do realnego wspierania ulubionych autorów.</p>
+<div id="infoModal" class="modal-overlay info-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
+    <div class="modal-content info-modal-content">
+        <div class="account-header">
+            <h2 id="info-modal-title" data-translate-key="crowdfundingTitle">Wspieraj Projekt</h2>
+            <button class="close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body" id="infoModalBody">
+            <div class="crowdfunding-container">
+                <div class="crowdfunding-header">
+                    <h2 class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspólnie Tworzymy Historię!</h2>
+                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
+                </div>
 
-            <h3>Nasza Misja</h3>
-            <p>Celem Ting Tong jest stworzenie ekosystemu, w którym kreatywność jest bezpośrednio nagradzana. Wierzymy, że twórcy zasługują na transparentne i proste narzędzia do monetyzacji swojej pasji, a widzowie powinni mieć możliwość realnego wpływu na rozwój kanałów, które kochają. Chcemy zlikwidować barierę między twórcą a odbiorcą, budując społeczność opartą na wzajemnym szacunku i wsparciu.</p>
+                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie to nie tylko pomoc finansowa, ale przede wszystkim wotum zaufania i nieoceniona motywacja. Dzięki Tobie możemy się rozwijać, organizować niezwykłe wydarzenia i dostarczać jeszcze więcej emocji. Zostań częścią tej podróży!</p>
 
-            <h3>Kluczowe Funkcje</h3>
-            <ul>
-                <li><strong>Intuicyjny Interfejs:</strong> Przewijaj wideo w pionie, tak jak lubisz. Nasz interfejs jest szybki, płynny i zaprojektowany z myślą o urządzeniach mobilnych.</li>
-                <li><strong>System Napiwków:</strong> Podoba Ci się treść? Okaż swoje wsparcie jednym kliknięciem! Zintegrowany i bezpieczny system napiwków pozwala na błyskawiczne przekazywanie drobnych kwot bezpośrednio do twórcy.</li>
-                <li><strong>Społeczność:</strong> Komentuj, lajkuj i udostępniaj. Bądź częścią aktywnej społeczności skupionej wokół Twoich ulubionych tematów i twórców.</li>
-                <li><strong>Tryb PWA (Progressive Web App):</strong> Zainstaluj Ting Tong na swoim telefonie, aby uzyskać dostęp do dodatkowych funkcji, płynniejszego działania i powiadomień push – wszystko to bez konieczności pobierania aplikacji ze sklepu.</li>
-                <li><strong>Tryb Immersyjny:</strong> Zanurz się w treściach bez rozpraszaczy. Jedno dotknięcie ukrywa interfejs, pozwalając Ci skupić się na tym, co najważniejsze – wideo.</li>
-            </ul>
+                <div class="progress-section">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                        <div class="progress-bar-sparkle"></div>
+                    </div>
+                    <div class="progress-label" data-translate-key-dynamic="crowdfundingGoalLabel" data-collected="0" data-goal="500" data-percentage="0">
+                        <span>Cel: <strong>0 z 500 EUR</strong> (0%)</span>
+                    </div>
+                </div>
 
-            <h3>Dla Twórców</h3>
-            <p>Jesteś twórcą? Ting Tong oferuje Ci proste narzędzia do zarabiania na swojej pasji. Bez skomplikowanych algorytmów i niejasnych zasad. Po prostu twórz, a Twoi fani zajmą się resztą. Skup się na jakości, a my zapewnimy Ci platformę do jej monetyzacji.</p>
+                <div class="countdown-section">
+                    <div class="premiere-date-label" data-translate-key="crowdfundingPremiereLabel">Premiera już</div>
+                    <div class="premiere-date-value">1.01.2026</div>
+                    <div class="countdown-label" data-translate-key="crowdfundingCountdownLabel">Pozostało</div>
+                    <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
+                    <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
+                </div>
 
-            <h3>Dla Widzów</h3>
-            <p>Jako widz, masz realny wpływ. Twoje wsparcie nie tylko motywuje twórców do dalszej pracy, ale także pomaga im inwestować w lepszy sprzęt, rozwijać nowe formaty i poświęcać więcej czasu na to, co robią najlepiej. Każdy napiwek to cegiełka budująca przyszłość niezależnej twórczości w internecie.</p>
-            <p>Dziękujemy, że jesteś z nami. Przewijaj, odkrywaj i wspieraj!</p>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label" data-translate-key="crowdfundingSupportersLabel">Patronów</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">500 EUR</span>
+                        <span class="stat-label" data-translate-key="crowdfundingGoalStatLabel">Cel</span>
+                    </div>
+                </div>
+
+                <div class="cta-section">
+                    <button class="cta-button" data-action="open-tipping-from-info">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
+                        <span data-translate-key="crowdfundingCtaButton">Zostań Patronem</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
