@@ -319,15 +319,22 @@ function closeModal(modal, options = {}) {
 
     modal.setAttribute("aria-hidden", "true");
     modal.classList.add("is-hiding");
-    modal.classList.remove("visible");
 
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
     const hasCustomAnimation = options.animationClass && contentElement;
 
+    if (hasCustomAnimation) {
+        modal.style.transition = 'none'; // Wyłącz domyślną animację przezroczystości
+    } else {
+        modal.style.transition = ''; // Przywróć domyślną animację
+    }
+    modal.classList.remove("visible");
+
+
     const eventToListenFor = hasCustomAnimation ? 'animationend' : 'transitionend';
     const elementToListenOn = hasCustomAnimation ? contentElement : modal;
-    const fallbackDuration = hasCustomAnimation ? 500 : 400; // Animation: 0.4s, Transition: 0.3s
+    const fallbackDuration = hasCustomAnimation ? 500 : 400;
 
     let cleanupHasRun = false;
     const cleanup = () => {
@@ -340,6 +347,7 @@ function closeModal(modal, options = {}) {
         modal.classList.remove('is-hiding');
         if (hasCustomAnimation) {
             contentElement.style.animation = '';
+            modal.style.transition = ''; // Przywróć po zakończeniu
         }
 
         if (modal._focusTrapDispose) {
@@ -366,7 +374,7 @@ function closeModal(modal, options = {}) {
     }
 
     elementToListenOn.addEventListener(eventToListenFor, cleanup, { once: true });
-    setTimeout(cleanup, fallbackDuration + 50); // Add a small buffer
+    setTimeout(cleanup, fallbackDuration + 50);
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
