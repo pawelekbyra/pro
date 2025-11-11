@@ -1428,14 +1428,16 @@ body,
 }
 .login-panel .login-form {
   background: white;
-  padding: 10px 20px 20px;
+  /* ZMIANA 1: Nowy dolny padding 10px */
+  padding: 10px 20px 10px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
   max-width: 400px;
-  margin: -9px auto 0;
+  /* ZMIANA 2: Nowy górny margines -5px (daje 5px widocznej odległości) */
+  margin: -5px auto 0;
 }
 
 /* === LOGIN PANEL NEW STYLE === */
