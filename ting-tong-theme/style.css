@@ -5893,11 +5893,19 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .modal-close-btn {
-    grid-column: 3;
-    justify-self: end;
-    margin-right: 10px;
+    position: absolute;
+    top: calc(var(--safe-area-top) + 6px);
+    right: 10px;
+    z-index: 10;
+    grid-column: auto;
+    justify-self: auto;
     font-size: 28px;
     font-weight: 300;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #author-profile-modal .options-btn {
@@ -6117,16 +6125,57 @@ main::-webkit-scrollbar {
     fill: white;
 }
 
+/* Nowe style dla nakładki na miniatury w profilu autora */
+.thumbnail-overlay-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    pointer-events: none;
+}
+
+.thumbnail-overlay-block .lock-icon {
+    width: 35%;
+    height: 35%;
+    opacity: 0.9;
+}
+
+.thumbnail-overlay-block .badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.thumbnail-overlay-block .badge svg {
+    width: 16px;
+    height: 16px;
+}
+
 .modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
     animation: slideOutLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .modal-content.slideInRight, .elegant-modal-content.slideInRight, .profile-modal-content.slideInRight {
-    animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .profile-modal-content.slideOutRight {
-    animation: slideOutRight 0.4s ease-in-out forwards;
+    animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .modal-content.slideOutLeft, .elegant-modal-content.slideOutLeft {
