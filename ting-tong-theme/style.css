@@ -6421,16 +6421,30 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 #slide-002 .secret-overlay .secret-icon,
 #slide-002 .secret-overlay .secret-title,
 #slide-002 .secret-overlay .secret-subtitle {
-  color: #000;
+  color: #000 !important; /* Wymuś czarny kolor na nakładce */
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
+/* Wymuś czarny stroke/fill dla ikon w sidebarze */
 #slide-002 .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
-  stroke: #000;
+  stroke: #000 !important; /* Wymuszenie czarnej ramki */
+  fill: #000 !important;   /* Wymuszenie czarnego wypełnienia (np. dla ikony serca, gdy jest active) */
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
 
-#slide-002 .tiktok-symulacja .sidebar .icon-button:not(.profileButton) .icon-label {
-  color: #000;
+/* Wymuś czarny kolor dla tekstu pod ikonami */
+#slide-002 .tiktok-symulacja .sidebar .icon-button .icon-label {
+  color: #000 !important;
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Upewnij się, że ikona serca jest czarna nawet w stanie "unliked" */
+#slide-002 .tiktok-symulacja .like-button > svg {
+  stroke: #000 !important;
+  fill: none !important;
+}
+/* A w stanie polubionym (jeśli to wideo publiczne, ale jest secret) */
+#slide-002 .tiktok-symulacja .like-button.active > svg {
+  stroke: #fff !important; /* Czasem polubione ma być białe dla kontrastu */
+  fill: var(--accent-color) !important;
 }
