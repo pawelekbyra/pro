@@ -495,4 +495,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // Koniec LOGIKA MOCK BUTTON
   }
+  window.ttPwa = PWA;
 });
