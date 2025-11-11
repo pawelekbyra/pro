@@ -96,8 +96,8 @@ function openAuthorProfileModal(slideData) {
             const isLoggedIn = getIsUserLoggedIn();
 
             if (isLoggedIn) {
-                btnSpan.textContent = 'Subskrybujesz';
-                btnSvg.innerHTML = '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"></path>';
+                btnSpan.textContent = 'Subsrajbujesz';
+                btnSvg.innerHTML = '<path d="M26,12H20V6a3.0033,3.0033,0,0,0-3-3H14.8672a2.009,2.009,0,0,0-1.98,1.5146L11,12v9H24l2-9Z"/><path d="M9,23H5a2.0023,2.0023,0,0,1-2-2V13a2.0023,2.0023,0,0,1,2-2H9Z"/><rect id="_Transparent_Rectangle_" data-name="&lt;Transparent Rectangle&gt;" class="cls-1" width="32" height="32"/>';
                 followBtn.disabled = true;
             } else {
                 btnSpan.textContent = 'Zostań Patronem';
