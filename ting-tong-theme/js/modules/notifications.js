@@ -1,39 +1,52 @@
-import { PWA } from './pwa.js';
+/* global webpushr */
 import { UI } from './ui.js';
-import { Utils } from './utils.js';
 import { State } from './state.js';
 
 const Notifications = {
-  async handleBellClick() {
-    const permission = Notification.permission;
+    init() {
+        // Since Webpushr is loaded via an external script,
+        // we need to wait for it to be available.
+        // We'll check every 100ms.
+        const webpushrInterval = setInterval(() => {
+            if (typeof webpushr !== 'undefined') {
+                clearInterval(webpushrInterval);
+                this.setup();
+            }
+        }, 100);
+    },
 
-    if (permission === 'default' || permission === 'denied') {
-      const result = await PWA.handlePushSubscription();
-      if (result === 'granted') {
-        UI.showAlert(Utils.getTranslation('notificationsEnabledSuccess'));
-      } else if (result === 'denied') {
-        UI.showAlert(Utils.getTranslation('notificationsPermissionDenied'));
-      } else if (result === 'error') {
-        UI.showAlert(Utils.getTranslation('notificationsSaveError'));
-      }
-    } else if (permission === 'granted') {
-      if (State.get('isUserLoggedIn')) {
-        this.showModal();
-      } else {
-        UI.showAlert('Zaloguj się, aby zobaczyć powiadomienia.');
-      }
+    setup() {
+        // Webpushr is ready.
+        // You can add any additional setup logic here if needed in the future.
+    },
+
+    // Re-added from original file to handle already-subscribed users
+    showModal() {
+        console.log('Otwieram modal powiadomień...');
+        UI.showAlert('Modal powiadomień - w budowie!');
+    },
+
+    handleBellClick() {
+        if (typeof webpushr !== 'undefined') {
+            webpushr.is_browser_location_enabled((is_enabled) => {
+                if (is_enabled) {
+                    // User is already subscribed. Check if they are logged in to show the modal.
+                    if (State.get('isUserLoggedIn')) {
+                        this.showModal();
+                    } else {
+                        UI.showAlert('Zaloguj się, aby zobaczyć powiadomienia.');
+                    }
+                } else {
+                    // User is not subscribed, show the native prompt to subscribe.
+                    webpushr.showNativePrompt();
+                }
+            });
+        } else {
+            console.error('Webpushr is not defined.');
+            // Fallback logic can be added here if necessary
+            UI.showAlert('Funkcja powiadomień jest chwilowo niedostępna.', true);
+        }
     }
-  },
-
-  showModal() {
-    // Tutaj w przyszłości pojawi się logika otwierania modala z listą powiadomień
-    console.log('Otwieram modal powiadomień...');
-    UI.showAlert('Modal powiadomień - w budowie!');
-  },
-
-  init() {
-    // Inicjalizacja modułu, jeśli potrzebna w przyszłości
-  }
 };
 
-export { Notifications };
+export { Notifications }; // Changed to named export
