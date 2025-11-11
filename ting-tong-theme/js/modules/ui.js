@@ -288,7 +288,8 @@ function closeModal(modal, options = {}) {
 
     modal.setAttribute("aria-hidden", "true");
 
-    const contentElement = modal.querySelector('.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content');
+    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
+    const contentElement = modal.querySelector(contentSelector);
     const hasCustomAnimation = options.animationClass && contentElement;
 
     const eventToListenFor = hasCustomAnimation ? 'animationend' : 'transitionend';

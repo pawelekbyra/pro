@@ -1153,7 +1153,7 @@ body,
   transition:
     border-color 0.1s ease-in-out,
     filter 0.2s;
-  background-color: white;
+  background-color: white; /* Dodane białe tło */
 }
 
 /* Styl dla obwódki VIP */
