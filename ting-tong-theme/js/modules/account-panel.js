@@ -216,7 +216,10 @@ function openAccountModal() {
 function closeAccountModal() {
     const modal = document.getElementById("accountModal");
     if (modal) {
-      UI.closeModal(modal);
+        UI.closeModal(modal, {
+            animationClass: 'slideOutLeft',
+            contentSelector: '.account-modal-content'
+        });
     }
 }
 

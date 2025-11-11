@@ -2260,7 +2260,7 @@ body,
 
 .close-btn {
   position: absolute;
-  right: 10px;
+  right: 4px;
   top: var(--safe-area-top);
   height: var(
     --topbar-base-height
@@ -5876,7 +5876,7 @@ main::-webkit-scrollbar {
 #author-profile-modal .modal-close-btn {
     position: absolute;
     top: var(--safe-area-top);
-    right: 10px;
+    right: 4px;
     height: var(--topbar-base-height);
     width: 40px;
     background: none;
@@ -6006,8 +6006,8 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .profile-actions .follow-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     fill: none;
     stroke: #fff;
     stroke-width: 1.5;
@@ -6376,4 +6376,13 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     opacity: 0;
     transform: scale(0.95) translateY(10px);
   }
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
 }
