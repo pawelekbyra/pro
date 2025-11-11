@@ -489,8 +489,10 @@ function showModal(options = {}) {
 function hideModal() {
   if (!dom.modal) return;
 
+  // Użycie domyślnych opcji (fade/scale), usuwając niestandardową klasę 'elegantFadeOut',
+  // aby modal zamykał się płynnie, bez nadpisywania logiki.
+  // Uwaga: Domyślna implementacja UI.closeModal obsługuje przejście.
   UI.closeModal(dom.modal, {
-    animationClass: 'elegantFadeOut',
     contentSelector: '.elegant-modal-content'
   });
   resetModalState();
