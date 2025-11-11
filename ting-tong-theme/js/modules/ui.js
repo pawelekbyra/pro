@@ -144,7 +144,10 @@ function openAuthorProfileModal(slideData) {
 function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
-    closeModal(modal, { animationClass: null });
+    closeModal(modal, {
+        animationClass: 'slideOutRight',
+        contentSelector: '.profile-modal-content'
+    });
 }
 
 function showToast(message, isError = false) {
@@ -294,6 +297,8 @@ function closeModal(modal, options = {}) {
     }
 
     modal.setAttribute("aria-hidden", "true");
+    modal.classList.add("is-hiding");
+    modal.classList.remove("visible");
 
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
@@ -301,7 +306,7 @@ function closeModal(modal, options = {}) {
 
     const eventToListenFor = hasCustomAnimation ? 'animationend' : 'transitionend';
     const elementToListenOn = hasCustomAnimation ? contentElement : modal;
-    const fallbackDuration = hasCustomAnimation ? 600 : 500;
+    const fallbackDuration = hasCustomAnimation ? 500 : 400; // Animation: 0.4s, Transition: 0.3s
 
     let cleanupHasRun = false;
     const cleanup = () => {
@@ -313,7 +318,7 @@ function closeModal(modal, options = {}) {
         modal.style.display = 'none';
         modal.classList.remove('is-hiding');
         if (hasCustomAnimation) {
-            contentElement.classList.remove(options.animationClass);
+            contentElement.style.animation = '';
         }
 
         if (modal._focusTrapDispose) {
@@ -335,16 +340,12 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    modal.classList.add("is-hiding");
-    modal.classList.remove("visible");
-
     if (hasCustomAnimation) {
-        contentElement.classList.add(options.animationClass);
+        contentElement.style.animation = `${options.animationClass} ${fallbackDuration / 1000}s ease-in-out forwards`;
     }
 
     elementToListenOn.addEventListener(eventToListenFor, cleanup, { once: true });
-
-    setTimeout(cleanup, fallbackDuration);
+    setTimeout(cleanup, fallbackDuration + 50); // Add a small buffer
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
