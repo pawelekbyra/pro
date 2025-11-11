@@ -72,9 +72,16 @@ function initDOMCache() {
   DOM.authorProfileModal = document.getElementById("author-profile-modal");
 }
 
-function openAuthorProfileModal(slideData) {
+function openAuthorProfileModal(slideData, options = {}) {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
+
+    const content = modal.querySelector('.profile-modal-content');
+    if (options.isLightTheme) {
+        content.classList.add('profile-modal--wall-background');
+    } else {
+        content.classList.remove('profile-modal--wall-background');
+    }
 
     openModal(modal, {
         animationClass: 'slideInRight',

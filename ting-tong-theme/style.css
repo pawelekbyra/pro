@@ -6458,3 +6458,48 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 .slide--light-theme .secret-subtitle u {
   border-bottom-color: #000 !important;
 }
+
+/* Video controls icons */
+.slide--light-theme .video-controls button svg {
+    fill: #000 !important;
+}
+
+/* Author profile modal background for light theme */
+.profile-modal--wall-background {
+  background-image: url('http://pawelperfect.pl/wp-content/uploads/2025/11/wall.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #000 !important;
+}
+
+.profile-modal--wall-background .profile-header,
+.profile-modal--wall-background .tabs {
+  border-bottom-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.profile-modal--wall-background .modal-close-btn,
+.profile-modal--wall-background .options-btn,
+.profile-modal--wall-background .username-header,
+.profile-modal--wall-background .fullname,
+.profile-modal--wall-background .stat-number,
+.profile-modal--wall-background .tab.active,
+.profile-modal--wall-background .tab svg,
+.profile-modal--wall-background .social-btn svg {
+  color: #000 !important;
+  fill: #000 !important;
+}
+
+.profile-modal--wall-background .bio,
+.profile-modal--wall-background .stat-label,
+.profile-modal--wall-background .tab {
+  color: #333 !important;
+}
+
+.profile-modal--wall-background .tab.active::after {
+  background-color: #000 !important;
+}
+
+.profile-modal--wall-background .avatar-container {
+    border-color: #000 !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.7) !important;
+}
