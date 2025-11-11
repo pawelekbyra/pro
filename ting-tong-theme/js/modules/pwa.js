@@ -138,72 +138,74 @@ function init() {
 }
 
 async function handlePushSubscription() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
-    console.warn('Push Notifications are not supported in this browser.');
-    return 'unsupported';
-  }
+    // =========================================================================
+    // ✅ FIX 1: Wymuś oczekiwanie na Service Worker Registration
+    // =========================================================================
+    let registration;
+    try {
+        if ('serviceWorker' in navigator) {
+            registration = await navigator.serviceWorker.ready;
+        } else {
+            // Zwróć błąd, jeśli PWA nie jest w ogóle obsługiwane
+            console.error('[PWA] Service Workers not supported.');
+            return 'unsupported';
+        }
+    } catch (e) {
+        // Jeśli rejestracja się nie powiodła (np. błąd 404 w sw.js)
+        console.error('[PWA] Service Worker registration failed:', e);
+        return 'sw_failed';
+    }
+    // =========================================================================
 
-  // >>> KROK 1: NATYCHMIASTOWE WYWOŁANIE PROMPTU (KRYTYCZNE)
-  // To musi być wykonane jako pierwsza operacja asynchroniczna, aby kontekst kliknięcia nie został utracony.
-  const permission = await Notification.requestPermission();
+    const permission = await Notification.requestPermission();
 
-  if (permission !== 'granted') {
-    console.log('Notification permission was not granted.');
-    return permission;
-  }
+    if (permission !== 'granted') {
+      console.warn('Notification permission was not granted.');
+      return permission;
+    }
 
-  // --- KROK 2: DALSZA LOGIKA TYLKO PO UZYSKANIU ZGODY ('granted') ---
+    let subscription = await registration.pushManager.getSubscription();
 
-  // Oczekiwanie na Service Worker jest teraz bezpieczne, ponieważ zgoda jest już udzielona.
-  const registration = await navigator.serviceWorker.ready;
+    if (subscription === null) {
+      const vapidPublicKey = window.TingTongData?.vapidPk;
+      if (!vapidPublicKey) {
+        console.error('VAPID public key is not available.');
+        return 'error';
+      }
 
-  if (!registration) {
-    console.error('Service Worker jest niedostępny po uzyskaniu zgody.');
-    return 'error';
-  }
-
-  let subscription = await registration.pushManager.getSubscription();
-
-  if (subscription === null) {
-    const vapidPublicKey = window.TingTongData?.vapidPk;
-    if (!vapidPublicKey) {
-      console.error('VAPID public key is not available.');
-      return 'error';
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: Utils.urlBase64ToUint8Array(vapidPublicKey),
+        });
+      } catch (error) {
+        console.error('Failed to subscribe to push notifications:', error);
+        return 'error';
+      }
     }
 
     try {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: Utils.urlBase64ToUint8Array(vapidPublicKey),
+      const subscriptionData = subscription.toJSON();
+      const API = (await import('./api.js')).API;
+      const result = await API.savePushSubscription({
+          endpoint: subscriptionData.endpoint,
+          keys: {
+              p256dh: subscriptionData.keys.p256dh,
+              auth: subscriptionData.keys.auth
+          }
       });
+
+      if (result.success) {
+        console.log('Push subscription saved successfully.');
+        return 'granted';
+      } else {
+        console.error('Failed to save push subscription on server:', result.data.message);
+        return 'error';
+      }
     } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
+      console.error('Error saving push subscription:', error);
       return 'error';
     }
-  }
-
-  try {
-    const subscriptionData = subscription.toJSON();
-    const API = (await import('./api.js')).API;
-    const result = await API.savePushSubscription({
-        endpoint: subscriptionData.endpoint,
-        keys: {
-            p256dh: subscriptionData.keys.p256dh,
-            auth: subscriptionData.keys.auth
-        }
-    });
-
-    if (result.success) {
-      console.log('Push subscription saved successfully.');
-      return 'granted';
-    } else {
-      console.error('Failed to save push subscription on server:', result.data.message);
-      return 'error';
-    }
-  } catch (error) {
-    console.error('Error saving push subscription:', error);
-    return 'error';
-  }
 }
 
 export const PWA = { init, runStandaloneCheck, handleInstallClick, closePwaModals, isStandalone, setUiModule, handlePushSubscription, isDesktop };
