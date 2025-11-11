@@ -326,27 +326,42 @@ function closeModal(modal, options = {}) {
     const contentElement = modal.querySelector(contentSelector);
     const hasCustomAnimation = options.animationClass && contentElement;
 
+    const fallbackDuration = 400; // Czas animacji 0.4s
+    let cleanupHasRun = false;
+
+    // --- KLUCZOWA SEKCJA NAPRAWCZA DLA WYJŚCIA ---
     if (hasCustomAnimation) {
-        modal.classList.add('no-transition');
+        // 1. Zabezpiecz element, usuwając domyślny transition
+        contentElement.style.transition = 'none';
+
+        // 2. Wymuś reflow/repaint, aby przeglądarka zarejestrowała 'transition: none'
+        void contentElement.offsetWidth;
+
+        // 3. Ustaw animację Keyframes jako inline style
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
     }
+    // --- KONIEC SEKCJI NAPRAWCZEJ ---
+
     modal.classList.remove("visible");
 
-    const eventToListenFor = hasCustomAnimation ? 'animationend' : 'transitionend';
+    const eventToListenFor = 'animationend';
     const elementToListenOn = hasCustomAnimation ? contentElement : modal;
-    const fallbackDuration = hasCustomAnimation ? 500 : 400;
 
-    let cleanupHasRun = false;
     const cleanup = () => {
         if (cleanupHasRun) return;
         cleanupHasRun = true;
 
         elementToListenOn.removeEventListener(eventToListenFor, cleanup);
 
+        // Po animacji
         modal.style.display = 'none';
         modal.classList.remove('is-hiding');
+
         if (hasCustomAnimation) {
+            // Wyczyść inline style, aby nie blokowały przyszłego wejścia
             contentElement.style.animation = '';
-            modal.classList.remove('no-transition');
+            contentElement.style.transition = ''; // Wyczyść 'transition: none'
+            contentElement.style.transform = 'translateX(100%)'; // Wymuś stan ukrycia na końcu animacji
         }
 
         if (modal._focusTrapDispose) {
@@ -368,10 +383,7 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    if (hasCustomAnimation) {
-        contentElement.style.animation = `${options.animationClass} ${fallbackDuration / 1000}s ease-in-out forwards`;
-    }
-
+    // Używamy timeoutu jako fallback, aby mieć pewność, że cleanup się odpali
     elementToListenOn.addEventListener(eventToListenFor, cleanup, { once: true });
     setTimeout(cleanup, fallbackDuration + 50);
 }
