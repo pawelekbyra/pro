@@ -5848,7 +5848,6 @@ main::-webkit-scrollbar {
 
 .profile-modal-overlay.is-hiding .profile-modal-content {
   transform: translateX(100%);
-  transition: transform 0.4s ease-in-out;
 }
 
 #author-profile-modal .profile-header {
@@ -6390,6 +6389,15 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
     }
     to {
         transform: translateX(0);

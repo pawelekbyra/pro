@@ -733,13 +733,11 @@ export const Handlers = {
         if (authorModal) {
             UI.closeModal(authorModal, {
                 animationClass: 'slideOutRight',
-                contentSelector: '.profile-modal-content',
-                onClose: () => {
-                    TippingModal.showModal({
-                        animationClass: 'slideInRight',
-                        contentSelector: '.elegant-modal-content'
-                    });
-                }
+                contentSelector: '.profile-modal-content'
+            });
+            TippingModal.showModal({
+                animationClass: 'slideInLeft',
+                contentSelector: '.elegant-modal-content'
             });
         } else {
             TippingModal.showModal();
