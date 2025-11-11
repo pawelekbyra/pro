@@ -159,11 +159,9 @@ function openAuthorProfileModal(slideData) {
 function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
-
-    // KLUCZOWA ZMIANA: Jawne dodanie animacji wyjścia.
-    // To jest lustrzane odbicie animacji wejścia ('slideInRight').
+    // Wymuszamy animację wyjścia 'slideOutRight', aby była lustrzana
     closeModal(modal, {
-        animationClass: 'slideOutRight',
+        animationClass: 'slideOutRight', // <--- ZMIANA: DODANO JAWNĄ KLASĘ WYJŚCIA
         contentSelector: '.profile-modal-content'
     });
 }

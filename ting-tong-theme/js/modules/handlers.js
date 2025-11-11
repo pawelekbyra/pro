@@ -731,13 +731,14 @@ export const Handlers = {
       case "show-tip-jar":
         const authorModal = actionTarget.closest('#author-profile-modal');
         if (authorModal) {
-            // KLUCZOWA ZMIANA: Wymuś animację wyjścia "slideOutRight" na modal Autora.
+            // KLUCZOWY KROK DLA PŁYNNEGO PRZEJŚCIA:
+            // 1. Użyj 'slideOutRight' dla modala autora.
+            // 2. Użyj 'slideInRight' w callbacku dla modala napiwkowego.
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutRight', // Modal Autora chowa się w prawo
+                animationClass: 'slideOutRight', // <--- ZMIANA: DODANO KLASĘ WYJŚCIA
                 contentSelector: '.profile-modal-content',
                 onClose: () => {
-                    // Po zakończeniu chowania, natychmiast pokaż Modal Napiwkowy,
-                    // wjeżdżający z prawej strony (tworząc efekt zamiany).
+                    // Modal napiwkowy wjeżdża z prawej (slideInRight)
                     TippingModal.showModal({
                         animationClass: 'slideInRight'
                     });
