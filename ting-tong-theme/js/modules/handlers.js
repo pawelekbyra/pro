@@ -729,7 +729,21 @@ export const Handlers = {
         }
         break;
       case "show-tip-jar":
-        TippingModal.showModal();
+        const authorModal = actionTarget.closest('#author-profile-modal');
+        if (authorModal) {
+            UI.closeModal(authorModal, {
+                animationClass: 'slideOutRight',
+                contentSelector: '.profile-modal-content',
+                onClose: () => {
+                    TippingModal.showModal({
+                        animationClass: 'slideInRight',
+                        contentSelector: '.elegant-modal-content'
+                    });
+                }
+            });
+        } else {
+            TippingModal.showModal();
+        }
         break;
       case "tipping-next":
         TippingModal.handleNextStep();

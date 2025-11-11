@@ -89,6 +89,22 @@ function openAuthorProfileModal(slideData) {
             modal.querySelector('.followers-count').textContent = '45.6K';
             modal.querySelector('.likes-count').textContent = '1.2M';
 
+            const followBtn = modal.querySelector('.follow-btn');
+            const btnSpan = followBtn.querySelector('span');
+            const btnSvg = followBtn.querySelector('svg');
+
+            const isLoggedIn = getIsUserLoggedIn();
+
+            if (isLoggedIn) {
+                btnSpan.textContent = 'Subskrybujesz';
+                btnSvg.innerHTML = '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"></path>';
+                followBtn.disabled = true;
+            } else {
+                btnSpan.textContent = 'Zostań Patronem';
+                btnSvg.innerHTML = '<rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" />';
+                followBtn.disabled = false;
+            }
+
             const videosGrid = modal.querySelector('#videos-grid');
             videosGrid.innerHTML = '';
 
@@ -96,7 +112,6 @@ function openAuthorProfileModal(slideData) {
             const otherSlides = authorSlides.filter(s => s.id !== slideData.id);
             const orderedSlides = [...otherSlides, slideData];
 
-            const isLoggedIn = getIsUserLoggedIn();
             const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
 
             orderedSlides.forEach(authorSlide => {
@@ -215,11 +230,17 @@ function openModal(modal, options = {}) {
 
     modal.style.display = 'flex';
     modal.classList.remove('is-hiding');
-
-    // Force a reflow before adding the class to ensure the transition is applied.
     void modal.offsetWidth;
-
     modal.classList.add('visible');
+
+    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
+    const contentElement = modal.querySelector(contentSelector);
+    if (options.animationClass && contentElement) {
+        contentElement.style.animation = `${options.animationClass} 0.4s ease-in-out forwards`;
+        contentElement.addEventListener('animationend', () => {
+            contentElement.style.animation = '';
+        }, { once: true });
+    }
 
     if (modal.id === 'comments-modal-container') {
         const swiper = State.get('swiper');
