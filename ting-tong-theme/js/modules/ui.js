@@ -325,12 +325,9 @@ function closeModal(modal, options = {}) {
     const hasCustomAnimation = options.animationClass && contentElement;
 
     if (hasCustomAnimation) {
-        modal.style.transition = 'none'; // Wyłącz domyślną animację przezroczystości
-    } else {
-        modal.style.transition = ''; // Przywróć domyślną animację
+        modal.classList.add('no-transition');
     }
     modal.classList.remove("visible");
-
 
     const eventToListenFor = hasCustomAnimation ? 'animationend' : 'transitionend';
     const elementToListenOn = hasCustomAnimation ? contentElement : modal;
@@ -347,7 +344,7 @@ function closeModal(modal, options = {}) {
         modal.classList.remove('is-hiding');
         if (hasCustomAnimation) {
             contentElement.style.animation = '';
-            modal.style.transition = ''; // Przywróć po zakończeniu
+            modal.classList.remove('no-transition');
         }
 
         if (modal._focusTrapDispose) {

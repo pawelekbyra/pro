@@ -6403,3 +6403,7 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
         transform: translateX(0);
     }
 }
+
+.no-transition {
+    transition: none !important;
+}
