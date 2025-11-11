@@ -619,9 +619,9 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background: rgba(0, 0, 0, 0.4);
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
-  backdrop-filter: blur(12px) saturate(120%);
+  background-image: url('../../wall.png');
+  background-size: cover;
+  background-position: center;
   z-index: 100;
   display: flex;
   align-items: center;
