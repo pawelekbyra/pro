@@ -619,7 +619,7 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background-image: url('ting-tong-theme/wall.jpg');
+  background-image: url('http://pawelperfect.pl/wp-content/uploads/2025/11/wall.jpg');
   background-size: cover;
   background-position: center;
   z-index: 100;
