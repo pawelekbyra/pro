@@ -159,8 +159,9 @@ function openAuthorProfileModal(slideData) {
 function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
-    // Usunięto animationClass, aby polegać na przejściu CSS zdefiniowanym dla .is-hiding
+    // Wymuszamy animację wyjścia 'slideOutRight', aby była lustrzana
     closeModal(modal, {
+        animationClass: 'slideOutRight', // <--- ZMIANA: DODANO JAWNĄ KLASĘ WYJŚCIA
         contentSelector: '.profile-modal-content'
     });
 }

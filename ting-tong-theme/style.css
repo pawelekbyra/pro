@@ -2243,7 +2243,6 @@ margin: -7px auto 0;
 .account-header {
   position: relative;
   height: var(--topbar-height);
-  background: #000;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
@@ -5862,7 +5861,6 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .profile-header {
-    background: #000;
     height: var(--topbar-height);
     display: flex;
     align-items: center;
