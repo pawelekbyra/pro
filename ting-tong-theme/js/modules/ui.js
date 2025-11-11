@@ -307,85 +307,51 @@ function _resetVideoPlayer(videoModal) {
     }
 }
 
-function closeModal(modal, options = {}) {
+function closeModal(modal) {
     if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
 
-    if (modal.id === 'video-player-modal') {
-        _resetVideoPlayer(modal);
-    }
+    modal.classList.add('is-hiding');
+    modal.classList.remove('visible');
+    modal.setAttribute('aria-hidden', 'true');
 
-    if (modal._closeOnClick) {
-        modal.removeEventListener('click', modal._closeOnClick);
-        delete modal._closeOnClick;
-    }
-
-    modal.setAttribute("aria-hidden", "true");
-    modal.classList.add("is-hiding");
-
-    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
-    const contentElement = modal.querySelector(contentSelector);
-    const hasCustomAnimation = options.animationClass && contentElement;
-
-    const fallbackDuration = 400; // Czas animacji 0.4s
     let cleanupHasRun = false;
-
-    // --- KLUCZOWA SEKCJA NAPRAWCZA DLA WYJŚCIA ---
-    if (hasCustomAnimation) {
-        // 1. Zabezpiecz element, usuwając domyślny transition
-        contentElement.style.transition = 'none';
-
-        // 2. Wymuś reflow/repaint, aby przeglądarka zarejestrowała 'transition: none'
-        void contentElement.offsetWidth;
-
-        // 3. Ustaw animację Keyframes jako inline style
-        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-    }
-    // --- KONIEC SEKCJI NAPRAWCZEJ ---
-
-    modal.classList.remove("visible");
-
-    const eventToListenFor = 'animationend';
-    const elementToListenOn = hasCustomAnimation ? contentElement : modal;
-
     const cleanup = () => {
         if (cleanupHasRun) return;
         cleanupHasRun = true;
 
-        elementToListenOn.removeEventListener(eventToListenFor, cleanup);
+        modal.removeEventListener('transitionend', cleanup);
+        modal.removeEventListener('animationend', cleanup);
 
-        // Po animacji
         modal.style.display = 'none';
         modal.classList.remove('is-hiding');
-
-        if (hasCustomAnimation) {
-            // Wyczyść inline style, aby nie blokowały przyszłego wejścia
-            contentElement.style.animation = '';
-            contentElement.style.transition = ''; // Wyczyść 'transition: none'
-            contentElement.style.transform = 'translateX(100%)'; // Wymuś stan ukrycia na końcu animacji
-        }
 
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
         }
+
         activeModals.delete(modal);
 
         if (activeModals.size === 0) {
             document.body.style.overflow = '';
-            DOM.container.removeAttribute("aria-hidden");
+            DOM.container.removeAttribute('aria-hidden');
         }
-        if (!options.keepFocus) {
-            State.get("lastFocusedElement")?.focus();
+
+        const lastFocused = State.get("lastFocusedElement");
+        if (lastFocused && document.body.contains(lastFocused)) {
+            lastFocused.focus();
         }
+
         if (typeof modal.onCloseCallback === 'function') {
             modal.onCloseCallback();
             delete modal.onCloseCallback;
         }
     };
 
-    // Używamy timeoutu jako fallback, aby mieć pewność, że cleanup się odpali
-    elementToListenOn.addEventListener(eventToListenFor, cleanup, { once: true });
-    setTimeout(cleanup, fallbackDuration + 50);
+    modal.addEventListener('transitionend', cleanup, { once: true });
+    modal.addEventListener('animationend', cleanup, { once: true });
+
+    setTimeout(cleanup, 500); // Fallback
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
