@@ -731,13 +731,14 @@ export const Handlers = {
       case "show-tip-jar":
         const authorModal = actionTarget.closest('#author-profile-modal');
         if (authorModal) {
+            // Poprawiono, aby używać przejścia CSS zamiast animationClass
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutRight',
-                contentSelector: '.profile-modal-content'
-            });
-            TippingModal.showModal({
-                animationClass: 'slideInLeft',
-                contentSelector: '.elegant-modal-content'
+                contentSelector: '.profile-modal-content',
+                onClose: () => {
+                    TippingModal.showModal({
+                        animationClass: 'slideInRight' // Tipping modal wsuwa się z prawej
+                    });
+                }
             });
         } else {
             TippingModal.showModal();

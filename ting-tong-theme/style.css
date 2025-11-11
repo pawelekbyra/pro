@@ -1427,17 +1427,17 @@ body,
   background: transparent !important;
 }
 .login-panel .login-form {
-  background: white;
-  /* ZMIANA 1: Nowy dolny padding 10px */
-  padding: 10px 20px 10px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 400px;
-  /* ZMIANA 2: Nowy górny margines -5px (daje 5px widocznej odległości) */
-  margin: -5px auto 0;
+background: white;
+/* ZMIANA 1: Nowy dolny padding 10px */
+padding: 10px 20px 10px;
+border-radius: 8px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+width: 100%;
+max-width: 400px;
+/* ZMIANA 2: Nowy górny margines -7px (daje 3px odległości od topbara) */
+margin: -7px auto 0;
 }
 
 /* === LOGIN PANEL NEW STYLE === */
@@ -4088,14 +4088,18 @@ overflow: hidden;
 
 /* Header */
 #comments-modal-container .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 0 12px;
-    flex-shrink: 0;
-    height: 48px;
-    border-bottom: 1px solid #3a3b3c;
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+padding: 0 12px;
+flex-shrink: 0;
+/* ZMIANA 1: Ustawienie wysokości na taką samą jak główny topbar */
+height: var(--topbar-height);
+/* ZMIANA 2: Dodanie paddingu dla strefy bezpiecznej */
+padding-top: var(--safe-area-top);
+/* ZMIANA 3: Usunięcie linii oddzielającej */
+border-bottom: none;
 }
 
 #commentsTitle {
@@ -4106,19 +4110,20 @@ overflow: hidden;
 }
 
 #comments-modal-container .modal-close-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #b0b3b8;
-    width: 32px;
-    height: 32px;
-    font-size: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
+position: absolute;
+/* ZMIANA 4: Umieszczenie przycisku w rogu (top i right 0) */
+right: 0;
+top: var(--safe-area-top);
+height: var(--topbar-base-height); /* Utrzymanie obszaru klikalności 40px */
+width: 40px;
+font-size: 24px; /* Zmniejszenie rozmiaru 'X' */
+color: #b0b3b8;
+display: flex;
+align-items: center;
+justify-content: center;
+/* Upewnienie się, że padding nie jest za duży */
+padding: 0;
+transform: none; /* Zabezpieczenie przed transform 50% */
 }
 
 #comments-modal-container .modal-close-btn:hover {
@@ -4629,10 +4634,14 @@ overflow: hidden;
 
 /* Sort Options */
 .comment-sort-options {
-    padding: 0 12px 8px;
-    border-bottom: 1px solid #3a3b3c;
-    display: flex;
-    justify-content: flex-end;
+position: absolute;
+left: auto;
+/* ZMIANA 5: Pozycja startowa = (szerokość X: 40px) + (Twój margines: 3px) */
+right: 43px;
+top: 50%;
+transform: translateY(-50%);
+z-index: 10;
+padding-right: 3px;
 }
 
 .sort-dropdown {
@@ -4640,13 +4649,14 @@ overflow: hidden;
 }
 
 .sort-trigger {
-  background: none;
-  border: none;
-  color: #b0b3b8;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 4px 8px;
+background: none;
+border: none;
+color: #b0b3b8;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+/* ZMIANA 6: Usunięcie zbędnego prawego paddingu */
+padding: 4px 0 4px 8px;
 }
 
 .sort-trigger .current-sort {
