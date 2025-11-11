@@ -1566,7 +1566,7 @@ body,
   align-items: center;
   justify-content: center;
   gap: 10px;
-  z-index: 10001; /* Podniesiony z-index */
+  z-index: 10301; /* Podniesiony z-index, aby był nad modalem autora */
   white-space: nowrap; /* ✅ FIX: Wymuś jedną linię dla krótkich tekstów */
 
   /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
@@ -5874,9 +5874,9 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .profile-header {
     height: var(--topbar-height);
-    display: grid;
-    grid-template-columns: 60px 1fr 60px;
+    display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0;
     padding-top: var(--safe-area-top);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -5940,6 +5940,7 @@ main::-webkit-scrollbar {
     border-radius: 50%;
     overflow: hidden;
     position: relative;
+    background: transparent;
 }
 
 #author-profile-modal .avatar-container .profile-avatar {
@@ -6013,6 +6014,18 @@ main::-webkit-scrollbar {
     font-weight: 600;
     font-size: 16px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#author-profile-modal .profile-actions .follow-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.5;
 }
 
 #author-profile-modal .profile-actions .social-btn {

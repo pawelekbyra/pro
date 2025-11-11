@@ -151,6 +151,10 @@ export const Handlers = {
     const videoThumbnail = target.closest(".video-thumbnail");
 
     if (videoThumbnail) {
+        if (videoThumbnail.classList.contains('locked-thumbnail')) {
+            UI.showAlert(Utils.getTranslation('becomePatronToWatch'), true);
+            return;
+        }
         const videoUrl = videoThumbnail.dataset.videoUrl;
         if (videoUrl) {
             const videoModal = document.getElementById('video-player-modal');

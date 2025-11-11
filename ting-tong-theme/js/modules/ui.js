@@ -105,6 +105,7 @@ function openAuthorProfileModal(slideData) {
 
                 const isSecret = authorSlide.access === 'secret';
                 const isPwaSecret = authorSlide.access === 'pwa-secret';
+                const isLocked = (isSecret && !isLoggedIn) || (isPwaSecret && !isStandalone);
 
                 if (isSecret && !isLoggedIn) {
                     overlayHtml = `
@@ -125,7 +126,7 @@ function openAuthorProfileModal(slideData) {
                 }
 
                 const videoThumbnail = `
-                    <div class="video-thumbnail" data-video-url="${authorSlide.mp4Url}">
+                    <div class="video-thumbnail ${isLocked ? 'locked-thumbnail' : ''}" data-video-url="${authorSlide.mp4Url}">
                         <img src="${thumbnailUrl}" alt="Video thumbnail">
                         ${overlayHtml}
                         <div class="video-views">

@@ -386,7 +386,10 @@ get_header();
             <p class="fullname"></p>
             <p class="bio"></p>
             <div class="profile-actions">
-                <button class="follow-btn" data-translate-key="profileFollow">Obserwuj</button>
+                <button class="follow-btn" data-translate-key="profileFollow">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"></rect><path d="M2 10h20"></path><circle cx="18" cy="13" r="2"></circle></svg>
+                    <span>Zostań Patronem</span>
+                </button>
                 <button class="social-btn instagram" aria-label="Instagram">
                     <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </button>
