@@ -26,7 +26,7 @@ self.addEventListener('install', event => {
         // Cache każdy URL osobno z resilient error handling
         const cachePromises = ESSENTIAL_URLS.map(url => {
           // ✅ FIX: Poprawnie obsługuj ścieżki absolutne (jak '/') i relatywne
-          const fullUrl = url.startsWith('/') ? url : themeUrl + '/' + url;
+          const fullUrl = url.startsWith('/') ? url : themeUrl + url;
           return cache.add(fullUrl)
             .then(() => console.log(`[SW] ✅ Cached: ${fullUrl}`))
             .catch(err => {
