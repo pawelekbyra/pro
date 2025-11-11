@@ -435,11 +435,11 @@ get_header();
             <div class="sort-dropdown">
                 <button class="sort-trigger">
                     <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
-                    <span class="current-sort" data-translate-key="commentSortNewest">Fresz</span> ▼
+                    <span class="current-sort" data-translate-key="commentSortNewest">najnowsz</span> ▼
                 </button>
                 <div class="sort-options">
-                    <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">Fresz</button>
-                    <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">Best</button>
+                    <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">najnowsz</button>
+                    <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">najlepsze</button>
                 </div>
             </div>
         </div>
