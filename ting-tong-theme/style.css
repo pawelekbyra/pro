@@ -1566,7 +1566,7 @@ body,
   align-items: center;
   justify-content: center;
   gap: 10px;
-  z-index: 10301; /* Podniesiony z-index, aby był nad modalem autora */
+  z-index: 10500; /* Znacząco podniesiony z-index */
   white-space: nowrap; /* ✅ FIX: Wymuś jedną linię dla krótkich tekstów */
 
   /* ✅ FIX: Szerokość dopasowana do treści, z marginesami */
@@ -6356,4 +6356,24 @@ font-size: 14px; /* Zmniejszenie stat-number */
 #author-profile-modal .stats-container .stat-label {
 font-size: 10px; /* Zmniejszenie stat-label */
 white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes elegantFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
 }
