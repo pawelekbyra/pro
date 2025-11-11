@@ -598,7 +598,8 @@ export const Handlers = {
             const slideId = activeSlide.dataset.slideId;
             const slideData = slidesData.find((s) => s.id === slideId);
             if (slideData) {
-                UI.openAuthorProfileModal(slideData);
+                const isLightTheme = activeSlide.classList.contains('slide--light-theme');
+                UI.openAuthorProfileModal(slideData, { isLightTheme });
             }
         }
         break;
