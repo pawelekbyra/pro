@@ -85,26 +85,49 @@ function openAuthorProfileModal(slideData) {
             modal.querySelector('.fullname').textContent = author.name;
             modal.querySelector('.bio').textContent = author.bio || '';
 
-            // Mockup stats
             modal.querySelector('.following-count').textContent = '123';
             modal.querySelector('.followers-count').textContent = '45.6K';
             modal.querySelector('.likes-count').textContent = '1.2M';
 
-            // Populate video grid with real thumbnails
             const videosGrid = modal.querySelector('#videos-grid');
             videosGrid.innerHTML = '';
 
             const authorSlides = slidesData.filter(s => s.author.name === author.name && !s.isIframe);
-
-            // Display author's slides, with the current slide as the last one
             const otherSlides = authorSlides.filter(s => s.id !== slideData.id);
             const orderedSlides = [...otherSlides, slideData];
 
+            const isLoggedIn = getIsUserLoggedIn();
+            const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
+
             orderedSlides.forEach(authorSlide => {
                 const thumbnailUrl = authorSlide.thumbnailUrl || `https://picsum.photos/200/300?random=${authorSlide.id}`;
+                let overlayHtml = '';
+
+                const isSecret = authorSlide.access === 'secret';
+                const isPwaSecret = authorSlide.access === 'pwa-secret';
+
+                if (isSecret && !isLoggedIn) {
+                    overlayHtml = `
+                        <div class="thumbnail-overlay-block">
+                            <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                            <div class="badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 9l10 13L22 9l-10-7zM2 9l10 3 10-3M12 12v10" /></svg>
+                            </div>
+                        </div>`;
+                } else if (isPwaSecret && !isStandalone) {
+                    overlayHtml = `
+                        <div class="thumbnail-overlay-block">
+                            <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                            <div class="badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
+                            </div>
+                        </div>`;
+                }
+
                 const videoThumbnail = `
                     <div class="video-thumbnail" data-video-url="${authorSlide.mp4Url}">
                         <img src="${thumbnailUrl}" alt="Video thumbnail">
+                        ${overlayHtml}
                         <div class="video-views">
                             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
                             <span>${Utils.formatCount(authorSlide.initialLikes)}</span>
