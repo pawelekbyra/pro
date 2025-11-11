@@ -6386,3 +6386,12 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
         transform: translateX(-100%);
     }
 }
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
