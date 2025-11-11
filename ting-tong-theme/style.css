@@ -4627,11 +4627,10 @@ overflow: hidden;
 
 /* Sort Options */
 .comment-sort-options {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
+    padding: 0 12px 8px;
+    border-bottom: 1px solid #3a3b3c;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .sort-dropdown {
@@ -6317,7 +6316,6 @@ FIX: 3. Author Modal - Usunięcie Transition z Hiding + Wymiary
 /* Usunięcie transition przy chowaniu */
 .profile-modal-overlay.is-hiding .profile-modal-content {
 transform: translateX(100%);
-transition: none;
 }
 
 /* Usunięcie transition przy chowaniu z Account Modal */
