@@ -368,23 +368,23 @@ get_header();
                 <div class="avatar-container">
                     <img src="" alt="User Avatar" class="profile-avatar">
                 </div>
-                <div class="stats-container">
-                    <div class="stat">
-                        <span class="stat-number following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Followers</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Followers</span>
-                    </div>
-                </div>
             </section>
             <p class="fullname"></p>
             <p class="bio"></p>
+            <div class="stats-container">
+                <div class="stat">
+                    <span class="stat-number following-count">0</span>
+                    <span class="stat-label" data-translate-key="profileFollowing">Followers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number followers-count">0</span>
+                    <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number likes-count">0</span>
+                    <span class="stat-label" data-translate-key="profileLikes">Followers</span>
+                </div>
+            </div>
             <div class="profile-actions">
                 <button class="follow-btn" data-translate-key="profileFollow">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2"></rect><path d="M2 10h20"></path><circle cx="18" cy="13" r="2"></circle></svg>

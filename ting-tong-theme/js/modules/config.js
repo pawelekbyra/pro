@@ -267,9 +267,9 @@ export const Config = {
       deleteHelperText:
         "Po usunięciu konta zostaniesz automatycznie wylogowany.",
       deleteAccountBtn: "Trwale usuń konto",
-      profileFollowingLabel: "Followers",
-      profileFollowersLabel: "Followers",
-      profileLikesLabel: "Followers",
+      profileFollowing: "Filmików",
+      profileFollowers: "Patronów",
+      profileLikes: "Lajkaczy",
       profileFollowBtn: "Obserwuj",
       savingButtonText: "Zapisywanie...",
       changingButtonText: "Zmienianie...",

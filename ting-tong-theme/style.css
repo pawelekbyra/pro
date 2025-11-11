@@ -5940,7 +5940,8 @@ main::-webkit-scrollbar {
     border-radius: 50%;
     overflow: hidden;
     position: relative;
-    background: transparent;
+    background-color: white;
+    border: 2px solid white;
 }
 
 #author-profile-modal .avatar-container .profile-avatar {
@@ -6154,6 +6155,12 @@ main::-webkit-scrollbar {
     justify-content: center;
     color: white;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.video-thumbnail:hover .thumbnail-overlay-block {
+    opacity: 1;
 }
 
 .thumbnail-overlay-block .lock-icon {
