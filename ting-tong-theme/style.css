@@ -6418,34 +6418,34 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 }
 
 /* Custom styles for "Elephants Dream" slide (slide-002) */
-#slide-002 .secret-overlay .secret-icon,
-#slide-002 .secret-overlay .secret-title,
-#slide-002 .secret-overlay .secret-subtitle {
+[data-slide-id="slide-002"] .secret-overlay .secret-icon,
+[data-slide-id="slide-002"] .secret-overlay .secret-title,
+[data-slide-id="slide-002"] .secret-overlay .secret-subtitle {
   color: #000 !important; /* Force black color on the overlay */
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 /* Force black stroke/fill for sidebar icons, excluding the avatar */
-#slide-002 .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
+[data-slide-id="slide-002"] .tiktok-symulacja .sidebar .icon-button:not(.profileButton) svg {
   stroke: #000 !important;
   fill: #000 !important;
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
 
 /* Force black color for text under icons */
-#slide-002 .tiktok-symulacja .sidebar .icon-button .icon-label {
+[data-slide-id="slide-002"] .tiktok-symulacja .sidebar .icon-button .icon-label {
   color: #000 !important;
   text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
 /* Ensure heart icon is black when unliked */
-#slide-002 .tiktok-symulacja .like-button:not(.active) > svg {
+[data-slide-id="slide-002"] .tiktok-symulacja .like-button:not(.active) > svg {
   stroke: #000 !important;
   fill: none !important;
 }
 
 /* Ensure heart icon has a white stroke when liked for contrast */
-#slide-002 .tiktok-symulacja .like-button.active > svg {
+[data-slide-id="slide-002"] .tiktok-symulacja .like-button.active > svg {
   stroke: #fff !important;
   fill: var(--accent-color) !important;
 }
