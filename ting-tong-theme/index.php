@@ -368,23 +368,23 @@ get_header();
                 <div class="avatar-container">
                     <img src="" alt="User Avatar" class="profile-avatar">
                 </div>
-                <div class="stats-container">
-                    <div class="stat">
-                        <span class="stat-number following-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowing">Followers</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number followers-count">0</span>
-                        <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number likes-count">0</span>
-                        <span class="stat-label" data-translate-key="profileLikes">Followers</span>
-                    </div>
-                </div>
             </section>
             <p class="fullname"></p>
             <p class="bio"></p>
+            <div class="stats-container">
+                <div class="stat">
+                    <span class="stat-number following-count">0</span>
+                    <span class="stat-label" data-translate-key="profileFollowing">Followers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number followers-count">0</span>
+                    <span class="stat-label" data-translate-key="profileFollowers">Followers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number likes-count">0</span>
+                    <span class="stat-label" data-translate-key="profileLikes">Followers</span>
+                </div>
+            </div>
             <div class="profile-actions">
                 <button class="follow-btn">
                     <span>Zostań Patronem</span>
