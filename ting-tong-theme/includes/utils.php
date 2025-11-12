@@ -203,30 +203,65 @@ function tt_get_slides_data() {
  */
 function tt_generate_mock_comments($count) {
     $comments = [];
-    $users = ['Anna', 'Piotr', 'Kasia', 'Tomek', 'Ewa'];
+    $users = [
+        ['name' => 'Anna Kowalska', 'avatar' => 'https://i.pravatar.cc/100?u=anna'],
+        ['name' => 'Piotr Nowak', 'avatar' => 'https://i.pravatar.cc/100?u=piotr'],
+        ['name' => 'Katarzyna Wiśniewska', 'avatar' => 'https://i.pravatar.cc/100?u=kasia'],
+        ['name' => 'Tomasz Wójcik', 'avatar' => 'https://i.pravatar.cc/100?u=tomek'],
+        ['name' => 'Ewa Dąbrowska', 'avatar' => 'https://i.pravatar.cc/100?u=ewa'],
+        ['name' => 'Marcin Lewandowski', 'avatar' => 'https://i.pravatar.cc/100?u=marcin'],
+    ];
     $texts = [
-        'To jest super!',
-        'Świetny filmik, dzięki!',
-        'Nie mogę się doczekać kolejnych.',
-        'Bardzo inspirujące :)',
-        'Haha, dobre!',
+        'To jest absolutnie fantastyczne! Dziękuję za udostępnienie.',
+        'Świetny materiał wideo, naprawdę daje do myślenia. Czekam na więcej!',
+        'Nie mogę się doczekać, co będzie dalej. Trzymam kciuki za projekt!',
+        'Bardzo inspirujące i motywujące. Oby tak dalej! :)',
+        'Haha, to jest genialne! Poprawiło mi humor na cały dzień.',
+        'Wow, jakość produkcji jest na najwyższym poziomie. Profesjonalna robota!',
+        'Czy ktoś wie, jaka to piosenka w tle? Jest niesamowita.',
+        'Zgadzam się z poprzednimi komentarzami. Super robota!',
+        'Mam pytanie: czy planujesz zrobić z tego serię? Bo ja bym oglądał!',
+        'To jest jeden z najlepszych filmików, jakie ostatnio widziałem. Szacun!',
     ];
 
+    $comment_id_counter = 1;
+
     for ($i = 1; $i <= $count; $i++) {
-        $user = $users[array_rand($users)];
-        $comments[] = [
-            'id'        => $i,
-            'parentId'  => null,
-            'user'      => $user,
-            'avatar'    => 'https://i.pravatar.cc/100?u=' . urlencode($user),
+        $user_data = $users[array_rand($users)];
+        $parent_id = null;
+
+        // Co trzeci komentarz jest odpowiedzią (jeśli istnieją już inne komentarze)
+        if ($i > 1 && $i % 3 === 0 && !empty($comments)) {
+            $parent_id = $comments[array_rand(array_keys($comments))]['id'];
+        }
+
+        $comment = [
+            'id'        => $comment_id_counter,
+            'parentId'  => $parent_id,
+            'user'      => $user_data['name'],
+            'avatar'    => $user_data['avatar'],
             'text'      => $texts[array_rand($texts)],
             'image_url' => null,
-            'timestamp' => (new DateTime("-{$i} minutes"))->format(DateTime::ATOM),
-            'likes'     => rand(0, 50),
+            'timestamp' => (new DateTime("-{$i} hours"))->format(DateTime::ATOM),
+            'likes'     => rand(0, 150),
             'isLiked'   => (bool) rand(0, 1),
-            'canEdit'   => false,
+            'canEdit'   => false, // W mockowych danych użytkownik nie jest właścicielem
         ];
+
+        // Co piąty komentarz ma obrazek
+        if ($comment_id_counter > 0 && $comment_id_counter % 5 === 0) {
+            $comment['image_url'] = 'https://picsum.photos/300/200?random=' . $comment_id_counter;
+        }
+
+        $comments[] = $comment;
+        $comment_id_counter++;
     }
+
+    // Sortuj komentarze po dacie (najnowsze na dole)
+    usort($comments, function($a, $b) {
+        return strtotime($a['timestamp']) - strtotime($b['timestamp']);
+    });
+
     return $comments;
 }
 
