@@ -85,7 +85,6 @@ function openAuthorProfileModal(slideData, options = {}) {
     }
 
     openModal(modal, {
-        animationClass: 'slideInRight',
         onOpen: () => {
             const author = slideData.author;
             modal.querySelector('.username-header').textContent = Utils.getTranslation('authorProfileTitle');
@@ -169,7 +168,6 @@ function closeAuthorProfileModal() {
     if (!modal) return;
 
     closeModal(modal, {
-        animationClass: 'slideOutRight',
         contentSelector: '.profile-modal-content'
     });
 }
@@ -451,9 +449,10 @@ function updateUIForLoginState() {
     const video = section.querySelector("video");
 
     // Determine overlay visibility
-    const showSecret = isSecret && !isLoggedIn;
+    const isElephantSlide = sim.closest('.webyx-section').dataset.slideId === 'slide-002';
+    const showSecret = (isSecret && !isLoggedIn) || (isElephantSlide && isLoggedIn);
     const showPwaSecret = isPwaSecret && !isStandalone;
-    const showInteractiveWall = isSecret && isLoggedIn;
+    const showInteractiveWall = isSecret && isLoggedIn && !isElephantSlide;
 
     // If an overlay is active, force the UI to be visible
     if (showSecret || showPwaSecret || showInteractiveWall) {
@@ -463,8 +462,7 @@ function updateUIForLoginState() {
     // Toggle "secret" overlay (static wall for guests)
     const secretOverlay = section.querySelector(".secret-overlay");
     if (secretOverlay) {
-        secretOverlay.classList.toggle('hidden', !showSecret);
-        secretOverlay.style.display = showSecret ? 'flex' : 'none';
+        secretOverlay.classList.toggle('visible', showSecret);
         if (showSecret) {
             secretOverlay.querySelector(".secret-title").textContent = Utils.getTranslation("secretTitle");
             const subtitleUElement = secretOverlay.querySelector(".secret-subtitle u");
