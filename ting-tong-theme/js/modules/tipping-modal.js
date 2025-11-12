@@ -236,17 +236,20 @@ function validateStep(step) {
                 return false;
             }
         }
+        return true; // Explicitly return true on success for step 0
     }
     // Step 1: Amount and terms validation
     else if (step === 1) {
-        const amount = parseFloat(dom.amountInput.value);
+        const amountStr = dom.amountInput.value.trim();
         const currency = dom.currencySelect.value.toLowerCase();
         const minAmount = (currency === 'pln') ? 5 : 1;
 
-        const amountStr = dom.amountInput.value.trim();
         if (amountStr === '') {
-             // Jeśli pole jest puste, walidacja się nie udaje, ale nie pokazujemy błędu.
-             // Błąd zostanie pokazany przez funkcję wywołującą (handleNextStep), jeśli to konieczne.
+            const currencyDisplay = currency.toUpperCase();
+            const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
+                .replace('{minAmount}', minAmount)
+                .replace('{currency}', currencyDisplay);
+            showLocalError(1, message);
             return false;
         }
 
@@ -264,7 +267,7 @@ function validateStep(step) {
             showLocalError(1, getTranslatedText('errorTermsNotAccepted', 'You must accept the terms and conditions.'));
             return false;
         }
-        return true; // FIX: Ensure true is returned on successful validation
+        return true;
     }
     return true;
 }
