@@ -6407,7 +6407,7 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 
 /* Avatar border and glow */
 .slide--light-theme .tiktok-symulacja .profile img {
-  border-color: #000 !important;
+  border-color: #fff !important;
   animation: flicker-glow 2s infinite;
 }
 
