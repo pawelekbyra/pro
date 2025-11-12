@@ -1157,39 +1157,16 @@ body,
 }
 
 /* Styl dla obwódki VIP */
-@keyframes spin-gradient {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .vip-avatar-border {
   position: relative;
-  border: none !important; /* Usuwamy standardową ramkę */
-  padding: 2px; /* Tworzymy przestrzeń na nową "ramkę" */
-  background-clip: content-box !important; /* Tło tylko pod obrazkiem */
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.7); /* Złota poświata */
-}
-
-.vip-avatar-border::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  background: conic-gradient(from 0deg, gold, #ffeb3b, #ffc107, #ffeb3b, gold) border-box;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  animation: spin-gradient 2s linear infinite;
+  /* Zastąpienie złotej animowanej ramki prostą czarną ramką */
+  border: 2px solid #000 !important;
+  padding: 0;
+  background-clip: padding-box !important;
+  box-shadow: none !important; /* Usunięcie złotej poświaty */
+  /* Upewnienie się, że zwykła ramka nie zostanie nadpisana przez błędy z innych miejsc */
+  transition: border-color 0.1s ease-in-out, filter 0.2s;
+  background-color: white; /* Dziedziczenie defaultowego tła jest ok */
 }
 .tiktok-symulacja .profileButton:active img {
   border-color: var(--accent-color);
@@ -6417,54 +6394,3 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     transition: none !important;
 }
 
-/* Custom styles for slides with a light theme, like "Elephants Dream" */
-
-/* Text elements should be black */
-.slide--light-theme .secret-overlay .secret-title,
-.slide--light-theme .secret-overlay .secret-subtitle,
-.slide--light-theme .tiktok-symulacja .sidebar .icon-button .icon-label,
-.slide--light-theme .tiktok-symulacja .bottombar .author-name,
-.slide--light-theme .tiktok-symulacja .bottombar .slide-title,
-.slide--light-theme .tiktok-symulacja .bottombar .slide-description {
-  color: #000 !important;
-  text-shadow: none !important;
-}
-
-/* The lock icon which uses currentColor */
-.slide--light-theme .secret-overlay .secret-icon {
-  color: #000 !important;
-}
-
-/* For all sidebar icons on this slide, set stroke to black and keep other properties */
-.slide--light-theme .tiktok-symulacja .sidebar .icon-button svg {
-  stroke: #000 !important;
-  fill: none !important; /* This is the default, but let's be explicit */
-  stroke-width: 1.5 !important; /* Explicitly keep the same stroke-width */
-}
-
-/* Special case for the ACTIVE like button, restore original look for contrast */
-.slide--light-theme .tiktok-symulacja .like-button.active > svg {
-  fill: var(--accent-color) !important;
-  stroke: white !important; /* White stroke looks better on red fill */
-}
-
-/* Avatar border and glow */
-.slide--light-theme .tiktok-symulacja .profile img {
-  border: 2px solid #000 !important;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.7) !important;
-}
-
-/* Plus icon border */
-.slide--light-theme .tiktok-symulacja .plus {
-  border-color: #000 !important;
-}
-
-/* Underline for the login link */
-.slide--light-theme .secret-subtitle u {
-  border-bottom-color: #000 !important;
-}
-
-/* Video controls icons */
-.slide--light-theme .video-controls button svg {
-    fill: #000 !important;
-}
