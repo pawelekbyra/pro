@@ -1,6 +1,7 @@
 import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
+import { initInteractiveWall } from './interactive-wall.js';
 // import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
 
@@ -611,6 +612,33 @@ function createSlideElement(slideData, index) {
   }
 
   // Ustawienie początkowej widoczności nakładek.
+  const isLoggedIn = getIsUserLoggedIn();
+  const isSecret = slideData.access === 'secret';
+  const secretOverlay = section.querySelector('.secret-overlay');
+  const interactiveOverlay = section.querySelector('.interactive-wall-overlay');
+  const interactiveCanvas = section.querySelector('.interactive-canvas');
+
+  if (isSecret) {
+      if (isLoggedIn) {
+          secretOverlay.classList.add('hidden');
+          secretOverlay.style.display = 'none';
+          interactiveOverlay.classList.remove('hidden');
+
+          if (interactiveCanvas && !interactiveCanvas.dataset.initialized) {
+               initInteractiveWall(interactiveCanvas, slideData.id);
+               interactiveCanvas.dataset.initialized = 'true';
+          }
+      } else {
+          secretOverlay.classList.remove('hidden');
+          secretOverlay.style.display = 'flex';
+          interactiveOverlay.classList.add('hidden');
+      }
+  } else {
+      secretOverlay.classList.add('hidden');
+      secretOverlay.style.display = 'none';
+      interactiveOverlay.classList.add('hidden');
+  }
+
   // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
   if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');

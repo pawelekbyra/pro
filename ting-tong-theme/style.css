@@ -636,15 +636,35 @@ body,
   pointer-events: auto;
 }
 
-/* --- Brick Wall Background Styles --- */
-.mur-container {
-    position: fixed;
+/* New overlay for interactive wall */
+.interactive-wall-overlay {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    z-index: 50; /* Above video, below UI */
+}
+
+.interactive-wall-overlay.hidden {
+    display: none;
+}
+
+.interactive-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+/* --- Brick Wall Background Styles --- */
+.mur-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: -1; /* Place it behind the content */
-    border: 1px solid #333333;
     background-color: #333333;
     overflow: hidden;
 }
