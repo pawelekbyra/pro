@@ -94,7 +94,7 @@ class AuthManager {
    * @param {object} data - Dane do wysłania.
    * @param {boolean} sendAsJSON - Jeśli true, wyślij dane jako application/json.
    */
-  async ajax(action, data = {}, sendAsJSON = false, _bypassQueue = false) {
+  async ajax(action, data = {}, sendAsJson = false, { _bypassQueue = false, retries = 1 } = {}) {
     if (State.get('isMock')) {
         console.log(`%c[MOCK] Intercepted AJAX call: ${action}`, 'color: #00aaff;');
         if (action === 'tt_profile_get') {
@@ -110,7 +110,7 @@ class AuthManager {
 
         // UWAGA: Logika została uproszczona, aby zawsze używać POST i przekazywać
         // akcję w ciele, co jest bardziej standardowe dla `admin-ajax.php`.
-        if (sendAsJSON) {
+        if (sendAsJson) {
             headers['Content-Type'] = 'application/json; charset=UTF-8';
             // Nonce jest wysyłany w nagłówku, co jest dobrą praktyką dla API REST-podobnych.
             headers['X-WP-Nonce'] = currentNonce;
@@ -138,17 +138,16 @@ class AuthManager {
     const requestFn = async () => {
       try {
         const validated = await performFetch(ajax_object.nonce);
+        // Proactive nonce update
         if (validated.data?.new_nonce) {
           ajax_object.nonce = validated.data.new_nonce;
         }
         return validated;
       } catch (error) {
-        if ((error.message.includes('403') || error.message.includes('400')) && action !== 'tt_refresh_nonce') {
+        if (retries > 0 && (error.message.includes('403') || error.message.includes('400')) && action !== 'tt_refresh_nonce') {
           console.warn(`[AUTH] Nonce error detected (${error.message}). Refreshing...`);
 
-          // ✅ FIX: Wywołaj odświeżanie z flagą _bypassQueue, aby uniknąć zakleszczenia (deadlock).
-          // To jest kluczowa zmiana, która naprawia "zawieszanie się" przycisków.
-          const refreshResponse = await this.ajax('tt_refresh_nonce', {}, false, true);
+          const refreshResponse = await this.ajax('tt_refresh_nonce', {}, false, { _bypassQueue: true, retries: 0 });
 
           if (!refreshResponse.success || !refreshResponse.data?.nonce) {
             console.error('[AUTH] Failed to refresh nonce. Throwing original error.');
@@ -158,12 +157,8 @@ class AuthManager {
           ajax_object.nonce = refreshResponse.data.nonce;
           console.log('[AUTH] Nonce refreshed. Retrying original request...');
 
-          // Ponów oryginalne żądanie z nowym nonce
-          const retryValidated = await performFetch(ajax_object.nonce);
-          if (retryValidated.data?.new_nonce) {
-            ajax_object.nonce = retryValidated.data.new_nonce;
-          }
-          return retryValidated;
+          // Retry the original request with the new nonce
+          return await performFetch(ajax_object.nonce);
         }
         throw error;
       }

@@ -59,9 +59,19 @@ async function handleCommentAction(e) {
         case 'toggle-comment-like':
             // Basic optimistic update
             actionTarget.classList.toggle('active');
-            const result = await API.toggleCommentLike(slideId, commentId);
-            if (!result.success) {
-                actionTarget.classList.toggle('active'); // Revert on failure
+            try {
+                const result = await API.toggleCommentLike(slideId, commentId);
+                if (!result.success) {
+                    actionTarget.classList.toggle('active'); // Revert on failure
+                    alert(result.data?.message || 'Failed to toggle like.');
+                }
+            } catch (error) {
+                actionTarget.classList.toggle('active'); // Revert optimistic update
+                if (error.message && error.message.includes('403')) {
+                    alert(Utils.getTranslation('mustBeLoggedIn'));
+                } else {
+                    alert(Utils.getTranslation('unknownError'));
+                }
             }
             // Full re-render would be better, but this is a quick fix
             const countEl = commentItem.querySelector('.comment-like-count');
@@ -73,18 +83,38 @@ async function handleCommentAction(e) {
              const currentText = commentItem.querySelector('.comment-text').textContent;
              const newText = prompt("Edit your comment:", currentText);
              if (newText && newText.trim() !== currentText) {
-                 const result = await API.editComment(slideId, commentId, newText.trim());
-                 if (result.success) {
-                     commentItem.querySelector('.comment-text').textContent = newText.trim();
-                 }
+                try {
+                    const result = await API.editComment(slideId, commentId, newText.trim());
+                    if (result.success) {
+                        commentItem.querySelector('.comment-text').textContent = newText.trim();
+                    } else {
+                        alert(result.data?.message || 'Failed to edit comment.');
+                    }
+                } catch (error) {
+                    if (error.message && error.message.includes('403')) {
+                        alert(Utils.getTranslation('mustBeLoggedIn'));
+                    } else {
+                        alert(Utils.getTranslation('unknownError'));
+                    }
+                }
              }
             break;
         case 'delete-comment':
              if (confirm("Are you sure you want to delete this comment?")) {
-                 const result = await API.deleteComment(slideId, commentId);
-                 if (result.success) {
-                     commentItem.remove();
-                 }
+                try {
+                    const result = await API.deleteComment(slideId, commentId);
+                    if (result.success) {
+                        commentItem.remove();
+                    } else {
+                        alert(result.data?.message || 'Failed to delete comment.');
+                    }
+                } catch (error) {
+                    if (error.message && error.message.includes('403')) {
+                        alert(Utils.getTranslation('mustBeLoggedIn'));
+                    } else {
+                        alert(Utils.getTranslation('unknownError'));
+                    }
+                }
              }
             break;
     }
@@ -115,30 +145,39 @@ async function handleFormSubmit(e) {
         }
 
         const postResult = await API.postComment(slideId, text, null, imageUrl);
-        if (postResult.success) {
+        if (postResult.success && postResult.data) {
             DOM.commentInput.value = '';
             removeCommentImage();
 
-            const commentsResult = await API.getComments(slideId);
-            if (commentsResult.success) {
-                renderComments(commentsResult.data);
+            // Optimistic update: add the new comment to the UI immediately
+            const slideData = slidesData.find(s => s.id === slideId);
+            if (slideData) {
+                if (!slideData.comments) {
+                    slideData.comments = [];
+                }
+                slideData.comments.push(postResult.data);
+                slideData.initialComments = slideData.comments.length;
 
-                const slideData = slidesData.find(s => s.id === slideId);
-                if(slideData) {
-                    slideData.initialComments = commentsResult.data.length;
-                    const countElement = document.querySelector(`.swiper-slide-active .comment-count`);
-                    if(countElement) {
-                        countElement.textContent = Utils.formatCount(slideData.initialComments);
-                    }
+                // Re-render with the new comment
+                sortAndRerenderComments();
+
+                // Update the comment count on the slide
+                const countElement = document.querySelector(`.swiper-slide-active .comment-count`);
+                if (countElement) {
+                    countElement.textContent = Utils.formatCount(slideData.initialComments);
                 }
             }
-
         } else {
-            throw new Error(postResult.data.message || 'Failed to post comment');
+            throw new Error(postResult.data?.message || 'Failed to post comment');
         }
 
     } catch (error) {
         console.error("Comment post error:", error);
+        if (error.message && error.message.includes('403')) {
+            alert(Utils.getTranslation('mustBeLoggedInToComment'));
+        } else {
+            alert(error.message || Utils.getTranslation('unknownError'));
+        }
     } finally {
         button.disabled = false;
     }
@@ -246,7 +285,7 @@ function renderComments(comments) {
         return;
     }
 
-    DOM.modalBody.innerHTML = "";
+    DOM.modalBody.innerHTML = `<div class="loading-spinner"></div>`;
 
     if (!comments || comments.length === 0) {
         DOM.modalBody.innerHTML = `<p class="no-comments-message" data-translate-key="noComments">${Utils.getTranslation('noComments')}</p>`;
@@ -270,7 +309,7 @@ function renderComments(comments) {
 
         commentItem.dataset.commentId = comment.id;
 
-        templateClone.querySelector('.comment-author').textContent = comment.user;
+        templateClone.querySelector('.comment-user').textContent = comment.user;
         templateClone.querySelector('.comment-avatar img').src = comment.avatar;
         templateClone.querySelector('.comment-text').textContent = comment.text;
         templateClone.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);

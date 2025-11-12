@@ -27,7 +27,7 @@ add_action( 'wp_ajax_toggle_like', function () {
         $wpdb->insert( $table_name, [ 'item_id' => $item_id, 'user_id' => $user_id ] );
         $status = 'liked';
     }
-    wp_send_json_success( [ 'status' => $status, 'count'  => tt_likes_get_count( $item_id ) ] );
+    wp_send_json_success( [ 'status' => $status, 'count'  => tt_likes_get_count( $item_id ), 'new_nonce' => wp_create_nonce('tt-ajax-nonce') ] );
 } );
 
 // --- Komentarze ---
@@ -129,6 +129,7 @@ add_action('wp_ajax_tt_post_comment', function() {
         'isLiked'   => false,
         'canEdit'   => true,
         'new_comment_count' => $new_comment_count,
+        'new_nonce' => wp_create_nonce('tt-ajax-nonce'),
     ]);
 });
 
@@ -172,7 +173,7 @@ add_action('wp_ajax_tt_edit_comment', function() {
         'canEdit'   => (int) $updated_comment->user_id === $user_id || current_user_can('manage_options'),
     ];
 
-    wp_send_json_success($comment_data);
+    wp_send_json_success(array_merge($comment_data, ['new_nonce' => wp_create_nonce('tt-ajax-nonce')]));
 });
 
 add_action('wp_ajax_tt_delete_comment', function() {
@@ -204,7 +205,7 @@ add_action('wp_ajax_tt_delete_comment', function() {
 
     // Zwróć nową liczbę komentarzy dla slajdu
     $new_comment_count = tt_comments_get_count($slide_id);
-    wp_send_json_success(['new_count' => $new_comment_count]);
+    wp_send_json_success(['new_count' => $new_comment_count, 'new_nonce' => wp_create_nonce('tt-ajax-nonce')]);
 });
 
 add_action('wp_ajax_tt_toggle_comment_like', function() {
@@ -233,6 +234,7 @@ add_action('wp_ajax_tt_toggle_comment_like', function() {
     wp_send_json_success([
         'isLiked' => $isLiked,
         'likes'   => tt_comment_likes_get_count($comment_id),
+        'new_nonce' => wp_create_nonce('tt-ajax-nonce'),
     ]);
 });
 
