@@ -619,8 +619,8 @@ body,
   left: 0;
   width: 100%;
   height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
-  background: none; /* Remove old background */
-  z-index: 40;
+  background: none;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -630,6 +630,7 @@ body,
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
+  overflow: hidden;
 }
 .secret-overlay.visible {
   opacity: 1;
