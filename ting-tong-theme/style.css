@@ -643,12 +643,13 @@ body,
     top: var(--topbar-height);
     left: 0;
     width: 100%;
-    bottom: 0; /* Match secret-overlay for full height */
-    height: auto; /* Match secret-overlay for full height */
-    z-index: 50;
+    bottom: 0; /* Cover the entire area */
+    height: auto;
+    z-index: 10100; /* Higher than sidebar and bottombar */
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
+    background-color: #333; /* Ensure it has a background */
 }
 
 .interactive-wall-overlay.visible {

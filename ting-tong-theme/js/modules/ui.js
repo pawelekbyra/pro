@@ -451,9 +451,10 @@ function updateUIForLoginState() {
     const video = section.querySelector("video");
 
     // Determine overlay visibility
+    const slideId = sim.closest('.webyx-section')?.dataset.slideId;
     const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
-    const showInteractiveWall = isSecret && isLoggedIn;
+    const showInteractiveWall = isSecret && isLoggedIn && slideId === 'slide-002';
 
     // If an overlay is active, force the UI to be visible
     if (showSecret || showPwaSecret || showInteractiveWall) {
