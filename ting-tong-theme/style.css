@@ -603,31 +603,6 @@ body,
   z-index: 1;
   font-family: "Manrope", sans-serif;
 }
-.brick-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 101;
-    display: none; /* Initially hidden */
-}
-
-/* When the wall is active, show canvas and hide other elements */
-.tiktok-symulacja[data-is-interactive-wall="true"] .secret-overlay {
-    background-image: none !important; /* Hide original background */
-}
-
-.tiktok-symulacja[data-is-interactive-wall="true"] .brick-canvas {
-    display: block;
-    cursor: crosshair;
-}
-
-.tiktok-symulacja[data-is-interactive-wall="true"] .secret-icon,
-.tiktok-symulacja[data-is-interactive-wall="true"] .secret-title,
-.tiktok-symulacja[data-is-interactive-wall="true"] .secret-subtitle {
-    display: none; /* Hide lock and text */
-}
 .tiktok-symulacja iframe {
   width: 100%;
   height: 100%;
@@ -1499,7 +1474,7 @@ margin: -7px auto 0;
 
 .login-panel .login-form button[type="submit"] {
   background: var(--accent-color);
-  border: none;
+  border: 2px solid black;
   width: 100%;
   padding: 10px;
   font-weight: bold;

@@ -11,7 +11,6 @@ import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
 import { CommentsModal } from './modules/comments-modal.js';
-import { BrickWallManager } from './modules/brick-wall.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -473,14 +472,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.ttState = State;
     console.log('%c🔧 Debug Mode', 'color: #ff0055; font-size: 16px; font-weight: bold');
     console.log('Available: window.ttAuth, window.ttState, #mockLoginBtn');
-
-    const destroyWallBtn = document.getElementById('destroyWallBtn');
-    if (destroyWallBtn) {
-        destroyWallBtn.style.display = 'block';
-        destroyWallBtn.addEventListener('click', () => {
-            BrickWallManager.destroyActiveWall();
-        });
-    }
 
     const mockBtn = document.getElementById('mockLoginBtn');
     if (mockBtn) {
