@@ -615,14 +615,14 @@ body,
 }
 .secret-overlay {
   position: absolute;
-  /* NAPRAWA KRUCJALNA: Pozycjonowanie i wysokość identyczna jak obszar wideo */
   top: var(--topbar-height);
   left: 0;
   width: 100%;
+  /* NAPRAWA: Wymuszenie pokrycia CAŁEGO OBSZARU WIDEO */
   height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
   background: none;
   z-index: 100;
-  display: flex; /* Domyślny layout dla tekstu/kłódki */
+  display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -643,6 +643,7 @@ body,
     top: var(--topbar-height);
     left: 0;
     width: 100%;
+    /* MUSI BYĆ IDENTYCZNE JAK .secret-overlay */
     height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
     z-index: 50;
 }
@@ -669,6 +670,7 @@ body,
     /* Upewnia się, że "fuga" jest kolorem tła */
     background-color: #333333;
     overflow: hidden;
+    display: block !important; /* Wymuś widoczność */
 }
 
 .mur-row {
