@@ -615,13 +615,14 @@ body,
 }
 .secret-overlay {
   position: absolute;
+  /* NAPRAWA KRUCJALNA: Pozycjonowanie i wysokość identyczna jak obszar wideo */
   top: var(--topbar-height);
   left: 0;
   width: 100%;
   height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
   background: none;
   z-index: 100;
-  display: flex;
+  display: flex; /* Domyślny layout dla tekstu/kłódki */
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -637,14 +638,13 @@ body,
   pointer-events: auto;
 }
 
-/* New overlay for interactive wall */
 .interactive-wall-overlay {
     position: absolute;
     top: var(--topbar-height);
     left: 0;
     width: 100%;
     height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
-    z-index: 50; /* Above video, below UI */
+    z-index: 50;
 }
 
 .interactive-wall-overlay.hidden {
@@ -658,14 +658,15 @@ body,
     cursor: crosshair;
 }
 
-/* --- Brick Wall Background Styles --- */
+/* Ten kontener musi mieć ten sam kolor co fuga w Canvas, aby były spójne */
 .mur-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* Place it behind the content */
+    z-index: -1;
+    /* Upewnia się, że "fuga" jest kolorem tła */
     background-color: #333333;
     overflow: hidden;
 }
@@ -680,12 +681,14 @@ body,
     margin-left: -30.5px;
 }
 
+/* W statycznym murze obrys (fuga) jest realizowana przez tło kontenera i marginesy. */
 .cegla {
     width: 60px;
     height: 30px;
     background-color: #ffffff;
+    /* Daje efekt białej cegły z ciemną fugą */
     margin-right: 1px;
-    flex-shrink: 0; /* Prevent bricks from shrinking */
+    flex-shrink: 0;
 }
 /* --- End Brick Wall --- */
 
