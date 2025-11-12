@@ -113,10 +113,44 @@ export function initInteractiveWall(canvas, slideId) {
         // NAPRAWA KRUCJALNA (PRZEZROCZYSTOŚĆ): Usuwamy wypełnienie tła, wideo pod spodem jest widoczne
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // NOWA LOGIKA: Sprawdzenie kaskadowych zawaleń przed aktualizacją pozycji
+        sprawdzWsparcie(); // <--- DODAJ TUTAJ
+
         cegly.forEach(cegla => {
             cegla.update();
             cegla.draw();
         });
+
+        // Wewnątrz funkcji animate, przed requestAnimationFrame
+        // ...
+        let pozostaleStatyczne = cegly.some(c => c.isStatic);
+
+        if (!pozostaleStatyczne) {
+            const tiktokSymulacja = canvas.closest('.tiktok-symulacja');
+            if (tiktokSymulacja) {
+                // KLUCZOWY KROK: Ukryj canvas, usuń nakładkę z DOM i odblokuj interakcje UI
+                canvas.style.display = 'none';
+                // Usuń pointer-events: none z elementów UI pod Canvasem
+                tiktokSymulacja.querySelector('.sidebar').style.pointerEvents = 'auto';
+                tiktokSymulacja.querySelector('.bottombar').style.pointerEvents = 'auto';
+
+                // Dodatkowo: znajdź i odblokuj wideo (jeśli było zablokowane)
+                const video = tiktokSymulacja.querySelector('video');
+                if (video && video.paused) {
+                    video.play().catch(e => console.warn('Autoplay error po zniszczeniu muru:', e));
+                    const pauseOverlay = tiktokSymulacja.querySelector('.pause-overlay');
+                    if(pauseOverlay) pauseOverlay.classList.remove('visible');
+                }
+
+                // Konieczne jest też usunięcie samej nakładki Canvas
+                const interactiveOverlay = canvas.closest('.interactive-wall-overlay');
+                if (interactiveOverlay) {
+                    interactiveOverlay.remove();
+                }
+                resizeObserver.unobserve(parent);
+                return; // Zakończ animację
+            }
+        }
 
         requestAnimationFrame(animate);
     }
@@ -131,6 +165,53 @@ export function initInteractiveWall(canvas, slideId) {
     });
     if (parent) {
        resizeObserver.observe(parent);
+    }
+
+    function sprawdzWsparcie() {
+        // 1. Filtruj tylko aktywne, statyczne cegły (potencjalnie niestabilne)
+        const statyczneCegly = cegly.filter(c => c.isStatic && !c.zniszczona);
+        let ceglyDoZawalenia = [];
+
+        statyczneCegly.forEach(cegla => {
+            // Pomijamy najniższy rząd (który zawsze ma podparcie)
+            if (cegla.y + cegla.wysokosc + fugaGrubosc >= canvas.height - 1) return;
+
+            // Określ obszar podparcia (jedną cegłę niżej, z uwzględnieniem offsetu)
+            const xSrodek = cegla.x + cegla.szerokosc / 2;
+            const yPodparcia = cegla.y + cegla.wysokosc + fugaGrubosc;
+
+            // Flaga, czy znaleziono podparcie
+            let maPodparcie = false;
+
+            // Szukamy cegieł, które mogą stanowić podparcie w nowym, niższym rzędzie
+            for (const podparcie of statyczneCegly) {
+                // Sprawdź, czy cegła podparcia jest na niższym poziomie Y (z tolerancją)
+                if (podparcie.y > cegla.y + 1) {
+                    // Sprawdź, czy jej obszar X pokrywa się z górną cegłą
+                    const jestPodSrodkiem = xSrodek >= podparcie.x && xSrodek <= podparcie.x + podparcie.szerokosc;
+
+                    // Sprawdź, czy sąsiadują w pionie (na podstawie kalkulacji rzędów)
+                    const jestWPrawidlowymRzedzie = Math.abs(podparcie.y - yPodparcia) < 2;
+
+                    if (jestPodSrodkiem && jestWPrawidlowymRzedzie) {
+                        maPodparcie = true;
+                        break;
+                    }
+                }
+            }
+
+            // Jeśli nie ma podparcia, dodaj do listy do zwalenia
+            if (!maPodparcie) {
+                ceglyDoZawalenia.push(cegla);
+            }
+        });
+
+        // Zwalaj cegły i nadaj im losowy impuls
+        ceglyDoZawalenia.forEach(cegla => {
+            cegla.isStatic = false;
+            cegla.vy = Math.random() * 2; // Mały impuls w dół
+            cegla.predkoscKatowa = (Math.random() - 0.5) * 0.2;
+        });
     }
 
     // Listener interakcji
