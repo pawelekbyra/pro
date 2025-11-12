@@ -619,9 +619,9 @@ body,
   left: 0;
   width: 100%;
   /* NAPRAWA: Wymuszenie pokrycia CAŁEGO OBSZARU WIDEO */
-  height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
+  height: calc(100% - var(--topbar-height));
   background: none;
-  z-index: 100;
+  z-index: 10053;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -629,7 +629,7 @@ body,
   text-align: center;
   padding: 20px;
   opacity: 0;
-  pointer-events: none;
+  pointer-events: all;
   transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
   overflow: hidden;
 }
@@ -644,8 +644,9 @@ body,
     left: 0;
     width: 100%;
     /* MUSI BYĆ IDENTYCZNE JAK .secret-overlay */
-    height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
-    z-index: 50;
+    height: calc(100% - var(--topbar-height));
+    z-index: 10053;
+    pointer-events: all;
 }
 
 .interactive-wall-overlay.hidden {
