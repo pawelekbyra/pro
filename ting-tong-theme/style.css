@@ -1156,16 +1156,14 @@ body,
   background-color: white; /* Dodane białe tło */
 }
 
-@keyframes white-glow {
-  0% {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 1);
-  }
-  100% {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
-  }
+@keyframes flicker-glow {
+  0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+  20% { box-shadow: 0 0 10px rgba(255, 255, 255, 1); }
+  30% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+  50% { box-shadow: 0 0 12px rgba(255, 255, 255, 0.8); }
+  70% { box-shadow: 0 0 4px rgba(255, 255, 255, 0.6); }
+  90% { box-shadow: 0 0 10px rgba(255, 255, 255, 1); }
+  100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
 }
 
 /* Styl dla obwódki VIP */
@@ -1174,7 +1172,7 @@ body,
   border: 2px solid #000 !important;
   padding: 0;
   background-clip: padding-box !important;
-  animation: white-glow 2s infinite;
+  animation: flicker-glow 2s infinite;
   transition: border-color 0.1s ease-in-out, filter 0.2s;
   background-color: white; /* Dziedziczenie defaultowego tła jest ok */
 }
@@ -6411,7 +6409,7 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 /* Avatar border and glow */
 .slide--light-theme .tiktok-symulacja .profile img {
   border-color: #000 !important;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.7) !important;
+  animation: flicker-glow 2s infinite;
 }
 
 /* Text elements should be black */
