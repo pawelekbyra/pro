@@ -453,16 +453,18 @@ function updateUIForLoginState() {
     // Determine overlay visibility
     const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
+    const showInteractiveWall = isSecret && isLoggedIn;
 
     // If an overlay is active, force the UI to be visible
-    if (showSecret || showPwaSecret) {
+    if (showSecret || showPwaSecret || showInteractiveWall) {
       sim.classList.add("video-loaded");
     }
 
-    // Toggle "secret" overlay
+    // Toggle "secret" overlay (static wall for guests)
     const secretOverlay = section.querySelector(".secret-overlay");
     if (secretOverlay) {
-        secretOverlay.classList.toggle("visible", showSecret);
+        secretOverlay.classList.toggle('hidden', !showSecret);
+        secretOverlay.style.display = showSecret ? 'flex' : 'none';
         if (showSecret) {
             secretOverlay.querySelector(".secret-title").textContent = Utils.getTranslation("secretTitle");
             const subtitleUElement = secretOverlay.querySelector(".secret-subtitle u");
@@ -472,6 +474,18 @@ function updateUIForLoginState() {
                 subtitleUElement.textContent = Utils.getTranslation("secretSubtitleAction");
                 subtitleSpanElement.textContent = " " + Utils.getTranslation("secretSubtitleRest");
             }
+        }
+    }
+
+    // Toggle "interactive-wall" overlay (canvas for logged-in users)
+    const interactiveOverlay = section.querySelector(".interactive-wall-overlay");
+    const interactiveCanvas = section.querySelector(".interactive-canvas");
+    if (interactiveOverlay) {
+        interactiveOverlay.classList.toggle('hidden', !showInteractiveWall);
+
+        if (showInteractiveWall && interactiveCanvas && !interactiveCanvas.dataset.initialized) {
+            initInteractiveWall(interactiveCanvas, section.dataset.slideId);
+            interactiveCanvas.dataset.initialized = 'true';
         }
     }
 
@@ -612,33 +626,6 @@ function createSlideElement(slideData, index) {
   }
 
   // Ustawienie początkowej widoczności nakładek.
-  const isLoggedIn = getIsUserLoggedIn();
-  const isSecret = slideData.access === 'secret';
-  const secretOverlay = section.querySelector('.secret-overlay');
-  const interactiveOverlay = section.querySelector('.interactive-wall-overlay');
-  const interactiveCanvas = section.querySelector('.interactive-canvas');
-
-  if (isSecret) {
-      if (isLoggedIn) {
-          secretOverlay.classList.add('hidden');
-          secretOverlay.style.display = 'none';
-          interactiveOverlay.classList.remove('hidden');
-
-          if (interactiveCanvas && !interactiveCanvas.dataset.initialized) {
-               initInteractiveWall(interactiveCanvas, slideData.id);
-               interactiveCanvas.dataset.initialized = 'true';
-          }
-      } else {
-          secretOverlay.classList.remove('hidden');
-          secretOverlay.style.display = 'flex';
-          interactiveOverlay.classList.add('hidden');
-      }
-  } else {
-      secretOverlay.classList.add('hidden');
-      secretOverlay.style.display = 'none';
-      interactiveOverlay.classList.add('hidden');
-  }
-
   // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
   if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalone()) {
     const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
