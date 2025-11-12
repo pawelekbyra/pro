@@ -70,7 +70,7 @@ export function initInteractiveWall(canvas, slideId) {
         ceglyDoZniszczenia = 0; // Reset
         const szerokoscCeglyZFuga = ceglaSzerokosc + fugaGrubosc;
         const wysokoscCeglyZFuga = ceglaWysokosc + fugaGrubosc;
-        const iloscRzedow = Math.ceil(canvas.height / wysokoscCeglyZFuga);
+        const iloscRzedow = Math.ceil(canvas.height / wysokoscCeglyZFuga) + 1; /* DODANY BUFOR +1 */
         // Dodatkowa kolumna dla pełnego pokrycia
         const iloscKolumn = Math.ceil(canvas.width / szerokoscCeglyZFuga) + 2;
 

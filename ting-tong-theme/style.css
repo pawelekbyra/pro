@@ -623,7 +623,7 @@ body,
   /* === POCZĄTEK NAPRAWY === */
   background-image: url('wall.png'); /* Użyj wall.png lub wall.jpg */
   background-repeat: repeat;
-  background-size: auto; /* Użyj domyślnego rozmiaru obrazka do powtarzania */
+  background-size: 300px; /* POPRAWNA WARTOŚĆ (jak .interactive-wall) */
   /* === KONIEC NAPRAWY === */
   z-index: 100;
   display: flex;
@@ -1234,18 +1234,19 @@ body,
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid black;
   display: block;
   transition:
     border-color 0.1s ease-in-out,
     filter 0.2s;
   background-color: white; /* Dodane białe tło */
+  animation: flicker-glow 2s infinite;
 }
 
 @keyframes flicker-glow {
- 0% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
- 50% { box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.7); }
- 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+ 0% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.4); }
+ 50% { box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.8); }
+ 100% { box-shadow: 0 0 8px rgba(255, 255, 255, 0.4); }
 }
 
 /* Styl dla obwódki VIP */
@@ -1253,7 +1254,7 @@ body,
   position: relative;
   padding: 0;
   background-clip: padding-box !important;
-  animation: flicker-glow 4s infinite;
+  animation: flicker-glow 2s infinite;
   transition: border-color 0.1s ease-in-out, filter 0.2s;
   background-color: white; /* Dziedziczenie defaultowego tła jest ok */
 }
@@ -5976,11 +5977,16 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal main {
-    flex-grow: 1;
-    overflow-y: visible;
-    padding: 20px 16px;
-    background-color: #e1e1e1;
-    color: #333;
+/* NOWE TŁO GLASSMORPHISM */
+background-color: rgba(255, 255, 255, 0.08);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+
+/* ZACHOWAJ CIEMNY TEKST I USTAWIENIA */
+color: #333;
+flex-grow: 1;
+overflow-y: visible;
+padding: 20px 16px;
 }
 
 .author-modal-avatar {
@@ -6149,7 +6155,7 @@ main::-webkit-scrollbar {
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: #fff;
+    background-color: var(--accent-color);
 }
 
 #author-profile-modal .tabs .tab svg {
@@ -6211,6 +6217,84 @@ main::-webkit-scrollbar {
     height: 16px;
     margin-right: 4px;
     fill: white;
+}
+
+/* Dostosuj statystyki, bio i nazwy (powinny już być ciemne, ale to upewnia) */
+#author-profile-modal .stats-container .stat-label {
+color: #555;
+}
+
+#author-profile-modal .fullname,
+#author-profile-modal .tabs .tab.active {
+color: #111;
+}
+
+#author-profile-modal .bio {
+color: #333;
+}
+
+/* Dostosuj zakładki */
+#author-profile-modal .tabs {
+border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Ciemniejsza linia */
+}
+
+#author-profile-modal .tabs .tab {
+color: #555; /* Ciemny tekst nieaktywnej zakładki */
+}
+
+/* Kreska pod aktywną zakładką musi być widoczna (zmieniamy z #fff) */
+#author-profile-modal .tabs .tab.active::after {
+background-color: var(--accent-color);
+}
+
+/* Upewnij się, że ikony social media mają ciemne tło i ciemne ikony */
+#author-profile-modal .profile-actions .social-btn {
+background-color: rgba(0, 0, 0, 0.1);
+border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#author-profile-modal .profile-actions .social-btn svg {
+fill: #333; /* Ciemna ikona */
+stroke: none;
+}
+
+#author-profile-modal .profile-actions .social-btn.instagram svg {
+stroke: #333; /* Ciemna ikona */
+fill: none;
+}
+
+/* Dodaj transition i will-change do przycisków akcji */
+#author-profile-modal .profile-actions .follow-btn,
+#author-profile-modal .profile-actions .social-btn {
+transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1.2), background-color 0.15s ease-out, filter 0.15s ease-out;
+will-change: transform, background-color, filter;
+
+/* Upewnij się, że .follow-btn zachowuje swój kolor */
+background-color: var(--accent-color);
+color: #fff;
+}
+
+/* Upewnij się, że .social-btn ma swoje tło */
+#author-profile-modal .profile-actions .social-btn {
+background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Definicja stanu .pressed (wciśnięcie) */
+#author-profile-modal .profile-actions .follow-btn.pressed {
+transform: scale(0.95);
+background-color: #e6004d; /* Lekko ciemniejszy/nasycony akcent */
+filter: brightness(1.1);
+}
+
+#author-profile-modal .profile-actions .social-btn.pressed {
+transform: scale(0.95);
+background-color: rgba(0, 0, 0, 0.2); /* Ciemniejsze tło social */
+}
+
+/* Definicja stanu .bounced (odbicie po puszczeniu) */
+#author-profile-modal .profile-actions .follow-btn.bounced,
+#author-profile-modal .profile-actions .social-btn.bounced {
+transform: scale(1.02);
 }
 
 /* Nowe style dla nakładki na miniatury w profilu autora */
