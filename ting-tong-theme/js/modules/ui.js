@@ -88,7 +88,9 @@ function openAuthorProfileModal(slideData, options = {}) {
         onOpen: () => {
             const author = slideData.author;
             modal.querySelector('.username-header').textContent = Utils.getTranslation('authorProfileTitle');
-            modal.querySelector('.profile-avatar').src = author.avatar;
+            const avatarImg = modal.querySelector('.profile-avatar');
+            avatarImg.src = author.avatar;
+            avatarImg.classList.add('author-modal-avatar');
             modal.querySelector('.fullname').textContent = author.name;
             modal.querySelector('.bio').textContent = author.bio || '';
 
