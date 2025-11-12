@@ -175,7 +175,7 @@ class BrickWall {
         };
 
         this.canvas.addEventListener('click', handleInteraction);
-        this.canvas.addEventListener('touchstart', handleInteraction, { passive: true });
+        this.canvas.addEventListener('touchstart', handleInteraction);
     }
 }
 
