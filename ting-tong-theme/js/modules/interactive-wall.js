@@ -81,9 +81,9 @@ export function initInteractiveWall(canvas, slideId) {
     }
 
     function niszczMur(klikX, klikY) {
-        // Zmniejszony promień i siła destrukcji
-        const PROMIEN_DESTRUKCJI = 80;
-        const BAZOWA_SILA = 15;
+        // NAPRAWA 1: Zmniejszony promień destrukcji i siła (mniejsze fragmenty)
+        const PROMIEN_DESTRUKCJI = 40;
+        const BAZOWA_SILA = 8;
         let ceglaZniszczona = false;
 
         cegly.forEach(cegla => {
@@ -135,44 +135,44 @@ export function initInteractiveWall(canvas, slideId) {
 
     // Listener interakcji
     canvas.addEventListener('click', (event) => {
-        // KRUCJALNA NAPRAWA 1: ZAWSZE blokuj propagację do Swipera.
+        // KRUCJALNA NAPRAWA 2: ZAWSZE blokuj propagację do Swipera/Wideo.
         event.stopPropagation();
 
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Uruchom niszczenie muru i sprawdź, czy jakakolwiek cegła została zniszczona
+        // 1. Wykonaj destrukcję. Zapisz, czy jakakolwiek cegła została uderzona.
         const czyZniszczono = niszczMur(x, y);
 
-        // KROK KONTROLNY: Sprawdź, czy kliknięto w miejsce, gdzie jest nienaruszona cegła (dla logiki pauzy)
+        // 2. Sprawdź, czy kliknięcie trafiło w JAKĄKOLWIEK nienaruszoną cegłę (nawet poza promieniem destrukcji)
         let trafionoWNienaruszonaCegle = cegly.some(cegla => {
             if (cegla.isStatic && !cegla.zniszczona) {
-                return (
-                    x >= cegla.x && x <= cegla.x + cegla.szerokosc &&
-                    y >= cegla.y && y <= cegla.y + cegla.wysokosc
-                );
+                 return (
+                     x >= cegla.x && x <= cegla.x + cegla.szerokosc &&
+                     y >= cegla.y && y <= cegla.y + cegla.wysokosc
+                 );
             }
             return false;
         });
 
-        // KRUCJALNA LOGIKA PAUZY:
-        // Pauzujemy/odtwarzamy wideo tylko, jeśli:
-        // 1. Nie spowodowano destrukcji (czyZniszczono === false) ORAZ
-        // 2. Nie trafiło się w ŻADNĄ nienaruszoną cegłę (czyli kliknięto w "dziurę")
-        if (!czyZniszczono && !trafionoWNienaruszonaCegle) {
-            const video = canvas.closest('.tiktok-symulacja')?.querySelector('video');
-            const pauseOverlay = canvas.closest('.tiktok-symulacja')?.querySelector('.pause-overlay');
+        // 3. LOGIKA PAUZY (NAPRAWIONA):
+        // Wideo pauzuje/odtwarza TYLKO, jeśli NIE TRAFIONO w ŻADNĄ nienaruszoną cegłę.
+        // (Czyli kliknięto w PUSTE TŁO lub w DZIURĘ pozostawioną przez zniszczone cegły).
 
-            if(video) {
-                if (video.paused) {
-                    video.play().catch(e => console.warn('Autoplay error:', e));
-                    if (pauseOverlay) pauseOverlay.classList.remove("visible");
-                } else {
-                    video.pause();
-                    if (pauseOverlay) pauseOverlay.classList.add("visible");
-                }
-            }
+        if (!trafionoWNienaruszonaCegle) {
+             const video = canvas.closest('.tiktok-symulacja')?.querySelector('video');
+             const pauseOverlay = canvas.closest('.tiktok-symulacja')?.querySelector('.pause-overlay');
+
+             if(video) {
+                 if (video.paused) {
+                     video.play().catch(e => console.warn('Autoplay error:', e));
+                     if (pauseOverlay) pauseOverlay.classList.remove("visible");
+                 } else {
+                     video.pause();
+                     if (pauseOverlay) pauseOverlay.classList.add("visible");
+                 }
+             }
         }
     });
 
