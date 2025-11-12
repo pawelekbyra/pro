@@ -630,15 +630,14 @@ export const Handlers = {
         }
         break;
       case "close-author-profile": {
-        const authorModal = document.getElementById('author-profile-modal');
-
-        // Nowa logika do zatrzymania odtwarzania wideo z kafelka
-        const activeVideoPlayer = authorModal.querySelector('.video-tile-content.active video');
-        if (activeVideoPlayer) {
-            activeVideoPlayer.pause();
-            activeVideoPlayer.currentTime = 0; // Przewinięcie na początek
-        }
-        UI.closeAuthorProfileModal();
+        /* === POCZĄTEK POPRAWKI === */
+        const authorModal = actionTarget.closest('#author-profile-modal');
+        // Użyj tej samej (lustrzanej) animacji co przy otwieraniu
+        UI.closeModal(authorModal, {
+            animationClass: 'slideOutRight',
+            contentSelector: '.profile-modal-content'
+        });
+        /* === KONIEC POPRAWKI === */
         break;
       }
       case "close-modal":
@@ -760,7 +759,7 @@ export const Handlers = {
         if (authorModal) {
             // NAPRAWA: Wymuś lustrzaną animację wyjścia
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutRight', // <--- POPRAWIONO: Modal Autora chowa się w prawo
+                animationClass: 'slideOutLeft', // <--- POPRAWIONO: Modal Autora chowa się w lewo
                 contentSelector: '.profile-modal-content',
                 onClose: () => {
                     // Modal Napiwkowy wjeżdża z prawej (efekt płynnej zamiany)

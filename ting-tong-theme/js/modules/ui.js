@@ -2,7 +2,6 @@ import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
 import { initInteractiveWall } from './interactive-wall.js';
-import { Notifications } from './notifications.js'; // <-- DODAJ TĘ LINIĘ
 // import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
 
@@ -78,14 +77,10 @@ function openAuthorProfileModal(slideData, options = {}) {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
 
-    // 1. Pokaż element (nadal jest przezroczysty i mały)
-    modal.style.display = 'flex'; // lub 'block', w zależności od layoutu
-
-    // 2. Użyj małego opóźnienia, aby przeglądarka 'zauważyła' zmianę display
-    // i mogła uruchomić animację 'wejścia'
-    setTimeout(() => {
-        modal.classList.add('visible');
-    }, 10); // 10ms w zupełności wystarczy
+    /* === POCZĄTEK POPRAWKI === */
+    // Logika 'setTimeout' i 'classList.add' została usunięta.
+    // 'openModal' zajmie się teraz wszystkim.
+    /* === KONIEC POPRAWKI === */
 
     const content = modal.querySelector('.profile-modal-content');
     if (options.isLightTheme) {
@@ -94,7 +89,12 @@ function openAuthorProfileModal(slideData, options = {}) {
         content.classList.remove('profile-modal--wall-background');
     }
 
+    // Przekaż animację i selektor do 'openModal'
     openModal(modal, {
+        /* === POCZĄTEK POPRAWKI === */
+        animationClass: 'slideInRight',
+        contentSelector: '.profile-modal-content',
+        /* === KONIEC POPRAWKI === */
         onOpen: () => {
             const author = slideData.author;
             modal.querySelector('.username-header').textContent = Utils.getTranslation('authorProfileTitle');
@@ -109,6 +109,29 @@ function openAuthorProfileModal(slideData, options = {}) {
             modal.querySelector('.likes-count').textContent = '1.2M';
 
             const followBtn = modal.querySelector('.follow-btn');
+            const socialBtns = modal.querySelectorAll('.social-btn');
+            const allBtns = [followBtn, ...socialBtns];
+
+            allBtns.forEach(btn => {
+                const handlePress = () => btn.classList.add('pressed');
+                const handleRelease = () => {
+                    btn.classList.remove('pressed');
+                    btn.classList.add('bounced');
+                    setTimeout(() => btn.classList.remove('bounced'), 150);
+                };
+
+                btn.removeEventListener('mousedown', handlePress);
+                btn.removeEventListener('mouseup', handleRelease);
+                btn.removeEventListener('mouseleave', handleRelease);
+                btn.removeEventListener('touchstart', handlePress);
+                btn.removeEventListener('touchend', handleRelease);
+
+                btn.addEventListener('mousedown', handlePress);
+                btn.addEventListener('mouseup', handleRelease);
+                btn.addEventListener('mouseleave', handleRelease);
+                btn.addEventListener('touchstart', handlePress, { passive: true });
+                btn.addEventListener('touchend', handleRelease);
+            });
             const btnSpan = followBtn.querySelector('span');
             const btnSvg = followBtn.querySelector('svg');
 
@@ -175,27 +198,6 @@ function openAuthorProfileModal(slideData, options = {}) {
     });
 }
 
-function closeAuthorProfileModal() {
-    const modal = DOM.authorProfileModal;
-    if (!modal) return;
-
-    // 1. Uruchom animację 'wyjścia' (lustrzaną) poprzez usunięcie klasy
-    modal.classList.remove('visible');
-
-    // 2. Użyj 'transitionend' aby ukryć element (display: none)
-    // DOPIERO PO zakończeniu animacji chowania
-    function handleTransitionEnd() {
-        // Sprawdź na wszelki wypadek, gdyby modal został ponownie otwarty
-        // zanim animacja się skończyła
-        if (!modal.classList.contains('visible')) {
-            modal.style.display = 'none';
-        }
-        // Usuń listener, aby nie kumulował się przy kolejnych otwarciach
-        modal.removeEventListener('transitionend', handleTransitionEnd);
-    }
-
-    modal.addEventListener('transitionend', handleTransitionEnd);
-}
 
 function showToast(message, isError = false) {
     showAlert(message, isError);
@@ -340,6 +342,17 @@ function _resetVideoPlayer(videoModal) {
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
 
+    // === POCZĄTEK NAPRAWY: Synchronizacja animacji tła i modala ===
+    // 1. Natychmiast usuń modal z listy aktywnych
+    activeModals.delete(modal);
+
+    // 2. Jeśli to był ostatni modal, natychmiast rozpocznij animację rozjaśniania tła
+    if (activeModals.size === 0) {
+        document.body.style.overflow = '';
+        DOM.container.removeAttribute('aria-hidden');
+    }
+    // === KONIEC NAPRAWY ===
+
     modal.classList.add('is-hiding');
     modal.setAttribute('aria-hidden', 'true');
 
@@ -369,13 +382,6 @@ function closeModal(modal, options = {}) {
         if (modal._focusTrapDispose) {
             modal._focusTrapDispose();
             delete modal._focusTrapDispose;
-        }
-
-        activeModals.delete(modal);
-
-        if (activeModals.size === 0) {
-            document.body.style.overflow = '';
-            DOM.container.removeAttribute('aria-hidden');
         }
 
         const lastFocused = State.get("lastFocusedElement");
@@ -1272,42 +1278,23 @@ export const UI = {
   closeWelcomeModal,
   updateCrowdfundingStats,
   openAuthorProfileModal,
-  closeAuthorProfileModal,
-  handleWallDestroyed, // <-- UPEWNIJ SIĘ, ŻE TA LINIA JEST DODANA
+  handleWallDestroyed(slideId) {
+    const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
+    UI.showAlert(successMessage, false);
+
+    // Zapisz stan w localStorage (persystencja)
+    localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
+
+    // Usuń klasę wall-active z aktywnego slajdu
+    const activeSlide = document.querySelector('.swiper-slide-active');
+    if(activeSlide) {
+        activeSlide.querySelector('.tiktok-symulacja').classList.remove('wall-active');
+    }
+
+    // Ponowne uruchomienie logiki UI w celu odblokowania przycisków
+    updateUIForLoginState();
+  },
 };
-
-function handleWallDestroyed(slideId) {
-  // Zintegrowana logika: łączy nowe funkcje z przywróconą logiką
-  const slide = document.getElementById(slideId);
-  if (!slide) return;
-
-  const topBar = document.querySelector('.top-bar');
-  const bottomBar = slide.querySelector('.bottombar'); // Poprawiony selektor
-  const sidebar = slide.querySelector('.sidebar');
-  const overlay = slide.querySelector('.interactive-wall-overlay');
-
-  // Przywróć widoczność UI
-  if (overlay) {
-    overlay.classList.remove('visible');
-    overlay.style.display = 'none';
-  }
-  if (topBar) topBar.classList.add('visible');
-  if (bottomBar) bottomBar.classList.add('visible');
-  if (sidebar) sidebar.classList.add('visible');
-
-  // Pokaż komunikat o sukcesie
-  Notifications.show('Mur zburzony! Odkryłeś sekretną zawartość.', 'success', 5000);
-
-  // Przywrócona logika: zapisz stan i zaktualizuj UI
-  localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
-
-  const activeSlide = document.querySelector('.swiper-slide-active .tiktok-symulacja');
-  if (activeSlide) {
-      activeSlide.classList.remove('wall-active');
-  }
-
-  updateUIForLoginState();
-}
 
 async function updateCrowdfundingStats() {
     try {
