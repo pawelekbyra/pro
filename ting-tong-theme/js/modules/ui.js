@@ -2,6 +2,7 @@ import { Config } from './config.js';
 import { State } from './state.js';
 import { Utils } from './utils.js';
 import { initInteractiveWall } from './interactive-wall.js';
+import { Notifications } from './notifications.js'; // <-- DODAJ TĘ LINIĘ
 // import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
 
@@ -76,6 +77,15 @@ function initDOMCache() {
 function openAuthorProfileModal(slideData, options = {}) {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
+
+    // 1. Pokaż element (nadal jest przezroczysty i mały)
+    modal.style.display = 'flex'; // lub 'block', w zależności od layoutu
+
+    // 2. Użyj małego opóźnienia, aby przeglądarka 'zauważyła' zmianę display
+    // i mogła uruchomić animację 'wejścia'
+    setTimeout(() => {
+        modal.classList.add('visible');
+    }, 10); // 10ms w zupełności wystarczy
 
     const content = modal.querySelector('.profile-modal-content');
     if (options.isLightTheme) {
@@ -169,9 +179,22 @@ function closeAuthorProfileModal() {
     const modal = DOM.authorProfileModal;
     if (!modal) return;
 
-    closeModal(modal, {
-        contentSelector: '.profile-modal-content'
-    });
+    // 1. Uruchom animację 'wyjścia' (lustrzaną) poprzez usunięcie klasy
+    modal.classList.remove('visible');
+
+    // 2. Użyj 'transitionend' aby ukryć element (display: none)
+    // DOPIERO PO zakończeniu animacji chowania
+    function handleTransitionEnd() {
+        // Sprawdź na wszelki wypadek, gdyby modal został ponownie otwarty
+        // zanim animacja się skończyła
+        if (!modal.classList.contains('visible')) {
+            modal.style.display = 'none';
+        }
+        // Usuń listener, aby nie kumulował się przy kolejnych otwarciach
+        modal.removeEventListener('transitionend', handleTransitionEnd);
+    }
+
+    modal.addEventListener('transitionend', handleTransitionEnd);
 }
 
 function showToast(message, isError = false) {
@@ -1250,23 +1273,41 @@ export const UI = {
   updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,
-  handleWallDestroyed(slideId) {
-    const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
-    UI.showAlert(successMessage, false);
-
-    // Zapisz stan w localStorage (persystencja)
-    localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
-
-    // Usuń klasę wall-active z aktywnego slajdu
-    const activeSlide = document.querySelector('.swiper-slide-active');
-    if(activeSlide) {
-        activeSlide.querySelector('.tiktok-symulacja').classList.remove('wall-active');
-    }
-
-    // Ponowne uruchomienie logiki UI w celu odblokowania przycisków
-    updateUIForLoginState();
-  },
+  handleWallDestroyed, // <-- UPEWNIJ SIĘ, ŻE TA LINIA JEST DODANA
 };
+
+function handleWallDestroyed(slideId) {
+  // Zintegrowana logika: łączy nowe funkcje z przywróconą logiką
+  const slide = document.getElementById(slideId);
+  if (!slide) return;
+
+  const topBar = document.querySelector('.top-bar');
+  const bottomBar = slide.querySelector('.bottombar'); // Poprawiony selektor
+  const sidebar = slide.querySelector('.sidebar');
+  const overlay = slide.querySelector('.interactive-wall-overlay');
+
+  // Przywróć widoczność UI
+  if (overlay) {
+    overlay.classList.remove('visible');
+    overlay.style.display = 'none';
+  }
+  if (topBar) topBar.classList.add('visible');
+  if (bottomBar) bottomBar.classList.add('visible');
+  if (sidebar) sidebar.classList.add('visible');
+
+  // Pokaż komunikat o sukcesie
+  Notifications.show('Mur zburzony! Odkryłeś sekretną zawartość.', 'success', 5000);
+
+  // Przywrócona logika: zapisz stan i zaktualizuj UI
+  localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
+
+  const activeSlide = document.querySelector('.swiper-slide-active .tiktok-symulacja');
+  if (activeSlide) {
+      activeSlide.classList.remove('wall-active');
+  }
+
+  updateUIForLoginState();
+}
 
 async function updateCrowdfundingStats() {
     try {

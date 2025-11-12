@@ -616,15 +616,21 @@ body,
 /* FIX 1: Zapewnienie, że tło statycznego muru pokrywa całą przestrzeń i maskuje wideo */
 .secret-overlay {
   position: absolute;
-  top: var(--topbar-height);
+  /* === POCZĄTEK NAPRAWY 1.1 === */
+  top: 0;
   left: 0;
   width: 100%;
-  height: calc(100vh - var(--topbar-height));
-  /* === POCZĄTEK NAPRAWY === */
+  height: 100vh;
+  /* === KONIEC NAPRAWY 1.1 === */
+
   background-image: url('wall.png'); /* Użyj wall.png lub wall.jpg */
-  background-repeat: repeat;
-  background-size: auto; /* Użyj domyślnego rozmiaru obrazka do powtarzania */
-  /* === KONIEC NAPRAWY === */
+
+  /* === POCZĄTEK NAPRAWY 1.2 === */
+  background-repeat: no-repeat;
+  background-size: cover; /* Dopasowuje mur do ekranu, zachowując proporcje */
+  background-position: center; /* Centruje tło */
+  /* === KONIEC NAPRAWY 1.2 === */
+
   z-index: 100;
   display: flex;
   align-items: center;
@@ -4940,7 +4946,7 @@ padding: 4px 0 4px 8px;
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease !important;
+  transition: opacity 0.3s ease, visibility 0.3s ease !important;
   overflow: hidden;
 }
 
@@ -4968,7 +4974,7 @@ padding: 4px 0 4px 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   transform: scale(0.95) translateY(10px);
   opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
 }
 
 .elegant-modal-overlay.visible .elegant-modal-content {
@@ -5499,11 +5505,11 @@ main::-webkit-scrollbar {
 .profile-actions .social-btn svg {
   width: 24px;
   height: 24px;
-  fill: #fff;
+    fill: #333; /* Ciemna ikona */
   stroke: none;
 }
 .profile-actions .social-btn.instagram svg {
-    stroke: #fff;
+    stroke: #333; /* Ciemna ikona */
     stroke-width: 2px;
     fill: none;
 }
@@ -5559,7 +5565,8 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .profile-tabs {
   display: flex;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.2); /* Tło dla paska zakładek */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Cieńsza linia */
 }
 
 #author-profile-modal .profile-tab {
@@ -5571,10 +5578,12 @@ main::-webkit-scrollbar {
   color: rgba(255, 255, 255, 0.6);
   background: none;
   border: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .profile-tab.active {
   color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .profile-tab.active::after {
@@ -5584,7 +5593,7 @@ main::-webkit-scrollbar {
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #fff;
+  background-color: var(--accent-color);
 }
 
 .profile-tab svg {
@@ -5942,6 +5951,17 @@ main::-webkit-scrollbar {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 
+#author-profile-modal {
+    opacity: 0;
+    transform: scale(0.95); /* Stan początkowy (ukryty) */
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+#author-profile-modal.visible {
+    opacity: 1;
+    transform: scale(1); /* Stan końcowy (widoczny) */
+}
+
 #author-profile-modal .username-header {
     font-size: 16px;
     font-weight: 700;
@@ -5983,8 +6003,8 @@ main::-webkit-scrollbar {
     flex-grow: 1;
     overflow-y: visible;
     padding: 20px 16px;
-    background-color: #e1e1e1;
-    color: #333;
+    background-color: #1c1c1e; /* Ciemne tło pasujące do nagłówka */
+    color: #e4e6eb; /* Jasny kolor tekstu dla czytelności */
 }
 
 .author-modal-avatar {
@@ -6053,7 +6073,7 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .stats-container .stat-label {
     font-size: 12px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 #author-profile-modal .fullname {
@@ -6061,13 +6081,12 @@ main::-webkit-scrollbar {
     font-weight: 700;
     margin-bottom: 4px;
     text-align: center;
-    color: #111;
 }
 
 #author-profile-modal .bio {
     font-size: 14px;
     line-height: 1.5;
-    color: #333;
+    color: rgba(255, 255, 255, 0.8);
     margin-bottom: 16px;
     white-space: pre-wrap;
     text-align: center;
@@ -6107,9 +6126,9 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .profile-actions .social-btn {
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.1); /* Ciemniejsze tło */
     border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Ciemniejsza ramka */
     display: flex;
     align-items: center;
     justify-content: center;
