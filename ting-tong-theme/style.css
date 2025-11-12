@@ -618,8 +618,7 @@ body,
   top: var(--topbar-height);
   left: 0;
   width: 100%;
-  bottom: 0;
-  height: auto !important;
+  height: calc(100vh - var(--topbar-height));
   background: none;
   z-index: 100;
   display: flex;
@@ -645,7 +644,7 @@ body,
     width: 100%;
     bottom: 0; /* Cover the entire area */
     height: auto;
-    z-index: 10100; /* Higher than sidebar and bottombar */
+    z-index: 10200; /* Match modal z-index to cover everything */
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -723,8 +722,7 @@ body,
   top: var(--topbar-height);
   left: 0;
   width: 100%;
-  bottom: 0;
-  height: auto;
+  height: calc(100% - var(--topbar-height));
   background: rgba(0, 0, 0, 0.4);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   backdrop-filter: blur(12px) saturate(120%);
@@ -4916,7 +4914,7 @@ padding: 4px 0 4px 8px;
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition: opacity 0.4s ease, visibility 0.4s ease !important;
   overflow: hidden;
 }
 
@@ -5869,7 +5867,7 @@ main::-webkit-scrollbar {
   z-index: 10300; /* Above other modals */
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  /* transition: opacity 0.4s ease, visibility 0.4s ease; */ /* This was incorrect */
   overflow: hidden;
 }
 
