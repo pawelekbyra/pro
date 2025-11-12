@@ -29,9 +29,3 @@ require_once $theme_includes_path . 'ajax-comments.php';
 
 // Handlery AJAX i webhooki dla integracji z płatnościami Stripe
 require_once $theme_includes_path . 'ajax-payments.php';
-
-// Funkcje związane z PWA (Service Worker, Manifest, Web Push)
-require_once $theme_includes_path . 'pwa-functions.php';
-
-// Funkcje panelu administracyjnego (Push Center)
-require_once $theme_includes_path . 'admin-panel.php';
