@@ -487,7 +487,15 @@ function showModal(options = {}) {
         dom.amountInput.placeholder = ' ';
     }
 
-    UI.openModal(dom.modal, options);
+    UI.openModal(dom.modal, {
+        ...options,
+        onOpen: () => {
+            const modal = dom.modal;
+            modal.querySelector('.modal-body p:nth-of-type(1)').innerHTML = `Twój napiwek wspiera twórcę bezpośrednio.`;
+            modal.querySelector('.modal-body p:nth-of-type(2)').innerHTML = `Założyć konto patrona? 🏆`;
+            if (options.onOpen) options.onOpen();
+        }
+    });
     updateStepDisplay();
 }
 

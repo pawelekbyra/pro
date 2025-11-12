@@ -109,58 +109,58 @@ function openAuthorProfileModal(slideData, options = {}) {
             modal.querySelector('.likes-count').textContent = '1.2M';
 
             const followBtn = modal.querySelector('.follow-btn');
-// --- Start: Pop & Bounce Animation ---
-const actionButtons = modal.querySelectorAll('.follow-btn, .social-btn');
+            // --- Start: Pop & Bounce Animation ---
+            const actionButtons = modal.querySelectorAll('.follow-btn, .social-btn');
 
-actionButtons.forEach(btn => {
-let bounceTimeout;
+            actionButtons.forEach(btn => {
+                let bounceTimeout;
 
-// Funkcja czyszcząca klasy na wszelki wypadek
-const removeClasses = () => {
-btn.classList.remove('pressed', 'bounced');
-clearTimeout(bounceTimeout);
-};
+                // Funkcja czyszcząca klasy na wszelki wypadek
+                const removeClasses = () => {
+                    btn.classList.remove('pressed', 'bounced');
+                    clearTimeout(bounceTimeout);
+                };
 
-// Handler naciśnięcia
-const handlePress = (e) => {
-// Zapobiegaj 'ghost click' na mobile
-if (e.type === 'touchstart') e.preventDefault();
-btn.classList.add('pressed');
-};
+                // Handler naciśnięcia
+                const handlePress = (e) => {
+                    // Zapobiegaj 'ghost click' na mobile
+                    if (e.type === 'touchstart') e.preventDefault();
+                    btn.classList.add('pressed');
+                };
 
-// Handler puszczenia przycisku
-const handleRelease = () => {
-// Wykonaj tylko jeśli był wciśnięty
-if (!btn.classList.contains('pressed')) return;
+                // Handler puszczenia przycisku
+                const handleRelease = () => {
+                    // Wykonaj tylko jeśli był wciśnięty
+                    if (!btn.classList.contains('pressed')) return;
 
-btn.classList.remove('pressed');
-btn.classList.add('bounced');
+                    btn.classList.remove('pressed');
+                    btn.classList.add('bounced');
 
-// Usuń klasę odbicia po chwili
-bounceTimeout = setTimeout(() => {
-btn.classList.remove('bounced');
-}, 150);
-};
+                    // Usuń klasę odbicia po chwili
+                    bounceTimeout = setTimeout(() => {
+                        btn.classList.remove('bounced');
+                    }, 150);
+                };
 
-// Dodaj kompletne listenery
-btn.addEventListener('mousedown', handlePress);
-btn.addEventListener('touchstart', handlePress, { passive: false });
-btn.addEventListener('mouseup', handleRelease);
-btn.addEventListener('mouseleave', removeClasses); // Czyści, jeśli wyjedziesz myszką
-btn.addEventListener('touchend', handleRelease);
-});
-// --- End: Pop & Bounce Animation ---
+                // Dodaj kompletne listenery
+                btn.addEventListener('mousedown', handlePress);
+                btn.addEventListener('touchstart', handlePress, { passive: false });
+                btn.addEventListener('mouseup', handleRelease);
+                btn.addEventListener('mouseleave', removeClasses); // Czyści, jeśli wyjedziesz myszką
+                btn.addEventListener('touchend', handleRelease);
+            });
+            // --- End: Pop & Bounce Animation ---
             const btnSpan = followBtn.querySelector('span');
             const btnSvg = followBtn.querySelector('svg');
 
             const isLoggedIn = getIsUserLoggedIn();
 
             if (isLoggedIn) {
-btnSpan.textContent = 'Subskrybujesz'; // ZMIANA 1: Tekst
-// ZMIANA 2: Nowa ikona (24x24) i styl
-btnSvg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12" /><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 1.79 1.11L15 5.88Z" /></svg>';
-followBtn.disabled = true;
-} else {
+                btnSpan.textContent = 'Subskrybujesz'; // ZMIANA 1: Tekst
+                // ZMIANA 2: Nowa ikona (24x24) i styl
+                btnSvg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" style="margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.25a.75.75 0 01-.75-.75V10.5c0-.414.336-.75.75-.75h1.383z"/></svg>';
+                followBtn.disabled = true;
+            } else {
                 btnSpan.textContent = 'Zostań Patronem';
                 btnSvg.innerHTML = '<rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" />';
                 followBtn.disabled = false;
