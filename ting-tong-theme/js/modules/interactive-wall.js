@@ -70,18 +70,11 @@ export function initInteractiveWall(canvas, slideId) {
         ceglyDoZniszczenia = 0; // Reset
         const szerokoscCeglyZFuga = ceglaSzerokosc + fugaGrubosc;
         const wysokoscCeglyZFuga = ceglaWysokosc + fugaGrubosc;
-
-        /* === POCZĄTEK NAPRAWY === */
-        // Bufor na dole ekranu (np. 80px), aby cegły nie renderowały się pod dolną belką
-        const bottomBuffer = 80;
-        const effectiveCanvasHeight = canvas.height - bottomBuffer;
-        /* === KONIEC NAPRAWY === */
-
+        const iloscRzedow = Math.ceil(canvas.height / wysokoscCeglyZFuga);
+        // Dodatkowa kolumna dla pełnego pokrycia
         const iloscKolumn = Math.ceil(canvas.width / szerokoscCeglyZFuga) + 2;
-        // Użyj nowej, efektywnej wysokości do obliczenia liczby wierszy
-        const iloscWierszy = Math.ceil(effectiveCanvasHeight / wysokoscCeglyZFuga) + 1;
 
-        for (let rzad = 0; rzad < iloscWierszy; rzad++) {
+        for (let rzad = 0; rzad < iloscRzedow; rzad++) {
             const offset = (rzad % 2 !== 0) ? szerokoscCeglyZFuga / 2 : 0;
             for (let kolumna = 0; kolumna < iloscKolumn; kolumna++) {
                 let x = kolumna * szerokoscCeglyZFuga - offset;

@@ -490,18 +490,10 @@ function showModal(options = {}) {
 
 function hideModal() {
     if (!dom.modal) return;
-
-    // Usuń obie klasy jednocześnie, aby zsynchronizować animacje
-    dom.modal.classList.remove('visible');
-    document.body.classList.remove('modal-open'); // Zakładając, że ta klasa kontroluje tło
-
-    // Użyj UI.closeModal do obsługi reszty logiki (np. display: none po animacji)
     UI.closeModal(dom.modal, {
         animationClass: 'elegantFadeOut',
         contentSelector: '.elegant-modal-content'
     });
-
-    // Resetuj stan natychmiast, zamiast czekać na koniec animacji
     resetModalState();
 }
 
