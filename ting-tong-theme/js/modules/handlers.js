@@ -746,8 +746,11 @@ export const Handlers = {
           UI.showAlert(Utils.getTranslation("subscribeAlert"));
         }
         break;
-      case "toggle-push-notifications":
-        Notifications.handleBellClick();
+      case "toggle-notifications":
+        const notificationPopup = document.getElementById("notificationPopup");
+        if (notificationPopup) {
+            notificationPopup.classList.toggle("visible");
+        }
         break;
       case "close-notifications":
         if (UI.DOM.notificationPopup) {

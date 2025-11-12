@@ -156,9 +156,8 @@ function openAuthorProfileModal(slideData, options = {}) {
             const isLoggedIn = getIsUserLoggedIn();
 
             if (isLoggedIn) {
-                btnSpan.textContent = 'Subskrybujesz'; // ZMIANA 1: Tekst
-                // ZMIANA 2: Nowa ikona (24x24) i styl
-                btnSvg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24" style="margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.25a.75.75 0 01-.75-.75V10.5c0-.414.336-.75.75-.75h1.383z"/></svg>';
+                btnSpan.textContent = 'Subskrajbujesz';
+                btnSvg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>';
                 followBtn.disabled = true;
             } else {
                 btnSpan.textContent = 'Zostań Patronem';
@@ -786,10 +785,18 @@ function createSlideElement(slideData, index, isWallDestroyed) { // Zaktualizowa
     let isDragging = false;
 
     const updateProgress = () => {
-      if (isDragging || !videoEl.duration) return;
-      const progress = (videoEl.currentTime / videoEl.duration) * 100;
-      progressBarFill.style.width = `${progress}%`;
-      if (handle) handle.style.left = `${progress}%`;
+        if (isDragging || !videoEl.duration) return;
+        const progress = (videoEl.currentTime / videoEl.duration) * 100;
+
+        // Get current width to prevent "going back"
+        const currentWidth = parseFloat(progressBarFill.style.width) || 0;
+        if (progress < currentWidth && videoEl.currentTime > 0) {
+            // This can happen on buffer/seek, let's ignore it to prevent visual glitch
+            return;
+        }
+
+        progressBarFill.style.width = `${progress}%`;
+        if (handle) handle.style.left = `${progress}%`;
     };
 
     const seek = (e) => {

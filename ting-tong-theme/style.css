@@ -1152,7 +1152,7 @@ body,
 /* 5. Zmień sposób obsługi hover - powiększamy cały kontener */
 .progress-bar:hover,
 .progress-bar.dragging {
-  height: 4px; /* Zwiększamy wysokość całego paska */
+  height: 2px;
 }
 
 .progress-bar:hover .progress-bar-handle,
@@ -2088,10 +2088,7 @@ margin: -7px auto 0;
   backdrop-filter: blur(12px) saturate(120%);
   opacity: 0;
   transform: translateX(-50%) scale(0.95);
-  transition:
-    opacity 0.2s ease-out,
-    transform 0.2s ease-out,
-    visibility 0.2s;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
   visibility: hidden;
   pointer-events: none;
   display: flex;
@@ -4700,14 +4697,10 @@ transform: none; /* Zabezpieczenie przed transform 50% */
 
 /* Sort Options */
 .comment-sort-options {
-position: absolute;
-left: auto;
-/* ZMIANA 5: Pozycja startowa = (szerokość X: 40px) + (Twój margines: 3px) */
-right: 43px;
-top: 50%;
-transform: translateY(-50%);
-z-index: 10;
-padding-right: 3px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 16px 8px;
+    border-bottom: 1px solid #3a3b3c;
 }
 
 .sort-dropdown {
@@ -5490,6 +5483,10 @@ main::-webkit-scrollbar {
   font-weight: 600;
   font-size: 16px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .profile-actions .social-btn {
@@ -5582,15 +5579,6 @@ main::-webkit-scrollbar {
   color: #fff;
 }
 
-.profile-tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #fff;
-}
 
 .profile-tab svg {
   width: 28px;
@@ -5940,7 +5928,7 @@ main::-webkit-scrollbar {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
     position: relative;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: #1c1c1e;
 }
 
 #author-profile-modal .username-header {
@@ -5981,25 +5969,20 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal main {
-  /* NOWE TŁO GLASSMORPHISM */
-  background-color: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
-  /* ZACHOWAJ CIEMNY TEKST I USTAWIENIA */
-  color: #333;
+  background-color: #2c2c2e;
+  color: #fff;
   flex-grow: 1;
-  overflow-y: visible;
+  overflow-y: auto;
   padding: 20px 16px;
 }
 
 .author-modal-avatar {
-  position: relative;
-  padding: 0;
-  background-clip: padding-box !important;
-  animation: flicker-glow 4s infinite;
-  transition: border-color 0.1s ease-in-out, filter 0.2s;
-  background-color: white;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid black;
+    animation: none;
 }
 
 #author-profile-modal main::-webkit-scrollbar {
@@ -6021,7 +6004,7 @@ main::-webkit-scrollbar {
     overflow: hidden;
     position: relative;
     background-color: white;
-    border: 2px solid white;
+    border: 2px solid black;
 }
 
 #author-profile-modal .avatar-container .profile-avatar {
@@ -6055,34 +6038,38 @@ main::-webkit-scrollbar {
     font-size: 14px;
     font-weight: 700;
     display: block;
+    color: #fff;
 }
 
 #author-profile-modal .stats-container .stat-label {
-  color: #555;
+    color: #a0a0a0;
 }
 
 #author-profile-modal .fullname,
 #author-profile-modal .tabs .tab.active {
-  color: #111;
+  color: #fff;
 }
 
 #author-profile-modal .bio {
-  color: #333;
+    color: #a0a0a0;
 }
 
-/* Dostosuj zakładki */
-#author-profile-modal .tabs {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Ciemniejsza linia */
+#author-profile-modal .profile-tabs {
+  border-bottom: 1px solid #3a3a3c;
 }
 
-#author-profile-modal .tabs .tab {
-  color: #555; /* Ciemny tekst nieaktywnej zakładki */
+#author-profile-modal .profile-tab {
+  color: #a0a0a0;
+  background: none;
+  border: none;
 }
 
-/* Kreska pod aktywną zakładką musi być widoczna (zmieniamy z #fff) */
-#author-profile-modal .tabs .tab.active::after {
-  background-color: var(--accent-color);
+#author-profile-modal .profile-tab.active {
+    color: #fff;
+    background: none;
+    border-bottom: 2px solid var(--accent-color);
 }
+
 
 /* Upewnij się, że ikony social media mają ciemne tło i ciemne ikony */
 #author-profile-modal .profile-actions .social-btn {
@@ -6091,12 +6078,12 @@ main::-webkit-scrollbar {
 }
 
 #author-profile-modal .profile-actions .social-btn svg {
-  fill: #333; /* Ciemna ikona */
+  fill: #fff; /* Ciemna ikona */
   stroke: none;
 }
 
 #author-profile-modal .profile-actions .social-btn.instagram svg {
-  stroke: #333; /* Ciemna ikona */
+  stroke: #fff; /* Ciemna ikona */
   fill: none;
 }
 
