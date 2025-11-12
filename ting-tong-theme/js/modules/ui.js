@@ -3,7 +3,6 @@ import { State } from './state.js';
 import { Utils } from './utils.js';
 // import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
-import { BrickWallManager } from './brick-wall.js';
 
 let PWA_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
 function setPwaModule(pwaModule) {
@@ -450,24 +449,12 @@ function updateUIForLoginState() {
     const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
     const video = section.querySelector("video");
 
-    // NEW Brick Wall Logic
-    const isInteractiveWall = isSecret && isLoggedIn;
-    sim.dataset.isInteractiveWall = isInteractiveWall;
-
-    if (isInteractiveWall) {
-        const canvas = section.querySelector('.brick-canvas');
-        if (canvas) {
-            BrickWallManager.init(canvas);
-        }
-    }
-
-
     // Determine overlay visibility
     const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
 
     // If an overlay is active, force the UI to be visible
-    if (showSecret || showPwaSecret || isInteractiveWall) {
+    if (showSecret || showPwaSecret) {
       sim.classList.add("video-loaded");
     }
 
