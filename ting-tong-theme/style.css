@@ -619,9 +619,27 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background-image: url('http://pawelperfect.pl/wp-content/uploads/2025/11/wall.jpg');
-  background-size: cover;
-  background-position: center;
+  background-color: #ffffff;
+  background-image:
+    /* horizontal lines */
+    repeating-linear-gradient(
+      #333333 0, #333333 1px,
+      transparent 1px, transparent 31px
+    ),
+    /* vertical lines */
+    repeating-linear-gradient(
+      90deg,
+      #333333 0, #333333 1px,
+      transparent 1px, transparent 61px
+    ),
+    /* vertical lines offset */
+    repeating-linear-gradient(
+      90deg,
+      #333333 0, #333333 1px,
+      transparent 1px, transparent 61px
+    );
+  background-size: 100% 31px, 122px 62px, 122px 62px;
+  background-position: 0 0, 0 0, 61px 31px;
   z-index: 100;
   display: flex;
   align-items: center;
