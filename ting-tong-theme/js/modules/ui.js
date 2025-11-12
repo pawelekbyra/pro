@@ -1250,11 +1250,7 @@ export const UI = {
   updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,
-  handleWallDestroyed,
-};
-
-// ... Dodaj nową funkcję na końcu modułu UI.js:
-function handleWallDestroyed(slideId) {
+  handleWallDestroyed(slideId) {
     const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
     UI.showAlert(successMessage, false);
 
@@ -1269,7 +1265,8 @@ function handleWallDestroyed(slideId) {
 
     // Ponowne uruchomienie logiki UI w celu odblokowania przycisków
     updateUIForLoginState();
-}
+  },
+};
 
 async function updateCrowdfundingStats() {
     try {
