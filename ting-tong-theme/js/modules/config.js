@@ -362,6 +362,7 @@ export const Config = {
       badge: "Odznaka",
       becomePatronToWatch: "Zostań patronem, aby obejrzeć",
       authorProfileTitle: "Profil Twórcy",
+      wallDestroyedSuccess: "Mur zniszczony! Oglądaj!",
     }, // KONIEC 'pl'
     en: {
       loggedOutText: "You don't have the guts to log in",
@@ -573,6 +574,7 @@ export const Config = {
       badge: "Badge",
       becomePatronToWatch: "Become a patron to watch",
       authorProfileTitle: "Creator's Profile",
+      wallDestroyedSuccess: "Wall destroyed! Enjoy the show!",
     }, // KONIEC 'en'
   },
 };

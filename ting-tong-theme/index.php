@@ -193,6 +193,9 @@ get_header();
     <button id="mockLoginBtn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #007aff; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
         DEBUG: Pokaż First Login Modal
     </button>
+    <button id="destroyWallBtn" style="position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: #ff3b30; color: white; padding: 10px 20px; border: none; border-radius: 8px; z-index: 100; display: none;">
+        DEBUG: Zniszcz Mur
+    </button>
 </div>
 
 <div id="app-frame">
@@ -254,6 +257,7 @@ get_header();
                 </div>
 
                 <div class="secret-overlay" aria-hidden="true">
+                    <canvas class="brick-canvas"></canvas>
                     <svg class="secret-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                     <h2 class="secret-title" data-translate-key="secretTitle">Top Secret</h2>
                     <p class="secret-subtitle">
