@@ -451,10 +451,9 @@ function updateUIForLoginState() {
     const video = section.querySelector("video");
 
     // Determine overlay visibility
-    const isElephantSlide = sim.closest('.webyx-section').dataset.slideId === 'slide-002';
-    const showSecret = (isSecret && !isLoggedIn) || (isElephantSlide && isLoggedIn);
+    const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
-    const showInteractiveWall = isSecret && isLoggedIn && !isElephantSlide;
+    const showInteractiveWall = isSecret && isLoggedIn;
 
     // If an overlay is active, force the UI to be visible
     if (showSecret || showPwaSecret || showInteractiveWall) {
@@ -481,7 +480,7 @@ function updateUIForLoginState() {
     const interactiveOverlay = section.querySelector(".interactive-wall-overlay");
     const interactiveCanvas = section.querySelector(".interactive-canvas");
     if (interactiveOverlay) {
-        interactiveOverlay.classList.toggle('hidden', !showInteractiveWall);
+        interactiveOverlay.classList.toggle('visible', showInteractiveWall);
 
         if (showInteractiveWall && interactiveCanvas && !interactiveCanvas.dataset.initialized) {
             initInteractiveWall(interactiveCanvas, section.dataset.slideId);

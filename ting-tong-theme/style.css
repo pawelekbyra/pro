@@ -643,13 +643,17 @@ body,
     top: var(--topbar-height);
     left: 0;
     width: 100%;
-    /* MUSI BYĆ IDENTYCZNE JAK .secret-overlay */
-    height: calc(100vh - var(--topbar-height) - var(--bottombar-height));
+    bottom: 0; /* Match secret-overlay for full height */
+    height: auto; /* Match secret-overlay for full height */
     z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
 }
 
-.interactive-wall-overlay.hidden {
-    display: none;
+.interactive-wall-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .interactive-canvas {
