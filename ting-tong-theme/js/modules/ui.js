@@ -480,26 +480,12 @@ function updateUIForLoginState() {
     // Toggle "interactive-wall" overlay (canvas for logged-in users)
     const interactiveOverlay = section.querySelector(".interactive-wall-overlay");
     const interactiveCanvas = section.querySelector(".interactive-canvas");
-
-    // KLUCZOWY KROK: Upewnij się, że sidebar i bottombar są nieklikalne
-    const sidebar = section.querySelector(".sidebar");
-    const bottombar = section.querySelector(".bottombar");
-
     if (interactiveOverlay) {
         interactiveOverlay.classList.toggle('hidden', !showInteractiveWall);
 
-        if (showInteractiveWall) {
-            if (sidebar) sidebar.style.pointerEvents = 'none'; // ZABLOKUJ
-            if (bottombar) bottombar.style.pointerEvents = 'none'; // ZABLOKUJ
-
-            if (interactiveCanvas && !interactiveCanvas.dataset.initialized) {
-                initInteractiveWall(interactiveCanvas, section.dataset.slideId);
-                interactiveCanvas.dataset.initialized = 'true';
-            }
-        } else {
-            // Wyczyść style, jeśli nakładka nie jest widoczna
-            if (sidebar) sidebar.style.pointerEvents = 'auto';
-            if (bottombar) bottombar.style.pointerEvents = 'auto';
+        if (showInteractiveWall && interactiveCanvas && !interactiveCanvas.dataset.initialized) {
+            initInteractiveWall(interactiveCanvas, section.dataset.slideId);
+            interactiveCanvas.dataset.initialized = 'true';
         }
     }
 
