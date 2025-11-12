@@ -81,22 +81,32 @@ export function initInteractiveWall(canvas, slideId) {
     }
 
     function niszczMur(klikX, klikY) {
+        // Zmniejszony promień i siła destrukcji
+        const PROMIEN_DESTRUKCJI = 80;
+        const BAZOWA_SILA = 15;
+        let ceglaZniszczona = false;
+
         cegly.forEach(cegla => {
             if (cegla.isStatic && !cegla.zniszczona) {
                 const dx = (cegla.x + cegla.szerokosc / 2) - klikX;
                 const dy = (cegla.y + cegla.wysokosc / 2) - klikY;
                 const dystans = Math.sqrt(dx * dx + dy * dy);
 
-                if (dystans < 150) {
+                if (dystans < PROMIEN_DESTRUKCJI) {
+                    ceglaZniszczona = true; // Zaznacz, że coś zostało zniszczone
                     cegla.isStatic = false;
                     const katEksplozji = Math.atan2(dy, dx);
-                    const sila = (150 - dystans) / 15;
-                    cegla.vx = -Math.cos(katEksplozji) * sila;
-                    cegla.vy = -Math.sin(katEksplozji) * sila - 5;
+
+                    // Siła jest proporcjonalna do dystansu od centrum
+                    const sila = (PROMIEN_DESTRUKCJI - dystans) / (PROMIEN_DESTRUKCJI / BAZOWA_SILA);
+
+                    cegla.vx = -Math.cos(katEksplozji) * sila * (0.8 + Math.random() * 0.4);
+                    cegla.vy = -Math.sin(katEksplozji) * sila * (0.5 + Math.random() * 0.5) - 5;
                     cegla.predkoscKatowa = (Math.random() - 0.5) * 0.4;
                 }
             }
         });
+        return ceglaZniszczona; // Zwróć true, jeśli jakakolwiek cegła została uderzona
     }
 
     function animate() {
@@ -125,41 +135,44 @@ export function initInteractiveWall(canvas, slideId) {
 
     // Listener interakcji
     canvas.addEventListener('click', (event) => {
-        // KRUCJALNA NAPRAWA 1: ZAWSZE blokuj propagację, by zapobiec pauzie w Swiperze.
+        // KRUCJALNA NAPRAWA 1: ZAWSZE blokuj propagację do Swipera.
         event.stopPropagation();
 
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Uruchom niszczenie muru
-        niszczMur(x, y);
+        // Uruchom niszczenie muru i sprawdź, czy jakakolwiek cegła została zniszczona
+        const czyZniszczono = niszczMur(x, y);
 
-        // KRUCJALNA NAPRAWA 2: Logika pauzowania/odtwarzania (tylko w "dziurze")
+        // KROK KONTROLNY: Sprawdź, czy kliknięto w miejsce, gdzie jest nienaruszona cegła (dla logiki pauzy)
         let trafionoWNienaruszonaCegle = cegly.some(cegla => {
             if (cegla.isStatic && !cegla.zniszczona) {
-                 return (
-                     x >= cegla.x && x <= cegla.x + cegla.szerokosc &&
-                     y >= cegla.y && y <= cegla.y + cegla.wysokosc
-                 );
+                return (
+                    x >= cegla.x && x <= cegla.x + cegla.szerokosc &&
+                    y >= cegla.y && y <= cegla.y + cegla.wysokosc
+                );
             }
             return false;
         });
 
-        // Jeśli NIE trafiono w ŻADNĄ nienaruszoną cegłę (czyli kliknięto w tło/dziurę)
-        if (!trafionoWNienaruszonaCegle) {
-             const video = canvas.closest('.tiktok-symulacja')?.querySelector('video');
-             const pauseOverlay = canvas.closest('.tiktok-symulacja')?.querySelector('.pause-overlay');
+        // KRUCJALNA LOGIKA PAUZY:
+        // Pauzujemy/odtwarzamy wideo tylko, jeśli:
+        // 1. Nie spowodowano destrukcji (czyZniszczono === false) ORAZ
+        // 2. Nie trafiło się w ŻADNĄ nienaruszoną cegłę (czyli kliknięto w "dziurę")
+        if (!czyZniszczono && !trafionoWNienaruszonaCegle) {
+            const video = canvas.closest('.tiktok-symulacja')?.querySelector('video');
+            const pauseOverlay = canvas.closest('.tiktok-symulacja')?.querySelector('.pause-overlay');
 
-             if(video) {
-                 if (video.paused) {
-                     video.play().catch(e => console.warn('Autoplay error after clicking hole:', e));
-                     if (pauseOverlay) pauseOverlay.classList.remove("visible");
-                 } else {
-                     video.pause();
-                     if (pauseOverlay) pauseOverlay.classList.add("visible");
-                 }
-             }
+            if(video) {
+                if (video.paused) {
+                    video.play().catch(e => console.warn('Autoplay error:', e));
+                    if (pauseOverlay) pauseOverlay.classList.remove("visible");
+                } else {
+                    video.pause();
+                    if (pauseOverlay) pauseOverlay.classList.add("visible");
+                }
+            }
         }
     });
 
