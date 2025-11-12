@@ -370,9 +370,13 @@ document.addEventListener("DOMContentLoaded", () => {
               const secretOverlay = activeSlide.querySelector('.secret-overlay.visible');
               const pwaSecretOverlay = activeSlide.querySelector('.pwa-secret-overlay.visible');
 
-              if (secretOverlay || pwaSecretOverlay) {
-                return; // Blokuj kliknięcie, jeśli nakładka jest widoczna
+              /* === POCZĄTEK NAPRAWY === */
+              const interactiveWall = activeSlide.querySelector('.interactive-wall-overlay.visible');
+
+              if (secretOverlay || pwaSecretOverlay || interactiveWall) {
+                return; // Blokuj kliknięcie, jeśli jakakolwiek nakładka jest widoczna
               }
+              /* === KONIEC NAPRAWY === */
 
               // Sprawdź, czy kliknięty element lub jego rodzic ma atrybut 'data-action'.
               // Jeśli tak, zakończ, aby uniknąć pauzowania wideo.
