@@ -1178,7 +1178,7 @@ body,
   transform: translateX(-50%);
   background: var(--accent-color);
   color: white;
-  border: 2px solid white;
+  border: 2px solid black;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -6394,3 +6394,44 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     transition: none !important;
 }
 
+/* Custom styles for slides with a light theme, like "Elephants Dream" */
+
+/* Text elements should be black */
+.slide--light-theme .secret-overlay .secret-title,
+.slide--light-theme .secret-overlay .secret-subtitle,
+.slide--light-theme .tiktok-symulacja .sidebar .icon-button .icon-label,
+.slide--light-theme .tiktok-symulacja .bottombar .author-name,
+.slide--light-theme .tiktok-symulacja .bottombar .slide-title,
+.slide--light-theme .tiktok-symulacja .bottombar .slide-description {
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+/* The lock icon which uses currentColor */
+.slide--light-theme .secret-overlay .secret-icon {
+  color: #000 !important;
+}
+
+/* For all sidebar icons on this slide, set stroke to black and keep other properties */
+.slide--light-theme .tiktok-symulacja .sidebar .icon-button svg {
+  stroke: #000 !important;
+  fill: none !important; /* This is the default, but let's be explicit */
+  stroke-width: 1.5 !important; /* Explicitly keep the same stroke-width */
+}
+
+/* Special case for the ACTIVE like button, restore original look for contrast */
+.slide--light-theme .tiktok-symulacja .like-button.active > svg {
+  fill: var(--accent-color) !important;
+  stroke: white !important; /* White stroke looks better on red fill */
+}
+
+
+/* Underline for the login link */
+.slide--light-theme .secret-subtitle u {
+  border-bottom-color: #000 !important;
+}
+
+/* Video controls icons */
+.slide--light-theme .video-controls button svg {
+    fill: #000 !important;
+}
