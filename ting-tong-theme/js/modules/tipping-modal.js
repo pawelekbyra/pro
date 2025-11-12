@@ -3,6 +3,8 @@ import { UI } from './ui.js';
 import { State } from './state.js';
 import { API } from './api.js';
 
+let isInitialized = false;
+
 // Helper do obsługi tłumaczeń, które mogą być obiektami
 function getTranslatedText(key, fallback) {
     const translation = Utils.getTranslation(key);
@@ -496,6 +498,7 @@ function hideModal() {
 }
 
 function init() {
+    if (isInitialized) return;
     cacheDOM();
     if (!dom.modal) return;
 
@@ -526,6 +529,7 @@ function init() {
       if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
       if (e.target.closest('[data-action="hide-terms"]')) hideTerms();
     });
+    isInitialized = true;
 }
 
 function translateUI() {
