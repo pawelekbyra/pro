@@ -452,7 +452,7 @@ function updateUIForLoginState() {
 
     // Determine overlay visibility
     const slideId = sim.closest('.webyx-section')?.dataset.slideId;
-        // NOWE: Sprawdź stan zniszczenia muru (persystencja)
+    // NOWE: Sprawdź stan zniszczenia muru (persystencja)
     const isWallDestroyed = localStorage.getItem(`tt_wall_destroyed_${slideId}`) === 'true';
 
     const showSecret = isSecret && !isLoggedIn;
@@ -463,7 +463,7 @@ function updateUIForLoginState() {
 
 
     // If an overlay is active, force the UI to be visible
-    if (showSecret || showPwaSecret || showInteractiveWall) {
+    if (isOverlaid) {
       sim.classList.add("video-loaded");
     }
 
@@ -511,7 +511,7 @@ function updateUIForLoginState() {
         }
     }
 
-    // Control video playback based on overlay state
+    // Control video playback/UI visibility based on overlay state
     if (video) {
         const isCurrentSlide = section.classList.contains('swiper-slide-active');
 
@@ -642,8 +642,16 @@ function createSlideElement(slideData, index, isWallDestroyed) { // Zaktualizowa
     section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 
-  section.querySelector(".tiktok-symulacja").dataset.access =
-    slideData.access;
+  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
+  // ZMIANA: Dodaj klasę wall-active na start, jeśli mur jest aktywny i NIE zniszczony
+  const showInteractiveWall = slideData.access === 'secret' && getIsUserLoggedIn() && slideData.id === 'slide-002' && !isWallDestroyed;
+
+  if (showInteractiveWall) {
+      tiktokSymulacja.classList.add("wall-active");
+  }
+
+
+  tiktokSymulacja.dataset.access = slideData.access;
   const avatarImg = section.querySelector(".profileButton img");
   avatarImg.src = slideData.author.avatar;
   if (slideData.author.is_vip) {
@@ -665,7 +673,6 @@ function createSlideElement(slideData, index, isWallDestroyed) { // Zaktualizowa
     slideData.initialComments,
   );
 
-  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
   const videoEl = section.querySelector("video");
   const pauseOverlay = section.querySelector(".pause-overlay");
   const replayOverlay = section.querySelector(".replay-overlay");
@@ -798,12 +805,7 @@ function createSlideElement(slideData, index, isWallDestroyed) { // Zaktualizowa
       passive: false,
     });
   }
-// ZMIANA: Dodaj klasę wall-active na start, jeśli mur jest aktywny i NIE zniszczony
-const showInteractiveWall = slideData.access === 'secret' && getIsUserLoggedIn() && slideData.id === 'slide-002' && !isWallDestroyed;
 
-if (showInteractiveWall) {
-tiktokSymulacja.classList.add("wall-active");
-}
   return section;
 }
 
@@ -1248,25 +1250,25 @@ export const UI = {
   updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,
-  handleWallDestroyed, // NOWA FUNKCJA
+  handleWallDestroyed,
 };
 
 // ... Dodaj nową funkcję na końcu modułu UI.js:
 function handleWallDestroyed(slideId) {
-const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
-UI.showAlert(successMessage, false);
+    const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
+    UI.showAlert(successMessage, false);
 
-// Zapisz stan w localStorage (persystencja)
-localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
+    // Zapisz stan w localStorage (persystencja)
+    localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
 
-// Usuń klasę wall-active z aktywnego slajdu
-const activeSlide = document.querySelector('.swiper-slide-active');
-if(activeSlide) {
-activeSlide.querySelector('.tiktok-symulacja').classList.remove('wall-active');
-}
+    // Usuń klasę wall-active z aktywnego slajdu
+    const activeSlide = document.querySelector('.swiper-slide-active');
+    if(activeSlide) {
+        activeSlide.querySelector('.tiktok-symulacja').classList.remove('wall-active');
+    }
 
-// Ponowne uruchomienie logiki UI w celu odblokowania przycisków
-updateUIForLoginState();
+    // Ponowne uruchomienie logiki UI w celu odblokowania przycisków
+    updateUIForLoginState();
 }
 
 async function updateCrowdfundingStats() {

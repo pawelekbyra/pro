@@ -1,4 +1,5 @@
 import { UI } from './ui.js'; // Dodaj import na początku
+
 // ting-tong-theme/js/modules/interactive-wall.js
 
 export function initInteractiveWall(canvas, slideId) {
