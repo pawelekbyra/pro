@@ -452,12 +452,18 @@ function updateUIForLoginState() {
 
     // Determine overlay visibility
     const slideId = sim.closest('.webyx-section')?.dataset.slideId;
+    // NOWE: Sprawdź stan zniszczenia muru (persystencja)
+    const isWallDestroyed = localStorage.getItem(`tt_wall_destroyed_${slideId}`) === 'true';
+
     const showSecret = isSecret && !isLoggedIn;
     const showPwaSecret = isPwaSecret && !isStandalone;
-    const showInteractiveWall = isSecret && isLoggedIn && slideId === 'slide-002';
+    // ZMIANA: Pokaż interaktywny mur TYLKO jeśli nie został jeszcze zniszczony i użytkownik jest zalogowany
+    const showInteractiveWall = isSecret && isLoggedIn && slideId === 'slide-002' && !isWallDestroyed;
+    const isOverlaid = showSecret || showPwaSecret || showInteractiveWall;
+
 
     // If an overlay is active, force the UI to be visible
-    if (showSecret || showPwaSecret || showInteractiveWall) {
+    if (isOverlaid) {
       sim.classList.add("video-loaded");
     }
 
@@ -481,6 +487,7 @@ function updateUIForLoginState() {
     const interactiveOverlay = section.querySelector(".interactive-wall-overlay");
     const interactiveCanvas = section.querySelector(".interactive-canvas");
     if (interactiveOverlay) {
+        // ZMIANA: Użyj nowej flagi 'showInteractiveWall'
         interactiveOverlay.classList.toggle('visible', showInteractiveWall);
 
         if (showInteractiveWall && interactiveCanvas && !interactiveCanvas.dataset.initialized) {
@@ -504,21 +511,20 @@ function updateUIForLoginState() {
         }
     }
 
-    // Control video playback based on overlay state
+    // Control video playback/UI visibility based on overlay state
     if (video) {
-        const isOverlayVisible = showSecret || showPwaSecret;
         const isCurrentSlide = section.classList.contains('swiper-slide-active');
 
-        // First, enforce pausing if any overlay is active.
-        // This is the most important rule.
-        if (isOverlayVisible) {
-            if (!video.paused) {
-                video.pause();
-            }
-        }
-        // Only if no overlays are active, consider playing the video.
-        else if (isCurrentSlide && video.paused) {
+        // ZMIANA: Wideo ma ZAWSZE grać, jeśli to nie jest statyczna/pwa blokada
+        if (isCurrentSlide && !showSecret && !showPwaSecret && video.paused) {
             video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
+        }
+
+        // ZMIANA: Ukryj wszystkie standardowe elementy UI (sidebar, bottombar, controls), jeśli mur jest aktywny
+        if (showInteractiveWall) {
+            sim.classList.add("wall-active");
+        } else {
+            sim.classList.remove("wall-active");
         }
     }
 
@@ -584,7 +590,7 @@ function updateTranslations() {
   updateUIForLoginState();
 }
 
-function createSlideElement(slideData, index) {
+function createSlideElement(slideData, index, isWallDestroyed) { // Zaktualizowana sygnatura
   const slideFragment = DOM.template.content.cloneNode(true);
   const section = slideFragment.querySelector(".webyx-section");
   section.dataset.index = index;
@@ -636,8 +642,16 @@ function createSlideElement(slideData, index) {
     section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
   }
 
-  section.querySelector(".tiktok-symulacja").dataset.access =
-    slideData.access;
+  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
+  // ZMIANA: Dodaj klasę wall-active na start, jeśli mur jest aktywny i NIE zniszczony
+  const showInteractiveWall = slideData.access === 'secret' && getIsUserLoggedIn() && slideData.id === 'slide-002' && !isWallDestroyed;
+
+  if (showInteractiveWall) {
+      tiktokSymulacja.classList.add("wall-active");
+  }
+
+
+  tiktokSymulacja.dataset.access = slideData.access;
   const avatarImg = section.querySelector(".profileButton img");
   avatarImg.src = slideData.author.avatar;
   if (slideData.author.is_vip) {
@@ -659,7 +673,6 @@ function createSlideElement(slideData, index) {
     slideData.initialComments,
   );
 
-  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
   const videoEl = section.querySelector("video");
   const pauseOverlay = section.querySelector(".pause-overlay");
   const replayOverlay = section.querySelector(".replay-overlay");
@@ -803,7 +816,11 @@ function renderSlides() {
   if (slidesData.length === 0) return;
 
   slidesData.forEach((data, index) => {
-    const slideElement = createSlideElement(data, index);
+    // NOWE: Pobierz stan zniszczenia muru dla każdego slajdu
+    const isWallDestroyed = localStorage.getItem(`tt_wall_destroyed_${data.id}`) === 'true';
+
+    // Przekazanie stanu muru do tworzenia elementu
+    const slideElement = createSlideElement(data, index, isWallDestroyed);
     wrapper.appendChild(slideElement);
   });
 }
@@ -1233,7 +1250,26 @@ export const UI = {
   updateCrowdfundingStats,
   openAuthorProfileModal,
   closeAuthorProfileModal,
+  handleWallDestroyed,
 };
+
+// ... Dodaj nową funkcję na końcu modułu UI.js:
+function handleWallDestroyed(slideId) {
+    const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
+    UI.showAlert(successMessage, false);
+
+    // Zapisz stan w localStorage (persystencja)
+    localStorage.setItem(`tt_wall_destroyed_${slideId}`, 'true');
+
+    // Usuń klasę wall-active z aktywnego slajdu
+    const activeSlide = document.querySelector('.swiper-slide-active');
+    if(activeSlide) {
+        activeSlide.querySelector('.tiktok-symulacja').classList.remove('wall-active');
+    }
+
+    // Ponowne uruchomienie logiki UI w celu odblokowania przycisków
+    updateUIForLoginState();
+}
 
 async function updateCrowdfundingStats() {
     try {

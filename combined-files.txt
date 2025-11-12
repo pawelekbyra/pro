@@ -613,14 +613,13 @@ body,
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
-/* FIX 1: Zapewnienie, że tło statycznego muru pokrywa całą przestrzeń i maskuje wideo */
 .secret-overlay {
   position: absolute;
   top: var(--topbar-height);
   left: 0;
   width: 100%;
   height: calc(100vh - var(--topbar-height));
-
+  background: none;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -637,12 +636,7 @@ body,
   opacity: 1;
   pointer-events: auto;
 }
-.secret-overlay .mur-container {
-  /* Ukrycie hardkodowanego muru (cegieł) na rzecz tła, by zawsze sięgał do dołu */
-  display: none !important;
-}
 
-/* FIX 2: Przezroczyste tło dla interaktywnego muru (umożliwia widoczność wideo) */
 .interactive-wall-overlay {
     position: absolute;
     top: var(--topbar-height);
@@ -654,28 +648,12 @@ body,
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
-    background-color: transparent !important; /* KLUCZOWA ZMIANA */
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background-color: #333; /* Ensure it has a background */
 }
 
 .interactive-wall-overlay.visible {
   opacity: 1;
   pointer-events: auto;
-}
-
-/* FIX 3: Ukrycie wszystkich interaktywnych elementów podczas aktywnej gry na murze */
-.tiktok-symulacja.wall-active .sidebar,
-.tiktok-symulacja.wall-active .bottombar,
-.tiktok-symulacja.wall-active .video-controls {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: opacity 0.3s ease-out; /* Dodaj przejście dla płynności */
-}
-
-/* Upewnij się, że element nie przeszkadza w klikaniu muru */
-.tiktok-symulacja.wall-active .interactive-wall-overlay {
-    z-index: 10201; /* Upewnij się, że jest na wierzchu */
 }
 
 .interactive-canvas {
@@ -6543,3 +6521,2501 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 .slide--light-theme .video-controls button svg {
     fill: #000 !important;
 }
+import { Config } from './config.js';
+import { State } from './state.js';
+import { Utils } from './utils.js';
+import { initInteractiveWall } from './interactive-wall.js';
+// import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
+import { API, slidesData } from './api.js';
+
+let PWA_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
+function setPwaModule(pwaModule) {
+  PWA_MODULE = pwaModule;
+}
+
+function getIsUserLoggedIn() {
+return State.get("isUserLoggedIn");
+}
+
+let countdownInterval = null;
+
+function startCountdown() {
+  const countdownElement = document.getElementById('countdown-timer');
+  const countdownDateElement = document.getElementById('countdown-date');
+  if (!countdownElement || !countdownDateElement) return;
+
+  const endDate = new Date(countdownDateElement.textContent).getTime();
+
+  const updateCountdown = () => {
+    const now = new Date().getTime();
+    const distance = endDate - now;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownElement.textContent = "Premiera!";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    countdownElement.innerHTML = `
+      <span class="countdown-part">${days}<span class="countdown-label-small">dni</span></span>
+      <span class="countdown-part">${hours.toString().padStart(2, '0')}<span class="countdown-label-small">h</span></span>
+      <span class="countdown-part">${minutes.toString().padStart(2, '0')}<span class="countdown-label-small">m</span></span>
+      <span class="countdown-part">${seconds.toString().padStart(2, '0')}<span class="countdown-label-small">s</span></span>`;
+  };
+
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+let selectedCommentImage = null;
+
+const DOM = {};
+let alertTimeout;
+
+function initDOMCache() {
+  DOM.container = document.getElementById("webyx-container");
+  DOM.template = document.getElementById("slide-template");
+  DOM.preloader = document.getElementById("preloader");
+  DOM.alertBox = document.getElementById("alertBox");
+  DOM.alertText = document.getElementById("alertText");
+  DOM.commentsModal = document.getElementById("comments-modal-container");
+  DOM.accountModal = document.getElementById("accountModal");
+  DOM.notificationPopup = document.getElementById("notificationPopup");
+  DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
+  DOM.pwaIosInstructions = document.getElementById("pwa-ios-instructions");
+  DOM.welcomeModal = document.getElementById("welcome-modal");
+  DOM.infoModal = document.getElementById("infoModal");
+  DOM.authorProfileModal = document.getElementById("author-profile-modal");
+}
+
+function openAuthorProfileModal(slideData, options = {}) {
+    const modal = DOM.authorProfileModal;
+    if (!modal) return;
+
+    const content = modal.querySelector('.profile-modal-content');
+    if (options.isLightTheme) {
+        content.classList.add('profile-modal--wall-background');
+    } else {
+        content.classList.remove('profile-modal--wall-background');
+    }
+
+    openModal(modal, {
+        onOpen: () => {
+            const author = slideData.author;
+            modal.querySelector('.username-header').textContent = Utils.getTranslation('authorProfileTitle');
+            const avatarImg = modal.querySelector('.profile-avatar');
+            avatarImg.src = author.avatar;
+            avatarImg.classList.add('author-modal-avatar');
+            modal.querySelector('.fullname').textContent = author.name;
+            modal.querySelector('.bio').textContent = author.bio || '';
+
+            modal.querySelector('.following-count').textContent = '123';
+            modal.querySelector('.followers-count').textContent = '45.6K';
+            modal.querySelector('.likes-count').textContent = '1.2M';
+
+            const followBtn = modal.querySelector('.follow-btn');
+            const btnSpan = followBtn.querySelector('span');
+            const btnSvg = followBtn.querySelector('svg');
+
+            const isLoggedIn = getIsUserLoggedIn();
+
+            if (isLoggedIn) {
+                btnSpan.textContent = 'Subsrajbujesz';
+                btnSvg.innerHTML = '<path d="M26,12H20V6a3.0033,3.0033,0,0,0-3-3H14.8672a2.009,2.009,0,0,0-1.98,1.5146L11,12v9H24l2-9Z"/><path d="M9,23H5a2.0023,2.0023,0,0,1-2-2V13a2.0023,2.0023,0,0,1,2-2H9Z"/><rect id="_Transparent_Rectangle_" data-name="&lt;Transparent Rectangle&gt;" class="cls-1" width="32" height="32"/>';
+                followBtn.disabled = true;
+            } else {
+                btnSpan.textContent = 'Zostań Patronem';
+                btnSvg.innerHTML = '<rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" />';
+                followBtn.disabled = false;
+            }
+
+            const videosGrid = modal.querySelector('#videos-grid');
+            videosGrid.innerHTML = '';
+
+            const authorSlides = slidesData.filter(s => s.author.name === author.name && !s.isIframe);
+            const otherSlides = authorSlides.filter(s => s.id !== slideData.id);
+            const orderedSlides = [...otherSlides, slideData];
+
+            const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
+
+            orderedSlides.forEach(authorSlide => {
+                const thumbnailUrl = authorSlide.thumbnailUrl || `https://picsum.photos/200/300?random=${authorSlide.id}`;
+                let overlayHtml = '';
+
+                const isSecret = authorSlide.access === 'secret';
+                const isPwaSecret = authorSlide.access === 'pwa-secret';
+                const isLocked = (isSecret && !isLoggedIn) || (isPwaSecret && !isStandalone);
+
+                if (isSecret && !isLoggedIn) {
+                    overlayHtml = `
+                        <div class="thumbnail-overlay-block">
+                            <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                            <div class="badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 9l10 13L22 9l-10-7zM2 9l10 3 10-3M12 12v10" /></svg>
+                            </div>
+                        </div>`;
+                } else if (isPwaSecret && !isStandalone) {
+                    overlayHtml = `
+                        <div class="thumbnail-overlay-block">
+                            <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                            <div class="badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>
+                            </div>
+                        </div>`;
+                }
+
+                const videoThumbnail = `
+                    <div class="video-thumbnail ${isLocked ? 'locked-thumbnail' : ''}" data-video-url="${authorSlide.mp4Url}">
+                        <img src="${thumbnailUrl}" alt="Video thumbnail">
+                        ${overlayHtml}
+                        <div class="video-views">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                            <span>${Utils.formatCount(authorSlide.initialLikes)}</span>
+                        </div>
+                    </div>
+                `;
+                videosGrid.innerHTML += videoThumbnail;
+            });
+        }
+    });
+}
+
+function closeAuthorProfileModal() {
+    const modal = DOM.authorProfileModal;
+    if (!modal) return;
+
+    closeModal(modal, {
+        contentSelector: '.profile-modal-content'
+    });
+}
+
+function showToast(message, isError = false) {
+    showAlert(message, isError);
+}
+
+function showAlert(message, isError = false) {
+  if (!DOM.alertBox || !DOM.alertText) return;
+  clearTimeout(alertTimeout);
+  DOM.alertBox.style.animation = "none";
+  requestAnimationFrame(() => {
+    DOM.alertBox.style.animation = "";
+    DOM.alertText.textContent = message;
+    DOM.alertBox.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+    DOM.alertBox.style.border = isError
+      ? "1px solid var(--accent-color)"
+      : "1px solid #000";
+    DOM.alertBox.classList.add("visible");
+  });
+  alertTimeout = setTimeout(
+    () => DOM.alertBox.classList.remove("visible"),
+    3000,
+  );
+}
+
+function getFocusable(node) {
+  if (!node) return [];
+  return Array.from(
+    node.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    ),
+  );
+}
+
+function trapFocus(modal) {
+  const focusable = getFocusable(modal);
+  if (focusable.length === 0) return () => {};
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const handleKeyDown = (e) => {
+    if (e.key !== "Tab") return;
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        last.focus();
+        e.preventDefault();
+      }
+    } else {
+      if (document.activeElement === last) {
+        first.focus();
+        e.preventDefault();
+      }
+    }
+  };
+  modal.addEventListener("keydown", handleKeyDown);
+  return () => modal.removeEventListener("keydown", handleKeyDown);
+}
+
+const activeModals = new Set();
+
+function openModal(modal, options = {}) {
+    if (!modal) {
+        console.error("Attempted to open a null modal element.");
+        return;
+    }
+
+    modal.style.display = 'flex';
+    modal.classList.remove('is-hiding');
+    void modal.offsetWidth;
+    modal.classList.add('visible');
+
+    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
+    const contentElement = modal.querySelector(contentSelector);
+    if (options.animationClass && contentElement) {
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+        contentElement.addEventListener('animationend', () => {
+            contentElement.style.animation = '';
+        }, { once: true });
+    }
+
+    if (modal.id === 'comments-modal-container') {
+        const swiper = State.get('swiper');
+        if (swiper) {
+            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+            const slideData = slidesData.find(s => s.id === slideId);
+            const count = slideData ? slideData.initialComments : 0;
+            const titleEl = modal.querySelector('#commentsTitle');
+            if (titleEl) {
+                titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
+            }
+        }
+    }
+
+    if (modal.id === 'infoModal') {
+        startCountdown();
+        updateCrowdfundingStats();
+    }
+
+    // Umożliwienie zamknięcia przez kliknięcie tła, jeśli to nie jest modal wymuszony
+    if (!options.isPersistent) {
+        const closeOnClick = (e) => {
+            // Sprawdź, czy kliknięto bezpośrednio w overlay
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        };
+        modal.addEventListener('click', closeOnClick);
+        modal._closeOnClick = closeOnClick;
+    }
+
+    activeModals.add(modal);
+    document.body.style.overflow = 'hidden';
+    DOM.container.setAttribute("aria-hidden", "true");
+    modal.setAttribute("aria-hidden", "false");
+
+    // Zarządzanie focusem
+    State.set("lastFocusedElement", document.activeElement);
+    const focusable = getFocusable(modal);
+    const focusTarget = modal.querySelector(".modal-content, .fl-modal-content, .tiktok-profile-content, .profile-content") || modal;
+
+    if (focusable.length > 0) {
+        focusable[0].focus();
+    } else {
+        focusTarget.focus();
+    }
+
+    modal._focusTrapDispose = trapFocus(modal);
+
+    if (options.onOpen) options.onOpen();
+    if (options.onClose) modal.onCloseCallback = options.onClose;
+}
+
+function _resetVideoPlayer(videoModal) {
+    if (!videoModal) return;
+    const videoPlayer = videoModal.querySelector('video');
+    if (videoPlayer) {
+        videoPlayer.pause();
+        videoPlayer.currentTime = 0;
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
+    }
+}
+
+function closeModal(modal, options = {}) {
+    if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
+    const contentElement = modal.querySelector(contentSelector);
+
+    if (options.animationClass && contentElement) {
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+    } else {
+        modal.classList.remove('visible');
+    }
+
+    let cleanupHasRun = false;
+    const cleanup = () => {
+        if (cleanupHasRun) return;
+        cleanupHasRun = true;
+
+        if (contentElement) {
+            contentElement.removeEventListener('animationend', cleanup);
+            contentElement.style.animation = '';
+        }
+        modal.removeEventListener('transitionend', cleanup);
+
+        modal.style.display = 'none';
+        modal.classList.remove('is-hiding', 'visible');
+
+        if (modal._focusTrapDispose) {
+            modal._focusTrapDispose();
+            delete modal._focusTrapDispose;
+        }
+
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            document.body.style.overflow = '';
+            DOM.container.removeAttribute('aria-hidden');
+        }
+
+        const lastFocused = State.get("lastFocusedElement");
+        if (lastFocused && document.body.contains(lastFocused)) {
+            lastFocused.focus();
+        }
+
+        if (typeof modal.onCloseCallback === 'function') {
+            modal.onCloseCallback();
+            delete modal.onCloseCallback;
+        }
+    };
+
+    modal.addEventListener('transitionend', cleanup, { once: true });
+    modal.addEventListener('animationend', cleanup, { once: true });
+
+    setTimeout(cleanup, 500); // Fallback
+}
+
+function updateLikeButtonState(likeButton, liked, count) {
+  if (!likeButton) return;
+  const likeCountEl = likeButton.querySelector(".like-count");
+  likeButton.classList.toggle("active", liked);
+  likeButton.setAttribute("aria-pressed", String(liked));
+  if (likeCountEl) {
+    likeCountEl.textContent = Utils.formatCount(count);
+    likeCountEl.dataset.rawCount = String(count);
+  }
+  const translationKey = liked
+    ? "unlikeAriaLabelWithCount"
+    : "likeAriaLabelWithCount";
+  const label = Utils.getTranslation(translationKey).replace(
+    "{count}",
+    Utils.formatCount(count),
+  );
+  likeButton.setAttribute("aria-label", label);
+}
+
+function applyLikeStateToDom(likeId, liked, count) {
+  document
+    .querySelectorAll(`.like-button[data-like-id="${likeId}"]`)
+    .forEach((btn) => updateLikeButtonState(btn, liked, count));
+}
+
+/**
+ * Sprawdza czy dla danego slajdu jest aktywna nakładka blokująca
+ */
+function isSlideOverlayActive(slideElement) {
+  if (!slideElement) return false;
+
+  const secretOverlay = slideElement.querySelector('.secret-overlay');
+  const pwaSecretOverlay = slideElement.querySelector('.pwa-secret-overlay');
+
+  const isSecretVisible = secretOverlay && secretOverlay.classList.contains('visible');
+  const isPwaSecretVisible = pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible');
+
+  return isSecretVisible || isPwaSecretVisible;
+}
+
+function updateUIForLoginState() {
+  UI.updateCommentFormVisibility();
+  const isLoggedIn = State.get("isUserLoggedIn");
+  const currentSlideIndex = State.get("currentSlideIndex");
+
+  // Update global UI elements
+  const topbar = document.querySelector("#app-frame > .topbar");
+  const loginPanel = document.querySelector("#app-frame > .login-panel");
+  const loggedInMenu = document.querySelector(
+    "#app-frame > .logged-in-menu",
+  );
+
+  if (topbar) {
+    topbar
+      .querySelector(".central-text-wrapper")
+      .classList.toggle("with-arrow", !isLoggedIn);
+    topbar.querySelector(".topbar-text").textContent = isLoggedIn
+      ? "Ting Tong"
+      : Utils.getTranslation("loggedOutText");
+    topbar.classList.remove("login-panel-active");
+  }
+  if (loginPanel) {
+    loginPanel.classList.remove("active");
+  }
+  if (loggedInMenu) {
+    loggedInMenu.classList.remove("active");
+  }
+
+  // Update per-slide elements
+  DOM.container.querySelectorAll(".webyx-section").forEach((section) => {
+    const sim = section.querySelector(".tiktok-symulacja");
+    sim.classList.toggle("is-logged-in", isLoggedIn);
+
+    const isSecret = sim.dataset.access === "secret";
+    const isPwaSecret = sim.dataset.access === "pwa-secret";
+    const isStandalone = PWA_MODULE ? PWA_MODULE.isStandalone() : false;
+    const video = section.querySelector("video");
+
+    // Determine overlay visibility
+    const slideId = sim.closest('.webyx-section')?.dataset.slideId;
+    const showSecret = isSecret && !isLoggedIn;
+    const showPwaSecret = isPwaSecret && !isStandalone;
+    const showInteractiveWall = isSecret && isLoggedIn && slideId === 'slide-002';
+
+    // If an overlay is active, force the UI to be visible
+    if (showSecret || showPwaSecret || showInteractiveWall) {
+      sim.classList.add("video-loaded");
+    }
+
+    // Toggle "secret" overlay (static wall for guests)
+    const secretOverlay = section.querySelector(".secret-overlay");
+    if (secretOverlay) {
+        secretOverlay.classList.toggle('visible', showSecret);
+        if (showSecret) {
+            secretOverlay.querySelector(".secret-title").textContent = Utils.getTranslation("secretTitle");
+            const subtitleUElement = secretOverlay.querySelector(".secret-subtitle u");
+            const subtitleSpanElement = secretOverlay.querySelector(".secret-subtitle span");
+            if (subtitleUElement && subtitleSpanElement) {
+                subtitleUElement.dataset.action = "toggle-login-panel";
+                subtitleUElement.textContent = Utils.getTranslation("secretSubtitleAction");
+                subtitleSpanElement.textContent = " " + Utils.getTranslation("secretSubtitleRest");
+            }
+        }
+    }
+
+    // Toggle "interactive-wall" overlay (canvas for logged-in users)
+    const interactiveOverlay = section.querySelector(".interactive-wall-overlay");
+    const interactiveCanvas = section.querySelector(".interactive-canvas");
+    if (interactiveOverlay) {
+        interactiveOverlay.classList.toggle('visible', showInteractiveWall);
+
+        if (showInteractiveWall && interactiveCanvas && !interactiveCanvas.dataset.initialized) {
+            initInteractiveWall(interactiveCanvas, section.dataset.slideId);
+            interactiveCanvas.dataset.initialized = 'true';
+        }
+    }
+
+    // Toggle "pwa-secret" overlay
+    const pwaSecretOverlay = section.querySelector(".pwa-secret-overlay");
+    if (pwaSecretOverlay) {
+        pwaSecretOverlay.classList.toggle("visible", showPwaSecret);
+        if (showPwaSecret) {
+            pwaSecretOverlay.querySelector(".pwa-secret-title").textContent = Utils.getTranslation("pwaTitle");
+            const subtitleUElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle u");
+            const subtitleSpanElement = pwaSecretOverlay.querySelector(".pwa-secret-subtitle span");
+            if (subtitleUElement && subtitleSpanElement) {
+                subtitleUElement.textContent = Utils.getTranslation("pwaSecretSubtitleAction");
+                subtitleSpanElement.textContent = Utils.getTranslation("pwaSecretSubtitleRest");
+            }
+        }
+    }
+
+    // Control video playback based on overlay state
+    if (video) {
+        const isOverlayVisible = showSecret || showPwaSecret;
+        const isCurrentSlide = section.classList.contains('swiper-slide-active');
+
+        // First, enforce pausing if any overlay is active.
+        // This is the most important rule.
+        if (isOverlayVisible) {
+            if (!video.paused) {
+                video.pause();
+            }
+        }
+        // Only if no overlays are active, consider playing the video.
+        else if (isCurrentSlide && video.paused) {
+            video.play().catch(e => console.warn("Autoplay prevented on UI update:", e));
+        }
+    }
+
+    const likeBtn = section.querySelector(".like-button");
+    if (likeBtn) {
+      const slide = slidesData.find(
+        (s) => String(s.likeId) === String(likeBtn.dataset.likeId),
+      );
+      if (slide) {
+        updateLikeButtonState(
+          likeBtn,
+          !!(slide.isLiked && isLoggedIn),
+          Number(slide.initialLikes || 0),
+        );
+      }
+    }
+  });
+}
+
+function updateTranslations() {
+  const lang = State.get("currentLang");
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll("[data-translate-key]").forEach((el) => {
+    el.textContent = Utils.getTranslation(el.dataset.translateKey);
+  });
+  document.querySelectorAll("[data-translate-aria-label]").forEach((el) => {
+    el.setAttribute(
+      "aria-label",
+      Utils.getTranslation(el.dataset.translateAriaLabel),
+    );
+  });
+  document.querySelectorAll("[data-translate-title]").forEach((el) => {
+    el.setAttribute(
+      "title",
+      Utils.getTranslation(el.dataset.translateTitle),
+    );
+  });
+  document
+    .querySelectorAll("[data-translate-placeholder]")
+    .forEach((el) => {
+      el.setAttribute(
+        "placeholder",
+        Utils.getTranslation(el.dataset.translatePlaceholder),
+      );
+    });
+
+  // Handle composite elements
+  const sortTrigger = document.querySelector(".sort-trigger");
+  if (sortTrigger) {
+    const sortOrder = State.get("commentSortOrder");
+    const currentSortText = Utils.getTranslation(
+      sortOrder === "popular" ? "commentSortBest" : "commentSortNewest",
+    );
+    sortTrigger.innerHTML = `${Utils.getTranslation("commentSortTriggerText")}<span class="current-sort">${currentSortText}</span> ▼`;
+  }
+
+  const loginPrompt = document.querySelector(".login-to-comment-prompt p");
+  if (loginPrompt) {
+    loginPrompt.innerHTML = `<a href="#" data-action="toggle-login-panel" data-translate-key="loginToCommentAction">${Utils.getTranslation("loginToCommentAction")}</a><span data-translate-key="loginToCommentRest">${Utils.getTranslation("loginToCommentRest")}</span>`;
+  }
+
+  updateUIForLoginState();
+}
+
+function createSlideElement(slideData, index) {
+  const slideFragment = DOM.template.content.cloneNode(true);
+  const section = slideFragment.querySelector(".webyx-section");
+  section.dataset.index = index;
+  section.dataset.slideId = slideData.id;
+
+  if (slideData.id === 'slide-002') {
+    section.classList.add('slide--light-theme');
+  }
+
+  if (slideData.isIframe) {
+    const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
+    const videoEl = tiktokSymulacja.querySelector("video");
+    if (videoEl) videoEl.remove();
+    const pauseOverlay = tiktokSymulacja.querySelector(".pause-overlay");
+    if (pauseOverlay) pauseOverlay.remove();
+    const secretOverlay = tiktokSymulacja.querySelector(".secret-overlay");
+    if (secretOverlay) secretOverlay.remove();
+    const errorOverlay = tiktokSymulacja.querySelector(".error-overlay");
+    if (errorOverlay) errorOverlay.remove();
+
+    const iframe = document.createElement("iframe");
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.src = slideData.iframeUrl;
+    iframe.frameBorder = "0";
+    iframe.allow =
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    tiktokSymulacja.prepend(iframe);
+  } else if (slideData.mp4Url) {
+    const videoEl = section.querySelector("video");
+    if (videoEl) {
+      videoEl.src = slideData.mp4Url;
+      // Wideo zablokowane domyślnie pauzujemy. Logika UI je odblokuje, jeśli warunki są spełnione.
+      if (slideData.access === 'secret' || slideData.access === 'pwa-secret') {
+        videoEl.pause();
+      }
+    }
+  }
+
+  // Ustawienie początkowej widoczności nakładek.
+  // Główna logika jest w `updateUIForLoginState`, ale to zapewnia poprawny stan przed pierwszym renderowaniem.
+  if (slideData.access === 'pwa-secret' && PWA_MODULE && !PWA_MODULE.isStandalone()) {
+    const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
+    if (pwaSecretOverlay) {
+      pwaSecretOverlay.classList.add('visible');
+    }
+    // ✅ FIX: Natychmiast dodaj klasę video-loaded dla slajdów PWA, aby UI był widoczny
+    section.querySelector('.tiktok-symulacja').classList.add('video-loaded');
+  }
+
+  section.querySelector(".tiktok-symulacja").dataset.access =
+    slideData.access;
+  const avatarImg = section.querySelector(".profileButton img");
+  avatarImg.src = slideData.author.avatar;
+  if (slideData.author.is_vip) {
+    avatarImg.classList.add("vip-avatar-border");
+  }
+
+  section.querySelector(".slide-title").textContent = slideData.title;
+  section.querySelector(".author-name").textContent = slideData.author.name;
+  section.querySelector(".slide-description").textContent =
+    slideData.description;
+
+  const likeBtn = section.querySelector(".like-button");
+  likeBtn.dataset.likeId = slideData.likeId;
+  updateLikeButtonState(likeBtn, slideData.isLiked, slideData.initialLikes);
+
+  const commentsBtn = section.querySelector(".commentsButton");
+  const commentsCountEl = commentsBtn.querySelector(".comment-count");
+  commentsCountEl.textContent = Utils.formatCount(
+    slideData.initialComments,
+  );
+
+  const tiktokSymulacja = section.querySelector(".tiktok-symulacja");
+  const videoEl = section.querySelector("video");
+  const pauseOverlay = section.querySelector(".pause-overlay");
+  const replayOverlay = section.querySelector(".replay-overlay");
+
+  if (videoEl && pauseOverlay && replayOverlay) {
+    // Gdy video się kończy - pokaż replay
+    videoEl.addEventListener("ended", () => {
+      replayOverlay.classList.add("visible");
+    });
+
+    // Gdy video zaczyna grać - ukryj overlays
+    videoEl.addEventListener("play", () => {
+      replayOverlay.classList.remove("visible");
+      pauseOverlay.classList.remove("visible");
+    });
+
+    // Gdy video jest odtwarzane (po play) - ukryj overlays
+    videoEl.addEventListener("playing", () => {
+      replayOverlay.classList.remove("visible");
+      pauseOverlay.classList.remove("visible");
+    });
+  }
+  const progressBar = section.querySelector(".progress-bar");
+  const progressBarFill = section.querySelector(".progress-bar-fill");
+
+  if (videoEl) {
+    // ✅ FIX: Pokaż UI od razu po załadowaniu metadanych, nie czekaj na odtwarzanie
+    videoEl.addEventListener(
+      "loadedmetadata",
+      () => {
+        tiktokSymulacja.classList.add("video-loaded");
+      },
+      { once: true },
+    );
+
+    // Spróbuj odtworzyć (może zadziałać lub nie - ale UI już będzie widoczny)
+    videoEl.addEventListener(
+      "canplay",
+      () => {
+        // Tylko jeśli to aktywny slajd i brak overlay
+        if (section.classList.contains('swiper-slide-active')) {
+          const secretOverlay = section.querySelector('.secret-overlay');
+          const pwaSecretOverlay = section.querySelector('.pwa-secret-overlay');
+          const isOverlayVisible =
+            (secretOverlay && secretOverlay.classList.contains('visible')) ||
+            (pwaSecretOverlay && pwaSecretOverlay.classList.contains('visible'));
+
+          if (!isOverlayVisible && videoEl.paused) {
+            videoEl.play().catch(e => {
+              console.log("Autoplay prevented, showing pause overlay");
+              const pauseOverlay = section.querySelector('.pause-overlay');
+              if (pauseOverlay) pauseOverlay.classList.add('visible');
+            });
+          }
+        }
+      },
+      { once: true },
+    );
+  }
+
+  if (videoEl && progressBar && progressBarFill) {
+    const handle = section.querySelector(".progress-bar-handle");
+    let isDragging = false;
+
+    const updateProgress = () => {
+      if (isDragging || !videoEl.duration) return;
+      const progress = (videoEl.currentTime / videoEl.duration) * 100;
+      progressBarFill.style.width = `${progress}%`;
+      if (handle) handle.style.left = `${progress}%`;
+    };
+
+    const seek = (e) => {
+      const rect = progressBar.getBoundingClientRect();
+      const clickX =
+        (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const width = rect.width;
+      const progress = Math.max(0, Math.min(1, clickX / width));
+
+      if (videoEl.duration > 0) {
+        videoEl.currentTime = progress * videoEl.duration;
+        progressBarFill.style.width = `${progress * 100}%`;
+        if (handle) handle.style.left = `${progress * 100}%`;
+      }
+    };
+
+    videoEl.addEventListener("timeupdate", updateProgress);
+
+    const startDrag = (e) => {
+      if (e.type === "touchstart") {
+        e.preventDefault();
+      }
+      isDragging = true;
+      progressBar.classList.add("dragging");
+      const wasPlaying = !videoEl.paused;
+      videoEl.pause();
+
+      seek(e);
+
+      const onDrag = (moveEvent) => {
+        if (!isDragging) return;
+        moveEvent.preventDefault();
+        seek(moveEvent);
+      };
+
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        progressBar.classList.remove("dragging");
+        if (wasPlaying) {
+          videoEl.play().catch((err) => {
+            console.error("Play failed after drag:", err);
+          });
+        }
+        document.removeEventListener("mousemove", onDrag);
+        document.removeEventListener("mouseup", endDrag);
+        document.removeEventListener("touchmove", onDrag, {
+          passive: false,
+        });
+        document.removeEventListener("touchend", endDrag);
+      };
+
+      document.addEventListener("mousemove", onDrag);
+      document.addEventListener("mouseup", endDrag);
+      document.addEventListener("touchmove", onDrag, { passive: false });
+      document.addEventListener("touchend", endDrag);
+    };
+
+    progressBar.addEventListener("mousedown", startDrag);
+    progressBar.addEventListener("touchstart", startDrag, {
+      passive: false,
+    });
+  }
+
+  return section;
+}
+
+function renderSlides() {
+  const wrapper = DOM.container.querySelector(".swiper-wrapper");
+  if (!wrapper) return;
+  wrapper.innerHTML = "";
+  if (slidesData.length === 0) return;
+
+  slidesData.forEach((data, index) => {
+    const slideElement = createSlideElement(data, index);
+    wrapper.appendChild(slideElement);
+  });
+}
+
+function updateCommentFormVisibility() {
+  const isLoggedIn = State.get("isUserLoggedIn");
+  const form = document.getElementById("comment-form");
+  const prompt = document.querySelector(".login-to-comment-prompt");
+
+  if (form && prompt) {
+    if (isLoggedIn) {
+      form.style.display = "flex";
+      prompt.style.display = "none";
+    } else {
+      form.style.display = "none";
+      prompt.style.display = "block";
+    }
+  }
+}
+
+function updateVolumeButton(isMuted) {
+  document.querySelectorAll(".volume-button").forEach(button => {
+    const onIcon = button.querySelector(".volume-on-icon");
+    const offIcon = button.querySelector(".volume-off-icon");
+    if (onIcon && offIcon) {
+      onIcon.style.display = isMuted ? 'none' : 'block';
+      offIcon.style.display = isMuted ? 'block' : 'none';
+    }
+  });
+}
+
+/**
+ * Globalny Keyboard Listener (v2 - Niezawodny)
+ * Odporny na zmiany orientacji i poprawnie współpracuje z CSS "Freezer".
+ */
+
+function initEmojiPicker() {
+  const emojiPicker = document.querySelector('.emoji-picker');
+  if (!emojiPicker || emojiPicker.children.length > 0) return;
+
+  const fragment = document.createDocumentFragment();
+  Config.EMOJI_LIST.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'emoji-item';
+    btn.textContent = emoji;
+    btn.setAttribute('aria-label', `Insert ${emoji}`);
+    btn.addEventListener('click', () => insertEmoji(emoji));
+    fragment.appendChild(btn);
+  });
+  emojiPicker.appendChild(fragment);
+}
+
+function insertEmoji(emoji) {
+  const input = document.querySelector('#comment-input');
+  if (!input) return;
+
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const text = input.value;
+
+  input.value = text.substring(0, start) + emoji + text.substring(end);
+  input.selectionStart = input.selectionEnd = start + emoji.length;
+  input.focus();
+
+  hideEmojiPicker();
+}
+
+// Dodaj zmienną dla debounce na początku pliku (przed funkcją)
+let emojiPickerTimeout = null;
+let emojiPickerClickListener = null;
+
+function toggleEmojiPicker() {
+  const picker = document.querySelector('.emoji-picker');
+  if (!picker) {
+    console.warn('Emoji picker element not found');
+    return;
+  }
+
+  // Debounce - zapobiegaj podwójnym kliknięciom
+  if (emojiPickerTimeout) {
+    return;
+  }
+
+  const isVisible = picker.classList.contains('visible');
+
+  if (isVisible) {
+    hideEmojiPicker();
+  } else {
+    picker.classList.add('visible');
+
+    // Usuń stary listener jeśli istnieje
+    if (emojiPickerClickListener) {
+      document.removeEventListener('click', emojiPickerClickListener);
+      emojiPickerClickListener = null;
+    }
+
+    // Dodaj nowy listener po micro-delay
+    setTimeout(() => {
+      emojiPickerClickListener = (e) => closeEmojiPickerOnClickOutside(e);
+      document.addEventListener('click', emojiPickerClickListener, { once: true });
+    }, 10);
+  }
+
+  // Debounce timer
+  emojiPickerTimeout = setTimeout(() => {
+    emojiPickerTimeout = null;
+  }, 300);
+}
+
+function hideEmojiPicker() {
+  const picker = document.querySelector('.emoji-picker');
+  if (picker) {
+    picker.classList.remove('visible');
+  }
+
+  // Usuń pending listener
+  if (emojiPickerClickListener) {
+    document.removeEventListener('click', emojiPickerClickListener);
+    emojiPickerClickListener = null;
+  }
+}
+
+function closeEmojiPickerOnClickOutside(e) {
+  const picker = document.querySelector('.emoji-picker');
+  const emojiBtn = document.querySelector('.emoji-btn');
+
+  // Walidacja elementów
+  if (!picker || !emojiBtn) {
+    return;
+  }
+
+  // Sprawdź czy kliknięcie było poza pickerem i przyciskiem
+  if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
+    hideEmojiPicker();
+  }
+}
+
+function handleImageAttachment() {
+  const fileInput = document.querySelector('.comment-image-input');
+
+  if (!fileInput) {
+    console.error('Comment image input not found');
+    UI.showAlert(
+      Utils.getTranslation('imageInputError') || 'Nie można załączyć obrazu',
+      true
+    );
+    return;
+  }
+
+  // Sprawdź czy użytkownik jest zalogowany
+  if (!State.get('isUserLoggedIn')) {
+    UI.showAlert(Utils.getTranslation('likeAlert') || 'Zaloguj się, aby dodać obraz', true);
+    return;
+  }
+
+  fileInput.click();
+}
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  // Walidacja typu
+  if (!file.type.startsWith('image/')) {
+    UI.showAlert(
+      Utils.getTranslation('fileSelectImageError') || 'Wybierz plik obrazu (JPG, PNG, GIF)',
+      true
+    );
+    e.target.value = '';
+    return;
+  }
+
+  // Walidacja rozmiaru
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    UI.showAlert(
+      Utils.getTranslation('fileTooLargeError') || 'Obraz jest za duży. Maksymalny rozmiar: 5MB',
+      true
+    );
+    e.target.value = '';
+    return;
+  }
+
+  // Sprawdź czy można odczytać plik
+  const reader = new FileReader();
+
+  reader.onerror = () => {
+    console.error('Failed to read file');
+    UI.showAlert(
+      Utils.getTranslation('fileReadError') || 'Nie można odczytać pliku',
+      true
+    );
+    e.target.value = '';
+  };
+
+  reader.onload = () => {
+    // Plik jest OK - zapisz go
+    selectedCommentImage = file;
+    showImagePreview(file);
+  };
+
+  // Rozpocznij odczyt (tylko dla walidacji)
+  reader.readAsDataURL(file);
+
+  // Wyczyść input żeby można było wybrać ten sam plik ponownie
+  e.target.value = '';
+}
+
+function showImagePreview(file) {
+  const container = document.querySelector('.image-preview-container');
+  if (!container) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    container.innerHTML = `
+      <div class="image-preview">
+        <img src="${e.target.result}" alt="Preview">
+        <button type="button" class="remove-image-btn" data-action="remove-comment-image">&times;</button>
+      </div>
+    `;
+    container.classList.add('visible');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeCommentImage() {
+  selectedCommentImage = null;
+  const container = document.querySelector('.image-preview-container');
+  if (container) {
+    container.classList.remove('visible');
+    container.innerHTML = '';
+  }
+}
+
+function focusCommentInput() {
+  const input = document.querySelector('#comment-input');
+  if (input) {
+    setTimeout(() => {
+      input.focus();
+
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+}
+
+function scrollToComment(commentId) {
+  const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+  if (commentEl) {
+    commentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    commentEl.style.background = 'rgba(255, 0, 85, 0.1)';
+    setTimeout(() => {
+      commentEl.style.background = '';
+    }, 1000);
+  }
+}
+
+function openImageLightbox(imageUrl) {
+  const lightbox = document.querySelector('.image-lightbox');
+  if (!lightbox) return;
+
+  const img = lightbox.querySelector('img');
+  img.src = imageUrl;
+  lightbox.classList.add('visible');
+
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImageLightbox() {
+  const lightbox = document.querySelector('.image-lightbox');
+  if (!lightbox) return;
+
+  lightbox.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+function renderComments(comments) {
+    const container = DOM.commentsModal.querySelector('.comments-list');
+    const emptyState = DOM.commentsModal.querySelector('.comments-empty-state');
+    const errorState = DOM.commentsModal.querySelector('.comment-load-error');
+    const template = document.getElementById('comment-template');
+
+    if (!container || !emptyState || !errorState || !template) {
+        console.error('Required comment elements not found in DOM.');
+        if(errorState) errorState.style.display = 'block';
+        return;
+    }
+
+    container.innerHTML = '';
+    errorState.style.display = 'none';
+
+    if (!comments || comments.length === 0) {
+        emptyState.style.display = 'flex';
+        return;
+    }
+    emptyState.style.display = 'none';
+
+    const fragment = document.createDocumentFragment();
+
+    comments.forEach(comment => {
+        const commentNode = template.content.cloneNode(true);
+        const commentItem = commentNode.querySelector('.comment-item');
+
+        commentItem.dataset.commentId = comment.id;
+        commentItem.querySelector('.comment-avatar img').src = comment.avatar || 'path/to/default-avatar.png';
+        commentItem.querySelector('.comment-author').textContent = comment.user;
+        commentItem.querySelector('.comment-timestamp').textContent = Utils.formatTimeAgo(comment.timestamp);
+        commentItem.querySelector('.comment-text').textContent = comment.text;
+
+        const imageAttachment = commentItem.querySelector('.comment-image-attachment');
+        if (comment.image_url) {
+            imageAttachment.style.display = 'block';
+            imageAttachment.querySelector('img').src = comment.image_url;
+            imageAttachment.querySelector('img').addEventListener('click', () => openImageLightbox(comment.image_url));
+        } else {
+            imageAttachment.style.display = 'none';
+        }
+
+        const likeBtn = commentItem.querySelector('.comment-like-btn');
+        likeBtn.classList.toggle('active', comment.isLiked);
+        commentItem.querySelector('.comment-like-count').textContent = Utils.formatCount(comment.likes);
+
+        const optionsContainer = commentItem.querySelector('.comment-options');
+        if (comment.canEdit) {
+            optionsContainer.style.display = 'block';
+        } else {
+            optionsContainer.style.display = 'none';
+        }
+
+        fragment.appendChild(commentNode);
+    });
+
+    container.appendChild(fragment);
+}
+
+function initGlobalPanels() {
+  initEmojiPicker();
+
+  // Setup file input handler
+  const fileInput = document.querySelector('.comment-image-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', handleImageSelect);
+  }
+
+  // Setup lightbox close
+  const lightboxClose = document.querySelector('.image-lightbox-close');
+  if (lightboxClose) {
+    lightboxClose.addEventListener('click', closeImageLightbox);
+  }
+
+  const lightbox = document.querySelector('.image-lightbox');
+  if (lightbox) {
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeImageLightbox();
+      }
+    });
+  }
+}
+
+function closeWelcomeModal() {
+    const modal = DOM.welcomeModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const content = modal.querySelector('.welcome-modal-content');
+
+    const cleanup = () => {
+        if(content) content.removeEventListener('animationend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            const lastFocused = State.get('lastFocusedElement');
+            if(lastFocused) lastFocused.focus();
+        }
+    };
+
+    if(content){
+        content.addEventListener('animationend', cleanup, { once: true });
+        setTimeout(cleanup, 700); // Fallback
+    } else {
+        closeModal(modal); // Fallback for simple structure
+    }
+}
+
+export const UI = {
+  initDOMCache,
+  DOM,
+  showAlert,
+  openModal,
+  closeModal,
+  updateUIForLoginState,
+  updateTranslations,
+  applyLikeStateToDom,
+  createSlideElement,
+  renderSlides,
+  initGlobalPanels,
+  renderComments,
+  updateCommentFormVisibility,
+  showToast,
+  updateVolumeButton,
+  toggleEmojiPicker,
+  hideEmojiPicker,
+  handleImageAttachment,
+  removeCommentImage,
+  focusCommentInput,
+  scrollToComment,
+  openImageLightbox,
+  closeImageLightbox,
+  isSlideOverlayActive, // ✅ NOWE
+  setPwaModule, // ✅ NOWE
+  getIsUserLoggedIn,
+  closeCommentsModal,
+  closeWelcomeModal,
+  updateCrowdfundingStats,
+  openAuthorProfileModal,
+  closeAuthorProfileModal,
+};
+
+async function updateCrowdfundingStats() {
+    try {
+        const result = await API.getNewCrowdfundingStats();
+        if (result.success && result.data) {
+            const stats = result.data;
+            const patronsEl = document.querySelector('.stats-grid .stat-item:nth-child(1) .stat-value');
+            const collectedEl = document.querySelector('.progress-label span strong');
+            const progressFillEl = document.querySelector('.progress-section .progress-bar-fill');
+            const progressLabelEl = document.querySelector('.progress-label');
+
+            if (patronsEl) patronsEl.textContent = stats.patrons_count;
+
+            if (progressLabelEl) {
+                const goal = parseFloat(progressLabelEl.dataset.goal) || 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressLabelEl.dataset.collected = stats.collected_eur.toFixed(2);
+                progressLabelEl.dataset.percentage = percentage.toFixed(0);
+
+                if (collectedEl) collectedEl.textContent = `${stats.collected_eur.toFixed(2)} z ${goal} EUR`;
+
+                const labelSpan = progressLabelEl.querySelector('span');
+                if(labelSpan) {
+                    labelSpan.innerHTML = `Cel: <strong>${stats.collected_eur.toFixed(2)} z ${goal} EUR</strong> (${percentage.toFixed(0)}%)`;
+                }
+            }
+
+            if (progressFillEl) {
+                const goal = 500;
+                const percentage = Math.min(100, (stats.collected_eur / goal) * 100);
+                progressFillEl.style.width = `${percentage}%`;
+            }
+        }
+    } catch (error) {
+        console.error("Failed to update crowdfunding stats:", error);
+    }
+}
+
+function closeCommentsModal() {
+    const modal = DOM.commentsModal;
+    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
+        return;
+    }
+
+    modal.classList.add('is-hiding');
+    modal.setAttribute('aria-hidden', 'true');
+
+    const cleanup = () => {
+        modal.removeEventListener('transitionend', cleanup);
+        modal.classList.remove('visible', 'is-hiding');
+        activeModals.delete(modal);
+
+        if (activeModals.size === 0) {
+            DOM.container.removeAttribute('aria-hidden');
+            State.get('lastFocusedElement')?.focus();
+        }
+    };
+
+    modal.addEventListener('transitionend', cleanup, { once: true });
+    // Fallback w razie gdyby event się nie odpalił
+    setTimeout(cleanup, 400);
+}// ting-tong-theme/js/modules/interactive-wall.js
+
+export function initInteractiveWall(canvas, slideId) {
+    const ctx = canvas.getContext('2d');
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
+    // Definicje stałych (kolor fugi jest też kolorem konturu)
+    const ceglaSzerokosc = 60;
+    const ceglaWysokosc = 30;
+    const fugaGrubosc = 1;
+    const kolorCegly = '#ffffff';
+    const kolorKonturu = '#333333'; // Kolor konturu/fugi
+    const grawitacja = 0.5;
+
+    let cegly = [];
+
+    class Cegla {
+        constructor(x, y, szerokosc, wysokosc, isStatic = true) {
+            this.x = x;
+            this.y = y;
+            this.szerokosc = szerokosc;
+            this.wysokosc = wysokosc;
+            this.isStatic = isStatic;
+            this.vx = 0;
+            this.vy = 0;
+            this.kat = 0;
+            this.predkoscKatowa = 0;
+            this.zniszczona = false;
+        }
+
+        draw() {
+            if (this.zniszczona) return;
+            ctx.save();
+            ctx.translate(this.x + this.szerokosc / 2, this.y + this.wysokosc / 2);
+            ctx.rotate(this.kat);
+
+            // Rysowanie cegły (wypełnienie)
+            ctx.fillStyle = kolorCegly;
+            ctx.fillRect(-this.szerokosc / 2, -this.wysokosc / 2, this.szerokosc, this.wysokosc);
+
+            // NAPRAWA KONTURU: Rysowanie konturu (fugi)
+            ctx.strokeStyle = kolorKonturu;
+            ctx.lineWidth = fugaGrubosc;
+            ctx.strokeRect(-this.szerokosc / 2, -this.wysokosc / 2, this.szerokosc, this.wysokosc);
+
+            ctx.restore();
+        }
+
+        update() {
+            if (this.isStatic || this.zniszczona) return;
+
+            // Logika fizyki
+            this.vy += grawitacja;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.kat += this.predkoscKatowa;
+
+            if (this.y > canvas.height + this.wysokosc) {
+                this.zniszczona = true;
+            }
+        }
+    }
+
+    function inicjalizujMur() {
+        cegly = [];
+        const szerokoscCeglyZFuga = ceglaSzerokosc + fugaGrubosc;
+        const wysokoscCeglyZFuga = ceglaWysokosc + fugaGrubosc;
+        const iloscRzedow = Math.ceil(canvas.height / wysokoscCeglyZFuga);
+        // Dodatkowa kolumna dla pełnego pokrycia
+        const iloscKolumn = Math.ceil(canvas.width / szerokoscCeglyZFuga) + 1;
+
+        for (let rzad = 0; rzad < iloscRzedow; rzad++) {
+            const offset = (rzad % 2 !== 0) ? szerokoscCeglyZFuga / 2 : 0;
+            for (let kolumna = 0; kolumna < iloscKolumn; kolumna++) {
+                let x = kolumna * szerokoscCeglyZFuga - offset;
+                const y = rzad * wysokoscCeglyZFuga;
+                cegly.push(new Cegla(x, y, ceglaSzerokosc, ceglaWysokosc));
+            }
+        }
+    }
+
+    function niszczMur(klikX, klikY) {
+        // NAPRAWA 1: Zmniejszony promień destrukcji i siła (mniejsze fragmenty)
+        const PROMIEN_DESTRUKCJI = 40;
+        const BAZOWA_SILA = 8;
+        let ceglaZniszczona = false;
+
+        cegly.forEach(cegla => {
+            if (cegla.isStatic && !cegla.zniszczona) {
+                const dx = (cegla.x + cegla.szerokosc / 2) - klikX;
+                const dy = (cegla.y + cegla.wysokosc / 2) - klikY;
+                const dystans = Math.sqrt(dx * dx + dy * dy);
+
+                if (dystans < PROMIEN_DESTRUKCJI) {
+                    ceglaZniszczona = true; // Zaznacz, że coś zostało zniszczone
+                    cegla.isStatic = false;
+                    const katEksplozji = Math.atan2(dy, dx);
+
+                    // Siła jest proporcjonalna do dystansu od centrum
+                    const sila = (PROMIEN_DESTRUKCJI - dystans) / (PROMIEN_DESTRUKCJI / BAZOWA_SILA);
+
+                    cegla.vx = -Math.cos(katEksplozji) * sila * (0.8 + Math.random() * 0.4);
+                    cegla.vy = -Math.sin(katEksplozji) * sila * (0.5 + Math.random() * 0.5) - 5;
+                    cegla.predkoscKatowa = (Math.random() - 0.5) * 0.4;
+                }
+            }
+        });
+        return ceglaZniszczona; // Zwróć true, jeśli jakakolwiek cegła została uderzona
+    }
+
+    function animate() {
+        // NAPRAWA KRUCJALNA (PRZEZROCZYSTOŚĆ): Usuwamy wypełnienie tła, wideo pod spodem jest widoczne
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        cegly.forEach(cegla => {
+            cegla.update();
+            cegla.draw();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    // Resize handler (dostosowuje Canvas przy zmianie rozmiaru)
+    const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+            canvas.width = entry.contentRect.width;
+            canvas.height = entry.contentRect.height;
+            inicjalizujMur();
+        }
+    });
+    if (parent) {
+       resizeObserver.observe(parent);
+    }
+
+    // Listener interakcji
+    canvas.addEventListener('click', (event) => {
+        // KRUCJALNA NAPRAWA 2: ZAWSZE blokuj propagację do Swipera/Wideo.
+        event.stopPropagation();
+
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // 1. Wykonaj destrukcję. Zapisz, czy jakakolwiek cegła została uderzona.
+        const czyZniszczono = niszczMur(x, y);
+
+        // 2. Sprawdź, czy kliknięcie trafiło w JAKĄKOLWIEK nienaruszoną cegłę (nawet poza promieniem destrukcji)
+        let trafionoWNienaruszonaCegle = cegly.some(cegla => {
+            if (cegla.isStatic && !cegla.zniszczona) {
+                 return (
+                     x >= cegla.x && x <= cegla.x + cegla.szerokosc &&
+                     y >= cegla.y && y <= cegla.y + cegla.wysokosc
+                 );
+            }
+            return false;
+        });
+
+        // 3. LOGIKA PAUZY (NAPRAWIONA):
+        // Wideo pauzuje/odtwarza TYLKO, jeśli NIE TRAFIONO w ŻADNĄ nienaruszoną cegłę.
+        // (Czyli kliknięto w PUSTE TŁO lub w DZIURĘ pozostawioną przez zniszczone cegły).
+
+        if (!trafionoWNienaruszonaCegle) {
+             const video = canvas.closest('.tiktok-symulacja')?.querySelector('video');
+             const pauseOverlay = canvas.closest('.tiktok-symulacja')?.querySelector('.pause-overlay');
+
+             if(video) {
+                 if (video.paused) {
+                     video.play().catch(e => console.warn('Autoplay error:', e));
+                     if (pauseOverlay) pauseOverlay.classList.remove("visible");
+                 } else {
+                     video.pause();
+                     if (pauseOverlay) pauseOverlay.classList.add("visible");
+                 }
+             }
+        }
+    });
+
+    inicjalizujMur();
+    animate();
+}
+import { State } from './state.js';
+import { UI } from './ui.js';
+import { Utils } from './utils.js';
+import { API, slidesData } from './api.js';
+import { PWA } from './pwa.js';
+import { Notifications } from './notifications.js';
+import { AccountPanel } from './account-panel.js';
+import { authManager } from './auth-manager.js';
+import { TippingModal } from './tipping-modal.js';
+import { CommentsModal } from './comments-modal.js';
+
+function mockToggleLogin() {
+  const isLoggedIn = State.get("isUserLoggedIn");
+  State.set("isUserLoggedIn", !isLoggedIn);
+  UI.updateUIForLoginState();
+  const message = !isLoggedIn
+    ? Utils.getTranslation("loginSuccess")
+    : Utils.getTranslation("logoutSuccess");
+  UI.showAlert(message);
+
+  // If we are logging in, close the panel
+  if (!isLoggedIn) {
+    const loginPanel = document.querySelector("#app-frame > .login-panel");
+    if (loginPanel) loginPanel.classList.remove("active");
+    const topbar = document.querySelector("#app-frame > .topbar");
+    if (topbar) topbar.classList.remove("login-panel-active");
+  }
+}
+
+
+async function handleLikeToggle(button) {
+  if (!State.get("isUserLoggedIn")) {
+    Utils.vibrateTry();
+    UI.showAlert(Utils.getTranslation("likeAlert"));
+    return;
+  }
+  const swiper = State.get('swiper');
+  if (!swiper) return;
+  const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+  const slideData = slidesData.find((s) => s.id === slideId);
+  if (!slideData) return;
+
+  const isCurrentlyLiked = !!slideData.isLiked;
+  const newLikedState = !isCurrentlyLiked;
+  const currentCount = slideData.initialLikes;
+  const newCount = newLikedState
+    ? currentCount + 1
+    : Math.max(0, currentCount - 1);
+
+  // Optimistic UI update
+  slideData.isLiked = newLikedState;
+  slideData.initialLikes = newCount;
+  UI.applyLikeStateToDom(slideData.likeId, newLikedState, newCount);
+  button.disabled = true;
+
+  const json = await API.toggleLike(slideData.likeId);
+
+  if (json.success) {
+    slideData.isLiked = json.data.status === "liked";
+    slideData.initialLikes = json.data.count;
+    UI.applyLikeStateToDom(
+      slideData.likeId,
+      slideData.isLiked,
+      slideData.initialLikes,
+    );
+  } else {
+    // Revert
+    slideData.isLiked = isCurrentlyLiked;
+    slideData.initialLikes = currentCount;
+    UI.applyLikeStateToDom(
+      slideData.likeId,
+      isCurrentlyLiked,
+      currentCount,
+    );
+    UI.showAlert(
+      json.data?.message || Utils.getTranslation("likeError"),
+      true,
+    );
+  }
+  button.disabled = false;
+}
+
+function handleShare(button) {
+  const swiper = State.get('swiper');
+  if (!swiper) return;
+  const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+  const slideData = slidesData.find(
+    (s) => s.id === slideId,
+  );
+  if (navigator.share && slideData) {
+    navigator
+      .share({
+        title: Utils.getTranslation("shareTitle"),
+        text: slideData.description,
+        url: window.location.href,
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") console.error("Share error:", err);
+      });
+  } else {
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => UI.showAlert(Utils.getTranslation("linkCopied")));
+  }
+}
+
+async function handleLanguageToggle() { // Zmień na async
+  const oldLang = State.get("currentLang");
+  const newLang = oldLang === "pl" ? "en" : "pl";
+
+  // Mapowanie na lokalizację WP
+  const newLocale = newLang === 'pl' ? 'pl_PL' : 'en_GB';
+
+  // 1. Aktualizacja stanu aplikacji
+  State.set("currentLang", newLang);
+  localStorage.setItem("tt_lang", newLang);
+
+  // 2. Aktualizacja UI
+  UI.updateTranslations();
+  Notifications.render();
+
+  // 3. Wysłanie nowej lokalizacji do API WordPressa
+  if (State.get("isUserLoggedIn")) {
+      try {
+        const result = await API.updateLocale(newLocale);
+        if (result.success) {
+          console.log(`WordPress locale updated to: ${newLocale}`);
+        } else {
+          console.warn("Failed to update WP locale via main toggle:", result.data?.message);
+        }
+      } catch (error) {
+        console.error("API Error updating WP locale via main toggle:", error);
+      }
+  }
+}
+
+
+export const Handlers = {
+  handleNotificationClick: (event) => {
+    const item = event.target.closest(".notification-item");
+    if (!item) return;
+    item.classList.toggle("expanded");
+    item.setAttribute("aria-expanded", item.classList.contains("expanded"));
+    if (item.classList.contains("unread")) {
+      item.classList.remove("unread");
+    }
+  },
+  mainClickHandler: (e) => {
+    const target = e.target;
+    const actionTarget = target.closest("[data-action]");
+    const videoThumbnail = target.closest(".video-thumbnail");
+
+    if (videoThumbnail) {
+        if (videoThumbnail.classList.contains('locked-thumbnail')) {
+            UI.showAlert(Utils.getTranslation('becomePatronToWatch'), true);
+            return;
+        }
+        const videoUrl = videoThumbnail.dataset.videoUrl;
+        if (videoUrl) {
+            const videoModal = document.getElementById('video-player-modal');
+            const videoPlayer = videoModal.querySelector('video');
+            videoPlayer.src = videoUrl;
+
+            // 1. Zlokalizuj wideo w tle i zapauzuj, jeśli gra
+            const swiper = State.get('swiper');
+            let mainVideo;
+            if (swiper && swiper.slides[swiper.activeIndex]) {
+                mainVideo = swiper.slides[swiper.activeIndex].querySelector('video');
+                // Pauzujemy główne wideo tylko, jeśli już leci
+                if (mainVideo && !mainVideo.paused && !mainVideo.ended) {
+                    mainVideo.pause();
+                    State.set('videoPausedByAuthorModal', true); // Nowa flaga
+                }
+            }
+
+            // 2. Otwórz modal z wideo
+            UI.openModal(videoModal);
+            videoPlayer.play();
+
+            // 3. Dodaj handler, aby wznowić główne wideo po zamknięciu
+            const closeModalHandler = () => {
+                videoPlayer.pause();
+
+                // Wznów tylko jeśli zostało zapauzowane przez modal autora
+                if (State.get('videoPausedByAuthorModal') && mainVideo) {
+                    mainVideo.play().catch(e => console.error("Błąd odtwarzania głównego wideo:", e));
+                    State.set('videoPausedByAuthorModal', false);
+                }
+                // Musimy też upewnić się, że flaga jest czyszczona przy zamykaniu modala
+                State.set('videoPausedByAuthorModal', false);
+            };
+            videoModal.addEventListener('modal:close', closeModalHandler, { once: true });
+            return;
+        }
+    }
+
+    // Handle comment-related actions first
+    if (actionTarget && actionTarget.closest(".comment-item")) {
+      const commentItem = actionTarget.closest(".comment-item");
+      const commentId = commentItem.dataset.commentId;
+      const slideId = document.querySelector(".swiper-slide-active")
+        ?.dataset.slideId;
+
+      // Walidacja przed wykonaniem akcji
+      if (!slideId || !commentId) {
+        console.error('Missing slideId or commentId');
+        return;
+      }
+
+      // Sprawdź czy użytkownik jest zalogowany (dla akcji wymagających autoryzacji)
+      const requiresAuth = ['edit-comment', 'delete-comment', 'toggle-comment-like'];
+      if (requiresAuth.includes(actionTarget.dataset.action) && !State.get('isUserLoggedIn')) {
+        UI.showAlert(Utils.getTranslation('likeAlert'), true);
+        return;
+      }
+
+      switch (actionTarget.dataset.action) {
+        case "toggle-comment-like": {
+          const countEl = commentItem.querySelector(".comment-like-count");
+
+          if (!countEl) {
+            console.error('Like count element not found');
+            return;
+          }
+
+          let currentLikes = parseInt(countEl.textContent.replace(/K|M/g, "")) || 0;
+
+          // Optimistic UI update
+          actionTarget.classList.toggle("active");
+          const isLiked = actionTarget.classList.contains("active");
+          currentLikes += isLiked ? 1 : -1;
+          countEl.textContent = Utils.formatCount(currentLikes);
+
+          // Disable button podczas requestu
+          actionTarget.disabled = true;
+
+          API.toggleCommentLike(slideId, commentId)
+            .then((response) => {
+              // Walidacja odpowiedzi
+              if (!response || typeof response.success !== 'boolean') {
+                throw new Error('Invalid response format');
+              }
+
+              if (!response.success) {
+                // Revert on failure
+                actionTarget.classList.toggle("active");
+                currentLikes += isLiked ? -1 : 1;
+                countEl.textContent = Utils.formatCount(currentLikes);
+
+                throw new Error(
+                  response.data?.message || Utils.getTranslation("failedToUpdateLike")
+                );
+              }
+
+              // Zaktualizuj z prawdziwą wartością z serwera
+              if (response.data?.likes !== undefined) {
+                countEl.textContent = Utils.formatCount(response.data.likes);
+              }
+            })
+            .catch((error) => {
+              console.error('Toggle comment like error:', error);
+              UI.showAlert(error.message || Utils.getTranslation("failedToUpdateLike"), true);
+            })
+            .finally(() => {
+              actionTarget.disabled = false;
+            });
+          break;
+        }
+        case "edit-comment": {
+          const textElement = commentItem.querySelector(".comment-text");
+
+          if (!textElement) {
+            console.error('Comment text element not found');
+            return;
+          }
+
+          const currentText = textElement.textContent;
+          const newText = prompt(
+            Utils.getTranslation("editCommentPrompt"),
+            currentText,
+          );
+
+          // Walidacja input
+          if (!newText || !newText.trim()) {
+            return;
+          }
+
+          if (newText.trim() === currentText) {
+            return; // Brak zmian
+          }
+
+          // Disable edit button podczas requestu
+          actionTarget.disabled = true;
+
+          API.editComment(slideId, commentId, newText.trim())
+            .then((response) => {
+              // Walidacja odpowiedzi
+              if (!response || typeof response.success !== 'boolean') {
+                throw new Error('Invalid response format');
+              }
+
+              if (!response.success) {
+                throw new Error(
+                  response.data?.message || Utils.getTranslation("commentUpdateError")
+                );
+              }
+
+              // Sprawdź czy mamy dane komentarza
+              if (!response.data || !response.data.id) {
+                throw new Error('Invalid comment data in response');
+              }
+
+              // Zaktualizuj w slidesData
+              const slideData = slidesData.find((s) => s.id === slideId);
+              if (slideData && Array.isArray(slideData.comments)) {
+                const commentIndex = slideData.comments.findIndex(
+                  c => String(c.id) === String(commentId)
+                );
+                if (commentIndex > -1) {
+                  slideData.comments[commentIndex] = response.data;
+                }
+                UI.renderComments(slideData.comments);
+              }
+
+              UI.showToast(Utils.getTranslation("commentUpdateSuccess"));
+            })
+            .catch((error) => {
+              console.error('Edit comment error:', error);
+              UI.showAlert(error.message || Utils.getTranslation("commentUpdateError"), true);
+            })
+            .finally(() => {
+              actionTarget.disabled = false;
+            });
+          break;
+        }
+        case "delete-comment": {
+          if (!confirm(Utils.getTranslation("deleteCommentConfirm"))) {
+            return;
+          }
+
+          // Disable delete button podczas requestu
+          actionTarget.disabled = true;
+
+          API.deleteComment(slideId, commentId)
+            .then((response) => {
+              // Walidacja odpowiedzi
+              if (!response || typeof response.success !== 'boolean') {
+                throw new Error('Invalid response format');
+              }
+
+              if (!response.success) {
+                throw new Error(
+                  response.data?.message || Utils.getTranslation("commentDeleteError")
+                );
+              }
+
+              // Sprawdź czy mamy new_count
+              if (typeof response.data?.new_count !== 'number') {
+                console.warn('Missing new_count in response, calculating manually');
+              }
+
+              // Zaktualizuj slidesData
+              const slideData = slidesData.find((s) => s.id === slideId);
+              if (slideData) {
+                // Usuń komentarz z lokalnych danych
+                if (Array.isArray(slideData.comments)) {
+                  const commentIndex = slideData.comments.findIndex(
+                    c => String(c.id) === String(commentId)
+                  );
+                  if (commentIndex > -1) {
+                    slideData.comments.splice(commentIndex, 1);
+                  }
+                }
+
+                // Zaktualizuj licznik
+                slideData.initialComments = response.data?.new_count ?? slideData.comments.length;
+
+                // Re-render komentarzy
+                UI.renderComments(slideData.comments);
+
+                // Zaktualizuj licznik w głównym widoku
+                const slideElement = document.querySelector(
+                  `.swiper-slide-active[data-slide-id="${slideId}"]`
+                );
+                const mainSlideCount = slideElement?.querySelector(".comment-count");
+                if (mainSlideCount) {
+                  mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+                }
+
+                // Zaktualizuj tytuł modala
+                const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+                if (commentsTitle) {
+                  commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+                }
+              }
+
+              UI.showToast(Utils.getTranslation("commentDeleteSuccess"));
+            })
+            .catch((error) => {
+              console.error('Delete comment error:', error);
+              UI.showAlert(error.message || Utils.getTranslation("commentDeleteError"), true);
+              actionTarget.disabled = false; // Re-enable jeśli błąd
+            });
+          break;
+        }
+      }
+      // Return to avoid double-handling reply-to-comment
+      if (actionTarget.dataset.action !== 'reply-to-comment') {
+          return;
+      }
+    }
+
+    if (!actionTarget) {
+      return;
+    }
+
+    const action = actionTarget.dataset.action;
+
+    const topbar = document.querySelector("#app-frame > .topbar");
+    const loginPanel = document.querySelector("#app-frame > .login-panel");
+    const loggedInMenu = document.querySelector(
+      "#app-frame > .logged-in-menu",
+    );
+
+    switch (action) {
+      case "toggle-password-visibility":
+        const passwordInput = document.getElementById('tt-password');
+        const eyeOpen = actionTarget.querySelector('.eye-icon-open');
+        const eyeClosed = actionTarget.querySelector('.eye-icon-closed');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeOpen.style.display = 'block';
+            eyeClosed.style.display = 'none';
+        } else {
+            passwordInput.type = 'password';
+            eyeOpen.style.display = 'none';
+            eyeClosed.style.display = 'block';
+        }
+        break;
+      case "toggle-emoji-picker":
+        UI.toggleEmojiPicker();
+        break;
+      case "attach-image":
+        UI.handleImageAttachment();
+        break;
+      case "remove-comment-image":
+        UI.removeCommentImage();
+        break;
+      case "reply-to-comment": {
+        const commentItem = actionTarget.closest(".comment-item");
+        const commentId = commentItem?.dataset.commentId;
+        const userElement = commentItem?.querySelector(".comment-user");
+
+        // Walidacja
+        if (!commentId || !userElement) {
+          console.error('Invalid reply target');
+          return;
+        }
+
+        const user = userElement.textContent;
+
+        // Sprawdź czy już nie odpowiadamy na ten komentarz
+        const currentReplyId = State.get("replyingToComment");
+        if (currentReplyId === commentId) {
+          // Już odpowiadamy na ten komentarz - tylko focus input
+          UI.focusCommentInput();
+          return;
+        }
+
+        State.set("replyingToComment", commentId);
+
+        const formContainer = document.querySelector(".comment-form-container");
+        if (!formContainer) {
+          console.error('Comment form container not found');
+          return;
+        }
+
+        // Usuń stary reply context jeśli istnieje (zapobieganie duplikatom)
+        const oldReplyContext = formContainer.querySelector(".reply-context");
+        if (oldReplyContext) {
+          oldReplyContext.remove();
+        }
+
+        // Utwórz nowy reply context
+        const replyContext = document.createElement("div");
+        replyContext.className = "reply-context";
+        formContainer.prepend(replyContext);
+
+        const cancelAriaLabel = Utils.getTranslation("cancelReplyAriaLabel");
+        const replyingToText = Utils.getTranslation("replyingTo").replace("{user}", user);
+
+        replyContext.innerHTML = `
+          <span class="reply-context-text">${replyingToText}</span>
+          <button class="cancel-reply-btn" data-action="cancel-reply" aria-label="${cancelAriaLabel}">&times;</button>
+        `;
+        replyContext.style.display = "flex";
+
+        // Animacja wejścia
+        requestAnimationFrame(() => {
+          replyContext.style.opacity = '0';
+          replyContext.style.transform = 'translateY(-10px)';
+          replyContext.style.transition = 'opacity 0.2s, transform 0.2s';
+
+          requestAnimationFrame(() => {
+            replyContext.style.opacity = '1';
+            replyContext.style.transform = 'translateY(0)';
+          });
+        });
+
+        UI.focusCommentInput();
+        break;
+      }
+      case "cancel-reply": {
+        State.set("replyingToComment", null);
+        const replyContext = document.querySelector(".reply-context");
+        if (replyContext) replyContext.style.display = "none";
+        UI.removeCommentImage();
+        break;
+      }
+      case "go-back":
+        const modalToClose = actionTarget.closest(".modal-overlay");
+        if (modalToClose) {
+          UI.closeModal(modalToClose);
+        }
+        break;
+      case "toggle-like":
+        handleLikeToggle(actionTarget);
+        break;
+      case "share":
+        handleShare(actionTarget);
+        break;
+      case "toggle-language":
+        handleLanguageToggle();
+        break;
+      case "open-comments-modal": {
+        const modal = document.getElementById('comments-modal-container');
+        if (modal) {
+            modal.classList.add('visible');
+        }
+        break;
+      }
+      case "switch-profile-tab": {
+        const tabButton = actionTarget;
+        const tabContentId = tabButton.dataset.tab;
+
+        const modal = tabButton.closest('.profile-modal-content');
+        if (!modal) return;
+
+        // Deactivate all tabs and hide all content
+        modal.querySelectorAll('.profile-tab').forEach(tab => tab.classList.remove('active'));
+        modal.querySelectorAll('.video-gallery').forEach(content => content.classList.remove('active'));
+
+        // Activate the clicked tab and show its content
+        tabButton.classList.add('active');
+        const activeContent = modal.querySelector(`#${tabContentId}`);
+        if (activeContent) {
+          activeContent.classList.add('active');
+        }
+        break;
+      }
+      case "close-comments-modal":
+        UI.closeCommentsModal();
+        break;
+      case "open-info-modal":
+        UI.openModal(document.getElementById('infoModal'), {
+          animationClass: 'slideInFromTop'
+        });
+        break;
+      case "open-tipping-from-info": {
+        const infoModal = document.getElementById('infoModal');
+        if (infoModal && infoModal.classList.contains('visible')) {
+            UI.closeModal(infoModal, {
+                keepFocus: true,
+                animationClass: 'slideOutLeft',
+                onClose: () => {
+                    TippingModal.showModal({ animationClass: 'slideInRight' });
+                }
+            });
+        } else {
+            TippingModal.showModal();
+        }
+        break;
+      }
+      case "open-desktop-pwa-modal":
+        PWA.openDesktopModal();
+        break;
+      case "open-ios-pwa-modal":
+        PWA.openIosModal();
+        break;
+      case "install-pwa":
+        // This is now handled directly in the PWA module.
+        break;
+      case "open-author-profile":
+        const swiper = State.get('swiper');
+        if (swiper) {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            const slideId = activeSlide.dataset.slideId;
+            const slideData = slidesData.find((s) => s.id === slideId);
+            if (slideData) {
+                const isLightTheme = activeSlide.classList.contains('slide--light-theme');
+                UI.openAuthorProfileModal(slideData, { isLightTheme });
+            }
+        }
+        break;
+      case "close-author-profile": {
+        const authorModal = document.getElementById('author-profile-modal');
+
+        // Nowa logika do zatrzymania odtwarzania wideo z kafelka
+        const activeVideoPlayer = authorModal.querySelector('.video-tile-content.active video');
+        if (activeVideoPlayer) {
+            activeVideoPlayer.pause();
+            activeVideoPlayer.currentTime = 0; // Przewinięcie na początek
+        }
+        UI.closeAuthorProfileModal();
+        break;
+      }
+      case "close-modal":
+        e.stopPropagation(); // Stop the event from bubbling up to parent elements
+        const modal = actionTarget.closest(".modal-overlay");
+        if (modal) {
+          if (modal.id === 'infoModal') {
+            UI.closeModal(modal, { animationClass: 'slideOutToTop' });
+          } else {
+            UI.closeModal(modal);
+          }
+        } else {
+          PWA.closePwaModals();
+        }
+        break;
+      case "close-welcome-modal":
+        UI.closeWelcomeModal();
+        break;
+      case "open-account-modal":
+        AccountPanel.openAccountModal();
+        break;
+      case "close-account-modal":
+        UI.closeModal(UI.DOM.accountModal, { animationClass: 'slideOutLeft' });
+        break;
+      case "logout":
+        e.preventDefault();
+        (async () => {
+          if (actionTarget.disabled) return;
+
+          actionTarget.disabled = true;
+          const originalText = actionTarget.textContent;
+
+          try {
+            await authManager.logout();
+
+            if (loggedInMenu) loggedInMenu.classList.remove("active");
+
+            UI.showAlert(Utils.getTranslation("logoutSuccess"));
+
+          } catch (error) {
+            console.error('Logout error:', error);
+            UI.showAlert(error.message || 'Logout failed', true);
+          } finally {
+            actionTarget.disabled = false;
+            actionTarget.textContent = originalText;
+          }
+        })();
+        break;
+      case "toggle-main-menu":
+        if (State.get("isUserLoggedIn")) {
+          if (loggedInMenu) loggedInMenu.classList.toggle("active");
+        } else {
+          Utils.vibrateTry();
+          UI.showAlert(Utils.getTranslation("menuAccessAlert"));
+        }
+        break;
+      case "toggle-login-panel":
+        if (!State.get("isUserLoggedIn")) {
+            // Kod do zapisania stanu odtwarzania wideo w tle (zachowany)
+            const swiper = State.get('swiper');
+            if (swiper) {
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                const video = activeSlide?.querySelector('video');
+                if (video) {
+                    State.set('videoPlaybackState', {
+                        slideId: activeSlide.dataset.slideId,
+                        currentTime: video.currentTime,
+                    });
+                }
+            }
+
+            if (UI.DOM.commentsModal.classList.contains("visible")) {
+                UI.closeCommentsModal();
+            }
+            if (loginPanel) {
+                if (loginPanel.classList.contains('active')) {
+                    // CLOSING
+                    loginPanel.classList.add('login-panel--closing');
+                    // Użyj transitionend dla transform, aby zapewnić płynne zamknięcie i prawidłowe czyszczenie
+                    const onTransitionEnd = (e) => {
+                        // Upewnij się, że event dotyczy właściwej właściwości i że jest to stan zamykania
+                        if (e.propertyName === 'transform' && loginPanel.classList.contains('login-panel--closing')) {
+                            loginPanel.classList.remove('active', 'login-panel--closing');
+                            loginPanel.removeEventListener('transitionend', onTransitionEnd);
+                            if (topbar) {
+                                topbar.classList.remove("login-panel-active");
+                            }
+                        }
+                    };
+                    // Użyj { once: true } na ogólnym listenerze dla bezpieczeństwa
+                    loginPanel.addEventListener('transitionend', onTransitionEnd);
+                } else {
+                    // OPENING
+                    loginPanel.classList.remove('login-panel--closing');
+                    loginPanel.classList.add('active');
+                    if (topbar) {
+                        topbar.classList.add("login-panel-active");
+                    }
+                }
+            }
+        }
+        break;
+      case "subscribe":
+        if (!State.get("isUserLoggedIn")) {
+          Utils.vibrateTry();
+          UI.showAlert(Utils.getTranslation("subscribeAlert"));
+        }
+        break;
+      case "toggle-push-notifications":
+        Notifications.handleBellClick();
+        break;
+      case "close-notifications":
+        if (UI.DOM.notificationPopup) {
+          UI.DOM.notificationPopup.classList.remove("visible");
+        }
+        break;
+      case "show-tip-jar":
+        const authorModal = actionTarget.closest('#author-profile-modal');
+        if (authorModal) {
+            // NAPRAWA: Wymuś lustrzaną animację wyjścia
+            UI.closeModal(authorModal, {
+                animationClass: 'slideOutRight', // <--- POPRAWIONO: Modal Autora chowa się w prawo
+                contentSelector: '.profile-modal-content',
+                onClose: () => {
+                    // Modal Napiwkowy wjeżdża z prawej (efekt płynnej zamiany)
+                    TippingModal.showModal({
+                        animationClass: 'slideInRight'
+                    });
+                }
+            });
+        } else {
+            TippingModal.showModal();
+        }
+        break;
+      case "tipping-next":
+        TippingModal.handleNextStep();
+        break;
+      case "tipping-prev":
+        TippingModal.handlePrevStep();
+        break;
+      case "play-video": {
+        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
+        if (video) {
+          video.play().catch(err => console.log("Błąd play:", err));
+          const pauseOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".pause-overlay");
+          if (pauseOverlay) pauseOverlay.classList.remove('visible');
+        }
+        break;
+      }
+      case "replay-video": {
+        const video = actionTarget.closest(".tiktok-symulacja")?.querySelector("video");
+        if (video) {
+          video.currentTime = 0;
+          video.play().catch(err => console.log("Błąd replay:", err));
+          const replayOverlay = actionTarget.closest(".tiktok-symulacja")?.querySelector(".replay-overlay");
+          if (replayOverlay) replayOverlay.classList.remove('visible');
+        }
+        break;
+      }
+      case "toggle-volume":
+        e.stopPropagation();
+        const isMuted = !State.get("isSoundMuted");
+        State.set("isSoundMuted", isMuted);
+        const activeSlideVideo = document.querySelector(".swiper-slide-active video");
+        if (activeSlideVideo) {
+          activeSlideVideo.muted = isMuted;
+        }
+        UI.updateVolumeButton(isMuted);
+        break;
+      case "toggle-fullscreen": {
+        // This action should only work in PWA mode.
+        if (!PWA.isStandalone()) {
+          UI.showToast(Utils.getTranslation("immersiveModePwaOnly"));
+          return;
+        }
+
+        const appFrame = document.getElementById("app-frame");
+        if (appFrame) {
+            const isHiding = appFrame.classList.toggle("hide-ui");
+
+            // Find the button in the active slide to update its icon
+            const activeSlide = document.querySelector('.swiper-slide-active');
+            const btn = activeSlide?.querySelector('.fullscreen-button');
+
+            if (btn) {
+                const enterIcon = btn.querySelector('.fullscreen-enter-icon');
+                const exitIcon = btn.querySelector('.fullscreen-exit-icon');
+
+                if (isHiding) {
+                    enterIcon.style.display = 'none';
+                    exitIcon.style.display = 'block';
+                } else {
+                    enterIcon.style.display = 'block';
+                    exitIcon.style.display = 'none';
+                }
+            }
+        }
+        break;
+      }
+    }
+  },
+  formSubmitHandler: async (e) => {
+    const loginForm = e.target.closest("form#tt-login-form");
+
+    // ========================================================================
+    // OBSŁUGA FORMULARZA LOGOWANIA - Z AKTUALIZACJĄ O MODAL PIERWSZEGO LOGOWANIA
+    // ========================================================================
+    if (loginForm) {
+      e.preventDefault();
+
+      const usernameInput = loginForm.querySelector("#tt-username");
+      const passwordInput = loginForm.querySelector("#tt-password");
+      const submitButton = loginForm.querySelector("#tt-login-submit");
+
+      if (!usernameInput || !passwordInput) {
+        UI.showAlert("Form elements not found", true);
+        return;
+      }
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        UI.showAlert(Utils.getTranslation("allFieldsRequiredError") || "Please enter username and password.", true);
+        return;
+      }
+
+      submitButton.disabled = true;
+      const originalText = submitButton.textContent;
+      submitButton.innerHTML = '<span class="loading-spinner"></span>';
+
+      try {
+        // Zaloguj się. authManager.login sam wywoła event 'user:login',
+        // który jest obsługiwany w app.js. To centralne miejsce
+        // zajmie się pokazaniem modala lub zaktualizowaniem UI.
+        await authManager.login(username, password);
+
+        // Po prostu wyczyść formularz.
+        usernameInput.value = '';
+        passwordInput.value = '';
+
+      } catch (error) {
+        console.error('Login error:', error);
+        UI.showAlert(
+          error.message || Utils.getTranslation("loginFailed"),
+          true
+        );
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+      }
+
+      return;
+    }
+
+    const tippingForm = e.target.closest("form#tippingForm");
+    if (tippingForm) {
+        e.preventDefault();
+        TippingModal.handleFormSubmit();
+        return;
+    }
+
+    // ========================================================================
+    // OBSŁUGA FORMULARZA KOMENTARZY (pozostaje bez zmian)
+    // ========================================================================
+    const commentForm = e.target.closest("form#comment-form");
+    if (commentForm) {
+      e.preventDefault();
+
+      const input = commentForm.querySelector("#comment-input");
+      if (!input) {
+        console.error('Comment input not found');
+        return;
+      }
+
+      const text = input.value.trim();
+      const hasImage = window.selectedCommentImage !== null;
+
+      // Walidacja - musi być tekst lub obraz
+      if (!text && !hasImage) {
+        return;
+      }
+
+      const button = commentForm.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+
+      const swiper = State.get('swiper');
+      if (!swiper) {
+        console.error('Swiper instance not found');
+        if (button) button.disabled = false;
+        return;
+      }
+      const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+      const parentId = State.get("replyingToComment");
+
+      if (!slideId) {
+        console.error('No active slide found');
+        if (button) button.disabled = false;
+        return;
+      }
+
+      (async () => {
+        try {
+          let imageUrl = null;
+
+          // Upload obrazu jeśli istnieje
+          if (window.selectedCommentImage) {
+            UI.showToast(Utils.getTranslation('uploadingAvatar') || 'Przesyłanie obrazu...');
+
+            const uploadResult = await API.uploadCommentImage(window.selectedCommentImage);
+
+            // Walidacja odpowiedzi
+            if (!uploadResult || typeof uploadResult.success !== 'boolean') {
+              throw new Error('Invalid upload response');
+            }
+
+            if (!uploadResult.success) {
+              throw new Error(
+                uploadResult.data?.message || 'Nie udało się przesłać obrazu'
+              );
+            }
+
+            if (!uploadResult.data?.url) {
+              throw new Error('Missing image URL in response');
+            }
+
+            imageUrl = uploadResult.data.url;
+          }
+
+          // Wyślij komentarz
+          const postResponse = await API.postComment(slideId, text, parentId, imageUrl);
+
+          // Walidacja odpowiedzi
+          if (!postResponse || typeof postResponse.success !== 'boolean') {
+            throw new Error('Invalid comment response');
+          }
+
+          if (!postResponse.success) {
+            throw new Error(
+              postResponse.data?.message || Utils.getTranslation("postCommentError")
+            );
+          }
+
+          if (!postResponse.data || !postResponse.data.id) {
+            throw new Error('Invalid comment data in response');
+          }
+
+          // Sukces - wyczyść formularz
+          input.value = "";
+          State.set("replyingToComment", null);
+
+          const replyContext = document.querySelector(".reply-context");
+          if (replyContext) replyContext.style.display = "none";
+
+          UI.removeCommentImage();
+
+          UI.showToast(Utils.getTranslation("postCommentSuccess"));
+
+          // Zaktualizuj lokalne dane
+          const slideData = slidesData.find((s) => s.id === slideId);
+          if (slideData) {
+            // Dodaj nowy komentarz
+            if (!Array.isArray(slideData.comments)) {
+              slideData.comments = [];
+            }
+            slideData.comments.push(postResponse.data);
+
+            // Zaktualizuj licznik
+            slideData.initialComments = postResponse.data.new_comment_count ?? slideData.comments.length;
+
+            // Re-render
+            UI.renderComments(slideData.comments);
+
+            // Zaktualizuj licznik w głównym widoku
+            const mainSlideCount = slideElement.querySelector(".comment-count");
+            if (mainSlideCount) {
+              mainSlideCount.textContent = Utils.formatCount(slideData.initialComments);
+            }
+
+            // Zaktualizuj tytuł modala
+            const commentsTitle = UI.DOM.commentsModal.querySelector("#commentsTitle");
+            if (commentsTitle) {
+              commentsTitle.textContent = `${Utils.getTranslation("commentsModalTitle")} (${slideData.initialComments})`;
+            }
+
+            // Scroll do dołu
+            const modalBody = UI.DOM.commentsModal.querySelector(".modal-body");
+            if (modalBody) {
+              setTimeout(() => {
+                modalBody.scrollTop = modalBody.scrollHeight;
+              }, 100);
+            }
+          }
+
+        } catch (error) {
+          console.error('Post comment error:', error);
+          UI.showAlert(error.message || Utils.getTranslation("postCommentError"), true);
+        } finally {
+          if (button) button.disabled = false;
+          input.focus();
+        }
+      })();
+    }
+  },
+};
