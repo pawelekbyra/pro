@@ -1169,7 +1169,6 @@ body,
 /* Styl dla obwódki VIP */
 .vip-avatar-border {
   position: relative;
-  border: 2px solid #000 !important;
   padding: 0;
   background-clip: padding-box !important;
   animation: flicker-glow 2s infinite;

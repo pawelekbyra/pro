@@ -114,9 +114,13 @@ export const Config = {
         pl: "Bramka Napiwkowa",
         en: "Tipping Gateway",
       },
+      tippingThankYou: {
+        pl: "Dziękuję za napiwek! 🏆",
+        en: "Thank you for the tip! 🏆"
+      },
       tippingStep1Desc: {
-          pl: "Założyć konto Patrona? 🏆",
-          en: "Become a Love Patron and support the project's development. 🏆"
+          pl: "Założyć konto Patrona?",
+          en: "Become a Love Patron and support the project's development."
       },
       tippingCreateAccountLabel: {
           pl: "No raczej!",
