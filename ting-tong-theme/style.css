@@ -613,6 +613,7 @@ body,
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
+/* FIX 1: Zapewnienie, że tło statycznego muru pokrywa całą przestrzeń i maskuje wideo */
 .secret-overlay {
   position: absolute;
   top: var(--topbar-height);
@@ -620,7 +621,9 @@ body,
   width: 100%;
   bottom: 0;
   height: auto !important;
-  background: none;
+  background: rgba(0, 0, 0, 0.7) !important; /* Mocne czarne, półprzezroczyste tło */
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -633,11 +636,18 @@ body,
   transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
   overflow: hidden;
 }
+
+.secret-overlay .mur-container {
+/* Ukrycie hardkodowanego muru (cegieł) na rzecz tła, by zawsze sięgał do dołu */
+display: none !important;
+}
+
 .secret-overlay.visible {
   opacity: 1;
   pointer-events: auto;
 }
 
+/* FIX 2: Przezroczyste tło dla interaktywnego muru (umożliwia widoczność wideo) */
 .interactive-wall-overlay {
     position: absolute;
     top: var(--topbar-height);
@@ -649,12 +659,28 @@ body,
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
-    background-color: #333; /* Ensure it has a background */
+    background-color: transparent !important; /* KLUCZOWA ZMIANA */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 .interactive-wall-overlay.visible {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* FIX 3: Ukrycie wszystkich interaktywnych elementów podczas aktywnej gry na murze */
+.tiktok-symulacja.wall-active .sidebar,
+.tiktok-symulacja.wall-active .bottombar,
+.tiktok-symulacja.wall-active .video-controls {
+opacity: 0 !important;
+pointer-events: none !important;
+transition: opacity 0.3s ease-out; /* Dodaj przejście dla płynności */
+}
+
+/* Upewnij się, że element nie przeszkadza w klikaniu muru */
+.tiktok-symulacja.wall-active .interactive-wall-overlay {
+z-index: 10100; /* Upewnij się, że jest na wierzchu */
 }
 
 .interactive-canvas {

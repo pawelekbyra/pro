@@ -1,3 +1,4 @@
+import { UI } from './ui.js'; // Dodaj import na początku
 // ting-tong-theme/js/modules/interactive-wall.js
 
 export function initInteractiveWall(canvas, slideId) {
@@ -14,6 +15,7 @@ export function initInteractiveWall(canvas, slideId) {
     const grawitacja = 0.5;
 
     let cegly = [];
+    let ceglyDoZniszczenia = 0; // NOWA ZMIENNA (zlicza pierwotną liczbę cegieł)
 
     class Cegla {
         constructor(x, y, szerokosc, wysokosc, isStatic = true) {
@@ -64,6 +66,7 @@ export function initInteractiveWall(canvas, slideId) {
 
     function inicjalizujMur() {
         cegly = [];
+        ceglyDoZniszczenia = 0; // Reset
         const szerokoscCeglyZFuga = ceglaSzerokosc + fugaGrubosc;
         const wysokoscCeglyZFuga = ceglaWysokosc + fugaGrubosc;
         const iloscRzedow = Math.ceil(canvas.height / wysokoscCeglyZFuga);
@@ -75,7 +78,9 @@ export function initInteractiveWall(canvas, slideId) {
             for (let kolumna = 0; kolumna < iloscKolumn; kolumna++) {
                 let x = kolumna * szerokoscCeglyZFuga - offset;
                 const y = rzad * wysokoscCeglyZFuga;
-                cegly.push(new Cegla(x, y, ceglaSzerokosc, ceglaWysokosc));
+                const nowaCegla = new Cegla(x, y, ceglaSzerokosc, ceglaWysokosc);
+                cegly.push(nowaCegla);
+                ceglyDoZniszczenia++; // Zlicz statyczne cegły
             }
         }
     }
@@ -110,13 +115,43 @@ export function initInteractiveWall(canvas, slideId) {
     }
 
     function animate() {
-        // NAPRAWA KRUCJALNA (PRZEZROCZYSTOŚĆ): Usuwamy wypełnienie tła, wideo pod spodem jest widoczne
+        // NAPRAWA KRUCJALNA (PRZEZROCZYSTOŚĆ): Usunięto wypełnienie tła, wideo pod spodem jest widoczne
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        cegly.forEach(cegla => {
-            cegla.update();
-            cegla.draw();
-        });
+        let statyczneCegly = 0;
+
+        // Iteracja od tyłu dla bezpieczeństwa
+        for(let i = cegly.length - 1; i >= 0; i--) {
+            const cegla = cegly[i];
+            if (!cegla.zniszczona) {
+                cegla.update();
+                cegla.draw();
+            }
+            if (cegla.isStatic && !cegla.zniszczona) {
+                statyczneCegly++;
+            }
+        }
+
+        // Usuń cegły, które zniszczyły się lub wypadły z ekranu
+        cegly = cegly.filter(c => !c.zniszczona && (c.isStatic || c.y < canvas.height + c.wysokosc));
+
+        // KLUCZOWA LOGIKA SPRAWDZANIA ZNISZCZENIA
+        if (statyczneCegly === 0 && ceglyDoZniszczenia > 0) {
+            // Wszystkie statyczne cegły zostały zamienione na dynamiczne.
+            ceglyDoZniszczenia = 0; // Zapobiega ponownemu wywołaniu
+
+            // Poczekaj na animację spadania (np. 1.5 sekundy)
+            setTimeout(() => {
+                UI.handleWallDestroyed(slideId); // Wywołaj funkcję sukcesu UI
+                // Opcjonalnie: usuń canvas po animacji
+                if (parent) {
+                    canvas.remove();
+                    parent.classList.remove('visible');
+                }
+            }, 1500);
+
+            return; // Zakończ pętlę animacji na dobre
+        }
 
         requestAnimationFrame(animate);
     }
@@ -135,45 +170,17 @@ export function initInteractiveWall(canvas, slideId) {
 
     // Listener interakcji
     canvas.addEventListener('click', (event) => {
-        // KRUCJALNA NAPRAWA 2: ZAWSZE blokuj propagację do Swipera/Wideo.
+        // KRUCJALNA NAPRAWA: ZAWSZE blokuj propagację do Swipera/Wideo.
         event.stopPropagation();
 
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // 1. Wykonaj destrukcję. Zapisz, czy jakakolwiek cegła została uderzona.
-        const czyZniszczono = niszczMur(x, y);
+        // Wykonaj destrukcję.
+        niszczMur(x, y);
 
-        // 2. Sprawdź, czy kliknięcie trafiło w JAKĄKOLWIEK nienaruszoną cegłę (nawet poza promieniem destrukcji)
-        let trafionoWNienaruszonaCegle = cegly.some(cegla => {
-            if (cegla.isStatic && !cegla.zniszczona) {
-                 return (
-                     x >= cegla.x && x <= cegla.x + cegla.szerokosc &&
-                     y >= cegla.y && y <= cegla.y + cegla.wysokosc
-                 );
-            }
-            return false;
-        });
-
-        // 3. LOGIKA PAUZY (NAPRAWIONA):
-        // Wideo pauzuje/odtwarza TYLKO, jeśli NIE TRAFIONO w ŻADNĄ nienaruszoną cegłę.
-        // (Czyli kliknięto w PUSTE TŁO lub w DZIURĘ pozostawioną przez zniszczone cegły).
-
-        if (!trafionoWNienaruszonaCegle) {
-             const video = canvas.closest('.tiktok-symulacja')?.querySelector('video');
-             const pauseOverlay = canvas.closest('.tiktok-symulacja')?.querySelector('.pause-overlay');
-
-             if(video) {
-                 if (video.paused) {
-                     video.play().catch(e => console.warn('Autoplay error:', e));
-                     if (pauseOverlay) pauseOverlay.classList.remove("visible");
-                 } else {
-                     video.pause();
-                     if (pauseOverlay) pauseOverlay.classList.add("visible");
-                 }
-             }
-        }
+        // ZMIANA: USUNIĘTO logikę pauzy/odtwarzania wideo
     });
 
     inicjalizujMur();
