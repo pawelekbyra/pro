@@ -619,27 +619,7 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background-color: #ffffff;
-  background-image:
-    /* horizontal lines */
-    repeating-linear-gradient(
-      #333333 0, #333333 1px,
-      transparent 1px, transparent 31px
-    ),
-    /* vertical lines */
-    repeating-linear-gradient(
-      90deg,
-      #333333 0, #333333 1px,
-      transparent 1px, transparent 61px
-    ),
-    /* vertical lines offset */
-    repeating-linear-gradient(
-      90deg,
-      #333333 0, #333333 1px,
-      transparent 1px, transparent 61px
-    );
-  background-size: 100% 31px, 122px 62px, 122px 62px;
-  background-position: 0 0, 0 0, 61px 31px;
+  background: none; /* Remove old background */
   z-index: 100;
   display: flex;
   align-items: center;
@@ -650,11 +630,45 @@ body,
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
+  overflow: hidden; /* Ensure the brick pattern is contained */
 }
 .secret-overlay.visible {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* --- Brick Wall Background Styles --- */
+.mur-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Place it behind the content */
+    border: 1px solid #333333;
+    background-color: #333333;
+    overflow: hidden;
+}
+
+.mur-row {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-bottom: 1px;
+}
+
+.mur-row:nth-child(even) {
+    margin-left: -30.5px;
+}
+
+.cegla {
+    width: 60px;
+    height: 30px;
+    background-color: #ffffff;
+    margin-right: 1px;
+    flex-shrink: 0; /* Prevent bricks from shrinking */
+}
+/* --- End Brick Wall --- */
+
 .secret-overlay .secret-icon {
   width: 64px;
   height: 64px;
@@ -6425,7 +6439,7 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 
 /* Avatar border and glow */
 .slide--light-theme .tiktok-symulacja .profile img {
-  border-color: #fff !important;
+  border-color: #000 !important;
   animation: flicker-glow 2s infinite;
 }
 
