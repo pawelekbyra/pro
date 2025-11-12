@@ -109,39 +109,58 @@ function openAuthorProfileModal(slideData, options = {}) {
             modal.querySelector('.likes-count').textContent = '1.2M';
 
             const followBtn = modal.querySelector('.follow-btn');
-            const socialBtns = modal.querySelectorAll('.social-btn');
-            const allBtns = [followBtn, ...socialBtns];
+// --- Start: Pop & Bounce Animation ---
+const actionButtons = modal.querySelectorAll('.follow-btn, .social-btn');
 
-            allBtns.forEach(btn => {
-                const handlePress = () => btn.classList.add('pressed');
-                const handleRelease = () => {
-                    btn.classList.remove('pressed');
-                    btn.classList.add('bounced');
-                    setTimeout(() => btn.classList.remove('bounced'), 150);
-                };
+actionButtons.forEach(btn => {
+let bounceTimeout;
 
-                btn.removeEventListener('mousedown', handlePress);
-                btn.removeEventListener('mouseup', handleRelease);
-                btn.removeEventListener('mouseleave', handleRelease);
-                btn.removeEventListener('touchstart', handlePress);
-                btn.removeEventListener('touchend', handleRelease);
+// Funkcja czyszcząca klasy na wszelki wypadek
+const removeClasses = () => {
+btn.classList.remove('pressed', 'bounced');
+clearTimeout(bounceTimeout);
+};
 
-                btn.addEventListener('mousedown', handlePress);
-                btn.addEventListener('mouseup', handleRelease);
-                btn.addEventListener('mouseleave', handleRelease);
-                btn.addEventListener('touchstart', handlePress, { passive: true });
-                btn.addEventListener('touchend', handleRelease);
-            });
+// Handler naciśnięcia
+const handlePress = (e) => {
+// Zapobiegaj 'ghost click' na mobile
+if (e.type === 'touchstart') e.preventDefault();
+btn.classList.add('pressed');
+};
+
+// Handler puszczenia przycisku
+const handleRelease = () => {
+// Wykonaj tylko jeśli był wciśnięty
+if (!btn.classList.contains('pressed')) return;
+
+btn.classList.remove('pressed');
+btn.classList.add('bounced');
+
+// Usuń klasę odbicia po chwili
+bounceTimeout = setTimeout(() => {
+btn.classList.remove('bounced');
+}, 150);
+};
+
+// Dodaj kompletne listenery
+btn.addEventListener('mousedown', handlePress);
+btn.addEventListener('touchstart', handlePress, { passive: false });
+btn.addEventListener('mouseup', handleRelease);
+btn.addEventListener('mouseleave', removeClasses); // Czyści, jeśli wyjedziesz myszką
+btn.addEventListener('touchend', handleRelease);
+});
+// --- End: Pop & Bounce Animation ---
             const btnSpan = followBtn.querySelector('span');
             const btnSvg = followBtn.querySelector('svg');
 
             const isLoggedIn = getIsUserLoggedIn();
 
             if (isLoggedIn) {
-                btnSpan.textContent = 'Subsrajbujesz';
-                btnSvg.innerHTML = '<path d="M26,12H20V6a3.0033,3.0033,0,0,0-3-3H14.8672a2.009,2.009,0,0,0-1.98,1.5146L11,12v9H24l2-9Z"/><path d="M9,23H5a2.0023,2.0023,0,0,1-2-2V13a2.0023,2.0023,0,0,1,2-2H9Z"/><rect id="_Transparent_Rectangle_" data-name="&lt;Transparent Rectangle&gt;" class="cls-1" width="32" height="32"/>';
-                followBtn.disabled = true;
-            } else {
+btnSpan.textContent = 'Subskrybujesz'; // ZMIANA 1: Tekst
+// ZMIANA 2: Nowa ikona (24x24) i styl
+btnSvg.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12" /><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 1.79 1.11L15 5.88Z" /></svg>';
+followBtn.disabled = true;
+} else {
                 btnSpan.textContent = 'Zostań Patronem';
                 btnSvg.innerHTML = '<rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" />';
                 followBtn.disabled = false;
