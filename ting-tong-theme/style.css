@@ -1156,15 +1156,25 @@ body,
   background-color: white; /* Dodane białe tło */
 }
 
+@keyframes white-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
+}
+
 /* Styl dla obwódki VIP */
 .vip-avatar-border {
   position: relative;
-  /* Zastąpienie złotej animowanej ramki prostą czarną ramką */
   border: 2px solid #000 !important;
   padding: 0;
   background-clip: padding-box !important;
-  box-shadow: none !important; /* Usunięcie złotej poświaty */
-  /* Upewnienie się, że zwykła ramka nie zostanie nadpisana przez błędy z innych miejsc */
+  animation: white-glow 2s infinite;
   transition: border-color 0.1s ease-in-out, filter 0.2s;
   background-color: white; /* Dziedziczenie defaultowego tła jest ok */
 }
@@ -5818,7 +5828,9 @@ main::-webkit-scrollbar {
   right: 0;
   width: 100%;
   height: 100%;
-  background: #1C1C1E;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -6395,6 +6407,12 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 }
 
 /* Custom styles for slides with a light theme, like "Elephants Dream" */
+
+/* Avatar border and glow */
+.slide--light-theme .tiktok-symulacja .profile img {
+  border-color: #000 !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.7) !important;
+}
 
 /* Text elements should be black */
 .slide--light-theme .secret-overlay .secret-title,
