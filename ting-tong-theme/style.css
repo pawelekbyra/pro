@@ -620,9 +620,7 @@ body,
   left: 0;
   width: 100%;
   height: calc(100vh - var(--topbar-height));
-  background: rgba(0, 0, 0, 0.7) !important; /* Mocne czarne, półprzezroczyste tło */
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+
   z-index: 100;
   display: flex;
   align-items: center;
