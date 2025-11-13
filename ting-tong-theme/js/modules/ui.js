@@ -973,14 +973,12 @@ export const renderNewComment = (commentObject) => {
 
 export const UI = {
   initDOMCache,
-  renderComments,
-  renderNewComment,
   DOM,
   showAlert,
-  renderComments,
-  renderNewComment,
   openModal,
   closeModal,
+  renderComments,
+  renderNewComment,
   updateUIForLoginState,
   updateTranslations,
   applyLikeStateToDom,

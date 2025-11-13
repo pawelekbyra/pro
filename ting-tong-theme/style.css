@@ -5195,34 +5195,34 @@ padding: 4px 0 4px 8px;
   justify-content: center;
 }
 
-.comment {
+.tt-comment {
     display: flex;
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #333;
 }
 
-.comment-author-avatar img {
+.tt-comment-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 15px;
 }
 
-.comment-details {
+.tt-comment-body {
     color: #fff;
 }
 
-.comment-author-name {
+.tt-comment-author {
     font-weight: bold;
     margin-bottom: 5px;
 }
 
-.comment-text {
+.tt-comment-content {
     margin-bottom: 8px;
 }
 
-.comment-timestamp {
+.tt-comment-time {
     font-size: 0.8em;
     color: #888;
 }
