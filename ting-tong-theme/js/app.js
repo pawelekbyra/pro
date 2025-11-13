@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.addEventListener("submit", Handlers.formSubmitHandler);
 
       document
-        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#comments-modal-container)")
+        .querySelectorAll(".modal-overlay:not(#accountModal):not(#welcome-modal):not(#fastcomments-modal-container)")
         .forEach((modal) => {
           modal.addEventListener("click", (e) => {
             if (e.target === modal) UI.closeModal(modal);
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (commentsModal) {
         commentsModal.addEventListener('click', (e) => {
           if (e.target === commentsModal) {
-            UI.closeCommentsModal();
+            UI.closeModal(commentsModal);
           }
         });
       }
