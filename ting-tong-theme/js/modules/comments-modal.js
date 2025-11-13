@@ -18,8 +18,12 @@ function cacheDOM() {
  * Główna funkcja do ładowania Hyvor Talk dla aktywnego slajdu.
  */
 async function loadHyvorTalkComments() {
+    console.log(`[HYVOR DIAG] Attempting load. HyvorTalk is: ${typeof window.HyvorTalk}`);
     // Sprawdzenie, czy komponent Hyvor Talk jest załadowany globalnie
-    if (!DOM.commentsContainer || typeof window.HyvorTalk === 'undefined') return;
+    if (!DOM.commentsContainer || typeof window.HyvorTalk === 'undefined') {
+        console.error("[HYVOR DIAG] Load failed: window.HyvorTalk is undefined.");
+        return;
+    }
 
     const swiper = State.get('swiper');
     if (!swiper) return;
