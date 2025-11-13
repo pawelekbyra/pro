@@ -420,7 +420,7 @@ export const Handlers = {
         const authorModal = actionTarget.closest('#author-profile-modal');
         if (authorModal) {
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutRight',
+                animationClass: 'slideOutLeft',
                 contentSelector: '.profile-modal-content',
                 onClose: () => {
                     // Slight delay to ensure the first modal is gone
