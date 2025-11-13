@@ -264,15 +264,17 @@ export const Handlers = {
       case "toggle-language":
         handleLanguageToggle();
         break;
-      case "open-comments-modal": {
-        const modal = document.getElementById('comments-modal-container');
-        if (modal) {
-            // Użycie UI.openModal zapewni wywołanie zdarzenia 'modal:open',
-            // którego nasłuchuje comments-modal.js
-            UI.openModal(modal);
+      case 'open-comments-modal':
+        {
+          const swiper = State.get('swiper');
+          const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+          UI.openModal(UI.DOM.commentsModal);
+          const comments = await API.getComments(slideId);
+          if (comments) {
+            UI.renderComments(comments);
+          }
         }
         break;
-      }
       case "switch-profile-tab": {
         const tabButton = actionTarget;
         const tabContentId = tabButton.dataset.tab;
@@ -610,5 +612,18 @@ export const Handlers = {
         return;
     }
 
+    if (e.target.id === 'comment-form') {
+      const content = e.target.querySelector('#comment-content').value;
+      if (!content.trim()) return;
+
+      const swiper = State.get('swiper');
+      const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+
+      const newComment = await API.postComment(slideId, content);
+      if (newComment) {
+        UI.renderNewComment(newComment);
+        e.target.reset();
+      }
+    }
   },
 };

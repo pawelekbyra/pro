@@ -950,7 +950,7 @@ function _createCommentHtml(comment) {
 }
 
 // Publiczna funkcja: Wyświetla listę komentarzy (przy ładowaniu)
-export const renderComments = (commentsArray) => {
+function renderComments(commentsArray) {
     const container = document.getElementById('comments-list');
     if (!container) return;
     container.innerHTML = ''; // Usuń placeholder lub stare komentarze
@@ -962,7 +962,7 @@ export const renderComments = (commentsArray) => {
 };
 
 // Publiczna funkcja: Dodaje nowy komentarz (po wysłaniu)
-export const renderNewComment = (commentObject) => {
+function renderNewComment(commentObject) {
     const container = document.getElementById('comments-list');
     if (!container) return;
     const newCommentHtml = _createCommentHtml(commentObject);
