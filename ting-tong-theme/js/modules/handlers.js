@@ -423,11 +423,11 @@ export const Handlers = {
         const authorModal = actionTarget.closest('#author-profile-modal');
         if (authorModal) {
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutLeft',
+                animationClass: 'slideOutRight',
                 contentSelector: '.profile-modal-content',
                 onClose: () => {
                     TippingModal.showModal({
-                        animationClass: 'slideInRight'
+                        animationClass: 'slideInLeft'
                     });
                 }
             });
