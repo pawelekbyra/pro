@@ -269,6 +269,33 @@ function tt_generate_mock_comments($count) {
 // ============================================================================
 // CUSTOM AVATAR LOGIC
 // ============================================================================
+
+/**
+ * Gets a user's custom avatar URL, falling back to the site default.
+ * This is the primary function to get a user's avatar for API responses.
+ *
+ * @param int|WP_User $user_id User ID or WP_User object.
+ * @return string The URL of the avatar.
+ */
+function tt_get_user_avatar_url($user_id) {
+    if ($user_id instanceof WP_User) {
+        $user_id = $user_id->ID;
+    }
+
+    if ( ! is_numeric($user_id) || $user_id <= 0) {
+        return get_template_directory_uri() . '/jajk.png';
+    }
+
+    $custom_avatar_url = get_user_meta($user_id, 'tt_avatar_url', true);
+
+    if (!empty($custom_avatar_url) && filter_var($custom_avatar_url, FILTER_VALIDATE_URL)) {
+        return $custom_avatar_url;
+    }
+
+    // Fallback to the default if no custom avatar is found.
+    return get_template_directory_uri() . '/jajk.png';
+}
+
 /**
  * Filters the avatar data to use a custom uploaded avatar or a local default.
  * This function bypasses Gravatar and enforces a local default avatar
@@ -298,7 +325,7 @@ function tt_custom_avatar_filter($args, $id_or_email) {
         $user_id = (int) $id_or_email->user_id;
     }
 
-    $default_avatar_url = get_template_directory_uri() . '/assets/img/default-user.png';
+    $default_avatar_url = get_template_directory_uri() . '/jajk.png';
 
     if ($user_id) {
         // Check for the custom uploaded avatar URL first
