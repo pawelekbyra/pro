@@ -65,9 +65,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
 
-  // Ignoruj żądania non-HTTP/HTTPS
+  // Ignoruj żądania non-HTTP/HTTPS, pozwalając im przejść do sieci
   if (!request.url.startsWith('http')) {
-    return;
+    return; // Przeglądarka obsłuży to żądanie domyślnie
   }
 
   // Dla żądań non-GET lub zapytań AJAX, zawsze idź do sieci.
