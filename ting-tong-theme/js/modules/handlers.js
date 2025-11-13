@@ -562,7 +562,9 @@ export const Handlers = {
       case "open-comments-modal": {
         const modal = document.getElementById('comments-modal-container');
         if (modal) {
-            modal.classList.add('visible');
+            // Użycie UI.openModal zapewni wywołanie zdarzenia 'modal:open',
+            // którego nasłuchuje comments-modal.js
+            UI.openModal(modal);
         }
         break;
       }
