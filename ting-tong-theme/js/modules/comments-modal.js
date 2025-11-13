@@ -12,33 +12,46 @@ function cacheDOM() {
     DOM.commentsContainer = document.getElementById('hyvor-comments-container');
     DOM.loadingSpinner = document.getElementById('hyvor-loading-spinner');
     DOM.titleElement = DOM.commentsModal ? DOM.commentsModal.querySelector('#commentsTitle') : null;
+    // Dodano logowanie statusu kontenera, aby sprawdzić, czy jest poprawny
+    console.log('[HYVOR DEBUG] cacheDOM executed. Container status:', DOM.commentsContainer ? 'OK' : 'NULL');
 }
 
 /**
  * Główna funkcja do ładowania Hyvor Talk dla aktywnego slajdu.
  */
 async function loadHyvorTalkComments() {
-    console.log('[HYVOR DEBUG] loadHyvorTalkComments started.');
-    console.log(`[HYVOR DEBUG] DOM.commentsContainer:`, DOM.commentsContainer);
-    console.log(`[HYVOR DEBUG] typeof window.HyvorTalk:`, typeof window.HyvorTalk);
-
-    if (!DOM.commentsContainer || typeof window.HyvorTalk === 'undefined') {
-        console.error("[HYVOR DEBUG] Pre-check failed: Either container missing or HyvorTalk undefined.");
-        // Dodaj tutaj krótkie opóźnienie i ponowną próbę, jeśli problemem jest timing
-        // setTimeout(loadHyvorTalkComments, 500); // TYLKO DO TESTÓW
+    // 1. Sprawdzenie, czy kontener DOM istnieje (powinien istnieć)
+    if (!DOM.commentsContainer) {
+        console.error("[HYVOR] Load failed: DOM commentsContainer is missing.");
         return;
     }
 
     const swiper = State.get('swiper');
-    console.log(`[HYVOR DEBUG] Swiper state:`, swiper);
-    if (!swiper) {
-        console.error("[HYVOR DEBUG] Swiper state is null. Cannot get slide info.");
-        return;
-    }
+    if (!swiper) return;
 
     // Pokaż spinner i wyczyść kontener (usunięcie poprzedniego widżetu)
     DOM.commentsContainer.innerHTML = '';
     DOM.loadingSpinner.style.display = 'block';
+
+    // --- NOWY MECHANIZM OCZEKIWANIA NA BIBLIOTEKĘ HYVOR TALK ---
+    let attempts = 0;
+    const MAX_ATTEMPTS = 20; // Czekaj max 2 sekundy (20 * 100ms)
+
+    // Oczekuj na załadowanie globalnego obiektu HyvorTalk (typu "function")
+    while (typeof window.HyvorTalk !== 'function' && attempts < MAX_ATTEMPTS) {
+        // Logika asynchronicznego oczekiwania, minimalizująca blokowanie wątku głównego
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+    }
+
+    // 2. Failsafe po oczekiwaniu
+    if (typeof window.HyvorTalk !== 'function') {
+        console.error("[HYVOR] Load failed: window.HyvorTalk is still undefined after waiting. Timing issue confirmed.");
+        DOM.loadingSpinner.style.display = 'none';
+        UI.showAlert("Błąd ładowania komentarzy. Skrypt Hyvor nie załadował się na czas.", true);
+        return;
+    }
+    // --- KONIEC NOWEGO MECHANIZMU ---
 
     const slideElement = swiper.slides[swiper.activeIndex];
     const slideId = slideElement.dataset.slideId;
@@ -102,7 +115,9 @@ async function loadHyvorTalkComments() {
 
     // Opcjonalna aktualizacja tytułu modala
     if (DOM.titleElement) {
-        DOM.titleElement.textContent = Utils.getTranslation('commentsModalTitle');
+        // Użyj bieżącego licznika z danych
+        const count = slideData.initialComments;
+        DOM.titleElement.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
     }
 }
 
@@ -116,6 +131,4 @@ function init() {
 
 export const CommentsModal = {
     init,
-    // Wszystkie stare funkcje zarządzania komentarzami (renderComments, handleFormSubmit, itp.)
-    // muszą zostać usunięte z modułu.
 };
