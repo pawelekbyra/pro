@@ -627,7 +627,7 @@ body,
   top: var(--topbar-height);
   left: 0;
   width: 100%;
-  height: calc(100vh - var(--topbar-height));
+  height: calc(100% - var(--topbar-height) - var(--bottombar-height));
   background-image: url('wall.png'); /* Użyj wall.png lub wall.jpg */
   background-repeat: repeat;
   background-size: 300px; /* POPRAWNA WARTOŚĆ (jak .interactive-wall) */
@@ -658,15 +658,17 @@ body,
     top: var(--topbar-height);
     left: 0;
     width: 100%;
-    bottom: 0; /* Cover the entire area */
-    height: auto;
+    height: calc(100% - var(--topbar-height) - var(--bottombar-height));
     z-index: 10200; /* Match modal z-index to cover everything */
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s ease;
-    background-color: transparent !important; /* KLUCZOWA ZMIANA */
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
+    background-image: url('wall.png');
+    background-repeat: repeat;
+    background-size: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .interactive-wall-overlay.visible {
@@ -4696,7 +4698,7 @@ transform: none; /* Zabezpieczenie przed transform 50% */
 }
 
 /* Sort Options */
-.comment-sort-options {
+.comments-sorting-controls {
     display: flex;
     justify-content: flex-end;
     padding: 0 16px 8px;
@@ -4903,6 +4905,12 @@ padding: 4px 0 4px 8px;
 
 #app-frame.hide-ui .pause-overlay,
 #app-frame.hide-ui .replay-overlay {
+    top: var(--topbar-height);
+    height: calc(100% - var(--topbar-height));
+}
+
+#app-frame.hide-ui .secret-overlay,
+#app-frame.hide-ui .interactive-wall-overlay {
     top: var(--topbar-height);
     height: calc(100% - var(--topbar-height));
 }
