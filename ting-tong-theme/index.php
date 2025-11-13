@@ -449,7 +449,7 @@ get_header();
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
             <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
-        <div class="comment-sort-options">
+        <div class="comments-sorting-controls">
             <div class="sort-dropdown">
                 <button class="sort-trigger">
                     <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
