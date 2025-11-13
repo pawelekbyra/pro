@@ -374,7 +374,7 @@ export const Handlers = {
                 }
             }
             if (UI.DOM.commentsModal.classList.contains("visible")) {
-                UI.closeCommentsModal();
+                UI.closeModal(UI.DOM.commentsModal);
             }
             if (loginPanel) {
                 if (loginPanel.classList.contains('active')) {
