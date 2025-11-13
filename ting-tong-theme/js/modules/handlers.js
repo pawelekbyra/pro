@@ -17,7 +17,6 @@ function mockToggleLogin() {
     : Utils.getTranslation("logoutSuccess");
   UI.showAlert(message);
 
-  // If we are logging in, close the panel
   if (!isLoggedIn) {
     const loginPanel = document.querySelector("#app-frame > .login-panel");
     if (loginPanel) loginPanel.classList.remove("active");
@@ -25,7 +24,6 @@ function mockToggleLogin() {
     if (topbar) topbar.classList.remove("login-panel-active");
   }
 }
-
 
 async function handleLikeToggle(button) {
   if (!State.get("isUserLoggedIn")) {
@@ -46,7 +44,6 @@ async function handleLikeToggle(button) {
     ? currentCount + 1
     : Math.max(0, currentCount - 1);
 
-  // Optimistic UI update
   slideData.isLiked = newLikedState;
   slideData.initialLikes = newCount;
   UI.applyLikeStateToDom(slideData.likeId, newLikedState, newCount);
@@ -63,7 +60,6 @@ async function handleLikeToggle(button) {
       slideData.initialLikes,
     );
   } else {
-    // Revert
     slideData.isLiked = isCurrentlyLiked;
     slideData.initialLikes = currentCount;
     UI.applyLikeStateToDom(
@@ -103,22 +99,16 @@ function handleShare(button) {
   }
 }
 
-async function handleLanguageToggle() { // Zmień na async
+async function handleLanguageToggle() {
   const oldLang = State.get("currentLang");
   const newLang = oldLang === "pl" ? "en" : "pl";
-
-  // Mapowanie na lokalizację WP
   const newLocale = newLang === 'pl' ? 'pl_PL' : 'en_GB';
 
-  // 1. Aktualizacja stanu aplikacji
   State.set("currentLang", newLang);
   localStorage.setItem("tt_lang", newLang);
-
-  // 2. Aktualizacja UI
   UI.updateTranslations();
   Notifications.render();
 
-  // 3. Wysłanie nowej lokalizacji do API WordPressa
   if (State.get("isUserLoggedIn")) {
       try {
         const result = await API.updateLocale(newLocale);
@@ -133,7 +123,6 @@ async function handleLanguageToggle() { // Zmień na async
   }
 }
 
-
 export const Handlers = {
   handleNotificationClick: (event) => {
     const item = event.target.closest(".notification-item");
@@ -144,7 +133,7 @@ export const Handlers = {
       item.classList.remove("unread");
     }
   },
-  mainClickHandler: (e) => {
+  mainClickHandler: async (e) => {
     const target = e.target;
     const actionTarget = target.closest("[data-action]");
     const videoThumbnail = target.closest(".video-thumbnail");
@@ -160,32 +149,25 @@ export const Handlers = {
             const videoPlayer = videoModal.querySelector('video');
             videoPlayer.src = videoUrl;
 
-            // 1. Zlokalizuj wideo w tle i zapauzuj, jeśli gra
             const swiper = State.get('swiper');
             let mainVideo;
             if (swiper && swiper.slides[swiper.activeIndex]) {
                 mainVideo = swiper.slides[swiper.activeIndex].querySelector('video');
-                // Pauzujemy główne wideo tylko, jeśli już leci
                 if (mainVideo && !mainVideo.paused && !mainVideo.ended) {
                     mainVideo.pause();
-                    State.set('videoPausedByAuthorModal', true); // Nowa flaga
+                    State.set('videoPausedByAuthorModal', true);
                 }
             }
 
-            // 2. Otwórz modal z wideo
             UI.openModal(videoModal);
             videoPlayer.play();
 
-            // 3. Dodaj handler, aby wznowić główne wideo po zamknięciu
             const closeModalHandler = () => {
                 videoPlayer.pause();
-
-                // Wznów tylko jeśli zostało zapauzowane przez modal autora
                 if (State.get('videoPausedByAuthorModal') && mainVideo) {
                     mainVideo.play().catch(e => console.error("Błąd odtwarzania głównego wideo:", e));
                     State.set('videoPausedByAuthorModal', false);
                 }
-                // Musimy też upewnić się, że flaga jest czyszczona przy zamykaniu modala
                 State.set('videoPausedByAuthorModal', false);
             };
             videoModal.addEventListener('modal:close', closeModalHandler, { once: true });
@@ -193,12 +175,10 @@ export const Handlers = {
         }
     }
 
-
     if (!actionTarget) {
       const activeSlide = document.querySelector(".swiper-slide-active");
       const sim = activeSlide?.querySelector(".tiktok-symulacja");
       const isWallActive = sim?.classList.contains("wall-active");
-      // Zablokuj kliknięcie na wideo w tle, które pauzuje film.
       if (isWallActive && !actionTarget) {
         e.preventDefault();
         return;
@@ -207,18 +187,14 @@ export const Handlers = {
     }
 
     const action = actionTarget.dataset.action;
-
     const activeSlide = document.querySelector(".swiper-slide-active");
     const sim = activeSlide?.querySelector(".tiktok-symulacja");
     const isWallActive = sim?.classList.contains("wall-active");
-
-    // ZMIANA: Zablokuj wszystkie interaktywne akcje (poza menu, logowaniem, notyfikacjami)
     const blockedActions = [
       "toggle-like", "share", "open-comments-modal", "show-tip-jar",
       "play-video", "replay-video", "toggle-volume", "toggle-fullscreen", "open-author-profile"
     ];
 
-    // Zablokuj akcję, jeśli mur jest aktywny
     if (isWallActive && blockedActions.includes(action)) {
       e.preventDefault();
       Utils.vibrateTry();
@@ -237,7 +213,6 @@ export const Handlers = {
         const passwordInput = document.getElementById('tt-password');
         const eyeOpen = actionTarget.querySelector('.eye-icon-open');
         const eyeClosed = actionTarget.querySelector('.eye-icon-closed');
-
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             eyeOpen.style.display = 'block';
@@ -277,15 +252,10 @@ export const Handlers = {
       case "switch-profile-tab": {
         const tabButton = actionTarget;
         const tabContentId = tabButton.dataset.tab;
-
         const modal = tabButton.closest('.profile-modal-content');
         if (!modal) return;
-
-        // Deactivate all tabs and hide all content
         modal.querySelectorAll('.profile-tab').forEach(tab => tab.classList.remove('active'));
         modal.querySelectorAll('.video-gallery').forEach(content => content.classList.remove('active'));
-
-        // Activate the clicked tab and show its content
         tabButton.classList.add('active');
         const activeContent = modal.querySelector(`#${tabContentId}`);
         if (activeContent) {
@@ -323,7 +293,6 @@ export const Handlers = {
         PWA.openIosModal();
         break;
       case "install-pwa":
-        // This is now handled directly in the PWA module.
         break;
       case "open-author-profile":
         const swiper = State.get('swiper');
@@ -338,18 +307,15 @@ export const Handlers = {
         }
         break;
       case "close-author-profile": {
-        /* === POCZĄTEK POPRAWKI === */
         const authorModal = actionTarget.closest('#author-profile-modal');
-        // Użyj tej samej (lustrzanej) animacji co przy otwieraniu
         UI.closeModal(authorModal, {
             animationClass: 'slideOutRight',
             contentSelector: '.profile-modal-content'
         });
-        /* === KONIEC POPRAWKI === */
         break;
       }
       case "close-modal":
-        e.stopPropagation(); // Stop the event from bubbling up to parent elements
+        e.stopPropagation();
         const modal = actionTarget.closest(".modal-overlay");
         if (modal) {
           if (modal.id === 'infoModal') {
@@ -374,17 +340,12 @@ export const Handlers = {
         e.preventDefault();
         (async () => {
           if (actionTarget.disabled) return;
-
           actionTarget.disabled = true;
           const originalText = actionTarget.textContent;
-
           try {
             await authManager.logout();
-
             if (loggedInMenu) loggedInMenu.classList.remove("active");
-
             UI.showAlert(Utils.getTranslation("logoutSuccess"));
-
           } catch (error) {
             console.error('Logout error:', error);
             UI.showAlert(error.message || 'Logout failed', true);
@@ -404,7 +365,6 @@ export const Handlers = {
         break;
       case "toggle-login-panel":
         if (!State.get("isUserLoggedIn")) {
-            // Kod do zapisania stanu odtwarzania wideo w tle (zachowany)
             const swiper = State.get('swiper');
             if (swiper) {
                 const activeSlide = swiper.slides[swiper.activeIndex];
@@ -416,17 +376,13 @@ export const Handlers = {
                     });
                 }
             }
-
             if (UI.DOM.commentsModal.classList.contains("visible")) {
                 UI.closeCommentsModal();
             }
             if (loginPanel) {
                 if (loginPanel.classList.contains('active')) {
-                    // CLOSING
                     loginPanel.classList.add('login-panel--closing');
-                    // Użyj transitionend dla transform, aby zapewnić płynne zamknięcie i prawidłowe czyszczenie
                     const onTransitionEnd = (e) => {
-                        // Upewnij się, że event dotyczy właściwej właściwości i że jest to stan zamykania
                         if (e.propertyName === 'transform' && loginPanel.classList.contains('login-panel--closing')) {
                             loginPanel.classList.remove('active', 'login-panel--closing');
                             loginPanel.removeEventListener('transitionend', onTransitionEnd);
@@ -435,10 +391,8 @@ export const Handlers = {
                             }
                         }
                     };
-                    // Użyj { once: true } na ogólnym listenerze dla bezpieczeństwa
                     loginPanel.addEventListener('transitionend', onTransitionEnd);
                 } else {
-                    // OPENING
                     loginPanel.classList.remove('login-panel--closing');
                     loginPanel.classList.add('active');
                     if (topbar) {
@@ -468,12 +422,10 @@ export const Handlers = {
       case "show-tip-jar":
         const authorModal = actionTarget.closest('#author-profile-modal');
         if (authorModal) {
-            // NAPRAWA: Wymuś lustrzaną animację wyjścia
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutLeft', // <--- POPRAWIONO: Modal Autora chowa się w lewo
+                animationClass: 'slideOutLeft',
                 contentSelector: '.profile-modal-content',
                 onClose: () => {
-                    // Modal Napiwkowy wjeżdża z prawej (efekt płynnej zamiany)
                     TippingModal.showModal({
                         animationClass: 'slideInRight'
                     });
@@ -519,24 +471,18 @@ export const Handlers = {
         UI.updateVolumeButton(isMuted);
         break;
       case "toggle-fullscreen": {
-        // This action should only work in PWA mode.
         if (!PWA.isStandalone()) {
           UI.showToast(Utils.getTranslation("immersiveModePwaOnly"));
           return;
         }
-
         const appFrame = document.getElementById("app-frame");
         if (appFrame) {
             const isHiding = appFrame.classList.toggle("hide-ui");
-
-            // Find the button in the active slide to update its icon
             const activeSlide = document.querySelector('.swiper-slide-active');
             const btn = activeSlide?.querySelector('.fullscreen-button');
-
             if (btn) {
                 const enterIcon = btn.querySelector('.fullscreen-enter-icon');
                 const exitIcon = btn.querySelector('.fullscreen-exit-icon');
-
                 if (isHiding) {
                     enterIcon.style.display = 'none';
                     exitIcon.style.display = 'block';
@@ -552,44 +498,28 @@ export const Handlers = {
   },
   formSubmitHandler: async (e) => {
     const loginForm = e.target.closest("form#tt-login-form");
-
-    // ========================================================================
-    // OBSŁUGA FORMULARZA LOGOWANIA - Z AKTUALIZACJĄ O MODAL PIERWSZEGO LOGOWANIA
-    // ========================================================================
     if (loginForm) {
       e.preventDefault();
-
       const usernameInput = loginForm.querySelector("#tt-username");
       const passwordInput = loginForm.querySelector("#tt-password");
       const submitButton = loginForm.querySelector("#tt-login-submit");
-
       if (!usernameInput || !passwordInput) {
         UI.showAlert("Form elements not found", true);
         return;
       }
-
       const username = usernameInput.value.trim();
       const password = passwordInput.value;
-
       if (!username || !password) {
         UI.showAlert(Utils.getTranslation("allFieldsRequiredError") || "Please enter username and password.", true);
         return;
       }
-
       submitButton.disabled = true;
       const originalText = submitButton.textContent;
       submitButton.innerHTML = '<span class="loading-spinner"></span>';
-
       try {
-        // Zaloguj się. authManager.login sam wywoła event 'user:login',
-        // który jest obsługiwany w app.js. To centralne miejsce
-        // zajmie się pokazaniem modala lub zaktualizowaniem UI.
         await authManager.login(username, password);
-
-        // Po prostu wyczyść formularz.
         usernameInput.value = '';
         passwordInput.value = '';
-
       } catch (error) {
         console.error('Login error:', error);
         UI.showAlert(
@@ -600,7 +530,6 @@ export const Handlers = {
         submitButton.disabled = false;
         submitButton.innerHTML = originalText;
       }
-
       return;
     }
 
@@ -612,12 +541,11 @@ export const Handlers = {
     }
 
     if (e.target.id === 'comment-form') {
+      e.preventDefault();
       const content = e.target.querySelector('#comment-content').value;
       if (!content.trim()) return;
-
       const swiper = State.get('swiper');
       const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-
       const newComment = await API.postComment(slideId, content);
       if (newComment) {
         UI.renderNewComment(newComment);
