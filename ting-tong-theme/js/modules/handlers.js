@@ -747,10 +747,7 @@ export const Handlers = {
         }
         break;
       case "toggle-notifications":
-        const notificationPopup = document.getElementById("notificationPopup");
-        if (notificationPopup) {
-            notificationPopup.classList.toggle("visible");
-        }
+        Notifications.toggle();
         break;
       case "close-notifications":
         if (UI.DOM.notificationPopup) {
