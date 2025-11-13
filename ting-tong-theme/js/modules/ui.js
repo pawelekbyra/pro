@@ -461,7 +461,6 @@ function isSlideOverlayActive(slideElement) {
 }
 
 function updateUIForLoginState() {
-  UI.updateCommentFormVisibility();
   const isLoggedIn = State.get("isUserLoggedIn");
   const currentSlideIndex = State.get("currentSlideIndex");
 
