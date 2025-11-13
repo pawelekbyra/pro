@@ -39,13 +39,8 @@ function tt_comment_controller() {
 
         if ($result) {
             $new_comment = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $wpdb->insert_id));
-
-            $user_data = get_userdata($new_comment->user_id);
-            $new_comment->author_name = $user_data ? $user_data->display_name : 'Anonymous';
-            $new_comment->author_avatar = get_avatar_url($new_comment->user_id);
-            $new_comment->timestamp = human_time_diff(strtotime($new_comment->date), current_time('timestamp')) . ' ago';
-
-            wp_send_json_success($new_comment);
+            $display_data = tt_get_comment_display_data($new_comment);
+            wp_send_json_success($display_data);
         } else {
             wp_send_json_error('Failed to add comment.');
         }
@@ -54,15 +49,8 @@ function tt_comment_controller() {
     if ($action === 'tt_get_comments') {
         $slide_id = intval($_POST['slide_id']);
         $comments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE slide_id = %d ORDER BY date DESC", $slide_id));
-
-        foreach ($comments as $comment) {
-            $user_data = get_userdata($comment->user_id);
-            $comment->author_name = $user_data ? $user_data->display_name : 'Anonymous';
-            $comment->author_avatar = get_avatar_url($comment->user_id);
-            $comment->timestamp = human_time_diff(strtotime($comment->date), current_time('timestamp')) . ' ago';
-        }
-
-        wp_send_json_success($comments);
+        $processed_comments = array_map('tt_get_comment_display_data', $comments);
+        wp_send_json_success($processed_comments);
     }
 
     wp_die();

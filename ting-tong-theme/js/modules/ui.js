@@ -933,41 +933,48 @@ function closeWelcomeModal() {
     }
 }
 
-function renderComments(comments) {
-    const commentsList = document.getElementById('comments-list');
-    const template = document.getElementById('comment-template');
-    commentsList.innerHTML = '';
+function _createCommentHtml(comment) {
+    // Generowanie HTML na podstawie danych JSON. Użyj klas CSS motywu.
+    return `
+        <div class="tt-comment" data-id="${comment.id}">
+            <img class="tt-comment-avatar" src="${comment.avatar_url}" alt="${comment.display_name}" />
+            <div class="tt-comment-body">
+                <div class="tt-comment-header">
+                    <span class="tt-comment-author">${comment.display_name}</span>
+                    <span class="tt-comment-time">${comment.time_ago}</span>
+                </div>
+                <p class="tt-comment-content">${comment.content}</p>
+                </div>
+        </div>
+    `;
+}
 
-    comments.forEach(commentData => {
-        const commentClone = template.content.cloneNode(true);
-        const commentElement = commentClone.querySelector('.comment');
+// Publiczna funkcja: Wyświetla listę komentarzy (przy ładowaniu)
+export const renderComments = (commentsArray) => {
+    const container = document.getElementById('comments-list');
+    if (!container) return;
+    container.innerHTML = ''; // Usuń placeholder lub stare komentarze
 
-        commentElement.querySelector('.comment-author-avatar img').src = commentData.author_avatar;
-        commentElement.querySelector('.comment-author-name').textContent = commentData.author_name;
-        commentElement.querySelector('.comment-text').textContent = commentData.content;
-        commentElement.querySelector('.comment-timestamp').textContent = commentData.timestamp;
-
-        commentsList.appendChild(commentClone);
+    // Użyj pętli do wyrenderowania każdego komentarza
+    commentsArray.forEach(comment => {
+        container.innerHTML += _createCommentHtml(comment);
     });
-}
+};
 
-function renderNewComment(commentData) {
-    const commentsList = document.getElementById('comments-list');
-    const template = document.getElementById('comment-template');
+// Publiczna funkcja: Dodaje nowy komentarz (po wysłaniu)
+export const renderNewComment = (commentObject) => {
+    const container = document.getElementById('comments-list');
+    if (!container) return;
+    const newCommentHtml = _createCommentHtml(commentObject);
 
-    const commentClone = template.content.cloneNode(true);
-    const commentElement = commentClone.querySelector('.comment');
-
-    commentElement.querySelector('.comment-author-avatar img').src = commentData.author_avatar;
-    commentElement.querySelector('.comment-author-name').textContent = commentData.author_name;
-    commentElement.querySelector('.comment-text').textContent = commentData.content;
-    commentElement.querySelector('.comment-timestamp').textContent = commentData.timestamp;
-
-    commentsList.prepend(commentClone);
-}
+    // Dodaj nowy komentarz na górę listy
+    container.insertAdjacentHTML('afterbegin', newCommentHtml);
+};
 
 export const UI = {
   initDOMCache,
+  renderComments,
+  renderNewComment,
   DOM,
   showAlert,
   renderComments,
