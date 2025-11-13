@@ -345,6 +345,9 @@ function openModal(modal, options = {}) {
 
     if (options.onOpen) options.onOpen();
     if (options.onClose) modal.onCloseCallback = options.onClose;
+
+    // Dispatch the custom event
+    modal.dispatchEvent(new CustomEvent('modal:open'));
 }
 
 function _resetVideoPlayer(videoModal) {

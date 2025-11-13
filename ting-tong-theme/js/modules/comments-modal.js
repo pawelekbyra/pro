@@ -18,15 +18,23 @@ function cacheDOM() {
  * Główna funkcja do ładowania Hyvor Talk dla aktywnego slajdu.
  */
 async function loadHyvorTalkComments() {
-    console.log(`[HYVOR DIAG] Attempting load. HyvorTalk is: ${typeof window.HyvorTalk}`);
-    // Sprawdzenie, czy komponent Hyvor Talk jest załadowany globalnie
+    console.log('[HYVOR DEBUG] loadHyvorTalkComments started.');
+    console.log(`[HYVOR DEBUG] DOM.commentsContainer:`, DOM.commentsContainer);
+    console.log(`[HYVOR DEBUG] typeof window.HyvorTalk:`, typeof window.HyvorTalk);
+
     if (!DOM.commentsContainer || typeof window.HyvorTalk === 'undefined') {
-        console.error("[HYVOR DIAG] Load failed: window.HyvorTalk is undefined.");
+        console.error("[HYVOR DEBUG] Pre-check failed: Either container missing or HyvorTalk undefined.");
+        // Dodaj tutaj krótkie opóźnienie i ponowną próbę, jeśli problemem jest timing
+        // setTimeout(loadHyvorTalkComments, 500); // TYLKO DO TESTÓW
         return;
     }
 
     const swiper = State.get('swiper');
-    if (!swiper) return;
+    console.log(`[HYVOR DEBUG] Swiper state:`, swiper);
+    if (!swiper) {
+        console.error("[HYVOR DEBUG] Swiper state is null. Cannot get slide info.");
+        return;
+    }
 
     // Pokaż spinner i wyczyść kontener (usunięcie poprzedniego widżetu)
     DOM.commentsContainer.innerHTML = '';
