@@ -468,11 +468,50 @@ get_header();
         <button data-action="close-notifications" data-translate-aria-label="closeNotificationsAriaLabel" aria-label="Zamknij powiadomienia">&times;</button>
     </div>
     <ul class="notification-list">
+        <li class="notification-item unread">
+            <div class="notif-header">
+                <div class="notif-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                </div>
+                <div class="notif-content-wrapper">
+                    <div class="notif-summary">
+                        <span class="notif-preview">Nowy komentarz od Paweł</span>
+                        <span class="notif-time">2 min temu</span>
+                    </div>
+                    <div class="expand-chevron"></div>
+                    <div class="unread-dot"></div>
+                </div>
+            </div>
+            <div class="notif-full-details">
+                <div class="notif-full-details-content">
+                    <p>Cześć! Dzięki za super materiał. Naprawdę mi się podobał. Oby tak dalej!</p>
+                </div>
+            </div>
+        </li>
+        <li class="notification-item">
+            <div class="notif-header">
+                <div class="notif-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+                <div class="notif-content-wrapper">
+                    <div class="notif-summary">
+                        <span class="notif-preview">Anna polubiła Twój film</span>
+                        <span class="notif-time">1 godz. temu</span>
+                    </div>
+                    <div class="expand-chevron"></div>
+                </div>
+            </div>
+            <div class="notif-full-details">
+                <div class="notif-full-details-content">
+                    <p>Anna właśnie polubiła Twój film pod tytułem "Niesamowite przygody w dżungli".</p>
+                </div>
+            </div>
+        </li>
         <div class="notification-empty-state hidden-by-js">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
             <p data-translate-key="notificationsEmpty">Wszystko na bieżąco!</p>
         </div>
-        </ul>
+    </ul>
 </div>
 
 <div class="account-modal-overlay" id="accountModal">

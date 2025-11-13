@@ -149,6 +149,16 @@ document.addEventListener("DOMContentLoaded", () => {
       UI.DOM.notificationPopup
         .querySelector(".notification-list")
         .addEventListener("click", Handlers.handleNotificationClick);
+
+      // Dedicated listener for notification item expansion
+      const notificationList = UI.DOM.notificationPopup.querySelector('.notification-list');
+      notificationList.addEventListener('click', (event) => {
+          const item = event.target.closest('.notification-item');
+          if (item) {
+              item.classList.toggle('expanded');
+          }
+      });
+
       UI.DOM.tiktokProfileModal?.addEventListener(
         "click",
         Handlers.profileModalTabHandler,
