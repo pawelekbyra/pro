@@ -384,7 +384,7 @@ function handleFileSelect(event) {
 }
 
 function openCropModal(callback) {
-    const modal = document.getElementById('cropModal');
+    const modal = UI.DOM.cropModal;
     if (!modal) return;
 
     UI.openModal(modal, {
