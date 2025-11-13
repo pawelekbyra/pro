@@ -126,14 +126,14 @@ export const API = {
     else console.error("Failed to refresh nonce.", json);
   },
   fetchSlidesData: () => _request("tt_get_slides_data_ajax"),
-  fetchComments: (slideId) => _request("tt_get_comments", { slide_id: slideId }),
-  postComment: (slideId, text, parentId = null, imageUrl = null) =>
-    _request("tt_post_comment", {
-      slide_id: slideId,
-      text,
-      parent_id: parentId,
-      image_url: imageUrl,
-    }),
+  getComments: async (slideId) => {
+    const response = await _request("tt_get_comments", { slide_id: slideId });
+    return response.success ? response.data : null;
+  },
+  postComment: async (slideId, content) => {
+    const response = await _request("tt_post_comment", { slide_id: slideId, content: content });
+    return response.success ? response.data : null;
+  },
   editComment: (slideId, commentId, newText) =>
     _request("tt_edit_comment", {
       slide_id: slideId,
