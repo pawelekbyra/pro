@@ -4128,7 +4128,7 @@ overflow: hidden;
 #comments-modal-container.modal-overlay {
   align-items: flex-end !important; /* FIX: Override generic centering for bottom-sheet style */
   z-index: 10005;
-  transition: visibility 0.3s ease-out;
+  transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
 }
 
 #comments-modal-container .modal-content {
