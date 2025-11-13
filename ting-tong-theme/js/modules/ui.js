@@ -933,10 +933,45 @@ function closeWelcomeModal() {
     }
 }
 
+function renderComments(comments) {
+    const commentsList = document.getElementById('comments-list');
+    const template = document.getElementById('comment-template');
+    commentsList.innerHTML = '';
+
+    comments.forEach(commentData => {
+        const commentClone = template.content.cloneNode(true);
+        const commentElement = commentClone.querySelector('.comment');
+
+        commentElement.querySelector('.comment-author-avatar img').src = commentData.author_avatar;
+        commentElement.querySelector('.comment-author-name').textContent = commentData.author_name;
+        commentElement.querySelector('.comment-text').textContent = commentData.content;
+        commentElement.querySelector('.comment-timestamp').textContent = commentData.timestamp;
+
+        commentsList.appendChild(commentClone);
+    });
+}
+
+function renderNewComment(commentData) {
+    const commentsList = document.getElementById('comments-list');
+    const template = document.getElementById('comment-template');
+
+    const commentClone = template.content.cloneNode(true);
+    const commentElement = commentClone.querySelector('.comment');
+
+    commentElement.querySelector('.comment-author-avatar img').src = commentData.author_avatar;
+    commentElement.querySelector('.comment-author-name').textContent = commentData.author_name;
+    commentElement.querySelector('.comment-text').textContent = commentData.content;
+    commentElement.querySelector('.comment-timestamp').textContent = commentData.timestamp;
+
+    commentsList.prepend(commentClone);
+}
+
 export const UI = {
   initDOMCache,
   DOM,
   showAlert,
+  renderComments,
+  renderNewComment,
   openModal,
   closeModal,
   updateUIForLoginState,

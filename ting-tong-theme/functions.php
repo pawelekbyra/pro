@@ -21,11 +21,11 @@ require_once $theme_includes_path . 'database.php';
 // Funkcje pomocnicze, dane symulacyjne i logika awatarów
 require_once $theme_includes_path . 'utils.php';
 
-// Handlery AJAX dla autentykacji i profilu użytkownika
-require_once $theme_includes_path . 'ajax-auth.php';
-
 // Handlery AJAX i webhooki dla integracji z płatnościami Stripe
 require_once $theme_includes_path . 'ajax-payments.php';
 
-// Handlery dla Hyvor Talk SSO
-require_once $theme_includes_path . 'hyvor-sso.php';
+// Handlery AJAX dla autentykacji i profilu użytkownika
+require_once $theme_includes_path . 'ajax-auth.php';
+
+// Handlery AJAX dla nowego systemu komentarzy
+require_once $theme_includes_path . 'ajax-comments.php';
