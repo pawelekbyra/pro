@@ -11,11 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Generates the SSO payload for a logged-in user for FastComments.
  */
 function tt_generate_sso_token_callback() {
-    // 1. Verify nonce for security
-    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'tt_ajax_nonce' ) ) {
-        wp_send_json_error( [ 'message' => 'Błąd weryfikacji nonce.' ], 403 );
-        return;
-    }
+    // 1. Verify nonce for security. This function handles dying on failure.
+    check_ajax_referer('tt_ajax_nonce', 'nonce');
 
     // 2. Check if user is logged in
     if ( ! is_user_logged_in() ) {

@@ -51,12 +51,15 @@ export const FastCommentsIntegration = {
             return;
         }
 
+        const currentLang = State.get("currentLang"); // np. 'pl' lub 'en'
+
         const config = {
             tenantId: window.TingTongData.fcTenantId,
             widgetId: window.TingTongData.fcWidgetId,
             region: window.TingTongData.fcRegion,
             urlId: slideId,
-            container: UI.DOM.fastCommentsContainer
+            container: UI.DOM.fastCommentsContainer,
+            locale: currentLang
         };
 
         if (State.get("isUserLoggedIn")) {
