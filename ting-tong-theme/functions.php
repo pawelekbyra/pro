@@ -27,5 +27,5 @@ require_once $theme_includes_path . 'ajax-payments.php';
 // Handlery AJAX dla autentykacji i profilu użytkownika
 require_once $theme_includes_path . 'ajax-auth.php';
 
-// Handlery AJAX dla nowego systemu komentarzy
-require_once $theme_includes_path . 'ajax-comments.php';
+// Handlery AJAX dla FastComments SSO
+require_once $theme_includes_path . 'ajax-fastcomments.php';

@@ -10,6 +10,7 @@ import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
+import { FastCommentsIntegration } from './modules/fastcomments.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -466,6 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Notifications.init();
         UI.initGlobalPanels();
         PWA.init();
+        FastCommentsIntegration.init();
         _initializePreloader();
         document.body.classList.add("loaded");
       },

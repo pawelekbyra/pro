@@ -63,6 +63,9 @@ export const API = {
 
   // === ISTNIEJĄCE METODY ===
 
+  getSSOToken: () => _request("tt_generate_sso_token"),
+
+  /*
   uploadCommentImage: async (file) => {
     try {
       // ... (pozostała logika bez zmian)
@@ -116,6 +119,7 @@ export const API = {
       };
     }
   },
+  */
 
   login: (data) => _request("tt_ajax_login", data),
   logout: () => _request("tt_ajax_logout"),
@@ -126,30 +130,6 @@ export const API = {
     else console.error("Failed to refresh nonce.", json);
   },
   fetchSlidesData: () => _request("tt_get_slides_data_ajax"),
-  getComments: async (slideId) => {
-    const response = await _request("tt_get_comments", { slide_id: slideId });
-    return response.success ? response.data : null;
-  },
-  postComment: async (slideId, content) => {
-    const response = await _request("tt_post_comment", { slide_id: slideId, content: content });
-    return response.success ? response.data : null;
-  },
-  editComment: (slideId, commentId, newText) =>
-    _request("tt_edit_comment", {
-      slide_id: slideId,
-      comment_id: commentId,
-      text: newText,
-    }),
-  deleteComment: (slideId, commentId) =>
-    _request("tt_delete_comment", {
-      slide_id: slideId,
-      comment_id: commentId,
-    }),
-  toggleCommentLike: (slideId, commentId) =>
-    _request("tt_toggle_comment_like", {
-      slide_id: slideId,
-      comment_id: commentId,
-    }),
   getNewCrowdfundingStats: () => _request("tt_get_crowdfunding_stats"),
   saveSettings: (data) => _request("tt_save_settings", data),
   uploadAvatar: (data) => _request("tt_avatar_upload", data),
