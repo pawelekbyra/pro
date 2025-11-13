@@ -1782,7 +1782,7 @@ margin: -7px auto 0;
     position: relative;
     width: 100%;
     height: 100vh;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: linear-gradient(180deg, #28282a 0%, #1c1c1e 100%);
     display: flex !important;
     flex-direction: column;
     will-change: transform, opacity;
@@ -5921,6 +5921,8 @@ main::-webkit-scrollbar {
   will-change: transform;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
 }
 
 .profile-modal-overlay.visible .profile-modal-content {
