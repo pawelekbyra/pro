@@ -33,36 +33,6 @@ function tt_create_database_tables() {
     dbDelta( $sql_likes );
     update_option( 'tt_likes_db_version', '1.0' );
 
-    // Tabela: Komentarze
-    $table_name_comments = $wpdb->prefix . 'tt_comments';
-    $sql_comments        = "CREATE TABLE {$table_name_comments} (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        slide_id VARCHAR(255) NOT NULL,
-        user_id BIGINT UNSIGNED NOT NULL,
-        parent_id BIGINT UNSIGNED DEFAULT NULL,
-        content TEXT NOT NULL,
-        image_url VARCHAR(500) NULL,
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        KEY idx_slide_id (slide_id(191)),
-        KEY idx_user_id (user_id)
-    ) {$charset_collate};";
-    dbDelta( $sql_comments );
-    update_option( 'tt_comments_db_version', '1.0' );
-
-    // Tabela: Polubienia komentarzy
-    $table_name_comment_likes = $wpdb->prefix . 'tt_comment_likes';
-    $sql_comment_likes        = "CREATE TABLE {$table_name_comment_likes} (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        comment_id BIGINT UNSIGNED NOT NULL,
-        user_id BIGINT UNSIGNED NOT NULL,
-        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        UNIQUE KEY uniq_user_comment (user_id, comment_id),
-        KEY idx_comment_id (comment_id)
-    ) {$charset_collate};";
-    dbDelta( $sql_comment_likes );
-    update_option( 'tt_comment_likes_db_version', '1.0' );
 
     // Tabela: Donacje
     $table_name_donations = $wpdb->prefix . 'tt_donations';
@@ -109,8 +79,6 @@ add_action(
     'init',
     function () {
         if ( get_option( 'tt_likes_db_version' ) !== '1.0'
-            || get_option( 'tt_comments_db_version' ) !== '1.0'
-            || get_option( 'tt_comment_likes_db_version' ) !== '1.0'
             || get_option('tt_donations_db_version') !== '1.0'
             || get_option('tt_push_subscriptions_db_version') !== '1.0') {
             tt_create_database_tables();

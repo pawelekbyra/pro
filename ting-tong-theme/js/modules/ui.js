@@ -63,7 +63,8 @@ function initDOMCache() {
   DOM.preloader = document.getElementById("preloader");
   DOM.alertBox = document.getElementById("alertBox");
   DOM.alertText = document.getElementById("alertText");
-  DOM.commentsModal = document.getElementById("comments-modal-container");
+  DOM.commentsModal = document.getElementById("fastcomments-modal-container");
+  DOM.fastCommentsContainer = document.getElementById("fastcomments-widget-0");
   DOM.accountModal = document.getElementById("accountModal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
@@ -295,18 +296,6 @@ function openModal(modal, options = {}) {
         }, { once: true });
     }
 
-    if (modal.id === 'comments-modal-container') {
-        const swiper = State.get('swiper');
-        if (swiper) {
-            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-            const slideData = slidesData.find(s => s.id === slideId);
-            const count = slideData ? slideData.initialComments : 0;
-            const titleEl = modal.querySelector('#commentsTitle');
-            if (titleEl) {
-                titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
-            }
-        }
-    }
 
     if (modal.id === 'infoModal') {
         startCountdown();
@@ -933,52 +922,12 @@ function closeWelcomeModal() {
     }
 }
 
-function _createCommentHtml(comment) {
-    // Generowanie HTML na podstawie danych JSON. Użyj klas CSS motywu.
-    return `
-        <div class="tt-comment" data-id="${comment.id}">
-            <img class="tt-comment-avatar" src="${comment.avatar_url}" alt="${comment.display_name}" />
-            <div class="tt-comment-body">
-                <div class="tt-comment-header">
-                    <span class="tt-comment-author">${comment.display_name}</span>
-                    <span class="tt-comment-time">${comment.time_ago}</span>
-                </div>
-                <p class="tt-comment-content">${comment.content}</p>
-                </div>
-        </div>
-    `;
-}
-
-// Publiczna funkcja: Wyświetla listę komentarzy (przy ładowaniu)
-function renderComments(commentsArray) {
-    const container = document.getElementById('comments-list');
-    if (!container) return;
-    container.innerHTML = ''; // Usuń placeholder lub stare komentarze
-
-    // Użyj pętli do wyrenderowania każdego komentarza
-    commentsArray.forEach(comment => {
-        container.innerHTML += _createCommentHtml(comment);
-    });
-};
-
-// Publiczna funkcja: Dodaje nowy komentarz (po wysłaniu)
-function renderNewComment(commentObject) {
-    const container = document.getElementById('comments-list');
-    if (!container) return;
-    const newCommentHtml = _createCommentHtml(commentObject);
-
-    // Dodaj nowy komentarz na górę listy
-    container.insertAdjacentHTML('afterbegin', newCommentHtml);
-};
-
 export const UI = {
   initDOMCache,
   DOM,
   showAlert,
   openModal,
   closeModal,
-  renderComments,
-  renderNewComment,
   updateUIForLoginState,
   updateTranslations,
   applyLikeStateToDom,
@@ -990,7 +939,6 @@ export const UI = {
   isSlideOverlayActive, // ✅ NOWE
   setPwaModule, // ✅ NOWE
   getIsUserLoggedIn,
-  closeCommentsModal,
   closeWelcomeModal,
   updateCrowdfundingStats,
   openAuthorProfileModal,

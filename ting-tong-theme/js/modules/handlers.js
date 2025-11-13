@@ -7,6 +7,7 @@ import { Notifications } from './notifications.js';
 import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
+import { FastCommentsIntegration } from './fastcomments.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -241,11 +242,10 @@ export const Handlers = {
       case 'open-comments-modal':
         {
           const swiper = State.get('swiper');
-          const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-          UI.openModal(UI.DOM.commentsModal);
-          const comments = await API.getComments(slideId);
-          if (comments) {
-            UI.renderComments(comments);
+          if (swiper) {
+            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
+            UI.openModal(UI.DOM.commentsModal);
+            FastCommentsIntegration.renderComments(slideId);
           }
         }
         break;
@@ -263,9 +263,6 @@ export const Handlers = {
         }
         break;
       }
-      case "close-comments-modal":
-        UI.closeCommentsModal();
-        break;
       case "open-info-modal":
         UI.openModal(document.getElementById('infoModal'), {
           animationClass: 'slideInFromTop'
@@ -540,17 +537,5 @@ export const Handlers = {
         return;
     }
 
-    if (e.target.id === 'comment-form') {
-      e.preventDefault();
-      const content = e.target.querySelector('#comment-content').value;
-      if (!content.trim()) return;
-      const swiper = State.get('swiper');
-      const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-      const newComment = await API.postComment(slideId, content);
-      if (newComment) {
-        UI.renderNewComment(newComment);
-        e.target.reset();
-      }
-    }
   },
 };

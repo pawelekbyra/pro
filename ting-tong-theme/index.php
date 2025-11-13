@@ -420,24 +420,8 @@ get_header();
 </div>
 
 
-<!-- Comments Modal -->
-<div id="comments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="comments-modal-title" aria-hidden="true">
-    <div class="modal-content" tabindex="-1">
-        <div class="modal-header">
-            <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
-            <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="comments-list"></div>
-            <div id="comments-loading-spinner" style="padding: 60px; text-align: center;">
-                <span class="loading-spinner large" style="margin: 0 auto; display: block;"></span>
-            </div>
-            <form id="comment-form">
-                <textarea id="comment-content" placeholder="Dodaj komentarz..."></textarea>
-                <button type="submit">Opublikuj</button>
-            </form>
-        </div>
-    </div>
+<div id="fastcomments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="fastcomments-widget-0"></div>
 </div>
 
 <div id="video-player-modal" class="modal-overlay" style="background-color: #000;">

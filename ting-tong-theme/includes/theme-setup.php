@@ -104,6 +104,9 @@ function tt_enqueue_and_localize_scripts() {
             // W tym miejscu używamy stałej PHP, która musi być zdefiniowana w wp-config.php
             'stripePk'   => defined('TT_STRIPE_PUBLISHABLE_KEY') ? TT_STRIPE_PUBLISHABLE_KEY : null,
             'vapidPk'    => defined('TT_VAPID_PUBLIC_KEY') ? TT_VAPID_PUBLIC_KEY : null,
+            'fcTenantId' => defined('FASTCOMMENTS_TENANT_ID') ? FASTCOMMENTS_TENANT_ID : null,
+            'fcRegion'   => defined('FASTCOMMENTS_REGION') ? FASTCOMMENTS_REGION : null,
+            'fcWidgetId' => defined('FASTCOMMENTS_WIDGET_ID') ? FASTCOMMENTS_WIDGET_ID : null,
         ]
     );
 
