@@ -2077,7 +2077,7 @@ margin: -7px auto 0;
   left: 50%;
   width: 350px;
   max-width: calc(100vw - 20px);
-  background: rgba(30, 30, 30, 0.9);
+  background: #1e1e1e;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -2086,11 +2086,9 @@ margin: -7px auto 0;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
-  backdrop-filter: blur(12px) saturate(120%);
   opacity: 0;
   transform: translateX(-50%) scale(0.95);
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s;
   visibility: hidden;
   pointer-events: none;
   display: flex;
@@ -2323,7 +2321,7 @@ margin: -7px auto 0;
   padding: 0 20px; /* Simplified padding */
   padding-top: var(--safe-area-top);
   flex-shrink: 0;
-  background: linear-gradient(90deg, #28282a 0%, #1c1c1e 100%);
+  background-image: linear-gradient(to top, #434343 0%, #000000 100%);
 }
 
 .account-header h2 {
@@ -4134,7 +4132,7 @@ overflow: hidden;
 }
 
 #comments-modal-container .modal-content {
-  background: #18191a;
+  background: linear-gradient(180deg, #28282a 0%, #1c1c1e 100%);
   color: #e4e6eb;
   width: 100%;
   max-width: 100%;
@@ -4946,7 +4944,7 @@ padding: 4px 0 4px 8px;
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease !important;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
 }
 
@@ -5937,7 +5935,7 @@ main::-webkit-scrollbar {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
     position: relative;
-    background: linear-gradient(90deg, #28282a 0%, #1c1c1e 100%);
+    background-image: linear-gradient(to top, #434343 0%, #000000 100%);
 }
 
 #author-profile-modal .username-header {
@@ -6065,6 +6063,7 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .profile-tabs {
   border-bottom: 1px solid #3a3a3c;
+  background-color: #1c1c1e;
 }
 
 #author-profile-modal .profile-tab {
@@ -6075,7 +6074,7 @@ main::-webkit-scrollbar {
 
 #author-profile-modal .profile-tab.active {
     color: #fff;
-    background: none;
+    background: #2c2c2e;
     border-bottom: 2px solid var(--accent-color);
 }
 
