@@ -225,36 +225,48 @@ function tt_generate_mock_comments($count) {
     ];
 
     $comment_id_counter = 1;
+    $parent_comments = [];
 
-    for ($i = 1; $i <= $count; $i++) {
+    // Create 4 parent comments
+    for ($i = 0; $i < 4; $i++) {
         $user_data = $users[array_rand($users)];
-        $parent_id = null;
-
-        // Co trzeci komentarz jest odpowiedzią (jeśli istnieją już inne komentarze)
-        if ($i > 1 && $i % 3 === 0 && !empty($comments)) {
-            $parent_id = $comments[array_rand(array_keys($comments))]['id'];
-        }
-
         $comment = [
             'id'        => $comment_id_counter,
-            'parentId'  => $parent_id,
+            'parentId'  => null,
             'user'      => $user_data['name'],
             'avatar'    => $user_data['avatar'],
             'text'      => $texts[array_rand($texts)],
             'image_url' => null,
-            'timestamp' => (new DateTime("-{$i} hours"))->format(DateTime::ATOM),
+            'timestamp' => (new DateTime("-{$comment_id_counter} hours"))->format(DateTime::ATOM),
             'likes'     => rand(0, 150),
             'isLiked'   => (bool) rand(0, 1),
-            'canEdit'   => false, // W mockowych danych użytkownik nie jest właścicielem
+            'canEdit'   => false,
         ];
-
-        // Co piąty komentarz ma obrazek
-        if ($comment_id_counter > 0 && $comment_id_counter % 5 === 0) {
-            $comment['image_url'] = 'https://picsum.photos/300/200?random=' . $comment_id_counter;
-        }
-
         $comments[] = $comment;
+        $parent_comments[] = $comment_id_counter;
         $comment_id_counter++;
+    }
+
+    // Create replies for each parent comment
+    foreach ($parent_comments as $parent_id) {
+        $replies_count = rand(1, 3);
+        for ($j = 0; $j < $replies_count; $j++) {
+            $user_data = $users[array_rand($users)];
+            $comment = [
+                'id'        => $comment_id_counter,
+                'parentId'  => $parent_id,
+                'user'      => $user_data['name'],
+                'avatar'    => $user_data['avatar'],
+                'text'      => $texts[array_rand($texts)],
+                'image_url' => null,
+                'timestamp' => (new DateTime("-{$comment_id_counter} minutes"))->format(DateTime::ATOM),
+                'likes'     => rand(0, 50),
+                'isLiked'   => (bool) rand(0, 1),
+                'canEdit'   => false,
+            ];
+            $comments[] = $comment;
+            $comment_id_counter++;
+        }
     }
 
     // Sortuj komentarze po dacie (najnowsze na dole)
