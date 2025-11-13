@@ -71,6 +71,7 @@ function initDOMCache() {
   DOM.welcomeModal = document.getElementById("welcome-modal");
   DOM.infoModal = document.getElementById("infoModal");
   DOM.authorProfileModal = document.getElementById("author-profile-modal");
+  DOM.cropModal = document.getElementById("cropModal");
 }
 
 function openAuthorProfileModal(slideData, options = {}) {

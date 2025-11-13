@@ -449,19 +449,19 @@ get_header();
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
             <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
-        <div class="modal-body">
-            <div class="comment-sort-options">
-                <div class="sort-dropdown">
-                    <button class="sort-trigger">
-                        <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
-                        <span class="current-sort" data-translate-key="commentSortNewest">najnowsz</span> ▼
-                    </button>
-                    <div class="sort-options">
-                        <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">najnowsz</button>
-                        <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">najlepsze</button>
-                    </div>
+        <div class="comments-sorting-controls">
+            <div class="sort-dropdown">
+                <button class="sort-trigger">
+                    <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
+                    <span class="current-sort" data-translate-key="commentSortNewest">najnowsz</span> ▼
+                </button>
+                <div class="sort-options">
+                    <button class="sort-option active" data-sort="newest" data-translate-key="commentSortNewest">najnowsz</button>
+                    <button class="sort-option" data-sort="popular" data-translate-key="commentSortBest">najlepsze</button>
                 </div>
             </div>
+        </div>
+        <div class="modal-body">
             <!-- Comments will be rendered here -->
         </div>
         <div class="comment-form-container">

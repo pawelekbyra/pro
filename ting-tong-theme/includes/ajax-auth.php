@@ -61,7 +61,7 @@ add_action('wp_ajax_nopriv_tt_ajax_login', function () {
             'display_name'        => $u->display_name,
             'first_name'          => (string) $first_name,
             'last_name'           => (string) $last_name,
-            'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
+            'avatar'              => tt_get_user_avatar_url($u->ID),
             'email_consent'       => (bool) get_user_meta($u->ID, 'tt_email_consent', true),
             'email_language'      => (string) get_user_meta($u->ID, 'tt_email_language', true) ?: 'pl',
             'is_profile_complete' => $is_profile_complete,
@@ -161,7 +161,7 @@ add_action('wp_ajax_tt_profile_get', function () {
         'display_name'        => $u->display_name,
         'first_name'          => (string) $first_name,
         'last_name'           => (string) $last_name,
-        'avatar'              => get_avatar_url($u->ID, ['size' => 96]),
+        'avatar'              => tt_get_user_avatar_url($u->ID),
         'is_profile_complete' => $is_profile_complete,
         'new_nonce'           => wp_create_nonce('tt_ajax_nonce'),
     ]);
@@ -207,7 +207,7 @@ add_action('wp_ajax_tt_profile_update', function () {
         'first_name'   => $first,
         'last_name'    => $last,
         'email'        => $email,
-        'avatar'       => get_avatar_url($u->ID, ['size' => 96]),
+        'avatar'       => tt_get_user_avatar_url($u->ID),
     ]);
 });
 add_action('wp_ajax_tt_avatar_upload', function () {
