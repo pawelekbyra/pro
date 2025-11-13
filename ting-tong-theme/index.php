@@ -806,10 +806,7 @@ get_header();
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
                     <h2 class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspólnie Tworzymy Historię!</h2>
-                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
                 </div>
-
-                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie to nie tylko pomoc finansowa, ale przede wszystkim wotum zaufania i nieoceniona motywacja. Dzięki Tobie możemy się rozwijać, organizować niezwykłe wydarzenia i dostarczać jeszcze więcej emocji. Zostań częścią tej podróży!</p>
 
                 <div class="progress-section">
                     <div class="progress-bar-wrapper">
