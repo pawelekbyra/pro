@@ -99,6 +99,37 @@ function tt_comments_get_count( $slide_id ) {
     return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}tt_comments WHERE slide_id = %s", $slide_id ) );
 }
 
+/**
+ * Wzbogaca surowy obiekt komentarza o dane do wyświetlenia (nazwa, awatar, czas).
+ * @param object $comment Surowy obiekt komentarza z bazy danych.
+ * @return array Wzbogacona tablica danych.
+ */
+function tt_get_comment_display_data($comment) {
+    if (empty($comment->user_id)) {
+        // Logika dla gości (opcjonalnie, jeśli dozwolone są niezalogowane komentarze)
+        $display_name = 'Gość';
+        $avatar_url = get_template_directory_uri() . '/assets/img/default-user.png'; // Użyj domyślnego avatara
+    } else {
+        $user = get_user_by('id', $comment->user_id);
+        $display_name = $user ? $user->display_name : 'Użytkownik usunięty';
+        // Użyj Gravatar lub niestandardowego awatara
+        $avatar_url = get_avatar_url($comment->user_id, ['size' => 64]);
+    }
+
+    // Użyj funkcji WP do formatowania czasu (np. '2 godziny temu')
+    $time_ago = human_time_diff(strtotime($comment->date), current_time('timestamp'));
+
+    return [
+        'id' => $comment->id,
+        'user_id' => $comment->user_id,
+        'display_name' => $display_name,
+        'avatar_url' => $avatar_url,
+        'content' => $comment->content,
+        'time_ago' => sprintf('%s temu', $time_ago), // np. "2 godziny temu"
+        // Dodaj inne pola potrzebne do UI
+    ];
+}
+
 // --- Polubienia komentarzy ---
 function tt_comment_likes_get_count( $comment_id ) {
     global $wpdb;
