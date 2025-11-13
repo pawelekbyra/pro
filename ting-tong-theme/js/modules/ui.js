@@ -353,28 +353,18 @@ function _resetVideoPlayer(videoModal) {
 function closeModal(modal, options = {}) {
     if (!modal || !activeModals.has(modal) || modal.classList.contains('is-hiding')) return;
 
-    // === POCZĄTEK NAPRAWY: Synchronizacja animacji tła i modala ===
-    // 1. Natychmiast usuń modal z listy aktywnych
     activeModals.delete(modal);
 
-    // 2. Jeśli to był ostatni modal, natychmiast rozpocznij animację rozjaśniania tła
     if (activeModals.size === 0) {
         document.body.style.overflow = '';
         DOM.container.removeAttribute('aria-hidden');
     }
-    // === KONIEC NAPRAWY ===
 
     modal.classList.add('is-hiding');
     modal.setAttribute('aria-hidden', 'true');
 
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
-
-    if (options.animationClass && contentElement) {
-        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-    } else {
-        modal.classList.remove('visible');
-    }
 
     let cleanupHasRun = false;
     const cleanup = () => {
@@ -383,9 +373,10 @@ function closeModal(modal, options = {}) {
 
         if (contentElement) {
             contentElement.removeEventListener('animationend', cleanup);
-            contentElement.style.animation = '';
+            contentElement.style.animation = ''; // Zresetuj animację po zakończeniu
         }
         modal.removeEventListener('transitionend', cleanup);
+
 
         modal.style.display = 'none';
         modal.classList.remove('is-hiding', 'visible');
@@ -396,20 +387,26 @@ function closeModal(modal, options = {}) {
         }
 
         const lastFocused = State.get("lastFocusedElement");
-        if (lastFocused && document.body.contains(lastFocused)) {
+        if (lastFocused && document.body.contains(lastFocused) && !options.keepFocus) {
             lastFocused.focus();
         }
 
-        if (typeof modal.onCloseCallback === 'function') {
-            modal.onCloseCallback();
-            delete modal.onCloseCallback;
+        if (typeof options.onClose === 'function') {
+            options.onClose();
         }
     };
 
-    modal.addEventListener('transitionend', cleanup, { once: true });
-    modal.addEventListener('animationend', cleanup, { once: true });
+    if (options.animationClass && contentElement) {
+        // Dodajemy klasę animacji i nasłuchujemy na 'animationend'
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+        contentElement.addEventListener('animationend', cleanup, { once: true });
+    } else {
+        // Fallback do standardowego transition, jeśli nie ma animacji
+        modal.classList.remove('visible');
+        modal.addEventListener('transitionend', cleanup, { once: true });
+    }
 
-    setTimeout(cleanup, 500); // Fallback
+    setTimeout(cleanup, 500); // Ostateczny fallback
 }
 
 function updateLikeButtonState(likeButton, liked, count) {
