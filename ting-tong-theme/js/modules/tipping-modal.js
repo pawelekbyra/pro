@@ -3,8 +3,6 @@ import { UI } from './ui.js';
 import { State } from './state.js';
 import { API } from './api.js';
 
-let isInitialized = false;
-
 // Helper do obsługi tłumaczeń, które mogą być obiektami
 function getTranslatedText(key, fallback) {
     const translation = Utils.getTranslation(key);
@@ -236,20 +234,17 @@ function validateStep(step) {
                 return false;
             }
         }
-        return true; // Explicitly return true on success for step 0
     }
     // Step 1: Amount and terms validation
     else if (step === 1) {
-        const amountStr = dom.amountInput.value.trim();
+        const amount = parseFloat(dom.amountInput.value);
         const currency = dom.currencySelect.value.toLowerCase();
         const minAmount = (currency === 'pln') ? 5 : 1;
 
+        const amountStr = dom.amountInput.value.trim();
         if (amountStr === '') {
-            const currencyDisplay = currency.toUpperCase();
-            const message = (getTranslatedText('errorMinTipAmount', 'The minimum tip amount is {minAmount} {currency}.'))
-                .replace('{minAmount}', minAmount)
-                .replace('{currency}', currencyDisplay);
-            showLocalError(1, message);
+             // Jeśli pole jest puste, walidacja się nie udaje, ale nie pokazujemy błędu.
+             // Błąd zostanie pokazany przez funkcję wywołującą (handleNextStep), jeśli to konieczne.
             return false;
         }
 
@@ -267,7 +262,7 @@ function validateStep(step) {
             showLocalError(1, getTranslatedText('errorTermsNotAccepted', 'You must accept the terms and conditions.'));
             return false;
         }
-        return true;
+        return true; // FIX: Ensure true is returned on successful validation
     }
     return true;
 }
@@ -487,15 +482,7 @@ function showModal(options = {}) {
         dom.amountInput.placeholder = ' ';
     }
 
-    UI.openModal(dom.modal, {
-        ...options,
-        onOpen: () => {
-            const modal = dom.modal;
-            modal.querySelector('.modal-body p:nth-of-type(1)').innerHTML = `Twój napiwek wspiera twórcę bezpośrednio.`;
-            modal.querySelector('.modal-body p:nth-of-type(2)').innerHTML = `Założyć konto patrona? 🏆`;
-            if (options.onOpen) options.onOpen();
-        }
-    });
+    UI.openModal(dom.modal, options);
     updateStepDisplay();
 }
 
@@ -509,7 +496,6 @@ function hideModal() {
 }
 
 function init() {
-    if (isInitialized) return;
     cacheDOM();
     if (!dom.modal) return;
 
@@ -540,7 +526,6 @@ function init() {
       if (e.target.closest('[data-action="show-terms"]')) { e.preventDefault(); showTerms(); }
       if (e.target.closest('[data-action="hide-terms"]')) hideTerms();
     });
-    isInitialized = true;
 }
 
 function translateUI() {

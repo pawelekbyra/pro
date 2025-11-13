@@ -23,6 +23,7 @@ get_header();
             <div class="elegant-modal-body" id="tippingBody">
                 <!-- Krok 1: E-mail i zgoda -->
                 <div class="elegant-modal-step" data-step="0">
+                    <p class="elegant-modal-step-description" data-translate-key="tippingThankYou"></p>
                     <p class="elegant-modal-step-description" data-translate-key="tippingStep1Desc">Założyć konto Patrona? 🏆</p>
                     <div class="elegant-modal-fields-container">
                         <label class="elegant-modal-preference-row">
@@ -448,7 +449,7 @@ get_header();
             <h2 id="commentsTitle" class="modal-title" data-translate-key="commentsModalTitle">Komentarze</h2>
             <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
-        <div class="comments-sorting-controls">
+        <div class="comment-sort-options">
             <div class="sort-dropdown">
                 <button class="sort-trigger">
                     <span data-translate-key="commentSortTriggerText">Sortuj według: </span>
@@ -806,7 +807,10 @@ get_header();
             <div class="crowdfunding-container">
                 <div class="crowdfunding-header">
                     <h2 class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspólnie Tworzymy Historię!</h2>
+                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
                 </div>
+
+                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie to nie tylko pomoc finansowa, ale przede wszystkim wotum zaufania i nieoceniona motywacja. Dzięki Tobie możemy się rozwijać, organizować niezwykłe wydarzenia i dostarczać jeszcze więcej emocji. Zostań częścią tej podróży!</p>
 
                 <div class="progress-section">
                     <div class="progress-bar-wrapper">
