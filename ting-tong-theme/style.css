@@ -5195,6 +5195,38 @@ padding: 4px 0 4px 8px;
   justify-content: center;
 }
 
+.comment {
+    display: flex;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.comment-author-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.comment-details {
+    color: #fff;
+}
+
+.comment-author-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.comment-text {
+    margin-bottom: 8px;
+}
+
+.comment-timestamp {
+    font-size: 0.8em;
+    color: #888;
+}
+
 .elegant-modal-btn:active {
   transform: scale(0.97);
 }

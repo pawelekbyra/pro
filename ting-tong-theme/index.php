@@ -328,35 +328,14 @@ get_header();
     </template>
 
     <template id="comment-template">
-        <div class="comment-item" data-comment-id="">
-            <div class="comment-avatar">
+        <div class="comment">
+            <div class="comment-author-avatar">
                 <img src="" alt="Avatar">
             </div>
-            <div class="comment-content">
-                <div class="comment-header">
-                    <span class="comment-author"></span>
-                    <span class="comment-timestamp"></span>
-                </div>
+            <div class="comment-details">
+                <p class="comment-author-name"></p>
                 <p class="comment-text"></p>
-                <div class="comment-image-attachment" style="display: none;">
-                    <img src="" class="comment-image" alt="Comment image attachment">
-                </div>
-                <div class="comment-actions">
-                    <button class="comment-like-btn" data-action="toggle-comment-like">
-                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    </button>
-                    <span class="comment-like-count">0</span>
-                    <button class="comment-reply-btn" data-action="reply-to-comment" data-translate-key="commentReply">Odpowiedz</button>
-                </div>
-            </div>
-            <div class="comment-options" style="display: none;">
-                <button class="comment-options-trigger" data-action="toggle-comment-options">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
-                </button>
-                <div class="comment-options-menu">
-                    <button data-action="edit-comment" data-translate-key="commentEdit">Edytuj</button>
-                    <button data-action="delete-comment" data-translate-key="commentDelete">Usuń</button>
-                </div>
+                <p class="comment-timestamp"></p>
             </div>
         </div>
     </template>
@@ -449,14 +428,18 @@ get_header();
             <button class="modal-close-btn" data-action="close-comments-modal" data-translate-aria-label="closeCommentsAriaLabel" aria-label="Zamknij komentarze">&times;</button>
         </div>
         <div class="modal-body">
-            <div id="hyvor-comments-container">
-            </div>
-            <div id="hyvor-loading-spinner" style="padding: 60px; text-align: center;">
+            <div id="comments-list"></div>
+            <div id="comments-loading-spinner" style="padding: 60px; text-align: center;">
                 <span class="loading-spinner large" style="margin: 0 auto; display: block;"></span>
             </div>
+            <form id="comment-form">
+                <textarea id="comment-content" placeholder="Dodaj komentarz..."></textarea>
+                <button type="submit">Opublikuj</button>
+            </form>
         </div>
     </div>
 </div>
+
 <div id="video-player-modal" class="modal-overlay" style="background-color: #000;">
     <video controls style="width: 100%; height: 100%;"></video>
     <button class="modal-close-btn" data-action="close-modal" style="color: #fff;">&times;</button>
