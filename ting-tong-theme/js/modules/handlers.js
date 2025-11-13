@@ -423,9 +423,12 @@ export const Handlers = {
                 animationClass: 'slideOutRight',
                 contentSelector: '.profile-modal-content',
                 onClose: () => {
-                    TippingModal.showModal({
-                        animationClass: 'slideInLeft'
-                    });
+                    // Slight delay to ensure the first modal is gone
+                    setTimeout(() => {
+                        TippingModal.showModal({
+                            animationClass: 'slideInRight'
+                        });
+                    }, 50);
                 }
             });
         } else {
