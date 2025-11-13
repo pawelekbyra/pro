@@ -898,26 +898,6 @@ function updateVolumeButton(isMuted) {
  */
 
 function initGlobalPanels() {
-  // Setup file input handler
-  const fileInput = document.querySelector('.comment-image-input');
-  if (fileInput) {
-    fileInput.addEventListener('change', handleImageSelect);
-  }
-
-  // Setup lightbox close
-  const lightboxClose = document.querySelector('.image-lightbox-close');
-  if (lightboxClose) {
-    lightboxClose.addEventListener('click', closeImageLightbox);
-  }
-
-  const lightbox = document.querySelector('.image-lightbox');
-  if (lightbox) {
-    lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) {
-        closeImageLightbox();
-      }
-    });
-  }
 }
 
 function closeWelcomeModal() {
