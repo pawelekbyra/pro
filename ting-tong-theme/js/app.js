@@ -10,6 +10,7 @@ import { AccountPanel } from './modules/account-panel.js';
 import { authManager } from './modules/auth-manager.js';
 import { FirstLoginModal } from './modules/first-login-modal.js';
 import { TippingModal } from './modules/tipping-modal.js';
+import { CommentsModal } from './modules/comments-modal.js';
 
 // Wstrzyknięcie zależności, aby przerwać cykl
 UI.setPwaModule(PWA);
@@ -463,6 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
         AccountPanel.init();
         FirstLoginModal.init();
         TippingModal.init();
+        CommentsModal.init();
         Notifications.init();
         UI.initGlobalPanels();
         PWA.init();
