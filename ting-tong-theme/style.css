@@ -1716,12 +1716,12 @@ margin: -7px auto 0;
 }
 
 /* Default state for modals that just fade/scale */
-.modal-overlay:not(#comments-modal-container) .modal-content {
+.modal-overlay .modal-content {
   opacity: 0;
   transform: scale(0.95);
 }
 
-.modal-overlay.visible:not(#comments-modal-container) .modal-content {
+.modal-overlay.visible .modal-content {
     opacity: 1;
     transform: scale(1);
 }
@@ -3732,14 +3732,12 @@ overflow: hidden;
 }
 
 @keyframes slideOutDown {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1) rotateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(50px) scale(0.9) rotateX(-10deg);
-  }
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
 }
 
 .welcome-modal.is-hiding .welcome-modal-content {
@@ -3863,7 +3861,6 @@ overflow: hidden;
 
   /* NOWE: Ujednolicony selektor modali i widgetów */
 
-  #commentsModal,
   .modal-overlay,
   .fl-modal-overlay,
   .elegant-modal-overlay,
@@ -5908,16 +5905,27 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     }
 }
 
-#commentsModal.modal-overlay, #fastcomments-modal-container {
+#fastcomments-modal-container {
     align-items: flex-end !important;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10200; /* Upewnij się, że jest na wierzchu */
 }
 
-#commentsModal .modal-content, #fastcomments-modal-container .modal-content {
+#fastcomments-modal-container .modal-content {
+    background: #1c1c1e;
     width: 100%;
+    max-width: 100%; /* Na desktopie będzie ograniczony przez .modal-overlay */
     border-radius: 20px 20px 0 0;
-    animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    max-height: 80vh;
-    transform: none !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%); /* Start poza ekranem */
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+#fastcomments-modal-container.visible .modal-content {
+    transform: translateY(0);
 }
 
 @keyframes slideOutRight {

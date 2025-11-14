@@ -290,7 +290,14 @@ function openModal(modal, options = {}) {
 
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
-    if (options.animationClass && contentElement) {
+
+    if (modal.id === 'fastcomments-modal-container') {
+        contentElement.style.transform = 'translateY(100%)';
+        modal.style.display = 'block';
+        setTimeout(() => {
+            modal.classList.add('visible');
+        }, 10);
+    } else if (options.animationClass && contentElement) {
         contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
         contentElement.addEventListener('animationend', () => {
             contentElement.style.animation = '';
@@ -367,12 +374,6 @@ function closeModal(modal, options = {}) {
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
 
-    // ZMIANA: Nowa animacja dla modalu komentarzy
-    if (modal.id === 'fastcomments-modal-container') {
-        options.animationClass = 'slideOutDown';
-        contentSelector = '.modal-content';
-    }
-
     let cleanupHasRun = false;
     const cleanup = () => {
         if (cleanupHasRun) return;
@@ -403,12 +404,17 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    if (options.animationClass && contentElement) {
-        // Dodajemy klasę animacji i nasłuchujemy na 'animationend'
+    if (modal.id === 'fastcomments-modal-container') {
+        modal.classList.remove('visible');
+        const onTransitionEnd = () => {
+            modal.removeEventListener('transitionend', onTransitionEnd);
+            cleanup();
+        };
+        modal.addEventListener('transitionend', onTransitionEnd);
+    } else if (options.animationClass && contentElement) {
         contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
         contentElement.addEventListener('animationend', cleanup, { once: true });
     } else {
-        // Fallback do standardowego transition, jeśli nie ma animacji
         modal.classList.remove('visible');
         modal.addEventListener('transitionend', cleanup, { once: true });
     }
