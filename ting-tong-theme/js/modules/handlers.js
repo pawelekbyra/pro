@@ -263,16 +263,12 @@ export const Handlers = {
       case "open-tipping-from-info": {
         const infoModal = document.getElementById('infoModal');
         if (infoModal && infoModal.classList.contains('visible')) {
-            // 1. Uruchom Modal Napiwkowy z animacją Wchodzenia z Prawa
-            TippingModal.showModal({
-                animationClass: 'slideInRight'
-            });
-
-            // 2. Uruchom Modal Info z animacją Wychodzenia w Lewo,
-            // używając nowej funkcji.
-            UI.startParallelClose(infoModal, {
-                contentSelector: '.info-modal-content',
-                animationClass: 'slideOutLeft' // INFO modal chowa się w lewo
+            UI.closeModal(infoModal, {
+                keepFocus: true,
+                animationClass: 'slideOutLeft',
+                onClose: () => {
+                    TippingModal.showModal({ animationClass: 'slideInRight' });
+                }
             });
         } else {
             TippingModal.showModal();
@@ -412,30 +408,20 @@ export const Handlers = {
           UI.DOM.notificationPopup.classList.remove("visible");
         }
         break;
-        case "show-tip-jar":
-          const authorModal = actionTarget.closest('#author-profile-modal');
-          if (authorModal) {
-              // KLUCZOWA ZMIANA: Inicjujemy MODAL NAPIWKOWY NATYCHMIAST,
-              // A MODAL AUTORA ZACZYNA SIĘ CHOWAĆ RÓWNOLEGLE.
-
-              // 1. Uruchom Modal Napiwkowy z animacją Wchodzenia z Prawa
-              TippingModal.showModal({
-                  animationClass: 'slideInRight'
-              });
-
-              // 2. Uruchom Modal Autora z animacją Wychodzenia w Prawo,
-              // używając funkcji ParallelClose, aby nie czekać na event animacji.
-              // Zauważ, że usuwamy onClose, ponieważ TippingModal jest już otwarty.
-              UI.startParallelClose(authorModal, {
-                  contentSelector: '.profile-modal-content',
-                  animationClass: 'slideOutRight'
-              });
-
-          } else {
-              // Standardowe wywołanie, jeśli kliknięto spoza modali
-              TippingModal.showModal();
-          }
-          break;
+      case "show-tip-jar":
+        const authorModal = actionTarget.closest('#author-profile-modal');
+        if (authorModal) {
+            UI.closeModal(authorModal, {
+                animationClass: 'slideOutRight',
+                contentSelector: '.profile-modal-content',
+            });
+            TippingModal.showModal({
+                animationClass: 'slideInRight'
+            });
+        } else {
+            TippingModal.showModal();
+        }
+        break;
       case "tipping-next":
         TippingModal.handleNextStep();
         break;
