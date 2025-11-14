@@ -1,0 +1,154 @@
+implementacja FastComments spowodowała problemy z wyświetlaniem modalu i zablokowała interakcję. Zdiagnozowałem błędy w plikach HTML (PHP), CSS i JavaScript, które powodują ten problem.
+
+Błąd polega na tym, że modal komentarzy jest zdefiniowany jako element typu modal-overlay (który domyślnie jest ukryty i wyśrodkowany). W pliku CSS dodane są niestandardowe style, które nadpisują jego położenie i animację, aby wysuwał się od dołu (align-items: flex-end !important;). Jednakże, sama jego zawartość (.modal-content) pozostaje w stanie domyślnym dla modali, co może powodować, że jej rozmiar i położenie jest nieprawidłowe, a co najważniejsze, brakuje domyślnego mechanizmu ukrywania modalu. W połączeniu z potencjalnym błędem renderowania widżetu FastComments, modal jest wyświetlany nieprawidłowo.
+
+Ponadto, sekcja CSS odpowiadająca za to, że modal wysuwa się od dołu, jest zdefiniowana w sposób, który może kolidować z innymi stylami:
+
+CSS
+
+/* Plik style.css */
+#commentsModal.modal-overlay, #fastcomments-modal-container {
+    align-items: flex-end !important;
+}
+
+#commentsModal .modal-content, #fastcomments-modal-container .modal-content {
+    /* ... */
+    animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* ... */
+}
+Aby to naprawić i przywrócić poprawną funkcjonalność i elegancki wygląd modalu wysuwanego od dołu, należy wprowadzić poprawki w 3 plikach.
+
+Kompleksowy prompt naprawczy
+Plik 1: ting-tong-theme/index.php
+Naprawa jest potrzebna w definicji modala FastComments, aby używał uniwersalnych klas modalowych (modal-content i modal-body):
+
+Zmień:
+
+PHP
+
+<div id="fastcomments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="commentsModalTitle" data-translate-key="commentsModalTitle">Komentarze</h2>
+            <button class="modal-close-btn" data-action="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="fastcomments-widget-0"></div>
+        </div>
+    </div>
+</div>
+Na (Brak zmian jest OK, ponieważ struktura jest poprawna, musimy skupić się na CSS i JS): Struktura HTML jest prawidłowa, ponieważ używa modal-overlay i modal-content. Błędy leżą w CSS i JS.
+
+Plik 2: ting-tong-theme/style.css
+Musimy dodać style odpowiedzialne za animację powrotną modala do dołu ekranu. W Twojej wersji brakuje definicji dla slideOutDown, ale jest on używany w JS.
+
+Dodaj/Zmień w sekcji "Modal Transition Animations" (lub na samym dole):
+
+CSS
+
+/*
+ * W Pliku: ting-tong-theme/style.css
+ * Sekcja: --- POPRAWKI UI/UX NA ŻYCZENIE UŻYTKOWNIKA ---
+ */
+
+/* 1. Modal komentarzy wysuwany od dołu */
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+/* DODAJ Jawną animację zamykającą 'slideOutDown' */
+@keyframes slideOutDown {
+    from {
+        transform: translateY(0);
+        opacity: 1; /* Musi być zdefiniowane, aby uniknąć nagłego znikania */
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 1;
+    }
+}
+
+#commentsModal.modal-overlay, #fastcomments-modal-container {
+    /* Ustawia modal przy dolnej krawędzi okna */
+    align-items: flex-end !important;
+}
+
+#commentsModal .modal-content, #fastcomments-modal-container .modal-content {
+    /* ... (istniejące style) ... */
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    /* Upewnij się, że używamy transform: none, aby nie przeszkadzać w animacji slideInUp */
+    transform: none !important;
+    max-height: 80vh;
+    display: flex; /* Wymuszenie flex, aby zawartość była poprawnie ułożona */
+    flex-direction: column;
+}
+
+/* Wymuś animację wejścia */
+#fastcomments-modal-container.visible .modal-content {
+    animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Wymuś animację wyjścia - ta klasa jest dodawana przez UI.js */
+#fastcomments-modal-container.is-hiding .modal-content {
+    animation: slideOutDown 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
+
+/* KRYTYCZNA POPRAWKA: Zabezpiecz przed ukryciem przez domyślne style modala, które mogą używać opacity/transform:scale(0.95) dla fade-in/out */
+.modal-overlay:not(#comments-modal-container) .modal-content {
+    /* Ta domyślna reguła NIE MOŻE dotyczyć modalu komentarzy */
+}
+/* Upewnij się, że .modal-content domyślnie jest wyświetlane wewnątrz .modal-overlay, ale jego transformacja jest zerowana*/
+#fastcomments-modal-container .modal-content {
+    opacity: 1 !important; /* Wymuś widoczność */
+    transform: translateY(100%); /* Domyślna pozycja do animacji wejścia */
+}
+/* Stan początkowy dla modala z klasą 'visible' */
+#fastcomments-modal-container.visible .modal-content {
+    transform: translateY(0);
+}
+Plik 3: ting-tong-theme/js/modules/comments-modal.js
+Musisz się upewnić, że podczas chowania modala (funkcja hideModal), używasz poprawnej animacji, która jest zdefiniowana w CSS (slideOutDown) i że jest to klasa, którą UI.closeModal potrafi obsłużyć.
+
+Zmień w funkcji hideModal:
+
+JavaScript
+
+// ting-tong-theme/js/modules/comments-modal.js
+
+function hideModal() {
+const modal = UI.DOM.commentsModal;
+if (modal) {
+// ZMIEŃ:
+// Upewnij się, że używasz 'slideOutDown' w JS, a CSS to obsłuży (naprawione w style.css)
+UI.closeModal(modal, { animationClass: 'slideOutDown', contentSelector: '.modal-content' });
+}
+}
+Krytyczna poprawka w funkcji showModal (która jest poprawna, ale dla pewności):
+
+JavaScript
+
+// ting-tong-theme/js/modules/comments-modal.js
+
+async function showModal() {
+// ...
+// 1. Otwarcie modala (z animacją SlideInUp)
+// contentSelector: '.modal-content' jest kluczowy do określenia, który element ma być animowany.
+UI.openModal(modal, { animationClass: 'slideInUp', contentSelector: '.modal-content' });
+// ...
+}
+Po wprowadzeniu tych poprawek:
+
+Modal będzie miał prawidłową wysokość i szerokość (100%).
+
+Będzie przyklejony do dolnej krawędzi ekranu (align-items: flex-end).
+
+Będzie wysuwał się od dołu po kliknięciu przycisku (slideInUp).
+
+Będzie chował się z powrotem do dołu po zamknięciu (slideOutDown).
+
+Użycie UI.openModal i UI.closeModal z klasami animacji i selektorem .modal-content zapewni poprawne działanie mechanizmu zarządzania widocznością modala (.visible / .is-hiding na nakładce).
