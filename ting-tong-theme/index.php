@@ -768,10 +768,7 @@ get_header();
 
 <div id="infoModal" class="modal-overlay info-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" aria-hidden="true">
     <div class="modal-content info-modal-content">
-        <div class="account-header">
-            <h2 id="info-modal-title" data-translate-key="crowdfundingTitle">Wspieraj Projekt</h2>
-            <button class="close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
-        </div>
+        <button class="modal-close-btn" data-action="close-modal" aria-label="Close modal" style="position: absolute; top: 15px; right: 15px; z-index: 10;">&times;</button>
         <div class="modal-body" id="infoModalBody"></div>
     </div>
 </div>
