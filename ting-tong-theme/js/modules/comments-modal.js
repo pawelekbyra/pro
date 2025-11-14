@@ -110,15 +110,32 @@ function loadFastCommentsSDK() {
         script.src = 'https://cdn.fastcomments.com/js/embed.min.js';
         script.async = true;
 
-        // FIX 2: Dodanie małego opóźnienia, aby dać SDK czas na inicjalizację globalnego obiektu
         script.onload = () => {
-            // Zmieniamy 50 na 200 ms - bezpieczniejsza wartość
-            setTimeout(resolve, 200);
+            const maxWaitTime = 5000; // 5 sekund max oczekiwania
+            const pollInterval = 50;  // Sprawdzaj co 50ms
+            let elapsedTime = 0;
+
+            const intervalId = setInterval(() => {
+                // Sprawdzaj, czy oba obiekty SDK są gotowe
+                if (window.FastCommentsSDK && window.FastCommentsState) {
+                    clearInterval(intervalId);
+                    resolve();
+                } else {
+                    elapsedTime += pollInterval;
+                    if (elapsedTime >= maxWaitTime) {
+                        clearInterval(intervalId);
+                        console.error("FastComments SDK nie zainicjalizował się w określonym czasie.");
+                        resolve(); // Rozwiąż obietnicę, aby nie blokować aplikacji
+                    }
+                }
+            }, pollInterval);
         };
+
         script.onerror = () => {
-             console.error("Failed to load FastComments SDK script.");
-             resolve();
+            console.error("Błąd ładowania skryptu FastComments SDK.");
+            resolve(); // Rozwiąż obietnicę, aby nie blokować aplikacji
         };
+
         document.head.appendChild(script);
     });
 }
