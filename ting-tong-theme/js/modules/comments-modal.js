@@ -3,6 +3,7 @@
 import { UI } from './ui.js';
 import { State } from './state.js';
 import { API } from './api.js';
+import { Utils } from './utils.js';
 
 let isInitialized = false;
 
@@ -12,12 +13,6 @@ return `${window.location.origin}/slide/${slideId}`;
 }
 
 async function initializeFastComments(slideId, containerElement) {
-if (!window.FastCommentsState || !window.FastCommentsSDK) {
-console.error("FastComments SDK or State is not available.");
-UI.showAlert("Błąd: Biblioteka komentarzy nie załadowana.", true);
-return;
-}
-
 const ssoPayload = State.get('isUserLoggedIn') ? await API.getFastCommentsSSOToken() : null;
 
 const tenantId = window.TingTongData?.fcTenantId;
@@ -89,7 +84,7 @@ if (slideData) {
 const count = slideData.initialComments || 0;
 const titleEl = modal.querySelector('#commentsModalTitle');
 if (titleEl) {
-titleEl.textContent = `${UI.Utils.getTranslation('commentsModalTitle')} (${count})`;
+titleEl.textContent = `${Utils.getTranslation('commentsModalTitle')} (${count})`;
 }
 }
 }
