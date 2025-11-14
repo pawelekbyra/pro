@@ -354,44 +354,39 @@ function setupEventListeners() {
 }
 
 function handleFileSelect(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-  // Walidacja pliku (przeniesiona dla czytelności)
-  if (!file.type.startsWith("image/")) {
-    return showError("avatarError", Utils.getTranslation("fileSelectImageError"));
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    return showError("avatarError", Utils.getTranslation("fileTooLargeError"));
-  }
+    if (!file.type.startsWith("image/")) {
+        return showError("avatarError", Utils.getTranslation("fileSelectImageError"));
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        return showError("avatarError", Utils.getTranslation("fileTooLargeError"));
+    }
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    cropImage = new Image();
-    cropImage.onload = function () {
-      const modal = UI.DOM.cropModal;
-      // Funkcja, która zostanie wywołana po zakończeniu animacji wejścia
-      const onModalOpen = () => {
-        initializeCropCanvas();
-        // Usuń listener, aby uniknąć wielokrotnego wywołania
-        modal.removeEventListener('transitionend', onModalOpen);
-      };
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        cropImage = new Image();
+        cropImage.onload = function () {
+            const modal = UI.DOM.cropModal;
 
-      // Nasłuchuj na zakończenie transition (animacji CSS)
-      modal.addEventListener('transitionend', onModalOpen, { once: true });
-
-      // Otwórz modal (to rozpocznie animację)
-      UI.openModal(modal);
+            // Użyj `onOpen` aby mieć pewność, że modal jest gotowy
+            UI.openModal(modal, {
+                onOpen: () => {
+                    // Czekaj na `transitionend` aby zagwarantować, że modal jest w pełni widoczny
+                    // i ma poprawne wymiary przed inicjalizacją canvasa.
+                    modal.addEventListener('transitionend', function onModalReady() {
+                        initializeCropCanvas();
+                        modal.removeEventListener('transitionend', onModalReady);
+                    }, { once: true });
+                }
+            });
+        };
+        cropImage.onerror = () => showError("avatarError", "Nie udało się załadować obrazu.");
+        cropImage.src = e.target.result;
     };
-    cropImage.onerror = () => {
-      showError("avatarError", "Nie udało się załadować obrazu.");
-    };
-    cropImage.src = e.target.result;
-  };
-  reader.onerror = () => {
-    showError("avatarError", "Nie udało się odczytać pliku.");
-  };
-  reader.readAsDataURL(file);
+    reader.onerror = () => showError("avatarError", "Nie udało się odczytać pliku.");
+    reader.readAsDataURL(file);
 }
 function closeCropModal() {
   const modal = document.getElementById("cropModal");

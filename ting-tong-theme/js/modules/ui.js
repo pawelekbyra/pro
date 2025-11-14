@@ -283,27 +283,18 @@ function openModal(modal, options = {}) {
         return;
     }
 
-    // Specjalna obsługa dla modala FastComments, który używa `transition` zamiast `animation`
-    if (modal.id === 'fastcomments-modal-container') {
-        modal.style.display = 'flex';
-        modal.classList.remove('is-hiding');
-        void modal.offsetWidth; // Trigger reflow
-        modal.classList.add('visible');
-    } else {
-        // Istniejąca logika dla pozostałych modali
-        modal.style.display = 'flex';
-        modal.classList.remove('is-hiding');
-        void modal.offsetWidth;
-        modal.classList.add('visible');
+    modal.style.display = 'flex';
+    modal.classList.remove('is-hiding');
+    void modal.offsetWidth;
+    modal.classList.add('visible');
 
-        const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
-        const contentElement = modal.querySelector(contentSelector);
-        if (options.animationClass && contentElement) {
-            contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-            contentElement.addEventListener('animationend', () => {
-                contentElement.style.animation = '';
-            }, { once: true });
-        }
+    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
+    const contentElement = modal.querySelector(contentSelector);
+    if (options.animationClass && contentElement) {
+        contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+        contentElement.addEventListener('animationend', () => {
+            contentElement.style.animation = '';
+        }, { once: true });
     }
 
 
@@ -376,6 +367,11 @@ function closeModal(modal, options = {}) {
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
 
+    // ZMIANA: Nowa animacja dla modalu komentarzy
+    if (modal.id === 'fastcomments-modal-container') {
+        options.animationClass = 'slideOutDown';
+        contentSelector = '.modal-content';
+    }
 
     let cleanupHasRun = false;
     const cleanup = () => {
