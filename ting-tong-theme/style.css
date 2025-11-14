@@ -5887,8 +5887,9 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     }
 }
 
-#commentsModal.modal-overlay {
+#commentsModal.modal-overlay, #fastcomments-modal-container.modal-overlay {
     align-items: flex-end !important; /* Wyrównaj do dołu */
+    z-index: 10201;
 }
 
 #commentsModal .modal-content {
