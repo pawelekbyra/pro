@@ -4191,7 +4191,7 @@ overflow: hidden;
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
 }
 
@@ -4219,7 +4219,7 @@ overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   transform: scale(0.95) translateY(10px);
   opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
 }
 
 .elegant-modal-overlay.visible .elegant-modal-content {
@@ -5894,12 +5894,19 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
     align-items: flex-end !important;
 }
 
-#commentsModal .modal-content, #fastcomments-modal-container .modal-content {
+#commentsModal .modal-content, #fastcomments-modal-container .fastcomments-content {
     width: 100%;
     border-radius: 20px 20px 0 0;
-    animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     max-height: 80vh;
-    transform: none !important;
+    /* Reset default modal animation and set starting position for slide-up */
+    transform: translateY(100%);
+    opacity: 1; /* Ensure it's not faded out by default styles */
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* When the overlay is visible, slide the content up into view */
+#fastcomments-modal-container.visible .fastcomments-content {
+    transform: translateY(0);
 }
 
 @keyframes slideOutRight {

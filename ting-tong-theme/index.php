@@ -422,7 +422,7 @@ get_header();
 
 <!-- FastComments Modal -->
 <div id="fastcomments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-content">
+    <div class="modal-content fastcomments-content">
         <div class="modal-header">
             <h2 id="commentsModalTitle" data-translate-key="commentsModalTitle">Komentarze</h2>
             <button class="modal-close-btn" data-action="close-modal">&times;</button>
