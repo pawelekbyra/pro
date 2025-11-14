@@ -449,9 +449,5 @@ if (!$sso_token) {
 wp_send_json_error(['message' => 'Failed to generate SSO token.'], 500);
 }
 
-wp_send_json_success([
-'ssoToken' => $sso_token,
-'userEmail' => $user->user_email ?: 'guest',
-'new_nonce' => wp_create_nonce('tt_ajax_nonce')
-]);
+wp_send_json_success($sso_token);
 }
