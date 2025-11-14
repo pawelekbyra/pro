@@ -369,16 +369,19 @@ function handleFileSelect(event) {
   reader.onload = function (e) {
     cropImage = new Image();
     cropImage.onload = function () {
-      // Używamy UI.openModal i opcji onOpen.
+      const modal = UI.DOM.cropModal;
+      // Funkcja, która zostanie wywołana po zakończeniu animacji wejścia
       const onModalOpen = () => {
-        const onTransitionEnd = () => {
-          initializeCropCanvas();
-          UI.DOM.cropModal.removeEventListener('transitionend', onTransitionEnd);
-        };
-        UI.DOM.cropModal.addEventListener('transitionend', onTransitionEnd);
+        initializeCropCanvas();
+        // Usuń listener, aby uniknąć wielokrotnego wywołania
+        modal.removeEventListener('transitionend', onModalOpen);
       };
 
-      UI.openModal(UI.DOM.cropModal, { onOpen: onModalOpen });
+      // Nasłuchuj na zakończenie transition (animacji CSS)
+      modal.addEventListener('transitionend', onModalOpen, { once: true });
+
+      // Otwórz modal (to rozpocznie animację)
+      UI.openModal(modal);
     };
     cropImage.onerror = () => {
       showError("avatarError", "Nie udało się załadować obrazu.");
