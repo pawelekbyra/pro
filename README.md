@@ -1,1 +1,31 @@
- Opis projektu Ting Tong (Wersja Szczegółowa - Zaktualizowana)Ting Tong to innowacyjna, w pełni autorska platforma wideo stworzona z myślą o monetyzacji talentu wokalnego bez pośredników. Projekt powstał jako manifest twórczej suwerenności, uniezależniający twórcę od algorytmów i wysokich prowizji Big Tech.🚀 Elevator PitchTing Tong to prywatna platforma wideo, która łączy funkcje TikToka, Patronite’a i Kickstartera w jednym, kontrolowanym ekosystemie.Użytkownicy skrolują pionowy feed z krótkimi filmami, lecz część treści jest zablokowana i dostępna tylko po spełnieniu określonych warunków:PWA-SECRET: Wymaga instalacji aplikacji jako PWA.SECRET: Wymaga wsparcia finansowego przez Własną Bramkę Płatności Stripe.Pełna automatyzacja: Darowizna natychmiastowo tworzy konto patrona w WordPressie, przypisując prawidłową Lokalizację (locale) i dając dostęp do ekskluzywnych materiałów. Zero algorytmów, 100% kontroli.🧠 Koncepcja i ArchitekturaTing Tong jest zbudowany od zera w oparciu o WordPress i technologię Progressive Web App (PWA), tworząc architekturę zbliżoną do Single Page Application (SPA). Frontend bazuje na ES Modules i SwiperJS (dla płynnego scrollowania), a backend PHP jest sercem logiki monetyzacji i zarządzania dostępami.Three-Tier Funnel Dostępu:Poziom DostępuOpisCel Biznesowy i TechnologicznyPUBLICWirusowe, zjawiskowe wideo.Budowanie zasięgu (TOFU), darmowy teaser treści.PWA-SECRETTreści dostępne po instalacji PWA.Budowanie soft commitment, zwiększenie retencji i umożliwienie Powiadomień Push.SECRET (Patron)Ekskluzywne materiały dla mecenasów.Bezpośrednia, natychmiastowa monetyzacja i budowa segmentu "Patronów Miłości".🔄 Automatyzacja Rejestracji i Bramka StripePrzejście na własną bramkę płatności Stripe pozwoliło na osiągnięcie maksymalnej kontroli nad danymi transakcyjnymi i eliminację pośredników (jak Zapier czy BMC).Proces tworzenia konta patrona:Inicjacja w Aplikacji: Użytkownik klika przycisk "Napiwek", co otwiera wbudowany modal płatności (Tipping Modal).Wskazówka Językowa (Frontend): Aplikacja mapuje aktualny język interfejsu (np. pl lub en) na kod kraju (PL lub GB) i wysyła go do backendu jako wskazówkę (country_hint).Tworzenie Payment Intent (Backend): Serwer PHP używa Stripe API do utworzenia obiektu Payment Intent, osadzając wskazówkę kraju w Metadanych.Finalizacja Płatności: Użytkownik dokonuje płatności w bezpiecznym środowisku Stripe, a środki trafiają bezpośrednio na konto twórcy.Webook Stripe (checkout.session.completed): Po udanej płatności, Stripe wysyła webhook do zdefiniowanego endpointu PHP.Weryfikacja i Lokalizacja (PHP): Skrypt PHP odbiera i weryfikuje webhook, po czym następuje logika Lokalizacji:System pobiera oficjalny kod kraju transakcji (lub używa metadanych jako fallbacku).Jeżeli kod kraju to PL, Lokalizacja konta WordPress (locale) jest ustawiana na pl_PL.W pozostałych przypadkach Lokalizacja jest ustawiana na en_GB (domyślny angielski).Rejestracja Konta: System wywołuje funkcję WordPressa, tworząc konto z nadanym locale, e-mailem i tymczasowym hasłem (tingtong).Dostęp: Użytkownik otrzymuje maila powitalnego i natychmiastowo zyskuje dostęp do treści SECRET.💡 Przewagi i Filozofia (Zaktualizowane)CechaZysk dla Twórcy✅ Pełna Kontrola PłatnościMaksymalna niezależność i integracja bramki Stripe bezpośrednio w aplikację.✅ Lokalizacja UżytkownikaPrecyzyjne ustawienie pola locale w WP (np. pl_PL / en_GB), co zapewnia poprawność maili i interfejsu.✅ 100% OwnershipPełna baza mailowa użytkowników, niezależność od zewnętrznych platform.✅ 95% RevenueMinimalne opłaty transakcyjne (Stripe), maksymalny przychód zatrzymywany przez Twórcę.✅ Zero AlgorytmówKontrola nad tym, co, kiedy i dla kogo jest publikowane.✅ Technologiczna PrzewagaWłasny ekosystem PWA ze złożoną, autorską logiką backendową.Filozofia projektu:"Anty-establishment approach to creator economy. Zamiast karmić algorytmy Big Tech, budujesz własny świat, w którym fani wspierają Cię bezpośrednio. Ty tworzysz – oni wspierają – wszyscy wygrywają."
+# Plan Migracji Ting Tong
+
+Ten dokument opisuje kroki migracji aplikacji Ting Tong z architektury WordPress/PHP do nowoczesnego stosu React/Node.js, z wdrożeniem na platformie Vercel.
+
+## Kroki Migracji
+
+1. **Przygotowanie środowiska i struktury projektu.**
+   - Przeniesienie wszystkich istniejących plików do katalogu `legacy-wordpress-theme`, aby zachować kod źródłowy jako referencję.
+   - Utworzenie nowej struktury katalogów (`client`, `server`) dla aplikacji React/Node.js.
+   - Zainicjowanie nowego projektu Node.js za pomocą `npm init` i skonfigurowanie podstawowych zależności.
+   - Utworzenie pliku `README.md` z opisem kroków migracji, celów i instrukcji dla kolejnych agentów.
+
+2. **Implementacja API w Node.js (backend).**
+   - Utworzenie serwera Express.js do obsługi zapytań API.
+   - Zaimplementowanie logiki autentykacji użytkowników (rejestracja, logowanie, weryfikacja statusu).
+   - Odtworzenie logiki integracji z płatnościami Stripe, w tym webhooków do obsługi płatności.
+   - Stworzenie endpointów API do pobierania danych o slajdach, zarządzania profilem użytkownika i obsługi polubień.
+   - Konfiguracja połączenia z bazą danych (np. PostgreSQL lub MongoDB) do przechowywania danych użytkowników i innych informacji.
+
+3. **Implementacja aplikacji w React (frontend).**
+   - Skonfigurowanie nowego projektu React za pomocą Create React App lub Vite.
+   - Przeniesienie i adaptacja istniejącej logiki z plików JavaScript (z katalogu `legacy-wordpress-theme/js/modules`) do komponentów React.
+   - Odtworzenie interfejsu użytkownika, w tym odtwarzacza wideo, logiki SwiperJS i paneli bocznych.
+   - Zintegrowanie aplikacji React z nowym API Node.js w celu pobierania danych i obsługi akcji użytkownika.
+   - Implementacja logiki Progressive Web App (PWA) w aplikacji React, w tym service workera i manifestu aplikacji.
+
+4. **Testowanie, wdrożenie i finalizacja.**
+   - Przeprowadzenie kompleksowych testów w celu zapewnienia, że wszystkie funkcje działają poprawnie (płatności, autentykacja, PWA).
+   - Skonfigurowanie projektu do wdrożenia na platformie Vercel.
+   - Wdrożenie aplikacji i przeprowadzenie testów na środowisku produkcyjnym.
+   - Zaktualizowanie `README.md` o instrukcje dotyczące uruchomienia i wdrożenia projektu.
