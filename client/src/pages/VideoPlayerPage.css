@@ -1,0 +1,36 @@
+/* Plik: client/src/pages/VideoPlayerPage.css */
+
+.video-swiper {
+  width: 100%;
+  height: 100vh;
+}
+
+.video-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-color: black;
+}
+
+.video-slide video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Używamy contain, aby całe wideo było widoczne */
+}
+
+.video-title {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 1.2rem;
+}
+
+.error-message {
+    color: red;
+    font-size: 1.5rem;
+}

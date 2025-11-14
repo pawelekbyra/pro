@@ -1,20 +1,23 @@
+// Plik: server/middleware/auth.js
+// Middleware do weryfikacji tokena JWT
+
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
-  // Get token from header
+  // Pobierz token z nagłówka
   const token = req.header('x-auth-token');
 
-  // Check if not token
+  // Sprawdź, czy token istnieje
   if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
+    return res.status(401).json({ msg: 'Brak tokena, autoryzacja odrzucona' });
   }
 
-  // Verify token
+  // Zweryfikuj token
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.user;
+    req.user = decoded.user; // Dodaj zdekodowane dane użytkownika do obiektu req
     next();
   } catch (err) {
-    res.status(401).json({ msg: 'Token is not valid' });
+    res.status(401).json({ msg: 'Token jest nieprawidłowy' });
   }
 };
