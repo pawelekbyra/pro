@@ -340,3 +340,59 @@ function tt_custom_avatar_filter($args, $id_or_email) {
     return $args;
 }
 add_filter('pre_get_avatar_data', 'tt_custom_avatar_filter', 99, 2);
+
+/**
+* Generuje podpisany token SSO dla FastComments.
+*
+* @param WP_User|null $user Obiekt użytkownika WordPress.
+* @return string Podpisany token JWT lub null.
+*/
+function tt_fastcomments_generate_sso_token($user) {
+if (!defined('FASTCOMMENTS_SSO_SECRET_KEY')) {
+error_log('BŁĄD FASTCOMMENTS: Brak stałej FASTCOMMENTS_SSO_SECRET_KEY.');
+return null;
+}
+
+$secret_key = FASTCOMMENTS_SSO_SECRET_KEY;
+
+if (!$user || !($user instanceof WP_User) || $user->ID === 0) {
+// Użytkownik wylogowany (Guest)
+$payload = ['id' => null];
+} else {
+// Użytkownik zalogowany
+$payload = [
+'id' => (string) $user->ID,
+'username' => $user->display_name,
+'email' => $user->user_email,
+// Opcjonalnie: 'avatar' => tt_get_user_avatar_url($user->ID),
+];
+}
+
+// Dodanie niezbędnych pól FastComments
+$payload['timestamp'] = time();
+$payload['verify'] = true; // Wymuszamy weryfikację
+$payload['tenantId'] = defined('FASTCOMMENTS_TENANT_ID') ? FASTCOMMENTS_TENANT_ID : null;
+
+// FastComments używa Base64Url (RFC 7515 §2) do kodowania, nie wymaga zewnętrznej biblioteki JWT
+$header = ['alg' => 'HS256', 'typ' => 'JWT'];
+
+$base64UrlEncode = function ($data) {
+$base64 = base64_encode(json_encode($data));
+return str_replace(['+', '/', '='], ['-', '_', ''], $base64);
+};
+
+$base64UrlDecode = function ($data) {
+$base64 = str_replace(['-', '_'], ['+', '/'], $data);
+$base64 = str_pad($base64, strlen($base64) % 4, '=', STR_PAD_RIGHT);
+return json_decode(base64_decode($base64));
+};
+
+$header_encoded = $base64UrlEncode($header);
+$payload_encoded = $base64UrlEncode($payload);
+$signature_content = $header_encoded . '.' . $payload_encoded;
+
+$signature = hash_hmac('sha256', $signature_content, $secret_key, true);
+$signature_encoded = $base64UrlEncode($signature);
+
+return $signature_content . '.' . $signature_encoded;
+}

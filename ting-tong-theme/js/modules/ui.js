@@ -4,6 +4,7 @@ import { Utils } from './utils.js';
 import { initInteractiveWall } from './interactive-wall.js';
 // import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
+import { CommentsModal } from './comments-modal.js';
 
 let PWA_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
 function setPwaModule(pwaModule) {
@@ -63,8 +64,8 @@ function initDOMCache() {
   DOM.preloader = document.getElementById("preloader");
   DOM.alertBox = document.getElementById("alertBox");
   DOM.alertText = document.getElementById("alertText");
-  DOM.commentsModal = document.getElementById("commentsModal");
-  DOM.fastCommentsContainer = document.getElementById("fastcomments-widget");
+  DOM.commentsModal = document.getElementById("fastcomments-modal-container");
+  DOM.fastCommentsContainer = document.getElementById("fastcomments-widget-0");
   DOM.accountModal = document.getElementById("accountModal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
@@ -365,6 +366,12 @@ function closeModal(modal, options = {}) {
 
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
+
+    // ZMIANA: Nowa animacja dla modalu komentarzy
+    if (modal.id === 'fastcomments-modal-container') {
+        options.animationClass = 'slideOutDown';
+        contentSelector = '.modal-content';
+    }
 
     let cleanupHasRun = false;
     const cleanup = () => {
@@ -920,6 +927,7 @@ function closeWelcomeModal() {
 }
 
 export const UI = {
+  slidesData,
   initDOMCache,
   DOM,
   showAlert,

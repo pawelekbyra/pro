@@ -139,6 +139,27 @@ export const API = {
   loadUserProfile: () => _request("tt_profile_get"),
 
   /**
+  * Pobiera podpisany token SSO dla FastComments (dla zalogowanych lub gości).
+  */
+  getFastCommentsSSOToken: async () => {
+    // Używamy opcji `retries: 0` dla tokenów SSO, aby uniknąć pętli
+    const result = await _request("tt_fastcomments_sso_token");
+
+    if (result.success && result.data?.ssoToken) {
+      return result.data;
+    }
+
+    // Zwróć null lub rzuć błąd w zależności od potrzeb logiki klienta
+    return null;
+  },
+
+  // Nowa metoda do czyszczenia tokena z pamięci (dla bezpieczeństwa)
+  clearFastCommentsSSOToken: async () => {
+    // W obecnym, bezstanowym modelu to jest No-op, ale zachowaj dla API
+    return Promise.resolve(true);
+  },
+
+  /**
    * Zapisuje subskrypcję Web Push na serwerze.
    * @param {PushSubscription} subscription Obiekt subskrypcji z przeglądarki.
    */

@@ -431,3 +431,27 @@ wp_send_json_success([
 'new_nonce' => wp_create_nonce('tt_ajax_nonce'),
 ]);
 });
+
+/**
+* AJAX: Generuje token SSO dla FastComments (dla zalogowanych lub gości).
+*/
+add_action('wp_ajax_tt_fastcomments_sso_token', 'tt_fastcomments_sso_token_callback');
+add_action('wp_ajax_nopriv_tt_fastcomments_sso_token', 'tt_fastcomments_sso_token_callback');
+
+function tt_fastcomments_sso_token_callback() {
+// Nonce jest sprawdzane przez AuthManager.js
+// check_ajax_referer('tt_ajax_nonce', 'nonce');
+
+$user = wp_get_current_user();
+$sso_token = tt_fastcomments_generate_sso_token($user);
+
+if (!$sso_token) {
+wp_send_json_error(['message' => 'Failed to generate SSO token.'], 500);
+}
+
+wp_send_json_success([
+'ssoToken' => $sso_token,
+'userEmail' => $user->user_email ?: 'guest',
+'new_nonce' => wp_create_nonce('tt_ajax_nonce')
+]);
+}
