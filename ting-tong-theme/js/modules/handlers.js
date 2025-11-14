@@ -7,7 +7,6 @@ import { Notifications } from './notifications.js';
 import { AccountPanel } from './account-panel.js';
 import { authManager } from './auth-manager.js';
 import { TippingModal } from './tipping-modal.js';
-import { FastCommentsIntegration } from './fastcomments.js';
 
 function mockToggleLogin() {
   const isLoggedIn = State.get("isUserLoggedIn");
@@ -240,14 +239,7 @@ export const Handlers = {
         handleLanguageToggle();
         break;
       case 'open-comments-modal':
-        {
-          const swiper = State.get('swiper');
-          if (swiper) {
-            const slideId = swiper.slides[swiper.activeIndex].dataset.slideId;
-            UI.openModal(UI.DOM.commentsModal);
-            FastCommentsIntegration.renderComments(slideId);
-          }
-        }
+        UI.openModal(UI.DOM.commentsModal);
         break;
       case "switch-profile-tab": {
         const tabButton = actionTarget;
@@ -420,16 +412,11 @@ export const Handlers = {
         const authorModal = actionTarget.closest('#author-profile-modal');
         if (authorModal) {
             UI.closeModal(authorModal, {
-                animationClass: 'slideOutLeft',
+                animationClass: 'slideOutRight',
                 contentSelector: '.profile-modal-content',
-                onClose: () => {
-                    // Slight delay to ensure the first modal is gone
-                    setTimeout(() => {
-                        TippingModal.showModal({
-                            animationClass: 'slideInRight'
-                        });
-                    }, 50);
-                }
+            });
+            TippingModal.showModal({
+                animationClass: 'slideInRight'
             });
         } else {
             TippingModal.showModal();
