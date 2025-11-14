@@ -370,9 +370,15 @@ function handleFileSelect(event) {
     cropImage = new Image();
     cropImage.onload = function () {
       // Używamy UI.openModal i opcji onOpen.
-      UI.openModal(UI.DOM.cropModal, {
-        onOpen: initializeCropCanvas // Po prostu przekaż funkcję jako callback.
-      });
+      const onModalOpen = () => {
+        const onTransitionEnd = () => {
+          initializeCropCanvas();
+          UI.DOM.cropModal.removeEventListener('transitionend', onTransitionEnd);
+        };
+        UI.DOM.cropModal.addEventListener('transitionend', onTransitionEnd);
+      };
+
+      UI.openModal(UI.DOM.cropModal, { onOpen: onModalOpen });
     };
     cropImage.onerror = () => {
       showError("avatarError", "Nie udało się załadować obrazu.");

@@ -1085,42 +1085,49 @@ body,
 .app-frame--pwa-visible .bottombar {
 }
 .progress-bar {
-position: absolute;
-bottom: 100%; /* Utrzymaj pozycjonowanie na górnej krawędzi bottombar */
-left: 0;
-width: 100%;
-height: 10px; /* FIX: Powiększ hitbox do 10px */
-cursor: pointer;
--webkit-tap-highlight-color: transparent;
-z-index: 10060;
-transition: height 0.2s ease-in-out; /* Utrzymaj transition dla estetyki */
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 10060;
+  transition: height 0.2s ease-in-out;
 }
 
-/* Tło i wypełnienie (wizualny pasek) */
-.progress-bar::before,
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: height 0.2s ease-in-out;
+}
+
 .progress-bar-fill {
-position: absolute;
-left: 0;
-top: 50%; /* FIX: Centrowanie w pionie */
-transform: translateY(-50%); /* FIX: Centrowanie w pionie */
-width: 100%;
-height: 4px; /* FIX: Ustaw stałą grubość wizualną */
-border-radius: 2px;
-pointer-events: none;
-transition: height 0.2s ease-in-out; /* Umożliwia płynne przejście */
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0%;
+  height: 4px;
+  background-color: var(--progress-bar-color);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: height 0.2s ease-in-out;
 }
 
-.progress-bar-fill {
-width: 0%; /* Wypełnienie jest zmieniane przez JS */
-/* Upewnij się, że nie ma transform: translateY(-50%) w selektorze .progress-bar-fill (jest w grupie powyżej, więc OK) */
-}
-
-/* Wymuś powiększenie wizualne na hover/drag */
 .progress-bar:hover::before,
 .progress-bar.dragging::before,
 .progress-bar:hover .progress-bar-fill,
 .progress-bar.dragging .progress-bar-fill {
-height: 6px; /* FIX: Zwiększenie grubości */
+  height: 6px;
 }
 
 .progress-bar:hover .progress-bar-handle,
@@ -2748,7 +2755,7 @@ margin: -7px auto 0;
   width: 100%;
   height: 100vh;
   background: rgba(0, 0, 0, 0.95);
-  z-index: 3000;
+  z-index: 10300;
   display: none;
   align-items: center;
   justify-content: center;
