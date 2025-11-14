@@ -369,8 +369,10 @@ function handleFileSelect(event) {
   reader.onload = function (e) {
     cropImage = new Image();
     cropImage.onload = function () {
-      // Przekazujemy inicjalizację jako callback
-      openCropModal(initializeCropCanvas);
+      // Używamy UI.openModal i opcji onOpen.
+      UI.openModal(UI.DOM.cropModal, {
+        onOpen: initializeCropCanvas // Po prostu przekaż funkcję jako callback.
+      });
     };
     cropImage.onerror = () => {
       showError("avatarError", "Nie udało się załadować obrazu.");
@@ -381,20 +383,6 @@ function handleFileSelect(event) {
     showError("avatarError", "Nie udało się odczytać pliku.");
   };
   reader.readAsDataURL(file);
-}
-
-function openCropModal(callback) {
-    const modal = UI.DOM.cropModal;
-    if (!modal) return;
-
-    UI.openModal(modal, {
-      onOpen: () => {
-        if (typeof callback === 'function') {
-            // Use a short timeout to ensure the modal is rendered before canvas calculations
-            setTimeout(callback, 50);
-        }
-      }
-    });
 }
 function closeCropModal() {
   const modal = document.getElementById("cropModal");

@@ -420,8 +420,16 @@ get_header();
 </div>
 
 
-<div id="fastcomments-modal-container" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div id="fastcomments-widget-0"></div>
+<div id="commentsModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Komentarze</h2>
+            <button class="modal-close-btn" data-action="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="fastcomments-widget"></div>
+        </div>
+    </div>
 </div>
 
 <div id="video-player-modal" class="modal-overlay" style="background-color: #000;">

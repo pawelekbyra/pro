@@ -63,8 +63,8 @@ function initDOMCache() {
   DOM.preloader = document.getElementById("preloader");
   DOM.alertBox = document.getElementById("alertBox");
   DOM.alertText = document.getElementById("alertText");
-  DOM.commentsModal = document.getElementById("fastcomments-modal-container");
-  DOM.fastCommentsContainer = document.getElementById("fastcomments-widget-0");
+  DOM.commentsModal = document.getElementById("commentsModal");
+  DOM.fastCommentsContainer = document.getElementById("fastcomments-widget");
   DOM.accountModal = document.getElementById("accountModal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
