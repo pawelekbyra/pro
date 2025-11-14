@@ -112,7 +112,8 @@ function loadFastCommentsSDK() {
 
         // FIX 2: Dodanie małego opóźnienia, aby dać SDK czas na inicjalizację globalnego obiektu
         script.onload = () => {
-            setTimeout(resolve, 50); // Opóźnienie 50ms
+            // Zmieniamy 50 na 200 ms - bezpieczniejsza wartość
+            setTimeout(resolve, 200);
         };
         script.onerror = () => {
              console.error("Failed to load FastComments SDK script.");
