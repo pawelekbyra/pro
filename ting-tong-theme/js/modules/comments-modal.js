@@ -18,13 +18,7 @@ UI.showAlert("Błąd: Biblioteka komentarzy nie załadowana.", true);
 return;
 }
 
-const ssoToken = State.get('isUserLoggedIn') ? await API.getFastCommentsSSOToken() : null;
-const ssoPayload = ssoToken?.ssoToken;
-
-// Przekazanie SSO payload i usunięcie z pamięci po użyciu
-if (ssoToken) {
-await API.clearFastCommentsSSOToken(); // Opcjonalnie: Funkcja czyszcząca token z pamięci
-}
+const ssoPayload = State.get('isUserLoggedIn') ? await API.getFastCommentsSSOToken() : null;
 
 const tenantId = window.TingTongData?.fcTenantId;
 const widgetId = window.TingTongData?.fcWidgetId;
