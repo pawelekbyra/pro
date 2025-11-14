@@ -763,9 +763,7 @@ get_header();
             <h2 id="info-modal-title" data-translate-key="crowdfundingTitle">Wspieraj Projekt</h2>
             <button class="close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
         </div>
-        <div class="modal-body" id="infoModalBody">
-
-        </div>
+        <div class="modal-body" id="infoModalBody"></div>
     </div>
 </div>
 

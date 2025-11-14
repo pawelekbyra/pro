@@ -919,71 +919,6 @@ function closeWelcomeModal() {
     }
 }
 
-function closeAuthorProfileModal() {
-  const modal = DOM.authorProfileModal;
-  if (modal) {
-    closeModal(modal, {
-      contentSelector: '.profile-modal-content',
-      animationClass: 'slideOutRight'
-    });
-  }
-}
-
-/**
- * Inicjuje animację wyjścia dla modala w trybie równoległym.
- * Usuwa blokadę tła i aktywuje onClose PRZED zakończeniem animacji,
- * co umożliwia natychmiastowe otwarcie następnego modala w tle.
- * @param {HTMLElement} modal
- * @param {object} options
- */
-function startParallelClose(modal, options = {}) {
-    if (!modal || !activeModals.has(modal)) return;
-
-    // KROK 1: Inicjalizacja stanu zamykania
-    modal.classList.add('is-hiding');
-    modal.setAttribute('aria-hidden', 'true');
-
-    // KROK 2: Inicjacja animacji (zgodnie z czasem w CSS: 0.4s)
-    const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content';
-    const contentElement = modal.querySelector(contentSelector);
-    const animationClass = options.animationClass || 'slideOutRight'; // Domyślnie chowa się w prawo
-
-    if (contentElement) {
-        // Używamy zdefiniowanych klas animacji CSS (np. slideOutRight)
-        contentElement.style.animation = `${animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-    }
-
-    // KROK 3: Natychmiastowe usunięcie modal z aktywnego stosu,
-    // co zwalnia document.body.style.overflow = 'hidden' (jeśli to ostatni modal).
-    activeModals.delete(modal);
-
-    if (activeModals.size === 0) {
-        document.body.style.overflow = '';
-        DOM.container.removeAttribute('aria-hidden');
-    }
-
-    // KROK 4: Asynchroniczne wyczyszczenie modala (po 300ms - długość animacji).
-    setTimeout(() => {
-        if (contentElement) contentElement.style.animation = ''; // Usuń animację
-
-        modal.style.display = 'none';
-        modal.classList.remove('is-hiding', 'visible');
-
-        if (modal._focusTrapDispose) {
-            modal._focusTrapDispose();
-            delete modal._focusTrapDispose;
-        }
-
-        // Wywołaj callback po zakończeniu animacji (opcjonalnie)
-        if (typeof options.onClose === 'function') {
-            options.onClose();
-        }
-    }, 300); // Czas musi odpowiadać długości animacji
-
-    // Dispatch the custom event (required for other Handlers.js cleanup)
-    modal.dispatchEvent(new CustomEvent('modal:close'));
-}
-
 export const UI = {
   initDOMCache,
   DOM,
@@ -1004,8 +939,6 @@ export const UI = {
   closeWelcomeModal,
   updateCrowdfundingStats,
   openAuthorProfileModal,
-  closeAuthorProfileModal,
-  startParallelClose,
   handleWallDestroyed(slideId) {
     const successMessage = 'Nieźle!'; // Komunikat zgodnie z życzeniem
     UI.showAlert(successMessage, false);
@@ -1083,5 +1016,5 @@ function closeCommentsModal() {
 
     modal.addEventListener('transitionend', cleanup, { once: true });
     // Fallback w razie gdyby event się nie odpalił
-    setTimeout(cleanup, 300);
+    setTimeout(cleanup, 400);
 }

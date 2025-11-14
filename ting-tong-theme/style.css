@@ -1743,30 +1743,6 @@ margin: -7px auto 0;
     transform: scale(1);
 }
 
-/* --- Comments Modal (TikTok Style) --- */
-#fastcomments-modal-container {
-    align-items: flex-end !important; /* Push to bottom */
-    background: rgba(0, 0, 0, 0.5);
-    transition: opacity 0.3s ease; /* Faster fade-in for the overlay */
-}
-
-/* The widget itself is the content */
-#fastcomments-modal-container #fastcomments-widget-0 {
-    width: 100%;
-    max-height: 75vh;
-    height: 75vh; /* Set a fixed height for consistency */
-    background-color: #18181a; /* Darker, more tiktok-like */
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    overflow: hidden;
-}
-
-#fastcomments-modal-container.visible #fastcomments-widget-0 {
-    transform: translateY(0);
-}
-
 .modal-close-btn {
   position: absolute;
   top: 8px;
@@ -1800,23 +1776,20 @@ margin: -7px auto 0;
 }
 
 .info-modal-overlay.visible {
-    background: rgba(0, 0, 0, 0.7); /* Match other modals */
+    background: transparent;
 }
 
 .info-modal-content {
-    background: linear-gradient(180deg, #28282a 0%, #1c1c1e 100%);
-    color: #f0f0f0;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 420px;
-    max-height: 85vh;
-    display: flex;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    display: flex !important;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    will-change: transform, opacity;
     transform: scale(0.95) translateY(10px);
     opacity: 0;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
 }
 
 .info-modal-overlay.visible .info-modal-content {
@@ -2105,7 +2078,7 @@ margin: -7px auto 0;
   left: 50%;
   width: 350px;
   max-width: calc(100vw - 20px);
-  background: #28282a;
+  background: #1e1e1e;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
@@ -2116,7 +2089,7 @@ margin: -7px auto 0;
     sans-serif;
   opacity: 0;
   transform: translateX(-50%) scale(0.95);
-  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s, background-color 0.3s, backdrop-filter 0.3s;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s, background-color 0.4s, backdrop-filter 0.4s;
   visibility: hidden;
   pointer-events: none;
   display: flex;
@@ -4250,7 +4223,7 @@ overflow: hidden;
   z-index: 10200;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
 }
 
@@ -4278,7 +4251,7 @@ overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   transform: scale(0.95) translateY(10px);
   opacity: 0;
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
 }
 
 .elegant-modal-overlay.visible .elegant-modal-content {
@@ -5236,7 +5209,7 @@ main::-webkit-scrollbar {
 }
 
 .profile-modal-content {
-  position: relative;
+  position: absolute;
   top: 0;
   right: 0;
   width: 100%;
@@ -5267,7 +5240,7 @@ main::-webkit-scrollbar {
     padding-top: var(--safe-area-top);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
-    position: relative;
+    position: static;
     background-color: #1c1c1e;
 }
 
@@ -5312,6 +5285,7 @@ main::-webkit-scrollbar {
   background-color: #2c2c2e;
   color: #fff;
   flex-grow: 1;
+  overflow-y: auto;
   padding: 20px 16px;
 }
 
@@ -5939,4 +5913,60 @@ white-space: nowrap; /* Zapobieganie zawijaniu stat-label */
 /* Video controls icons */
 .slide--light-theme .video-controls button svg {
     fill: #000 !important;
+}
+
+/* ============================================================================
+   --- POPRAWKI UI/UX NA ŻYCZENIE UŻYTKOWNIKA ---
+   ============================================================================ */
+
+/* 1. Modal komentarzy wysuwany od dołu */
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+#commentsModal.modal-overlay {
+    align-items: flex-end !important; /* Wyrównaj do dołu */
+}
+
+#commentsModal .modal-content {
+    width: 100%;
+    border-radius: 20px 20px 0 0; /* Zaokrąglenie tylko górnych rogów */
+    animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    max-height: 80vh;
+    transform: none !important; /* Nadpisz domyślny transform */
+}
+
+/* 2. Przyspieszenie animacji modali */
+.notification-popup, .elegant-modal-overlay {
+    transition-duration: 0.3s !important;
+}
+.elegant-modal-content {
+    transition-duration: 0.3s !important;
+}
+
+/* 3. Top-bar modalu autora (nieprzyklejony) */
+#author-profile-modal .profile-header {
+    position: static !important; /* Zmień pozycję na statyczną, aby przewijał się z resztą */
+}
+
+/* 4. Dopasowanie koloru modalu powiadomień */
+.notification-popup {
+    background: #242426 !important; /* Delikatnie jaśniejszy kolor tła */
+}
+
+/* 5. Wyczyszczenie i animacja modalu crowdfundingu */
+.crowdfunding-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.info-modal-content {
+    background: #1c1c1e !important; /* Spójne tło */
+    animation: elegantFadeIn 0.4s ease-out; /* Ta sama animacja co w napiwkach */
 }
