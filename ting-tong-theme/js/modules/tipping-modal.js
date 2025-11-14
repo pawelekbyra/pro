@@ -123,6 +123,12 @@ function hideLocalErrors() {
 function updateStepDisplay(isShowingTerms = false) {
     const isLoggedIn = State.get('isUserLoggedIn');
 
+    // Add trophy emoji
+    const createAccountLabel = document.querySelector('[data-translate-key="tippingCreateAccountLabel"]');
+    if (createAccountLabel && !createAccountLabel.textContent.includes('🏆')) {
+        createAccountLabel.textContent += ' 🏆';
+    }
+
     dom.steps.forEach(stepEl => {
         const step = parseInt(stepEl.dataset.step, 10);
         stepEl.classList.toggle('active', isShowingTerms ? step === 4 : step === currentStep);

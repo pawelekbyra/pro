@@ -1,4 +1,16 @@
 export const Config = {
+  OG_METADATA: {
+      pl: {
+          description: "Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.",
+          og_title: "Ting Tong: Twoja strefa wideo bez algorytmów.",
+          theme_color: "#ff0055",
+      },
+      en: {
+          description: "Ting Tong — vertical video feed with prefetching and HLS/CDN-ready mode.",
+          og_title: "Ting Tong: Your ad-free video space.",
+          theme_color: "#ff0055",
+      }
+  },
   EMOJI_LIST: [
     '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂',
     '🙂', '🙃', '😉', '😊', '😇', '🥰', '😍', '🤩',

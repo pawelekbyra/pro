@@ -114,8 +114,10 @@ resolve();
 return;
 }
 const script = document.createElement('script');
-const region = window.TingTongData?.fcRegion || 'us';
-script.src = `https://cdn.fastcomments.com/${region}/js/embed.min.js`;
+// FIX: Używamy globalnego (nie-regionalnego) endpointu CDN jako najbardziej niezawodnego fallbacku.
+// Adres https://cdn.fastcomments.com/js/embed.min.js zawsze powinien działać,
+// niezależnie od awarii regionalnych serwerów.
+script.src = `https://cdn.fastcomments.com/js/embed.min.js`; // KLUCZOWA POPRAWKA
 script.async = true;
 script.onload = resolve;
 document.head.appendChild(script);

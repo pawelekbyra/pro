@@ -1753,14 +1753,6 @@ margin: -7px auto 0;
 }
 
 /* Modal: Info */
-.info-modal-overlay {
-    background: transparent;
-    transition: background-color 0.6s ease; /* Zmieniamy na tło */
-}
-
-.info-modal-overlay.visible {
-    background: transparent;
-}
 
 .info-modal-content {
     position: relative;
@@ -1772,7 +1764,7 @@ margin: -7px auto 0;
     will-change: transform, opacity;
     transform: scale(0.95) translateY(10px);
     opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
 }
 
 .info-modal-overlay.visible .info-modal-content {
@@ -1780,10 +1772,15 @@ margin: -7px auto 0;
     opacity: 1;
 }
 
+#infoModal .account-header {
+    display: none;
+}
+
 #infoModal .modal-body {
   overflow-y: auto;
   padding: 16px 24px;
   -webkit-overflow-scrolling: touch;
+  height: 100%;
 }
 
 #infoModal .modal-body::-webkit-scrollbar {
@@ -1800,13 +1797,35 @@ margin: -7px auto 0;
     background: rgba(255, 255, 255, 0.4);
 }
 
+#infoModal .modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+#infoModal .modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
 #infoModal h2 {
-  margin-top: 0;
+  margin-top: 20px;
   padding-right: 40px;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 10px;
   margin-bottom: 15px;
+  text-align: center;
 }
 #infoModal h3 {
     margin-top: 20px;
@@ -1816,15 +1835,6 @@ margin: -7px auto 0;
 #infoModal p,
 #infoModal li {
     color: var(--text-secondary);
-}
-#infoModal .modal-close-btn {
-  color: #fff;
-  opacity: 0.7;
-}
-#infoModal .modal-close-btn:hover {
-  opacity: 1;
-  background-color: transparent;
-  transform: none;
 }
 
 #infoModal ul {
@@ -2073,7 +2083,7 @@ margin: -7px auto 0;
     sans-serif;
   opacity: 0;
   transform: translateX(-50%) scale(0.95);
-  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.4s, background-color 0.4s, backdrop-filter 0.4s;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s, background-color 0.3s, backdrop-filter 0.3s;
   visibility: hidden;
   pointer-events: none;
   display: flex;
@@ -2084,9 +2094,9 @@ margin: -7px auto 0;
   transform: translateX(-50%) scale(1);
   visibility: visible;
   pointer-events: auto;
-  background: linear-gradient(180deg, rgba(45, 45, 47, 0.95) 0%, rgba(30, 30, 32, 0.95) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(40, 40, 42, 0.95) 0%, rgba(28, 28, 30, 0.95) 100%);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 .notification-popup.visible::before {
     content: '';

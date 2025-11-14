@@ -396,3 +396,79 @@ $signature_encoded = $base64UrlEncode($signature);
 
 return $signature_content . '.' . $signature_encoded;
 }
+
+/**
+ * Renderuje dynamiczne meta tagi (SEO i OG) na podstawie preferencji językowych.
+ */
+function tt_render_dynamic_meta_tags() {
+    // 1. Zdefiniuj statyczną tablicę danych z pliku config.js (normalnie byłaby ładowana z WP lub bazy)
+    $meta_data = [
+        'pl' => [
+            'description' => 'Ting Tong — pionowy feed wideo z prefetchingiem i trybem HLS/CDN-ready.',
+            'og_title'    => 'Ting Tong: Twoja strefa wideo bez algorytmów.',
+            'og_image_pl' => get_template_directory_uri() . '/jajk.png',
+            'og_image_en' => get_template_directory_uri() . '/open.jpg',
+            'theme_color' => '#000000',
+        ],
+        'en' => [
+            'description' => 'Ting Tong — vertical video feed with prefetching and HLS/CDN-ready mode.',
+            'og_title'    => 'Ting Tong: Your ad-free video space.',
+            'og_image_pl' => get_template_directory_uri() . '/jajk.png',
+            'og_image_en' => get_template_directory_uri() . '/open.jpg',
+            'theme_color' => '#000000',
+        ]
+    ];
+
+    // 2. Wykryj preferowany język dla crawlera
+    $preferred_lang = tt_detect_locale_for_crawler(); // Użyjemy istniejącej logiki lub prostej detekcji
+
+    // Uproszczona logika: sprawdzamy, czy Accept-Language zawiera 'pl'
+    $accept_language = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
+    $lang = (strpos($accept_language, 'pl') !== false) ? 'pl' : 'en';
+
+    // Wczytaj dane dla wykrytego języka (fallback na 'en')
+    $current_meta = $meta_data[$lang] ?? $meta_data['en'];
+    $alternate_meta = $meta_data[($lang === 'pl' ? 'en' : 'pl')];
+
+    // 3. Renderowanie standardowych tagów
+    echo '<meta name="description" content="' . esc_attr( $current_meta['description'] ) . '">' . "\n";
+    echo '<meta name="theme-color" content="' . esc_attr( $current_meta['theme_color'] ) . '">' . "\n";
+
+    // 4. Renderowanie Open Graph
+    echo '<meta property="og:title" content="' . esc_attr( $current_meta['og_title'] ) . '">' . "\n";
+    echo '<meta property="og:description" content="' . esc_attr( $current_meta['description'] ) . '">' . "\n";
+    echo '<meta property="og:type" content="website">' . "\n";
+    echo '<meta property="og:url" content="' . esc_url( home_url( $_SERVER['REQUEST_URI'] ) ) . '">' . "\n";
+
+    // 5. Renderowanie OG Images (możesz użyć tej samej logiki, co w pierwotnym header.php)
+    echo '<meta property="og:image" content="' . esc_url( $current_meta['og_image_pl'] ) . '">' . "\n";
+    echo '<meta property="og:image:width" content="500">' . "\n";
+    echo '<meta property="og:image:height" content="500">' . "\n";
+    echo '<meta property="og:image" content="' . esc_url( $current_meta['og_image_en'] ) . '">' . "\n";
+    echo '<meta property="og:image:width" content="1200">' . "\n";
+    echo '<meta property="og:image:height" content="630">' . "\n";
+
+    // 6. Renderowanie alternatywnej lokalizacji (KLUCZOWE dla sugerowania innych języków)
+    echo '<meta property="og:locale" content="' . esc_attr( $lang === 'pl' ? 'pl_PL' : 'en_GB' ) . '">' . "\n";
+    echo '<meta property="og:locale:alternate" content="' . esc_attr( $lang === 'pl' ? 'en_GB' : 'pl_PL' ) . '">' . "\n";
+}
+
+/**
+ * Uproszczona funkcja detekcji języka dla crawlera.
+ * Używamy jej jako pomocniczej, ponieważ pełna implementacja
+ * wymagałaby refaktoryzacji całego procesu lokalizacji WP.
+ * Zwraca 'pl' lub 'en'.
+ */
+function tt_detect_locale_for_crawler() {
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        foreach ($langs as $lang) {
+            $lang = trim(substr($lang, 0, 2));
+            if ($lang === 'pl') {
+                return 'pl';
+            }
+        }
+    }
+    // Domyślny fallback na język angielski, gdy nie wykryto polskiego
+    return 'en';
+}
