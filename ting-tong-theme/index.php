@@ -764,50 +764,7 @@ get_header();
             <button class="close-btn" data-action="close-modal" aria-label="Close modal">&times;</button>
         </div>
         <div class="modal-body" id="infoModalBody">
-            <div class="crowdfunding-container">
-                <div class="crowdfunding-header">
-                    <h2 class="crowdfunding-title" data-translate-key="crowdfundingTitle">Wspólnie Tworzymy Historię!</h2>
-                    <p class="crowdfunding-subtitle" data-translate-key="crowdfundingSubtitle">Każdy gest, mały czy duży, napędza naszą kreatywność i pozwala realizować marzenia.</p>
-                </div>
 
-                <p class="crowdfunding-description" data-translate-key="crowdfundingDescription">Ting Tong to więcej niż aplikacja - to społeczność pasjonatów, którzy wierzą w siłę autentycznych treści. Twoje wsparcie to nie tylko pomoc finansowa, ale przede wszystkim wotum zaufania i nieoceniona motywacja. Dzięki Tobie możemy się rozwijać, organizować niezwykłe wydarzenia i dostarczać jeszcze więcej emocji. Zostań częścią tej podróży!</p>
-
-                <div class="progress-section">
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar-fill" style="width: 0%;"></div>
-                        <div class="progress-bar-sparkle"></div>
-                    </div>
-                    <div class="progress-label" data-translate-key-dynamic="crowdfundingGoalLabel" data-collected="0" data-goal="500" data-percentage="0">
-                        <span>Cel: <strong>0 z 500 EUR</strong> (0%)</span>
-                    </div>
-                </div>
-
-                <div class="countdown-section">
-                    <div class="premiere-date-label" data-translate-key="crowdfundingPremiereLabel">Premiera już</div>
-                    <div class="premiere-date-value">1.01.2026</div>
-                    <div class="countdown-label" data-translate-key="crowdfundingCountdownLabel">Pozostało</div>
-                    <div class="countdown-value" id="countdown-timer">--:--:--:--</div>
-                    <span id="countdown-date" style="display: none;">2026-01-01T00:00:00</span>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-value">0</span>
-                        <span class="stat-label" data-translate-key="crowdfundingSupportersLabel">Patronów</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">500 EUR</span>
-                        <span class="stat-label" data-translate-key="crowdfundingGoalStatLabel">Cel</span>
-                    </div>
-                </div>
-
-                <div class="cta-section">
-                    <button class="cta-button" data-action="open-tipping-from-info">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="12" rx="2" ry="2" /><path d="M2 10h20" /><circle cx="18" cy="13" r="2" /></svg>
-                        <span data-translate-key="crowdfundingCtaButton">Zostań Patronem</span>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
