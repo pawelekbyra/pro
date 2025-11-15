@@ -892,29 +892,6 @@ function closeWelcomeModal() {
     }
 }
 
-export const UI = {
-  slidesData,
-  initDOMCache,
-  DOM,
-  showAlert,
-  openModal,
-  closeModal,
-  updateUIForLoginState,
-  updateTranslations,
-  applyLikeStateToDom,
-  createSlideElement,
-  renderSlides,
-  initGlobalPanels,
-  showToast,
-  updateVolumeButton,
-  isSlideOverlayActive, // ✅ NOWE
-  setPwaModule, // ✅ NOWE
-  getIsUserLoggedIn,
-  closeWelcomeModal,
-  updateCrowdfundingStats,
-  openAuthorProfileModal,
-};
-
 async function updateCrowdfundingStats() {
     try {
         const result = await API.getNewCrowdfundingStats();
@@ -951,3 +928,26 @@ async function updateCrowdfundingStats() {
         console.error("Failed to update crowdfunding stats:", error);
     }
 }
+
+export const UI = {
+  slidesData,
+  initDOMCache,
+  DOM,
+  showAlert,
+  openModal,
+  closeModal,
+  updateUIForLoginState,
+  updateTranslations,
+  applyLikeStateToDom,
+  createSlideElement,
+  renderSlides,
+  initGlobalPanels,
+  showToast,
+  updateVolumeButton,
+  isSlideOverlayActive, // ✅ NOWE
+  setPwaModule, // ✅ NOWE
+  getIsUserLoggedIn,
+  closeWelcomeModal,
+  updateCrowdfundingStats,
+  openAuthorProfileModal,
+};
