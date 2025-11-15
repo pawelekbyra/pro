@@ -1,1 +1,29 @@
- Opis projektu Ting Tong (Wersja Szczegółowa - Zaktualizowana)Ting Tong to innowacyjna, w pełni autorska platforma wideo stworzona z myślą o monetyzacji talentu wokalnego bez pośredników. Projekt powstał jako manifest twórczej suwerenności, uniezależniający twórcę od algorytmów i wysokich prowizji Big Tech.🚀 Elevator PitchTing Tong to prywatna platforma wideo, która łączy funkcje TikToka, Patronite’a i Kickstartera w jednym, kontrolowanym ekosystemie.Użytkownicy skrolują pionowy feed z krótkimi filmami, lecz część treści jest zablokowana i dostępna tylko po spełnieniu określonych warunków:PWA-SECRET: Wymaga instalacji aplikacji jako PWA.SECRET: Wymaga wsparcia finansowego przez Własną Bramkę Płatności Stripe.Pełna automatyzacja: Darowizna natychmiastowo tworzy konto patrona w WordPressie, przypisując prawidłową Lokalizację (locale) i dając dostęp do ekskluzywnych materiałów. Zero algorytmów, 100% kontroli.🧠 Koncepcja i ArchitekturaTing Tong jest zbudowany od zera w oparciu o WordPress i technologię Progressive Web App (PWA), tworząc architekturę zbliżoną do Single Page Application (SPA). Frontend bazuje na ES Modules i SwiperJS (dla płynnego scrollowania), a backend PHP jest sercem logiki monetyzacji i zarządzania dostępami.Three-Tier Funnel Dostępu:Poziom DostępuOpisCel Biznesowy i TechnologicznyPUBLICWirusowe, zjawiskowe wideo.Budowanie zasięgu (TOFU), darmowy teaser treści.PWA-SECRETTreści dostępne po instalacji PWA.Budowanie soft commitment, zwiększenie retencji i umożliwienie Powiadomień Push.SECRET (Patron)Ekskluzywne materiały dla mecenasów.Bezpośrednia, natychmiastowa monetyzacja i budowa segmentu "Patronów Miłości".🔄 Automatyzacja Rejestracji i Bramka StripePrzejście na własną bramkę płatności Stripe pozwoliło na osiągnięcie maksymalnej kontroli nad danymi transakcyjnymi i eliminację pośredników (jak Zapier czy BMC).Proces tworzenia konta patrona:Inicjacja w Aplikacji: Użytkownik klika przycisk "Napiwek", co otwiera wbudowany modal płatności (Tipping Modal).Wskazówka Językowa (Frontend): Aplikacja mapuje aktualny język interfejsu (np. pl lub en) na kod kraju (PL lub GB) i wysyła go do backendu jako wskazówkę (country_hint).Tworzenie Payment Intent (Backend): Serwer PHP używa Stripe API do utworzenia obiektu Payment Intent, osadzając wskazówkę kraju w Metadanych.Finalizacja Płatności: Użytkownik dokonuje płatności w bezpiecznym środowisku Stripe, a środki trafiają bezpośrednio na konto twórcy.Webook Stripe (checkout.session.completed): Po udanej płatności, Stripe wysyła webhook do zdefiniowanego endpointu PHP.Weryfikacja i Lokalizacja (PHP): Skrypt PHP odbiera i weryfikuje webhook, po czym następuje logika Lokalizacji:System pobiera oficjalny kod kraju transakcji (lub używa metadanych jako fallbacku).Jeżeli kod kraju to PL, Lokalizacja konta WordPress (locale) jest ustawiana na pl_PL.W pozostałych przypadkach Lokalizacja jest ustawiana na en_GB (domyślny angielski).Rejestracja Konta: System wywołuje funkcję WordPressa, tworząc konto z nadanym locale, e-mailem i tymczasowym hasłem (tingtong).Dostęp: Użytkownik otrzymuje maila powitalnego i natychmiastowo zyskuje dostęp do treści SECRET.💡 Przewagi i Filozofia (Zaktualizowane)CechaZysk dla Twórcy✅ Pełna Kontrola PłatnościMaksymalna niezależność i integracja bramki Stripe bezpośrednio w aplikację.✅ Lokalizacja UżytkownikaPrecyzyjne ustawienie pola locale w WP (np. pl_PL / en_GB), co zapewnia poprawność maili i interfejsu.✅ 100% OwnershipPełna baza mailowa użytkowników, niezależność od zewnętrznych platform.✅ 95% RevenueMinimalne opłaty transakcyjne (Stripe), maksymalny przychód zatrzymywany przez Twórcę.✅ Zero AlgorytmówKontrola nad tym, co, kiedy i dla kogo jest publikowane.✅ Technologiczna PrzewagaWłasny ekosystem PWA ze złożoną, autorską logiką backendową.Filozofia projektu:"Anty-establishment approach to creator economy. Zamiast karmić algorytmy Big Tech, budujesz własny świat, w którym fani wspierają Cię bezpośrednio. Ty tworzysz – oni wspierają – wszyscy wygrywają."
+# Migracja Ting Tong do Next.js
+
+Ten projekt to migracja aplikacji Ting Tong z WordPress PWA do nowoczesnego stosu technologicznego opartego na Next.js, TypeScript i Vercel.
+
+## Cel migracji
+
+Celem migracji jest unowocześnienie aplikacji, poprawa jej wydajności, skalowalności i ułatwienie dalszego rozwoju. Next.js został wybrany ze względu na doskonałe wsparcie dla renderowania po stronie serwera (SSR), generowania stron statycznych (SSG) i łatwość wdrożenia na platformie Vercel.
+
+## Plan migracji
+
+1.  **Archiwizacja istniejących plików:** Wszystkie pliki oryginalnej aplikacji WordPress zostały przeniesione do katalogu `archive`.
+2.  **Inicjalizacja projektu Next.js:** Nowy projekt Next.js z TypeScriptem, Tailwind CSS i ESLint został zainicjowany w głównym katalogu.
+3.  **Implementacja podstawowej struktury:** Zostanie zaimplementowana podstawowa struktura aplikacji, w tym strony główne i routing.
+4.  **Migracja logiki biznesowej:** Logika biznesowa związana z monetyzacją, PWA i zarządzaniem użytkownikami zostanie przepisana do TypeScriptu.
+5.  **Integracja ze Stripe:** Zostanie zaimplementowana integracja z bramką płatności Stripe, z uwzględnieniem logiki webhooków.
+6.  **Wdrożenie na Vercel:** Aplikacja zostanie wdrożona na platformie Vercel, z skonfigurowanym CI/CD.
+
+## Obecny stan prac
+
+-   [x] Krok 1: Archiwizacja istniejących plików.
+-   [x] Krok 2: Inicjalizacja projektu Next.js.
+-   [ ] Krok 3: Implementacja podstawowej struktury.
+
+## Instrukcje dla przyszłych agentów
+
+1.  Zapoznaj się z oryginalnym kodem w katalogu `archive`, aby zrozumieć logikę biznesową.
+2.  Kontynuuj implementację zgodnie z planem migracji.
+3.  Utrzymuj kod w czystości i zgodności z dobrymi praktykami TypeScriptu i Reacta.
+4.  Pisz testy jednostkowe i integracyjne, aby zapewnić stabilność aplikacji.
