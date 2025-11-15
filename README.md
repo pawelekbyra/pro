@@ -8,7 +8,7 @@ Celem migracji jest unowocześnienie aplikacji, poprawa jej wydajności, skalowa
 
 ## Plan migracji
 
-1.  **Archiwizacja istniejących plików:** Wszystkie pliki oryginalnej aplikacji WordPress zostały przeniesione do katalogu `archive`.
+1.  **Archiwizacja istniejących plików:** Wszystkie pliki oryginalnej aplikacji WordPress zostały spakowane do pliku `archive.zip`.
 2.  **Inicjalizacja projektu Next.js:** Nowy projekt Next.js z TypeScriptem, Tailwind CSS i ESLint został zainicjowany w głównym katalogu.
 3.  **Implementacja podstawowej struktury:** Zostanie zaimplementowana podstawowa struktura aplikacji, w tym strony główne i routing.
 4.  **Migracja logiki biznesowej:** Logika biznesowa związana z monetyzacją, PWA i zarządzaniem użytkownikami zostanie przepisana do TypeScriptu.
