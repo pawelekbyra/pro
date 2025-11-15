@@ -1046,14 +1046,13 @@ body,
     top: 0;
     left: 0;
     width: 100%;
-    height: 10px; /* Increased height to make it a better touch target */
+    height: 10px; /* Keep a reasonable touch area */
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    display: flex;
-    align-items: center;
     z-index: 10010;
 }
 
+/* The track of the progress bar */
 .progress-bar::before {
     content: '';
     position: absolute;
@@ -1061,46 +1060,54 @@ body,
     top: 50%;
     transform: translateY(-50%);
     width: 100%;
-    height: 4px;
-    background-color: rgba(255, 0, 85, 0.3);
+    height: 2px; /* Thinner bar */
+    background-color: rgba(255, 255, 255, 0.3); /* Lighter track for better visibility */
     transition: height 0.2s ease-in-out;
 }
 
+/* The filled part of the progress bar */
 .progress-bar-fill {
     position: absolute;
     left: 0;
     top: 50%;
     transform: translateY(-50%);
     width: 0%;
-    height: 4px;
+    height: 2px; /* Thinner bar */
     background-color: var(--progress-bar-color);
     border-radius: 2px;
     transition: height 0.2s ease-in-out;
     pointer-events: none;
 }
+
+/* The handle (circle) */
 .progress-bar-handle {
     position: absolute;
     top: 50%;
-    left: 0%; /* Will be updated by JS */
+    left: 0%; /* Updated by JS */
     width: 12px;
     height: 12px;
     border-radius: 50%;
     background-color: white;
-    transform: translate(-50%, -50%) scale(1);
-    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    opacity: 1; /* Always visible */
-    pointer-events: none; /* The whole bar is the target */
+    /* Initially hidden */
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease;
+    pointer-events: none;
     box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
+
+/* On hover or drag, make the bar slightly thicker and show the handle */
 .progress-bar:hover::before,
 .progress-bar.dragging::before,
 .progress-bar:hover .progress-bar-fill,
 .progress-bar.dragging .progress-bar-fill {
-    height: 6px;
+    height: 4px; /* Slightly thicker on interaction */
 }
+
 .progress-bar:hover .progress-bar-handle,
 .progress-bar.dragging .progress-bar-handle {
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(1); /* Show handle */
+    opacity: 1;
 }
 
 .tiktok-symulacja .text-info {
