@@ -3,7 +3,6 @@ import { State } from './state.js';
 import { Utils } from './utils.js';
 // import { PWA } from './pwa.js'; // Usunięte, aby przerwać zależność cykliczną
 import { API, slidesData } from './api.js';
-import { CommentsModal } from './comments-modal.js';
 
 let PWA_MODULE = null; // Zmienna przechowująca wstrzykniętą zależność
 function setPwaModule(pwaModule) {
@@ -63,8 +62,6 @@ function initDOMCache() {
   DOM.preloader = document.getElementById("preloader");
   DOM.alertBox = document.getElementById("alertBox");
   DOM.alertText = document.getElementById("alertText");
-  DOM.commentsModal = document.getElementById("fastcomments-modal-container");
-  DOM.fastCommentsContainer = document.getElementById("fastcomments-widget-0");
   DOM.accountModal = document.getElementById("accountModal");
   DOM.notificationPopup = document.getElementById("notificationPopup");
   DOM.pwaDesktopModal = document.getElementById("pwa-desktop-modal");
@@ -285,13 +282,7 @@ function openModal(modal, options = {}) {
     const contentSelector = options.contentSelector || '.modal-content, .elegant-modal-content, .profile-modal-content, .fl-modal-content, .welcome-modal-content';
     const contentElement = modal.querySelector(contentSelector);
 
-    if (modal.id === 'fastcomments-modal-container') {
-        contentElement.style.transform = 'translateY(100%)';
-        modal.style.display = 'block';
-        setTimeout(() => {
-            modal.classList.add('visible');
-        }, 10);
-    } else if (options.animationClass && contentElement) {
+    if (options.animationClass && contentElement) {
         contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
         contentElement.addEventListener('animationend', () => {
             contentElement.style.animation = '';
@@ -398,14 +389,7 @@ function closeModal(modal, options = {}) {
         }
     };
 
-    if (modal.id === 'fastcomments-modal-container') {
-        modal.classList.remove('visible');
-        const onTransitionEnd = () => {
-            modal.removeEventListener('transitionend', onTransitionEnd);
-            cleanup();
-        };
-        modal.addEventListener('transitionend', onTransitionEnd);
-    } else if (options.animationClass && contentElement) {
+    if (options.animationClass && contentElement) {
         contentElement.style.animation = `${options.animationClass} 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
         contentElement.addEventListener('animationend', cleanup, { once: true });
     } else {
@@ -946,29 +930,4 @@ async function updateCrowdfundingStats() {
     } catch (error) {
         console.error("Failed to update crowdfunding stats:", error);
     }
-}
-
-function closeCommentsModal() {
-    const modal = DOM.commentsModal;
-    if (!modal || !modal.classList.contains('visible') || modal.classList.contains('is-hiding')) {
-        return;
-    }
-
-    modal.classList.add('is-hiding');
-    modal.setAttribute('aria-hidden', 'true');
-
-    const cleanup = () => {
-        modal.removeEventListener('transitionend', cleanup);
-        modal.classList.remove('visible', 'is-hiding');
-        activeModals.delete(modal);
-
-        if (activeModals.size === 0) {
-            DOM.container.removeAttribute('aria-hidden');
-            State.get('lastFocusedElement')?.focus();
-        }
-    };
-
-    modal.addEventListener('transitionend', cleanup, { once: true });
-    // Fallback w razie gdyby event się nie odpalił
-    setTimeout(cleanup, 400);
 }
