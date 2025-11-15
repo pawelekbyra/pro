@@ -370,17 +370,10 @@ function handleFileSelect(event) {
         cropImage.onload = function () {
             const modal = UI.DOM.cropModal;
 
-            // Użyj `onOpen` aby mieć pewność, że modal jest gotowy
-            UI.openModal(modal, {
-                onOpen: () => {
-                    // Czekaj na `transitionend` aby zagwarantować, że modal jest w pełni widoczny
-                    // i ma poprawne wymiary przed inicjalizacją canvasa.
-                    modal.addEventListener('transitionend', function onModalReady() {
-                        initializeCropCanvas();
-                        modal.removeEventListener('transitionend', onModalReady);
-                    }, { once: true });
-                }
-            });
+            UI.openModal(modal);
+            setTimeout(() => {
+                initializeCropCanvas();
+            }, 300); // Małe opóźnienie, aby modal zdążył się wyrenderować
         };
         cropImage.onerror = () => showError("avatarError", "Nie udało się załadować obrazu.");
         cropImage.src = e.target.result;
