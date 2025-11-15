@@ -729,42 +729,61 @@ function createSlideElement(slideData, index) {
   if (videoEl && progressBar && progressBarFill) {
     const handle = section.querySelector(".progress-bar-handle");
     let isDragging = false;
+    let animationFrameId = null;
 
     const updateProgress = () => {
-        if (isDragging || !videoEl.duration) return;
+        if (!videoEl.duration) return;
         const progress = (videoEl.currentTime / videoEl.duration) * 100;
 
-        // Get current width to prevent "going back"
-        const currentWidth = parseFloat(progressBarFill.style.width) || 0;
-        if (progress < currentWidth && videoEl.currentTime > 0) {
-            // This can happen on buffer/seek, let's ignore it to prevent visual glitch
-            return;
+        // Use transform for smoother updates
+        progressBarFill.style.transform = `scaleX(${progress / 100})`;
+        if (handle) {
+            handle.style.transform = `translate(-50%, -50%) scale(0) translateX(${progressBar.offsetWidth * (progress / 100)}px)`;
         }
 
-        progressBarFill.style.width = `${progress}%`;
-        if (handle) handle.style.left = `${progress}%`;
+        animationFrameId = requestAnimationFrame(updateProgress);
     };
 
     const seek = (e) => {
       const rect = progressBar.getBoundingClientRect();
-      const clickX =
-        (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      let clickX = 0;
+      if (e.touches && e.touches.length > 0) {
+        clickX = e.touches[0].clientX - rect.left;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clickX = e.changedTouches[0].clientX - rect.left;
+      } else {
+        clickX = e.clientX - rect.left;
+      }
+
       const width = rect.width;
       const progress = Math.max(0, Math.min(1, clickX / width));
 
       if (videoEl.duration > 0) {
+        // Cancel the animation frame to prevent flickering during seek
+        cancelAnimationFrame(animationFrameId);
         videoEl.currentTime = progress * videoEl.duration;
-        progressBarFill.style.width = `${progress * 100}%`;
-        if (handle) handle.style.left = `${progress * 100}%`;
+        progressBarFill.style.transform = `scaleX(${progress})`;
+        if (handle) {
+           handle.style.transform = `translate(-50%, -50%) scale(1) translateX(${width * progress}px)`;
+        }
       }
     };
 
-    videoEl.addEventListener("timeupdate", updateProgress);
+    videoEl.addEventListener("play", () => {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(updateProgress);
+    });
+
+    videoEl.addEventListener("pause", () => {
+        cancelAnimationFrame(animationFrameId);
+    });
+
+    videoEl.addEventListener("ended", () => {
+        cancelAnimationFrame(animationFrameId);
+    });
 
     const startDrag = (e) => {
-      if (e.type === "touchstart") {
-        e.preventDefault();
-      }
+      if (e.type === "touchstart") e.preventDefault();
       isDragging = true;
       progressBar.classList.add("dragging");
       const wasPlaying = !videoEl.paused;
@@ -778,8 +797,12 @@ function createSlideElement(slideData, index) {
         seek(moveEvent);
       };
 
-      const endDrag = () => {
+      const endDrag = (endEvent) => {
         if (!isDragging) return;
+
+        // seek on the final touch/mouse position
+        seek(endEvent);
+
         isDragging = false;
         progressBar.classList.remove("dragging");
         if (wasPlaying) {
@@ -787,11 +810,10 @@ function createSlideElement(slideData, index) {
             console.error("Play failed after drag:", err);
           });
         }
+
         document.removeEventListener("mousemove", onDrag);
         document.removeEventListener("mouseup", endDrag);
-        document.removeEventListener("touchmove", onDrag, {
-          passive: false,
-        });
+        document.removeEventListener("touchmove", onDrag, { passive: false });
         document.removeEventListener("touchend", endDrag);
       };
 
@@ -802,9 +824,7 @@ function createSlideElement(slideData, index) {
     };
 
     progressBar.addEventListener("mousedown", startDrag);
-    progressBar.addEventListener("touchstart", startDrag, {
-      passive: false,
-    });
+    progressBar.addEventListener("touchstart", startDrag, { passive: false });
   }
 
   return section;
