@@ -628,7 +628,6 @@ body,
   left: 0;
   width: 100%;
   height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-  background-image: url('wall.png');
   background-repeat: repeat;
   background-size: 300px;
   z-index: 100;
@@ -650,48 +649,6 @@ body,
 .secret-overlay .mur-container {
   /* Ukrycie hardkodowanego muru (cegieł) na rzecz tła, by zawsze sięgał do dołu */
   display: none !important;
-}
-
-/* FIX 2: Przezroczyste tło dla interaktywnego muru (umożliwia widoczność wideo) */
-.interactive-wall-overlay {
-    position: absolute;
-    top: var(--topbar-height);
-    left: 0;
-    width: 100%;
-    height: calc(100% - var(--topbar-height) - var(--bottombar-height));
-    z-index: 10200; /* Match modal z-index to cover everything */
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease, top 0.3s ease-out, height 0.3s ease-out;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.interactive-wall-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* FIX 3: Ukrycie wszystkich interaktywnych elementów podczas aktywnej gry na murze */
-.tiktok-symulacja.wall-active .sidebar,
-.tiktok-symulacja.wall-active .bottombar,
-.tiktok-symulacja.wall-active .video-controls {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: opacity 0.3s ease-out; /* Dodaj przejście dla płynności */
-}
-
-/* Upewnij się, że element nie przeszkadza w klikaniu muru */
-.tiktok-symulacja.wall-active .interactive-wall-overlay {
-    z-index: 10201; /* Upewnij się, że jest na wierzchu */
-}
-
-.interactive-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    cursor: crosshair;
 }
 
 /* Ten kontener musi mieć ten sam kolor co fuga w Canvas, aby były spójne */
@@ -4154,8 +4111,7 @@ margin: -7px auto 0;
     height: calc(100% - var(--topbar-height));
 }
 
-#app-frame.hide-ui .secret-overlay,
-#app-frame.hide-ui .interactive-wall-overlay {
+#app-frame.hide-ui .secret-overlay {
     top: var(--topbar-height);
     height: calc(100% - var(--topbar-height));
 }

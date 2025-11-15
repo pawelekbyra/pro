@@ -177,31 +177,10 @@ export const Handlers = {
     }
 
     if (!actionTarget) {
-      const activeSlide = document.querySelector(".swiper-slide-active");
-      const sim = activeSlide?.querySelector(".tiktok-symulacja");
-      const isWallActive = sim?.classList.contains("wall-active");
-      if (isWallActive && !actionTarget) {
-        e.preventDefault();
-        return;
-      }
       return;
     }
 
     const action = actionTarget.dataset.action;
-    const activeSlide = document.querySelector(".swiper-slide-active");
-    const sim = activeSlide?.querySelector(".tiktok-symulacja");
-    const isWallActive = sim?.classList.contains("wall-active");
-    const blockedActions = [
-      "toggle-like", "share", "open-comments-modal", "show-tip-jar",
-      "play-video", "replay-video", "toggle-volume", "toggle-fullscreen", "open-author-profile"
-    ];
-
-    if (isWallActive && blockedActions.includes(action)) {
-      e.preventDefault();
-      Utils.vibrateTry();
-      UI.showAlert("Musisz najpierw zniszczyć mur!", true);
-      return;
-    }
 
     const topbar = document.querySelector("#app-frame > .topbar");
     const loginPanel = document.querySelector("#app-frame > .login-panel");
